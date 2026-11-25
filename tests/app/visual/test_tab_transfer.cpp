@@ -12,6 +12,7 @@
 #include <winrt/Microsoft.UI.Xaml.Automation.Peers.h>
 #include <winrt/Microsoft.UI.Xaml.Automation.Provider.h>
 #include <winrt/Microsoft.UI.Xaml.Media.Imaging.h>
+#include <winrt/Microsoft.UI.Xaml.Shapes.h>
 
 import folia.markdown.instrumentation;
 
@@ -57,10 +58,10 @@ namespace winrt::Folia::implementation {
         static auto Handle(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->WindowHandle(); }
         static auto About(Microsoft::UI::Xaml::Window const& window) {
             auto impl = Impl(window);
-            impl->SetSettingsMode(true);
+            impl->OpenSettingsTab();
             auto nav = impl->settingsView->Root();
-            for (auto item : nav.MenuItems()) {
-                auto entry = item.as<Microsoft::UI::Xaml::Controls::NavigationViewItem>();
+            for (auto item : nav.Items()) {
+                auto entry = item.as<Microsoft::UI::Xaml::Controls::ListViewItem>();
                 if (winrt::unbox_value<winrt::hstring>(entry.Tag()) == L"about") nav.SelectedItem(entry);
             }
             window.Content().as<Microsoft::UI::Xaml::FrameworkElement>().UpdateLayout();
@@ -70,6 +71,8 @@ namespace winrt::Folia::implementation {
             return Impl(window)->ContainsTabDragPoint(point);
         }
         static void PointerBegin(Microsoft::UI::Xaml::Window const& window, Windows::Graphics::PointInt32 point) { Impl(window)->BeginTabPointerGesture(point); }
+        static void Sidebar(Microsoft::UI::Xaml::Window const& window, bool open) { Impl(window)->SetSidebarOpen(open); }
+        static void Pane(Microsoft::UI::Xaml::Window const& window, bool outline) { Impl(window)->SelectWorkspacePane(outline); }
         static void PointerEnd(Microsoft::UI::Xaml::Window const& window) { Impl(window)->EndTabPointerGesture(); }
         static void EnterMove(Microsoft::UI::Xaml::Window const& window) {
             Impl(window)->EnterTabMove(Microsoft::UI::Input::InputNonClientPointerSource::GetForWindowId(window.AppWindow().Id()));
@@ -132,15 +135,14 @@ namespace winrt::Folia::implementation {
             Impl(window)->UpdateWorkspaceAppearance(settings);
         }
         static void Hover(Microsoft::UI::Xaml::Window const& window, Windows::Foundation::Point point) {
-            Impl(window)->topBar.OnPointer(point);
-            Impl(window)->bottomBar.OnPointer(point);
+            Impl(window)->documentTools.OnPointer(point);
         }
         static void Progress(Microsoft::UI::Xaml::Window const& window, bool active, double value) {
             Impl(window)->SetOperationProgress(active, value, active);
             Impl(window)->UpdateLoadingState();
         }
         static auto OpenFileMenu(Microsoft::UI::Xaml::Window const& window) {
-            auto button = Impl(window)->MainMenuButton();
+            auto button = Impl(window)->DocumentActionsButton();
             auto flyout = button.Flyout();
             flyout.ShowAt(button);
             return flyout;
@@ -188,89 +190,51 @@ namespace {
         return nullptr;
     }
     suite tab_transfer_tests = [] {
-        "workspace edge bars reveal over a stationary viewport and follow their own settings"_test = [] {
+        "document tools reveal over a stationary reading surface without moving the tabs"_test = [] {
             OwnedWindow current(App()->CreateMainWindow());
             auto window = current.window;
-            auto root = window.Content().as<Controls::Grid>();
-            root.UpdateLayout();
-            auto workspace = root.FindName(L"WorkspaceHost").as<FrameworkElement>();
-            auto top = root.FindName(L"TopChrome").as<FrameworkElement>();
-            auto bottom = root.FindName(L"StatusBar").as<FrameworkElement>();
-            auto offset = [](auto bar) { return bar.RenderTransform().template as<Media::TranslateTransform>().Y(); };
-            auto move = [&](float x, float y) {
-                Access::Hover(window, {x, y});
-            };
-            auto waitForOffset = [&](FrameworkElement const& bar, double expected, char const* step) {
-                try { Pump([&] { return std::abs(offset(bar) - expected) < .01; }); }
-                catch (std::runtime_error const&) {
-                    throw std::runtime_error(std::format("{}: offset {}, expected {}", step, offset(bar), expected));
-                }
-            };
-            auto middle = static_cast<float>(root.ActualWidth() * .5);
-            move(middle, 100);
-            Access::Bars(window, {true, false});
-            root.UpdateLayout();
-            expect(offset(top) <= -top.ActualHeight());
-            expect(offset(bottom) == 0.);
-            expect(workspace.ActualHeight() == root.ActualHeight() - bottom.ActualHeight());
-            Access::Bars(window, {true, true});
-            root.UpdateLayout();
-            const auto height = workspace.ActualHeight();
-            expect(height == root.ActualHeight());
-            expect(offset(bottom) >= bottom.ActualHeight());
-
-            move(middle, 40);
-            expect(offset(top) <= -top.ActualHeight());
-            move(middle, 28);
-            waitForOffset(top, 0., "hovering within the height of a tab");
-            expect(window.AppWindow().TitleBar().PreferredHeightOption() == winrt::Microsoft::UI::Windowing::TitleBarHeightOption::Standard);
-            expect(workspace.ActualHeight() == height);
-            auto menu = Access::OpenFileMenu(window);
-            move(middle, 120);
-            const auto afterDelay = std::chrono::steady_clock::now() + std::chrono::milliseconds(550);
-            Pump([&] { return std::chrono::steady_clock::now() > afterDelay; });
-            expect(offset(top) == 0.);
-            bool closed = false;
-            auto closedEvent = menu.Closed(winrt::auto_revoke, [&](auto const&, auto const&) { closed = true; });
-            menu.Hide();
-            Pump([&] { return closed; });
-            root.FindName(L"EditorSurface").as<Controls::SwapChainPanel>().Focus(FocusState::Programmatic);
-            move(middle, 120);
-            waitForOffset(top, -top.ActualHeight(), "leaving the top menu");
-
-            move(middle, static_cast<float>(root.ActualHeight() - 3));
-            waitForOffset(bottom, 0., "hovering at the bottom edge");
-            expect(workspace.ActualHeight() == height);
-            move(middle, 120);
-            waitForOffset(bottom, bottom.ActualHeight(), "leaving the bottom bar");
-            Access::Bars(window, {false, false});
-            root.UpdateLayout();
-            expect(workspace.ActualHeight() == height - top.ActualHeight() - bottom.ActualHeight());
-        };
-
-        "workspace sidebar occupies the full window independently of both bars"_test = [] {
-            OwnedWindow owned(App()->CreateMainWindow());
-            auto window = owned.window;
             auto root = window.Content().as<FrameworkElement>();
-            auto dpi = root.XamlRoot().RasterizationScale();
-            window.AppWindow().Resize({static_cast<int>(880 * dpi), static_cast<int>(560 * dpi)});
-            Pump([&] { return root.ActualWidth() > 760; });
-            auto pane = root.FindName(L"DocumentWorkspace").as<Controls::SplitView>();
-            auto sidebar = root.FindName(L"WorkspaceSidebar").as<Controls::Grid>();
-            auto column = root.FindName(L"DocumentColumn").as<Controls::Grid>();
-            pane.IsPaneOpen(true);
-            Pump([&] {
-                root.UpdateLayout();
-                return column.TransformToVisual(root).TransformPoint({0, 0}).X == pane.OpenPaneLength();
-            });
-            for (bool hidden : {false, true}) {
-                Access::Bars(window, {hidden, hidden});
-                root.UpdateLayout();
-                expect(sidebar.ActualHeight() == root.ActualHeight()) << std::format("sidebar {} / root {}", sidebar.ActualHeight(), root.ActualHeight());
-                expect(sidebar.TransformToVisual(root).TransformPoint({0, 0}).Y == 0.f) << "sidebar starts at window top";
-                expect(column.TransformToVisual(root).TransformPoint({0, 0}).X == pane.OpenPaneLength()) << "column starts at sidebar edge";
-                expect(column.ActualHeight() == root.ActualHeight()) << "document column spans window height";
-            }
+            auto toolbar = root.FindName(L"DocumentToolbar").as<FrameworkElement>();
+            auto card = root.FindName(L"ReadingCard").as<FrameworkElement>();
+            auto top = root.FindName(L"TopChrome").as<FrameworkElement>();
+            auto view = root.FindName(L"DocumentViewport").as<FrameworkElement>();
+            root.FindName(L"EditorSurface").as<UIElement>().Focus(FocusState::Programmatic);
+            Access::Bars(window, {true});
+            root.UpdateLayout();
+            auto origin = view.TransformToVisual(card).TransformPoint({0,0});
+            expect(toolbar.Opacity() == 0. && !toolbar.IsHitTestVisible()) << "auto-hide starts with inactive tools";
+            Access::Hover(window, {100,4});
+            Pump([&] { return toolbar.Opacity() == 1.; });
+            expect(toolbar.IsHitTestVisible()) << "revealed tools receive input";
+            expect(view.TransformToVisual(card).TransformPoint({0,0}) == origin) << "hover does not move the viewport";
+            expect(top.Visibility() == Visibility::Visible) << "the title strip stays visible";
+            expect(view.Clip().as<Media::RectangleGeometry>().Transform().as<Media::TranslateTransform>().Y() > 0.)
+                << "the document does not paint under the visible tools";
+            Access::Hover(window, {100,160});
+            Pump([&] { return toolbar.Opacity() == 0.; });
+            expect(!toolbar.IsHitTestVisible()) << "hidden tools leave input to the document";
+            Access::Bars(window, {});
+            root.UpdateLayout();
+            expect(toolbar.Opacity() == 1.) << "pinned tools are visible";
+            Pump([&] { return std::abs(view.TransformToVisual(card).TransformPoint({0,0}).Y - toolbar.ActualHeight()) <= 1.; });
+        };
+        "opening the sidebar preserves the reading width"_test = [] {
+            OwnedWindow current(App()->CreateMainWindow());
+            auto window = current.window;
+            auto root = window.Content().as<FrameworkElement>();
+            auto card = root.FindName(L"ReadingCard").as<FrameworkElement>();
+            auto rail = root.FindName(L"WorkspaceRail").as<FrameworkElement>();
+            auto sidebar = root.FindName(L"WorkspaceSidebar").as<FrameworkElement>();
+            root.UpdateLayout();
+            const auto original = card.ActualWidth();
+            Access::Sidebar(window, true);
+            Pump([&] { return sidebar.Visibility() == Visibility::Visible && sidebar.ActualWidth() > 0.; });
+            expect(std::abs(card.ActualWidth() - original) <= 1.);
+            expect(rail.ActualHeight() == root.ActualHeight());
+            expect(rail.TransformToVisual(root).TransformPoint({0,0}).X == 0.f);
+            Access::Sidebar(window, false);
+            Pump([&] { return sidebar.Visibility() == Visibility::Collapsed; });
+            expect(std::abs(card.ActualWidth() - original) <= 1.);
         };
         "workspace material can leave the reading surface opaque independently of the window"_test = [] {
             using namespace winrt::Microsoft::UI::Composition::SystemBackdrops;
@@ -279,9 +243,8 @@ namespace {
             expect(Access::MaterialsReady(window)) << "both materials are resolved before the window is activated";
             OwnedWindow owned(window);
             auto root = window.Content().as<FrameworkElement>();
-            auto paper = root.FindName(L"ReadingBackdropHost").as<Controls::SystemBackdropElement>();
-            auto pane = root.FindName(L"DocumentWorkspace").as<Controls::SplitView>();
-            pane.IsPaneOpen(false);
+            auto readingBackdrop = root.FindName(L"ReadingBackdrop").as<Controls::SystemBackdropElement>();
+            Access::Sidebar(window, false);
             auto tabs = Access::Tabs(window);
             auto first = tabs.SelectedItem();
             Access::New(window);
@@ -293,16 +256,20 @@ namespace {
                 Access::Render(window);
                 return winrt::Folia::EditorRendererTestAccess::PaperAlpha(renderer);
             };
-            auto selected = [&] {
+            auto selected = [&]() -> Media::SystemBackdrop {
                 auto tab = Access::View(window, Access::Documents(window).Active()->id);
-                return TabPart(tab, L"SelectedTabBackdrop").as<Controls::SystemBackdropElement>();
+                auto shape = TabPart(tab, L"SelectedBackgroundPath").as<Shapes::Path>();
+                expect(shape.Fill() == root.Resources().Lookup(winrt::box_value(L"FoliaReadingSurfaceBrush")).as<Media::Brush>())
+                    << "the native tab silhouette uses the reading surface tint";
+                auto surface = TabPart(tab, L"SelectedTabBackdrop").try_as<Controls::SystemBackdropElement>();
+                return surface ? surface.SystemBackdrop() : nullptr;
             };
             bool highContrast = winrt::Windows::UI::ViewManagement::AccessibilitySettings().HighContrast();
             for (auto material : {WindowMaterial::Solid, WindowMaterial::Mica, WindowMaterial::MicaAlt, WindowMaterial::Acrylic}) {
                 bool supported = material == WindowMaterial::Acrylic ? DesktopAcrylicController::IsSupported()
                     : material != WindowMaterial::Solid && MicaController::IsSupported();
-                Access::Bars(window, {false, false, material, {}});
-                expect(selected().SystemBackdrop() == paper.SystemBackdrop());
+                Access::Bars(window, {false, material, {}});
+                expect(selected() == nullptr && readingBackdrop.SystemBackdrop() == nullptr);
                 if (!supported || highContrast) {
                     expect(window.SystemBackdrop() == nullptr);
                     expect(paperAlpha() == 255);
@@ -313,20 +280,27 @@ namespace {
                 else expect(window.SystemBackdrop().as<Media::MicaBackdrop>().Kind()
                     == (material == WindowMaterial::Mica ? MicaKind::Base : MicaKind::BaseAlt));
                 expect(paperAlpha() < 255) << "the editor background transmits the window material with the sidebar closed";
-                auto backdrop = window.SystemBackdrop();
-                Access::Bars(window, {false, false, material, WindowMaterial::Solid});
-                expect(window.SystemBackdrop() == backdrop);
-                expect(paper.SystemBackdrop() == nullptr && selected().SystemBackdrop() == nullptr);
+                Access::Bars(window, {false, material, WindowMaterial::Solid});
+                expect(window.SystemBackdrop() != nullptr && readingBackdrop.SystemBackdrop() == nullptr && selected() == nullptr);
                 expect(paperAlpha() == 255) << "solid paper takes effect on the next frame";
-                Access::Bars(window, {false, false, WindowMaterial::Solid, material});
+                Access::Bars(window, {false, WindowMaterial::Solid, material});
                 expect(window.SystemBackdrop() == nullptr);
-                expect(selected().SystemBackdrop() == paper.SystemBackdrop() && paper.SystemBackdrop() != nullptr);
+                expect(selected() == readingBackdrop.SystemBackdrop() && readingBackdrop.SystemBackdrop() != nullptr);
                 expect(paperAlpha() < 255);
-                auto old = selected();
+                auto old = Access::View(window, Access::Documents(window).Active()->id);
                 tabs.SelectedItem(tabs.SelectedItem() == first ? second : first);
-                expect(selected() != old) << "selection moved to the other realized tab";
-                expect(selected().SystemBackdrop() == paper.SystemBackdrop()) << "the active tab immediately inherits the page backdrop";
-                expect(old.SystemBackdrop() == nullptr) << "the old tab releases the reading material";
+                expect(selected() == readingBackdrop.SystemBackdrop()) << "the active tab immediately inherits the page backdrop";
+                expect(!TabPart(old, L"SelectedTabBackdrop")) << "the old tab releases the reading material";
+            }
+            Access::Bars(window, {true, WindowMaterial::Mica, WindowMaterial::Acrylic});
+            auto reading = readingBackdrop.SystemBackdrop();
+            auto base = window.SystemBackdrop();
+            for (auto [open, distance] : {std::pair{false, 16.f}, {false, 200.f}, {true, 200.f}, {false, 16.f}}) {
+                Access::Sidebar(window, open);
+                Access::Hover(window, {600.f, distance});
+                auto until = std::chrono::steady_clock::now() + std::chrono::milliseconds(500);
+                Pump([&] { return std::chrono::steady_clock::now() >= until; });
+                expect(readingBackdrop.SystemBackdrop() == reading && window.SystemBackdrop() == base);
             }
         };
         "workspace notifications remain actionable between the revealed edge bars"_test = [] {
@@ -335,7 +309,7 @@ namespace {
             OwnedWindow owned(App()->CreateMainWindow());
             auto window = owned.window;
             auto root = window.Content().as<Controls::Grid>();
-            Access::Bars(window, {true, true});
+            Access::Bars(window, {true});
             auto error = root.FindName(L"ErrorInfoBar").as<Controls::InfoBar>();
             auto external = root.FindName(L"ExternalChangeInfoBar").as<Controls::InfoBar>();
             auto paper = root.FindName(L"WorkspaceHost").as<FrameworkElement>();
@@ -359,47 +333,29 @@ namespace {
                 }
                 return false;
             };
-            for (auto name : {L"TopChrome", L"StatusBar"}) {
-                auto bar = root.FindName(name).as<FrameworkElement>();
-                auto y = bar.VerticalAlignment() == VerticalAlignment::Top ? 2.f : static_cast<float>(root.ActualHeight() - 2.);
-                Access::Hover(window, {static_cast<float>(root.ActualWidth() / 2), y});
-                Pump([&] { return bar.RenderTransform().as<Media::TranslateTransform>().Y() == 0.; });
-                expect(reachable(close)) << "the close button is the pointer target";
-                expect(reachable(root.FindName(L"KeepLocalButton").as<FrameworkElement>())) << "the conflict action is the pointer target";
-            }
+            Access::Hover(window, {100,4});
+            auto tools = root.FindName(L"DocumentToolbar").as<FrameworkElement>();
+            Pump([&] { return tools.Opacity() == 1.; });
+            expect(reachable(close)) << "the close button is the pointer target";
+            expect(reachable(root.FindName(L"KeepLocalButton").as<FrameworkElement>()));
             Peers::ButtonAutomationPeer(close).GetPattern(Peers::PatternInterface::Invoke).as<Provider::IInvokeProvider>().Invoke();
             Pump([&] { return !error.IsOpen(); });
             expect(external.IsOpen()) << "dismissing an error preserves an outstanding disk change";
         };
-        "workspace tab drag reveals another window before its drop bounds are read"_test = [] {
+        "tab drag targets remain available while document tools are hidden"_test = [] {
             OwnedWindow source(App()->CreateMainWindow()), target(App()->CreateMainWindow());
-            Access::Bars(source.window, {false, false});
-            Access::Bars(target.window, {true, false});
+            Access::Bars(target.window, {true});
             auto root = target.window.Content().as<FrameworkElement>();
-            auto top = root.FindName(L"TopChrome").as<FrameworkElement>();
+            auto tools = root.FindName(L"DocumentToolbar").as<FrameworkElement>();
             root.UpdateLayout();
-            auto offset = [&] { return top.RenderTransform().as<Media::TranslateTransform>().Y(); };
-            auto center = [](FrameworkElement const& element) {
-                auto point = element.TransformToVisual(nullptr).TransformPoint({
-                    static_cast<float>(element.ActualWidth() / 2), static_cast<float>(element.ActualHeight() / 2)});
-                return element.XamlRoot().CoordinateConverter().ConvertLocalToScreen(point);
-            };
-            auto caption = source.window.Content().as<FrameworkElement>().FindName(L"TitleDragArea").as<FrameworkElement>();
-            Access::PointerBegin(source.window, center(caption));
-            Access::EnterMove(source.window);
-            expect(offset() == -top.ActualHeight());
-            Access::ExitMove(source.window);
             auto id = Access::Documents(source.window).Active()->id;
-            Access::PointerBegin(source.window, center(Access::View(source.window, id)));
-            Access::EnterMove(source.window);
-            expect(offset() == 0.);
-            auto destination = center(Access::View(target.window, Access::Documents(target.window).Active()->id));
-            expect(Access::ContainsDragPoint(target.window, destination));
+            auto destination = Access::View(target.window, Access::Documents(target.window).Active()->id);
+            auto point = destination.TransformToVisual(nullptr).TransformPoint({
+                static_cast<float>(destination.ActualWidth() / 2), static_cast<float>(destination.ActualHeight() / 2)});
+            expect(tools.Opacity() == 0.);
+            expect(Access::ContainsDragPoint(target.window, root.XamlRoot().CoordinateConverter().ConvertLocalToScreen(point)));
             expect(Access::AllowDrop(target.window, Access::Binding(source.window, id)->item));
             expect(Access::Transfer(source.window, id, target.window, 0));
-            Access::ExitMove(source.window);
-            Access::Hover(target.window, {300, 120});
-            Pump([&] { return offset() == -top.ActualHeight(); });
             expect(Access::Documents(target.window).Active()->id == id);
         };
         "workspace operation progress presents the reported percentage and cancellation in the editor"_test = [] {
@@ -431,34 +387,20 @@ namespace {
             Access::SetRecentHistory(window, directory.path / L"recent.json");
             Access::OpenFolder(window, folder);
             Access::Open(window, file);
-            auto pane = root.FindName(L"DocumentWorkspace").as<Controls::SplitView>();
+            auto pane = root.FindName(L"WorkspaceSidebar").as<FrameworkElement>();
             auto list = root.FindName(L"OutlineList").as<Controls::ListView>();
             auto tree = root.FindName(L"FileTree").as<Controls::TreeView>();
-            Pump([&] { return pane.IsPaneOpen() && tree.RootNodes().Size() && list.Items().Size() == 2; });
+            Pump([&] { return pane.Visibility() == Visibility::Visible && tree.RootNodes().Size() && list.Items().Size() == 2; });
             root.UpdateLayout();
             auto treeRoot = tree.RootNodes().GetAt(0);
-            auto filesTab = root.FindName(L"FilesTab").as<Controls::RadioButton>();
-            auto outlineTab = root.FindName(L"OutlineTab").as<Controls::RadioButton>();
-            expect(filesTab.ActualWidth() > pane.OpenPaneLength() * .4);
-            expect(std::abs(filesTab.ActualWidth() - outlineTab.ActualWidth()) <= 1.);
-            auto snapshot = [&](wchar_t const* name) {
-                auto settled = std::chrono::steady_clock::now() + std::chrono::milliseconds(350);
-                Pump([&] { return std::chrono::steady_clock::now() >= settled; });
-                root.UpdateLayout();
-                Media::Imaging::RenderTargetBitmap bitmap;
-                Await(bitmap.RenderAsync(root));
-                auto pixels = Await(bitmap.GetPixelsAsync());
-                auto out = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
-                    / L"build/tests/workspace-chrome";
-                visual_tests::SavePng(out / name, bitmap.PixelWidth(), bitmap.PixelHeight(), pixels);
-            };
-            expect(root.FindName(L"FilesTab").as<Controls::RadioButton>().IsChecked().GetBoolean());
-            snapshot(L"sidebar-files.png");
-            root.FindName(L"OutlineTab").as<Controls::RadioButton>().IsChecked(true);
-            snapshot(L"sidebar-outline.png");
+            auto filesTab = root.FindName(L"FilesTab").as<Controls::Primitives::ToggleButton>();
+            auto outlineTab = root.FindName(L"OutlineTab").as<Controls::Primitives::ToggleButton>();
+            expect(filesTab.IsChecked().GetBoolean());
+            Access::Pane(window, true);
+            expect(outlineTab.IsChecked().GetBoolean() && !filesTab.IsChecked().GetBoolean());
             expect(list.Visibility() == Visibility::Visible);
             expect(root.FindName(L"OutlineEmptyText").as<FrameworkElement>().Visibility() == Visibility::Collapsed);
-            root.FindName(L"FilesTab").as<Controls::RadioButton>().IsChecked(true);
+            Access::Pane(window, false);
             expect(tree.RootNodes().GetAt(0) == treeRoot);
         };
 
@@ -560,6 +502,7 @@ namespace {
         };
         "caption move after selecting another tab rechecks a click without a nonclient release"_test = [] {
             OwnedWindow source(App()->CreateMainWindow());
+            Access::Bars(source.window, {});
             const auto a = Access::Documents(source.window).Active();
             Access::New(source.window);
             const auto b = Access::Documents(source.window).Active();
@@ -575,8 +518,8 @@ namespace {
             for (const auto& document : {a, b, a, b}) {
                 Access::PointerBegin(source.window, point(Access::View(source.window, document->id)));
                 tabs.SelectedItem(Access::Binding(source.window, document->id)->item);
-                expect(Access::Documents(source.window).Active() == document);
-                expect(tabs.CanTearOutTabs());
+                expect(Access::Documents(source.window).Active() == document) << "selected document" << document->id;
+                expect(tabs.CanTearOutTabs()) << "visible tab owns the native move" << document->id;
                 // Selection can route the release to XAML instead. A new native
                 // move must use its own pointer origin even without PointerEnd.
                 Access::PointerBegin(source.window, point(root.FindName(L"TitleDragArea").as<FrameworkElement>()));
@@ -586,8 +529,41 @@ namespace {
                 Pump([&] { return tabs.CanTearOutTabs(); });
             }
         };
+        "the blank title bar moves the window with the sidebar open or closed"_test = [] {
+            OwnedWindow source(App()->CreateMainWindow());
+            auto window = source.window;
+            Access::Bars(window, {});
+            Access::New(window);
+            auto root = window.Content().as<FrameworkElement>();
+            auto drag = root.FindName(L"TitleDragArea").as<FrameworkElement>();
+            auto split = root.FindName(L"NewTabButton").as<FrameworkElement>();
+            auto id = window.AppWindow().Id();
+            auto native = winrt::Microsoft::UI::Content::ContentCoordinateConverter::CreateForWindowId(id);
+            auto input = winrt::Microsoft::UI::Input::InputNonClientPointerSource::GetForWindowId(id);
+            auto center = [&](FrameworkElement const& element) {
+                return root.XamlRoot().CoordinateConverter().ConvertLocalToScreen(
+                    element.TransformToVisual(nullptr).TransformPoint({static_cast<float>(element.ActualWidth()/2),
+                        static_cast<float>(element.ActualHeight()/2)}));
+            };
+            auto captionAt = [&](auto screen) {
+                auto point = native.ConvertScreenToLocal(screen);
+                return std::ranges::any_of(input.GetRegionRects(winrt::Microsoft::UI::Input::NonClientRegionKind::Caption),
+                    [&](auto rect) { return point.X >= rect.X && point.X < rect.X + rect.Width && point.Y >= rect.Y && point.Y < rect.Y + rect.Height; });
+            };
+            for (bool open : {false, true, false}) {
+                Access::Sidebar(window, open);
+                root.UpdateLayout();
+                Pump([&] { return captionAt(center(drag)) && !captionAt(center(split)); });
+                Access::PointerBegin(window, center(drag));
+                expect(!Access::Tabs(window).CanTearOutTabs());
+                expect(captionAt(center(drag)));
+                Access::PointerEnd(window);
+                Pump([&] { return Access::Tabs(window).CanTearOutTabs(); });
+            }
+        };
         "caption gestures after tab selection cannot enter the native tab tear out loop"_test = [] {
             OwnedWindow source(App()->CreateMainWindow());
+            Access::Bars(source.window, {});
             for (int i = 0; i < 10; ++i) Access::New(source.window);
             auto tabs = Access::Tabs(source.window);
             auto root = source.window.Content().as<FrameworkElement>();
@@ -703,17 +679,17 @@ namespace {
             auto& renderer = Access::Renderer(source.window);
             auto presentCount = [&] { return winrt::Folia::EditorRendererTestAccess::PresentCount(renderer); };
             auto before = presentCount();
-            std::vector<double> opacityDuringPresentation;
+            std::vector<Visibility> selectionDuringPresentation;
             auto token = count.RegisterPropertyChangedCallback(Controls::TextBlock::TextProperty(), [&](auto const&, auto const&) {
                 auto tab = tabs.ContainerFromItem(tabs.SelectedItem()).as<Controls::TabViewItem>();
-                opacityDuringPresentation.push_back(TabPart(tab, L"SelectionIndicator").Opacity());
+                selectionDuringPresentation.push_back(TabPart(tab, L"SelectedBackgroundPath").Visibility());
             });
             for (auto document : {first, second, first, second}) tabs.SelectedItem(Access::Binding(source.window, document->id)->item);
             count.UnregisterPropertyChangedCallback(Controls::TextBlock::TextProperty(), token);
             expect(presentCount() == before) << "switching must not submit intermediate document buffers";
             expect(Access::Documents(source.window).Active() == second);
-            expect(opacityDuringPresentation.size() == 4_u);
-            for (auto opacity : opacityDuringPresentation) expect(opacity == 1.) << "blue indicator during document update";
+            expect(selectionDuringPresentation.size() == 4_u);
+            for (auto visibility : selectionDuringPresentation) expect(visibility == Visibility::Visible) << "active tab during document update";
             std::optional<UINT> presentedWithShell;
             auto rendered = Media::CompositionTarget::Rendered(winrt::auto_revoke, [&](auto const&, auto const&) {
                 if (!presentedWithShell) presentedWithShell = presentCount();
@@ -727,7 +703,7 @@ namespace {
             OwnedWindow owned(App()->CreateMainWindow());
             auto id = Access::Documents(owned.window).Active()->id;
             Access::Edit(owned.window, U"x");
-            auto header = Access::View(owned.window, id).Header().as<Controls::StackPanel>();
+            auto header = Access::View(owned.window, id).Header().as<Controls::Panel>();
             auto dirty = header.Children().GetAt(2).as<Controls::TextBlock>();
             expect(dirty.Visibility() == Visibility::Visible);
             expect(dirty.Text().size() == 1_u);

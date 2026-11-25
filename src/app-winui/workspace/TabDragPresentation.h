@@ -20,7 +20,7 @@ namespace winrt::Folia {
         Microsoft::UI::Xaml::Controls::TabView tabs_{nullptr};
         Windows::Foundation::IInspectable item_{nullptr};
         Microsoft::UI::Xaml::Controls::TabViewItem container_{nullptr};
-        Microsoft::UI::Xaml::Media::TranslateTransform slide_{nullptr};
+        Microsoft::UI::Xaml::FrameworkElement artwork_{nullptr};
         Microsoft::UI::Input::InputNonClientPointerSource pointer_{nullptr};
         winrt::event_token move_{};
         float grabOffset_ = 0;

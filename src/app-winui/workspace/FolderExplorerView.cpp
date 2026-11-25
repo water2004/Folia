@@ -22,7 +22,7 @@ namespace winrt::Folia {
             DataTemplate editFolder = EditorTemplate(WorkspaceIcon::Folder);
 
             static DataTemplate Template(WorkspaceIcon icon, bool root = false) {
-                const bool showIcon = icon != WorkspaceIcon::Folder;
+                const bool showIcon = !root;
                 auto xaml = std::wstring(LR"(<DataTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><Grid ColumnDefinitions=")")
                     + (root ? L"*,Auto,Auto,Auto,Auto" : showIcon ? L"16,*" : L"*")

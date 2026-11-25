@@ -1,8 +1,9 @@
 # Settings
 
-Settings opens from the application menu and uses the same left sidebar as Files
-and Outline. Back or an unhandled Escape restores the document's sidebar and
-its selected view. Pages share
+The gear at the bottom of the activity rail opens one Settings tab per window.
+Its categories use the same left sidebar as Files and Outline. Switching back
+restores the document’s sidebar and selected view. Escape returns to the
+previous document when the current control does not handle it. Pages share
 theme typography and form styles. Long shortcut, LaTeX and license lists use
 native virtualization; ordinary forms use one page scroll surface. Closed choices
 leave the wheel to the page, and numeric AI budgets use plain integer inputs.
@@ -16,8 +17,11 @@ their own viewports. Narrow pages stack these viewports vertically.
 
 Under **General → Window appearance**, the window and reading area can use Mica,
 Mica Alt, desktop acrylic, or the Folia theme's solid color. The reading area
-defaults to **Follow window**. The active tab uses the reading material. Changes
-apply to open windows and are restored when a new window opens.
+defaults to **Follow window**. The activity rail, sidebar, and title bar share
+the window material. The rounded reading card uses the reading material.
+**Auto-hide document tools** reveals the file information and editor actions
+just below the tabs on hover or keyboard focus. The tabs remain visible and
+hovering over the tools does not resize the document.
 
 ## Math rendering
 

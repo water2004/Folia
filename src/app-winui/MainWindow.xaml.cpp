@@ -3,6 +3,7 @@
 #include "localization/Localization.h"
 #include "storage/AssetPaths.h"
 #include <winrt/Microsoft.UI.Composition.SystemBackdrops.h>
+#include <winrt/Microsoft.UI.Xaml.Automation.h>
 #if __has_include("MainWindow.g.cpp")
 #include "MainWindow.g.cpp"
 #endif
@@ -69,7 +70,6 @@ namespace winrt::Folia::implementation
         editorRenderer.SetMediaDisplaySettings(appSettings.media);
         ExtendsContentIntoTitleBar(true);
         AppWindow().TitleBar().PreferredHeightOption(Microsoft::UI::Windowing::TitleBarHeightOption::Standard);
-        SetTitleBar(TitleDragArea());
         RegisterCommandHandlers();
         InitializeTextInput();
         AttachControllers();
@@ -93,11 +93,9 @@ namespace winrt::Folia::implementation
             ToolTipService::SetToolTip(element, winrt::box_value(Localize(resource)));
         };
 
-        FileMenu().Text(Localize(L"FileMenu"));
-        MainMenuLabel().Text(Localize(L"AppName"));
-        EditMenu().Text(Localize(L"EditMenu"));
+        Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(NewTabButton(), Localize(L"NewDocument"));
+        tooltip(NewTabButton(), L"NewDocument");
         FormatMenu().Text(Localize(L"FormatMenu"));
-        NewButton().Text(Localize(L"NewDocument"));
         OpenFolderButton().Text(Localize(L"OpenFolder"));
         RecentFilesMenu().Text(Localize(L"OpenRecentFile"));
         RecentFoldersMenu().Text(Localize(L"OpenRecentFolder"));
@@ -108,14 +106,9 @@ namespace winrt::Folia::implementation
         CloseTabButton().Text(Localize(L"CloseTab"));
         UndoButton().Text(Localize(L"ShortcutUndo"));
         RedoButton().Text(Localize(L"ShortcutRedo"));
-        EditCutButton().Text(Localize(L"Cut"));
-        EditCopyButton().Text(Localize(L"Copy"));
-        EditPasteButton().Text(Localize(L"Paste"));
         FindButton().Text(Localize(L"Find"));
         ReplaceButton().Text(Localize(L"Replace"));
         tooltip(SidebarButton(), L"ToggleSidebar");
-        FilesTab().Content(winrt::box_value(Localize(L"Files")));
-        OutlineTab().Content(winrt::box_value(Localize(L"Outline")));
         OutlineEmptyText().Text(Localize(L"NoOutline"));
 
         OpenButton().Text(Localize(L"Open"));
@@ -162,7 +155,6 @@ namespace winrt::Folia::implementation
         ImageButton().Text(Localize(L"Image"));
         FootnoteButton().Text(Localize(L"Footnote"));
         TocButton().Text(Localize(L"TableOfContents"));
-        SettingsButton().Text(Localize(L"Settings"));
         tooltip(SettingsButton(), L"Settings");
         CutMenuItem().Text(Localize(L"Cut"));
         CopyMenuItem().Text(Localize(L"Copy"));
@@ -185,8 +177,10 @@ namespace winrt::Folia::implementation
 
     winrt::hstring MainWindow::LocalizedDocumentName()
     {
-        if (!HasActiveEditor()) return winrt::hstring(workspaceDocuments.Active()->path.filename().c_str());
-        return editorSession().HasFile() ? editorSession().DisplayName() : Localize(L"UntitledMarkdown");
+        auto active = workspaceDocuments.Active();
+        if (active->editor && editorSession().HasFile()) return editorSession().DisplayName();
+        if (!active->path.empty()) return winrt::hstring(active->path.filename().c_str());
+        return Localize(SettingsActive() ? L"Settings" : L"UntitledMarkdown");
     }
 
     void MainWindow::UpdateDocumentInfo()
@@ -194,12 +188,11 @@ namespace winrt::Folia::implementation
         auto const displayName = LocalizedDocumentName();
         auto active = workspaceDocuments.Active();
         if (active->editor) workspaceDocuments.RefreshPath(active->id);
-        if (!settingsMode) Title(LocalizeFormat(L"WindowTitleDocument", { displayName }));
+        if (!SettingsActive()) Title(LocalizeFormat(L"WindowTitleDocument", { displayName }));
+        ToolbarFilename().Text(displayName);
         if (!active->editor) { UpdateDocumentTab(active->id); return; }
         CharacterCountText().Text(LocalizeFormat(
             L"CharacterCount", { winrt::to_hstring(editorSession().CharacterCount()) }));
-        RevisionText().Text(LocalizeFormat(
-            L"Revision", { winrt::to_hstring(editorSession().Revision()) }));
         auto encodingLabel = winrt::to_hstring(editorSession().Encoding().name);
         if (editorSession().Encoding().byteOrderMark == folia::encoding::DocumentByteOrderMark::Utf8)
             encodingLabel = encodingLabel + L" BOM";
@@ -261,7 +254,7 @@ namespace winrt::Folia::implementation
 
     bool MainWindow::ExecuteEditorCommand(folia::Command const& command)
     {
-        if (windowClosed || settingsMode || !HasActiveEditor()
+        if (windowClosed || SettingsActive() || !HasActiveEditor()
             || workspaceDocuments.Active()->editor->opening || documentController().IsLoading()) return false;
         keyboardController.ResetCaretGoal();
         auto oldRevision = editorSession().Revision();
@@ -451,7 +444,7 @@ namespace winrt::Folia::implementation
 
     void MainWindow::RenderEditorSurface()
     {
-        if (windowClosed || settingsMode || !HasActiveEditor() || !EditorSurface().IsLoaded()) return;
+        if (windowClosed || !HasActiveEditor() || !EditorSurface().IsLoaded()) return;
         try
         {
             auto snippetPlaceholders = keyboardController.SnippetPlaceholders();
@@ -509,8 +502,6 @@ namespace winrt::Folia::implementation
         resources.Insert(winrt::box_value(L"FoliaMonoFontFamily"), Font(themeProfile.typography.ui_monospace.family));
 
         ApplyWorkspaceMaterial();
-        ShellDivider().Background(Brush(colors.shell_border));
-        StatusBar().BorderBrush(Brush(colors.shell_border));
 
         auto titleBar = AppWindow().TitleBar();
         titleBar.BackgroundColor(Windows::UI::Color{});
@@ -529,7 +520,7 @@ namespace winrt::Folia::implementation
         EditorScrollBar().Width(themeProfile.layout.scrollbar_width);
         EditorScrollBarColumn().Width(Microsoft::UI::Xaml::GridLengthHelper::FromPixels(themeProfile.layout.scrollbar_width));
         scrollController.SetWidth(themeProfile.layout.scrollbar_width);
-        StatusBar().MinHeight(themeProfile.layout.status_bar_min_height);
+        DocumentToolbar().MinHeight((std::max)(30.f, themeProfile.layout.status_bar_min_height));
     }
 
     void MainWindow::ApplyWorkspaceMaterial()
@@ -552,38 +543,29 @@ namespace winrt::Folia::implementation
         auto const& appearance = appSettings.appearance;
         auto material = supported(appearance.material);
         auto reading = supported(appearance.readingMaterial.value_or(appearance.material));
+        const bool sharesBase = reading == material;
+        const bool changedLayer = (appliedReadingMaterial == appliedMaterial) != sharesBase;
         if (appliedMaterial != material) {
             SystemBackdrop(backdrop(material));
             appliedMaterial = material;
         }
-        if (appliedReadingMaterial != reading) {
-            ReadingBackdropHost().SystemBackdrop(backdrop(reading));
+        if (appliedReadingMaterial != reading || changedLayer) {
+            ReadingBackdrop().SystemBackdrop(sharesBase ? nullptr : backdrop(reading));
             appliedReadingMaterial = reading;
             UpdateSelectedTabMaterial();
         }
 
         auto const& colors = themeProfile.colors;
         auto resources = Root().Resources();
-        UpdateBrushResource(resources, L"FoliaChromeSurfaceBrush", colors.shell_layer_bg);
         UpdateBrushResource(resources, L"FoliaReadingSurfaceBrush", colors.bg);
-        auto overlay = resources.Lookup(box_value(L"FoliaOverlayMaterialBrush")).as<media::AcrylicBrush>();
-        overlay.TintColor(UiColor(colors.shell_layer_bg));
-        overlay.FallbackColor(UiColor(colors.shell_layer_bg));
-        bool solid = material == WindowMaterial::Solid;
-        Root().Background(solid ? Brush(colors.shell_bg) : nullptr);
+        Root().Background(material == WindowMaterial::Solid
+            ? resources.Lookup(box_value(L"FoliaShellBackgroundBrush")).as<media::Brush>() : nullptr);
         auto paper = resources.Lookup(box_value(L"FoliaReadingSurfaceBrush")).as<media::SolidColorBrush>();
-        paper.Opacity(reading != WindowMaterial::Solid
-            ? unbox_value<double>(resources.Lookup(box_value(L"FoliaReadingMaterialOpacity"))) : 1.);
-        editorRenderer.SetPaperOpacity(static_cast<float>(paper.Opacity()));
-        auto background = [&](bool floats) {
-            auto key = solid ? L"FoliaShellLayerBrush" : floats ? L"FoliaOverlayMaterialBrush" : L"FoliaChromeSurfaceBrush";
-            return resources.Lookup(box_value(key)).as<media::Brush>();
-        };
-        auto chrome = background(false);
-        TopChrome().Background(chrome);
-        StatusBar().Background(chrome);
-        DocumentWorkspace().PaneBackground(background(DocumentWorkspace().DisplayMode()
-            == Microsoft::UI::Xaml::Controls::SplitViewDisplayMode::Overlay));
+        paper.Opacity(reading == WindowMaterial::Solid
+            ? 1. : unbox_value<double>(resources.Lookup(box_value(L"FoliaReadingMaterialOpacity"))));
+        ReadingTint().Background(paper);
+        editorRenderer.SetPaperOpacity(reading == WindowMaterial::Solid ? 1.f : 0.f);
+        ApplySidebarSurface();
     }
 
     void MainWindow::UpdateTheme()

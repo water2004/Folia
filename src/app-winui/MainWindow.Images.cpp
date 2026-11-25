@@ -13,12 +13,11 @@ namespace winrt::Folia::implementation {
         auto editorVisibility = editing ? Visibility::Visible : Visibility::Collapsed;
         EditorPane().Visibility(editorVisibility);
         CharacterCountText().Visibility(editorVisibility);
-        RevisionText().Visibility(editorVisibility);
         SourceModeButton().Visibility(editorVisibility);
         EncodingButton().Visibility(editorVisibility);
-        ImagePreviewPane().Visibility(editing ? Visibility::Collapsed : Visibility::Visible);
-        SetDocumentCommandsVisible(editing && !settingsMode);
-        ReloadButton().Visibility(settingsMode ? Visibility::Collapsed : Visibility::Visible);
+        ImagePreviewPane().Visibility(workspaceDocuments.Active()->kind == WorkspaceTabKind::Image ? Visibility::Visible : Visibility::Collapsed);
+        SetDocumentCommandsVisible(editing);
+        ReloadButton().Visibility(SettingsActive() ? Visibility::Collapsed : Visibility::Visible);
         UpdateWorkspaceLayout();
     }
 
@@ -87,6 +86,6 @@ namespace winrt::Folia::implementation {
 
     void MainWindow::ReloadWorkspaceFile() {
         if (HasActiveEditor()) documentController().ReloadDocument();
-        else LoadImagePreview();
+        else if (workspaceDocuments.Active()->kind == WorkspaceTabKind::Image) LoadImagePreview();
     }
 }

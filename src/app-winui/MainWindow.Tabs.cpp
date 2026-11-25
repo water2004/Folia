@@ -15,19 +15,23 @@ namespace winrt::Folia::implementation {
         if (!document || found == tabItems.end()) return;
         auto tab = DocumentTabs().ContainerFromItem(found->second->item).try_as<TabViewItem>();
         if (!tab) return;
-        auto header = tab.Header().try_as<StackPanel>();
+        auto header = tab.Header().try_as<Grid>();
         if (!header) return;
         auto iconHost = header.Children().GetAt(0).as<ContentControl>();
-        auto icon = !document->editor ? WorkspaceIcon::Image : document->path.empty()
+        const bool settings = document->kind == WorkspaceTabKind::Settings;
+        auto icon = document->kind == WorkspaceTabKind::Image ? WorkspaceIcon::Image : document->path.empty()
             ? WorkspaceIcon::Markdown : WorkspaceFileIcon(ClassifyWorkspaceFile(document->path));
-        auto iconId = static_cast<int>(icon);
+        auto iconId = settings ? -2 : static_cast<int>(icon);
         if (winrt::unbox_value_or<int>(iconHost.Tag(), -1) != iconId) {
-            iconHost.Content(MakeWorkspaceIcon(icon));
+            if (settings) {
+                iconHost.Content(MakeWorkspaceIcon(WorkspaceIcon::Settings));
+            } else iconHost.Content(MakeWorkspaceIcon(icon));
             iconHost.Tag(winrt::box_value(iconId));
         }
         auto title = header.Children().GetAt(1).as<TextBlock>();
         auto dirty = header.Children().GetAt(2).as<TextBlock>();
-        auto name = document->path.empty() ? Localize(L"UntitledMarkdown") : winrt::hstring(document->path.filename().c_str());
+        auto name = settings ? Localize(L"Settings") : document->path.empty()
+            ? Localize(L"UntitledMarkdown") : winrt::hstring(document->path.filename().c_str());
         auto label = name;
         for (auto const& other : workspaceDocuments.Items()) {
             if (other != document && !other->path.empty() && other->path.filename() == document->path.filename()) {
@@ -92,11 +96,33 @@ namespace winrt::Folia::implementation {
         auto tabs = DocumentTabs();
         auto item = tabs.SelectedItem();
         auto tab = item ? tabs.ContainerFromItem(item).try_as<TabViewItem>() : nullptr;
-        auto host = tab ? tab.as<IControlProtected>().GetTemplateChild(L"SelectedTabBackdrop").try_as<SystemBackdropElement>() : nullptr;
-        if (auto previous = selectedTabBackdrop.get(); previous && previous != host) previous.SystemBackdrop(nullptr);
-        selectedTabBackdrop = host;
-        if (host && host.SystemBackdrop() != ReadingBackdropHost().SystemBackdrop())
-            host.SystemBackdrop(ReadingBackdropHost().SystemBackdrop());
+        auto grid = tab ? tab.as<IControlProtected>().GetTemplateChild(L"LayoutRoot").try_as<Grid>() : nullptr;
+        // WinUI owns the path, shoulders, outline, hover and focus visuals. The
+        // system material sits behind its selected fill and moves with the tab.
+        auto material = ReadingBackdrop().SystemBackdrop();
+        if (selectedTabBackdrop) {
+            auto parent = Media::VisualTreeHelper::GetParent(selectedTabBackdrop).try_as<Grid>();
+            if (parent && (!material || parent != grid)) {
+                std::uint32_t index;
+                if (parent.Children().IndexOf(selectedTabBackdrop, index)) parent.Children().RemoveAt(index);
+            }
+        }
+        if (!grid || !material) {
+            selectedTabBackdrop = nullptr;
+            return;
+        }
+        if (!selectedTabBackdrop) {
+            selectedTabBackdrop = SystemBackdropElement();
+            selectedTabBackdrop.IsHitTestVisible(false);
+            selectedTabBackdrop.Name(L"SelectedTabBackdrop");
+        }
+        if (!Media::VisualTreeHelper::GetParent(selectedTabBackdrop)) {
+            auto corners = tab.CornerRadius();
+            selectedTabBackdrop.CornerRadius({corners.TopLeft, corners.TopRight, 0, 0});
+            Grid::SetColumnSpan(selectedTabBackdrop, 3);
+            grid.Children().InsertAt(0, selectedTabBackdrop);
+        }
+        if (selectedTabBackdrop.SystemBackdrop() != material) selectedTabBackdrop.SystemBackdrop(material);
     }
     void MainWindow::DocumentTabPrepared(FrameworkElement const& sender, DataContextChangedEventArgs const&) {
         if (windowClosed) return;
@@ -106,38 +132,14 @@ namespace winrt::Folia::implementation {
         auto found = tabItems.find(id);
         if (found == tabItems.end()) return;
         tab.Tag(found->second->item);
-        if (!tab.Header().try_as<StackPanel>()) {
-            tab.Style(Root().Resources().Lookup(winrt::box_value(L"WorkspaceTabStyle")).as<Style>());
-            StackPanel header;
-            header.Orientation(Orientation::Horizontal);
-            header.Spacing(8);
-            TextBlock title;
-            title.FontSize(14);
-            title.VerticalAlignment(VerticalAlignment::Center);
-            title.MaxWidth(210);
-            title.TextTrimming(TextTrimming::CharacterEllipsis);
-            TextBlock dirty;
-            dirty.Text(L"●");
-            dirty.FontSize(8);
-            dirty.VerticalAlignment(VerticalAlignment::Center);
-            ContentControl iconHost;
-            iconHost.IsTabStop(false);
-            iconHost.VerticalAlignment(VerticalAlignment::Center);
-            header.Children().Append(iconHost);
-            header.Children().Append(title);
-            header.Children().Append(dirty);
-            tab.Header(header);
-            tab.DoubleTapped(WindowEvent([this](auto const& sender, auto const&) {
-                auto id = winrt::unbox_value<std::uint64_t>(sender.template as<TabViewItem>().DataContext());
-                if (workspaceDocuments.Keep(id)) UpdateDocumentTab(id);
-            }));
-            tab.Tapped(WindowEvent([this](auto const& sender, auto const&) {
-                auto id = winrt::unbox_value<std::uint64_t>(sender.template as<TabViewItem>().DataContext());
-                if (settingsMode && IsActiveDocument(id)) SetSettingsMode(false);
-            }));
-        }
         UpdateDocumentTab(id);
         EnsureSelectedTabVisible();
+    }
+
+    void MainWindow::DocumentTabDoubleTapped(Windows::Foundation::IInspectable const& sender, Input::DoubleTappedRoutedEventArgs const&) {
+        if (windowClosed) return;
+        auto id = winrt::unbox_value<std::uint64_t>(sender.as<TabViewItem>().Tag());
+        if (workspaceDocuments.Keep(id)) UpdateDocumentTab(id);
     }
 
     winrt::fire_and_forget MainWindow::CloseDocumentAsync(std::uint64_t id) {
@@ -151,7 +153,8 @@ namespace winrt::Folia::implementation {
             if (IsActiveDocument(id)) textInputController.FocusLeave();
             if (!document->editor || co_await document->editor->controller.ConfirmCloseAsync()) {
                 if (IsActiveDocument(id)) {
-                    auto next = workspaceDocuments.Adjacent(id, 1);
+                    auto next = SettingsActive() && previousDocumentTab ? workspaceDocuments.Find(*previousDocumentTab) : nullptr;
+                    if (!next) next = workspaceDocuments.Adjacent(id, 1);
                     if (next == document) next = workspaceDocuments.New(winrt::Folia::WorkspaceOpenMode::Preview);
                     ActivateDocument(next->id);
                 }
@@ -164,31 +167,40 @@ namespace winrt::Folia::implementation {
         if (!windowClosed) UpdateLoadingState();
     }
 
+    ScrollViewer MainWindow::TabStripScroller() {
+        auto list = DocumentTabs().as<IControlProtected>().GetTemplateChild(L"TabListView").try_as<Control>();
+        return list ? list.as<IControlProtected>().GetTemplateChild(L"ScrollViewer").try_as<ScrollViewer>() : nullptr;
+    }
+
     void MainWindow::RegisterWorkspaceHandlers() {
-        using winrt::Folia::MakeWorkspaceIcon;
-        using winrt::Folia::WorkspaceIcon;
-        SidebarButton().Content(MakeWorkspaceIcon(WorkspaceIcon::PanelLeft));
-        SourceModeButton().Content(MakeWorkspaceIcon(WorkspaceIcon::Source));
-        Automation::AutomationProperties::SetName(SidebarButton(), Localize(L"ToggleSidebar"));
-        Automation::AutomationProperties::SetName(SourceModeButton(), Localize(L"SourceMode"));
-        OutlineList().Items().VectorChanged(WindowEvent([this](auto const&, auto const&) {
-            OutlineEmptyText().Visibility(HasActiveEditor() && OutlineList().Items().Size() ? Visibility::Collapsed : Visibility::Visible);
-        }));
-        auto changeSidebarPage = WindowEvent([this](auto const&, auto const&) { UpdateWorkspaceLayout(); });
-        FilesTab().Checked(changeSidebarPage);
-        OutlineTab().Checked(changeSidebarPage);
+        OutlineList().Items().VectorChanged(WindowEvent([this](auto const&, auto const&) { UpdateWorkspaceLayout(); }));
         DocumentTabs().TabItemsSource(tabSource);
+        DocumentTabs().Loaded(WindowEvent([this](auto const&, auto const&) {
+            if (auto viewer = TabStripScroller()) {
+                // TabView handles ViewChanged, but resizing the viewport at offset
+                // zero can expose more tabs without raising that event.
+                viewer.RegisterPropertyChangedCallback(ScrollViewer::ScrollableWidthProperty(), [](DependencyObject const& sender, DependencyProperty const&) {
+                    auto scroll = sender.as<ScrollViewer>();
+                    scroll.DispatcherQueue().TryEnqueue([weak = winrt::make_weak(scroll)] {
+                        if (auto view = weak.get(); view && view.IsLoaded()) {
+                            auto parts = view.as<IControlProtected>();
+                            auto back = parts.GetTemplateChild(L"ScrollDecreaseButton").try_as<Primitives::RepeatButton>();
+                            auto next = parts.GetTemplateChild(L"ScrollIncreaseButton").try_as<Primitives::RepeatButton>();
+                            if (back) back.IsEnabled(view.HorizontalOffset() > 0.1);
+                            if (next) next.IsEnabled(view.ScrollableWidth() - view.HorizontalOffset() > 0.1);
+                        }
+                    });
+                });
+            }
+        }));
         DocumentTabs().SelectionChanged(WindowEvent([this](auto const&, auto const&) {
             if (updatingTabs || windowClosed) return;
             if (auto item = DocumentTabs().SelectedItem()) ActivateDocument(winrt::unbox_value<std::uint64_t>(item));
         }));
-        DocumentTabs().AddTabButtonClick(WindowEvent([this](auto const&, auto const&) { NewDocument(); }));
         DocumentTabs().TabCloseRequested(WindowEvent([this](auto const&, TabViewTabCloseRequestedEventArgs const& args) {
             CloseDocumentAsync(winrt::unbox_value<std::uint64_t>(args.Item()));
         }));
         RegisterTabTransferHandlers();
-        DocumentWorkspace().RegisterPropertyChangedCallback(SplitView::IsPaneOpenProperty(),
-            WindowEvent([this](auto const&, auto const&) { UpdateWorkspaceLayout(); }));
         DocumentTabs().SizeChanged(WindowEvent([this](auto const&, auto const&) {
             UpdateChromeMetrics();
             EnsureSelectedTabVisible();
@@ -233,33 +245,4 @@ namespace winrt::Folia::implementation {
         CaptionInset().Width(AppWindow().TitleBar().RightInset() / (std::max)(1.0, scale));
     }
 
-    void MainWindow::UpdateWorkspaceLayout() {
-        auto width = Root().ActualWidth();
-        const bool compact = width > 0 && width < 760;
-        constexpr double sidebarWidth = 248;
-        const double paneWidth = settingsMode && compact ? SettingsNavigation().CompactPaneLength() : sidebarWidth;
-        DocumentWorkspace().OpenPaneLength(paneWidth);
-        if (settingsMode) {
-            SettingsNavigation().OpenPaneLength(sidebarWidth);
-            SettingsNavigation().PaneDisplayMode(compact ? NavigationViewPaneDisplayMode::LeftCompact : NavigationViewPaneDisplayMode::Left);
-            SettingsNavigation().IsPaneOpen(!compact);
-        }
-        auto mode = compact && !settingsMode ? SplitViewDisplayMode::Overlay : SplitViewDisplayMode::Inline;
-        if (DocumentWorkspace().DisplayMode() != mode) {
-            DocumentWorkspace().DisplayMode(mode);
-            if (appliedMaterial) ApplyWorkspaceMaterial();
-        }
-        const bool open = DocumentWorkspace().IsPaneOpen();
-        auto corners = open && !compact ? CornerRadius{8, 0, 0, 8} : CornerRadius{};
-        WorkspaceHost().CornerRadius(corners);
-        ReadingBackdropHost().CornerRadius(corners);
-        const double covered = open && mode == SplitViewDisplayMode::Overlay ? paneWidth : 0.;
-        topBar.SetCoveredWidth(covered);
-        bottomBar.SetCoveredWidth(covered);
-        const bool outline = OutlineTab().IsChecked().GetBoolean();
-        ExplorerPane().Visibility(outline ? Visibility::Collapsed : Visibility::Visible);
-        OutlinePaneContent().Visibility(outline ? Visibility::Visible : Visibility::Collapsed);
-        OutlineList().Visibility(HasActiveEditor() ? Visibility::Visible : Visibility::Collapsed);
-        OutlineEmptyText().Visibility(HasActiveEditor() && OutlineList().Items().Size() ? Visibility::Collapsed : Visibility::Visible);
-    }
 }

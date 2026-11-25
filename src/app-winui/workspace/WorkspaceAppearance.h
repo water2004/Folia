@@ -20,8 +20,7 @@ namespace winrt::Folia {
     };
 
     struct WorkspaceAppearance {
-        bool autoHideTop = false;
-        bool autoHideBottom = false;
+        bool autoHideTools = false;
         WindowMaterial material = WindowMaterial::MicaAlt;
         std::optional<WindowMaterial> readingMaterial;
         bool operator==(WorkspaceAppearance const&) const = default;

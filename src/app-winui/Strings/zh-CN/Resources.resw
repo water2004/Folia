@@ -404,6 +404,5 @@
   <data name="MaterialSolid" xml:space="preserve"><value>纯色</value></data>
   <data name="ReadingMaterial" xml:space="preserve"><value>阅读区域材质</value></data>
   <data name="MaterialFollowWindow" xml:space="preserve"><value>跟随窗口</value></data>
-  <data name="AutoHideTopBar" xml:space="preserve"><value>自动隐藏顶栏</value></data>
-  <data name="AutoHideBottomBar" xml:space="preserve"><value>自动隐藏底栏</value></data>
+  <data name="AutoHideDocumentTools" xml:space="preserve"><value>自动隐藏文档工具区</value></data>
 </root>

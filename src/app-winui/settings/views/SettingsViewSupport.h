@@ -1,5 +1,6 @@
 #pragma once
 
+#include <winrt/Microsoft.UI.Xaml.Automation.h>
 import folia.core.theme;
 
 namespace winrt::Folia::settings_ui
@@ -190,17 +191,28 @@ namespace winrt::Folia::settings_ui
         return lines;
     }
 
-    inline Controls::NavigationViewItem NavigationItem(
+    inline Controls::ListViewItem NavigationItem(
         winrt::hstring const& label,
         winrt::hstring const& tag,
         wchar_t const* glyph)
     {
-        Controls::NavigationViewItem item;
-        item.Content(winrt::box_value(label));
+        Controls::ListViewItem item;
+        Controls::StackPanel content;
+        content.Orientation(Controls::Orientation::Horizontal);
+        content.Spacing(10);
         item.Tag(winrt::box_value(tag));
         Controls::FontIcon icon;
         icon.Glyph(glyph);
-        item.Icon(icon);
+        icon.FontSize(15);
+        icon.Width(18);
+        Controls::TextBlock text;
+        text.Text(label);
+        text.FontSize(13);
+        text.VerticalAlignment(Microsoft::UI::Xaml::VerticalAlignment::Center);
+        content.Children().Append(icon);
+        content.Children().Append(text);
+        item.Content(content);
+        Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(item, label);
         return item;
     }
 

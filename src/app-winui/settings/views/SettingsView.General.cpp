@@ -60,8 +60,7 @@ namespace winrt::Folia
             check.Click([this](auto const&, auto const&) { ApplyAppearanceSetting(); });
             appearance.Children().Append(check);
         };
-        addToggle(autoHideTop_, L"AutoHideTopBar");
-        addToggle(autoHideBottom_, L"AutoHideBottomBar");
+        addToggle(autoHideTools_, L"AutoHideDocumentTools");
         UpdateWorkspaceAppearance(settings_.appearance);
         auto changed = [this](auto const&, auto const&) { ApplyAppearanceSetting(); };
         materialCombo_.SelectionChanged(changed);
@@ -125,8 +124,7 @@ namespace winrt::Folia
             ? std::ranges::find(windowMaterials, *appearance.readingMaterial, &WindowMaterialChoice::value)
             : windowMaterials.end();
         readingMaterialCombo_.SelectedIndex(reading == windowMaterials.end() ? 0 : 1 + static_cast<int>(reading - windowMaterials.begin()));
-        autoHideTop_.IsChecked(appearance.autoHideTop);
-        autoHideBottom_.IsChecked(appearance.autoHideBottom);
+        autoHideTools_.IsChecked(appearance.autoHideTools);
         refreshing_ = wasRefreshing;
     }
 
@@ -138,7 +136,7 @@ namespace winrt::Folia
         if (index < 0 || static_cast<size_t>(index) >= windowMaterials.size()
             || reading < 0 || static_cast<size_t>(reading) > windowMaterials.size()) return;
         auto proposed = appliedSettings_;
-        proposed.appearance = {autoHideTop_.IsChecked().GetBoolean(), autoHideBottom_.IsChecked().GetBoolean(),
+        proposed.appearance = {autoHideTools_.IsChecked().GetBoolean(),
             windowMaterials[index].value, reading ? std::optional{windowMaterials[reading - 1].value} : std::nullopt};
         if (proposed.appearance == appliedSettings_.appearance) return;
         if (auto error = applySettings_(proposed)) {

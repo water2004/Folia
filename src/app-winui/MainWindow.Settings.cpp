@@ -13,7 +13,6 @@ namespace winrt::Folia::implementation
         ReloadButton().Visibility(value);
         SaveButton().Visibility(value);
         SaveAsButton().Visibility(value);
-        EditMenu().Visibility(value);
         ExportPdfButton().Visibility(value);
         BoldButton().Visibility(value);
         ItalicButton().Visibility(value);
@@ -58,19 +57,6 @@ namespace winrt::Folia::implementation
         return std::nullopt;
     }
 
-    void MainWindow::ApplyBarLayout()
-    {
-        using Microsoft::UI::Xaml::Controls::Grid;
-        auto const& appearance = appSettings.appearance;
-        // The bars keep their grid rows. Only the reading viewport extends into
-        // an auto-hidden edge, leaving the middle row safe for notifications.
-        const int first = appearance.autoHideTop ? 0 : 1;
-        const int end = appearance.autoHideBottom && !settingsMode ? 3 : 2;
-        Grid::SetRow(TopEdgeViewport(), first);
-        Grid::SetRowSpan(TopEdgeViewport(), end - first);
-        topBar.Configure(appearance.autoHideTop);
-        bottomBar.Configure(appearance.autoHideBottom, !settingsMode);
-    }
 
     void MainWindow::UpdateWorkspaceAppearance(WorkspaceAppearance const& settings)
     {
@@ -87,26 +73,32 @@ namespace winrt::Folia::implementation
         appSettings.media = settings;
         editorRenderer.SetMediaDisplaySettings(settings);
         if (settingsView) settingsView->UpdateMediaSettings(settings);
-        if (!settingsMode) RenderEditorSurface();
+        if (!SettingsActive()) RenderEditorSurface();
     }
 
-    void MainWindow::SetSettingsMode(bool enabled)
+    void MainWindow::OpenSettingsTab()
     {
-        if (settingsMode == enabled)
-        {
-            return;
-        }
+        if (closePending || closingDocument || windowClosed) return;
+        auto tab = workspaceDocuments.OpenSettings();
+        ActivateDocument(tab->id);
+        RefreshDocumentTabs();
+    }
 
-        settingsMode = enabled;
-        if (inlineCompletion) inlineCompletion->SetFocused(false);
-        latexCompletionController.Cancel();
-        SetDocumentCommandsVisible(!enabled && HasActiveEditor());
-        if (!enabled) ReloadButton().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
+    void MainWindow::ReturnToDocumentTab()
+    {
+        if (!SettingsActive()) return;
+        auto tab = previousDocumentTab ? workspaceDocuments.Find(*previousDocumentTab) : nullptr;
+        if (!tab) tab = workspaceDocuments.Adjacent(workspaceDocuments.Active()->id, -1);
+        if (tab == workspaceDocuments.Active()) NewDocument();
+        else ActivateDocument(tab->id);
+    }
+
+    void MainWindow::ShowSettingsNavigation(bool enabled)
+    {
         if (enabled)
         {
-            documentSidebarWasOpen = DocumentWorkspace().IsPaneOpen();
+            documentSidebarWasOpen = sidebarOpen && !sidebarClosing;
             animationController.Focus(false);
-            HideFindBar();
             if (!settingsView)
             {
                 settingsView = std::make_shared<winrt::Folia::SettingsView>(
@@ -116,36 +108,27 @@ namespace winrt::Folia::implementation
                     latexCommandCatalog,
                     CurrentThemeVariant(),
                     WindowHandle(),
-                    [this](winrt::Folia::AppSettings const& changed) { return ApplySettings(changed); },
-                    [weak = get_weak()] {
-                        if (auto window = weak.get(); window && !window->windowClosed) window->SetSettingsMode(false);
-                    });
-            }
-            else
-            {
-                settingsView->Reset(appSettings, CurrentThemeVariant());
+                    [this](winrt::Folia::AppSettings const& changed) { return ApplySettings(changed); });
             }
             DocumentNavigation().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
             SettingsNavigation().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
-            DocumentWorkspace().IsPaneOpen(true);
+            SetSidebarOpen(true);
             UpdateWorkspaceLayout();
             DocumentPages().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
             SettingsViewHost().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
             ApplyBarLayout();
             Title(Localize(L"WindowTitleSettings"));
+            SettingsNavigation().Focus(Microsoft::UI::Xaml::FocusState::Programmatic);
             return;
         }
 
+        settingsView->CancelShortcutCapture();
         SettingsViewHost().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
         SettingsNavigation().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
         DocumentNavigation().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
-        DocumentWorkspace().IsPaneOpen(documentSidebarWasOpen);
+        SetSidebarOpen(documentSidebarWasOpen);
         UpdateWorkspaceLayout();
-        if (settingsView) settingsView->Reset(appSettings, CurrentThemeVariant());
         DocumentPages().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
         ApplyBarLayout();
-        UpdateDocumentInfo();
-        RenderEditorSurface();
-        if (HasActiveEditor()) EditorSurface().Focus(Microsoft::UI::Xaml::FocusState::Programmatic);
     }
 }

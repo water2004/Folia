@@ -44,23 +44,24 @@ suite settings_list_tests = [] {
         std::ofstream timings(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
             / "build/settings-lists-timing.log");
         auto started = std::chrono::steady_clock::now();
-        NavigationView settingsMenu;
-        auto view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, settingsMenu, winrt::Folia::AppSettings{},
+        ListView settingsMenu;
+        ContentControl pageHost;
+        auto view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, pageHost, winrt::Folia::AppSettings{},
             std::make_shared<winrt::Folia::ThemeCatalog>(), latex, folia::Theme::Light,
-            nullptr, [](auto const&) -> std::optional<winrt::hstring> { return {}; }, [] {});
+            nullptr, [](auto const&) -> std::optional<winrt::hstring> { return {}; });
         auto elapsed = [&] { return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count(); };
         timings << "settings construction ms=" << elapsed() << ", latex commands=" << latex->Commands().size() << std::endl;
         struct Cleanup { Window window; std::shared_ptr<winrt::Folia::SettingsView> view;
             ~Cleanup() { view->Detach(); window.Close(); } } cleanup{window, view};
-        root.Children().Append(view->Root()); window.AppWindow().Resize({1120, 900}); window.Activate();
+        root.Children().Append(pageHost); window.AppWindow().Resize({1120, 900}); window.Activate();
         Pump([&] { return root.IsLoaded(); });
         auto navigation = view->Root();
         auto select = [&](wchar_t const* tag) {
-            for (auto entry : navigation.MenuItems())
-                if (winrt::unbox_value<winrt::hstring>(entry.as<NavigationViewItem>().Tag()) == tag)
+            for (auto entry : navigation.Items())
+                if (winrt::unbox_value<winrt::hstring>(entry.as<ListViewItem>().Tag()) == tag)
                     navigation.SelectedItem(entry);
             root.UpdateLayout();
-            if (auto list = First<ListView>(navigation.Content().as<UIElement>())) {
+            if (auto list = First<ListView>(pageHost.Content().as<UIElement>())) {
                 Pump([&] {
                     root.UpdateLayout();
                     auto content = Row(list, 0);
@@ -71,7 +72,7 @@ suite settings_list_tests = [] {
         for (auto const* tag : {L"shortcuts", L"latex", L"shortcuts", L"latex"}) {
             started = std::chrono::steady_clock::now();
             select(tag);
-            auto page = navigation.Content().as<FrameworkElement>();
+            auto page = pageHost.Content().as<FrameworkElement>();
             timings << winrt::to_string(tag) << " switch/layout ms=" << elapsed()
                 << ", grids=" << Count<Grid>(page) << ", combos=" << Count<ComboBox>(page)
                 << ", textblocks=" << Count<TextBlock>(page) << std::endl;
@@ -90,7 +91,7 @@ suite settings_list_tests = [] {
             expect(source == list.ItemsSource()) << "unchanged model must reuse its data source";
             expect(first == Row(list, 0)) << "unchanged navigation must reuse its controls";
         }
-        auto list = First<ListView>(navigation.Content().as<UIElement>());
+        auto list = First<ListView>(pageHost.Content().as<UIElement>());
         auto last = list.Items().Size() - 1;
         auto source = list.ItemsSource();
         std::vector<winrt::weak_ref<FrameworkElement>> oldRows;
@@ -123,7 +124,7 @@ suite settings_list_tests = [] {
         latex->RecordUsage(latex->Commands().front().id);
         select(L"general"); select(L"latex");
         expect(source != list.ItemsSource()) << "usage changes invalidate command descriptions";
-        auto shortcuts = [&] { select(L"shortcuts"); return First<ListView>(navigation.Content().as<UIElement>()); }();
+        auto shortcuts = [&] { select(L"shortcuts"); return First<ListView>(pageHost.Content().as<UIElement>()); }();
         auto row = Row(shortcuts, 0);
         auto capture = First<Button>(row);
         expect(capture != nullptr);
@@ -168,23 +169,24 @@ suite settings_list_tests = [] {
         bool failApply = false;
         auto saved = settings;
         Window window; Grid root; window.Content(root);
-        NavigationView settingsMenu;
-        auto view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, settingsMenu, settings,
+        ListView settingsMenu;
+        ContentControl pageHost;
+        auto view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, pageHost, settings,
             std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
             folia::Theme::Light, nullptr, [&](auto const& value) -> std::optional<winrt::hstring> {
                 ++applied;
                 if (failApply) return L"test persistence failure";
                 saved = value; return {};
-            }, [] {});
+            });
         struct Cleanup { Window window; std::shared_ptr<winrt::Folia::SettingsView> view;
             ~Cleanup() { view->Detach(); window.Close(); } } cleanup{window, view};
-        root.Children().Append(view->Root()); window.AppWindow().Resize({1120, 900}); window.Activate();
+        root.Children().Append(pageHost); window.AppWindow().Resize({1120, 900}); window.Activate();
         Pump([&] { return root.IsLoaded(); });
         auto navigation = view->Root();
-        for (auto entry : navigation.MenuItems())
-            if (winrt::unbox_value<winrt::hstring>(entry.as<NavigationViewItem>().Tag()) == L"shortcuts") navigation.SelectedItem(entry);
+        for (auto entry : navigation.Items())
+            if (winrt::unbox_value<winrt::hstring>(entry.as<ListViewItem>().Tag()) == L"shortcuts") navigation.SelectedItem(entry);
         root.UpdateLayout();
-        auto list = First<ListView>(navigation.Content().as<UIElement>());
+        auto list = First<ListView>(pageHost.Content().as<UIElement>());
         Pump([&] { root.UpdateLayout(); return Row(list, 0) && First<ComboBox>(Row(list, 0)); });
         auto scope = First<ComboBox>(Row(list, 0));
         auto source = list.ItemsSource();

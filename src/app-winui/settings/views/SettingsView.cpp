@@ -11,14 +11,13 @@ namespace winrt::Folia
     using settings_ui::NavigationItem;
 
     SettingsView::SettingsView(
-        NavigationView const& navigation, ContentControl const& pageHost,
+        ListView const& navigation, ContentControl const& pageHost,
         AppSettings settings,
         std::shared_ptr<ThemeCatalog> catalog,
         std::shared_ptr<LatexCommandCatalog> latexCatalog,
         folia::Theme systemVariant,
         HWND owner,
-        ApplySettings applySettings,
-        CloseSettings closeSettings)
+        ApplySettings applySettings)
         : settings_(std::move(settings)),
           appliedSettings_(settings_),
           catalog_(std::move(catalog)),
@@ -27,54 +26,39 @@ namespace winrt::Folia
           owner_(owner),
           applySettings_(std::move(applySettings)), navigation_(navigation), pageHost_(pageHost)
     {
+        pageHost_.HorizontalContentAlignment(HorizontalAlignment::Stretch);
+        pageHost_.VerticalContentAlignment(VerticalAlignment::Stretch);
         shortcutModel_.Reset(settings_.shortcutBindings);
-        Build(std::move(closeSettings));
+        Build();
     }
 
-    void SettingsView::Build(CloseSettings closeSettings)
+    void SettingsView::Build()
     {
-        navigation_.AlwaysShowHeader(false);
-        navigation_.CompactPaneLength(48);
-        navigation_.IsBackButtonVisible(NavigationViewBackButtonVisible::Visible);
-        navigation_.IsBackEnabled(true);
-        backRequested_ = navigation_.BackRequested([close = std::move(closeSettings)](auto const&, auto const&) {
-            close();
-        });
-        navigation_.IsPaneOpen(true);
-        navigation_.IsPaneToggleButtonVisible(false);
-        navigation_.IsSettingsVisible(false);
-        navigation_.OpenPaneLength(280);
-        navigation_.PaneTitle(Localize(L"Settings"));
-        navigation_.PaneDisplayMode(NavigationViewPaneDisplayMode::Left);
-        navigation_.HorizontalAlignment(HorizontalAlignment::Stretch);
-        navigation_.VerticalAlignment(VerticalAlignment::Stretch);
-
         auto general = NavigationItem(Localize(L"General"), L"general", L"\xE713");
         auto shortcuts = NavigationItem(Localize(L"Shortcuts"), L"shortcuts", L"\xE765");
         auto latex = NavigationItem(Localize(L"LatexCommands"), L"latex", L"\xE943");
         auto themes = NavigationItem(Localize(L"Themes"), L"themes", L"\xE790");
         auto licenses = NavigationItem(Localize(L"Licenses"), L"licenses", L"\xE8A5");
         auto about = NavigationItem(Localize(L"About"), L"about", L"\xE946");
-        navigation_.MenuItems().Append(general);
-        navigation_.MenuItems().Append(shortcuts);
-        navigation_.MenuItems().Append(latex);
-        navigation_.MenuItems().Append(NavigationItem(Localize(L"AICompletion"), L"completion", L"\xE8D4"));
-        navigation_.MenuItems().Append(themes);
-        navigation_.MenuItems().Append(licenses);
-        navigation_.MenuItems().Append(about);
+        navigation_.Items().Append(general);
+        navigation_.Items().Append(shortcuts);
+        navigation_.Items().Append(latex);
+        navigation_.Items().Append(NavigationItem(Localize(L"AICompletion"), L"completion", L"\xE8D4"));
+        navigation_.Items().Append(themes);
+        navigation_.Items().Append(licenses);
+        navigation_.Items().Append(about);
 
         generalPage_ = BuildGeneralPage();
         themesPage_ = BuildThemesPage();
         licensesPage_ = BuildLicensesPage();
         aboutPage_ = BuildAboutPage();
-        navigation_.SelectionChanged([this](auto const&, NavigationViewSelectionChangedEventArgs const& args)
+        navigationChanged_ = navigation_.SelectionChanged(winrt::auto_revoke, [this](auto const&, auto const&)
         {
-            auto item = args.SelectedItem().try_as<NavigationViewItem>();
+            auto item = navigation_.SelectedItem().try_as<ListViewItem>();
             if (!item || !item.Tag()) return;
             Navigate(unbox_value<hstring>(item.Tag()));
         });
         navigation_.SelectedItem(general);
-        Navigate(L"general");
     }
 
     void SettingsView::Navigate(hstring const& page)
@@ -134,7 +118,7 @@ namespace winrt::Folia
 
     void SettingsView::Detach()
     {
-        if (backRequested_.value) { navigation_.BackRequested(backRequested_); backRequested_ = {}; }
+        navigationChanged_.revoke();
         detached_ = true;
         shortcutRows_.revoke();
         latexRows_.revoke();

@@ -44,11 +44,12 @@ namespace
             auto themes = std::make_shared<ThemeCatalog>();
             auto latex = std::make_shared<LatexCommandCatalog>();
             AppSettings settings;
-            NavigationView settingsMenu;
-            auto view = std::make_shared<SettingsView>(settingsMenu, settingsMenu, settings, themes, latex, folia::Theme::Light,
-                nullptr, [](auto const&) -> std::optional<winrt::hstring> { return std::nullopt; }, [] {});
+            ListView settingsMenu;
+            ContentControl pageHost;
+            auto view = std::make_shared<SettingsView>(settingsMenu, pageHost, settings, themes, latex, folia::Theme::Light,
+                nullptr, [](auto const&) -> std::optional<winrt::hstring> { return std::nullopt; });
             Window window;
-            window.Content(view->Root());
+            window.Content(pageHost);
             window.AppWindow().Resize({1120, 900});
             window.Activate();
             struct DetachView
@@ -58,9 +59,9 @@ namespace
                 ~DetachView() { view->Detach(); window.Close(); }
             } detach{view, window};
             auto navigation = view->Root();
-            for (auto const& item : navigation.MenuItems())
+            for (auto const& item : navigation.Items())
             {
-                auto entry = item.as<NavigationViewItem>();
+                auto entry = item.as<ListViewItem>();
                 if (winrt::unbox_value<winrt::hstring>(entry.Tag()) == L"shortcuts")
                 {
                     navigation.SelectedItem(entry);
@@ -68,8 +69,8 @@ namespace
                 }
             }
             SettleSettingsControls();
-            navigation.UpdateLayout();
-            auto content = navigation.Content().try_as<UIElement>();
+            pageHost.UpdateLayout();
+            auto content = pageHost.Content().try_as<UIElement>();
             expect(static_cast<bool>(content)) << "settings navigation must expose content";
             if (!content) return;
             for (int iteration = 0; iteration < 2; ++iteration)
@@ -81,7 +82,7 @@ namespace
                 expect(Grid::GetColumn(scope) == 1_i) << "scope must occupy shortcuts column 1";
                 auto oldScope = winrt::make_weak(scope);
                 view->Reset(settings, folia::Theme::Light);
-                navigation.UpdateLayout();
+                pageHost.UpdateLayout();
                 expect(FindScope(content) == scope) << "unchanged reset must reuse realized rows";
                 scope = nullptr; // Only the old visual tree and its handler can retain it.
                 settings.shortcutBindings.front().gesture.reset();
@@ -89,7 +90,7 @@ namespace
                     ? folia::platform::editor::EditorShortcutScope::Math
                     : folia::platform::editor::EditorShortcutScope::Code;
                 view->Reset(settings, folia::Theme::Light);
-                navigation.UpdateLayout();
+                pageHost.UpdateLayout();
                 SettleSettingsControls();
                 expect(!oldScope.get()) << "replaced scope retained after reset " << iteration;
                 expect(static_cast<bool>(FindScope(content))) << "reset must replace the scope control";

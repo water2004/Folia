@@ -40,13 +40,13 @@ namespace winrt::Folia::implementation {
         try {
             auto folder = co_await Windows::Storage::StorageFolder::GetFolderFromPathAsync(path.native());
             if (!current() || closePending || closingDocument || relocatingFiles || folderExplorer.IsBusy()) co_return;
-            if (settingsMode) SetSettingsMode(false);
+            if (SettingsActive()) ReturnToDocumentTab();
             folderExplorer.Open(std::filesystem::path(folder.Path().c_str()));
             recentWorkspace.Remember(RecentWorkspaceKind::Folder, folderExplorer.RootPath());
             FileTree().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
             ExplorerEmptyState().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
-            FilesTab().IsChecked(true);
-            DocumentWorkspace().IsPaneOpen(true);
+            outlineSelected = false;
+            SetSidebarOpen(true);
         } catch (winrt::hresult_error const& error) {
             if (!current()) co_return;
             ShowError(WorkspaceOpenError(RecentWorkspaceKind::Folder, path, error));

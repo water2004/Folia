@@ -13,28 +13,27 @@ namespace winrt::Folia
     {
     public:
         using ApplySettings = std::function<std::optional<winrt::hstring>(AppSettings const&)>;
-        using CloseSettings = std::function<void()>;
 
         SettingsView(
-            Microsoft::UI::Xaml::Controls::NavigationView const& navigation,
+            Microsoft::UI::Xaml::Controls::ListView const& navigation,
             Microsoft::UI::Xaml::Controls::ContentControl const& pageHost,
             AppSettings settings,
             std::shared_ptr<ThemeCatalog> catalog,
             std::shared_ptr<LatexCommandCatalog> latexCatalog,
             folia::Theme systemVariant,
             HWND owner,
-            ApplySettings applySettings,
-            CloseSettings closeSettings);
+            ApplySettings applySettings);
 
-        winrt::Microsoft::UI::Xaml::Controls::NavigationView Root() const { return navigation_; }
+        winrt::Microsoft::UI::Xaml::Controls::ListView Root() const { return navigation_; }
         void Reset(AppSettings settings, folia::Theme systemVariant);
         void SetSystemVariant(folia::Theme variant);
+        void CancelShortcutCapture();
         void UpdateWorkspaceAppearance(WorkspaceAppearance const& appearance);
         void UpdateMediaSettings(MediaDisplaySettings const& media);
         void Detach();
 
     private:
-        void Build(CloseSettings closeSettings);
+        void Build();
         winrt::Microsoft::UI::Xaml::UIElement BuildGeneralPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildCompletionPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildShortcutsPage();
@@ -59,7 +58,6 @@ namespace winrt::Folia
         void SetShortcutStatus(winrt::hstring const& message, bool error = false);
         void SetLatexStatus(winrt::hstring const& message, bool error = false);
         void RefreshShortcutList();
-        void CancelShortcutCapture();
         winrt::Microsoft::UI::Xaml::FrameworkElement BuildShortcutRow(std::size_t index);
         void BeginShortcutCapture(std::size_t index, winrt::Microsoft::UI::Xaml::Controls::Button const& button);
         void CaptureShortcut(
@@ -89,9 +87,9 @@ namespace winrt::Folia
         folia::Theme systemVariant_ = folia::Theme::Dark;
         HWND owner_ = nullptr;
         ApplySettings applySettings_;
-        winrt::Microsoft::UI::Xaml::Controls::NavigationView navigation_;
+        winrt::Microsoft::UI::Xaml::Controls::ListView navigation_;
         winrt::Microsoft::UI::Xaml::Controls::ContentControl pageHost_;
-        winrt::event_token backRequested_{};
+        winrt::Microsoft::UI::Xaml::Controls::ListView::SelectionChanged_revoker navigationChanged_;
         winrt::Microsoft::UI::Xaml::UIElement generalPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::UIElement completionPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::UIElement shortcutsPage_{ nullptr };
@@ -100,7 +98,7 @@ namespace winrt::Folia
         winrt::Microsoft::UI::Xaml::UIElement licensesPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::UIElement aboutPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::Controls::ToggleSwitch latexSuggestionsToggle_;
-        winrt::Microsoft::UI::Xaml::Controls::CheckBox autoHideTop_, autoHideBottom_;
+        winrt::Microsoft::UI::Xaml::Controls::CheckBox autoHideTools_;
         winrt::Microsoft::UI::Xaml::Controls::ComboBox materialCombo_{nullptr}, readingMaterialCombo_{nullptr};
         winrt::Microsoft::UI::Xaml::Controls::ComboBox languageCombo_;
         winrt::Microsoft::UI::Xaml::Controls::ComboBox imageWidthCombo_{nullptr};

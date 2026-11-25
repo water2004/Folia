@@ -90,9 +90,28 @@ window procedure is synthesized or replaced.
 Every native move entry rechecks its own pointer origin before TabView handles
 the move. A tab-selection click can finish through XAML without delivering a
 non-client release, so its recorded press cannot suppress a later origin check.
+The tab strip stays visible. Only the tools in the reading card can auto-hide.
+The native caption region is recomputed after sidebar changes because the
+whole strip can move without reporting a size change.
 The corresponding SDK sources are
 [TabView](https://github.com/microsoft/microsoft-ui-xaml/blob/693f472aeaf89c6dff66256ee6fcd453e5d553b8/controls/dev/TabView/TabView.cpp)
 and [TabViewListView](https://github.com/microsoft/microsoft-ui-xaml/blob/693f472aeaf89c6dff66256ee6fcd453e5d553b8/controls/dev/TabView/TabViewListView.cpp).
+
+## Workspace layout
+
+`MainWindow.xaml` owns the three layout regions: the activity rail, the
+sidebar, and the title strip over the reading card. `WorkspaceChrome.xaml`
+holds their control styles, and `FolderExplorer.xaml` holds the file tree
+presentation. The settings category list replaces the contents of the same
+sidebar while its tab is selected.
+
+`MainWindow.Workspace.cpp` coordinates the sidebar with the desktop work area.
+A restored window grows first toward its left edge, then toward available
+space on the right. When the window cannot grow, the sidebar opens over the
+reading card. `DocumentTools` owns the toolbar's hover and keyboard focus
+behavior. Its animated clip clears space for the tools without resizing the
+editor surface. The card provides the paper tint to both XAML and Direct2D
+content.
 
 Child XAML controls can deliver final notifications after their window closes.
 `MainWindow::WindowEvent` locks the weak window owner during delivery and skips

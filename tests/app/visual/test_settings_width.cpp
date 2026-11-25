@@ -31,27 +31,28 @@ namespace {
             root.VerticalAlignment(VerticalAlignment::Top);
             root.Width(1120);
             root.Height(800);
-            NavigationView settingsMenu;
-            auto view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, settingsMenu, winrt::Folia::AppSettings{},
+            ListView settingsMenu;
+            ContentControl pageHost;
+            auto view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, pageHost, winrt::Folia::AppSettings{},
                 std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
-                folia::Theme::Light, nullptr, [](auto const&) -> std::optional<winrt::hstring> { return {}; }, [] {});
+                folia::Theme::Light, nullptr, [](auto const&) -> std::optional<winrt::hstring> { return {}; });
             struct Cleanup {
                 Window window;
                 std::shared_ptr<winrt::Folia::SettingsView> view;
                 ~Cleanup() { view->Detach(); window.Close(); }
             } cleanup{window, view};
-            root.Children().Append(view->Root());
+            root.Children().Append(pageHost);
             window.Activate();
             Pump([&] { return root.IsLoaded(); });
             auto navigation = view->Root();
-            for (auto entry : navigation.MenuItems()) {
+            for (auto entry : navigation.Items()) {
                 navigation.SelectedItem(entry);
-                const auto name = winrt::to_string(winrt::unbox_value<winrt::hstring>(entry.as<NavigationViewItem>().Tag()));
+                const auto name = winrt::to_string(winrt::unbox_value<winrt::hstring>(entry.as<ListViewItem>().Tag()));
                 for (const auto width : {1120, 1800, 2400, 720, 1120}) {
                     root.Width(width);
                     Pump([&] { return std::abs(root.ActualWidth() - width) < 1.; });
                     root.UpdateLayout();
-                    auto page = navigation.Content().as<FrameworkElement>();
+                    auto page = pageHost.Content().as<FrameworkElement>();
                     Pump([&] { root.UpdateLayout(); return First<ContentPresenter>(page, L"PageContent") != nullptr; });
                     auto content = First<ContentPresenter>(page, L"PageContent");
                     const auto origin = content.TransformToVisual(page).TransformPoint({0, 0});
@@ -76,7 +77,7 @@ namespace {
                     root.Width(1800);
                     root.Height(700);
                     root.UpdateLayout();
-                    auto page = navigation.Content().as<FrameworkElement>();
+                    auto page = pageHost.Content().as<FrameworkElement>();
                     auto list = First<ListView>(page);
                     const auto listHeight = list.ActualHeight();
                     root.Height(1000);

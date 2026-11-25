@@ -77,7 +77,7 @@
   },
   "layout": {
     "documentHorizontalPadding": 48,
-    "documentVerticalPadding": 40,
+    "documentVerticalPadding": 22,
     "blockGap": 6,
     "paragraphMarginBottom": 8,
     "listMarginBottom": 8,

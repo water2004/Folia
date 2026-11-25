@@ -19,10 +19,11 @@
             <SolidColorBrush x:Key="FoliaShellForegroundBrush" Color="#E4E8F0"/>
             <SolidColorBrush x:Key="FoliaShellMutedForegroundBrush" Color="#8B95AA"/>
             <SolidColorBrush x:Key="FoliaShellAccentBrush" Color="#7AA2F7"/>
-            <SolidColorBrush x:Key="FoliaChromeSurfaceBrush" Opacity="0.16"/>
             <x:Double x:Key="FoliaReadingMaterialOpacity">0.40</x:Double>
             <SolidColorBrush x:Key="FoliaReadingSurfaceBrush"/>
-            <AcrylicBrush x:Key="FoliaOverlayMaterialBrush" TintOpacity="0.83"/>
+            <StaticResource x:Key="TabViewItemHeaderBackgroundSelected" ResourceKey="FoliaReadingSurfaceBrush"/>
+            <x:Double x:Key="WorkspaceTabHeight">32</x:Double>
+            <Thickness x:Key="WorkspaceTabRowInset">0,4,0,0</Thickness>
             <FontFamily x:Key="FoliaUiFontFamily">Segoe UI Variable Text</FontFamily>
             <FontFamily x:Key="FoliaMonoFontFamily">Cascadia Mono</FontFamily>
             <x:Double x:Key="FoliaUiFontSize">14</x:Double>
@@ -58,21 +59,24 @@
             </Style>
           </ResourceDictionary>
         </Grid.Resources>
-        <SplitView x:Name="DocumentWorkspace" DisplayMode="Inline" PanePlacement="Left" OpenPaneLength="248" IsPaneOpen="False"
-                   BorderThickness="0" PaneBackground="{ThemeResource FoliaChromeSurfaceBrush}">
-            <SplitView.Pane>
-            <Grid x:Name="WorkspaceSidebar" BorderBrush="{ThemeResource FoliaShellBorderBrush}" BorderThickness="0,0,1,0">
-            <Grid x:Name="DocumentNavigation" RowDefinitions="Auto,*">
-                <Grid Margin="10,9,10,5" Padding="3" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                      ColumnDefinitions="*,*" ColumnSpacing="2">
-                    <RadioButton x:Name="FilesTab" GroupName="Navigation" Content="Files" IsChecked="True"
-                                 Background="{ThemeResource FoliaShellBackgroundBrush}" BorderBrush="{ThemeResource FoliaShellBorderBrush}"
-                                 Style="{StaticResource SidebarTabStyle}"/>
-                    <RadioButton x:Name="OutlineTab" Grid.Column="1" GroupName="Navigation" Content="Outline"
-                                 Background="{ThemeResource FoliaShellBackgroundBrush}" BorderBrush="{ThemeResource FoliaShellBorderBrush}"
-                                 Style="{StaticResource SidebarTabStyle}"/>
-                </Grid>
-            <Grid x:Name="ExplorerPane" Grid.Row="1" RowDefinitions="Auto,*">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="44"/>
+                <ColumnDefinition x:Name="SidebarColumn" Width="0"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid x:Name="WorkspaceRail" Padding="5,36,5,8" RowDefinitions="Auto,*,Auto" Canvas.ZIndex="2">
+                <StackPanel Spacing="5">
+                    <ToggleButton x:Name="FilesTab" Style="{StaticResource WorkspaceRailButtonStyle}"/>
+                    <ToggleButton x:Name="OutlineTab" Style="{StaticResource WorkspaceRailButtonStyle}"/>
+                </StackPanel>
+                <Button x:Name="SettingsButton" Grid.Row="2" Style="{StaticResource WorkspaceRailActionStyle}"/>
+            </Grid>
+            <Grid x:Name="WorkspaceSidebar" Grid.Column="1" Margin="0,36,0,0" Padding="4,0,6,7" Visibility="Collapsed" Canvas.ZIndex="1">
+            <SystemBackdropElement x:Name="FloatingSidebarBackdrop" CornerRadius="8" IsHitTestVisible="False"/>
+            <Border x:Name="FloatingSidebarTint" CornerRadius="8" IsHitTestVisible="False"/>
+            <Grid x:Name="DocumentNavigation">
+            <Grid x:Name="ExplorerPane" RowDefinitions="Auto,*">
                 <StackPanel x:Name="FileOperationPanel" Grid.Row="0" Margin="16,8,12,8" Spacing="4" Visibility="Collapsed">
                     <TextBlock x:Name="FileOperationText" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
                     <ProgressBar x:Name="FileOperationProgress" Height="2" MinHeight="2" IsIndeterminate="True"/>
@@ -84,96 +88,98 @@
                 </StackPanel>
                 <TreeView x:Name="FileTree" Grid.Row="1" Margin="6,6,6,8" Style="{StaticResource ExplorerTreeStyle}" Visibility="Collapsed"/>
             </Grid>
-            <Grid x:Name="OutlinePaneContent" Grid.Row="1" Padding="6,2,6,8" Visibility="Collapsed">
+            <Grid x:Name="OutlinePaneContent" Padding="4,2,4,4" Visibility="Collapsed">
                 <ListView x:Name="OutlineList" Background="Transparent" SelectionMode="Single"
+                          ItemContainerStyle="{StaticResource WorkspaceNavigationItemStyle}"
                           ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollMode="Enabled"/>
                 <TextBlock x:Name="OutlineEmptyText" Margin="12,12" FontSize="13"
                            Foreground="{ThemeResource FoliaShellMutedForegroundBrush}" TextWrapping="Wrap" Visibility="Collapsed"/>
             </Grid>
             </Grid>
-                <NavigationView x:Name="SettingsNavigation" Visibility="Collapsed" Background="Transparent" IsTitleBarAutoPaddingEnabled="False">
-                    <NavigationView.Resources>
-                        <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="Transparent"/>
-                        <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="Transparent"/>
-                        <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent"/>
-                        <Thickness x:Key="NavigationViewContentGridBorderThickness">0</Thickness>
-                    </NavigationView.Resources>
-                </NavigationView>
+                <ListView x:Name="SettingsNavigation" Visibility="Collapsed" Background="Transparent"
+                          SelectionMode="Single" SingleSelectionFollowsFocus="True" IsItemClickEnabled="False"
+                          ItemContainerStyle="{StaticResource WorkspaceNavigationItemStyle}"/>
             </Grid>
-            </SplitView.Pane>
-        <SplitView.Content>
-        <Grid x:Name="DocumentColumn" RowDefinitions="Auto,*,Auto">
-        <Grid x:Name="TopChrome" VerticalAlignment="Top" Canvas.ZIndex="4" Background="{ThemeResource FoliaChromeSurfaceBrush}" RowDefinitions="32,1">
-            <Border x:Name="ShellDivider" Grid.Row="1" Height="1" VerticalAlignment="Bottom" Background="{ThemeResource FoliaShellBorderBrush}" IsHitTestVisible="False"/>
-        <TabView x:Name="DocumentTabs" Grid.RowSpan="2"
-                 CloseButtonOverlayMode="OnPointerOver" TabWidthMode="SizeToContent" CanDragTabs="True" CanReorderTabs="True" AllowDrop="True"
+        <Grid x:Name="DocumentColumn" Grid.Column="2" RowDefinitions="Auto,*" MinWidth="0">
+        <Grid x:Name="TopChrome" ColumnDefinitions="Auto,*" Height="36" Canvas.ZIndex="2">
+        <ToggleButton x:Name="SidebarButton" Margin="4,0,4,0" Style="{StaticResource WorkspacePaneToggleStyle}"/>
+        <TabView x:Name="DocumentTabs" Margin="{StaticResource WorkspaceTabRowInset}"
+                 Grid.Column="1"
+                 IsAddTabButtonVisible="False" CloseButtonOverlayMode="OnPointerOver" TabWidthMode="Equal" CanDragTabs="True" CanReorderTabs="True" AllowDrop="True"
                  Padding="0" BorderThickness="0" Background="Transparent">
             <TabView.TabItemTemplate>
                 <DataTemplate>
-                    <TabViewItem Tag="{Binding}" Background="{ThemeResource FoliaReadingSurfaceBrush}"
-                                 DataContextChanged="DocumentTabPrepared" Loaded="DocumentTabLoaded"/>
+                    <TabViewItem Tag="{Binding}" Height="{StaticResource WorkspaceTabHeight}" Margin="0"
+                                 HorizontalContentAlignment="Stretch" DoubleTapped="DocumentTabDoubleTapped"
+                                 DataContextChanged="DocumentTabPrepared" Loaded="DocumentTabLoaded">
+                        <TabViewItem.Header>
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6" VerticalAlignment="Center" UseLayoutRounding="True">
+                                <ContentControl Width="16" VerticalAlignment="Center" IsTabStop="False"/>
+                                <TextBlock Grid.Column="1" FontSize="14" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock Grid.Column="2" Text="&#x25CF;" FontSize="8" VerticalAlignment="Center" Visibility="Collapsed"/>
+                            </Grid>
+                        </TabViewItem.Header>
+                    </TabViewItem>
                 </DataTemplate>
             </TabView.TabItemTemplate>
             <TabView.Resources>
                 <SolidColorBrush x:Key="TabViewBorderBrush" Color="Transparent"/>
-                <Thickness x:Key="TabViewItemAddButtonContainerPadding">3,2,3,2</Thickness>
+                <x:Double x:Key="TabViewItemMaxWidth">200</x:Double>
             </TabView.Resources>
-            <TabView.TabStripHeader>
-                <Button x:Name="MainMenuButton" Height="28" MinHeight="0" Margin="5,2,6,2" Padding="8,0" Style="{StaticResource SubtleButtonStyle}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock x:Name="MainMenuLabel" Text="Folia" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        <FontIcon Glyph="&#xE70D;" FontSize="10"/>
-                    </StackPanel>
-                    <Button.Flyout>
-                        <MenuFlyout Placement="BottomEdgeAlignedLeft">
-                            <MenuFlyoutSubItem x:Name="FileMenu" Text="File">
-                                <MenuFlyoutItem x:Name="NewButton" Text="New document" KeyboardAcceleratorTextOverride="Ctrl+N"/>
-                                <MenuFlyoutItem x:Name="OpenButton" Text="Open file" KeyboardAcceleratorTextOverride="Ctrl+O"/>
-                                <MenuFlyoutSubItem x:Name="RecentFilesMenu" Text="Open Recent File"/>
-                                <MenuFlyoutItem x:Name="OpenFolderButton" Text="Open folder" KeyboardAcceleratorTextOverride="Ctrl+Shift+O"/>
-                                <MenuFlyoutSubItem x:Name="RecentFoldersMenu" Text="Open Recent Folder"/>
-                                <MenuFlyoutSeparator/>
-                                <MenuFlyoutItem x:Name="SaveButton" Text="Save" KeyboardAcceleratorTextOverride="Ctrl+S"/>
-                                <MenuFlyoutItem x:Name="SaveAsButton" Text="Save as"/>
-                                <MenuFlyoutItem x:Name="ReloadButton" Text="Reload"/>
-                                <MenuFlyoutItem x:Name="ExportPdfButton" Text="PDF"/>
-                                <MenuFlyoutSeparator/>
-                                <MenuFlyoutItem x:Name="CloseTabButton" Text="Close tab" KeyboardAcceleratorTextOverride="Ctrl+W"/>
-                            </MenuFlyoutSubItem>
-                            <MenuFlyoutSubItem x:Name="EditMenu" Text="Edit">
-                                <MenuFlyoutItem x:Name="UndoButton" Text="Undo"/>
-                                <MenuFlyoutItem x:Name="RedoButton" Text="Redo"/>
-                                <MenuFlyoutSeparator/>
-                                <MenuFlyoutItem x:Name="EditCutButton" Text="Cut"/>
-                                <MenuFlyoutItem x:Name="EditCopyButton" Text="Copy"/>
-                                <MenuFlyoutItem x:Name="EditPasteButton" Text="Paste"/>
-                                <MenuFlyoutSeparator/>
-                                <MenuFlyoutItem x:Name="FindButton" Text="Find"/>
-                                <MenuFlyoutItem x:Name="ReplaceButton" Text="Replace"/>
-                                <MenuFlyoutSubItem x:Name="FormatMenu" Text="Format">
-                                    <ToggleMenuFlyoutItem x:Name="BoldButton" Text="Bold"/>
-                                    <ToggleMenuFlyoutItem x:Name="ItalicButton" Text="Italic"/>
-                                    <ToggleMenuFlyoutItem x:Name="StrikeButton" Text="Strikethrough"/>
-                                    <ToggleMenuFlyoutItem x:Name="InlineCodeButton" Text="Inline code"/>
-                                    <MenuFlyoutSeparator/>
-                                    <MenuFlyoutItem x:Name="FormatDocumentButton" Text="Format document"/>
-                                </MenuFlyoutSubItem>
-                            </MenuFlyoutSubItem>
-                            <MenuFlyoutItem x:Name="SettingsButton" Text="Settings"/>
-                        </MenuFlyout>
-                    </Button.Flyout>
-                </Button>
-            </TabView.TabStripHeader>
             <TabView.TabStripFooter>
-                <Grid Height="32" ColumnDefinitions="*,Auto">
-                    <Border x:Name="TitleDragArea" Background="Transparent" MinWidth="36"/>
-                    <Border x:Name="CaptionInset" Grid.Column="1" Width="138"/>
+                <Grid Height="{StaticResource WorkspaceTabHeight}" ColumnDefinitions="Auto,*,Auto">
+                    <Button x:Name="NewTabButton" Style="{StaticResource WorkspaceToolActionStyle}" Margin="4,0"/>
+                    <Border x:Name="TitleDragArea" Grid.Column="1" Background="Transparent" MinWidth="36"/>
+                    <Border x:Name="CaptionInset" Grid.Column="2" Width="138"/>
                 </Grid>
             </TabView.TabStripFooter>
         </TabView>
         </Grid>
-        <Grid x:Name="TopEdgeViewport" Grid.Row="1">
-        <Grid x:Name="BottomEdgeViewport" RowDefinitions="Auto,*">
+        <Grid x:Name="ReadingCard" Grid.Row="1" Margin="4,0,6,6" CornerRadius="9">
+        <SystemBackdropElement x:Name="ReadingBackdrop" CornerRadius="9" IsHitTestVisible="False"/>
+        <Border x:Name="ReadingTint" CornerRadius="9" IsHitTestVisible="False"/>
+        <Grid x:Name="ReadingLayout" RowDefinitions="Auto,*">
+        <Grid x:Name="DocumentToolbar" MinHeight="30" VerticalAlignment="Top" Canvas.ZIndex="2"
+              Background="Transparent" Padding="5,0,6,0" ColumnDefinitions="Auto,*,Auto">
+            <Button x:Name="DocumentActionsButton" Style="{StaticResource WorkspaceToolActionStyle}">
+                <Button.Flyout>
+                    <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                        <MenuFlyoutItem x:Name="OpenButton" Text="Open file" KeyboardAcceleratorTextOverride="Ctrl+O"/>
+                        <MenuFlyoutItem x:Name="OpenFolderButton" Text="Open folder" KeyboardAcceleratorTextOverride="Ctrl+Shift+O"/>
+                        <MenuFlyoutSubItem x:Name="RecentFilesMenu" Text="Open Recent File"/>
+                        <MenuFlyoutSubItem x:Name="RecentFoldersMenu" Text="Open Recent Folder"/>
+                        <MenuFlyoutSeparator/>
+                        <MenuFlyoutItem x:Name="SaveButton" Text="Save" KeyboardAcceleratorTextOverride="Ctrl+S"/>
+                        <MenuFlyoutItem x:Name="SaveAsButton" Text="Save as"/>
+                        <MenuFlyoutItem x:Name="ReloadButton" Text="Reload"/>
+                        <MenuFlyoutItem x:Name="ExportPdfButton" Text="PDF"/>
+                        <MenuFlyoutItem x:Name="CloseTabButton" Text="Close tab" KeyboardAcceleratorTextOverride="Ctrl+W"/>
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+            <TextBlock x:Name="ToolbarFilename" Grid.Column="1" Margin="6,0" FontSize="12" FontWeight="SemiBold"
+                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <StackPanel x:Name="CompletionStatusPanel" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" Visibility="Collapsed">
+                    <ProgressRing x:Name="CompletionProgressRing" Style="{StaticResource FoliaCompletionProgressStyle}" IsActive="False" Visibility="Collapsed"/>
+                    <TextBlock x:Name="CompletionStatusText" FontSize="12" MaxWidth="180" TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
+                </StackPanel>
+                <TextBlock x:Name="CharacterCountText" FontSize="12" VerticalAlignment="Center" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
+                <TextBlock x:Name="ImageSizeText" FontSize="12" VerticalAlignment="Center" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}" Visibility="Collapsed"/>
+                <Button x:Name="EncodingButton" FontSize="12" MinHeight="22" Height="22" Padding="5,0" Style="{StaticResource SubtleButtonStyle}"
+                        Foreground="{ThemeResource FoliaShellMutedForegroundBrush}">
+                    <Button.Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem x:Name="ReopenEncodingItem"/>
+                            <MenuFlyoutItem x:Name="SaveEncodingItem"/>
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
+                <ToggleButton x:Name="SourceModeButton" Style="{StaticResource WorkspacePaneToggleStyle}"/>
+            </StackPanel>
+        </Grid>
+        <Grid x:Name="DocumentViewport" Grid.Row="1" RowDefinitions="Auto,*">
 
         <Border
             x:Name="FindReplaceBar"
@@ -235,7 +241,6 @@
         </Border>
 
         <Grid x:Name="WorkspaceHost" Grid.Row="1">
-                <SystemBackdropElement x:Name="ReadingBackdropHost" IsHitTestVisible="False"/>
                 <Grid x:Name="DocumentPages">
                 <Grid x:Name="EditorPane">
 
@@ -251,12 +256,25 @@
                         </FlyoutBase.AttachedFlyout>
                         <SwapChainPanel.ContextFlyout>
                             <MenuFlyout>
+                                <MenuFlyoutItem x:Name="UndoButton" Text="Undo" KeyboardAcceleratorTextOverride="Ctrl+Z"/>
+                                <MenuFlyoutItem x:Name="RedoButton" Text="Redo" KeyboardAcceleratorTextOverride="Ctrl+Y"/>
+                                <MenuFlyoutSeparator/>
                                 <MenuFlyoutItem x:Name="CutMenuItem" Text="Cut"/>
                                 <MenuFlyoutItem x:Name="CopyMenuItem" Text="Copy"/>
                                 <MenuFlyoutItem x:Name="PasteMenuItem" Text="Paste"/>
                                 <MenuFlyoutSeparator/>
                                 <MenuFlyoutItem x:Name="SelectAllMenuItem" Text="Select All"/>
                                 <MenuFlyoutSeparator/>
+                                <MenuFlyoutItem x:Name="FindButton" Text="Find" KeyboardAcceleratorTextOverride="Ctrl+F"/>
+                                <MenuFlyoutItem x:Name="ReplaceButton" Text="Replace" KeyboardAcceleratorTextOverride="Ctrl+H"/>
+                                <MenuFlyoutSubItem x:Name="FormatMenu" Text="Format">
+                                    <ToggleMenuFlyoutItem x:Name="BoldButton" Text="Bold"/>
+                                    <ToggleMenuFlyoutItem x:Name="ItalicButton" Text="Italic"/>
+                                    <ToggleMenuFlyoutItem x:Name="StrikeButton" Text="Strikethrough"/>
+                                    <ToggleMenuFlyoutItem x:Name="InlineCodeButton" Text="Inline code"/>
+                                    <MenuFlyoutSeparator/>
+                                    <MenuFlyoutItem x:Name="FormatDocumentButton" Text="Format document"/>
+                                </MenuFlyoutSubItem>
                                 <MenuFlyoutSubItem x:Name="InsertButton" Text="Insert">
                                     <MenuFlyoutItem x:Name="TableButton" Text="Table"/>
                                     <MenuFlyoutItem x:Name="InlineMathButton" Text="Inline math"/>
@@ -382,7 +400,7 @@
                     </StackPanel>
                   </Border>
                 </Grid>
-                <Grid x:Name="ImagePreviewPane" Visibility="Collapsed" Background="{ThemeResource FoliaReadingSurfaceBrush}">
+                <Grid x:Name="ImagePreviewPane" Visibility="Collapsed">
                     <ScrollViewer x:Name="ImagePreviewViewer" Margin="24" ZoomMode="Enabled" MinZoomFactor="1" MaxZoomFactor="8"
                                   HorizontalScrollMode="Enabled" VerticalScrollMode="Enabled"
                                   HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
@@ -400,15 +418,12 @@
                     </StackPanel>
                 </Grid>
                 </Grid>
-
             <ContentControl x:Name="SettingsViewHost" Visibility="Collapsed"
-                            Background="{ThemeResource FoliaReadingSurfaceBrush}"
                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
         </Grid>
         </Grid>
         </Grid>
-
-        <ScrollViewer x:Name="WorkspaceNotifications" Grid.Row="1" Canvas.ZIndex="3"
+        <ScrollViewer x:Name="WorkspaceNotifications" Canvas.ZIndex="3"
                       HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="12" MaxWidth="420"
                       HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled"
                       VerticalScrollBarVisibility="Auto" IsTabStop="False">
@@ -422,37 +437,8 @@
                 <InfoBar x:Name="ErrorInfoBar" Severity="Error" IsClosable="True"/>
             </StackPanel>
         </ScrollViewer>
-        <Grid x:Name="StatusBar" Grid.Row="2" Canvas.ZIndex="4" VerticalAlignment="Bottom" MinHeight="24" Padding="5,0,7,0"
-              Background="{ThemeResource FoliaChromeSurfaceBrush}" BorderBrush="{ThemeResource FoliaShellBorderBrush}"
-              BorderThickness="0,1,0,0" ColumnDefinitions="Auto,*,Auto">
-            <StackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
-                <ToggleButton x:Name="SidebarButton" Style="{StaticResource WorkspacePaneToggleStyle}"
-                              IsChecked="{Binding IsPaneOpen, ElementName=DocumentWorkspace, Mode=TwoWay}"/>
-                <ToggleButton x:Name="SourceModeButton" Style="{StaticResource WorkspacePaneToggleStyle}"/>
-            </StackPanel>
-            <StackPanel x:Name="CompletionStatusPanel" Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal"
-                        Spacing="4" Margin="6,0" VerticalAlignment="Center" Visibility="Collapsed">
-                <ProgressRing x:Name="CompletionProgressRing" Style="{StaticResource FoliaCompletionProgressStyle}" IsActive="False" Visibility="Collapsed"/>
-                <TextBlock x:Name="CompletionStatusText" FontSize="12" MaxWidth="200" TextTrimming="CharacterEllipsis"
-                           VerticalAlignment="Center" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
-            </StackPanel>
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <TextBlock x:Name="CharacterCountText" FontSize="12" VerticalAlignment="Center" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
-                <TextBlock x:Name="RevisionText" FontSize="12" VerticalAlignment="Center" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
-                <TextBlock x:Name="ImageSizeText" FontSize="12" VerticalAlignment="Center" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}" Visibility="Collapsed"/>
-                <Button x:Name="EncodingButton" FontSize="12" MinHeight="22" Height="22" Padding="5,0" Style="{StaticResource SubtleButtonStyle}"
-                        Foreground="{ThemeResource FoliaShellMutedForegroundBrush}">
-                    <Button.Flyout>
-                        <MenuFlyout>
-                            <MenuFlyoutItem x:Name="ReopenEncodingItem"/>
-                            <MenuFlyoutItem x:Name="SaveEncodingItem"/>
-                        </MenuFlyout>
-                    </Button.Flyout>
-                </Button>
-            </StackPanel>
         </Grid>
         </Grid>
-        </SplitView.Content>
-        </SplitView>
+        </Grid>
     </Grid>
 </Window>

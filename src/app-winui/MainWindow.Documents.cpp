@@ -74,7 +74,6 @@ namespace winrt::Folia::implementation {
     void MainWindow::ActivateDocument(std::uint64_t id) {
         auto document = workspaceDocuments.Find(id);
         if (!document || windowClosed) return;
-        if (settingsMode) SetSettingsMode(false);
         auto previous = workspaceDocuments.Active();
         if (previous == document) {
             SelectDocumentTab();
@@ -103,8 +102,12 @@ namespace winrt::Folia::implementation {
             ++editor->openSerial;
             editor->opening = false;
             editor->math = editorRenderer.TakeMathCache();
-        } else ClearImagePreview();
+        } else if (previous->kind == WorkspaceTabKind::Image) ClearImagePreview();
+        const bool enteringSettings = document->kind == WorkspaceTabKind::Settings;
+        const bool leavingSettings = previous->kind == WorkspaceTabKind::Settings;
+        if (enteringSettings) previousDocumentTab = previous->id;
         workspaceDocuments.Activate(id);
+        if (enteringSettings || leavingSettings) ShowSettingsNavigation(enteringSettings);
         UpdateWorkspaceContent();
         ExternalChangeInfoBar().IsOpen(false);
         SetOperationProgress(false);
@@ -115,7 +118,7 @@ namespace winrt::Folia::implementation {
         auto const& editor = document->editor;
         if (!editor) {
             UpdateCompletionStatus(winrt::Folia::CompletionState::Idle);
-            LoadImagePreview();
+            if (document->kind == WorkspaceTabKind::Image) LoadImagePreview();
             return;
         }
         if (editor->themeRevision != workspaceThemeRevision) {
@@ -141,6 +144,7 @@ namespace winrt::Folia::implementation {
         else RenderEditorSurface();
         UpdateLoadingState();
         if (!editor->loaded) LoadWorkspaceDocument(document);
+        if (leavingSettings) EditorSurface().Focus(FocusState::Programmatic);
     }
 
     void MainWindow::NewDocument() {
@@ -224,7 +228,7 @@ namespace winrt::Folia::implementation {
 
     void MainWindow::UpdateLoadingState() {
         auto movable = !closePending && !closingDocument && !relocatingFiles;
-        DocumentTabs().CanTearOutTabs(movable);
+        UpdateTabTransferAvailability();
         DocumentTabs().CanDragTabs(movable);
         auto const& editor = workspaceDocuments.Active()->editor;
         bool loading = editor && (editor->opening || editor->controller.IsLoading());

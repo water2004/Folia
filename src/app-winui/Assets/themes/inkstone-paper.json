@@ -46,7 +46,7 @@
     "syntax": ["#352F2A", "#8A3D72", "#276B68", "#785E24", "#9B3A2C", "#35734A", "#56804B", "#595047", "#7B4A83", "#334F8A", "#27708A"]
   },
   "layout": {
-    "documentHorizontalPadding": 64, "documentVerticalPadding": 52, "blockGap": 8,
+    "documentHorizontalPadding": 64, "documentVerticalPadding": 30, "blockGap": 8,
     "paragraphMarginBottom": 12, "listMarginBottom": 12, "listPaddingLeft": 22, "thematicBreakMargin": 14,
     "headingMarginTop": [30, 25, 20, 15, 10, 6], "headingMarginBottom": 7,
     "codeMargin": 12, "codePaddingVertical": 12, "codePaddingHorizontal": 16,

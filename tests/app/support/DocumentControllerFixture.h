@@ -3,6 +3,8 @@
 #include "editor/document/EditorDocumentController.h"
 #include "localization/Localization.h"
 #include <winrt/Windows.Graphics.Imaging.h>
+#include <format>
+#include <source_location>
 
 namespace document_tests {
     using namespace winrt::Folia;
@@ -10,7 +12,7 @@ namespace document_tests {
     using winrt::Windows::Foundation::IAsyncOperation;
     using winrt::Microsoft::UI::Xaml::Controls::ContentDialogResult;
 
-    template<class Done> void Pump(Done done) {
+    template<class Done> void Pump(Done done, std::source_location location = std::source_location::current()) {
         auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
         while (!done() && std::chrono::steady_clock::now() < deadline) {
             MSG message{};
@@ -20,7 +22,8 @@ namespace document_tests {
             }
             ::MsgWaitForMultipleObjectsEx(0, nullptr, 1, QS_ALLINPUT, MWMO_INPUTAVAILABLE);
         }
-        if (!done()) throw std::runtime_error("document operation exceeded ten seconds");
+        if (!done()) throw std::runtime_error(std::format("operation exceeded ten seconds at {}:{}",
+            location.file_name(), location.line()));
     }
     template<class Operation> auto Await(Operation const& operation) {
         Pump([&] { return operation.Status() != winrt::Windows::Foundation::AsyncStatus::Started; });

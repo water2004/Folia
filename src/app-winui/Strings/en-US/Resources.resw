@@ -404,6 +404,5 @@
   <data name="MaterialSolid" xml:space="preserve"><value>Solid color</value></data>
   <data name="ReadingMaterial" xml:space="preserve"><value>Reading area material</value></data>
   <data name="MaterialFollowWindow" xml:space="preserve"><value>Follow window</value></data>
-  <data name="AutoHideTopBar" xml:space="preserve"><value>Auto-hide the tab bar</value></data>
-  <data name="AutoHideBottomBar" xml:space="preserve"><value>Auto-hide the status bar</value></data>
+  <data name="AutoHideDocumentTools" xml:space="preserve"><value>Auto-hide document tools</value></data>
 </root>

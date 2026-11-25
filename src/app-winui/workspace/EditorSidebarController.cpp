@@ -31,12 +31,8 @@ namespace winrt::Folia
         using namespace winrt::Microsoft::UI::Xaml::Controls;
         outline_.ItemTemplate(Markup::XamlReader::Load(LR"(
             <DataTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-                <TextBlock Text="{Binding}" TextWrapping="Wrap" TextTrimming="None"/>
+                <TextBlock Text="{Binding}" FontSize="13" TextWrapping="Wrap"/>
             </DataTemplate>)").as<DataTemplate>());
-        outline_.ItemContainerStyle(Markup::XamlReader::Load(LR"(
-            <Style xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" TargetType="ListViewItem">
-                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-            </Style>)").as<Style>());
         ScrollViewer::SetHorizontalScrollMode(outline_, ScrollMode::Disabled);
         ScrollViewer::SetHorizontalScrollBarVisibility(outline_, ScrollBarVisibility::Disabled);
         outline_.IsItemClickEnabled(true);
@@ -47,7 +43,7 @@ namespace winrt::Folia
                 auto index = static_cast<std::size_t>(args.ItemIndex());
                 if (index >= outlineLevels_.size()) return;
                 auto container = args.ItemContainer();
-                container.Padding(Thickness{8.0 + 12.0 * (outlineLevels_[index] - 1), 6, 8, 6});
+                container.Padding(Thickness{8.0 + 8.0 * (outlineLevels_[index] - 1), 4, 8, 4});
             });
         Refresh();
     }

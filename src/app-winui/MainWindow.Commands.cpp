@@ -7,16 +7,13 @@ namespace winrt::Folia::implementation
 {
     void MainWindow::RegisterCommandHandlers()
     {
-        NewButton().Click(WindowEvent([this](auto const&, auto const&) { NewDocument(); }));
+        NewTabButton().Click(WindowEvent([this](auto const&, auto const&) { NewDocument(); }));
         OpenFolderButton().Click(WindowEvent([this](auto const&, auto const&) { PickWorkspaceFolder(); }));
-        MainMenuButton().Flyout().Opening(WindowEvent([this](auto const&, auto const&) { RefreshRecentMenu(); }));
+        DocumentActionsButton().Flyout().Opening(WindowEvent([this](auto const&, auto const&) { RefreshRecentMenu(); }));
         SaveAsButton().Click(WindowEvent([this](auto const&, auto const&) { documentController().SaveDocumentAs(); }));
         CloseTabButton().Click(WindowEvent([this](auto const&, auto const&) { CloseDocumentAsync(workspaceDocuments.Active()->id); }));
         UndoButton().Click(WindowEvent([this](auto const&, auto const&) { ExecuteEditorCommand(folia::Command{folia::CommandKind::Undo}); }));
         RedoButton().Click(WindowEvent([this](auto const&, auto const&) { ExecuteEditorCommand(folia::Command{folia::CommandKind::Redo}); }));
-        EditCutButton().Click(WindowEvent([this](auto const&, auto const&) { documentController().CutSelection(); }));
-        EditCopyButton().Click(WindowEvent([this](auto const&, auto const&) { documentController().CopySelection(); }));
-        EditPasteButton().Click(WindowEvent([this](auto const&, auto const&) { documentController().PasteClipboard(); }));
         FindButton().Click(WindowEvent([this](auto const&, auto const&) { ShowFindBar(false); }));
         ReplaceButton().Click(WindowEvent([this](auto const&, auto const&) { ShowFindBar(true); }));
         OpenButton().Click(WindowEvent([this](auto const&, auto const&)
@@ -56,7 +53,7 @@ namespace winrt::Folia::implementation
 
         SettingsButton().Click(WindowEvent([this](auto const&, auto const&)
         {
-            SetSettingsMode(true);
+            OpenSettingsTab();
         }));
 
         BoldButton().Click(WindowEvent([this](auto const&, auto const&)

@@ -14,7 +14,7 @@ void MainWindow::ConfigureInlineCompletion(folia::platform::completion::Completi
         },
         [this] { RenderEditorSurface(); }, [this](auto state, std::string const& text) { UpdateCompletionStatus(state, text); },
         std::move(transport));
-    inlineCompletion->SetFocused(EditorSurface().FocusState() != Microsoft::UI::Xaml::FocusState::Unfocused && !settingsMode);
+    inlineCompletion->SetFocused(EditorSurface().FocusState() != Microsoft::UI::Xaml::FocusState::Unfocused && !SettingsActive());
     textInputController.SetCompositionChanged([this](bool composing) {
         if (inlineCompletion) { inlineCompletion->CompositionChanged(composing); RenderEditorSurface(); }
     });

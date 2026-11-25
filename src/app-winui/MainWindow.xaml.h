@@ -22,7 +22,7 @@
 #include "workspace/WorkspaceDocuments.h"
 #include "workspace/FolderExplorerController.h"
 #include "workspace/RecentWorkspace.h"
-#include "workspace/WorkspaceEdgeBar.h"
+#include "workspace/DocumentTools.h"
 #include "workspace/TabDragPresentation.h"
 
 namespace winrt::Folia::implementation
@@ -35,6 +35,8 @@ namespace winrt::Folia::implementation
             Microsoft::UI::Xaml::RoutedEventArgs const& args);
         void DocumentTabPrepared(Microsoft::UI::Xaml::FrameworkElement const& sender,
             Microsoft::UI::Xaml::DataContextChangedEventArgs const& args);
+        void DocumentTabDoubleTapped(Windows::Foundation::IInspectable const& sender,
+            Microsoft::UI::Xaml::Input::DoubleTappedRoutedEventArgs const& args);
 
     private:
         // Child XAML controls may deliver final notifications after Closed.
@@ -54,6 +56,8 @@ namespace winrt::Folia::implementation
             winrt::weak_ref<MainWindow> tearOutWindow;
         };
         void RegisterTabTransferHandlers();
+        void UpdateTabTransferAvailability();
+        void RefreshTabCaptionRegion();
         MainWindow* CreateTabWindow();
         void SynchronizeTabOrder();
         void QueueTabOrderSync();
@@ -92,12 +96,19 @@ namespace winrt::Folia::implementation
         void RefreshRecentMenu();
         Windows::Foundation::IAsyncOperation<winrt::hstring> ApplyExplorerActionAsync(folia::platform::WorkspaceFileAction action);
         void RegisterWorkspaceHandlers();
+        Microsoft::UI::Xaml::Controls::ScrollViewer TabStripScroller();
         void RefreshDocumentTabs();
         void SelectDocumentTab();
         void UpdateDocumentTab(std::uint64_t id);
         void UpdateWorkspaceLayout();
         void UpdateChromeMetrics();
         void ApplyBarLayout();
+        void RegisterWorkspaceLayout();
+        void SelectWorkspacePane(bool outline);
+        void SetSidebarOpen(bool open);
+        void ApplySidebarOpen(bool open);
+        void AnimateSidebar(bool open);
+        void ApplySidebarSurface();
         void UpdateWorkspaceAppearance(WorkspaceAppearance const& settings);
         void EnsureSelectedTabVisible();
         void UpdateLoadingState();
@@ -118,7 +129,10 @@ namespace winrt::Folia::implementation
         void ApplyWorkspaceMaterial();
         void UpdateSelectedTabMaterial();
         folia::Theme CurrentThemeVariant();
-        void SetSettingsMode(bool enabled);
+        bool SettingsActive() const noexcept { return workspaceDocuments.Active()->kind == WorkspaceTabKind::Settings; }
+        void OpenSettingsTab();
+        void ReturnToDocumentTab();
+        void ShowSettingsNavigation(bool enabled);
         void SetDocumentCommandsVisible(bool visible);
         std::optional<winrt::hstring> ApplySettings(winrt::Folia::AppSettings const& settings);
         void UpdateMediaSettings(winrt::Folia::MediaDisplaySettings const& settings);
@@ -174,7 +188,7 @@ namespace winrt::Folia::implementation
         std::shared_ptr<winrt::Folia::SettingsView> settingsView;
         folia::ThemeProfile themeProfile = folia::default_theme_profile();
         bool updatingTheme = false;
-        bool settingsMode = false;
+        std::optional<std::uint64_t> previousDocumentTab;
         bool documentSidebarWasOpen = false;
         bool closePending = false;
         bool closeApproved = false;
@@ -182,11 +196,19 @@ namespace winrt::Folia::implementation
         bool relocatingFiles = false;
         bool selectedTabVisibilityPending = false;
         bool tabPointerDown = false, tabMoveInProgress = false;
+        bool tabRegionsPending = false;
         bool updatingTabs = false;
-        WorkspaceEdgeBar topBar, bottomBar;
+        DocumentTools documentTools;
         std::optional<WindowMaterial> appliedMaterial;
         std::optional<WindowMaterial> appliedReadingMaterial;
-        winrt::weak_ref<Microsoft::UI::Xaml::Controls::SystemBackdropElement> selectedTabBackdrop;
+        Microsoft::UI::Xaml::Controls::SystemBackdropElement selectedTabBackdrop{nullptr};
+        bool sidebarOpen = false, sidebarOverlay = false, outlineSelected = false;
+        bool updatingRailSelection = false;
+        bool sidebarClosing = false;
+        Microsoft::UI::Xaml::Media::Animation::Storyboard sidebarMotion{nullptr};
+        Microsoft::UI::Xaml::Media::Animation::Timeline::Completed_revoker sidebarMotionCompleted;
+        int sidebarAddedWidth = 0;
+        int sidebarMovedLeft = 0;
         TabDragPresentation dragPresentation;
         std::optional<float> tabGrabOffset;
         bool operationActive = false;

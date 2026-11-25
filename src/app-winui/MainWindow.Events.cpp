@@ -85,7 +85,7 @@ namespace winrt::Folia::implementation
                 DispatcherQueue().TryEnqueue([weak = get_weak()] {
                     auto window = weak.get();
                     if (!window || window->windowClosed || ::GetActiveWindow() != window->WindowHandle()) return;
-                    auto editing = window->EditorSurface().FocusState() != Microsoft::UI::Xaml::FocusState::Unfocused && !window->settingsMode;
+                    auto editing = window->EditorSurface().FocusState() != Microsoft::UI::Xaml::FocusState::Unfocused && !window->SettingsActive();
                     window->animationController.Focus(editing);
                     if (editing) window->textInputController.FocusEnter();
                     else window->textInputController.FocusLeave();
@@ -112,8 +112,7 @@ namespace winrt::Folia::implementation
         Closed(WindowEvent([this](auto const&, auto const&)
         {
             windowClosed = true;
-            topBar.Stop();
-            bottomBar.Stop();
+            documentTools.Stop();
             inlineCompletion.reset();
             tabDragEnded.Reset();
             preparedTabActivation.Reset();
@@ -145,18 +144,8 @@ namespace winrt::Folia::implementation
         ReopenEncodingItem().Click(WindowEvent([this](auto const&, auto const&) { ShowEncodingPicker(false); }));
         SaveEncodingItem().Click(WindowEvent([this](auto const&, auto const&) { ShowEncodingPicker(true); }));
 
-        topBar.Attach(DocumentColumn(), TopChrome(), TopEdgeViewport(), WorkspaceEdgeBar::Edge::Top, AppWindow().Id(), [this](bool shown) {
-            using Microsoft::UI::Windowing::TitleBarHeightOption;
-            AppWindow().TitleBar().PreferredHeightOption(shown ? TitleBarHeightOption::Standard : TitleBarHeightOption::Collapsed);
-            UpdateChromeMetrics();
-        });
-        bottomBar.Attach(DocumentColumn(), StatusBar(), BottomEdgeViewport(), WorkspaceEdgeBar::Edge::Bottom, AppWindow().Id());
-        MainMenuButton().Flyout().Opening(WindowEvent([this](auto const&, auto const&) { topBar.HoldOpen(true); }));
-        MainMenuButton().Flyout().Closed(WindowEvent([this](auto const&, auto const&) { topBar.HoldOpen(false); }));
-        EncodingButton().Flyout().Opening(WindowEvent([this](auto const&, auto const&) { bottomBar.HoldOpen(true); }));
-        EncodingButton().Flyout().Closed(WindowEvent([this](auto const&, auto const&) { bottomBar.HoldOpen(false); }));
-        ApplyBarLayout();
-        Root().Loaded(WindowEvent([this](auto const&, auto const&) { UpdateChromeMetrics(); }));
+        RegisterWorkspaceLayout();
+        Root().Loaded(WindowEvent([this](auto const&, auto const&) { UpdateChromeMetrics(); RefreshTabCaptionRegion(); }));
         Root().SizeChanged(WindowEvent([this](auto const&, auto const&) {
             UpdateChromeMetrics();
             UpdateWorkspaceLayout();
@@ -239,8 +228,8 @@ namespace winrt::Folia::implementation
         // Let child controls consume Escape first (dialogs, dropdowns, shortcut
         // capture). Only an unhandled key returns from the settings workspace.
         Root().KeyDown(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args) {
-            if (settingsMode && !args.Handled() && args.Key() == winrt::Windows::System::VirtualKey::Escape) {
-                SetSettingsMode(false);
+            if (SettingsActive() && !args.Handled() && args.Key() == winrt::Windows::System::VirtualKey::Escape) {
+                ReturnToDocumentTab();
                 args.Handled(true);
             }
         }));
@@ -338,7 +327,7 @@ namespace winrt::Folia::implementation
 
         auto navigateOutline = [this](auto const& item) {
             if (!item) return;
-            if (settingsMode) SetSettingsMode(false);
+            if (SettingsActive()) ReturnToDocumentTab();
             sidebarController.SelectOutline(item);
         };
         OutlineList().ItemClick(WindowEvent([navigateOutline](auto const&, Microsoft::UI::Xaml::Controls::ItemClickEventArgs const& args)
