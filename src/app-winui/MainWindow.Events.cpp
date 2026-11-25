@@ -145,19 +145,22 @@ namespace winrt::Folia::implementation
         ReopenEncodingItem().Click(WindowEvent([this](auto const&, auto const&) { ShowEncodingPicker(false); }));
         SaveEncodingItem().Click(WindowEvent([this](auto const&, auto const&) { ShowEncodingPicker(true); }));
 
-        topBar.Attach(Root(), TopChrome(), WorkspaceEdgeBar::Edge::Top, AppWindow().Id(), [this](bool shown) {
+        topBar.Attach(DocumentColumn(), TopChrome(), TopEdgeViewport(), WorkspaceEdgeBar::Edge::Top, AppWindow().Id(), [this](bool shown) {
             using Microsoft::UI::Windowing::TitleBarHeightOption;
             AppWindow().TitleBar().PreferredHeightOption(shown ? TitleBarHeightOption::Standard : TitleBarHeightOption::Collapsed);
             UpdateChromeMetrics();
         });
-        bottomBar.Attach(Root(), StatusBar(), WorkspaceEdgeBar::Edge::Bottom, AppWindow().Id());
+        bottomBar.Attach(DocumentColumn(), StatusBar(), BottomEdgeViewport(), WorkspaceEdgeBar::Edge::Bottom, AppWindow().Id());
         MainMenuButton().Flyout().Opening(WindowEvent([this](auto const&, auto const&) { topBar.HoldOpen(true); }));
         MainMenuButton().Flyout().Closed(WindowEvent([this](auto const&, auto const&) { topBar.HoldOpen(false); }));
         EncodingButton().Flyout().Opening(WindowEvent([this](auto const&, auto const&) { bottomBar.HoldOpen(true); }));
         EncodingButton().Flyout().Closed(WindowEvent([this](auto const&, auto const&) { bottomBar.HoldOpen(false); }));
         ApplyBarLayout();
         Root().Loaded(WindowEvent([this](auto const&, auto const&) { UpdateChromeMetrics(); }));
-        Root().SizeChanged(WindowEvent([this](auto const&, auto const&) { UpdateChromeMetrics(); }));
+        Root().SizeChanged(WindowEvent([this](auto const&, auto const&) {
+            UpdateChromeMetrics();
+            UpdateWorkspaceLayout();
+        }));
 
         EditorSurface().Loaded(WindowEvent([this](auto const&, auto const&)
         {
@@ -167,11 +170,6 @@ namespace winrt::Folia::implementation
         EditorSurface().SizeChanged(WindowEvent([this](auto const&, Microsoft::UI::Xaml::SizeChangedEventArgs const& args)
         {
             ResizeEditorSurface(args.NewSize().Width, args.NewSize().Height);
-        }));
-
-        WorkspaceHost().SizeChanged(WindowEvent([this](auto const&, Microsoft::UI::Xaml::SizeChangedEventArgs const& args)
-        {
-            UpdateWorkspaceLayout();
         }));
 
         EditorSurface().CompositionScaleChanged(WindowEvent([this](auto const&, auto const&)
@@ -338,11 +336,16 @@ namespace winrt::Folia::implementation
             pointerController.DoubleTapped(args);
         }));
 
-        OutlineList().ItemClick(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Controls::ItemClickEventArgs const& args)
+        auto navigateOutline = [this](auto const& item) {
+            if (!item) return;
+            if (settingsMode) SetSettingsMode(false);
+            sidebarController.SelectOutline(item);
+        };
+        OutlineList().ItemClick(WindowEvent([navigateOutline](auto const&, Microsoft::UI::Xaml::Controls::ItemClickEventArgs const& args)
         {
-            sidebarController.SelectOutline(args.ClickedItem());
+            navigateOutline(args.ClickedItem());
         }));
-        OutlineList().KeyUp(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args)
+        OutlineList().KeyUp(WindowEvent([this, navigateOutline](auto const&, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args)
         {
             // ItemClick handles mouse/Enter/Space activation. After the native
             // list has moved its keyboard selection, navigate that item too.
@@ -352,7 +355,7 @@ namespace winrt::Folia::implementation
             case VirtualKey::Up: case VirtualKey::Down:
             case VirtualKey::Home: case VirtualKey::End:
             case VirtualKey::PageUp: case VirtualKey::PageDown:
-                sidebarController.SelectOutline(OutlineList().SelectedItem());
+                navigateOutline(OutlineList().SelectedItem());
                 break;
             }
         }));

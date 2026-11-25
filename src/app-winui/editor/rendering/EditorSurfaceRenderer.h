@@ -63,6 +63,7 @@ namespace winrt::Folia
             detail::EditorRenderFrame const& frame);
         void CancelPdfExport();
         void SetTheme(folia::ThemeProfile const& value);
+        void SetPaperOpacity(float opacity);
         folia::ThemeProfile Theme() const;
         void SetMediaDisplaySettings(MediaDisplaySettings const& value);
         MediaDisplaySettings const& MediaSettings() const noexcept { return mediaSettings; }
@@ -166,6 +167,7 @@ namespace winrt::Folia
         std::uint64_t themeRevision = 1;
         EditorStyleSheet styleSheet = CreateEditorStyleSheet(themeProfile);
         MediaDisplaySettings mediaSettings;
+        float paperOpacity = 1.f;
         EditorInteractionMap interactionMap;
         EditorCaretAnimation caretAnimation;
         EditorSelectionAnimation selectionAnimation;

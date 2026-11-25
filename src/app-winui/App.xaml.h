@@ -3,7 +3,7 @@
 #include "App.xaml.g.h"
 #include "media/MediaDisplaySettings.h"
 #include "workspace/WorkspaceLaunch.h"
-#include "workspace/WorkspaceBarSettings.h"
+#include "workspace/WorkspaceAppearance.h"
 
 namespace winrt::Folia::implementation
 {
@@ -17,7 +17,8 @@ namespace winrt::Folia::implementation
         Microsoft::UI::Xaml::Window CreateMainWindow(winrt::hstring const& path = {});
         MainWindow* FindMainWindow(Microsoft::UI::WindowId id) const;
         MainWindow* FindDocumentWindow(std::uint64_t id) const;
-        void UpdateWindowViewSettings(MainWindow const* source, MediaDisplaySettings const& media, WorkspaceBarSettings const& bars);
+        void SetTabDragActive(Microsoft::UI::WindowId source, bool active);
+        void UpdateWindowViewSettings(MainWindow const* source, MediaDisplaySettings const& media, WorkspaceAppearance const& appearance);
 
     private:
         winrt::fire_and_forget LaunchAsync();
@@ -27,6 +28,7 @@ namespace winrt::Folia::implementation
         Microsoft::Windows::AppLifecycle::AppInstance::Activated_revoker activationSubscription;
         struct WindowEntry { Microsoft::UI::WindowId id; Microsoft::UI::Xaml::Window window; };
         std::vector<WindowEntry> windows;
+        Microsoft::UI::WindowId tabDragSource{};
         bool closingPreparedWindows = false;
     };
 }

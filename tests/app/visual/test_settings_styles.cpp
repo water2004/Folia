@@ -78,7 +78,8 @@ struct CompletionPage {
     CompletionPage(std::string base, std::string model = {}, std::string effort = {}, int protocol = 0) {
         winrt::Folia::AppSettings initial;
         initial.completion = {true, std::move(base), std::move(model), protocol, std::move(effort)};
-        view = std::make_shared<winrt::Folia::SettingsView>(initial,
+        NavigationView settingsMenu;
+        view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, settingsMenu, initial,
             std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
             folia::Theme::Light, nullptr, [this](auto const& settings) -> std::optional<winrt::hstring> {
                 applied = settings;
@@ -109,7 +110,8 @@ suite settings_style_tests = [] {
         Grid root;
         window.Content(root);
         std::optional<winrt::Folia::AppSettings> applied;
-        auto view = std::make_shared<winrt::Folia::SettingsView>(winrt::Folia::AppSettings{},
+        NavigationView settingsMenu;
+        auto view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, settingsMenu, winrt::Folia::AppSettings{},
             std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
             folia::Theme::Light, nullptr, [&](auto const& settings) -> std::optional<winrt::hstring> {
                 applied = settings;
@@ -254,7 +256,8 @@ suite settings_style_tests = [] {
         completion_tests::Server server({}, 200, true, "application/json");
         Window window; Grid root; window.Content(root);
         winrt::Folia::AppSettings initial; initial.completion.baseUrl = server.baseUrl; initial.completion.model = "fixture";
-        auto view = std::make_shared<winrt::Folia::SettingsView>(initial,
+        NavigationView settingsMenu;
+        auto view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, settingsMenu, initial,
             std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
             folia::Theme::Light, nullptr, [](auto const&) -> std::optional<winrt::hstring> { return {}; }, [] {});
         struct Cleanup { Window window; std::shared_ptr<winrt::Folia::SettingsView> view;
@@ -278,7 +281,8 @@ suite settings_style_tests = [] {
         std::optional<winrt::Folia::AppSettings> applied;
         winrt::Folia::AppSettings initial;
         initial.completion.baseUrl = server.baseUrl; initial.completion.model = "fixture";
-        auto view = std::make_shared<winrt::Folia::SettingsView>(initial,
+        NavigationView settingsMenu;
+        auto view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, settingsMenu, initial,
             std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
             folia::Theme::Light, nullptr, [&](auto const& settings) -> std::optional<winrt::hstring> { applied = settings; return {}; }, [] {});
         struct Cleanup { Window window; std::shared_ptr<winrt::Folia::SettingsView> view;
@@ -356,7 +360,8 @@ suite settings_style_tests = [] {
     };
     "settings pages share typography and render AI forms without enclosing borders"_test = [] {
         Window window; Grid root; window.Content(root); window.Title(L"Folia settings style test");
-        auto view = std::make_shared<winrt::Folia::SettingsView>(winrt::Folia::AppSettings{},
+        NavigationView settingsMenu;
+        auto view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, settingsMenu, winrt::Folia::AppSettings{},
             std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
             folia::Theme::Light, nullptr, [](auto const&) -> std::optional<winrt::hstring> { return {}; }, [] {});
         struct Cleanup { Window window; std::shared_ptr<winrt::Folia::SettingsView> view;

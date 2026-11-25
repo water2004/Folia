@@ -30,6 +30,13 @@ namespace winrt::Folia
         ClearPreparedDocument();
     }
 
+    void EditorSurfaceRenderer::SetPaperOpacity(float opacity)
+    {
+        if (paperOpacity == opacity) return;
+        paperOpacity = opacity;
+        Invalidate();
+    }
+
     folia::ThemeProfile EditorSurfaceRenderer::Theme() const
     {
         return themeProfile;
@@ -223,7 +230,9 @@ namespace winrt::Folia
         struct Reset { EditorSurfaceRenderer& owner; ~Reset() { owner.rendering = false; if (owner.deferredInvalidate.exchange(false)) owner.Invalidate(); } } reset{*this};
         resources.EnsureFrameResources(styleSheet);
         resources.d2dContext->BeginDraw();
-        resources.d2dContext->Clear(styleSheet.canvasColor);
+        auto paper = styleSheet.canvasColor;
+        paper.a *= paperOpacity;
+        resources.d2dContext->Clear(paper);
         try
         {
             DrawDocument(frame);

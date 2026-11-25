@@ -16,6 +16,8 @@ namespace winrt::Folia
         using CloseSettings = std::function<void()>;
 
         SettingsView(
+            Microsoft::UI::Xaml::Controls::NavigationView const& navigation,
+            Microsoft::UI::Xaml::Controls::ContentControl const& pageHost,
             AppSettings settings,
             std::shared_ptr<ThemeCatalog> catalog,
             std::shared_ptr<LatexCommandCatalog> latexCatalog,
@@ -27,9 +29,8 @@ namespace winrt::Folia
         winrt::Microsoft::UI::Xaml::Controls::NavigationView Root() const { return navigation_; }
         void Reset(AppSettings settings, folia::Theme systemVariant);
         void SetSystemVariant(folia::Theme variant);
-        void UpdateBarSettings(WorkspaceBarSettings const& bars);
+        void UpdateWorkspaceAppearance(WorkspaceAppearance const& appearance);
         void UpdateMediaSettings(MediaDisplaySettings const& media);
-        void SetNavigationWidth(double width) { navigation_.OpenPaneLength(width); }
         void Detach();
 
     private:
@@ -47,6 +48,7 @@ namespace winrt::Folia
         void UpdateThemePreview();
         void ApplyLatexSetting();
         void ApplyLanguageSetting();
+        void ApplyAppearanceSetting();
         void ApplyMediaSetting(MediaDisplaySettings const& media);
         void RefreshMediaControls();
         bool ApplyShortcutSettings();
@@ -88,6 +90,7 @@ namespace winrt::Folia
         HWND owner_ = nullptr;
         ApplySettings applySettings_;
         winrt::Microsoft::UI::Xaml::Controls::NavigationView navigation_;
+        winrt::Microsoft::UI::Xaml::Controls::ContentControl pageHost_;
         winrt::event_token backRequested_{};
         winrt::Microsoft::UI::Xaml::UIElement generalPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::UIElement completionPage_{ nullptr };
@@ -98,6 +101,7 @@ namespace winrt::Folia
         winrt::Microsoft::UI::Xaml::UIElement aboutPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::Controls::ToggleSwitch latexSuggestionsToggle_;
         winrt::Microsoft::UI::Xaml::Controls::CheckBox autoHideTop_, autoHideBottom_;
+        winrt::Microsoft::UI::Xaml::Controls::ComboBox materialCombo_{nullptr}, readingMaterialCombo_{nullptr};
         winrt::Microsoft::UI::Xaml::Controls::ComboBox languageCombo_;
         winrt::Microsoft::UI::Xaml::Controls::ComboBox imageWidthCombo_{nullptr};
         winrt::Microsoft::UI::Xaml::Controls::ComboBox mermaidThemeCombo_{nullptr};

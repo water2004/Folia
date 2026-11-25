@@ -7,14 +7,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Title="Folia">
-    <Window.SystemBackdrop>
-        <MicaBackdrop Kind="Base"/>
-    </Window.SystemBackdrop>
-
     <Grid
         x:Name="Root"
-        KeyboardAcceleratorPlacementMode="Hidden"
-        RowDefinitions="Auto,Auto,Auto,*,Auto">
+        KeyboardAcceleratorPlacementMode="Hidden">
         <Grid.Resources>
           <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="workspace/WorkspaceChrome.xaml"/><ResourceDictionary Source="workspace/FolderExplorer.xaml"/></ResourceDictionary.MergedDictionaries>
@@ -24,6 +19,10 @@
             <SolidColorBrush x:Key="FoliaShellForegroundBrush" Color="#E4E8F0"/>
             <SolidColorBrush x:Key="FoliaShellMutedForegroundBrush" Color="#8B95AA"/>
             <SolidColorBrush x:Key="FoliaShellAccentBrush" Color="#7AA2F7"/>
+            <SolidColorBrush x:Key="FoliaChromeSurfaceBrush" Opacity="0.16"/>
+            <x:Double x:Key="FoliaReadingMaterialOpacity">0.40</x:Double>
+            <SolidColorBrush x:Key="FoliaReadingSurfaceBrush"/>
+            <AcrylicBrush x:Key="FoliaOverlayMaterialBrush" TintOpacity="0.83"/>
             <FontFamily x:Key="FoliaUiFontFamily">Segoe UI Variable Text</FontFamily>
             <FontFamily x:Key="FoliaMonoFontFamily">Cascadia Mono</FontFamily>
             <x:Double x:Key="FoliaUiFontSize">14</x:Double>
@@ -59,15 +58,59 @@
             </Style>
           </ResourceDictionary>
         </Grid.Resources>
-        <Grid x:Name="TopChrome" VerticalAlignment="Top" Canvas.ZIndex="4" Background="{ThemeResource FoliaShellLayerBrush}" RowDefinitions="32,1">
-            <Border Grid.RowSpan="2" Background="{ThemeResource FoliaShellBorderBrush}" Opacity="0.27" IsHitTestVisible="False"/>
+        <SplitView x:Name="DocumentWorkspace" DisplayMode="Inline" PanePlacement="Left" OpenPaneLength="248" IsPaneOpen="False"
+                   BorderThickness="0" PaneBackground="{ThemeResource FoliaChromeSurfaceBrush}">
+            <SplitView.Pane>
+            <Grid x:Name="WorkspaceSidebar" BorderBrush="{ThemeResource FoliaShellBorderBrush}" BorderThickness="0,0,1,0">
+            <Grid x:Name="DocumentNavigation" RowDefinitions="Auto,*">
+                <Grid Margin="10,9,10,5" Padding="3" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                      ColumnDefinitions="*,*" ColumnSpacing="2">
+                    <RadioButton x:Name="FilesTab" GroupName="Navigation" Content="Files" IsChecked="True"
+                                 Background="{ThemeResource FoliaShellBackgroundBrush}" BorderBrush="{ThemeResource FoliaShellBorderBrush}"
+                                 Style="{StaticResource SidebarTabStyle}"/>
+                    <RadioButton x:Name="OutlineTab" Grid.Column="1" GroupName="Navigation" Content="Outline"
+                                 Background="{ThemeResource FoliaShellBackgroundBrush}" BorderBrush="{ThemeResource FoliaShellBorderBrush}"
+                                 Style="{StaticResource SidebarTabStyle}"/>
+                </Grid>
+            <Grid x:Name="ExplorerPane" Grid.Row="1" RowDefinitions="Auto,*">
+                <StackPanel x:Name="FileOperationPanel" Grid.Row="0" Margin="16,8,12,8" Spacing="4" Visibility="Collapsed">
+                    <TextBlock x:Name="FileOperationText" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
+                    <ProgressBar x:Name="FileOperationProgress" Height="2" MinHeight="2" IsIndeterminate="True"/>
+                </StackPanel>
+                <StackPanel x:Name="ExplorerEmptyState" Grid.Row="1" Margin="16,20" Spacing="8" VerticalAlignment="Top">
+                    <TextBlock x:Name="NoFolderHeading" FontSize="13" FontWeight="SemiBold" Text="No folder open"/>
+                    <TextBlock x:Name="NoFolderHint" FontSize="12" TextWrapping="Wrap" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}" Text="Open a folder to browse Markdown files."/>
+                    <HyperlinkButton x:Name="OpenFolderPaneButton" Content="Open folder…" HorizontalAlignment="Left" Padding="0" FontSize="13"/>
+                </StackPanel>
+                <TreeView x:Name="FileTree" Grid.Row="1" Margin="6,6,6,8" Style="{StaticResource ExplorerTreeStyle}" Visibility="Collapsed"/>
+            </Grid>
+            <Grid x:Name="OutlinePaneContent" Grid.Row="1" Padding="6,2,6,8" Visibility="Collapsed">
+                <ListView x:Name="OutlineList" Background="Transparent" SelectionMode="Single"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollMode="Enabled"/>
+                <TextBlock x:Name="OutlineEmptyText" Margin="12,12" FontSize="13"
+                           Foreground="{ThemeResource FoliaShellMutedForegroundBrush}" TextWrapping="Wrap" Visibility="Collapsed"/>
+            </Grid>
+            </Grid>
+                <NavigationView x:Name="SettingsNavigation" Visibility="Collapsed" Background="Transparent" IsTitleBarAutoPaddingEnabled="False">
+                    <NavigationView.Resources>
+                        <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="Transparent"/>
+                        <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="Transparent"/>
+                        <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent"/>
+                        <Thickness x:Key="NavigationViewContentGridBorderThickness">0</Thickness>
+                    </NavigationView.Resources>
+                </NavigationView>
+            </Grid>
+            </SplitView.Pane>
+        <SplitView.Content>
+        <Grid x:Name="DocumentColumn" RowDefinitions="Auto,*,Auto">
+        <Grid x:Name="TopChrome" VerticalAlignment="Top" Canvas.ZIndex="4" Background="{ThemeResource FoliaChromeSurfaceBrush}" RowDefinitions="32,1">
             <Border x:Name="ShellDivider" Grid.Row="1" Height="1" VerticalAlignment="Bottom" Background="{ThemeResource FoliaShellBorderBrush}" IsHitTestVisible="False"/>
         <TabView x:Name="DocumentTabs" Grid.RowSpan="2"
                  CloseButtonOverlayMode="OnPointerOver" TabWidthMode="SizeToContent" CanDragTabs="True" CanReorderTabs="True" AllowDrop="True"
                  Padding="0" BorderThickness="0" Background="Transparent">
             <TabView.TabItemTemplate>
                 <DataTemplate>
-                    <TabViewItem Tag="{Binding}" Background="{ThemeResource FoliaShellBackgroundBrush}"
+                    <TabViewItem Tag="{Binding}" Background="{ThemeResource FoliaReadingSurfaceBrush}"
                                  DataContextChanged="DocumentTabPrepared" Loaded="DocumentTabLoaded"/>
                 </DataTemplate>
             </TabView.TabItemTemplate>
@@ -129,26 +172,11 @@
             </TabView.TabStripFooter>
         </TabView>
         </Grid>
-        <StackPanel Grid.Row="1">
-        <InfoBar x:Name="ErrorInfoBar" Severity="Error" IsClosable="True"/>
-        <InfoBar
-            x:Name="ExternalChangeInfoBar"
-            IsClosable="False"
-            IsOpen="False"
-            Severity="Warning"
-            Title="The file changed on disk">
-            <InfoBar.Content>
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <Button x:Name="ReloadExternalButton" Content="Reload"/>
-                    <Button x:Name="KeepLocalButton" Content="Keep local changes"/>
-                </StackPanel>
-            </InfoBar.Content>
-        </InfoBar>
-        </StackPanel>
+        <Grid x:Name="TopEdgeViewport" Grid.Row="1">
+        <Grid x:Name="BottomEdgeViewport" RowDefinitions="Auto,*">
 
         <Border
             x:Name="FindReplaceBar"
-            Grid.Row="2"
             Padding="10,8"
             Background="{ThemeResource FoliaShellLayerBrush}"
             BorderBrush="{ThemeResource FoliaShellBorderBrush}"
@@ -206,42 +234,9 @@
             </Grid>
         </Border>
 
-        <Grid x:Name="WorkspaceHost" Grid.Row="3">
-            <SplitView x:Name="DocumentWorkspace" DisplayMode="Inline" PanePlacement="Left" OpenPaneLength="248" IsPaneOpen="False" PaneBackground="{ThemeResource FoliaShellLayerBrush}">
-                <SplitView.Pane>
-                <Grid RowDefinitions="Auto,*" Background="{ThemeResource FoliaShellLayerBrush}"
-                      BorderBrush="{ThemeResource FoliaShellBorderBrush}" BorderThickness="0,0,1,0">
-                    <Grid Margin="10,9,10,5" Padding="3" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                          ColumnDefinitions="*,*" ColumnSpacing="2">
-                        <RadioButton x:Name="FilesTab" GroupName="Navigation" Content="Files" IsChecked="True"
-                                     Background="{ThemeResource FoliaShellBackgroundBrush}" BorderBrush="{ThemeResource FoliaShellBorderBrush}"
-                                     Style="{StaticResource SidebarTabStyle}"/>
-                        <RadioButton x:Name="OutlineTab" Grid.Column="1" GroupName="Navigation" Content="Outline"
-                                     Background="{ThemeResource FoliaShellBackgroundBrush}" BorderBrush="{ThemeResource FoliaShellBorderBrush}"
-                                     Style="{StaticResource SidebarTabStyle}"/>
-                    </Grid>
-                <Grid x:Name="ExplorerPane" Grid.Row="1" RowDefinitions="Auto,*">
-                    <StackPanel x:Name="FileOperationPanel" Grid.Row="0" Margin="16,8,12,8" Spacing="4" Visibility="Collapsed">
-                        <TextBlock x:Name="FileOperationText" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
-                        <ProgressBar x:Name="FileOperationProgress" Height="2" MinHeight="2" IsIndeterminate="True"/>
-                    </StackPanel>
-                    <StackPanel x:Name="ExplorerEmptyState" Grid.Row="1" Margin="16,20" Spacing="8" VerticalAlignment="Top">
-                        <TextBlock x:Name="NoFolderHeading" FontSize="13" FontWeight="SemiBold" Text="No folder open"/>
-                        <TextBlock x:Name="NoFolderHint" FontSize="12" TextWrapping="Wrap" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}" Text="Open a folder to browse Markdown files."/>
-                        <HyperlinkButton x:Name="OpenFolderPaneButton" Content="Open folder…" HorizontalAlignment="Left" Padding="0" FontSize="13"/>
-                    </StackPanel>
-                    <TreeView x:Name="FileTree" Grid.Row="1" Margin="6,6,6,8" Style="{StaticResource ExplorerTreeStyle}" Visibility="Collapsed"/>
-                </Grid>
-                <Grid x:Name="OutlinePaneContent" Grid.Row="1" Padding="6,2,6,8" Visibility="Collapsed">
-                    <ListView x:Name="OutlineList" Background="Transparent" SelectionMode="Single"
-                              ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollMode="Enabled"/>
-                    <TextBlock x:Name="OutlineEmptyText" Margin="12,12" FontSize="13"
-                               Foreground="{ThemeResource FoliaShellMutedForegroundBrush}" TextWrapping="Wrap" Visibility="Collapsed"/>
-                </Grid>
-                </Grid>
-                </SplitView.Pane>
-                <SplitView.Content>
-                <Grid>
+        <Grid x:Name="WorkspaceHost" Grid.Row="1">
+                <SystemBackdropElement x:Name="ReadingBackdropHost" IsHitTestVisible="False"/>
+                <Grid x:Name="DocumentPages">
                 <Grid x:Name="EditorPane">
 
                   <Grid>
@@ -300,7 +295,7 @@
                         Width="16"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
-                        Background="{ThemeResource FoliaShellLayerBrush}"
+                        Background="{ThemeResource FoliaReadingSurfaceBrush}"
                         IndicatorMode="MouseIndicator"
                         IsTabStop="False"
                         Minimum="0"
@@ -387,7 +382,7 @@
                     </StackPanel>
                   </Border>
                 </Grid>
-                <Grid x:Name="ImagePreviewPane" Visibility="Collapsed" Background="{ThemeResource FoliaShellBackgroundBrush}">
+                <Grid x:Name="ImagePreviewPane" Visibility="Collapsed" Background="{ThemeResource FoliaReadingSurfaceBrush}">
                     <ScrollViewer x:Name="ImagePreviewViewer" Margin="24" ZoomMode="Enabled" MinZoomFactor="1" MaxZoomFactor="8"
                                   HorizontalScrollMode="Enabled" VerticalScrollMode="Enabled"
                                   HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
@@ -406,13 +401,29 @@
                 </Grid>
                 </Grid>
 
-                </SplitView.Content>
-            </SplitView>
-            <Grid x:Name="SettingsViewHost" Visibility="Collapsed"/>
+            <ContentControl x:Name="SettingsViewHost" Visibility="Collapsed"
+                            Background="{ThemeResource FoliaReadingSurfaceBrush}"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
+        </Grid>
+        </Grid>
         </Grid>
 
-        <Grid x:Name="StatusBar" Grid.Row="4" Canvas.ZIndex="4" VerticalAlignment="Bottom" MinHeight="24" Padding="5,0,7,0"
-              Background="{ThemeResource FoliaShellLayerBrush}" BorderBrush="{ThemeResource FoliaShellBorderBrush}"
+        <ScrollViewer x:Name="WorkspaceNotifications" Grid.Row="1" Canvas.ZIndex="3"
+                      HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="12" MaxWidth="420"
+                      HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto" IsTabStop="False">
+            <StackPanel Spacing="6">
+                <InfoBar x:Name="ExternalChangeInfoBar" Severity="Warning" IsClosable="False">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button x:Name="ReloadExternalButton" Content="Reload"/>
+                        <Button x:Name="KeepLocalButton" Content="Keep local changes"/>
+                    </StackPanel>
+                </InfoBar>
+                <InfoBar x:Name="ErrorInfoBar" Severity="Error" IsClosable="True"/>
+            </StackPanel>
+        </ScrollViewer>
+        <Grid x:Name="StatusBar" Grid.Row="2" Canvas.ZIndex="4" VerticalAlignment="Bottom" MinHeight="24" Padding="5,0,7,0"
+              Background="{ThemeResource FoliaChromeSurfaceBrush}" BorderBrush="{ThemeResource FoliaShellBorderBrush}"
               BorderThickness="0,1,0,0" ColumnDefinitions="Auto,*,Auto">
             <StackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
                 <ToggleButton x:Name="SidebarButton" Style="{StaticResource WorkspacePaneToggleStyle}"
@@ -440,5 +451,8 @@
                 </Button>
             </StackPanel>
         </Grid>
+        </Grid>
+        </SplitView.Content>
+        </SplitView>
     </Grid>
 </Window>

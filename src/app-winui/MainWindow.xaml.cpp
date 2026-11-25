@@ -2,6 +2,7 @@
 #include "MainWindow.xaml.h"
 #include "localization/Localization.h"
 #include "storage/AssetPaths.h"
+#include <winrt/Microsoft.UI.Composition.SystemBackdrops.h>
 #if __has_include("MainWindow.g.cpp")
 #include "MainWindow.g.cpp"
 #endif
@@ -66,13 +67,13 @@ namespace winrt::Folia::implementation
         auto loadedSettings = winrt::Folia::LoadAppSettings();
         appSettings = std::move(loadedSettings.settings);
         editorRenderer.SetMediaDisplaySettings(appSettings.media);
-        themeCatalog->Refresh();
         ExtendsContentIntoTitleBar(true);
         AppWindow().TitleBar().PreferredHeightOption(Microsoft::UI::Windowing::TitleBarHeightOption::Standard);
         SetTitleBar(TitleDragArea());
         RegisterCommandHandlers();
         InitializeTextInput();
         AttachControllers();
+        UpdateTheme();
         RegisterWindowHandlers();
         RegisterWorkspaceHandlers();
         UpdateSourceModeUi();
@@ -422,7 +423,6 @@ namespace winrt::Folia::implementation
 
     void MainWindow::InitializeEditorSurface()
     {
-        UpdateTheme();
         editorRenderer.Initialize(EditorSurface());
         auto render = [weak = get_weak()] {
             if (auto owner = weak.get(); owner && !owner->windowClosed) owner->RenderEditorSurface();
@@ -451,7 +451,7 @@ namespace winrt::Folia::implementation
 
     void MainWindow::RenderEditorSurface()
     {
-        if (windowClosed || settingsMode || !HasActiveEditor()) return;
+        if (windowClosed || settingsMode || !HasActiveEditor() || !EditorSurface().IsLoaded()) return;
         try
         {
             auto snippetPlaceholders = keyboardController.SnippetPlaceholders();
@@ -508,14 +508,13 @@ namespace winrt::Folia::implementation
         resources.Insert(winrt::box_value(L"FoliaUiFontSize"), winrt::box_value(static_cast<double>(themeProfile.typography.ui.size)));
         resources.Insert(winrt::box_value(L"FoliaMonoFontFamily"), Font(themeProfile.typography.ui_monospace.family));
 
-        Root().Background(Brush(colors.shell_bg));
+        ApplyWorkspaceMaterial();
         ShellDivider().Background(Brush(colors.shell_border));
-        StatusBar().Background(Brush(colors.shell_layer_bg));
         StatusBar().BorderBrush(Brush(colors.shell_border));
-        EditorScrollBar().Background(Brush(colors.shell_layer_bg));
 
         auto titleBar = AppWindow().TitleBar();
-        titleBar.BackgroundColor(ColorReference(colors.shell_bg));
+        titleBar.BackgroundColor(Windows::UI::Color{});
+        titleBar.InactiveBackgroundColor(Windows::UI::Color{});
         titleBar.ForegroundColor(ColorReference(colors.shell_fg));
         titleBar.ButtonBackgroundColor(Windows::UI::Color{});
         titleBar.ButtonForegroundColor(ColorReference(colors.shell_fg));
@@ -531,6 +530,60 @@ namespace winrt::Folia::implementation
         EditorScrollBarColumn().Width(Microsoft::UI::Xaml::GridLengthHelper::FromPixels(themeProfile.layout.scrollbar_width));
         scrollController.SetWidth(themeProfile.layout.scrollbar_width);
         StatusBar().MinHeight(themeProfile.layout.status_bar_min_height);
+    }
+
+    void MainWindow::ApplyWorkspaceMaterial()
+    {
+        using namespace Microsoft::UI::Composition::SystemBackdrops;
+        namespace media = Microsoft::UI::Xaml::Media;
+        bool highContrast = CurrentThemeVariant() == folia::Theme::HighContrast || themeProfile.variant == folia::Theme::HighContrast;
+        auto supported = [highContrast](WindowMaterial value) {
+            if (highContrast || value == WindowMaterial::Solid) return WindowMaterial::Solid;
+            auto available = value == WindowMaterial::Acrylic ? DesktopAcrylicController::IsSupported() : MicaController::IsSupported();
+            return available ? value : WindowMaterial::Solid;
+        };
+        auto backdrop = [](WindowMaterial value) -> media::SystemBackdrop {
+            if (value == WindowMaterial::Solid) return nullptr;
+            if (value == WindowMaterial::Acrylic) return media::DesktopAcrylicBackdrop{};
+            media::MicaBackdrop mica;
+            mica.Kind(value == WindowMaterial::Mica ? MicaKind::Base : MicaKind::BaseAlt);
+            return mica;
+        };
+        auto const& appearance = appSettings.appearance;
+        auto material = supported(appearance.material);
+        auto reading = supported(appearance.readingMaterial.value_or(appearance.material));
+        if (appliedMaterial != material) {
+            SystemBackdrop(backdrop(material));
+            appliedMaterial = material;
+        }
+        if (appliedReadingMaterial != reading) {
+            ReadingBackdropHost().SystemBackdrop(backdrop(reading));
+            appliedReadingMaterial = reading;
+            UpdateSelectedTabMaterial();
+        }
+
+        auto const& colors = themeProfile.colors;
+        auto resources = Root().Resources();
+        UpdateBrushResource(resources, L"FoliaChromeSurfaceBrush", colors.shell_layer_bg);
+        UpdateBrushResource(resources, L"FoliaReadingSurfaceBrush", colors.bg);
+        auto overlay = resources.Lookup(box_value(L"FoliaOverlayMaterialBrush")).as<media::AcrylicBrush>();
+        overlay.TintColor(UiColor(colors.shell_layer_bg));
+        overlay.FallbackColor(UiColor(colors.shell_layer_bg));
+        bool solid = material == WindowMaterial::Solid;
+        Root().Background(solid ? Brush(colors.shell_bg) : nullptr);
+        auto paper = resources.Lookup(box_value(L"FoliaReadingSurfaceBrush")).as<media::SolidColorBrush>();
+        paper.Opacity(reading != WindowMaterial::Solid
+            ? unbox_value<double>(resources.Lookup(box_value(L"FoliaReadingMaterialOpacity"))) : 1.);
+        editorRenderer.SetPaperOpacity(static_cast<float>(paper.Opacity()));
+        auto background = [&](bool floats) {
+            auto key = solid ? L"FoliaShellLayerBrush" : floats ? L"FoliaOverlayMaterialBrush" : L"FoliaChromeSurfaceBrush";
+            return resources.Lookup(box_value(key)).as<media::Brush>();
+        };
+        auto chrome = background(false);
+        TopChrome().Background(chrome);
+        StatusBar().Background(chrome);
+        DocumentWorkspace().PaneBackground(background(DocumentWorkspace().DisplayMode()
+            == Microsoft::UI::Xaml::Controls::SplitViewDisplayMode::Overlay));
     }
 
     void MainWindow::UpdateTheme()
@@ -564,7 +617,6 @@ namespace winrt::Folia::implementation
         if (settingsView)
         {
             settingsView->SetSystemVariant(systemVariant);
-            settingsView->SetNavigationWidth(themeProfile.layout.navigation_open_width);
         }
         if (!loaded.diagnostic.empty()) ShowError(loaded.diagnostic);
         RenderEditorSurface();

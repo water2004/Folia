@@ -63,8 +63,15 @@ namespace winrt::Folia
             if (schemaVersion >= 4.0)
                 settings.latexSuggestionsEnabled = root.GetNamedBoolean(L"latexSuggestionsEnabled", true);
             settings.themeId = winrt::to_string(root.GetNamedString(L"themeId"));
-            settings.bars.autoHideTop = root.GetNamedBoolean(L"autoHideTopBar", false);
-            settings.bars.autoHideBottom = root.GetNamedBoolean(L"autoHideBottomBar", false);
+            settings.appearance.autoHideTop = root.GetNamedBoolean(L"autoHideTopBar", false);
+            settings.appearance.autoHideBottom = root.GetNamedBoolean(L"autoHideBottomBar", false);
+            auto material = root.GetNamedString(L"windowMaterial", L"");
+            auto reading = root.GetNamedString(L"readingMaterial",
+                root.GetNamedBoolean(L"materialInDocument", true) ? L"window" : L"solid");
+            for (auto const& choice : windowMaterials) {
+                if (choice.id == std::wstring_view(material)) settings.appearance.material = choice.value;
+                if (choice.id == std::wstring_view(reading)) settings.appearance.readingMaterial = choice.value;
+            }
             auto imageWidth = root.GetNamedNumber(L"imageMaxWidthPercent", settings.media.imageMaxWidthPercent);
             auto const& widths = MediaDisplaySettings::imageWidths;
             if (auto width = std::find(widths.begin(), widths.end(), imageWidth); width != widths.end())
@@ -119,8 +126,15 @@ namespace winrt::Folia
             root.Insert(L"latexSuggestionsEnabled", Windows::Data::Json::JsonValue::CreateBooleanValue(settings.latexSuggestionsEnabled));
             root.Insert(L"themeId", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.themeId)));
             root.Insert(L"languageId", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.languageId)));
-            root.Insert(L"autoHideTopBar", Windows::Data::Json::JsonValue::CreateBooleanValue(settings.bars.autoHideTop));
-            root.Insert(L"autoHideBottomBar", Windows::Data::Json::JsonValue::CreateBooleanValue(settings.bars.autoHideBottom));
+            root.Insert(L"autoHideTopBar", Windows::Data::Json::JsonValue::CreateBooleanValue(settings.appearance.autoHideTop));
+            root.Insert(L"autoHideBottomBar", Windows::Data::Json::JsonValue::CreateBooleanValue(settings.appearance.autoHideBottom));
+            hstring reading = L"window";
+            for (auto const& choice : windowMaterials) {
+                if (choice.value == settings.appearance.material)
+                    root.Insert(L"windowMaterial", Windows::Data::Json::JsonValue::CreateStringValue(hstring(choice.id)));
+                if (choice.value == settings.appearance.readingMaterial) reading = hstring(choice.id);
+            }
+            root.Insert(L"readingMaterial", Windows::Data::Json::JsonValue::CreateStringValue(reading));
             root.Insert(L"imageMaxWidthPercent", Windows::Data::Json::JsonValue::CreateNumberValue(settings.media.imageMaxWidthPercent));
             root.Insert(L"mermaidTheme", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.media.mermaidTheme)));
             root.Insert(L"shortcutBindings", SerializeShortcutSettings(settings.shortcutBindings));

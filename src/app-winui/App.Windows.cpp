@@ -12,6 +12,7 @@ namespace winrt::Folia::implementation {
         auto window = winrt::make<MainWindow>(path);
         auto id = window.AppWindow().Id();
         windows.push_back({id, window});
+        if (tabDragSource.Value) winrt::get_self<MainWindow>(window)->topBar.SetTabDragActive(true);
         window.Closed([weak = get_weak(), id](auto const&, auto const&) {
             if (auto app = weak.get()) app->OnWindowClosed(id);
         });
@@ -19,6 +20,7 @@ namespace winrt::Folia::implementation {
     }
     void App::OnWindowClosed(Microsoft::UI::WindowId id) {
         std::erase_if(windows, [id](auto const& item) { return item.id == id; });
+        SetTabDragActive(id, false);
         if (closingPreparedWindows) return;
         // WinUI may prepare a cloaked tear-out host without completing a drag.
         // It belongs to its source until it receives a document and is revealed.
@@ -42,6 +44,14 @@ namespace winrt::Folia::implementation {
             Exit();
         }
     }
+    void App::SetTabDragActive(Microsoft::UI::WindowId source, bool active) {
+        if (active ? tabDragSource == source : tabDragSource != source) return;
+        tabDragSource = active ? source : Microsoft::UI::WindowId{};
+        for (auto const& entry : windows) {
+            auto window = winrt::get_self<MainWindow>(entry.window.as<winrt::Folia::MainWindow>());
+            if (!window->windowClosed) window->topBar.SetTabDragActive(active);
+        }
+    }
     void App::OpenWorkspaceWindows(winrt::Folia::WorkspaceLaunchRequest const& request) {
         if (request.documents.empty()) CreateMainWindow().Activate();
         else for (auto const& path : request.documents) CreateMainWindow(winrt::hstring(path.native())).Activate();
@@ -60,12 +70,12 @@ namespace winrt::Folia::implementation {
         }
         return nullptr;
     }
-    void App::UpdateWindowViewSettings(MainWindow const* source, MediaDisplaySettings const& media, WorkspaceBarSettings const& bars) {
+    void App::UpdateWindowViewSettings(MainWindow const* source, MediaDisplaySettings const& media, WorkspaceAppearance const& appearance) {
         for (auto const& item : windows) {
             auto window = winrt::get_self<MainWindow>(item.window.as<winrt::Folia::MainWindow>());
             if (window != source && !window->windowClosed) {
                 window->UpdateMediaSettings(media);
-                window->UpdateBarSettings(bars);
+                window->UpdateWorkspaceAppearance(appearance);
             }
         }
     }

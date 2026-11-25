@@ -31,7 +31,8 @@ namespace {
             root.VerticalAlignment(VerticalAlignment::Top);
             root.Width(1120);
             root.Height(800);
-            auto view = std::make_shared<winrt::Folia::SettingsView>(winrt::Folia::AppSettings{},
+            NavigationView settingsMenu;
+            auto view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, settingsMenu, winrt::Folia::AppSettings{},
                 std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
                 folia::Theme::Light, nullptr, [](auto const&) -> std::optional<winrt::hstring> { return {}; }, [] {});
             struct Cleanup {

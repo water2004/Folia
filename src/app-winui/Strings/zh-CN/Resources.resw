@@ -394,7 +394,14 @@
   <data name="ShortcutDeleteWordForward" xml:space="preserve"><value>删除后一个词</value></data>
   <data name="ToggleSidebar" xml:space="preserve"><value>展开或收起侧栏</value></data>
   <data name="NoOutline" xml:space="preserve"><value>当前文档没有标题。</value></data>
-  <data name="WindowBars" xml:space="preserve"><value>窗口栏</value></data>
+  <data name="WindowAppearance" xml:space="preserve"><value>窗口外观</value></data>
+  <data name="WindowMaterial" xml:space="preserve"><value>窗口材质</value></data>
+  <data name="MaterialMicaAlt" xml:space="preserve"><value>云母（增强）</value></data>
+  <data name="MaterialMica" xml:space="preserve"><value>云母</value></data>
+  <data name="MaterialAcrylic" xml:space="preserve"><value>亚克力（磨砂玻璃）</value></data>
+  <data name="MaterialSolid" xml:space="preserve"><value>纯色</value></data>
+  <data name="ReadingMaterial" xml:space="preserve"><value>阅读区域材质</value></data>
+  <data name="MaterialFollowWindow" xml:space="preserve"><value>跟随窗口</value></data>
   <data name="AutoHideTopBar" xml:space="preserve"><value>自动隐藏顶栏</value></data>
   <data name="AutoHideBottomBar" xml:space="preserve"><value>自动隐藏底栏</value></data>
 </root>

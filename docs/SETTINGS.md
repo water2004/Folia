@@ -1,7 +1,8 @@
 # Settings
 
-Settings is a full-window WinUI mode, opened directly from the application menu.
-Use native Back or an unhandled Escape to return to the document. Pages share
+Settings opens from the application menu and uses the same left sidebar as Files
+and Outline. Back or an unhandled Escape restores the document's sidebar and
+its selected view. Pages share
 theme typography and form styles. Long shortcut, LaTeX and license lists use
 native virtualization; ordinary forms use one page scroll surface. Closed choices
 leave the wheel to the page, and numeric AI budgets use plain integer inputs.
@@ -12,6 +13,11 @@ the same content width. The lists retain a finite height and virtualize their
 rows. The theme page reserves automatic-height rows for its heading and actions.
 The theme list and preview share the remaining finite height and scroll inside
 their own viewports. Narrow pages stack these viewports vertically.
+
+Under **General → Window appearance**, the window and reading area can use Mica,
+Mica Alt, desktop acrylic, or the Folia theme's solid color. The reading area
+defaults to **Follow window**. The active tab uses the reading material. Changes
+apply to open windows and are restored when a new window opens.
 
 ## Math rendering
 

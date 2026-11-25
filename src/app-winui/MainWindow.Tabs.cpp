@@ -77,13 +77,26 @@ namespace winrt::Folia::implementation {
         auto active = tabItems.find(workspaceDocuments.Active()->id);
         if (active != tabItems.end() && DocumentTabs().SelectedItem() != active->second->item)
             DocumentTabs().SelectedItem(active->second->item);
+        UpdateSelectedTabMaterial();
         EnsureSelectedTabVisible();
     }
 
     void MainWindow::DocumentTabLoaded(Windows::Foundation::IInspectable const& sender, RoutedEventArgs const&) {
         if (windowClosed) return;
         UpdateDocumentTab(winrt::unbox_value<std::uint64_t>(sender.as<TabViewItem>().DataContext()));
+        UpdateSelectedTabMaterial();
         EnsureSelectedTabVisible();
+    }
+
+    void MainWindow::UpdateSelectedTabMaterial() {
+        auto tabs = DocumentTabs();
+        auto item = tabs.SelectedItem();
+        auto tab = item ? tabs.ContainerFromItem(item).try_as<TabViewItem>() : nullptr;
+        auto host = tab ? tab.as<IControlProtected>().GetTemplateChild(L"SelectedTabBackdrop").try_as<SystemBackdropElement>() : nullptr;
+        if (auto previous = selectedTabBackdrop.get(); previous && previous != host) previous.SystemBackdrop(nullptr);
+        selectedTabBackdrop = host;
+        if (host && host.SystemBackdrop() != ReadingBackdropHost().SystemBackdrop())
+            host.SystemBackdrop(ReadingBackdropHost().SystemBackdrop());
     }
     void MainWindow::DocumentTabPrepared(FrameworkElement const& sender, DataContextChangedEventArgs const&) {
         if (windowClosed) return;
@@ -174,6 +187,8 @@ namespace winrt::Folia::implementation {
             CloseDocumentAsync(winrt::unbox_value<std::uint64_t>(args.Item()));
         }));
         RegisterTabTransferHandlers();
+        DocumentWorkspace().RegisterPropertyChangedCallback(SplitView::IsPaneOpenProperty(),
+            WindowEvent([this](auto const&, auto const&) { UpdateWorkspaceLayout(); }));
         DocumentTabs().SizeChanged(WindowEvent([this](auto const&, auto const&) {
             UpdateChromeMetrics();
             EnsureSelectedTabVisible();
@@ -219,9 +234,28 @@ namespace winrt::Folia::implementation {
     }
 
     void MainWindow::UpdateWorkspaceLayout() {
-        auto width = WorkspaceHost().ActualWidth();
-        DocumentWorkspace().OpenPaneLength(248);
-        DocumentWorkspace().DisplayMode(width > 0 && width < 760 ? SplitViewDisplayMode::Overlay : SplitViewDisplayMode::Inline);
+        auto width = Root().ActualWidth();
+        const bool compact = width > 0 && width < 760;
+        constexpr double sidebarWidth = 248;
+        const double paneWidth = settingsMode && compact ? SettingsNavigation().CompactPaneLength() : sidebarWidth;
+        DocumentWorkspace().OpenPaneLength(paneWidth);
+        if (settingsMode) {
+            SettingsNavigation().OpenPaneLength(sidebarWidth);
+            SettingsNavigation().PaneDisplayMode(compact ? NavigationViewPaneDisplayMode::LeftCompact : NavigationViewPaneDisplayMode::Left);
+            SettingsNavigation().IsPaneOpen(!compact);
+        }
+        auto mode = compact && !settingsMode ? SplitViewDisplayMode::Overlay : SplitViewDisplayMode::Inline;
+        if (DocumentWorkspace().DisplayMode() != mode) {
+            DocumentWorkspace().DisplayMode(mode);
+            if (appliedMaterial) ApplyWorkspaceMaterial();
+        }
+        const bool open = DocumentWorkspace().IsPaneOpen();
+        auto corners = open && !compact ? CornerRadius{8, 0, 0, 8} : CornerRadius{};
+        WorkspaceHost().CornerRadius(corners);
+        ReadingBackdropHost().CornerRadius(corners);
+        const double covered = open && mode == SplitViewDisplayMode::Overlay ? paneWidth : 0.;
+        topBar.SetCoveredWidth(covered);
+        bottomBar.SetCoveredWidth(covered);
         const bool outline = OutlineTab().IsChecked().GetBoolean();
         ExplorerPane().Visibility(outline ? Visibility::Collapsed : Visibility::Visible);
         OutlinePaneContent().Visibility(outline ? Visibility::Visible : Visibility::Collapsed);

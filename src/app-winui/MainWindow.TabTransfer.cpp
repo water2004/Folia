@@ -136,7 +136,6 @@ namespace winrt::Folia::implementation {
         dragPresentation.Stop(!windowClosed);
         if (draggingTab) {
             draggingTab->tearOutWindow = {};
-            if (!windowClosed) topBar.HoldOpen(false);
         }
         draggingTab.reset();
     }
@@ -165,6 +164,9 @@ namespace winrt::Folia::implementation {
         auto bounds = list.TransformToVisual(nullptr).TransformBounds({0, 0,
             static_cast<float>(list.ActualWidth()), static_cast<float>(list.ActualHeight())});
         auto local = list.XamlRoot().CoordinateConverter().ConvertScreenToLocal(point);
+        auto pane = DocumentWorkspace();
+        if (pane.IsPaneOpen() && pane.DisplayMode() == SplitViewDisplayMode::Overlay && local.X < pane.OpenPaneLength())
+            return false;
         return local.X >= bounds.X && local.X <= bounds.X + bounds.Width
             && local.Y >= bounds.Y && local.Y <= bounds.Y + bounds.Height;
     }
@@ -172,7 +174,7 @@ namespace winrt::Folia::implementation {
         if (tabMoveInProgress) return;
         tabPointerDown = true;
         EndTabDrag();
-        bool onVisibleTab = false;
+        tabGrabOffset.reset();
         auto tabs = DocumentTabs();
         if (ContainsTabDragPoint(point)) {
             const auto local = tabs.XamlRoot().CoordinateConverter().ConvertScreenToLocal(point);
@@ -181,7 +183,6 @@ namespace winrt::Folia::implementation {
             for (auto const& element : Media::VisualTreeHelper::FindElementsInHostCoordinates(local, tabs)) {
                 if (auto tab = element.try_as<TabViewItem>(); tab && tab.IsLoaded()) {
                     tabGrabOffset = local.X - tab.TransformToVisual(nullptr).TransformPoint({0, 0}).X;
-                    onVisibleTab = true;
                     break;
                 }
             }
@@ -189,7 +190,7 @@ namespace winrt::Folia::implementation {
         // The native TabView move loop must only participate in a gesture
         // that actually started on a visible tab. Caption movement remains
         // ordinary window movement, including after a previous tab click.
-        tabs.CanTearOutTabs(onVisibleTab);
+        tabs.CanTearOutTabs(tabGrabOffset.has_value());
     }
     void MainWindow::RestoreIdleTabTransfer() {
         DispatcherQueue().TryEnqueue([weak = get_weak()] {
@@ -202,24 +203,30 @@ namespace winrt::Folia::implementation {
         tabPointerDown = false;
         if (!tabMoveInProgress) RestoreIdleTabTransfer();
     }
+    void MainWindow::EnterTabMove(Microsoft::UI::Input::InputNonClientPointerSource const& pointer) {
+        tabMoveInProgress = true;
+        if (!tabPointerDown || !tabGrabOffset) return;
+        App::Current()->SetTabDragActive(AppWindow().Id(), true);
+        if (draggingTab && IsActiveDocument(winrt::unbox_value<std::uint64_t>(draggingTab->item)))
+            dragPresentation.Start(DocumentTabs(), draggingTab->item, *tabGrabOffset, pointer);
+    }
+    void MainWindow::ExitTabMove() {
+        tabMoveInProgress = false;
+        App::Current()->SetTabDragActive(AppWindow().Id(), false);
+        EndTabDrag();
+        EndTabPointerGesture();
+    }
     void MainWindow::RegisterTabTransferHandlers() {
         tabDragEnded.Attach(Microsoft::UI::Input::InputNonClientPointerSource::GetForWindowId(AppWindow().Id()),
             WindowEvent([this](auto const&, auto const& args) {
                 // A tab click can finish as client input without a non-client
                 // release. Resolve every move from its own native start point.
-                BeginTabPointerGesture(args.PointerScreenPoint());
+                if (args.MoveSizeOperation() == Microsoft::UI::Input::MoveSizeOperation::Move)
+                    BeginTabPointerGesture(args.PointerScreenPoint());
+                else tabGrabOffset.reset();
             }),
-            WindowEvent([this](auto const&, auto const&) {
-                tabMoveInProgress = false;
-                EndTabDrag(); EndTabPointerGesture();
-            }),
-            WindowEvent([this](auto const& pointer, auto const&) {
-                tabMoveInProgress = true;
-                if (draggingTab && IsActiveDocument(winrt::unbox_value<std::uint64_t>(draggingTab->item))) {
-                    topBar.HoldOpen(true);
-                    dragPresentation.Start(DocumentTabs(), draggingTab->item, tabGrabOffset, pointer);
-                }
-            }),
+            WindowEvent([this](auto const&, auto const&) { ExitTabMove(); }),
+            WindowEvent([this](auto const& pointer, auto const&) { EnterTabMove(pointer); }),
             WindowEvent([this](auto const&, auto const&) {
                 POINT point{};
                 if (::GetCursorPos(&point)) BeginTabPointerGesture({point.x, point.y});

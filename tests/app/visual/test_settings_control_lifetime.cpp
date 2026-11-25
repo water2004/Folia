@@ -44,7 +44,8 @@ namespace
             auto themes = std::make_shared<ThemeCatalog>();
             auto latex = std::make_shared<LatexCommandCatalog>();
             AppSettings settings;
-            auto view = std::make_shared<SettingsView>(settings, themes, latex, folia::Theme::Light,
+            NavigationView settingsMenu;
+            auto view = std::make_shared<SettingsView>(settingsMenu, settingsMenu, settings, themes, latex, folia::Theme::Light,
                 nullptr, [](auto const&) -> std::optional<winrt::hstring> { return std::nullopt; }, [] {});
             Window window;
             window.Content(view->Root());

@@ -10,20 +10,23 @@ namespace winrt::Folia {
     using namespace Microsoft::UI::Xaml::Media::Animation;
     using namespace std::chrono_literals;
 
-    void WorkspaceEdgeBar::Attach(Grid const& root, Grid const& bar, Edge edge, Microsoft::UI::WindowId window,
+    void WorkspaceEdgeBar::Attach(Grid const& root, Grid const& bar, Grid const& viewport, Edge edge, Microsoft::UI::WindowId window,
                                   std::function<void(bool)> visibilityChanged) {
         bar_ = bar;
         root_ = root;
+        viewport_ = viewport;
         edge_ = edge;
-        pinnedRow_ = Grid::GetRow(bar);
         visibilityChanged_ = std::move(visibilityChanged);
         slide_ = Media::TranslateTransform();
         bar_.RenderTransform(slide_);
+        clip_ = Media::RectangleGeometry();
+        clip_.Transform(slide_);
+        viewportResized_ = viewport_.SizeChanged(auto_revoke, [this](auto const&, auto const&) { UpdateViewportClip(); });
         hideTimer_ = bar_.DispatcherQueue().CreateTimer();
         hideTimer_.IsRepeating(false);
         hideTimer_.Interval(260ms);
         hideTick_ = hideTimer_.Tick([this](auto const&, auto const&) {
-            if (!held_ && !pointerOver_ && !HasKeyboardFocus()) Reveal(false, true);
+            if (!held_ && !tabDragActive_ && !pointerOver_ && !HasKeyboardFocus()) Reveal(false, true);
         });
         auto exit = [this](auto const&, auto const&) { pointerOver_ = false; ScheduleHide(); };
         rootExit_ = root_.PointerExited(auto_revoke, exit);
@@ -33,8 +36,10 @@ namespace winrt::Folia {
         auto nativeHover = [this](auto const&, auto const&) {
             if (!autoHide_ || !available_) return;
             POINT p{};
-            if (auto xaml = bar_.XamlRoot(); xaml && ::GetCursorPos(&p))
-                OnPointer(xaml.CoordinateConverter().ConvertScreenToLocal(Windows::Graphics::PointInt32{p.x, p.y}));
+            if (auto xaml = bar_.XamlRoot(); xaml && ::GetCursorPos(&p)) {
+                auto point = xaml.CoordinateConverter().ConvertScreenToLocal(Windows::Graphics::PointInt32{p.x, p.y});
+                OnPointer(xaml.Content().TransformToVisual(root_).TransformPoint(point));
+            }
         };
         nativeEnter_ = nativePointer_.PointerEntered(nativeHover);
         nativeMove_ = nativePointer_.PointerMoved(nativeHover);
@@ -44,15 +49,25 @@ namespace winrt::Folia {
         });
         blur_ = bar_.LostFocus(auto_revoke, [this](auto const&, auto const&) { ScheduleHide(); });
         resized_ = bar_.SizeChanged(auto_revoke, [this](auto const&, auto const&) {
+            UpdateViewportClip();
             if (autoHide_ && !revealed_) Reveal(false, false);
         });
+    }
+
+    void WorkspaceEdgeBar::UpdateViewportClip() {
+        if (!autoHide_ || !available_) return;
+        // Sharing the bar's transform exposes the window backdrop along the moving edge
+        // without shifting the document or running another animation.
+        const float height = static_cast<float>(bar_.ActualHeight());
+        clip_.Rect({0, edge_ == Edge::Top ? height : -height,
+            static_cast<float>(viewport_.ActualWidth()), static_cast<float>(viewport_.ActualHeight())});
     }
 
     void WorkspaceEdgeBar::OnPointer(Windows::Foundation::Point point) {
         if (!autoHide_ || !available_) return;
         const auto distance = edge_ == Edge::Top ? point.Y : root_.ActualHeight() - point.Y;
-        const double band = revealed_ ? bar_.ActualHeight() : 10.;
-        pointerOver_ = distance >= 0 && distance <= band && point.X >= 0 && point.X < root_.ActualWidth();
+        const double band = revealed_ ? bar_.ActualHeight() : (edge_ == Edge::Top ? 32. : 10.);
+        pointerOver_ = distance >= 0 && distance <= band && point.X >= coveredWidth_ && point.X < root_.ActualWidth();
         if (pointerOver_) {
             hideTimer_.Stop();
             Reveal(true, true);
@@ -87,18 +102,18 @@ namespace winrt::Folia {
             root_.RemoveHandler(UIElement::PointerMovedEvent(), pointerMoved_);
             pointerMoved_ = nullptr;
         }
-        Grid::SetRow(bar_, autoHide ? 0 : pinnedRow_);
-        Grid::SetRowSpan(bar_, autoHide ? static_cast<int>(root_.RowDefinitions().Size()) : 1);
         bar_.Visibility(available ? Visibility::Visible : Visibility::Collapsed);
         if (changed) {
+            UpdateViewportClip();
+            viewport_.Clip(autoHide && available ? clip_ : nullptr);
             hideTimer_.Stop();
             pointerOver_ = false;
-            Reveal(available && (!autoHide || held_ || HasKeyboardFocus()), false);
+            Reveal(available && (!autoHide || held_ || tabDragActive_ || HasKeyboardFocus()), false);
         }
     }
 
     void WorkspaceEdgeBar::ScheduleHide() {
-        if (autoHide_ && available_ && revealed_ && !held_ && !pointerOver_ && !hideTimer_.IsRunning()) hideTimer_.Start();
+        if (autoHide_ && available_ && revealed_ && !held_ && !tabDragActive_ && !pointerOver_ && !hideTimer_.IsRunning()) hideTimer_.Start();
     }
 
     void WorkspaceEdgeBar::HoldOpen(bool hold) {
@@ -106,6 +121,21 @@ namespace winrt::Folia {
         if (!autoHide_ || !available_) return;
         if (held_) { hideTimer_.Stop(); Reveal(true, true); }
         else ScheduleHide();
+    }
+
+    void WorkspaceEdgeBar::SetTabDragActive(bool active) {
+        if (tabDragActive_ == active) return;
+        tabDragActive_ = active;
+        if (!autoHide_ || !available_) return;
+        if (active) {
+            hideTimer_.Stop();
+            // TabView snapshots screen rectangles at the start of a move.
+            // Finish even an in-flight hover animation before that snapshot.
+            Reveal(true, false);
+            root_.UpdateLayout();
+        } else {
+            ScheduleHide();
+        }
     }
 
     void WorkspaceEdgeBar::Reveal(bool show, bool animate) {
@@ -147,6 +177,7 @@ namespace winrt::Folia {
         if (root_ && pointerMoved_) root_.RemoveHandler(UIElement::PointerMovedEvent(), pointerMoved_);
         pointerMoved_ = nullptr;
         rootExit_.revoke();
+        viewportResized_.revoke();
         focus_.revoke(); blur_.revoke(); resized_.revoke();
         hideTimer_ = nullptr;
         animation_ = nullptr;

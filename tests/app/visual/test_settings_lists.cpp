@@ -44,7 +44,8 @@ suite settings_list_tests = [] {
         std::ofstream timings(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
             / "build/settings-lists-timing.log");
         auto started = std::chrono::steady_clock::now();
-        auto view = std::make_shared<winrt::Folia::SettingsView>(winrt::Folia::AppSettings{},
+        NavigationView settingsMenu;
+        auto view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, settingsMenu, winrt::Folia::AppSettings{},
             std::make_shared<winrt::Folia::ThemeCatalog>(), latex, folia::Theme::Light,
             nullptr, [](auto const&) -> std::optional<winrt::hstring> { return {}; }, [] {});
         auto elapsed = [&] { return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count(); };
@@ -167,7 +168,8 @@ suite settings_list_tests = [] {
         bool failApply = false;
         auto saved = settings;
         Window window; Grid root; window.Content(root);
-        auto view = std::make_shared<winrt::Folia::SettingsView>(settings,
+        NavigationView settingsMenu;
+        auto view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, settingsMenu, settings,
             std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
             folia::Theme::Light, nullptr, [&](auto const& value) -> std::optional<winrt::hstring> {
                 ++applied;

@@ -32,7 +32,7 @@ namespace winrt::Folia::implementation
             return saveError;
         }
         auto themeChanged = appSettings.themeId != settings.themeId;
-        auto barsChanged = appSettings.bars != settings.bars;
+        auto appearanceChanged = appSettings.appearance != settings.appearance;
         auto mediaChanged = appSettings.media != settings.media;
         auto shortcutsChanged = appSettings.shortcutBindings != settings.shortcutBindings;
         auto latexSuggestionsChanged =
@@ -49,24 +49,36 @@ namespace winrt::Folia::implementation
         if (mediaChanged) {
             editorRenderer.SetMediaDisplaySettings(appSettings.media);
         }
-        if (barsChanged) ApplyBarLayout();
-        if (mediaChanged || barsChanged)
-            App::Current()->UpdateWindowViewSettings(this, appSettings.media, appSettings.bars);
+        if (appearanceChanged) {
+            ApplyBarLayout();
+            if (!themeChanged) ApplyWorkspaceMaterial();
+        }
+        if (mediaChanged || appearanceChanged)
+            App::Current()->UpdateWindowViewSettings(this, appSettings.media, appSettings.appearance);
         return std::nullopt;
     }
 
     void MainWindow::ApplyBarLayout()
     {
-        topBar.Configure(appSettings.bars.autoHideTop);
-        bottomBar.Configure(appSettings.bars.autoHideBottom, !settingsMode);
+        using Microsoft::UI::Xaml::Controls::Grid;
+        auto const& appearance = appSettings.appearance;
+        // The bars keep their grid rows. Only the reading viewport extends into
+        // an auto-hidden edge, leaving the middle row safe for notifications.
+        const int first = appearance.autoHideTop ? 0 : 1;
+        const int end = appearance.autoHideBottom && !settingsMode ? 3 : 2;
+        Grid::SetRow(TopEdgeViewport(), first);
+        Grid::SetRowSpan(TopEdgeViewport(), end - first);
+        topBar.Configure(appearance.autoHideTop);
+        bottomBar.Configure(appearance.autoHideBottom, !settingsMode);
     }
 
-    void MainWindow::UpdateBarSettings(WorkspaceBarSettings const& settings)
+    void MainWindow::UpdateWorkspaceAppearance(WorkspaceAppearance const& settings)
     {
-        if (appSettings.bars == settings) return;
-        appSettings.bars = settings;
+        if (appSettings.appearance == settings) return;
+        appSettings.appearance = settings;
         ApplyBarLayout();
-        if (settingsView) settingsView->UpdateBarSettings(settings);
+        ApplyWorkspaceMaterial();
+        if (settingsView) settingsView->UpdateWorkspaceAppearance(settings);
     }
 
     void MainWindow::UpdateMediaSettings(winrt::Folia::MediaDisplaySettings const& settings)
@@ -92,11 +104,13 @@ namespace winrt::Folia::implementation
         if (!enabled) ReloadButton().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
         if (enabled)
         {
+            documentSidebarWasOpen = DocumentWorkspace().IsPaneOpen();
             animationController.Focus(false);
             HideFindBar();
             if (!settingsView)
             {
                 settingsView = std::make_shared<winrt::Folia::SettingsView>(
+                    SettingsNavigation(), SettingsViewHost(),
                     appSettings,
                     themeCatalog,
                     latexCommandCatalog,
@@ -106,15 +120,16 @@ namespace winrt::Folia::implementation
                     [weak = get_weak()] {
                         if (auto window = weak.get(); window && !window->windowClosed) window->SetSettingsMode(false);
                     });
-                SettingsViewHost().Children().Append(settingsView->Root());
             }
             else
             {
                 settingsView->Reset(appSettings, CurrentThemeVariant());
             }
-            settingsView->SetNavigationWidth(themeProfile.layout.navigation_open_width);
-
-            DocumentWorkspace().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
+            DocumentNavigation().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
+            SettingsNavigation().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
+            DocumentWorkspace().IsPaneOpen(true);
+            UpdateWorkspaceLayout();
+            DocumentPages().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
             SettingsViewHost().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
             ApplyBarLayout();
             Title(Localize(L"WindowTitleSettings"));
@@ -122,8 +137,12 @@ namespace winrt::Folia::implementation
         }
 
         SettingsViewHost().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
+        SettingsNavigation().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
+        DocumentNavigation().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
+        DocumentWorkspace().IsPaneOpen(documentSidebarWasOpen);
+        UpdateWorkspaceLayout();
         if (settingsView) settingsView->Reset(appSettings, CurrentThemeVariant());
-        DocumentWorkspace().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
+        DocumentPages().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
         ApplyBarLayout();
         UpdateDocumentInfo();
         RenderEditorSurface();

@@ -214,7 +214,7 @@
     <ClInclude Include="workspace\WorkspaceDocuments.h" />
     <ClInclude Include="workspace\TabDragPresentation.h" />
     <ClInclude Include="workspace\WorkspaceEdgeBar.h" />
-    <ClInclude Include="workspace\WorkspaceBarSettings.h" />
+    <ClInclude Include="workspace\WorkspaceAppearance.h" />
     <ClInclude Include="workspace\RecentWorkspace.h" />
     <ClInclude Include="workspace\WorkspaceFileKind.h" />
     <ClInclude Include="workspace\WorkspaceIcons.h" />

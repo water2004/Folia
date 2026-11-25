@@ -42,28 +42,31 @@ namespace winrt::Folia
         languageSection.Children().Append(settings_ui::Hint(Localize(L"LanguageRestartDescription")));
         panel.Children().Append(languageSection);
 
-        auto barsSection = settings_ui::SectionPanel();
-        barsSection.Children().Append(settings_ui::SectionHeading(Localize(L"WindowBars")));
-        auto configureBar = [this, &barsSection](CheckBox const& check, wchar_t const* key) {
-            check.Content(box_value(Localize(key)));
-            check.Click([this](auto const&, auto const&) {
-                if (detached_ || refreshing_ || !applySettings_) return;
-                auto proposed = appliedSettings_;
-                proposed.bars = {autoHideTop_.IsChecked().GetBoolean(), autoHideBottom_.IsChecked().GetBoolean()};
-                if (auto error = applySettings_(proposed)) {
-                    UpdateBarSettings(appliedSettings_.bars);
-                    SetGeneralStatus(*error, true);
-                    return;
-                }
-                UpdateBarSettings(proposed.bars);
-                SetGeneralStatus({});
-            });
-            barsSection.Children().Append(check);
+        auto appearance = settings_ui::SectionPanel();
+        appearance.Children().Append(settings_ui::SectionHeading(Localize(L"WindowAppearance")));
+        auto materialChoice = [&](wchar_t const* label, bool allowInherit) {
+            auto combo = settings_ui::Choice();
+            combo.Header(box_value(Localize(label)));
+            combo.Style(settings_ui::ResourceStyle(L"SettingsComboBoxStyle"));
+            if (allowInherit) combo.Items().Append(box_value(Localize(L"MaterialFollowWindow")));
+            for (auto const& choice : windowMaterials) combo.Items().Append(box_value(Localize(choice.label)));
+            appearance.Children().Append(combo);
+            return combo;
         };
-        configureBar(autoHideTop_, L"AutoHideTopBar");
-        configureBar(autoHideBottom_, L"AutoHideBottomBar");
-        UpdateBarSettings(settings_.bars);
-        panel.Children().Append(barsSection);
+        materialCombo_ = materialChoice(L"WindowMaterial", false);
+        readingMaterialCombo_ = materialChoice(L"ReadingMaterial", true);
+        auto addToggle = [this, &appearance](CheckBox const& check, wchar_t const* key) {
+            check.Content(box_value(Localize(key)));
+            check.Click([this](auto const&, auto const&) { ApplyAppearanceSetting(); });
+            appearance.Children().Append(check);
+        };
+        addToggle(autoHideTop_, L"AutoHideTopBar");
+        addToggle(autoHideBottom_, L"AutoHideBottomBar");
+        UpdateWorkspaceAppearance(settings_.appearance);
+        auto changed = [this](auto const&, auto const&) { ApplyAppearanceSetting(); };
+        materialCombo_.SelectionChanged(changed);
+        readingMaterialCombo_.SelectionChanged(changed);
+        panel.Children().Append(appearance);
 
         auto mediaSection = settings_ui::SectionPanel();
         mediaSection.Children().Append(settings_ui::SectionHeading(Localize(L"DocumentMedia")));
@@ -112,11 +115,39 @@ namespace winrt::Folia
         return settings_ui::PageScroll(panel);
     }
 
-    void SettingsView::UpdateBarSettings(WorkspaceBarSettings const& bars)
+    void SettingsView::UpdateWorkspaceAppearance(WorkspaceAppearance const& appearance)
     {
-        settings_.bars = appliedSettings_.bars = bars;
-        autoHideTop_.IsChecked(bars.autoHideTop);
-        autoHideBottom_.IsChecked(bars.autoHideBottom);
+        auto wasRefreshing = std::exchange(refreshing_, true);
+        settings_.appearance = appliedSettings_.appearance = appearance;
+        auto choice = std::ranges::find(windowMaterials, appearance.material, &WindowMaterialChoice::value);
+        materialCombo_.SelectedIndex(static_cast<int>(choice - windowMaterials.begin()));
+        auto reading = appearance.readingMaterial
+            ? std::ranges::find(windowMaterials, *appearance.readingMaterial, &WindowMaterialChoice::value)
+            : windowMaterials.end();
+        readingMaterialCombo_.SelectedIndex(reading == windowMaterials.end() ? 0 : 1 + static_cast<int>(reading - windowMaterials.begin()));
+        autoHideTop_.IsChecked(appearance.autoHideTop);
+        autoHideBottom_.IsChecked(appearance.autoHideBottom);
+        refreshing_ = wasRefreshing;
+    }
+
+    void SettingsView::ApplyAppearanceSetting()
+    {
+        if (detached_ || refreshing_ || !applySettings_) return;
+        auto index = materialCombo_.SelectedIndex();
+        auto reading = readingMaterialCombo_.SelectedIndex();
+        if (index < 0 || static_cast<size_t>(index) >= windowMaterials.size()
+            || reading < 0 || static_cast<size_t>(reading) > windowMaterials.size()) return;
+        auto proposed = appliedSettings_;
+        proposed.appearance = {autoHideTop_.IsChecked().GetBoolean(), autoHideBottom_.IsChecked().GetBoolean(),
+            windowMaterials[index].value, reading ? std::optional{windowMaterials[reading - 1].value} : std::nullopt};
+        if (proposed.appearance == appliedSettings_.appearance) return;
+        if (auto error = applySettings_(proposed)) {
+            UpdateWorkspaceAppearance(appliedSettings_.appearance);
+            SetGeneralStatus(*error, true);
+            return;
+        }
+        UpdateWorkspaceAppearance(proposed.appearance);
+        SetGeneralStatus({});
     }
 
     void SettingsView::RefreshMediaControls()

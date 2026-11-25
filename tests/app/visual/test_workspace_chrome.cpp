@@ -59,13 +59,14 @@ namespace {
             pixels = Await(bitmap.GetPixelsAsync());
             scale = bitmap.PixelWidth() / root.ActualWidth();
         }
-        bool Ink(winrt::Windows::Foundation::Point point, winrt::Windows::UI::Color background) const {
+        bool Ink(winrt::Windows::Foundation::Point point, winrt::Windows::Foundation::Point empty) const {
             int contrast = 0;
+            auto background = pixels.data() + (int(empty.Y * scale) * bitmap.PixelWidth() + int(empty.X * scale)) * 4;
             for (int dy = -1; dy <= 1; ++dy) for (int dx = -1; dx <= 1; ++dx) {
                 int x = static_cast<int>(point.X * scale) + dx, y = static_cast<int>(point.Y * scale) + dy;
                 if (x < 0 || y < 0 || x >= bitmap.PixelWidth() || y >= bitmap.PixelHeight()) continue;
                 auto p = pixels.data() + (y * bitmap.PixelWidth() + x) * 4;
-                contrast += std::abs(int(p[0]) - background.B) + std::abs(int(p[1]) - background.G) + std::abs(int(p[2]) - background.R);
+                for (int c = 0; c < 4; ++c) contrast += std::abs(int(p[c]) - background[c]);
             }
             // Integrate coverage: a one-pixel SVG stroke can straddle pixels
             // at fractional scales, without any individual pixel being opaque.
@@ -179,7 +180,6 @@ namespace {
                 auto y = static_cast<int>((dividerBounds.Y + dividerBounds.Height * 0.6) * raster);
                 auto reference = pixels.data() + (y * bitmap.PixelWidth() + 8) * 4;
                 for (int x = 8; x < bitmap.PixelWidth() - 8; x += 32) {
-                    // The selected browser tab opens into the editor at its lower edge.
                     if (x >= bounds.X * raster && x <= (bounds.X + bounds.Width) * raster) continue;
                     auto offset = (y * bitmap.PixelWidth() + x) * 4;
                     auto data = pixels.data() + offset;
@@ -301,6 +301,10 @@ namespace {
             expect(activeBounds.X + activeBounds.Width <= f.Find<Border>(L"TitleDragArea").TransformToVisual(f.root).TransformPoint({0, 0}).X);
             auto indicator = Descendant(active, L"SelectionIndicator");
             expect(indicator.Opacity() == 1.);
+            auto tabBottom = indicator.TransformToVisual(f.root).TransformPoint({0, static_cast<float>(indicator.ActualHeight())}).Y;
+            auto paperTop = f.Find<Grid>(L"WorkspaceHost").TransformToVisual(f.root).TransformPoint({0, 0}).Y;
+            expect(std::lround(tabBottom * dpi) == std::lround(paperTop * dpi))
+                << "the active tab meets the reading surface on the same physical pixel boundary";
             Capture narrow(f.root, f.root.XamlRoot().RasterizationScale());
             auto artifacts = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path() / L"build/tests/workspace-chrome";
             SavePng(artifacts / L"narrow-tabs.png", narrow.bitmap.PixelWidth(), narrow.bitmap.PixelHeight(), narrow.pixels);
@@ -352,7 +356,6 @@ namespace {
 
         "workspace chrome icons retain the right and bottom SVG strokes in actual pixels"_test = [] { try {
             ChromeWindow f;
-            auto background = f.root.Resources().Lookup(winrt::box_value(L"FoliaShellLayerBrush")).as<Media::SolidColorBrush>().Color();
             {
                 auto name = L"SidebarButton";
                 auto icon = f.Find<Primitives::ToggleButton>(name).Content().as<Viewbox>();
@@ -367,8 +370,9 @@ namespace {
                 for (double scale : {1., 1.25, 1.5, 2.}) {
                     Capture capture(f.root, scale);
                     auto right = transform.TransformPoint({17.5f, 10.f}), bottom = transform.TransformPoint({10.f, 15.5f});
-                    expect(capture.Ink(right, background));
-                    expect(capture.Ink(bottom, background));
+                    auto empty = transform.TransformPoint({-2.f, 10.f});
+                    expect(capture.Ink(right, empty));
+                    expect(capture.Ink(bottom, empty));
                 }
                 // Demonstrate why geometry-bounds-only tests missed the old
                 // defect: the inner Path's automatic layout box clips strokes.
@@ -377,8 +381,9 @@ namespace {
                 f.root.UpdateLayout();
                 Capture cropped(f.root, 2.);
                 transform = path.TransformToVisual(f.root);
-                expect(!cropped.Ink(transform.TransformPoint({17.5f, 10.f}), background));
-                expect(!cropped.Ink(transform.TransformPoint({10.f, 15.5f}), background));
+                auto empty = transform.TransformPoint({-2.f, 10.f});
+                expect(!cropped.Ink(transform.TransformPoint({17.5f, 10.f}), empty));
+                expect(!cropped.Ink(transform.TransformPoint({10.f, 15.5f}), empty));
                 path.Width(20);
                 path.Height(20);
                 f.root.UpdateLayout();

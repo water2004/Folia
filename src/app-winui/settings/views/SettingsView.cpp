@@ -11,6 +11,7 @@ namespace winrt::Folia
     using settings_ui::NavigationItem;
 
     SettingsView::SettingsView(
+        NavigationView const& navigation, ContentControl const& pageHost,
         AppSettings settings,
         std::shared_ptr<ThemeCatalog> catalog,
         std::shared_ptr<LatexCommandCatalog> latexCatalog,
@@ -24,7 +25,7 @@ namespace winrt::Folia
           latexCatalog_(std::move(latexCatalog)),
           systemVariant_(systemVariant),
           owner_(owner),
-          applySettings_(std::move(applySettings))
+          applySettings_(std::move(applySettings)), navigation_(navigation), pageHost_(pageHost)
     {
         shortcutModel_.Reset(settings_.shortcutBindings);
         Build(std::move(closeSettings));
@@ -79,27 +80,27 @@ namespace winrt::Folia
     void SettingsView::Navigate(hstring const& page)
     {
         if (page != L"shortcuts") CancelShortcutCapture();
-        if (page == L"themes") navigation_.Content(themesPage_);
-        else if (page == L"completion") { completionPage_ = BuildCompletionPage(); navigation_.Content(completionPage_); }
+        if (page == L"themes") pageHost_.Content(themesPage_);
+        else if (page == L"completion") { completionPage_ = BuildCompletionPage(); pageHost_.Content(completionPage_); }
         else if (page == L"latex")
         {
             if (!latexPage_) latexPage_ = BuildLatexPage();
-            navigation_.Content(latexPage_);
+            pageHost_.Content(latexPage_);
             RefreshLatexCommandList();
         }
         else if (page == L"shortcuts")
         {
             if (!shortcutsPage_) shortcutsPage_ = BuildShortcutsPage();
-            navigation_.Content(shortcutsPage_);
+            pageHost_.Content(shortcutsPage_);
             RefreshShortcutList();
         }
         else if (page == L"licenses")
         {
-            navigation_.Content(licensesPage_);
+            pageHost_.Content(licensesPage_);
             LoadSelectedLicense();
         }
-        else if (page == L"about") navigation_.Content(aboutPage_);
-        else navigation_.Content(generalPage_);
+        else if (page == L"about") pageHost_.Content(aboutPage_);
+        else pageHost_.Content(generalPage_);
     }
 
     void SettingsView::Reset(AppSettings settings, folia::Theme systemVariant)
@@ -112,15 +113,15 @@ namespace winrt::Folia
         refreshing_ = true;
         latexSuggestionsToggle_.IsOn(settings_.latexSuggestionsEnabled);
         languageCombo_.SelectedIndex(LanguageIndex(settings_.languageId));
-        UpdateBarSettings(settings_.bars);
+        UpdateWorkspaceAppearance(settings_.appearance);
         RefreshMediaControls();
         refreshing_ = false;
         if (shortcutsPage_) RefreshShortcutList();
         if (latexPage_) RefreshLatexCommandList();
         RefreshThemeList();
         SetGeneralStatus({});
-        if (completionPage_ && navigation_.Content() == completionPage_) {
-            completionPage_ = BuildCompletionPage(); navigation_.Content(completionPage_);
+        if (completionPage_ && pageHost_.Content() == completionPage_) {
+            completionPage_ = BuildCompletionPage(); pageHost_.Content(completionPage_);
         }
     }
 

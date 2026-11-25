@@ -31,7 +31,10 @@ suite settings_navigation_tests = [] {
         expect(menu.Items().Size() == 3_u);
         expect(menu.Items().GetAt(2) == settings);
         expect(!root.FindName(L"ViewMenu"));
-        auto host = root.FindName(L"SettingsViewHost").as<Grid>();
+        auto host = root.FindName(L"SettingsViewHost").as<ContentControl>();
+        auto navigation = root.FindName(L"SettingsNavigation").as<NavigationView>();
+        auto sidebar = root.FindName(L"WorkspaceSidebar").as<Grid>();
+        auto documentNav = root.FindName(L"DocumentNavigation").as<Grid>();
         auto workspace = root.FindName(L"DocumentWorkspace").as<SplitView>();
         auto status = root.FindName(L"StatusBar").as<Grid>();
         auto tabs = root.FindName(L"DocumentTabs").as<TabView>();
@@ -51,8 +54,12 @@ suite settings_navigation_tests = [] {
             std::cout << "settings navigation: settings visible\n";
         };
         for (int iteration = 0; iteration < 3; ++iteration) {
+            bool sidebarOpen = iteration == 1;
+            workspace.IsPaneOpen(sidebarOpen);
             open();
-            auto navigation = host.Children().GetAt(0).as<NavigationView>();
+            expect(workspace.IsPaneOpen());
+            expect(navigation.Parent() == sidebar);
+            expect(documentNav.Visibility() == Visibility::Collapsed);
             expect(navigation.IsBackButtonVisible() == NavigationViewBackButtonVisible::Visible);
             expect(navigation.IsBackEnabled());
             for (auto item : navigation.MenuItems()) {
@@ -60,13 +67,18 @@ suite settings_navigation_tests = [] {
                 if (winrt::unbox_value<winrt::hstring>(entry.Tag()) == L"completion") navigation.SelectedItem(entry);
             }
             open(); // An entry named Settings opens it; it must not toggle it closed.
-            expect(host.Children().GetAt(0) == navigation);
+            expect(navigation.Visibility() == Visibility::Visible);
             root.UpdateLayout();
             auto back = FindBack(navigation).as<Button>();
             expect(back.Visibility() == Visibility::Visible && back.IsEnabled());
+            auto backBounds = back.TransformToVisual(root).TransformBounds({0, 0,
+                static_cast<float>(back.ActualWidth()), static_cast<float>(back.ActualHeight())});
+            expect(backBounds.X + backBounds.Width <= tabs.TransformToVisual(root).TransformPoint({0, 0}).X);
             Invoke(back);
             Pump([&] { return host.Visibility() == Visibility::Collapsed; });
             expect(workspace.Visibility() == Visibility::Visible);
+            expect(workspace.IsPaneOpen() == sidebarOpen);
+            expect(documentNav.Visibility() == Visibility::Visible);
             expect(status.Visibility() == Visibility::Visible);
             expect(tabs.SelectedItem() == selected);
         }

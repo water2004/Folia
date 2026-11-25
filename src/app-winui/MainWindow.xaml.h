@@ -66,6 +66,8 @@ namespace winrt::Folia::implementation
         bool ContainsTabDragPoint(Windows::Graphics::PointInt32 point);
         void BeginTabPointerGesture(Windows::Graphics::PointInt32 point);
         void EndTabPointerGesture();
+        void EnterTabMove(Microsoft::UI::Input::InputNonClientPointerSource const& pointer);
+        void ExitTabMove();
         void RestoreIdleTabTransfer();
         void EndTabDrag();
         void RevealTabWindow();
@@ -96,7 +98,7 @@ namespace winrt::Folia::implementation
         void UpdateWorkspaceLayout();
         void UpdateChromeMetrics();
         void ApplyBarLayout();
-        void UpdateBarSettings(WorkspaceBarSettings const& settings);
+        void UpdateWorkspaceAppearance(WorkspaceAppearance const& settings);
         void EnsureSelectedTabVisible();
         void UpdateLoadingState();
         bool DispatchApplicationAction(std::string_view action);
@@ -113,6 +115,8 @@ namespace winrt::Folia::implementation
         void RenderEditorSurface();
         void UpdateTheme();
         void ApplyShellTheme();
+        void ApplyWorkspaceMaterial();
+        void UpdateSelectedTabMaterial();
         folia::Theme CurrentThemeVariant();
         void SetSettingsMode(bool enabled);
         void SetDocumentCommandsVisible(bool visible);
@@ -169,6 +173,7 @@ namespace winrt::Folia::implementation
         folia::ThemeProfile themeProfile = folia::default_theme_profile();
         bool updatingTheme = false;
         bool settingsMode = false;
+        bool documentSidebarWasOpen = false;
         bool closePending = false;
         bool closeApproved = false;
         bool closingDocument = false;
@@ -177,8 +182,11 @@ namespace winrt::Folia::implementation
         bool tabPointerDown = false, tabMoveInProgress = false;
         bool updatingTabs = false;
         WorkspaceEdgeBar topBar, bottomBar;
+        std::optional<WindowMaterial> appliedMaterial;
+        std::optional<WindowMaterial> appliedReadingMaterial;
+        winrt::weak_ref<Microsoft::UI::Xaml::Controls::SystemBackdropElement> selectedTabBackdrop;
         TabDragPresentation dragPresentation;
-        float tabGrabOffset = 0;
+        std::optional<float> tabGrabOffset;
         bool operationActive = false;
         bool windowClosed = false;
         Windows::Foundation::IAsyncAction imagePreviewLoad{nullptr};
