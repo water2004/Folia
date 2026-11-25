@@ -22,6 +22,7 @@
 #include "workspace/WorkspaceDocuments.h"
 #include "workspace/FolderExplorerController.h"
 #include "workspace/RecentWorkspace.h"
+#include "workspace/WorkspaceEdgeBar.h"
 
 namespace winrt::Folia::implementation
 {
@@ -93,6 +94,8 @@ namespace winrt::Folia::implementation
         void UpdateDocumentTab(std::uint64_t id);
         void UpdateWorkspaceLayout();
         void UpdateChromeMetrics();
+        void ApplyBarLayout();
+        void UpdateBarSettings(WorkspaceBarSettings const& settings);
         void EnsureSelectedTabVisible();
         void UpdateLoadingState();
         bool DispatchApplicationAction(std::string_view action);
@@ -172,6 +175,7 @@ namespace winrt::Folia::implementation
         bool selectedTabVisibilityPending = false;
         bool tabPointerDown = false, tabMoveInProgress = false;
         bool updatingTabs = false;
+        WorkspaceEdgeBar topBar, bottomBar;
         bool operationActive = false;
         bool windowClosed = false;
         Windows::Foundation::IAsyncAction imagePreviewLoad{nullptr};

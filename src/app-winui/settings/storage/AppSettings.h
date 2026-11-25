@@ -5,6 +5,7 @@
 #include <string>
 #include "windows/completion/CompletionService.h"
 #include "media/MediaDisplaySettings.h"
+#include "workspace/WorkspaceBarSettings.h"
 
 import folia.platform.editor_shortcuts;
 
@@ -17,6 +18,7 @@ namespace winrt::Folia
         std::string themeId = "system";
         std::string languageId = "system";
         MediaDisplaySettings media;
+        WorkspaceBarSettings bars;
         std::vector<folia::platform::editor::EditorShortcutBinding> shortcutBindings =
             folia::platform::editor::default_editor_shortcuts();
 

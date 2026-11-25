@@ -32,6 +32,7 @@ namespace winrt::Folia::implementation
             return saveError;
         }
         auto themeChanged = appSettings.themeId != settings.themeId;
+        auto barsChanged = appSettings.bars != settings.bars;
         auto mediaChanged = appSettings.media != settings.media;
         auto shortcutsChanged = appSettings.shortcutBindings != settings.shortcutBindings;
         auto latexSuggestionsChanged =
@@ -47,9 +48,25 @@ namespace winrt::Folia::implementation
         if (themeChanged) UpdateTheme();
         if (mediaChanged) {
             editorRenderer.SetMediaDisplaySettings(appSettings.media);
-            App::Current()->UpdateWindowMediaSettings(this, appSettings.media);
         }
+        if (barsChanged) ApplyBarLayout();
+        if (mediaChanged || barsChanged)
+            App::Current()->UpdateWindowViewSettings(this, appSettings.media, appSettings.bars);
         return std::nullopt;
+    }
+
+    void MainWindow::ApplyBarLayout()
+    {
+        topBar.Configure(appSettings.bars.autoHideTop);
+        bottomBar.Configure(appSettings.bars.autoHideBottom, !settingsMode);
+    }
+
+    void MainWindow::UpdateBarSettings(WorkspaceBarSettings const& settings)
+    {
+        if (appSettings.bars == settings) return;
+        appSettings.bars = settings;
+        ApplyBarLayout();
+        if (settingsView) settingsView->UpdateBarSettings(settings);
     }
 
     void MainWindow::UpdateMediaSettings(winrt::Folia::MediaDisplaySettings const& settings)
@@ -99,7 +116,7 @@ namespace winrt::Folia::implementation
 
             DocumentWorkspace().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
             SettingsViewHost().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
-            StatusBar().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
+            ApplyBarLayout();
             Title(Localize(L"WindowTitleSettings"));
             return;
         }
@@ -107,7 +124,7 @@ namespace winrt::Folia::implementation
         SettingsViewHost().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
         if (settingsView) settingsView->Reset(appSettings, CurrentThemeVariant());
         DocumentWorkspace().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
-        StatusBar().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
+        ApplyBarLayout();
         UpdateDocumentInfo();
         RenderEditorSurface();
         if (HasActiveEditor()) EditorSurface().Focus(Microsoft::UI::Xaml::FocusState::Programmatic);

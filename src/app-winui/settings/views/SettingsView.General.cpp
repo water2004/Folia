@@ -42,6 +42,29 @@ namespace winrt::Folia
         languageSection.Children().Append(settings_ui::Hint(Localize(L"LanguageRestartDescription")));
         panel.Children().Append(languageSection);
 
+        auto barsSection = settings_ui::SectionPanel();
+        barsSection.Children().Append(settings_ui::SectionHeading(Localize(L"WindowBars")));
+        auto configureBar = [this, &barsSection](CheckBox const& check, wchar_t const* key) {
+            check.Content(box_value(Localize(key)));
+            check.Click([this](auto const&, auto const&) {
+                if (detached_ || refreshing_ || !applySettings_) return;
+                auto proposed = appliedSettings_;
+                proposed.bars = {autoHideTop_.IsChecked().GetBoolean(), autoHideBottom_.IsChecked().GetBoolean()};
+                if (auto error = applySettings_(proposed)) {
+                    UpdateBarSettings(appliedSettings_.bars);
+                    SetGeneralStatus(*error, true);
+                    return;
+                }
+                UpdateBarSettings(proposed.bars);
+                SetGeneralStatus({});
+            });
+            barsSection.Children().Append(check);
+        };
+        configureBar(autoHideTop_, L"AutoHideTopBar");
+        configureBar(autoHideBottom_, L"AutoHideBottomBar");
+        UpdateBarSettings(settings_.bars);
+        panel.Children().Append(barsSection);
+
         auto mediaSection = settings_ui::SectionPanel();
         mediaSection.Children().Append(settings_ui::SectionHeading(Localize(L"DocumentMedia")));
         imageWidthCombo_ = settings_ui::Choice();
@@ -87,6 +110,13 @@ namespace winrt::Folia
         generalStatus_.TextWrapping(TextWrapping::Wrap);
         panel.Children().Append(generalStatus_);
         return settings_ui::PageScroll(panel);
+    }
+
+    void SettingsView::UpdateBarSettings(WorkspaceBarSettings const& bars)
+    {
+        settings_.bars = appliedSettings_.bars = bars;
+        autoHideTop_.IsChecked(bars.autoHideTop);
+        autoHideBottom_.IsChecked(bars.autoHideBottom);
     }
 
     void SettingsView::RefreshMediaControls()

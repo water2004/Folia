@@ -112,6 +112,8 @@ namespace winrt::Folia::implementation
         Closed(WindowEvent([this](auto const&, auto const&)
         {
             windowClosed = true;
+            topBar.Stop();
+            bottomBar.Stop();
             inlineCompletion.reset();
             tabDragEnded.Reset();
             preparedTabActivation.Reset();
@@ -138,26 +140,22 @@ namespace winrt::Folia::implementation
             ToggleSourceMode();
         }));
 
-        EncodingButton().Click(WindowEvent([this](auto const&, auto const&)
-        {
-            auto menu = Microsoft::UI::Xaml::Controls::MenuFlyout();
-            auto reopen = Microsoft::UI::Xaml::Controls::MenuFlyoutItem();
-            reopen.Text(Localize(L"ReopenWithEncoding"));
-            reopen.Click(WindowEvent([this](auto const&, auto const&)
-            {
-                ShowEncodingPicker(false);
-            }));
-            menu.Items().Append(reopen);
-            auto save = Microsoft::UI::Xaml::Controls::MenuFlyoutItem();
-            save.Text(Localize(L"SaveWithEncoding"));
-            save.Click(WindowEvent([this](auto const&, auto const&)
-            {
-                ShowEncodingPicker(true);
-            }));
-            menu.Items().Append(save);
-            menu.ShowAt(EncodingButton());
-        }));
+        ReopenEncodingItem().Text(Localize(L"ReopenWithEncoding"));
+        SaveEncodingItem().Text(Localize(L"SaveWithEncoding"));
+        ReopenEncodingItem().Click(WindowEvent([this](auto const&, auto const&) { ShowEncodingPicker(false); }));
+        SaveEncodingItem().Click(WindowEvent([this](auto const&, auto const&) { ShowEncodingPicker(true); }));
 
+        topBar.Attach(Root(), TopChrome(), WorkspaceEdgeBar::Edge::Top, AppWindow().Id(), [this](bool shown) {
+            using Microsoft::UI::Windowing::TitleBarHeightOption;
+            AppWindow().TitleBar().PreferredHeightOption(shown ? TitleBarHeightOption::Standard : TitleBarHeightOption::Collapsed);
+            UpdateChromeMetrics();
+        });
+        bottomBar.Attach(Root(), StatusBar(), WorkspaceEdgeBar::Edge::Bottom, AppWindow().Id());
+        MainMenuButton().Flyout().Opening(WindowEvent([this](auto const&, auto const&) { topBar.HoldOpen(true); }));
+        MainMenuButton().Flyout().Closed(WindowEvent([this](auto const&, auto const&) { topBar.HoldOpen(false); }));
+        EncodingButton().Flyout().Opening(WindowEvent([this](auto const&, auto const&) { bottomBar.HoldOpen(true); }));
+        EncodingButton().Flyout().Closed(WindowEvent([this](auto const&, auto const&) { bottomBar.HoldOpen(false); }));
+        ApplyBarLayout();
         Root().Loaded(WindowEvent([this](auto const&, auto const&) { UpdateChromeMetrics(); }));
         Root().SizeChanged(WindowEvent([this](auto const&, auto const&) { UpdateChromeMetrics(); }));
 

@@ -422,7 +422,14 @@
                 <TextBlock x:Name="RevisionText" FontSize="12" VerticalAlignment="Center" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
                 <TextBlock x:Name="ImageSizeText" FontSize="12" VerticalAlignment="Center" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}" Visibility="Collapsed"/>
                 <Button x:Name="EncodingButton" FontSize="12" MinHeight="22" Height="22" Padding="5,0" Style="{StaticResource SubtleButtonStyle}"
-                        Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
+                        Foreground="{ThemeResource FoliaShellMutedForegroundBrush}">
+                    <Button.Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem x:Name="ReopenEncodingItem"/>
+                            <MenuFlyoutItem x:Name="SaveEncodingItem"/>
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
             </StackPanel>
         </Grid>
     </Grid>

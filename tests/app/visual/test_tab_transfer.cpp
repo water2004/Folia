@@ -100,6 +100,13 @@ namespace winrt::Folia::implementation {
         static void SetRecentHistory(Microsoft::UI::Xaml::Window const& window, std::filesystem::path const& path) {
             Impl(window)->recentWorkspace = RecentWorkspace(path);
         }
+        static void Bars(Microsoft::UI::Xaml::Window const& window, WorkspaceBarSettings settings) {
+            Impl(window)->UpdateBarSettings(settings);
+        }
+        static void Hover(Microsoft::UI::Xaml::Window const& window, Windows::Foundation::Point point) {
+            Impl(window)->topBar.OnPointer(point);
+            Impl(window)->bottomBar.OnPointer(point);
+        }
         static auto OpenFileMenu(Microsoft::UI::Xaml::Window const& window) {
             auto button = Impl(window)->MainMenuButton();
             auto flyout = button.Flyout();
@@ -145,6 +152,64 @@ namespace {
         return nullptr;
     }
     suite tab_transfer_tests = [] {
+        "workspace edge bars reveal over a stationary viewport and follow their own settings"_test = [] {
+            OwnedWindow current(App()->CreateMainWindow());
+            auto window = current.window;
+            auto root = window.Content().as<Controls::Grid>();
+            root.UpdateLayout();
+            auto workspace = root.FindName(L"WorkspaceHost").as<FrameworkElement>();
+            auto top = root.FindName(L"TopChrome").as<FrameworkElement>();
+            auto bottom = root.FindName(L"StatusBar").as<FrameworkElement>();
+            auto offset = [](auto bar) { return bar.RenderTransform().template as<Media::TranslateTransform>().Y(); };
+            auto move = [&](float x, float y) {
+                Access::Hover(window, {x, y});
+            };
+            auto waitForOffset = [&](FrameworkElement const& bar, double expected, char const* step) {
+                try { Pump([&] { return std::abs(offset(bar) - expected) < .01; }); }
+                catch (std::runtime_error const&) {
+                    throw std::runtime_error(std::format("{}: offset {}, expected {}", step, offset(bar), expected));
+                }
+            };
+            auto middle = static_cast<float>(root.ActualWidth() * .5);
+            move(middle, 100);
+            Access::Bars(window, {true, false});
+            root.UpdateLayout();
+            expect(offset(top) <= -top.ActualHeight());
+            expect(offset(bottom) == 0.);
+            expect(workspace.ActualHeight() == root.ActualHeight() - bottom.ActualHeight());
+            Access::Bars(window, {true, true});
+            root.UpdateLayout();
+            const auto height = workspace.ActualHeight();
+            expect(height == root.ActualHeight());
+            expect(offset(bottom) >= bottom.ActualHeight());
+
+            move(middle, 6);
+            waitForOffset(top, 0., "hovering at the top edge");
+            expect(window.AppWindow().TitleBar().PreferredHeightOption() == winrt::Microsoft::UI::Windowing::TitleBarHeightOption::Standard);
+            expect(workspace.ActualHeight() == height);
+            auto menu = Access::OpenFileMenu(window);
+            move(middle, 120);
+            const auto afterDelay = std::chrono::steady_clock::now() + std::chrono::milliseconds(550);
+            Pump([&] { return std::chrono::steady_clock::now() > afterDelay; });
+            expect(offset(top) == 0.);
+            bool closed = false;
+            auto closedEvent = menu.Closed(winrt::auto_revoke, [&](auto const&, auto const&) { closed = true; });
+            menu.Hide();
+            Pump([&] { return closed; });
+            root.FindName(L"EditorSurface").as<Controls::SwapChainPanel>().Focus(FocusState::Programmatic);
+            move(middle, 120);
+            waitForOffset(top, -top.ActualHeight(), "leaving the top menu");
+
+            move(middle, static_cast<float>(root.ActualHeight() - 3));
+            waitForOffset(bottom, 0., "hovering at the bottom edge");
+            expect(workspace.ActualHeight() == height);
+            move(middle, 120);
+            waitForOffset(bottom, bottom.ActualHeight(), "leaving the bottom bar");
+            Access::Bars(window, {false, false});
+            root.UpdateLayout();
+            expect(workspace.ActualHeight() == height - top.ActualHeight() - bottom.ActualHeight());
+        };
+
         "workspace recent menus reopen a file and a folder in a new window"_test = [] {
             TestDirectory directory;
             auto folder = directory.path / L"资料";

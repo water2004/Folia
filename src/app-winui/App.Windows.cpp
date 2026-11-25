@@ -60,10 +60,13 @@ namespace winrt::Folia::implementation {
         }
         return nullptr;
     }
-    void App::UpdateWindowMediaSettings(MainWindow const* source, MediaDisplaySettings const& settings) {
+    void App::UpdateWindowViewSettings(MainWindow const* source, MediaDisplaySettings const& media, WorkspaceBarSettings const& bars) {
         for (auto const& item : windows) {
             auto window = winrt::get_self<MainWindow>(item.window.as<winrt::Folia::MainWindow>());
-            if (window != source && !window->windowClosed) window->UpdateMediaSettings(settings);
+            if (window != source && !window->windowClosed) {
+                window->UpdateMediaSettings(media);
+                window->UpdateBarSettings(bars);
+            }
         }
     }
 }
