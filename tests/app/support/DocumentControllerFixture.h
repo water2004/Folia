@@ -16,7 +16,14 @@ namespace document_tests {
         auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
         while (!done() && std::chrono::steady_clock::now() < deadline) {
             MSG message{};
-            while (::PeekMessageW(&message, nullptr, 0, 0, PM_REMOVE)) {
+            // Layout, accessibility and rendering can post more work while
+            // messages are dispatched. Recheck the wait before draining
+            // another batch so a busy UI queue cannot starve the deadline.
+            for (int count = 0; count < 32 && ::PeekMessageW(&message, nullptr, 0, 0, PM_REMOVE); ++count) {
+                if (message.message == WM_QUIT) {
+                    ::PostQuitMessage(static_cast<int>(message.wParam));
+                    throw std::runtime_error("the test UI thread quit while an operation was pending");
+                }
                 ::TranslateMessage(&message);
                 ::DispatchMessageW(&message);
             }

@@ -20,6 +20,7 @@ namespace {
     suite settings_width_tests = [] {
         "settings center the shared content column and keep native list scrollbars at the page edge"_test = [] {
             Window window;
+            window.Title(L"Folia settings layout test");
             Grid host, root;
             host.Children().Append(root);
             window.Content(host);
@@ -50,17 +51,17 @@ namespace {
                 const auto name = winrt::to_string(winrt::unbox_value<winrt::hstring>(entry.as<ListViewItem>().Tag()));
                 for (const auto width : {1120, 1800, 2400, 720, 1120}) {
                     root.Width(width);
-                    Pump([&] { return std::abs(root.ActualWidth() - width) < 1.; });
                     root.UpdateLayout();
+                    expect(std::abs(root.ActualWidth() - width) < 1.) << name << width;
                     auto page = pageHost.Content().as<FrameworkElement>();
-                    Pump([&] { root.UpdateLayout(); return First<ContentPresenter>(page, L"PageContent") != nullptr; });
                     auto content = First<ContentPresenter>(page, L"PageContent");
+                    expect(fatal(content != nullptr));
                     const auto origin = content.TransformToVisual(page).TransformPoint({0, 0});
                     expect(std::abs(content.ActualWidth() - (std::min)(1008., page.ActualWidth())) < 2.) << name << width;
                     expect(std::abs(origin.X + content.ActualWidth() / 2 - page.ActualWidth() / 2) < 2.) << name << width;
                     if (name == "shortcuts" || name == "latex") {
                         auto list = First<ListView>(page);
-                        Pump([&] { root.UpdateLayout(); return list.ContainerFromIndex(0) != nullptr; });
+                        Pump([&] { return list.ContainerFromIndex(0) != nullptr; });
                         auto scroll = First<ScrollViewer>(list);
                         expect(fatal(scroll != nullptr));
                         const auto scrollPoint = scroll.TransformToVisual(page).TransformPoint({0, 0});
