@@ -4,7 +4,14 @@
          Compact rows constrain labels to the available width, never to text length. -->
     <Thickness x:Key="TreeViewItemPresenterMargin">0</Thickness>
     <Thickness x:Key="TreeViewItemPresenterPadding">0</Thickness>
-    <x:Double x:Key="TreeViewItemMinHeight">24</x:Double>
+    <x:Double x:Key="TreeViewItemMinHeight">29</x:Double>
+    <Style x:Key="ExplorerHeaderButtonStyle" TargetType="Button" BasedOn="{StaticResource SubtleButtonStyle}">
+        <Setter Property="Width" Value="26"/>
+        <Setter Property="Height" Value="26"/>
+        <Setter Property="MinWidth" Value="0"/>
+        <Setter Property="MinHeight" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
     <SolidColorBrush x:Key="TreeViewItemSelectionIndicatorForeground" Color="Transparent"/>
     <SolidColorBrush x:Key="TreeViewItemSelectionIndicatorForegroundPointerOver" Color="Transparent"/>
     <SolidColorBrush x:Key="TreeViewItemSelectionIndicatorForegroundPressed" Color="Transparent"/>
@@ -24,10 +31,10 @@
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
                 <Style TargetType="TreeViewItem">
-                    <Setter Property="Height" Value="24"/>
-                    <Setter Property="MinHeight" Value="24"/>
+                    <Setter Property="Height" Value="{StaticResource TreeViewItemMinHeight}"/>
+                    <Setter Property="MinHeight" Value="{StaticResource TreeViewItemMinHeight}"/>
                     <Setter Property="Padding" Value="0"/>
-                    <Setter Property="CornerRadius" Value="2"/>
+                    <Setter Property="CornerRadius" Value="5"/>
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                     <Setter Property="GlyphSize" Value="10"/>
                     <Setter Property="UseSystemFocusVisuals" Value="True"/>
@@ -35,7 +42,7 @@
                         <Setter.Value>
                             <ControlTemplate TargetType="TreeViewItem">
                                 <Grid x:Name="ContentPresenterGrid" Background="{TemplateBinding Background}"
-                                      CornerRadius="2" Control.IsTemplateFocusTarget="True">
+                                      CornerRadius="{TemplateBinding CornerRadius}" Control.IsTemplateFocusTarget="True">
                                     <VisualStateManager.VisualStateGroups>
                                         <VisualStateGroup x:Name="CommonStates">
                                             <VisualState x:Name="Normal"/>
@@ -63,7 +70,7 @@
                                             </VisualState.Setters></VisualState>
                                         </VisualStateGroup>
                                     </VisualStateManager.VisualStateGroups>
-                                    <Canvas x:Name="IndentGuides" Height="24" IsHitTestVisible="False" Visibility="Collapsed"/>
+                                    <Canvas x:Name="IndentGuides" IsHitTestVisible="False" Visibility="Collapsed"/>
                                     <!-- WinUI's default template hardcodes 16-DIP levels and
                                          a 40-DIP chevron slot. Geometry stays here, independent
                                          of the native tree's keyboard/expansion behavior. -->

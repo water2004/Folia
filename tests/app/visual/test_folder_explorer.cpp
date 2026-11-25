@@ -17,6 +17,7 @@ namespace {
     struct ExplorerWindow {
         Grid root{nullptr};
         Border host;
+        Border header;
         TreeView tree;
         winrt::Folia::FolderExplorerController explorer;
         TestDirectory directory;
@@ -44,9 +45,9 @@ namespace {
             host.Child(tree);
             Grid::SetRow(host, 3);
             root.Children().Append(host);
-            explorer.Attach(tree, [this](auto path, bool keep) { opened = path; kept = keep; }, {});
+            explorer.Attach(tree, [this](auto path, bool keep) { opened = path; kept = keep; }, {}, header);
             explorer.Open(folder);
-            Pump([&] { return !tree.RootNodes().GetAt(0).HasUnrealizedChildren(); });
+            Pump([&] { return tree.RootNodes().Size() == 4; });
             root.UpdateLayout();
         }
         ~ExplorerWindow() {
@@ -55,9 +56,13 @@ namespace {
             if (root.Children().IndexOf(host, index)) root.Children().RemoveAt(index);
         }
         TreeViewNode Find(std::wstring_view name) {
-            for (auto node : tree.RootNodes().GetAt(0).Children())
+            for (auto node : tree.RootNodes())
                 if (node.Content().as<winrt::Windows::Foundation::IStringable>().ToString() == name) return node;
             throw std::runtime_error("expected explorer node not found");
+        }
+        Input::ICommand HeaderCommand(wchar_t const* name) {
+            auto content = header.DataContext();
+            return content.as<Data::ICustomPropertyProvider>().GetCustomProperty(name).GetValue(content).as<Input::ICommand>();
         }
         Grid Row(TreeViewNode const& node) {
             Pump([&] { return tree.ContainerFromNode(node) != nullptr; });
@@ -72,10 +77,8 @@ namespace {
     suite explorer_window_tests = [] {
         "folder explorer window binds actual names and bounds long rows"_test = [] { try {
             ExplorerWindow f;
-            auto rootNode = f.tree.RootNodes().GetAt(0);
-            auto rootRow = f.Row(rootNode);
-            auto rootName = rootRow.FindName(L"EntryName").as<TextBlock>();
-            expect(rootName.Text() == L"Examples");
+            expect(f.header.DataContext().as<winrt::Windows::Foundation::IStringable>().ToString() == L"Examples");
+            expect(f.tree.RootNodes().Size() == 4_u);
             auto normal = f.Row(f.Find(L"正常.md")).FindName(L"EntryName").as<TextBlock>();
             expect(normal.Text() == L"正常.md");
             expect(f.Row(f.Find(L"空格 & emoji😀.md")).FindName(L"EntryName").as<TextBlock>().Text() == L"空格 & emoji😀.md");
@@ -83,7 +86,7 @@ namespace {
             auto row = f.Row(node);
             auto label = row.FindName(L"EntryName").as<TextBlock>();
             expect(label.Text() == f.longName);
-            expect(f.tree.RootNodes().GetAt(0).IsExpanded());
+            expect(node.Depth() == 0_i);
             expect(label.TextTrimming() == TextTrimming::CharacterEllipsis);
             expect(label.TextWrapping() == TextWrapping::NoWrap);
             auto tooltip = ToolTipService::GetToolTip(row).as<winrt::Windows::Foundation::IPropertyValue>().GetString();
@@ -96,7 +99,7 @@ namespace {
                 expect(label.ActualWidth() > previousWidth);
                 expect(at.X + label.ActualWidth() <= width + 0.5);
                 expect(label.IsTextTrimmed());
-                expect(f.tree.ContainerFromNode(node).as<TreeViewItem>().ActualHeight() == 24.);
+                expect(f.tree.ContainerFromNode(node).as<TreeViewItem>().ActualHeight() == 29.);
                 previousWidth = label.ActualWidth();
             }
             f.host.Width(248);
@@ -117,14 +120,13 @@ namespace {
 
         "folder explorer window uses eight DIP levels and a compact chevron"_test = [] { try {
             ExplorerWindow f;
-            auto rootNode = f.tree.RootNodes().GetAt(0);
-            auto rootName = f.Row(rootNode).FindName(L"EntryName").as<TextBlock>();
             auto nested = f.Find(L"章节");
             auto folderRow = f.Row(nested);
             auto folderName = folderRow.FindName(L"EntryName").as<TextBlock>();
             auto x = [&](FrameworkElement const& element) { return element.TransformToVisual(f.tree).TransformPoint({0, 0}).X; };
-            expect(x(rootName) <= 24.f);
-            expect(std::abs(x(folderName) - x(folderRow) - 18.f) < 0.5f) << "folder icon occupies its own slot";
+            const auto firstRow = x(folderRow);
+            expect(firstRow <= 24.f);
+            expect(std::abs(x(folderName) - firstRow - 20.f) < 0.5f) << "folder icon occupies its own slot";
             auto node = nested;
             for (int depth = 1; depth <= 3; ++depth) {
                 f.Row(node);
@@ -132,7 +134,7 @@ namespace {
                 peer.as<Automation::Provider::IExpandCollapseProvider>().Expand();
                 Pump([&] { return node.IsExpanded() && !node.HasUnrealizedChildren(); });
                 f.root.UpdateLayout();
-                expect(std::abs(x(f.Row(node)) - x(rootName) - 8.f * depth) < 0.5f) << "indent follows depth" << depth;
+                expect(std::abs(x(f.Row(node)) - firstRow - 8.f * (depth - 1)) < 0.5f) << "indent follows depth" << depth;
                 if (depth < 3) node = node.Children().GetAt(0);
             }
             auto leaf = node.Children().GetAt(0);
@@ -156,7 +158,6 @@ namespace {
 
         "folder explorer window exposes native root actions and lazy expansion"_test = [] { try {
             ExplorerWindow f;
-            auto root = f.tree.RootNodes().GetAt(0);
             expect(f.tree.ItemContainerTransitions().Size() == 1_u);
             auto entrance = f.tree.ItemContainerTransitions().GetAt(0).as<Media::Animation::EntranceThemeTransition>();
             expect(entrance.FromHorizontalOffset() == 0.);
@@ -167,49 +168,34 @@ namespace {
             f.explorer.Expand(nested);
             Pump([&] { return !nested.HasUnrealizedChildren(); });
             expect(nested.Children().Size() == 2_u);
-            auto row = f.Row(root);
-            auto refresh = row.Children().GetAt(3).as<Button>();
-            auto collapse = row.Children().GetAt(4).as<Button>();
-            expect(refresh.Command() != nullptr);
-            expect(collapse.Command() != nullptr);
-            expect(refresh.Content().try_as<Viewbox>() != nullptr);
-            expect(collapse.Content().try_as<Viewbox>() != nullptr);
-            for (auto const& button : {refresh, collapse}) {
-                auto at = button.TransformToVisual(f.host).TransformPoint({0, 0});
-                expect(at.X >= 0.f && at.X + button.ActualWidth() <= f.host.ActualWidth());
-                expect(button.ActualWidth() == 24.);
-            }
-            collapse.Command().Execute(nullptr);
-            expect(!root.IsExpanded());
+            auto refresh = f.HeaderCommand(L"Refresh");
+            auto collapse = f.HeaderCommand(L"Collapse");
+            expect(refresh.CanExecute(nullptr));
+            expect(collapse.CanExecute(nullptr));
+            collapse.Execute(nullptr);
             expect(!nested.IsExpanded());
-            f.explorer.Expand(root);
+            expect(f.tree.RootNodes().Size() == 4_u);
             f.explorer.Expand(nested);
             auto selected = f.Find(L"正常.md");
             f.tree.SelectedNode(selected);
             std::ofstream(f.folder / L"new.md") << "new";
-            refresh.Command().Execute(nullptr);
-            Pump([&] { return root.Children().Size() == 5; });
-            expect(f.tree.RootNodes().GetAt(0) == root);
-            expect(root.IsExpanded());
+            refresh.Execute(nullptr);
+            Pump([&] { return f.tree.RootNodes().Size() == 5; });
             expect(nested.IsExpanded());
             expect(f.Find(L"章节") == nested);
             expect(f.tree.SelectedNode() == selected);
-            expect(f.Row(f.tree.RootNodes().GetAt(0)).FindName(L"EntryName").as<TextBlock>().Text() == L"Examples");
+            expect(f.header.DataContext().as<winrt::Windows::Foundation::IStringable>().ToString() == L"Examples");
         } catch (winrt::hresult_error const& error) { throw std::runtime_error(winrt::to_string(error.message()) + " HRESULT " + std::to_string(error.code().value)); } };
 
         "folder explorer window edits names in place and preserves rows on failed creation"_test = [] { try {
             ExplorerWindow f;
-            auto root = f.tree.RootNodes().GetAt(0);
-            auto actions = f.Row(root);
-            expect(actions.Children().Size() == 5_u);
-            auto newFile = actions.Children().GetAt(1).as<Button>();
-            expect(newFile.Content().try_as<Viewbox>() != nullptr);
-            newFile.Command().Execute(nullptr);
+            auto newFile = f.HeaderCommand(L"NewFile");
+            newFile.Execute(nullptr);
             Pump([&] { return f.explorer.IsEditing(); });
             auto draft = f.tree.SelectedNode();
             auto editor = f.Row(draft).FindName(L"EntryEditor").as<TextBox>();
             expect(winrt::to_string(editor.Text()) == winrt::to_string(winrt::Folia::Localize(L"UntitledMarkdown")));
-            expect(!newFile.Command().CanExecute(nullptr));
+            expect(!newFile.CanExecute(nullptr));
             expect(!Await(f.explorer.CommitNameAsync(L"../bad.md")));
             expect(f.explorer.IsEditing());
             expect(editor.IsEnabled());
@@ -217,7 +203,7 @@ namespace {
             expect(f.explorer.IsEditing());
             expect(std::filesystem::file_size(f.folder / L"正常.md") == 6_u);
             expect(Await(f.explorer.CommitNameAsync(L"created.md")));
-            Pump([&] { return !root.HasUnrealizedChildren() && f.tree.SelectedNode() == draft; });
+            Pump([&] { return f.tree.SelectedNode() == draft; });
             expect(std::filesystem::exists(f.folder / L"created.md"));
             expect(f.opened == f.folder / L"created.md" && f.kept);
             expect(!f.explorer.IsEditing());
@@ -227,27 +213,24 @@ namespace {
             expect(f.explorer.IsEditing());
             expect(f.Row(draft).FindName(L"EntryEditor").try_as<TextBox>() != nullptr);
             expect(Await(f.explorer.CommitNameAsync(L"renamed.md")));
-            Pump([&] { return !root.HasUnrealizedChildren(); });
             expect(!std::filesystem::exists(f.folder / L"created.md"));
             expect(f.Find(L"renamed.md") == draft);
-            f.tree.SelectedNode(root);
+            f.tree.SelectedNode(nullptr);
             f.explorer.NewFolder();
-            Pump([&] { return f.explorer.IsEditing() && f.tree.SelectedNode() != root; });
+            Pump([&] { return f.explorer.IsEditing() && f.tree.SelectedNode() != nullptr; });
             auto folderDraft = f.tree.SelectedNode();
             expect(f.Row(folderDraft).FindName(L"EntryEditor").try_as<TextBox>() != nullptr);
             f.explorer.CancelNameEdit();
             expect(!f.explorer.IsEditing());
             f.explorer.NewFolder();
-            Pump([&] { return f.explorer.IsEditing() && f.tree.SelectedNode() != root; });
+            Pump([&] { return f.explorer.IsEditing() && f.tree.SelectedNode() != nullptr; });
             expect(Await(f.explorer.CommitNameAsync(L"New directory")));
-            Pump([&] { return !root.HasUnrealizedChildren(); });
             expect(std::filesystem::is_directory(f.folder / L"New directory"));
             expect(f.tree.CanDragItems() && !f.tree.CanReorderItems() && f.tree.AllowDrop());
         } catch (winrt::hresult_error const& error) { throw std::runtime_error(winrt::to_string(error.message()) + " HRESULT " + std::to_string(error.code().value)); } };
 
         "folder explorer window moves and copies while retaining expanded subtree identity"_test = [] { try {
             ExplorerWindow f;
-            auto root = f.tree.RootNodes().GetAt(0);
             expect(f.tree.ItemContainerTransitions().Size() == 1_u);
             auto entrance = f.tree.ItemContainerTransitions().GetAt(0).as<Media::Animation::EntranceThemeTransition>();
             expect(entrance.FromHorizontalOffset() == 0.);
@@ -259,7 +242,7 @@ namespace {
             auto target = f.folder / L"destination";
             std::filesystem::create_directory(target);
             f.explorer.Refresh();
-            Pump([&] { return root.Children().Size() == 5; });
+            Pump([&] { return f.tree.RootNodes().Size() == 5; });
             auto destination = f.Find(L"destination");
             auto result = Await(f.explorer.TransferAsync(f.folder / L"章节", target, true, false));
             Pump([&] { return !destination.HasUnrealizedChildren(); });
@@ -300,7 +283,7 @@ namespace {
                 for (int n = 0; n < Media::VisualTreeHelper::GetChildrenCount(object); ++n) self(self, Media::VisualTreeHelper::GetChild(object, n));
             };
             visit(visit, f.tree);
-            expect(guides >= 6_i);
+            expect(guides == 2_i);
             expect(emphasized == 2_i) << "expanded folder highlights its child branch";
             auto collapsed = folder.Children().GetAt(0);
             expect(!collapsed.IsExpanded());

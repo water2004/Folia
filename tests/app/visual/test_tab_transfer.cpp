@@ -64,11 +64,25 @@ namespace winrt::Folia::implementation {
             window.Content().as<Microsoft::UI::Xaml::FrameworkElement>().UpdateLayout();
             return impl->SettingsViewHost();
         }
+        static auto ThemeSettings(Microsoft::UI::Xaml::Window const& window) {
+            auto impl = Impl(window);
+            impl->OpenSettingsTab();
+            impl->settingsView->Navigate(winrt::Folia::SettingsView::Page::Themes);
+            return impl->SettingsViewHost();
+        }
+        static void Theme(Microsoft::UI::Xaml::Window const& window, std::string id) {
+            auto impl = Impl(window);
+            impl->appSettings.themeId = std::move(id);
+            impl->UpdateTheme();
+        }
         static bool ContainsDragPoint(Microsoft::UI::Xaml::Window const& window, Windows::Graphics::PointInt32 point) {
             return Impl(window)->ContainsTabDragPoint(point);
         }
         static void PointerBegin(Microsoft::UI::Xaml::Window const& window, Windows::Graphics::PointInt32 point) { Impl(window)->BeginTabPointerGesture(point); }
         static void Sidebar(Microsoft::UI::Xaml::Window const& window, bool open) { Impl(window)->SetSidebarOpen(open); }
+        static bool ScrollTabs(Microsoft::UI::Xaml::Window const& window, int delta) { return Impl(window)->ScrollTabsWithWheel(delta); }
+        static auto TabScroller(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->TabStripScroller(); }
+        static auto ReadingMaterialBounds(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->readingMaterialBounds; }
         static void Pane(Microsoft::UI::Xaml::Window const& window, bool outline) { Impl(window)->SelectWorkspacePane(outline); }
         static void PointerEnd(Microsoft::UI::Xaml::Window const& window) { Impl(window)->EndTabPointerGesture(); }
         static void EnterMove(Microsoft::UI::Xaml::Window const& window) {
@@ -186,6 +200,12 @@ namespace {
             if (auto value = TabPart(Media::VisualTreeHelper::GetChild(element, i), name)) return value;
         return nullptr;
     }
+    template<class T> T FirstControl(DependencyObject const& element) {
+        if (auto value = element.try_as<T>()) return value;
+        for (int i = 0; i < Media::VisualTreeHelper::GetChildrenCount(element); ++i)
+            if (auto value = FirstControl<T>(Media::VisualTreeHelper::GetChild(element, i))) return value;
+        return nullptr;
+    }
     suite tab_transfer_tests = [] {
         "document tools reveal over a stationary reading surface without moving the tabs"_test = [] {
             OwnedWindow current(App()->CreateMainWindow());
@@ -270,35 +290,92 @@ namespace {
             auto root = window.Content().as<FrameworkElement>();
             auto card = root.FindName(L"ReadingCard").as<FrameworkElement>();
             auto sidebar = root.FindName(L"WorkspaceSidebar").as<FrameworkElement>();
-            auto visual = Hosting::ElementCompositionPreview::GetElementVisual(sidebar);
+            auto slot = root.FindName(L"SidebarSlot").as<FrameworkElement>();
             root.UpdateLayout();
             const auto position = appWindow.Position();
             const auto size = appWindow.Size();
             const auto width = card.ActualWidth();
             auto expectStationary = [&] {
                 expect(appWindow.Position() == position && appWindow.Size() == size);
-                expect(card.ActualWidth() == width);
             };
             const bool animated = winrt::Windows::UI::ViewManagement::UISettings().AnimationsEnabled();
             Access::Sidebar(window, true);
             expect(sidebar.Visibility() == Visibility::Visible);
-            if (animated) {
-                auto clip = visual.Clip().as<winrt::Microsoft::UI::Composition::InsetClip>();
-                Pump([&] { return clip.RightInset() == 0.f; });
-            }
+            Pump([&] { return std::abs(card.ActualWidth() + slot.ActualWidth() - width) < 1.
+                && std::abs(slot.ActualWidth() - sidebar.Width()) < 1.; });
             expectStationary();
+            expect(card.ActualWidth() < width);
             Access::Sidebar(window, false);
             if (animated) {
                 expect(sidebar.Visibility() == Visibility::Visible) << "the panel stays on screen through the closing animation";
                 Access::Sidebar(window, true);
-                auto clip = visual.Clip().as<winrt::Microsoft::UI::Composition::InsetClip>();
-                Pump([&] { return clip.RightInset() == 0.f; });
+                Pump([&] { return std::abs(slot.ActualWidth() - sidebar.Width()) < 1.; });
                 expect(sidebar.Visibility() == Visibility::Visible) << "reopening keeps the panel visible";
                 Access::Sidebar(window, false);
             }
-            Pump([&] { return sidebar.Visibility() == Visibility::Collapsed; });
-            expect(!visual.Clip());
+            Pump([&] { return sidebar.Visibility() == Visibility::Collapsed && std::abs(card.ActualWidth() - width) < 1.; });
             expectStationary();
+        };
+        "overflowing tabs scroll by wheel and leave the native caption outside the viewport"_test = [] {
+            OwnedWindow current(App()->CreateMainWindow());
+            auto window = current.window;
+            auto root = window.Content().as<FrameworkElement>();
+            auto viewport = root.FindName(L"TabViewport").as<FrameworkElement>();
+            auto caption = root.FindName(L"CaptionInset").as<FrameworkElement>();
+            auto tabs = Access::Tabs(window);
+            auto scale = root.XamlRoot().RasterizationScale();
+            auto resize = [&](int width, auto settled) {
+                auto size = window.AppWindow().Size();
+                size.Width = static_cast<int>(width * scale);
+                window.AppWindow().Resize(size);
+                Pump([&] { return settled(root.ActualWidth()); });
+            };
+            for (int i = 0; i < 11; ++i) Access::New(window);
+            auto viewer = Access::TabScroller(window);
+            resize(640, [](double width) { return width < 670.; });
+            Pump([&] { return viewer.ScrollableWidth() > 0 && viewer.HorizontalOffset() > 0; });
+            auto initial = viewer.HorizontalOffset();
+            expect(Access::ScrollTabs(window, WHEEL_DELTA));
+            Pump([&] { return viewer.HorizontalOffset() < initial; });
+            auto inset = caption.TransformToVisual(root).TransformPoint({0, 0}).X;
+            auto right = viewport.TransformToVisual(root).TransformPoint({static_cast<float>(viewport.ActualWidth()), 0}).X;
+            expect(std::abs(right - inset) <= 1.) << "the strip ends before the caption buttons";
+            const auto oldWidth = viewport.ActualWidth();
+            resize(840, [](double width) { return width > 800.; });
+            expect(viewport.ActualWidth() > oldWidth + 180.);
+            expect(tabs.ActualWidth() <= viewport.ActualWidth() + 1.);
+        };
+        "open dropdowns and document menus use the current theme surface"_test = [] {
+            using namespace Controls;
+            OwnedWindow current(App()->CreateMainWindow());
+            auto window = current.window;
+            auto root = window.Content().as<FrameworkElement>();
+            auto host = Access::ThemeSettings(window);
+            ComboBox choice{nullptr};
+            Pump([&] { root.UpdateLayout(); choice = FirstControl<ComboBox>(host); return choice && choice.ActualWidth() > 0; });
+            auto surface = root.Resources().Lookup(winrt::box_value(L"FoliaShellLayerBrush")).as<Media::SolidColorBrush>();
+            for (auto theme : {"folia.dark", "folia.light"}) {
+                Access::Theme(window, theme);
+                root.UpdateLayout();
+                choice.IsDropDownOpen(true);
+                auto border = choice.as<IControlProtected>().GetTemplateChild(L"PopupBorder").as<Border>();
+                expect(border.Background() == surface && surface.Color().A == 255) << theme << " combo-box background";
+                choice.IsDropDownOpen(false);
+            }
+            Access::Theme(window, "folia.dark");
+            Access::Tabs(window).SelectedIndex(0);
+            root.UpdateLayout();
+            auto menu = Access::OpenFileMenu(window);
+            MenuFlyoutPresenter presenter{nullptr};
+            Pump([&] {
+                for (auto popup : Media::VisualTreeHelper::GetOpenPopupsForXamlRoot(root.XamlRoot())) {
+                    presenter = FirstControl<MenuFlyoutPresenter>(popup.Child());
+                    if (presenter) return true;
+                }
+                return false;
+            });
+            expect(presenter.Background() == surface) << "document-menu background";
+            menu.Hide();
         };
         "workspace material can leave the reading surface opaque independently of the window"_test = [] {
             using namespace winrt::Microsoft::UI::Composition::SystemBackdrops;
@@ -320,26 +397,26 @@ namespace {
                 Access::Render(window);
                 return winrt::Folia::EditorRendererTestAccess::PaperAlpha(renderer);
             };
-            auto selected = [&]() -> Media::SystemBackdrop {
+            auto selected = [&] {
                 auto tab = Access::View(window, Access::Documents(window).Active()->id);
                 auto shape = TabPart(tab, L"SelectedBackgroundPath").as<Shapes::Path>();
                 expect(shape.Fill() == root.Resources().Lookup(winrt::box_value(L"FoliaReadingSurfaceBrush")).as<Media::Brush>())
                     << "the native tab silhouette uses the reading surface tint";
-                auto surface = TabPart(tab, L"SelectedTabBackdrop").try_as<Controls::SystemBackdropElement>();
-                return surface ? surface.SystemBackdrop() : nullptr;
+                expect(!TabPart(tab, L"SelectedTabBackdrop")) << "the selected tab uses the shared backdrop visual";
             };
             bool highContrast = winrt::Windows::UI::ViewManagement::AccessibilitySettings().HighContrast();
             for (auto material : {WindowMaterial::Solid, WindowMaterial::Mica, WindowMaterial::MicaAlt, WindowMaterial::Acrylic}) {
                 bool supported = material == WindowMaterial::Acrylic ? DesktopAcrylicController::IsSupported()
                     : material != WindowMaterial::Solid && MicaController::IsSupported();
                 Access::Bars(window, {false, material, {}});
-                expect(selected() == nullptr && readingBackdrop.SystemBackdrop() == nullptr);
-                auto base = root.as<Controls::Grid>().Background().as<Media::SolidColorBrush>();
+                selected();
+                expect(readingBackdrop.SystemBackdrop() == nullptr);
+                auto base = root.as<Controls::Grid>().Background();
                 auto paper = root.FindName(L"ReadingTint").as<Controls::Border>().Background().as<Media::SolidColorBrush>();
-                expect(base.Color() != paper.Color()) << "the reading card remains distinct when both surfaces share a material";
                 if (!supported || highContrast) {
                     expect(window.SystemBackdrop() == nullptr);
                     expect(paperAlpha() == 255);
+                    expect(base.as<Media::SolidColorBrush>().Color() != paper.Color());
                     continue;
                 }
                 if (material == WindowMaterial::Acrylic)
@@ -347,18 +424,22 @@ namespace {
                 else expect(window.SystemBackdrop().as<Media::MicaBackdrop>().Kind()
                     == (material == WindowMaterial::Mica ? MicaKind::Base : MicaKind::BaseAlt));
                 expect(paperAlpha() < 255) << "the editor background transmits the window material with the sidebar closed";
-                expect(base.Opacity() < 1. && paper.Opacity() < 1.) << "both tints keep the shared material visible";
+                expect(paper.Opacity() < 1.);
                 Access::Bars(window, {false, material, WindowMaterial::Solid});
-                expect(window.SystemBackdrop() != nullptr && readingBackdrop.SystemBackdrop() == nullptr && selected() == nullptr);
+                expect(window.SystemBackdrop() != nullptr && readingBackdrop.SystemBackdrop() == nullptr);
+                expect(root.as<Controls::Grid>().Background() == base) << "reading material leaves the window's base shade unchanged";
                 expect(paperAlpha() == 255) << "solid paper takes effect on the next frame";
                 Access::Bars(window, {false, WindowMaterial::Solid, material});
                 expect(window.SystemBackdrop() == nullptr);
-                expect(selected() == readingBackdrop.SystemBackdrop() && readingBackdrop.SystemBackdrop() != nullptr);
+                expect(readingBackdrop.SystemBackdrop() != nullptr);
+                Pump([&] { auto bounds = Access::ReadingMaterialBounds(window); return bounds && bounds->second.Width > 0; });
+                expect(Hosting::ElementCompositionPreview::GetElementVisual(readingBackdrop).Clip()
+                    .try_as<winrt::Microsoft::UI::Composition::CompositionGeometricClip>() != nullptr);
                 expect(paperAlpha() < 255);
-                auto old = Access::View(window, Access::Documents(window).Active()->id);
+                auto old = Access::ReadingMaterialBounds(window);
                 tabs.SelectedItem(tabs.SelectedItem() == first ? second : first);
-                expect(selected() == readingBackdrop.SystemBackdrop()) << "the active tab immediately inherits the page backdrop";
-                expect(!TabPart(old, L"SelectedTabBackdrop")) << "the old tab releases the reading material";
+                Pump([&] { return Access::ReadingMaterialBounds(window) != old; });
+                selected();
             }
             Access::Bars(window, {true, WindowMaterial::Mica, WindowMaterial::Acrylic});
             auto reading = readingBackdrop.SystemBackdrop();
@@ -461,6 +542,15 @@ namespace {
             Pump([&] { return pane.Visibility() == Visibility::Visible && tree.RootNodes().Size() && list.Items().Size() == 2; });
             root.UpdateLayout();
             auto treeRoot = tree.RootNodes().GetAt(0);
+            auto header = root.FindName(L"FolderHeader").as<FrameworkElement>();
+            auto newFile = root.FindName(L"FolderNewFileButton").as<Controls::Button>();
+            auto sidebarButton = root.FindName(L"SidebarButton").as<FrameworkElement>();
+            auto centerY = [&](FrameworkElement const& element) {
+                return element.TransformToVisual(root).TransformPoint({0, static_cast<float>(element.ActualHeight() / 2.)}).Y;
+            };
+            expect(header.Visibility() == Visibility::Visible && newFile.Command() != nullptr);
+            expect(std::abs(centerY(newFile) - centerY(sidebarButton)) <= 1.f);
+            expect(tree.RootNodes().Size() == 3 && treeRoot.Depth() == 0);
             auto filesTab = root.FindName(L"FilesTab").as<Controls::Primitives::ToggleButton>();
             auto outlineTab = root.FindName(L"OutlineTab").as<Controls::Primitives::ToggleButton>();
             expect(filesTab.IsChecked().GetBoolean());

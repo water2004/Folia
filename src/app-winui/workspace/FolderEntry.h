@@ -10,7 +10,7 @@ namespace winrt::Folia::explorer_detail {
     namespace Input = Microsoft::UI::Xaml::Input;
 
     // Plain commands leave icon, tooltip and accessible-name presentation to
-    // the row template instead of XamlUICommand's automatic content replacement.
+    // the workspace header instead of XamlUICommand's automatic content replacement.
     struct RootCommand : winrt::implements<RootCommand, Input::ICommand> {
         std::function<void()> execute;
         std::function<bool()> enabled;
@@ -24,16 +24,13 @@ namespace winrt::Folia::explorer_detail {
         void Notify() { changed(this->get_strong().as<Input::ICommand>(), nullptr); }
     };
     struct RootActions {
-        Input::ICommand refresh{nullptr}, collapse{nullptr};
-        winrt::hstring refreshName, collapseName;
-        Input::ICommand newFile{nullptr}, newFolder{nullptr};
-        winrt::hstring newFileName, newFolderName;
+        Input::ICommand refresh{nullptr}, collapse{nullptr}, newFile{nullptr}, newFolder{nullptr};
     };
     struct NameEdit {
         bool creating = false, busy = false;
         winrt::hstring name, error;
     };
-    enum class EntryMember { Name, FullPath, Refresh, Collapse, RefreshName, CollapseName, Indent, NewFile, NewFolder, NewFileName, NewFolderName, EditName, EditError, EditEnabled, ErrorVisibility };
+    enum class EntryMember { Name, FullPath, Refresh, Collapse, Indent, NewFile, NewFolder, EditName, EditError, EditEnabled, ErrorVisibility };
 
     // Display properties use WinUI's normal COM binding contract.
     // Enumeration/cancellation state stays native and is never exposed to XAML.
@@ -75,13 +72,9 @@ namespace winrt::Folia::explorer_detail {
             case EntryMember::FullPath: return L"FullPath";
             case EntryMember::Refresh: return L"Refresh";
             case EntryMember::Collapse: return L"Collapse";
-            case EntryMember::RefreshName: return L"RefreshName";
-            case EntryMember::CollapseName: return L"CollapseName";
             case EntryMember::Indent: return L"Indent";
             case EntryMember::NewFile: return L"NewFile";
             case EntryMember::NewFolder: return L"NewFolder";
-            case EntryMember::NewFileName: return L"NewFileName";
-            case EntryMember::NewFolderName: return L"NewFolderName";
             case EntryMember::EditName: return L"EditName";
             case EntryMember::EditError: return L"EditError";
             case EntryMember::EditEnabled: return L"EditEnabled";
@@ -106,12 +99,8 @@ namespace winrt::Folia::explorer_detail {
             case EntryMember::FullPath: return winrt::box_value(winrt::hstring(entry->path.c_str()));
             case EntryMember::Refresh: return entry->actions ? entry->actions->refresh : nullptr;
             case EntryMember::Collapse: return entry->actions ? entry->actions->collapse : nullptr;
-            case EntryMember::RefreshName: return winrt::box_value(entry->actions ? entry->actions->refreshName : winrt::hstring{});
-            case EntryMember::CollapseName: return winrt::box_value(entry->actions ? entry->actions->collapseName : winrt::hstring{});
             case EntryMember::NewFile: return entry->actions ? entry->actions->newFile : nullptr;
             case EntryMember::NewFolder: return entry->actions ? entry->actions->newFolder : nullptr;
-            case EntryMember::NewFileName: return winrt::box_value(entry->actions ? entry->actions->newFileName : winrt::hstring{});
-            case EntryMember::NewFolderName: return winrt::box_value(entry->actions ? entry->actions->newFolderName : winrt::hstring{});
             case EntryMember::EditName: return winrt::box_value(entry->edit ? entry->edit->name : winrt::hstring{});
             case EntryMember::EditError: return winrt::box_value(entry->edit ? entry->edit->error : winrt::hstring{});
             case EntryMember::EditEnabled: return winrt::box_value(entry->edit && !entry->edit->busy);
@@ -139,13 +128,11 @@ namespace winrt::Folia::explorer_detail {
     };
 
     inline Data::ICustomProperty FolderEntry::GetCustomProperty(winrt::hstring const& name) const {
-        static const std::array<Data::ICustomProperty, 15> properties = {
+        static const std::array<Data::ICustomProperty, 11> properties = {
             winrt::make<EntryProperty>(EntryMember::Name), winrt::make<EntryProperty>(EntryMember::FullPath),
             winrt::make<EntryProperty>(EntryMember::Refresh), winrt::make<EntryProperty>(EntryMember::Collapse),
-            winrt::make<EntryProperty>(EntryMember::RefreshName), winrt::make<EntryProperty>(EntryMember::CollapseName),
             winrt::make<EntryProperty>(EntryMember::Indent),
             winrt::make<EntryProperty>(EntryMember::NewFile), winrt::make<EntryProperty>(EntryMember::NewFolder),
-            winrt::make<EntryProperty>(EntryMember::NewFileName), winrt::make<EntryProperty>(EntryMember::NewFolderName),
             winrt::make<EntryProperty>(EntryMember::EditName), winrt::make<EntryProperty>(EntryMember::EditError),
             winrt::make<EntryProperty>(EntryMember::EditEnabled), winrt::make<EntryProperty>(EntryMember::ErrorVisibility)};
         for (auto const& property : properties) if (property.Name() == name) return property;

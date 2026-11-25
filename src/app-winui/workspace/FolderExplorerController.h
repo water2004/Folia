@@ -15,7 +15,7 @@ namespace winrt::Folia {
         FolderExplorerController();
         ~FolderExplorerController();
         void Attach(winrt::Microsoft::UI::Xaml::Controls::TreeView const& tree,
-            OpenFile open, ReportError report);
+            OpenFile open, ReportError report, Microsoft::UI::Xaml::FrameworkElement const& header = nullptr);
         void Detach();
         void Open(std::filesystem::path path);
         void Expand(winrt::Microsoft::UI::Xaml::Controls::TreeViewNode const& node);

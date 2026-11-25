@@ -12,11 +12,10 @@ namespace winrt::Folia {
         using explorer_detail::Entry;
         constexpr wchar_t pathFormat[] = L"Folia.Workspace.Path";
         constexpr wchar_t directoryFormat[] = L"Folia.Workspace.Directory";
-        TreeViewNode TargetFolder(TreeView const& tree, DependencyObject const& element) {
+        TreeViewNode TargetFolder(TreeView const& tree, TreeViewNode const& root, DependencyObject const& element) {
             auto node = ExplorerNodeFromElement(tree, element);
             if (auto entry = Entry(node); entry && !entry->directory) node = node.Parent();
-            if (!node && tree.RootNodes().Size()) node = tree.RootNodes().GetAt(0);
-            return node;
+            return node ? node : root;
         }
     }
 
@@ -67,7 +66,7 @@ namespace winrt::Folia {
         state->dragOver = state->tree.DragOver([weak](auto const&, DragEventArgs const& args) {
             auto state = weak.lock();
             if (!state) return;
-            auto target = TargetFolder(state->tree, args.OriginalSource().try_as<DependencyObject>());
+            auto target = TargetFolder(state->tree, state->rootNode, args.OriginalSource().try_as<DependencyObject>());
             const bool internal = args.DataView().Contains(pathFormat);
             const bool available = !state->operationBusy && !state->editingNode && !state->preparingEdit && target && Entry(target) && !Entry(target)->edit;
             args.AcceptedOperation(available && (internal || args.DataView().Contains(StandardDataFormats::StorageItems()))
@@ -75,14 +74,14 @@ namespace winrt::Folia {
                     ? DataPackageOperation::Copy : DataPackageOperation::Move) : DataPackageOperation::None);
             if (target != state->hoverFolder) {
                 state->hoverTimer.Stop(); state->hoverFolder = target;
-                if (available && target && !target.IsExpanded()) state->hoverTimer.Start();
+                if (available && target != state->rootNode && !target.IsExpanded()) state->hoverTimer.Start();
             }
             args.Handled(true);
         });
         state->drop = state->tree.Drop([weak](auto const&, DragEventArgs args) -> winrt::fire_and_forget {
             auto state = weak.lock();
             if (!state || state->operationBusy || state->editingNode || state->preparingEdit) co_return;
-            auto node = TargetFolder(state->tree, args.OriginalSource().try_as<DependencyObject>());
+            auto node = TargetFolder(state->tree, state->rootNode, args.OriginalSource().try_as<DependencyObject>());
             auto target = Entry(node);
             if (!target || target->edit) co_return;
             state->hoverTimer.Stop(); state->hoverFolder = nullptr;

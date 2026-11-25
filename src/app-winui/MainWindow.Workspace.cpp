@@ -4,13 +4,14 @@ import std;
 #include "localization/Localization.h"
 #include "workspace/WorkspaceIcons.h"
 #include <winrt/Microsoft.UI.Xaml.Automation.h>
-#include <winrt/Microsoft.UI.Xaml.Hosting.h>
+#include <winrt/Microsoft.UI.Xaml.Media.Animation.h>
 #include <winrt/Windows.UI.ViewManagement.h>
 
 namespace winrt::Folia::implementation {
     using namespace Microsoft::UI::Windowing;
     using namespace Microsoft::UI::Xaml;
     using namespace Microsoft::UI::Xaml::Controls;
+    using namespace Microsoft::UI::Xaml::Media::Animation;
     using namespace std::chrono_literals;
 
     namespace {
@@ -37,6 +38,10 @@ namespace winrt::Folia::implementation {
         configure(NewTabButton(), WorkspaceIcon::Add, L"NewDocument");
         configure(DocumentActionsButton(), WorkspaceIcon::More, L"FileMenu");
         configure(SourceModeButton(), WorkspaceIcon::Source, L"SourceMode");
+        configure(FolderNewFileButton(), WorkspaceIcon::NewFile, L"NewFile");
+        configure(FolderNewFolderButton(), WorkspaceIcon::NewFolder, L"NewFolder");
+        configure(FolderRefreshButton(), WorkspaceIcon::Refresh, L"RefreshFiles");
+        configure(FolderCollapseButton(), WorkspaceIcon::Collapse, L"CollapseFolders");
         auto watchPane = [this](auto const& button, bool outline) {
             auto select = WindowEvent([this, outline](auto const&, auto const&) {
                 if (!updatingRailSelection) SelectWorkspacePane(outline);
@@ -57,9 +62,6 @@ namespace winrt::Folia::implementation {
         SidebarButton().Unchecked(toggleSidebar(false));
         WorkspaceSidebar().Width(sidebarWidth);
         WorkspaceSidebar().HorizontalAlignment(HorizontalAlignment::Left);
-        AppWindow().Changed(WindowEvent([this](auto const&, AppWindowChangedEventArgs const& args) {
-            if (args.DidPresenterChange()) LayoutSidebar();
-        }));
         documentTools.Attach(ReadingCard(), DocumentToolbar(), DocumentViewport());
         for (auto const& flyout : {EncodingButton().Flyout(), DocumentActionsButton().Flyout()}) {
             flyout.Opening(WindowEvent([this](auto const&, auto const&) { documentTools.HoldOpen(true); }));
@@ -82,41 +84,45 @@ namespace winrt::Folia::implementation {
             return;
         }
 
-        sidebarOpen = open;
+        const double from = SidebarSlot().ActualWidth();
         RevokeSidebarMotion();
+        sidebarOpen = open;
         if (open && !sidebarPresented) {
             sidebarPresented = true;
             ReserveSidebarSpace();
         }
         UpdateWorkspaceLayout();
 
-        if (!sidebarOverlay || !Root().IsLoaded() || !AppWindow().IsVisible()
+        auto presenter = AppWindow().Presenter().try_as<OverlappedPresenter>();
+        const bool extended = sidebarWindowExtension && presenter && presenter.State() == OverlappedPresenterState::Restored;
+        if (extended || !Root().IsLoaded() || !AppWindow().IsVisible()
             || !Windows::UI::ViewManagement::UISettings().AnimationsEnabled()) {
             FinishSidebarMotion();
             return;
         }
-        AnimateSidebarOverlay();
+        AnimateSidebarWidth(from);
     }
 
-    void MainWindow::AnimateSidebarOverlay() {
-        auto visual = Hosting::ElementCompositionPreview::GetElementVisual(WorkspaceSidebar());
-        auto compositor = visual.Compositor();
-        if (!sidebarClip) {
-            sidebarClip = compositor.CreateInsetClip(0, 0, static_cast<float>(sidebarWidth), 0);
-            visual.Clip(sidebarClip);
-        }
-        auto animation = compositor.CreateScalarKeyFrameAnimation();
-        animation.Duration(sidebarOpen ? 220ms : 175ms);
-        animation.StopBehavior(Microsoft::UI::Composition::AnimationStopBehavior::SetToFinalValue);
-        auto easing = compositor.CreateCubicBezierEasingFunction({0.22f, 0.65f}, {0.34f, 1.f});
-        animation.InsertExpressionKeyFrame(0.f, L"this.StartingValue");
-        animation.InsertKeyFrame(1.f, sidebarOpen ? 0.f : static_cast<float>(sidebarWidth), easing);
-        sidebarBatch = compositor.CreateScopedBatch(Microsoft::UI::Composition::CompositionBatchTypes::Animation);
-        sidebarMotionCompleted = sidebarBatch.Completed(WindowEvent([this](auto const&, auto const&) {
+    void MainWindow::AnimateSidebarWidth(double from) {
+        const double to = sidebarOpen ? sidebarWidth : 0.;
+        SidebarSlot().Width(to);
+        if (std::abs(to - from) < 0.5) { FinishSidebarMotion(); return; }
+        DoubleAnimation animation;
+        animation.From(from);
+        animation.To(to);
+        animation.EnableDependentAnimation(true);
+        animation.Duration(DurationHelper::FromTimeSpan(sidebarOpen ? 200ms : 170ms));
+        CubicEase easing;
+        easing.EasingMode(EasingMode::EaseOut);
+        animation.EasingFunction(easing);
+        Storyboard::SetTarget(animation, SidebarSlot());
+        Storyboard::SetTargetProperty(animation, L"Width");
+        sidebarMotion = Storyboard();
+        sidebarMotion.Children().Append(animation);
+        sidebarMotionCompleted = sidebarMotion.Completed(WindowEvent([this](auto const&, auto const&) {
             FinishSidebarMotion();
         }));
-        sidebarClip.StartAnimation(L"RightInset", animation);
-        sidebarBatch.End();
+        sidebarMotion.Begin();
     }
 
     void MainWindow::ReserveSidebarSpace() {
@@ -131,27 +137,28 @@ namespace winrt::Folia::implementation {
         const int width = static_cast<int>(std::lround(sidebarWidth * dpi));
         sidebarWindowExtension = width;
         LayoutSidebar();
+        SidebarSlot().Width(sidebarWidth);
         // Move only the left edge so the reading card remains where it was on
         // the desktop. The user controls where the window sits on the display.
         if (!::SetWindowPos(handle, nullptr, bounds.left - width, bounds.top,
                 bounds.right - bounds.left + width, bounds.bottom - bounds.top,
                 sidebarResizeFlags)) {
             sidebarWindowExtension = 0;
+            SidebarSlot().Width(0.);
         }
         Root().UpdateLayout();
     }
 
     void MainWindow::RevokeSidebarMotion() {
-        if (sidebarBatch) sidebarBatch.Completed(sidebarMotionCompleted);
-        sidebarBatch = nullptr;
+        if (!sidebarMotion) return;
+        sidebarMotion.Completed(sidebarMotionCompleted);
+        sidebarMotion.Stop();
+        sidebarMotion = nullptr;
     }
 
     void MainWindow::FinishSidebarMotion() {
         RevokeSidebarMotion();
-        if (sidebarClip) {
-            sidebarClip.StopAnimation(L"RightInset");
-            sidebarClip.RightInset(sidebarOpen ? 0.f : static_cast<float>(sidebarWidth));
-        }
+        SidebarSlot().Width(sidebarOpen ? sidebarWidth : 0.);
         if (sidebarOpen) return;
         sidebarPresented = false;
 
@@ -172,22 +179,7 @@ namespace winrt::Folia::implementation {
     }
 
     void MainWindow::LayoutSidebar() {
-        auto presenter = AppWindow().Presenter().try_as<OverlappedPresenter>();
-        const bool restored = presenter && presenter.State() == OverlappedPresenterState::Restored;
-        const bool overlay = sidebarPresented && (!restored || !sidebarWindowExtension);
-        if (sidebarOverlay != overlay) {
-            sidebarOverlay = overlay;
-            if (!overlay && sidebarClip) {
-                Hosting::ElementCompositionPreview::GetElementVisual(WorkspaceSidebar()).Clip(nullptr);
-                sidebarClip = nullptr;
-            }
-            ApplySidebarSurface();
-        }
-        const double width = sidebarPresented && !overlay ? sidebarWidth : 0.;
-        if (SidebarColumn().Width().Value != width) SidebarColumn().Width(GridLengthHelper::FromPixels(width));
         auto sidebar = WorkspaceSidebar();
-        const int span = overlay ? 2 : 1;
-        if (Grid::GetColumnSpan(sidebar) != span) Grid::SetColumnSpan(sidebar, span);
         sidebar.Visibility(sidebarPresented ? Visibility::Visible : Visibility::Collapsed);
         sidebar.IsHitTestVisible(sidebarOpen);
     }
@@ -205,14 +197,6 @@ namespace winrt::Folia::implementation {
         OutlineList().Visibility(HasActiveEditor() ? Visibility::Visible : Visibility::Collapsed);
         OutlineEmptyText().Visibility(HasActiveEditor() && OutlineList().Items().Size() ? Visibility::Collapsed : Visibility::Visible);
         RefreshTabCaptionRegion();
-    }
-
-    void MainWindow::ApplySidebarSurface() {
-        auto base = sidebarOverlay ? SystemBackdrop() : nullptr;
-        FloatingSidebarBackdrop().SystemBackdrop(base);
-        auto layer = Root().Resources().Lookup(box_value(L"FoliaShellBackgroundBrush")).as<Media::Brush>();
-        FloatingSidebarTint().Background(sidebarOverlay ? layer : nullptr);
-        FloatingSidebarTint().Opacity(base ? 0.68 : 1.);
     }
 
     void MainWindow::ApplyBarLayout() {

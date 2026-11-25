@@ -10,6 +10,7 @@
     <StaticResource x:Key="FoliaShellAccentBrush" ResourceKey="AccentTextFillColorPrimaryBrush"/>
     <StaticResource x:Key="FoliaShellLayerBrush" ResourceKey="SubtleFillColorSecondaryBrush"/>
     <StaticResource x:Key="FoliaShellBorderBrush" ResourceKey="DividerStrokeColorDefaultBrush"/>
+    <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="{ThemeResource SolidBackgroundFillColorSecondary}"/>
     <x:Double x:Key="SettingsSectionGap">24</x:Double>
     <x:Double x:Key="SettingsOptionControlWidth">240</x:Double>
     <x:Double x:Key="SettingsModelPickerWidth">320</x:Double>
@@ -18,9 +19,6 @@
     <x:Double x:Key="SettingsContentWidth">960</x:Double>
     <DataTemplate x:Key="SettingsRootTemplate">
         <Grid>
-            <Grid.Resources>
-                <StaticResource x:Key="ComboBoxDropDownBackground" ResourceKey="SolidBackgroundFillColorSecondaryBrush"/>
-            </Grid.Resources>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>

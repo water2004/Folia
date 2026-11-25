@@ -99,6 +99,7 @@ namespace winrt::Folia::implementation
         Windows::Foundation::IAsyncOperation<winrt::hstring> ApplyExplorerActionAsync(folia::platform::WorkspaceFileAction action);
         void RegisterWorkspaceHandlers();
         Microsoft::UI::Xaml::Controls::ScrollViewer TabStripScroller();
+        bool ScrollTabsWithWheel(int delta);
         void RefreshDocumentTabs();
         void SelectDocumentTab();
         void UpdateDocumentTab(std::uint64_t id);
@@ -109,11 +110,10 @@ namespace winrt::Folia::implementation
         void SelectWorkspacePane(bool outline);
         void SetSidebarOpen(bool open);
         void ReserveSidebarSpace();
-        void AnimateSidebarOverlay();
+        void AnimateSidebarWidth(double from);
         void FinishSidebarMotion();
         void RevokeSidebarMotion();
         void LayoutSidebar();
-        void ApplySidebarSurface();
         void UpdateWorkspaceAppearance(WorkspaceAppearance const& settings);
         void EnsureSelectedTabVisible();
         void UpdateLoadingState();
@@ -205,13 +205,13 @@ namespace winrt::Folia::implementation
         DocumentTools documentTools;
         std::optional<WindowMaterial> appliedMaterial;
         std::optional<WindowMaterial> appliedReadingMaterial;
-        Microsoft::UI::Xaml::Controls::SystemBackdropElement selectedTabBackdrop{nullptr};
-        bool sidebarOpen = false, sidebarOverlay = false, outlineSelected = false;
+        std::optional<std::pair<Windows::Foundation::Rect, Windows::Foundation::Rect>> readingMaterialBounds;
+        bool readingMaterialLayoutPending = false;
+        bool sidebarOpen = false, outlineSelected = false;
         bool updatingRailSelection = false;
         bool sidebarPresented = false;
         int sidebarWindowExtension = 0;
-        Microsoft::UI::Composition::InsetClip sidebarClip{nullptr};
-        Microsoft::UI::Composition::CompositionScopedBatch sidebarBatch{nullptr};
+        Microsoft::UI::Xaml::Media::Animation::Storyboard sidebarMotion{nullptr};
         winrt::event_token sidebarMotionCompleted{};
         TabDragPresentation dragPresentation;
         std::optional<float> tabGrabOffset;

@@ -4,10 +4,49 @@ import std;
 #include "localization/Localization.h"
 #include "workspace/WorkspaceIcons.h"
 #include <winrt/Microsoft.UI.Xaml.Automation.h>
+#include <winrt/Microsoft.UI.Xaml.Hosting.h>
+#include <winrt/Windows.Graphics.h>
+#include <windows.graphics.interop.h>
 
 namespace winrt::Folia::implementation {
     using namespace Microsoft::UI::Xaml;
     using namespace Microsoft::UI::Xaml::Controls;
+
+    namespace {
+        // A single backdrop sample covers the selected tab and the reading card.
+        struct ReadingMaterialGeometry : winrt::implements<ReadingMaterialGeometry,
+            Windows::Graphics::IGeometrySource2D, ::ABI::Windows::Graphics::IGeometrySource2DInterop> {
+            Windows::Foundation::Rect page, tab;
+            ReadingMaterialGeometry(Windows::Foundation::Rect pageBounds, Windows::Foundation::Rect tabBounds)
+                : page(pageBounds), tab(tabBounds) {}
+
+            HRESULT __stdcall GetGeometry(ID2D1Geometry** result) noexcept final try {
+                static auto factory = [] {
+                    winrt::com_ptr<ID2D1Factory> value;
+                    winrt::check_hresult(D2D1CreateFactory(D2D1_FACTORY_TYPE_MULTI_THREADED, value.put()));
+                    return value;
+                }();
+                return TryGetGeometryUsingFactory(factory.get(), result);
+            } catch (...) { return winrt::to_hresult(); }
+
+            HRESULT __stdcall TryGetGeometryUsingFactory(ID2D1Factory* factory, ID2D1Geometry** result) noexcept final try {
+                auto rounded = [factory](Windows::Foundation::Rect rect, float radius) {
+                    winrt::com_ptr<ID2D1RoundedRectangleGeometry> geometry;
+                    const D2D1_ROUNDED_RECT bounds{{rect.X, rect.Y, rect.X + rect.Width, rect.Y + rect.Height}, radius, radius};
+                    winrt::check_hresult(factory->CreateRoundedRectangleGeometry(bounds, geometry.put()));
+                    return geometry;
+                };
+                auto paper = rounded(page, 9);
+                if (tab.Width <= 0 || tab.Height <= 0) { *result = paper.detach(); return S_OK; }
+                auto selected = rounded(tab, 6);
+                ID2D1Geometry* shapes[]{paper.get(), selected.get()};
+                winrt::com_ptr<ID2D1GeometryGroup> group;
+                winrt::check_hresult(factory->CreateGeometryGroup(D2D1_FILL_MODE_WINDING, shapes, 2, group.put()));
+                *result = group.detach();
+                return S_OK;
+            } catch (...) { return winrt::to_hresult(); }
+        };
+    }
 
     void MainWindow::UpdateDocumentTab(std::uint64_t id) {
         auto document = workspaceDocuments.Find(id);
@@ -74,7 +113,6 @@ namespace winrt::Folia::implementation {
         }
         SelectDocumentTab();
         UpdateChromeMetrics();
-        EnsureSelectedTabVisible();
     }
 
     void MainWindow::SelectDocumentTab() {
@@ -89,40 +127,49 @@ namespace winrt::Folia::implementation {
         if (windowClosed) return;
         UpdateDocumentTab(winrt::unbox_value<std::uint64_t>(sender.as<TabViewItem>().DataContext()));
         UpdateSelectedTabMaterial();
-        EnsureSelectedTabVisible();
     }
 
     void MainWindow::UpdateSelectedTabMaterial() {
-        auto tabs = DocumentTabs();
-        auto item = tabs.SelectedItem();
-        auto tab = item ? tabs.ContainerFromItem(item).try_as<TabViewItem>() : nullptr;
-        auto grid = tab ? tab.as<IControlProtected>().GetTemplateChild(L"LayoutRoot").try_as<Grid>() : nullptr;
-        // WinUI owns the path, shoulders, outline, hover and focus visuals. The
-        // system material sits behind its selected fill and moves with the tab.
-        auto material = ReadingBackdrop().SystemBackdrop();
-        if (selectedTabBackdrop) {
-            auto parent = Media::VisualTreeHelper::GetParent(selectedTabBackdrop).try_as<Grid>();
-            if (parent && (!material || parent != grid)) {
-                std::uint32_t index;
-                if (parent.Children().IndexOf(selectedTabBackdrop, index)) parent.Children().RemoveAt(index);
-            }
-        }
-        if (!grid || !material) {
-            selectedTabBackdrop = nullptr;
+        if (!ReadingBackdrop().SystemBackdrop()) {
+            ReadingBackdrop().Visibility(Visibility::Collapsed);
+            readingMaterialBounds.reset();
             return;
         }
-        if (!selectedTabBackdrop) {
-            selectedTabBackdrop = SystemBackdropElement();
-            selectedTabBackdrop.IsHitTestVisible(false);
-            selectedTabBackdrop.Name(L"SelectedTabBackdrop");
-        }
-        if (!Media::VisualTreeHelper::GetParent(selectedTabBackdrop)) {
-            auto corners = tab.CornerRadius();
-            selectedTabBackdrop.CornerRadius({corners.TopLeft, corners.TopRight, 0, 0});
-            Grid::SetColumnSpan(selectedTabBackdrop, 3);
-            grid.Children().InsertAt(0, selectedTabBackdrop);
-        }
-        if (selectedTabBackdrop.SystemBackdrop() != material) selectedTabBackdrop.SystemBackdrop(material);
+        if (readingMaterialLayoutPending || windowClosed) return;
+        readingMaterialLayoutPending = DispatcherQueue().TryEnqueue([weak = get_weak()] {
+            auto window = weak.get();
+            if (!window) return;
+            window->readingMaterialLayoutPending = false;
+            auto layer = window->ReadingBackdrop();
+            auto card = window->ReadingCard();
+            if (window->windowClosed || !layer.SystemBackdrop() || !card.IsLoaded() || card.ActualWidth() <= 0.) return;
+            auto origin = window->DocumentColumn();
+            auto bounds = [&](FrameworkElement const& element) {
+                return element.TransformToVisual(origin).TransformBounds({0, 0,
+                    static_cast<float>(element.ActualWidth()), static_cast<float>(element.ActualHeight())});
+            };
+            auto paper = bounds(card);
+            Windows::Foundation::Rect selected{};
+            auto tabs = window->DocumentTabs();
+            auto viewer = window->TabStripScroller();
+            auto viewport = viewer ? viewer.as<IControlProtected>().GetTemplateChild(L"ScrollContentPresenter").try_as<FrameworkElement>() : nullptr;
+            if (auto tab = tabs.ContainerFromItem(tabs.SelectedItem()).try_as<FrameworkElement>(); tab && viewport && tab.IsLoaded()) {
+                auto item = bounds(tab);
+                auto visible = bounds(viewport);
+                float left = (std::max)(item.X, visible.X);
+                float right = (std::min)(item.X + item.Width, visible.X + visible.Width);
+                if (right > left) selected = {left, item.Y, right - left, paper.Y - item.Y + 6};
+            }
+            auto geometry = std::pair{paper, selected};
+            if (geometry == window->readingMaterialBounds) return;
+            auto visual = Hosting::ElementCompositionPreview::GetElementVisual(layer);
+            auto compositor = visual.Compositor();
+            auto path = compositor.CreatePathGeometry(Microsoft::UI::Composition::CompositionPath(
+                winrt::make<ReadingMaterialGeometry>(paper, selected)));
+            visual.Clip(compositor.CreateGeometricClip(path));
+            window->readingMaterialBounds = geometry;
+            layer.Visibility(Visibility::Visible);
+        });
     }
     void MainWindow::DocumentTabPrepared(FrameworkElement const& sender, DataContextChangedEventArgs const&) {
         if (windowClosed) return;
@@ -133,7 +180,6 @@ namespace winrt::Folia::implementation {
         if (found == tabItems.end()) return;
         tab.Tag(found->second->item);
         UpdateDocumentTab(id);
-        EnsureSelectedTabVisible();
     }
 
     void MainWindow::DocumentTabDoubleTapped(Windows::Foundation::IInspectable const& sender, Input::DoubleTappedRoutedEventArgs const&) {
@@ -172,11 +218,27 @@ namespace winrt::Folia::implementation {
         return list ? list.as<IControlProtected>().GetTemplateChild(L"ScrollViewer").try_as<ScrollViewer>() : nullptr;
     }
 
+    bool MainWindow::ScrollTabsWithWheel(int delta) {
+        auto view = TabStripScroller();
+        if (!view || !delta || view.ScrollableWidth() <= 0) return false;
+        auto offset = std::clamp(view.HorizontalOffset() - delta * view.ViewportWidth() / (3. * WHEEL_DELTA),
+            0., view.ScrollableWidth());
+        if (offset != view.HorizontalOffset()) view.ChangeView(offset, nullptr, nullptr, true);
+        return true;
+    }
+
     void MainWindow::RegisterWorkspaceHandlers() {
         OutlineList().Items().VectorChanged(WindowEvent([this](auto const&, auto const&) { UpdateWorkspaceLayout(); }));
         DocumentTabs().TabItemsSource(tabSource);
+        DocumentTabs().AddHandler(UIElement::PointerWheelChangedEvent(), box_value(Input::PointerEventHandler(
+            WindowEvent([this](auto const&, Input::PointerRoutedEventArgs const& args) {
+                auto properties = args.GetCurrentPoint(TabViewport()).Properties();
+                if ((!properties.IsHorizontalMouseWheel() || !args.Handled()) && ScrollTabsWithWheel(properties.MouseWheelDelta()))
+                    args.Handled(true);
+            }))), true);
         DocumentTabs().Loaded(WindowEvent([this](auto const&, auto const&) {
             if (auto viewer = TabStripScroller()) {
+                viewer.ViewChanged(WindowEvent([this](auto const&, auto const&) { UpdateSelectedTabMaterial(); }));
                 // TabView handles ViewChanged, but resizing the viewport at offset
                 // zero can expose more tabs without raising that event.
                 viewer.RegisterPropertyChangedCallback(ScrollViewer::ScrollableWidthProperty(), [](DependencyObject const& sender, DependencyProperty const&) {
@@ -201,15 +263,20 @@ namespace winrt::Folia::implementation {
             CloseDocumentAsync(winrt::unbox_value<std::uint64_t>(args.Item()));
         }));
         RegisterTabTransferHandlers();
-        DocumentTabs().SizeChanged(WindowEvent([this](auto const&, auto const&) {
+        TabViewport().SizeChanged(WindowEvent([this](auto const&, SizeChangedEventArgs const& args) {
+            auto size = args.NewSize();
+            TabViewportClip().Rect({0, 0, size.Width, size.Height});
             UpdateChromeMetrics();
             EnsureSelectedTabVisible();
+            RefreshTabCaptionRegion();
+            UpdateSelectedTabMaterial();
         }));
+        ReadingCard().SizeChanged(WindowEvent([this](auto const&, auto const&) { UpdateSelectedTabMaterial(); }));
         folderExplorer.Attach(FileTree(), [weak = get_weak()](auto path, bool keep) {
             if (auto window = weak.get()) window->OpenWorkspaceFile(std::move(path), keep ? winrt::Folia::WorkspaceOpenMode::Keep : winrt::Folia::WorkspaceOpenMode::Preview);
         }, [weak = get_weak()](auto error) {
             if (auto window = weak.get()) window->ShowError(LocalizeFormat(L"StatusFolderFailed", {error}));
-        });
+        }, FolderHeader());
         folderExplorer.SetOperationHandler([weak = get_weak()](folia::platform::WorkspaceFileAction action) -> Windows::Foundation::IAsyncOperation<winrt::hstring> {
             auto window = weak.get();
             if (!window) throw winrt::hresult_illegal_method_call();

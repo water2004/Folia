@@ -32,15 +32,15 @@ namespace winrt::Folia {
     winrt::fire_and_forget FolderExplorerController::BeginCreateAsync(std::shared_ptr<State> state, bool directory, TreeViewNode parent) {
         if (!state->tree || state->root.empty() || state->operationBusy || state->preparingEdit || state->editingNode) co_return;
         if (!parent) parent = state->tree.SelectedNode();
-        if (auto entry = Entry(parent); entry && !entry->directory) parent = parent.Parent();
-        if (!parent && state->tree.RootNodes().Size()) parent = state->tree.RootNodes().GetAt(0);
+        if (auto entry = Entry(parent); entry && !entry->directory) parent = state->Parent(parent);
+        if (!parent) parent = state->rootNode;
         if (!parent || !Entry(parent)) co_return;
         const auto generation = state->generation, serial = ++state->editSerial;
         state->preparingEdit = true;
         state->NotifyCommands();
         struct Preparing { std::shared_ptr<State> state; ~Preparing() { state->preparingEdit = false; state->NotifyCommands(); } } preparing{state};
         try {
-            parent.IsExpanded(true);
+            if (parent != state->rootNode) parent.IsExpanded(true);
             co_await Populate(state, parent);
             if (!state->tree || state->generation != generation || state->editSerial != serial) co_return;
             auto node = explorer_detail::Node(Entry(parent)->path, directory);
@@ -50,7 +50,7 @@ namespace winrt::Folia {
             entry->edit->creating = true;
             entry->edit->name = Localize(directory ? L"DefaultNewFolderName" : L"UntitledMarkdown");
             state->editingNode = node;
-            parent.Children().InsertAt(0, node);
+            state->Children(parent).InsertAt(0, node);
             state->tree.SelectedNode(node);
             state->pendingEditFocus = true;
             state->selectEditName = true;
@@ -87,11 +87,12 @@ namespace winrt::Folia {
             const bool draft = entry->edit->creating;
             entry->edit.reset();
             if (draft) {
-                auto parent = node.Parent();
+                auto parent = state->tree ? state->Parent(node) : nullptr;
                 if (parent) {
                     std::uint32_t index = 0;
-                    if (parent.Children().IndexOf(node, index)) parent.Children().RemoveAt(index);
-                    if (state->tree) state->tree.SelectedNode(parent);
+                    auto siblings = state->Children(parent);
+                    if (siblings.IndexOf(node, index)) siblings.RemoveAt(index);
+                    state->tree.SelectedNode(parent == state->rootNode ? nullptr : parent);
                 }
             } else if (state->tree) UpdateFolderExplorerRow(state->tree, node);
         }
@@ -151,31 +152,33 @@ namespace winrt::Folia {
     }
 
     void FolderExplorerController::PublishAction(std::shared_ptr<State> const& state, WorkspaceFileAction const& action, std::filesystem::path const& result) {
+        if (!state->rootNode) return;
         TreeViewNode source{nullptr}, destination{nullptr};
         auto find = [&](auto const& self, TreeViewNode const& node) -> void {
             if (auto entry = Entry(node)) {
                 if (SamePath(entry->path, action.source)) source = node;
                 if (entry->directory && SamePath(entry->path, result.parent_path())) destination = node;
             }
-            for (auto child : node.Children()) self(self, child);
+            for (auto child : state->Children(node)) self(self, child);
         };
-        for (auto node : state->tree.RootNodes()) find(find, node);
-        if (action.kind == WorkspaceFileActionKind::Move && source && destination && source.Parent() != destination && !Entry(source)->root) {
-            auto parent = source.Parent();
+        find(find, state->rootNode);
+        if (action.kind == WorkspaceFileActionKind::Move && source && destination
+            && source != state->rootNode && state->Parent(source) != destination) {
+            auto siblings = state->Children(state->Parent(source));
             std::uint32_t index = 0;
-            if (parent && parent.Children().IndexOf(source, index)) parent.Children().RemoveAt(index);
-            destination.Children().Append(source);
+            if (siblings.IndexOf(source, index)) siblings.RemoveAt(index);
+            state->Children(destination).Append(source);
         }
         auto update = [&](auto const& self, TreeViewNode const& node) -> void {
             if (auto entry = Entry(node)) if (auto path = RelocatedWorkspacePath(action, entry->path)) {
                 entry->path = *path;
                 entry->Notify(L"Name"); entry->Notify(L"FullPath"); entry->Notify(L"Indent");
             }
-            for (auto child : node.Children()) self(self, child);
+            for (auto child : state->Children(node)) self(self, child);
         };
-        for (auto node : state->tree.RootNodes()) update(update, node);
+        update(update, state->rootNode);
         if (auto root = RelocatedWorkspacePath(action, state->root)) state->root = *root;
-        if (destination) destination.IsExpanded(true);
+        if (destination && destination != state->rootNode) destination.IsExpanded(true);
         state->pendingSelection = result;
         RefreshLoadedNodes(state);
         RevealPendingSelection(state);
@@ -269,9 +272,9 @@ namespace winrt::Folia {
             Windows::Foundation::Point point{};
             const bool pointer = args.TryGetPosition(state->tree, point);
             if (!node && !pointer) node = state->tree.SelectedNode();
-            if (!node && state->tree.RootNodes().Size()) node = state->tree.RootNodes().GetAt(0);
+            if (!node) node = state->rootNode;
             if (!node) return;
-            state->tree.SelectedNode(node);
+            state->tree.SelectedNode(node == state->rootNode ? nullptr : node);
             MenuFlyout menu;
             auto add = [&](wchar_t const* label, auto handler) {
                 MenuFlyoutItem item; item.Text(Localize(label));
@@ -280,8 +283,10 @@ namespace winrt::Folia {
             };
             add(L"NewFile", [weak, node](auto const&, auto const&) { if (auto state = weak.lock()) BeginCreateAsync(state, false, node); });
             add(L"NewFolder", [weak, node](auto const&, auto const&) { if (auto state = weak.lock()) BeginCreateAsync(state, true, node); });
-            menu.Items().Append(MenuFlyoutSeparator());
-            add(L"Rename", [weak, node](auto const&, auto const&) { if (auto state = weak.lock()) BeginRename(state, node); });
+            if (node != state->rootNode) {
+                menu.Items().Append(MenuFlyoutSeparator());
+                add(L"Rename", [weak, node](auto const&, auto const&) { if (auto state = weak.lock()) BeginRename(state, node); });
+            }
             Primitives::FlyoutShowOptions options;
             if (pointer) options.Position(point);
             menu.ShowAt(state->tree, options);

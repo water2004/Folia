@@ -20,8 +20,10 @@ namespace {
     struct ChromeWindow {
         winrt::Microsoft::UI::Xaml::Window window{nullptr};
         Grid root{nullptr};
-        ChromeWindow() {
-            window = winrt::Folia::implementation::App::Current()->CreateMainWindow();
+        explicit ChromeWindow(bool pinDocumentTools = false) {
+            auto app = winrt::Folia::implementation::App::Current();
+            window = app->CreateMainWindow();
+            if (pinDocumentTools) app->UpdateWindowViewSettings(nullptr, {}, {});
             window.Title(L"Folia workspace visual test");
             expect(!!::AreDpiAwarenessContextsEqual(::GetThreadDpiAwarenessContext(), DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2));
             HWND handle{};
@@ -159,15 +161,16 @@ namespace {
             auto tab = tabs.ContainerFromIndex(0).as<TabViewItem>();
             auto bounds = tab.TransformToVisual(f.root).TransformBounds({0, 0, static_cast<float>(tab.ActualWidth()), static_cast<float>(tab.ActualHeight())});
             auto chrome = f.Find<Grid>(L"TopChrome");
-            expect(bounds.Y > 0.f);
+            expect(bounds.Y >= 0.f);
             expect(std::abs(bounds.Y + bounds.Height - chrome.ActualHeight()) <= 1.);
             expect(tab.IsSelected());
             expect(f.root.FindName(L"CloseOutlineButton") == nullptr);
             expect(f.Find<Grid>(L"WorkspaceSidebar").Visibility() == Visibility::Collapsed);
             expect(f.root.FindName(L"ExplorerHeadingText") == nullptr);
             expect(f.root.FindName(L"FolderActionsButton") == nullptr);
-            expect(f.Find<Grid>(L"ExplorerPane").RowDefinitions().Size() == 2_u);
-            expect(Grid::GetRow(f.Find<TreeView>(L"FileTree")) == 1_i);
+            expect(f.Find<Grid>(L"ExplorerPane").RowDefinitions().Size() == 3_u);
+            expect(Grid::GetRow(f.Find<TreeView>(L"FileTree")) == 2_i);
+            expect(Descendant(tab, L"TabContainer").as<Grid>().BorderThickness() == Thickness{});
             auto fill = Descendant(tab, L"SelectedBackgroundPath").as<Shapes::Path>().Fill();
             expect(fill == f.Find<Border>(L"ReadingTint").Background());
             expect(f.Find<Grid>(L"DocumentToolbar").Background().as<Media::SolidColorBrush>().Color().A == 0);
@@ -202,7 +205,7 @@ namespace {
         };
 
         "workspace chrome keeps text at native scale and separates title and document actions"_test = [] {
-            ChromeWindow f;
+            ChromeWindow f(true);
             auto tabs = f.Find<TabView>(L"DocumentTabs");
             auto selected = tabs.ContainerFromItem(tabs.SelectedItem()).as<TabViewItem>();
             auto header = selected.Header().as<Panel>();
@@ -226,7 +229,8 @@ namespace {
             auto top = f.Find<Grid>(L"TopChrome");
             auto card = f.Find<Grid>(L"ReadingCard");
             expect(leftAt.Y < top.ActualHeight());
-            expect(rightAt.X > leftAt.X && rightAt.Y >= top.ActualHeight());
+            expect(rightAt.X > leftAt.X && rightAt.Y >= top.ActualHeight())
+                << std::format("source mode origin ({}, {}), title strip height {}", rightAt.X, rightAt.Y, top.ActualHeight());
             expect(card.CornerRadius().TopLeft > 0. && card.Margin().Right > 0.);
             expect(!f.root.FindName(L"StatusBar"));
             Capture native(f.root, raster);

@@ -108,11 +108,15 @@ previous document before acting on the workspace.
 
 `MainWindow.Workspace.cpp` opens and closes the sidebar immediately in a
 resizable, restored window by moving its left edge. In a maximized or
-non-resizable window, the compositor animates the sidebar over the reading card.
+non-resizable window, a XAML animation changes the sidebar column width and the
+reading card reflows. The rail, sidebar, and title strip share the window base.
+The file explorer header holds the workspace name and commands, while the tree
+starts with the workspace's children.
 `DocumentTools` owns the toolbar's hover and keyboard focus behavior.
 Its animated clip clears space for the tools
 without resizing the editor surface. The card provides the paper tint to both
-XAML and Direct2D content.
+XAML and Direct2D content. The selected tab and reading card share a single
+backdrop when the reading material uses its own Windows backdrop.
 
 Child XAML controls can deliver final notifications after their window closes.
 `MainWindow::WindowEvent` locks the weak window owner during delivery and skips

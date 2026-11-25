@@ -15,53 +15,28 @@ namespace winrt::Folia {
             DataTemplate file = Template(WorkspaceIcon::Document);
             DataTemplate markdown = Template(WorkspaceIcon::Markdown);
             DataTemplate image = Template(WorkspaceIcon::Image);
-            DataTemplate root = Template(WorkspaceIcon::Folder, true);
             DataTemplate editFile = EditorTemplate(WorkspaceIcon::Document);
             DataTemplate editMarkdown = EditorTemplate(WorkspaceIcon::Markdown);
             DataTemplate editImage = EditorTemplate(WorkspaceIcon::Image);
             DataTemplate editFolder = EditorTemplate(WorkspaceIcon::Folder);
 
-            static DataTemplate Template(WorkspaceIcon icon, bool root = false) {
-                const bool showIcon = !root;
+            static DataTemplate Template(WorkspaceIcon icon) {
                 auto xaml = std::wstring(LR"(<DataTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><Grid ColumnDefinitions=")")
-                    + (root ? L"*,Auto,Auto,Auto,Auto" : showIcon ? L"16,*" : L"*")
-                    + LR"(" ColumnSpacing="2" Height="24" HorizontalAlignment="Stretch"
-                            ToolTipService.ToolTip="{Binding Content.FullPath}">)";
-                if (showIcon) xaml += WorkspaceIconXaml(icon);
-                xaml += std::wstring(LR"(<TextBlock x:Name="EntryName" Grid.Column=")") + (showIcon ? L"1" : L"0")
-                    + LR"(" Text="{Binding Content.Name}" FontSize="13" TextWrapping="NoWrap"
-                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center")";
-                xaml += root ? LR"( FontWeight="SemiBold"/>)" : L"/>";
-                if (root) {
-                    xaml += LR"(<Button Grid.Column="1" Width="24" Height="24" MinWidth="24" MinHeight="24"
-                            Padding="0" Style="{StaticResource SubtleButtonStyle}" Command="{Binding Content.NewFile}"
-                            AutomationProperties.Name="{Binding Content.NewFileName}" ToolTipService.ToolTip="{Binding Content.NewFileName}">)"
-                        + WorkspaceIconXaml(WorkspaceIcon::NewFile) + L"</Button>";
-                    xaml += LR"(<Button Grid.Column="2" Width="24" Height="24" MinWidth="24" MinHeight="24"
-                            Padding="0" Style="{StaticResource SubtleButtonStyle}" Command="{Binding Content.NewFolder}"
-                            AutomationProperties.Name="{Binding Content.NewFolderName}" ToolTipService.ToolTip="{Binding Content.NewFolderName}">)"
-                        + WorkspaceIconXaml(WorkspaceIcon::NewFolder) + L"</Button>";
-                    xaml += LR"(<Button Grid.Column="3" Width="24" Height="24" MinWidth="24" MinHeight="24"
-                            Padding="0" Style="{StaticResource SubtleButtonStyle}" Command="{Binding Content.Refresh}"
-                            AutomationProperties.Name="{Binding Content.RefreshName}" ToolTipService.ToolTip="{Binding Content.RefreshName}">)"
-                        + WorkspaceIconXaml(WorkspaceIcon::Refresh) + L"</Button>";
-                    xaml += LR"(<Button Grid.Column="4" Width="24" Height="24" MinWidth="24" MinHeight="24"
-                            Padding="0" Style="{StaticResource SubtleButtonStyle}" Command="{Binding Content.Collapse}"
-                            AutomationProperties.Name="{Binding Content.CollapseName}" ToolTipService.ToolTip="{Binding Content.CollapseName}">)"
-                        + WorkspaceIconXaml(WorkspaceIcon::Collapse) + L"</Button>";
-                }
-                xaml += L"</Grid></DataTemplate>";
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><Grid ColumnDefinitions="16,*"
+                    ColumnSpacing="4" MinHeight="24" HorizontalAlignment="Stretch"
+                    ToolTipService.ToolTip="{Binding Content.FullPath}">)")
+                    + WorkspaceIconXaml(icon)
+                    + LR"(<TextBlock x:Name="EntryName" Grid.Column="1" Text="{Binding Content.Name}"
+                          FontSize="13" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                          </Grid></DataTemplate>)";
                 return Markup::XamlReader::Load(xaml).as<DataTemplate>();
             }
 
             static DataTemplate EditorTemplate(WorkspaceIcon icon) {
-                auto file = icon != WorkspaceIcon::Folder;
                 auto xaml = std::wstring(LR"(<DataTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><Grid ColumnDefinitions=")")
-                    + (file ? L"16,*" : L"*") + LR"(" ColumnSpacing="6" Height="24" HorizontalAlignment="Stretch">)";
-                if (file) xaml += WorkspaceIconXaml(icon);
-                xaml += std::wstring(LR"(<Grid Grid.Column=")") + (file ? L"1" : L"0") + LR"(">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><Grid ColumnDefinitions="16,*"
+                    ColumnSpacing="4" Height="26" HorizontalAlignment="Stretch">)")
+                    + WorkspaceIconXaml(icon) + LR"(<Grid Grid.Column="1">
                     <TextBox x:Name="EntryEditor" Height="22" MinHeight="22" MinWidth="0" Padding="4,0"
                         FontSize="13" MaxLength="255" IsSpellCheckEnabled="False" IsTextPredictionEnabled="False"
                         Text="{Binding Content.EditName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -77,7 +52,7 @@ namespace winrt::Folia {
                 auto node = item.try_as<TreeViewNode>();
                 if (!node) return file;
                 auto entry = winrt::get_self<explorer_detail::FolderEntry>(node.Content().as<Windows::Foundation::IStringable>());
-                if (entry->directory) return entry->edit ? editFolder : entry->root ? root : folder;
+                if (entry->directory) return entry->edit ? editFolder : folder;
                 auto icon = WorkspaceFileIcon(ClassifyWorkspaceFile(entry->path));
                 if (icon == WorkspaceIcon::Markdown) return entry->edit ? editMarkdown : markdown;
                 if (icon == WorkspaceIcon::Image) return entry->edit ? editImage : image;
@@ -134,12 +109,13 @@ namespace winrt::Folia {
                 if (visibility == Visibility::Collapsed) return;
                 while (canvas.Children().Size() > static_cast<unsigned>(depth)) canvas.Children().RemoveAtEnd();
                 while (canvas.Children().Size() < static_cast<unsigned>(depth)) {
-                    Border line; line.Width(1); line.Height(24); line.Background(tree.Foreground());
+                    Border line; line.Width(1); line.Background(tree.Foreground());
                     Canvas::SetLeft(line, 9 + canvas.Children().Size() * 8.);
                     canvas.Children().Append(line);
                 }
                 for (unsigned index = 0; index < canvas.Children().Size(); ++index) {
                     auto line = canvas.Children().GetAt(index).as<Border>();
+                    if (line.Height() != canvas.ActualHeight()) line.Height(canvas.ActualHeight());
                     if (line.Background() != tree.Foreground()) line.Background(tree.Foreground());
                     const double opacity = inBranch && activeBranch && static_cast<int>(index) == activeBranch.Depth() ? .4 : visible ? .13 : 0.;
                     if (std::abs(line.Opacity() - opacity) > .001) line.Opacity(opacity);

@@ -5,6 +5,8 @@
 namespace winrt::Folia {
     struct FolderExplorerController::State {
         Microsoft::UI::Xaml::Controls::TreeView tree{nullptr};
+        Microsoft::UI::Xaml::FrameworkElement header{nullptr};
+        Microsoft::UI::Xaml::Controls::TreeViewNode rootNode{nullptr};
         OpenFile open;
         ReportError report;
         OperationHandler operate;
@@ -23,6 +25,14 @@ namespace winrt::Folia {
         std::filesystem::path pendingSelection;
         winrt::weak_ref<Microsoft::UI::Xaml::Controls::TreeViewNode> revealNode;
         bool revealParentRequested = false;
+        // The workspace root owns the filesystem request, while WinUI shows its
+        // children as the first visible level.
+        auto Children(Microsoft::UI::Xaml::Controls::TreeViewNode const& node) const {
+            return node == rootNode ? tree.RootNodes() : node.Children();
+        }
+        auto Parent(Microsoft::UI::Xaml::Controls::TreeViewNode const& node) const {
+            return node.Depth() == 0 ? rootNode : node.Parent();
+        }
         void NotifyCommands() {
             if (!tree) return;
             for (auto const& command : {refresh, collapse, newFile, newFolder})

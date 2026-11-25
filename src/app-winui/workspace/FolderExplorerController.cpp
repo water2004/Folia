@@ -26,9 +26,10 @@ namespace winrt::Folia {
     FolderExplorerController::FolderExplorerController() : state_(std::make_shared<State>()) {}
     FolderExplorerController::~FolderExplorerController() { Detach(); }
 
-    void FolderExplorerController::Attach(TreeView const& tree, OpenFile open, ReportError report) {
+    void FolderExplorerController::Attach(TreeView const& tree, OpenFile open, ReportError report, FrameworkElement const& header) {
         Detach();
         state_->tree = tree;
+        state_->header = header;
         state_->open = std::move(open);
         state_->report = std::move(report);
         auto weak = std::weak_ptr<State>(state_);
@@ -116,6 +117,13 @@ namespace winrt::Folia {
             tree.ItemTemplateSelector(nullptr);
         }
         state_->tree = nullptr;
+        if (state_->header) {
+            state_->header.DataContext(nullptr);
+            state_->header.Visibility(Visibility::Collapsed);
+            state_->header = nullptr;
+        }
+        state_->rootNode = nullptr;
+        state_->root.clear();
         state_->open = {};
         state_->report = {};
         state_->refresh = nullptr;
@@ -141,10 +149,12 @@ namespace winrt::Folia {
         state->tree.RootNodes().Clear();
         auto node = Node(state->root, true, true);
         Entry(node)->actions = std::make_unique<explorer_detail::RootActions>(state->refresh, state->collapse,
-            Localize(L"RefreshFiles"), Localize(L"CollapseFolders"), state->newFile, state->newFolder,
-            Localize(L"NewFile"), Localize(L"NewFolder"));
-        state->tree.RootNodes().Append(node);
-        node.IsExpanded(true);
+            state->newFile, state->newFolder);
+        state->rootNode = node;
+        if (state->header) {
+            state->header.DataContext(node.Content());
+            state->header.Visibility(Visibility::Visible);
+        }
         Populate(state, node);
         state->NotifyCommands();
     }
@@ -158,7 +168,7 @@ namespace winrt::Folia {
     void FolderExplorerController::Refresh() { RefreshLoadedNodes(state_); }
 
     void FolderExplorerController::RefreshLoadedNodes(std::shared_ptr<State> const& state) {
-        if (!state->tree || state->root.empty()) return;
+        if (!state->tree || !state->rootNode) return;
         state->stop.request_stop();
         state->stop = std::stop_source{};
         ++state->generation;
@@ -173,9 +183,9 @@ namespace winrt::Folia {
             if (!entry->root && !node.IsExpanded()) return;
             entry->loaded = false;
             expanded.push_back(node);
-            if (node.IsExpanded()) for (auto child : node.Children()) self(self, child);
+            for (auto child : state->Children(node)) self(self, child);
         };
-        for (auto node : state->tree.RootNodes()) visit(visit, node);
+        visit(visit, state->rootNode);
         for (auto node : expanded) Populate(state, node);
     }
     std::filesystem::path FolderExplorerController::RootPath() const { return state_->root; }
@@ -239,7 +249,7 @@ namespace winrt::Folia {
         auto current = [&] { return state->tree && state->generation == generation && entry->ticket == ticket && !rootStop.stop_requested() && !stop.stop_requested(); };
         if (!current()) co_return;
         if (failure) std::rethrow_exception(failure);
-        auto children = node.Children();
+        auto children = state->Children(node);
         std::unordered_map<std::wstring, TreeViewNode> existing;
         for (auto child : children) if (auto previous = Entry(child)) existing.emplace(previous->path.native(), child);
         // Clearing even an empty TreeViewNodeVector collapses its parent in
