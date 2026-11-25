@@ -3,8 +3,11 @@
 #include "../support/DocumentControllerFixture.h"
 #include "App.xaml.h"
 #include "MainWindow.xaml.h"
+#include "windows/media/images/ImageSource.h"
+#include "workspace/WorkspaceIcons.h"
 #include <dwmapi.h>
 #include <winrt/Microsoft.UI.Content.h>
+#include <winrt/Microsoft.UI.Xaml.Media.Imaging.h>
 
 import folia.markdown.instrumentation;
 
@@ -87,8 +90,16 @@ namespace winrt::Folia::implementation {
             Impl(window)->UpdateCompletionStatus(state);
         }
         static void Render(Microsoft::UI::Xaml::Window const& window) { Impl(window)->RenderEditorSurface(); }
-        static void Open(Microsoft::UI::Xaml::Window const& window, std::filesystem::path path) {
-            Impl(window)->OpenWorkspaceFile(std::move(path), winrt::Folia::WorkspaceOpenMode::Keep);
+        static void Open(Microsoft::UI::Xaml::Window const& window, std::filesystem::path path,
+            WorkspaceOpenMode mode = WorkspaceOpenMode::Keep) {
+            Impl(window)->OpenWorkspaceFile(std::move(path), mode);
+        }
+        static auto Preview(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->WorkspaceImage(); }
+        static auto PreviewViewer(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->ImagePreviewViewer(); }
+        static auto PreviewMessage(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->ImagePreviewMessage(); }
+        static auto Rename(Microsoft::UI::Xaml::Window const& window,
+            std::filesystem::path const& before, std::filesystem::path const& after) {
+            return Impl(window)->ApplyExplorerActionAsync({folia::platform::WorkspaceFileActionKind::Rename, before, after, false});
         }
         static auto& Renderer(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->editorRenderer; }
         static auto Notification(Microsoft::UI::Xaml::Window const& window, std::size_t& calls) {
@@ -119,6 +130,57 @@ namespace {
         return nullptr;
     }
     suite tab_transfer_tests = [] {
+        "workspace image tabs decode PNG and SVG and keep the editor view separate"_test = [] {
+            using namespace winrt::Folia;
+            using namespace winrt::Microsoft::UI::Xaml::Media::Imaging;
+            TestDirectory directory;
+            auto raster = directory.path / L"photo 中文.PNG";
+            auto vector = directory.path / L"picture.svg";
+            auto invalid = directory.path / L"invalid.png";
+            auto data = folia::platform::image_source::DecodeImageDataUri(
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAICAIAAAB/FOjAAAAAGElEQVR4nGN0r1rPQApgIkk1w6gGBqIAAD4eAYCPKMJsAAAAAElFTkSuQmCC");
+            expect(fatal(data.has_value()));
+            std::ofstream(raster, std::ios::binary).write(reinterpret_cast<const char*>(data->data()), data->size());
+            std::ofstream(vector) << R"(<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"><rect width="40" height="20" fill="navy"/></svg>)";
+            std::ofstream(invalid) << "not a PNG";
+            OwnedWindow source(App()->CreateMainWindow());
+            expect(bool(WorkspaceIconXaml(WorkspaceIcon::Markdown) != WorkspaceIconXaml(WorkspaceIcon::Image)));
+            expect(bool(WorkspaceIconXaml(WorkspaceIcon::Document) != WorkspaceIconXaml(WorkspaceIcon::Image)));
+            Access::New(source.window);
+            auto document = Access::Documents(source.window).Active();
+            Access::Edit(source.window, U"kept text");
+
+            Access::Open(source.window, raster, WorkspaceOpenMode::Preview);
+            auto photo = Access::Documents(source.window).Active();
+            expect(photo->path == raster && !photo->editor);
+            Pump([&] {
+                auto bitmap = Access::Preview(source.window).Source().try_as<BitmapImage>();
+                return bitmap && bitmap.PixelWidth() == 16 && Access::PreviewMessage(source.window).Text().empty();
+            });
+            expect(Access::Preview(source.window).ActualWidth() > 0.0);
+            expect(Access::PreviewViewer(source.window).ViewportWidth() > 0.0);
+            expect(Access::PreviewViewer(source.window).ChangeView(nullptr, nullptr, 2.0f, true));
+            Pump([&] { return Access::PreviewViewer(source.window).ZoomFactor() == 2.0f; });
+            Access::Open(source.window, raster, WorkspaceOpenMode::Keep);
+            expect(photo == Access::Documents(source.window).Active() && photo->kept);
+            auto renamed = directory.path / L"renamed.png";
+            Await(Access::Rename(source.window, raster, renamed));
+            expect(photo->path == renamed && std::filesystem::exists(renamed));
+
+            Access::Open(source.window, invalid, WorkspaceOpenMode::Preview);
+            Pump([&] { return Access::PreviewMessage(source.window).Text() == Localize(L"ImagePreviewFailed"); });
+            Access::Open(source.window, vector, WorkspaceOpenMode::Preview);
+            Pump([&] {
+                return Access::Preview(source.window).Source().try_as<SvgImageSource>()
+                    && Access::PreviewMessage(source.window).Text().empty();
+            });
+            expect(Access::PreviewViewer(source.window).ZoomFactor() == 1.0f);
+            expect(Access::Documents(source.window).Items().size() == 3_u);
+            Access::Tabs(source.window).SelectedItem(Access::Binding(source.window, document->id)->item);
+            expect(Access::Documents(source.window).Active() == document);
+            expect(!Access::Preview(source.window).Source());
+            expect(document->editor->session.TextUtf8() == "kept text" && document->IsModified());
+        };
         "caption move after selecting another tab rechecks a click without a nonclient release"_test = [] {
             OwnedWindow source(App()->CreateMainWindow());
             const auto a = Access::Documents(source.window).Active();
@@ -249,7 +311,7 @@ namespace {
             expect(!Access::Closed(target.window));
             expect(App()->FindMainWindow(id) != nullptr);
             expect(Access::Documents(target.window).Active() == document);
-            expect(document->session.TextUtf8() == "detached document");
+            expect(document->editor->session.TextUtf8() == "detached document");
         };
         "tab activation coalesces intermediate drawing until the shell frame"_test = [] {
             OwnedWindow source(App()->CreateMainWindow());
@@ -401,12 +463,12 @@ namespace {
                 // original UIElement and NewWindowId=0 are not document identity.
                 expect(Access::Complete(other.window, item));
                 expect(Access::Documents(target.window).Active() == document);
-                expect(document->session.TextUtf8() == "same document");
+                expect(document->editor->session.TextUtf8() == "same document");
             }
             Access::End(source.window);
             expect(!Access::Complete(target.window, item));
             Access::Edit(target.window, U" continues");
-            expect(document->session.TextUtf8() == "same document continues");
+            expect(document->editor->session.TextUtf8() == "same document continues");
         };
         "click-only tab window preparation stays cloaked until the unused host closes"_test = [] {
             OwnedWindow source(App()->CreateMainWindow());
@@ -448,7 +510,7 @@ namespace {
             expect(Access::View(target.window, document->id) != original);
             expect(Access::Documents(target.window).Items().size() == 1_u);
             Access::Edit(target.window, U"original empty document");
-            expect(document->session.TextUtf8() == "original empty document");
+            expect(document->editor->session.TextUtf8() == "original empty document");
         };
         "two untouched empty windows merge and close their emptied source"_test = [] {
             OwnedWindow source(App()->CreateMainWindow()), target(App()->CreateMainWindow());
@@ -468,7 +530,7 @@ namespace {
             expect(Access::Transfer(target.window, document->id, receiving, 0));
             OwnedWindow detached(receiving);
             Access::Edit(detached.window, U"moved empty document");
-            expect(document->session.TextUtf8() == "moved empty document");
+            expect(document->editor->session.TextUtf8() == "moved empty document");
         };
         "closed window notifications cannot access detached or destroyed controllers"_test = [] {
             OwnedWindow owned(App()->CreateMainWindow());
@@ -488,11 +550,11 @@ namespace {
             OwnedWindow source(App()->CreateMainWindow());
             auto document = Access::Documents(source.window).Active();
             Access::Edit(source.window, U"**原文** $x+1$\n");
-            expect(document->session.EnterSourceMode());
+            expect(document->editor->session.EnterSourceMode());
             Access::Edit(source.window, U"prefix ");
-            auto before = document->session.TextUtf8();
-            auto selection = document->session.Selection();
-            auto state = document->session.ContentState();
+            auto before = document->editor->session.TextUtf8();
+            auto selection = document->editor->session.Selection();
+            auto state = document->editor->session.ContentState();
             auto originalTab = Access::View(source.window, document->id);
             Access::New(source.window);
             OwnedWindow target(Access::TearOutWindow(source.window));
@@ -505,8 +567,8 @@ namespace {
             expect(Access::Documents(target.window).Active().get() == document.get());
             expect(Access::View(target.window, document->id) != originalTab);
             expect(Access::Binding(target.window, document->id)->owner.get().get() == Access::Impl(target.window));
-            expect(document->session.TextUtf8() == before && document->session.Selection() == selection);
-            expect(document->session.ContentState() == state && document->controller.IsModified() && document->session.IsSourceMode());
+            expect(document->editor->session.TextUtf8() == before && document->editor->session.Selection() == selection);
+            expect(document->editor->session.ContentState() == state && document->editor->controller.IsModified() && document->editor->session.IsSourceMode());
             auto firstCounters = folia::read_core_operation_counters();
             expect(firstCounters.full_document_parses == 0_u && firstCounters.full_document_serializations == 0_u)
                 << "moving an existing session rebuilt its source";
@@ -516,14 +578,14 @@ namespace {
             }
             // Later round trips create new empty placeholders when a window
             // loses its final tab. Their initialization is not a document edit.
-            expect(document->session.TextUtf8() == before) << "source changed on repeated transfer";
-            expect(document->session.Selection() == selection) << "selection changed on repeated transfer";
-            expect(document->session.ExecuteCommand(folia::Command{folia::CommandKind::Undo}));
-            expect(document->session.ExecuteCommand(folia::Command{folia::CommandKind::Redo}));
-            expect(document->session.TextUtf8() == before) << "source changed after transfer undo/redo";
-            expect(document->session.Selection() == selection) << "selection changed after transfer undo/redo";
-            if (document->session.Selection() != selection) {
-                auto now = document->session.Selection();
+            expect(document->editor->session.TextUtf8() == before) << "source changed on repeated transfer";
+            expect(document->editor->session.Selection() == selection) << "selection changed on repeated transfer";
+            expect(document->editor->session.ExecuteCommand(folia::Command{folia::CommandKind::Undo}));
+            expect(document->editor->session.ExecuteCommand(folia::Command{folia::CommandKind::Redo}));
+            expect(document->editor->session.TextUtf8() == before) << "source changed after transfer undo/redo";
+            expect(document->editor->session.Selection() == selection) << "selection changed after transfer undo/redo";
+            if (document->editor->session.Selection() != selection) {
+                auto now = document->editor->session.Selection();
                 std::fprintf(stderr, "source selection before=%llu:%zu/%d,%llu:%zu/%d after=%llu:%zu/%d,%llu:%zu/%d\n",
                     selection.anchor.container_id.v, selection.anchor.source_offset, static_cast<int>(selection.anchor.affinity),
                     selection.active.container_id.v, selection.active.source_offset, static_cast<int>(selection.active.affinity),
@@ -531,7 +593,7 @@ namespace {
                     now.active.container_id.v, now.active.source_offset, static_cast<int>(now.active.affinity));
             }
             Access::Edit(target.window, U"target ");
-            expect(document->controller.IsModified());
+            expect(document->editor->controller.IsModified());
             expect(!Access::Documents(source.window).Find(document->id));
         };
         "tabs transferred from the last source tab remove only implicit placeholders on return"_test = [] {
@@ -542,11 +604,11 @@ namespace {
             expect(Access::Transfer(source.window, document->id, target.window, 0));
             expect(Access::Documents(source.window).Items().size() == 1_u);
             auto placeholder = Access::Documents(source.window).Active();
-            expect(placeholder != document && !placeholder->controller.IsModified());
+            expect(placeholder != document && !placeholder->editor->controller.IsModified());
             expect(Access::Transfer(target.window, document->id, source.window, 0));
             expect(Access::Documents(source.window).Items().size() == 1_u);
             expect(Access::Documents(source.window).Active() == document);
-            expect(document->session.TextUtf8() == "unsaved last tab" && document->controller.IsModified());
+            expect(document->editor->session.TextUtf8() == "unsaved last tab" && document->editor->controller.IsModified());
             expect(!Access::Documents(source.window).Find(placeholder->id));
         };
         "native tab collection reorder updates model order after tear-out mode replaces old drag events"_test = [] {
@@ -582,18 +644,18 @@ namespace {
             auto path = directory.path / L"shared.md";
             std::ofstream(path, std::ios::binary) << "original";
             Access::Open(source.window, path); Access::Open(target.window, path);
-            Pump([&] { return Access::Documents(source.window).Active()->loaded && Access::Documents(target.window).Active()->loaded
-                && Access::Documents(source.window).Active()->session.HasFile() && Access::Documents(target.window).Active()->session.HasFile(); });
+            Pump([&] { return Access::Documents(source.window).Active()->editor->loaded && Access::Documents(target.window).Active()->editor->loaded
+                && Access::Documents(source.window).Active()->editor->session.HasFile() && Access::Documents(target.window).Active()->editor->session.HasFile(); });
             auto a = Access::Documents(source.window).Active();
             auto b = Access::Documents(target.window).Active();
             Access::Edit(source.window, U"first edit"); Access::Edit(target.window, U"second edit");
-            auto aText = a->session.TextUtf8(), bText = b->session.TextUtf8();
+            auto aText = a->editor->session.TextUtf8(), bText = b->editor->session.TextUtf8();
             expect(!Access::Transfer(source.window, a->id, target.window, 0));
             expect(Access::Documents(source.window).Active() == a && Access::Documents(target.window).Active() == b);
-            expect(a->session.TextUtf8() == aText) << "first text=" << a->session.TextUtf8();
-            expect(b->session.TextUtf8() == bText) << "second text=" << b->session.TextUtf8();
-            expect(a->controller.IsModified()) << "first baseline lost";
-            expect(b->controller.IsModified()) << "second baseline lost";
+            expect(a->editor->session.TextUtf8() == aText) << "first text=" << a->editor->session.TextUtf8();
+            expect(b->editor->session.TextUtf8() == bText) << "second text=" << b->editor->session.TextUtf8();
+            expect(a->editor->controller.IsModified()) << "first baseline lost";
+            expect(b->editor->controller.IsModified()) << "second baseline lost";
         };
         "tab transfer restores the visible source anchor and its viewport inset in the receiving window"_test = [] {
             TestDirectory directory;
@@ -603,7 +665,7 @@ namespace {
             text.close();
             OwnedWindow source(App()->CreateMainWindow());
             Access::Open(source.window,path);
-            Pump([&] { return Access::Documents(source.window).Active()->loaded && Access::Documents(source.window).Active()->session.HasFile(); });
+            Pump([&] { return Access::Documents(source.window).Active()->editor->loaded && Access::Documents(source.window).Active()->editor->session.HasFile(); });
             auto document=Access::Documents(source.window).Active();
             OwnedWindow target(Access::TearOutWindow(source.window));
             auto& renderer=Access::Renderer(source.window);
@@ -614,7 +676,7 @@ namespace {
             auto bounds=renderer.CaretBounds(*anchor);
             expect(fatal(bounds.has_value()));
             expect(renderer.ScrollOffset()>100.f);
-            auto selection=document->session.Selection();
+            auto selection=document->editor->session.Selection();
             expect(Access::Transfer(source.window,document->id,target.window,0));
             auto settled=std::chrono::steady_clock::now()+std::chrono::milliseconds(200);
             Pump([&] { return std::chrono::steady_clock::now()>=settled; });
@@ -623,8 +685,8 @@ namespace {
             expect(fatal(restored.has_value()));
             expect(std::abs(restored->top-bounds->top)<2.f) << "visible block shifted after transfer";
             expect(receiving.ScrollOffset()>100.f);
-            expect(document->session.Selection()==selection);
-            expect(!document->controller.IsModified());
+            expect(document->editor->session.Selection()==selection);
+            expect(!document->editor->controller.IsModified());
         };
     };
 }

@@ -12,6 +12,8 @@ namespace winrt::Folia::implementation
             : Microsoft::UI::Xaml::Visibility::Collapsed;
         ReloadButton().Visibility(value);
         SaveButton().Visibility(value);
+        SaveAsButton().Visibility(value);
+        EditMenu().Visibility(value);
         ExportPdfButton().Visibility(value);
         BoldButton().Visibility(value);
         ItalicButton().Visibility(value);
@@ -69,7 +71,8 @@ namespace winrt::Folia::implementation
         settingsMode = enabled;
         if (inlineCompletion) inlineCompletion->SetFocused(false);
         latexCompletionController.Cancel();
-        SetDocumentCommandsVisible(!enabled);
+        SetDocumentCommandsVisible(!enabled && HasActiveEditor());
+        if (!enabled) ReloadButton().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
         if (enabled)
         {
             animationController.Focus(false);
@@ -107,6 +110,6 @@ namespace winrt::Folia::implementation
         StatusBar().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
         UpdateDocumentInfo();
         RenderEditorSurface();
-        EditorSurface().Focus(Microsoft::UI::Xaml::FocusState::Programmatic);
+        if (HasActiveEditor()) EditorSurface().Focus(Microsoft::UI::Xaml::FocusState::Programmatic);
     }
 }

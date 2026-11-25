@@ -11,7 +11,9 @@ namespace winrt::Folia::implementation {
         auto lifetime = get_strong();
         try {
             Windows::Storage::Pickers::FileOpenPicker picker;
-            for (auto extension : {L".md", L".markdown", L".txt"}) picker.FileTypeFilter().Append(extension);
+            for (auto extension : WorkspaceTextExtensions) picker.FileTypeFilter().Append(extension);
+            for (auto extension : WorkspaceRasterExtensions) picker.FileTypeFilter().Append(extension);
+            picker.FileTypeFilter().Append(WorkspaceVectorExtension);
             winrt::check_hresult(picker.as<IInitializeWithWindow>()->Initialize(WindowHandle()));
             if (auto file = co_await picker.PickSingleFileAsync())
                 OpenWorkspaceFile(std::filesystem::path(file.Path().c_str()), winrt::Folia::WorkspaceOpenMode::Keep);
@@ -95,8 +97,26 @@ namespace winrt::Folia::implementation {
                 }
             });
         };
-        auto result = co_await winrt::Folia::ApplyWorkspaceDocumentFileActionAsync(workspaceDocuments, action, report);
-        if (!windowClosed) RefreshDocumentTabs();
+        auto active = workspaceDocuments.Active();
+        auto reloadImage = !active->editor && RelocatedWorkspacePath(action, active->path).has_value();
+        if (reloadImage) ClearImagePreview();
+        auto restoreImage = [&] {
+            if (reloadImage && !windowClosed && active == workspaceDocuments.Active()) {
+                UpdateDocumentInfo();
+                LoadImagePreview();
+            }
+        };
+        winrt::hstring result;
+        try {
+            result = co_await winrt::Folia::ApplyWorkspaceDocumentFileActionAsync(workspaceDocuments, action, report);
+        } catch (...) {
+            restoreImage();
+            throw;
+        }
+        if (!windowClosed) {
+            RefreshDocumentTabs();
+            restoreImage();
+        }
         co_return result;
     }
 

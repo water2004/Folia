@@ -243,6 +243,7 @@
                 </Grid>
                    </SplitView.Pane>
                    <SplitView.Content>
+                <Grid>
                 <Grid x:Name="EditorPane">
 
                   <Grid>
@@ -378,6 +379,24 @@
                     </StackPanel>
                   </Border>
                 </Grid>
+                <Grid x:Name="ImagePreviewPane" Visibility="Collapsed" Background="{ThemeResource FoliaShellBackgroundBrush}">
+                    <ScrollViewer x:Name="ImagePreviewViewer" Margin="24" ZoomMode="Enabled" MinZoomFactor="1" MaxZoomFactor="8"
+                                  HorizontalScrollMode="Enabled" VerticalScrollMode="Enabled"
+                                  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                                  HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                        <Viewbox Stretch="Uniform" StretchDirection="DownOnly"
+                                 MaxWidth="{x:Bind ImagePreviewViewer.ViewportWidth, Mode=OneWay}"
+                                 MaxHeight="{x:Bind ImagePreviewViewer.ViewportHeight, Mode=OneWay}">
+                            <Image x:Name="WorkspaceImage" Stretch="Uniform"/>
+                        </Viewbox>
+                    </ScrollViewer>
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12" Margin="24">
+                        <ProgressRing x:Name="ImagePreviewProgress" Width="24" Height="24" Visibility="Collapsed"/>
+                        <TextBlock x:Name="ImagePreviewMessage" TextWrapping="Wrap" TextAlignment="Center"
+                                   Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
+                    </StackPanel>
+                </Grid>
+                </Grid>
 
                    </SplitView.Content>
                   </SplitView>
@@ -461,6 +480,8 @@
                     VerticalAlignment="Center"
                     Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"
                     Text="Revision 0"/>
+                <TextBlock x:Name="ImageSizeText" VerticalAlignment="Center"
+                           Foreground="{ThemeResource FoliaShellMutedForegroundBrush}" Visibility="Collapsed"/>
                 <Button
                     x:Name="EncodingButton"
                     MinHeight="24"

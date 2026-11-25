@@ -71,11 +71,11 @@ namespace winrt::Folia::implementation {
             tabItems.emplace(id, tab);
             auto items = tabSource;
             items.InsertAt(static_cast<std::uint32_t>((std::min)(index, std::size_t{items.Size()})), tab->item);
-            document->themeRevision = 0;
+            if (document->editor) document->editor->themeRevision = 0;
             ActivateDocument(id);
             if (transferPlaceholder && *transferPlaceholder != id) {
                 auto placeholder = workspaceDocuments.Find(*transferPlaceholder);
-                if (placeholder && !placeholder->session.HasFile() && !placeholder->controller.IsModified()
+                if (placeholder && placeholder->path.empty() && !placeholder->IsModified()
                     && !placeholder->kept) workspaceDocuments.Remove(placeholder->id);
                 transferPlaceholder.reset();
             }

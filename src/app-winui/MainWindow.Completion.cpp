@@ -6,7 +6,7 @@ namespace winrt::Folia::implementation {
 void MainWindow::ConfigureInlineCompletion(folia::platform::completion::CompletionService::Transport transport) {
     inlineCompletion.reset();
     UpdateCompletionStatus(winrt::Folia::CompletionState::Idle);
-    if (!appSettings.completion.enabled) return;
+    if (!HasActiveEditor() || !appSettings.completion.enabled) return;
     inlineCompletion = std::make_shared<winrt::Folia::InlineCompletionController>(editorSession(), appSettings.completion,
         DispatcherQueue(), [this](auto const& command) {
             if (command.paste_range) keyboardController.PrepareSourceEdit(*command.paste_range);

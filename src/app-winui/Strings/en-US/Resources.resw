@@ -324,7 +324,10 @@
   <data name="RefreshFiles" xml:space="preserve"><value>Refresh files</value></data>
   <data name="StatusFolderFailed" xml:space="preserve"><value>Unable to read folder: {0}</value></data>
   <data name="NoFolderHeading" xml:space="preserve"><value>No folder open</value></data>
-  <data name="NoFolderHint" xml:space="preserve"><value>Open a folder to browse Markdown files.</value></data>
+  <data name="NoFolderHint" xml:space="preserve"><value>Open a folder to browse files and preview images.</value></data>
+  <data name="ImagePreviewLoading" xml:space="preserve"><value>Loading image…</value></data>
+  <data name="ImagePreviewFailed" xml:space="preserve"><value>Folia couldn't open this image.</value></data>
+  <data name="ImagePreviewDimensions" xml:space="preserve"><value>{0} × {1} px</value></data>
   <data name="NewFile" xml:space="preserve"><value>New File…</value></data>
   <data name="NewFolder" xml:space="preserve"><value>New Folder…</value></data>
   <data name="Rename" xml:space="preserve"><value>Rename…</value></data>

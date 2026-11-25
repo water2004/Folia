@@ -182,15 +182,20 @@ namespace winrt::Folia::implementation
 
     winrt::hstring MainWindow::LocalizedDocumentName()
     {
+        if (!HasActiveEditor()) return winrt::hstring(workspaceDocuments.Active()->path.filename().c_str());
         return editorSession().HasFile() ? editorSession().DisplayName() : Localize(L"UntitledMarkdown");
     }
 
     void MainWindow::UpdateDocumentInfo()
     {
         auto const displayName = LocalizedDocumentName();
-        auto const detail = editorSession().HasFile() ? editorSession().Path() : displayName;
+        auto active = workspaceDocuments.Active();
+        if (active->editor) workspaceDocuments.RefreshPath(active->id);
+        auto const detail = active->path.empty() ? displayName : winrt::hstring(active->path.c_str());
         DocumentNameText().Text(displayName);
         Microsoft::UI::Xaml::Controls::ToolTipService::SetToolTip(DocumentNameText(), winrt::box_value(detail));
+        if (!settingsMode) Title(LocalizeFormat(L"WindowTitleDocument", { displayName }));
+        if (!active->editor) { UpdateDocumentTab(active->id); return; }
         CharacterCountText().Text(LocalizeFormat(
             L"CharacterCount", { winrt::to_hstring(editorSession().CharacterCount()) }));
         RevisionText().Text(LocalizeFormat(
@@ -200,10 +205,8 @@ namespace winrt::Folia::implementation
             encodingLabel = encodingLabel + L" BOM";
         EncodingButton().Content(winrt::box_value(encodingLabel));
         EncodingButton().IsEnabled(editorSession().HasFile());
-        if (!settingsMode) Title(LocalizeFormat(L"WindowTitleDocument", { displayName }));
-        workspaceDocuments.RefreshPath(workspaceDocuments.Active()->id);
-        workspaceDocuments.ObserveEdit(workspaceDocuments.Active()->id);
-        UpdateDocumentTab(workspaceDocuments.Active()->id);
+        workspaceDocuments.ObserveEdit(active->id);
+        UpdateDocumentTab(active->id);
     }
 
     void MainWindow::UpdateSourceModeUi()
@@ -220,7 +223,7 @@ namespace winrt::Folia::implementation
 
     void MainWindow::ToggleSourceMode()
     {
-        if (workspaceDocuments.Active()->opening || documentController().IsLoading()) return;
+        if (!HasActiveEditor() || workspaceDocuments.Active()->editor->opening || documentController().IsLoading()) return;
         if (!editorSession().ToggleSourceMode())
         {
             UpdateSourceModeUi();
@@ -259,7 +262,8 @@ namespace winrt::Folia::implementation
 
     bool MainWindow::ExecuteEditorCommand(folia::Command const& command)
     {
-        if (windowClosed || settingsMode || workspaceDocuments.Active()->opening || documentController().IsLoading()) return false;
+        if (windowClosed || settingsMode || !HasActiveEditor()
+            || workspaceDocuments.Active()->editor->opening || documentController().IsLoading()) return false;
         keyboardController.ResetCaretGoal();
         auto oldRevision = editorSession().Revision();
         auto beforeSelection = editorSession().Selection();
@@ -441,7 +445,7 @@ namespace winrt::Folia::implementation
 
     void MainWindow::RenderEditorSurface()
     {
-        if (windowClosed || settingsMode) return;
+        if (windowClosed || settingsMode || !HasActiveEditor()) return;
         try
         {
             auto snippetPlaceholders = keyboardController.SnippetPlaceholders();
@@ -546,8 +550,11 @@ namespace winrt::Folia::implementation
             Root().RequestedTheme(themeProfile.variant == folia::Theme::Dark
                 ? ElementTheme::Dark
                 : ElementTheme::Light);
-        editorSession().SetTheme(themeProfile);
-        workspaceDocuments.Active()->themeRevision = ++workspaceThemeRevision;
+        ++workspaceThemeRevision;
+        if (auto const& editor = workspaceDocuments.Active()->editor) {
+            editor->session.SetTheme(themeProfile);
+            editor->themeRevision = workspaceThemeRevision;
+        }
         editorRenderer.SetTheme(themeProfile);
         if (settingsView)
         {

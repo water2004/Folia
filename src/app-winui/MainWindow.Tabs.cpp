@@ -17,6 +17,14 @@ namespace winrt::Folia::implementation {
         if (!tab) return;
         auto header = tab.Header().try_as<StackPanel>();
         if (!header) return;
+        auto iconHost = header.Children().GetAt(0).as<ContentControl>();
+        auto icon = !document->editor ? WorkspaceIcon::Image : document->path.empty()
+            ? WorkspaceIcon::Markdown : WorkspaceFileIcon(ClassifyWorkspaceFile(document->path));
+        auto iconId = static_cast<int>(icon);
+        if (winrt::unbox_value_or<int>(iconHost.Tag(), -1) != iconId) {
+            iconHost.Content(MakeWorkspaceIcon(icon));
+            iconHost.Tag(winrt::box_value(iconId));
+        }
         auto title = header.Children().GetAt(1).as<TextBlock>();
         auto dirty = header.Children().GetAt(2).as<TextBlock>();
         auto name = document->path.empty() ? Localize(L"UntitledMarkdown") : winrt::hstring(document->path.filename().c_str());
@@ -29,7 +37,7 @@ namespace winrt::Folia::implementation {
         }
         if (title.Text() != label) title.Text(label);
         title.FontStyle(document->kept ? Windows::UI::Text::FontStyle::Normal : Windows::UI::Text::FontStyle::Italic);
-        dirty.Visibility(document->controller.IsModified() ? Visibility::Visible : Visibility::Collapsed);
+        dirty.Visibility(document->IsModified() ? Visibility::Visible : Visibility::Collapsed);
         ToolTipService::SetToolTip(tab, winrt::box_value(document->path.empty() ? name : winrt::hstring(document->path.c_str())));
         Automation::AutomationProperties::SetName(tab, label);
     }
@@ -100,7 +108,10 @@ namespace winrt::Folia::implementation {
             dirty.Text(L"●");
             dirty.FontSize(8);
             dirty.VerticalAlignment(VerticalAlignment::Center);
-            header.Children().Append(winrt::Folia::MakeWorkspaceIcon(winrt::Folia::WorkspaceIcon::Document));
+            ContentControl iconHost;
+            iconHost.IsTabStop(false);
+            iconHost.VerticalAlignment(VerticalAlignment::Center);
+            header.Children().Append(iconHost);
             header.Children().Append(title);
             header.Children().Append(dirty);
             tab.Header(header);
@@ -126,7 +137,7 @@ namespace winrt::Folia::implementation {
         UpdateLoadingState();
         try {
             if (IsActiveDocument(id)) textInputController.FocusLeave();
-            if (co_await document->controller.ConfirmCloseAsync()) {
+            if (!document->editor || co_await document->editor->controller.ConfirmCloseAsync()) {
                 if (IsActiveDocument(id)) {
                     auto next = workspaceDocuments.Adjacent(id, 1);
                     if (next == document) next = workspaceDocuments.New(winrt::Folia::WorkspaceOpenMode::Preview);
@@ -161,6 +172,7 @@ namespace winrt::Folia::implementation {
             ExplorerPaneButton().IsChecked(explorerOpen);
         }));
         OutlineSplitView().PaneClosing(WindowEvent([this](auto const&, auto const&) {
+            if (!HasActiveEditor()) return;
             outlineOpen = false;
             OutlinePaneButton().IsChecked(outlineOpen);
         }));
@@ -224,8 +236,9 @@ namespace winrt::Folia::implementation {
         DocumentWorkspace().DisplayMode(width > 0 && width < 760 ? SplitViewDisplayMode::Overlay : SplitViewDisplayMode::Inline);
         OutlineSplitView().DisplayMode(width > 0 && width < 1040 ? SplitViewDisplayMode::Overlay : SplitViewDisplayMode::Inline);
         DocumentWorkspace().IsPaneOpen(explorerOpen);
-        OutlineSplitView().IsPaneOpen(outlineOpen);
+        OutlineSplitView().IsPaneOpen(outlineOpen && HasActiveEditor());
         ExplorerPaneButton().IsChecked(explorerOpen);
-        OutlinePaneButton().IsChecked(outlineOpen);
+        OutlinePaneButton().IsEnabled(HasActiveEditor());
+        OutlinePaneButton().IsChecked(outlineOpen && HasActiveEditor());
     }
 }

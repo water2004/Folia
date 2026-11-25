@@ -212,6 +212,7 @@
     <ClInclude Include="editor\interaction\EditorKeyboardController.h" />
     <ClInclude Include="editor\document\EditorDocumentController.h" />
     <ClInclude Include="workspace\WorkspaceDocuments.h" />
+    <ClInclude Include="workspace\WorkspaceFileKind.h" />
     <ClInclude Include="workspace\WorkspaceIcons.h" />
     <ClInclude Include="..\platform\windows\storage\WorkspaceFileOperations.h" />
     <ClInclude Include="workspace\FolderEntry.h" />
@@ -722,6 +723,7 @@
     <ClCompile Include="editor\interaction\EditorCodeLanguageController.cpp" />
     <ClCompile Include="editor\document\EditorDocumentController.cpp" />
     <ClCompile Include="workspace\WorkspaceDocuments.cpp" />
+    <ClCompile Include="MainWindow.Images.cpp" />
     <ClCompile Include="workspace\WorkspaceIcons.cpp" />
     <ClCompile Include="..\platform\windows\storage\WorkspaceFileOperations.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -873,6 +875,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Assets\themes\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\themes\resources\workspace-icons.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Assets\latex\commands.json">

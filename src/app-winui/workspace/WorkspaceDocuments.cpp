@@ -38,7 +38,7 @@ namespace winrt::Folia {
     std::shared_ptr<WorkspaceDocument> WorkspaceDocuments::New(WorkspaceOpenMode mode) {
         auto document = std::make_shared<WorkspaceDocument>(NextDocumentId());
         document->kept = mode == WorkspaceOpenMode::Keep;
-        document->loaded = true;
+        document->editor->loaded = true;
         documents_.push_back(document);
         return document;
     }
@@ -47,16 +47,16 @@ namespace winrt::Folia {
         if (path.empty() || !path.is_absolute()) throw std::invalid_argument("Workspace file paths must be absolute");
         path = path.lexically_normal();
         for (auto const& document : documents_)
-            if (!document->kept && document->controller.IsModified()) document->kept = true;
+            if (!document->kept && document->IsModified()) document->kept = true;
         if (auto document = Find(path)) {
             if (mode == WorkspaceOpenMode::Keep) document->kept = true;
             return {std::move(document), {}, false};
         }
         std::optional<std::uint64_t> replaced;
         auto preview = std::ranges::find_if(documents_, [](auto const& document) {
-            return !document->kept && !document->controller.IsModified();
+            return !document->kept && !document->IsModified();
         });
-        auto document = std::make_shared<WorkspaceDocument>(NextDocumentId());
+        auto document = std::make_shared<WorkspaceDocument>(NextDocumentId(), IsWorkspaceImage(ClassifyWorkspaceFile(path)));
         document->path = std::move(path);
         document->kept = mode == WorkspaceOpenMode::Keep;
         if (preview != documents_.end()) {
@@ -81,12 +81,12 @@ namespace winrt::Folia {
 
     bool WorkspaceDocuments::ObserveEdit(std::uint64_t id) {
         auto document = Find(id);
-        return document && document->controller.IsModified() && Keep(id);
+        return document && document->IsModified() && Keep(id);
     }
 
     void WorkspaceDocuments::RefreshPath(std::uint64_t id) {
-        if (auto document = Find(id); document && document->session.HasFile())
-            document->path = std::filesystem::path(document->session.Path().c_str()).lexically_normal();
+        if (auto document = Find(id); document && document->editor && document->editor->session.HasFile())
+            document->path = std::filesystem::path(document->editor->session.Path().c_str()).lexically_normal();
     }
 
     bool WorkspaceDocuments::Remove(std::uint64_t id) {
@@ -94,7 +94,7 @@ namespace winrt::Folia {
         if (found == documents_.end()) return false;
         if (active_ && active_->id == id)
             throw std::logic_error("Activate the replacement document before closing the current document");
-        (*found)->controller.Detach();
+        if (auto const& editor = (*found)->editor) editor->controller.Detach();
         documents_.erase(found);
         return true;
     }

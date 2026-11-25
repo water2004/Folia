@@ -13,11 +13,16 @@ namespace winrt::Folia {
         struct EntryTemplateSelector : DataTemplateSelectorT<EntryTemplateSelector> {
             DataTemplate folder = Template(WorkspaceIcon::Folder);
             DataTemplate file = Template(WorkspaceIcon::Document);
+            DataTemplate markdown = Template(WorkspaceIcon::Markdown);
+            DataTemplate image = Template(WorkspaceIcon::Image);
             DataTemplate root = Template(WorkspaceIcon::Folder, true);
-            DataTemplate editFile = EditorTemplate(true), editFolder = EditorTemplate(false);
+            DataTemplate editFile = EditorTemplate(WorkspaceIcon::Document);
+            DataTemplate editMarkdown = EditorTemplate(WorkspaceIcon::Markdown);
+            DataTemplate editImage = EditorTemplate(WorkspaceIcon::Image);
+            DataTemplate editFolder = EditorTemplate(WorkspaceIcon::Folder);
 
             static DataTemplate Template(WorkspaceIcon icon, bool root = false) {
-                const bool showIcon = icon == WorkspaceIcon::Document;
+                const bool showIcon = icon != WorkspaceIcon::Folder;
                 auto xaml = std::wstring(LR"(<DataTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><Grid ColumnDefinitions=")")
                     + (root ? L"*,Auto,Auto,Auto,Auto" : showIcon ? L"16,*" : L"*")
@@ -50,11 +55,12 @@ namespace winrt::Folia {
                 return Markup::XamlReader::Load(xaml).as<DataTemplate>();
             }
 
-            static DataTemplate EditorTemplate(bool file) {
+            static DataTemplate EditorTemplate(WorkspaceIcon icon) {
+                auto file = icon != WorkspaceIcon::Folder;
                 auto xaml = std::wstring(LR"(<DataTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><Grid ColumnDefinitions=")")
                     + (file ? L"16,*" : L"*") + LR"(" ColumnSpacing="6" Height="24" HorizontalAlignment="Stretch">)";
-                if (file) xaml += WorkspaceIconXaml(WorkspaceIcon::Document);
+                if (file) xaml += WorkspaceIconXaml(icon);
                 xaml += std::wstring(LR"(<Grid Grid.Column=")") + (file ? L"1" : L"0") + LR"(">
                     <TextBox x:Name="EntryEditor" Height="22" MinHeight="22" MinWidth="0" Padding="4,0"
                         FontSize="13" MaxLength="255" IsSpellCheckEnabled="False" IsTextPredictionEnabled="False"
@@ -71,8 +77,11 @@ namespace winrt::Folia {
                 auto node = item.try_as<TreeViewNode>();
                 if (!node) return file;
                 auto entry = winrt::get_self<explorer_detail::FolderEntry>(node.Content().as<Windows::Foundation::IStringable>());
-                if (entry->edit) return entry->directory ? editFolder : editFile;
-                return entry->root ? root : entry->directory ? folder : file;
+                if (entry->directory) return entry->edit ? editFolder : entry->root ? root : folder;
+                auto icon = WorkspaceFileIcon(ClassifyWorkspaceFile(entry->path));
+                if (icon == WorkspaceIcon::Markdown) return entry->edit ? editMarkdown : markdown;
+                if (icon == WorkspaceIcon::Image) return entry->edit ? editImage : image;
+                return entry->edit ? editFile : file;
             }
             DataTemplate SelectTemplateCore(IInspectable const& item, DependencyObject const&) {
                 return SelectTemplateCore(item);

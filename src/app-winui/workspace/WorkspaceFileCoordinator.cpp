@@ -12,13 +12,19 @@ namespace winrt::Folia {
             Windows::Storage::StorageFile file{nullptr};
         };
         std::vector<Lease> leases;
+        std::vector<std::pair<std::shared_ptr<WorkspaceDocument>, std::filesystem::path>> images;
         struct Release {
             std::vector<Lease>& leases;
-            ~Release() { for (auto& lease : leases) lease.document->controller.FinishFileRelocation(lease.token); }
+            ~Release() { for (auto& lease : leases) lease.document->editor->controller.FinishFileRelocation(lease.token); }
         } release{leases};
         for (auto const& document : documents.Items()) if (auto target = RelocatedWorkspacePath(action, document->path)) {
-            if (document->opening || !document->loaded) throw winrt::hresult_illegal_method_call(L"Wait for the document to finish opening");
-            auto token = document->controller.BeginFileRelocation();
+            auto const& editor = document->editor;
+            if (!editor) {
+                images.emplace_back(document, std::move(*target));
+                continue;
+            }
+            if (editor->opening || !editor->loaded) throw winrt::hresult_illegal_method_call(L"Wait for the document to finish opening");
+            auto token = editor->controller.BeginFileRelocation();
             if (!token) throw winrt::hresult_illegal_method_call(L"The document is busy; try again after it finishes");
             leases.push_back({document, *target, *token});
         }
@@ -35,9 +41,10 @@ namespace winrt::Folia {
             std::rethrow_exception(failure);
         }
         for (auto& lease : leases) {
-            lease.document->controller.FinishFileRelocation(lease.token, lease.file);
+            lease.document->editor->controller.FinishFileRelocation(lease.token, lease.file);
             documents.RefreshPath(lease.document->id);
         }
+        for (auto& [document, target] : images) document->path = std::move(target);
         co_return result;
     }
 }

@@ -324,7 +324,10 @@
   <data name="RefreshFiles" xml:space="preserve"><value>刷新文件列表</value></data>
   <data name="StatusFolderFailed" xml:space="preserve"><value>读取文件夹失败：{0}</value></data>
   <data name="NoFolderHeading" xml:space="preserve"><value>尚未打开文件夹</value></data>
-  <data name="NoFolderHint" xml:space="preserve"><value>打开文件夹以浏览 Markdown 文件。</value></data>
+  <data name="NoFolderHint" xml:space="preserve"><value>打开文件夹以浏览文件和预览图片。</value></data>
+  <data name="ImagePreviewLoading" xml:space="preserve"><value>正在加载图片…</value></data>
+  <data name="ImagePreviewFailed" xml:space="preserve"><value>Folia 无法打开这张图片。</value></data>
+  <data name="ImagePreviewDimensions" xml:space="preserve"><value>{0} × {1} 像素</value></data>
   <data name="NewFile" xml:space="preserve"><value>新建文件…</value></data>
   <data name="NewFolder" xml:space="preserve"><value>新建文件夹…</value></data>
   <data name="Rename" xml:space="preserve"><value>重命名…</value></data>

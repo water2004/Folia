@@ -88,7 +88,7 @@ namespace winrt::Folia::implementation
         const auto document = workspaceDocuments.Active();
         try
         {
-            if (!editorSession().HasFile()) co_return;
+            if (!document->editor || !editorSession().HasFile()) co_return;
             auto dialog = Microsoft::UI::Xaml::Controls::ContentDialog();
             dialog.XamlRoot(Root().XamlRoot());
             dialog.Title(winrt::box_value(Localize(

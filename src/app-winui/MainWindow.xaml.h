@@ -70,11 +70,17 @@ namespace winrt::Folia::implementation
         void AttachDocumentController(std::shared_ptr<winrt::Folia::WorkspaceDocument> const& document);
         winrt::Folia::EditorSession& editorSession() noexcept;
         winrt::Folia::EditorDocumentController& documentController() noexcept;
+        bool HasActiveEditor() const noexcept { return bool(workspaceDocuments.Active()->editor); }
         bool IsActiveDocument(std::uint64_t id) const noexcept;
         void ActivateDocument(std::uint64_t id);
         void NewDocument();
         winrt::fire_and_forget OpenWorkspaceFile(std::filesystem::path path, winrt::Folia::WorkspaceOpenMode mode);
         winrt::fire_and_forget LoadWorkspaceDocument(std::shared_ptr<winrt::Folia::WorkspaceDocument> document);
+        void UpdateWorkspaceContent();
+        void ClearImagePreview();
+        void LoadImagePreview();
+        Windows::Foundation::IAsyncAction DecodeImagePreview(std::filesystem::path path, std::uint64_t generation);
+        void ReloadWorkspaceFile();
         winrt::fire_and_forget PickWorkspaceFile();
         winrt::fire_and_forget PickWorkspaceFolder();
         Windows::Foundation::IAsyncOperation<winrt::hstring> ApplyExplorerActionAsync(folia::platform::WorkspaceFileAction action);
@@ -165,6 +171,8 @@ namespace winrt::Folia::implementation
         bool explorerOpen = false;
         bool outlineOpen = false;
         bool windowClosed = false;
+        Windows::Foundation::IAsyncAction imagePreviewLoad{nullptr};
+        std::uint64_t imagePreviewGeneration = 0;
         std::uint64_t workspaceThemeRevision = 1;
         std::unordered_map<std::uint64_t, std::shared_ptr<DocumentTab>> tabItems;
         Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> tabSource =

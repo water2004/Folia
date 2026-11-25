@@ -25,7 +25,7 @@ namespace winrt::Folia::implementation
 
         ReloadButton().Click(WindowEvent([this](auto const&, auto const&)
         {
-            documentController().ReloadDocument();
+            ReloadWorkspaceFile();
         }));
 
         SaveButton().Click(WindowEvent([this](auto const&, auto const&)

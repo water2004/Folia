@@ -2,6 +2,7 @@
 #include "support/folia_test.hpp"
 #include "support/DocumentControllerFixture.h"
 #include "workspace/WorkspaceDocuments.h"
+#include "workspace/WorkspaceIcons.h"
 
 import folia.markdown.instrumentation;
 
@@ -11,6 +12,28 @@ namespace {
     using namespace document_tests;
 
     suite workspace_documents = [] {
+        "workspace classifies files and shares the preview slot with images"_test = [] {
+            expect(WorkspaceFileIcon(ClassifyWorkspaceFile(L"note.MARKDOWN")) == WorkspaceIcon::Markdown);
+            expect(WorkspaceFileIcon(ClassifyWorkspaceFile(L"photo.JPEG")) == WorkspaceIcon::Image);
+            expect(WorkspaceFileIcon(ClassifyWorkspaceFile(L"vector.SvG")) == WorkspaceIcon::Image);
+            expect(WorkspaceFileIcon(ClassifyWorkspaceFile(L"plain.TXT")) == WorkspaceIcon::Document);
+            expect(WorkspaceFileIcon(ClassifyWorkspaceFile(L"archive.zip")) == WorkspaceIcon::Document);
+            WorkspaceDocuments documents;
+            auto first = documents.Open(L"D:/files/note.md", WorkspaceOpenMode::Preview);
+            documents.Activate(first.document->id);
+            auto photo = documents.Open(L"D:/files/PHOTO.PNG", WorkspaceOpenMode::Preview);
+            expect(photo.replaced == first.document->id);
+            expect(!photo.document->editor && !photo.document->IsModified());
+            documents.Activate(photo.document->id);
+            expect(documents.Open(L"d:/FILES/photo.png", WorkspaceOpenMode::Keep).document == photo.document);
+            expect(photo.document->kept);
+            auto second = documents.Open(L"D:/files/note.md", WorkspaceOpenMode::Preview);
+            expect(!second.replaced && static_cast<bool>(second.document->editor));
+            documents.Activate(second.document->id);
+            WorkspaceDocuments receiving;
+            documents.TransferTo(photo.document->id, receiving, 0);
+            expect(receiving.Find(photo.document->id) == photo.document && !documents.Find(photo.document->id));
+        };
         "workspace transfer moves the original session and preserves source history and viewport"_test = [] {
             Fixture fixture(false, L"");
             WorkspaceDocuments source, target;
@@ -18,36 +41,36 @@ namespace {
             auto successor = source.New();
             auto targetActive = target.Active();
             expect(document->id != targetActive->id && document->id != successor->id);
-            document->controller.Attach(document->session, {fixture.renderer, fixture.input, {}, {}, {}, {}, {}, {}, {}});
-            expect(document->session.ExecuteCommand(folia::Command::InsertText(U"**数学** $x+1$")));
+            document->editor->controller.Attach(document->editor->session, {fixture.renderer, fixture.input, {}, {}, {}, {}, {}, {}, {}});
+            expect(document->editor->session.ExecuteCommand(folia::Command::InsertText(U"**数学** $x+1$")));
             source.Keep(document->id);
-            expect(document->session.EnterSourceMode());
-            expect(document->session.ExecuteCommand(folia::Command::InsertText(U"prefix ")));
-            auto text = document->session.TextUtf8();
-            auto selection = document->session.Selection();
-            auto state = document->session.ContentState();
-            document->viewportPosition = selection.active;
-            document->scrollOffset = 1234;
-            document->viewportInset = -3;
-            document->math.emplace();
-            auto cache = &*document->math;
-            document->controller.SuspendPresentation();
+            expect(document->editor->session.EnterSourceMode());
+            expect(document->editor->session.ExecuteCommand(folia::Command::InsertText(U"prefix ")));
+            auto text = document->editor->session.TextUtf8();
+            auto selection = document->editor->session.Selection();
+            auto state = document->editor->session.ContentState();
+            document->editor->viewportPosition = selection.active;
+            document->editor->scrollOffset = 1234;
+            document->editor->viewportInset = -3;
+            document->editor->math.emplace();
+            auto cache = &*document->editor->math;
+            document->editor->controller.SuspendPresentation();
             source.Activate(successor->id);
             folia::reset_core_operation_counters();
             source.TransferTo(document->id, target, 0);
             expect(!source.Find(document->id));
             expect(target.Find(document->id).get() == document.get());
             expect(target.Items().front() == document && target.Active() == targetActive);
-            expect(document->controller.IsModified() && document->kept && document->session.IsSourceMode());
-            expect(document->viewportPosition == selection.active && document->scrollOffset == 1234.f && document->viewportInset == -3.f);
-            expect(&*document->math == cache);
-            expect(document->session.Selection() == selection && document->session.ContentState() == state);
-            expect(document->session.TextUtf8() == text);
-            expect(document->session.ExecuteCommand(folia::Command{folia::CommandKind::Undo}));
-            expect(document->session.ExecuteCommand(folia::Command{folia::CommandKind::Redo}));
+            expect(document->editor->controller.IsModified() && document->kept && document->editor->session.IsSourceMode());
+            expect(document->editor->viewportPosition == selection.active && document->editor->scrollOffset == 1234.f && document->editor->viewportInset == -3.f);
+            expect(&*document->editor->math == cache);
+            expect(document->editor->session.Selection() == selection && document->editor->session.ContentState() == state);
+            expect(document->editor->session.TextUtf8() == text);
+            expect(document->editor->session.ExecuteCommand(folia::Command{folia::CommandKind::Undo}));
+            expect(document->editor->session.ExecuteCommand(folia::Command{folia::CommandKind::Redo}));
             auto counters = folia::read_core_operation_counters();
             expect(counters.full_document_parses == 0_u && counters.full_document_serializations == 0_u);
-            expect(document->session.TextUtf8() == text && document->session.Selection() == selection);
+            expect(document->editor->session.TextUtf8() == text && document->editor->session.Selection() == selection);
             target.TransferTo(document->id, source, 1);
             expect(source.Items().back() == document && !target.Find(document->id));
         };
@@ -89,28 +112,28 @@ namespace {
             Fixture fixture(false, L"");
             WorkspaceDocuments documents;
             auto first = documents.Active();
-            first->controller.Attach(first->session, {fixture.renderer, fixture.input,
+            first->editor->controller.Attach(first->editor->session, {fixture.renderer, fixture.input,
                 {}, {}, {}, {}, {}, {}, {}});
             folia::Command insert{folia::CommandKind::InsertText};
             insert.text = U"first";
-            expect(first->session.ExecuteCommand(insert));
-            const auto selection = first->session.Selection();
+            expect(first->editor->session.ExecuteCommand(insert));
+            const auto selection = first->editor->session.Selection();
             auto second = documents.Open(L"D:/notes/second.md", WorkspaceOpenMode::Preview).document;
             expect(first->kept);
             expect(!second->kept);
             documents.Activate(second->id);
             insert.text = U"second";
-            expect(second->session.ExecuteCommand(insert));
+            expect(second->editor->session.ExecuteCommand(insert));
             folia::reset_core_operation_counters();
             documents.Activate(first->id);
-            expect(first->session.Selection() == selection);
-            expect(first->session.ExecuteCommand(folia::Command{folia::CommandKind::Undo}));
-            expect(first->session.ExecuteCommand(folia::Command{folia::CommandKind::Redo}));
+            expect(first->editor->session.Selection() == selection);
+            expect(first->editor->session.ExecuteCommand(folia::Command{folia::CommandKind::Undo}));
+            expect(first->editor->session.ExecuteCommand(folia::Command{folia::CommandKind::Redo}));
             auto counters = folia::read_core_operation_counters();
             expect(counters.full_document_parses == 0_u);
             expect(counters.full_document_serializations == 0_u);
-            expect(first->session.TextUtf8() == "first");
-            expect(second->session.TextUtf8() == "second");
+            expect(first->editor->session.TextUtf8() == "first");
+            expect(second->editor->session.TextUtf8() == "second");
         };
 
         "workspace documents explicit activation reorder and close preserve owners"_test = [] {
@@ -138,30 +161,30 @@ namespace {
             WorkspaceDocuments documents;
             auto first = documents.Active();
             auto second = documents.New();
-            first->session.SetText(L"**first** and $x+1$");
-            second->session.SetText(L"_second_");
-            expect(first->session.ToggleSourceMode());
-            expect(first->session.ExecuteCommand(folia::Command::InsertText(U"prefix ")));
-            auto source = first->session.TextUtf8();
-            auto selection = first->session.Selection();
-            auto state = first->session.ContentState();
+            first->editor->session.SetText(L"**first** and $x+1$");
+            second->editor->session.SetText(L"_second_");
+            expect(first->editor->session.ToggleSourceMode());
+            expect(first->editor->session.ExecuteCommand(folia::Command::InsertText(U"prefix ")));
+            auto source = first->editor->session.TextUtf8();
+            auto selection = first->editor->session.Selection();
+            auto state = first->editor->session.ContentState();
             folia::reset_core_operation_counters();
             for (int i = 0; i < 10; ++i) {
                 documents.Activate(second->id);
-                expect(!second->session.IsSourceMode());
+                expect(!second->editor->session.IsSourceMode());
                 documents.Activate(first->id);
-                expect(first->session.IsSourceMode());
-                expect(first->session.ContentState() == state);
-                expect(first->session.Selection() == selection);
+                expect(first->editor->session.IsSourceMode());
+                expect(first->editor->session.ContentState() == state);
+                expect(first->editor->session.Selection() == selection);
             }
-            expect(first->session.ExecuteCommand(folia::Command{folia::CommandKind::Undo}));
-            expect(first->session.ExecuteCommand(folia::Command{folia::CommandKind::Redo}));
+            expect(first->editor->session.ExecuteCommand(folia::Command{folia::CommandKind::Undo}));
+            expect(first->editor->session.ExecuteCommand(folia::Command{folia::CommandKind::Redo}));
             auto counters = folia::read_core_operation_counters();
             expect(counters.full_document_parses == 0_u);
             expect(counters.full_document_serializations == 0_u);
-            expect(first->session.TextUtf8() == source);
-            expect(first->session.Selection() == selection);
-            expect(second->session.TextUtf8() == "_second_");
+            expect(first->editor->session.TextUtf8() == source);
+            expect(first->editor->session.Selection() == selection);
+            expect(second->editor->session.TextUtf8() == "_second_");
         };
     };
 }

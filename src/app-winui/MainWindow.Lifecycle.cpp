@@ -7,12 +7,13 @@ namespace winrt::Folia::implementation {
         MainWindow::ConfirmUnsavedChangesAsync(std::uint64_t id) {
         auto lifetime = get_strong();
         auto document = workspaceDocuments.Find(id);
-        if (!document || windowClosed) co_return Microsoft::UI::Xaml::Controls::ContentDialogResult::None;
+        if (!document || !document->editor || windowClosed) co_return Microsoft::UI::Xaml::Controls::ContentDialogResult::None;
         using namespace Microsoft::UI::Xaml::Controls;
         ContentDialog dialog;
         dialog.XamlRoot(Root().XamlRoot());
         dialog.Title(winrt::box_value(Localize(L"UnsavedChangesTitle")));
-        auto name = document->session.HasFile() ? document->session.DisplayName() : Localize(L"UntitledMarkdown");
+        auto const& session = document->editor->session;
+        auto name = session.HasFile() ? session.DisplayName() : Localize(L"UntitledMarkdown");
         dialog.Content(winrt::box_value(LocalizeFormat(L"UnsavedChangesMessage", {name})));
         dialog.PrimaryButtonText(Localize(L"Save"));
         dialog.SecondaryButtonText(Localize(L"DiscardChanges"));
@@ -31,7 +32,7 @@ namespace winrt::Folia::implementation {
             std::vector<std::shared_ptr<winrt::Folia::WorkspaceDocument>> documents(workspaceDocuments.Items().begin(), workspaceDocuments.Items().end());
             bool approved = true;
             for (auto const& document : documents)
-                if (!co_await document->controller.ConfirmCloseAsync()) { approved = false; break; }
+                if (document->editor && !co_await document->editor->controller.ConfirmCloseAsync()) { approved = false; break; }
             if (approved) { closeApproved = true; Close(); }
         } catch (winrt::hresult_error const& error) {
             SetStatus(LocalizeFormat(L"StatusSaveFailed", {error.message()}));

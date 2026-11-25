@@ -20,18 +20,19 @@ namespace winrt::Folia::implementation {
         else if (action == "file.open") PickWorkspaceFile();
         else if (action == "file.open_folder") PickWorkspaceFolder();
         else if (action == "file.close") CloseDocumentAsync(workspaceDocuments.Active()->id);
-        else if (action == "file.save") documentController().SaveDocument();
-        else if (action == "file.save_as") documentController().SaveDocumentAs();
-        else if (action == "file.export_pdf") documentController().ExportPdf();
-        else if (action == "file.reload") documentController().ReloadDocument();
-        else if (action == "search.find") ShowFindBar(false);
-        else if (action == "search.replace") ShowFindBar(true);
-        else if (action == "insert.image") documentController().InsertImage();
-        else if (action == "view.source_mode") ToggleSourceMode();
+        else if (action == "file.reload") ReloadWorkspaceFile();
         else if (action == "view.next_tab" || action == "view.previous_tab") {
             auto document = workspaceDocuments.Adjacent(workspaceDocuments.Active()->id, action == "view.next_tab" ? 1 : -1);
             if (document) ActivateDocument(document->id);
         }
+        else if (!HasActiveEditor()) return false;
+        else if (action == "file.save") documentController().SaveDocument();
+        else if (action == "file.save_as") documentController().SaveDocumentAs();
+        else if (action == "file.export_pdf") documentController().ExportPdf();
+        else if (action == "search.find") ShowFindBar(false);
+        else if (action == "search.replace") ShowFindBar(true);
+        else if (action == "insert.image") documentController().InsertImage();
+        else if (action == "view.source_mode") ToggleSourceMode();
         return true;
     }
 

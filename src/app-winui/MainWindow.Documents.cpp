@@ -8,10 +8,10 @@ namespace winrt::Folia::implementation {
     using namespace Microsoft::UI::Xaml::Controls;
 
     winrt::Folia::EditorSession& MainWindow::editorSession() noexcept {
-        return workspaceDocuments.Active()->session;
+        return workspaceDocuments.Active()->editor->session;
     }
     winrt::Folia::EditorDocumentController& MainWindow::documentController() noexcept {
-        return workspaceDocuments.Active()->controller;
+        return workspaceDocuments.Active()->editor->controller;
     }
     bool MainWindow::IsActiveDocument(std::uint64_t id) const noexcept {
         return !windowClosed && workspaceDocuments.Active()->id == id;
@@ -37,8 +37,8 @@ namespace winrt::Folia::implementation {
                 if (!document) return;
                 auto previousPath = document->path;
                 window->workspaceDocuments.RefreshPath(id);
-                if (document->session.HasFile()) document->loaded = true;
-                if (window->IsActiveDocument(id)) document->themeRevision = window->workspaceThemeRevision;
+                if (document->editor->session.HasFile()) document->editor->loaded = true;
+                if (window->IsActiveDocument(id)) document->editor->themeRevision = window->workspaceThemeRevision;
                 window->workspaceDocuments.ObserveEdit(id);
                 if (previousPath != document->path) window->RefreshDocumentTabs();
                 else window->UpdateDocumentTab(id);
@@ -60,13 +60,14 @@ namespace winrt::Folia::implementation {
                     window->ExternalChangeInfoBar().IsOpen(visible);
                 }
             }};
-        if (document->controllerAttached) document->controller.RebindPresentation(std::move(presentation));
-        else document->controller.Attach(document->session, std::move(presentation));
-        document->controller.SetSaveDialogs([weak, id]() -> Windows::Foundation::IAsyncOperation<ContentDialogResult> {
+        auto& editor = *document->editor;
+        if (editor.controllerAttached) editor.controller.RebindPresentation(std::move(presentation));
+        else editor.controller.Attach(editor.session, std::move(presentation));
+        editor.controller.SetSaveDialogs([weak, id]() -> Windows::Foundation::IAsyncOperation<ContentDialogResult> {
             if (auto window = weak.get()) co_return co_await window->ConfirmUnsavedChangesAsync(id);
             co_return ContentDialogResult::None;
         });
-        document->controllerAttached = true;
+        editor.controllerAttached = true;
     }
 
     void MainWindow::ActivateDocument(std::uint64_t id) {
@@ -76,58 +77,69 @@ namespace winrt::Folia::implementation {
         auto previous = workspaceDocuments.Active();
         if (previous == document) {
             SelectDocumentTab();
-            if (!document->loaded) LoadWorkspaceDocument(document);
+            if (document->editor && !document->editor->loaded) LoadWorkspaceDocument(document);
             return;
         }
         auto frameUpdate = editorRenderer.UpdateWithXaml();
         // CoreText leaves the old session before the active owner changes.
         // A final IME commit can therefore still pin the old preview.
-        textInputController.Detach();
-        inlineCompletion.reset();
-        pointerController.Detach();
-        latexCompletionController.Detach();
-        codeLanguageController.Detach();
-        keyboardController.Detach();
-        sidebarController.Detach();
-        scrollController.Stop();
-        if (footnoteFlyout) footnoteFlyout.Hide();
-        previous->viewportPosition = editorRenderer.ViewportPosition();
-        previous->scrollOffset = editorRenderer.ScrollOffset();
-        if (previous->viewportPosition)
-            if (auto bounds = editorRenderer.CaretBounds(*previous->viewportPosition)) previous->viewportInset = bounds->top;
-        previous->controller.SuspendPresentation();
-        ++previous->openSerial;
-        previous->opening = false;
-        previous->math = editorRenderer.TakeMathCache();
+        if (auto const& editor = previous->editor) {
+            if (!document->editor) HideFindBar();
+            textInputController.Detach();
+            inlineCompletion.reset();
+            pointerController.Detach();
+            latexCompletionController.Detach();
+            codeLanguageController.Detach();
+            keyboardController.Detach();
+            sidebarController.Detach();
+            scrollController.Stop();
+            if (footnoteFlyout) footnoteFlyout.Hide();
+            editor->viewportPosition = editorRenderer.ViewportPosition();
+            editor->scrollOffset = editorRenderer.ScrollOffset();
+            if (editor->viewportPosition)
+                if (auto bounds = editorRenderer.CaretBounds(*editor->viewportPosition)) editor->viewportInset = bounds->top;
+            editor->controller.SuspendPresentation();
+            ++editor->openSerial;
+            editor->opening = false;
+            editor->math = editorRenderer.TakeMathCache();
+        } else ClearImagePreview();
         workspaceDocuments.Activate(id);
-        if (document->themeRevision != workspaceThemeRevision) {
-            document->session.SetTheme(themeProfile);
-            document->themeRevision = workspaceThemeRevision;
-        }
-        if (document->math) {
-            editorRenderer.RestoreMathCache(std::move(*document->math));
-            document->math.reset();
-        }
-        editorRenderer.SetScrollOffset(0);
+        UpdateWorkspaceContent();
         ExternalChangeInfoBar().IsOpen(false);
-        InitializeTextInput();
-        AttachControllers();
         SetOperationProgress(false);
         activeSearchMatch.reset();
-        UpdateSourceModeUi();
-        UpdateDocumentInfo();
         SelectDocumentTab();
+        UpdateDocumentInfo();
+        UpdateLoadingState();
+        auto const& editor = document->editor;
+        if (!editor) {
+            UpdateCompletionStatus(winrt::Folia::CompletionState::Idle);
+            LoadImagePreview();
+            return;
+        }
+        if (editor->themeRevision != workspaceThemeRevision) {
+            editor->session.SetTheme(themeProfile);
+            editor->themeRevision = workspaceThemeRevision;
+        }
+        if (editor->math) {
+            editorRenderer.RestoreMathCache(std::move(*editor->math));
+            editor->math.reset();
+        }
+        editorRenderer.SetScrollOffset(0);
+        InitializeTextInput();
+        AttachControllers();
+        UpdateSourceModeUi();
         RenderEditorSurface();
-        if (document->viewportPosition) {
-            editorRenderer.ScrollToPosition(*document->viewportPosition, winrt::Folia::EditorScrollAlignment::Start);
+        if (editor->viewportPosition) {
+            editorRenderer.ScrollToPosition(*editor->viewportPosition, winrt::Folia::EditorScrollAlignment::Start);
             RenderEditorSurface();
-            if (auto bounds = editorRenderer.CaretBounds(*document->viewportPosition))
-                editorRenderer.ScrollBy(bounds->top - document->viewportInset);
-        } else editorRenderer.SetScrollOffset(document->scrollOffset);
+            if (auto bounds = editorRenderer.CaretBounds(*editor->viewportPosition))
+                editorRenderer.ScrollBy(bounds->top - editor->viewportInset);
+        } else editorRenderer.SetScrollOffset(editor->scrollOffset);
         if (FindReplaceBar().Visibility() == Visibility::Visible) RefreshSearch(false);
         else RenderEditorSurface();
         UpdateLoadingState();
-        if (!document->loaded) LoadWorkspaceDocument(document);
+        if (!editor->loaded) LoadWorkspaceDocument(document);
     }
 
     void MainWindow::NewDocument() {
@@ -142,9 +154,7 @@ namespace winrt::Folia::implementation {
     winrt::fire_and_forget MainWindow::OpenWorkspaceFile(std::filesystem::path path, winrt::Folia::WorkspaceOpenMode mode) {
         try {
             if (closePending || closingDocument || windowClosed || relocatingFiles) co_return;
-            auto extension = path.extension().native();
-            const bool editable = _wcsicmp(extension.c_str(), L".md") == 0 || _wcsicmp(extension.c_str(), L".markdown") == 0 || _wcsicmp(extension.c_str(), L".txt") == 0;
-            if (!editable) {
+            if (winrt::Folia::ClassifyWorkspaceFile(path) == winrt::Folia::WorkspaceFileKind::Other) {
                 if (mode == winrt::Folia::WorkspaceOpenMode::Keep) {
                     auto lifetime = get_strong();
                     auto file = co_await Windows::Storage::StorageFile::GetFileFromPathAsync(path.native());
@@ -158,30 +168,30 @@ namespace winrt::Folia::implementation {
             ActivateDocument(result.document->id);
             RefreshDocumentTabs();
             if (result.replaced) {
-                if (previous->id == *result.replaced) previous->controller.Detach();
+                if (previous->id == *result.replaced && previous->editor) previous->editor->controller.Detach();
                 // The old preview's last shared owner releases its session/cache.
             }
-            if (!result.document->loaded) LoadWorkspaceDocument(result.document);
         } catch (winrt::hresult_error const& error) { SetStatus(LocalizeFormat(L"StatusOpenFailed", {error.message()})); }
         catch (std::exception const& error) { SetStatus(LocalizeFormat(L"StatusOpenFailed", {winrt::to_hstring(error.what())})); }
     }
 
     winrt::fire_and_forget MainWindow::LoadWorkspaceDocument(std::shared_ptr<winrt::Folia::WorkspaceDocument> document) {
-        if (document->loaded || document->opening || !IsActiveDocument(document->id) || document->path.empty()) co_return;
+        auto& editor = *document->editor;
+        if (editor.loaded || editor.opening || !IsActiveDocument(document->id) || document->path.empty()) co_return;
         auto lifetime = get_strong();
-        const auto ticket = ++document->openSerial;
-        document->opening = true;
+        const auto ticket = ++editor.openSerial;
+        editor.opening = true;
         UpdateLoadingState();
-        auto current = [&] { return IsActiveDocument(document->id) && workspaceDocuments.Find(document->id) == document && ticket == document->openSerial; };
+        auto current = [&] { return IsActiveDocument(document->id) && workspaceDocuments.Find(document->id) == document && ticket == editor.openSerial; };
         try {
             auto file = co_await Windows::Storage::StorageFile::GetFileFromPathAsync(document->path.wstring());
             if (!current()) co_return;
-            auto loaded = co_await document->controller.OpenFileAsync(file);
-            if (current()) document->loaded = loaded;
+            auto loaded = co_await editor.controller.OpenFileAsync(file);
+            if (current()) editor.loaded = loaded;
         } catch (winrt::hresult_error const& error) { if (current()) SetStatus(LocalizeFormat(L"StatusOpenFailed", {error.message()})); }
         catch (std::exception const& error) { if (current()) SetStatus(LocalizeFormat(L"StatusOpenFailed", {winrt::to_hstring(error.what())})); }
         if (!current()) co_return;
-        document->opening = false;
+        editor.opening = false;
         SetOperationProgress(false);
         UpdateLoadingState();
         UpdateDocumentInfo();
@@ -192,11 +202,12 @@ namespace winrt::Folia::implementation {
         auto movable = !closePending && !closingDocument && !relocatingFiles;
         DocumentTabs().CanTearOutTabs(movable);
         DocumentTabs().CanDragTabs(movable);
-        bool loading = workspaceDocuments.Active()->opening || documentController().IsLoading();
+        auto const& editor = workspaceDocuments.Active()->editor;
+        bool loading = editor && (editor->opening || editor->controller.IsLoading());
         DocumentLoadingOverlay().Visibility(loading ? Visibility::Visible : Visibility::Collapsed);
-        SaveButton().IsEnabled(!loading);
-        SaveAsButton().IsEnabled(!loading);
-        SourceModeButton().IsEnabled(!loading);
-        EncodingButton().IsEnabled(!loading && editorSession().HasFile());
+        SaveButton().IsEnabled(editor && !loading);
+        SaveAsButton().IsEnabled(editor && !loading);
+        SourceModeButton().IsEnabled(editor && !loading);
+        EncodingButton().IsEnabled(editor && !loading && editor->session.HasFile());
     }
 }

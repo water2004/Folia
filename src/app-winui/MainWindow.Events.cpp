@@ -121,7 +121,9 @@ namespace winrt::Folia::implementation
             if (latexCommandCatalog) latexCommandCatalog->Flush();
             if (settingsView) settingsView->Detach();
             folderExplorer.Detach();
-            for (auto const& document : workspaceDocuments.Items()) document->controller.Detach();
+            ClearImagePreview();
+            for (auto const& document : workspaceDocuments.Items())
+                if (document->editor) document->editor->controller.Detach();
             sidebarController.Detach();
             pointerController.Detach();
             latexCompletionController.Detach();
@@ -188,7 +190,10 @@ namespace winrt::Folia::implementation
         EditorSurface().IsTabStop(true);
         EditorSurface().CharacterReceived([this](auto const&, Microsoft::UI::Xaml::Input::CharacterReceivedRoutedEventArgs const& args)
         {
-            if (workspaceDocuments.Active()->opening || documentController().IsLoading()) { args.Handled(true); return; }
+            if (!HasActiveEditor() || workspaceDocuments.Active()->editor->opening || documentController().IsLoading()) {
+                args.Handled(true);
+                return;
+            }
             auto handled = keyboardController.Character(args.Character());
             if (handled) latexCompletionController.Refresh();
             args.Handled(handled);

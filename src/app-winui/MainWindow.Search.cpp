@@ -24,6 +24,7 @@ namespace winrt::Folia::implementation
 
     void MainWindow::ShowFindBar(bool replace)
     {
+        if (!HasActiveEditor()) return;
         if (settingsMode) SetSettingsMode(false);
         FindReplaceBar().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
         ReplaceControls().Visibility(replace
