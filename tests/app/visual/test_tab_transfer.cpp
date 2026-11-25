@@ -394,6 +394,49 @@ namespace {
             window.AppWindow().Resize(size);
             Pump([&] { return first.ActualWidth() < width - 35. && addX() < initialAddX - 140.; });
         };
+        "visible close buttons keep client input after switching tabs"_test = [] {
+            using namespace Controls;
+            using winrt::Microsoft::UI::Input::InputNonClientPointerSource;
+            using winrt::Microsoft::UI::Input::NonClientRegionKind;
+            using winrt::Microsoft::UI::Content::ContentCoordinateConverter;
+            OwnedWindow owned(App()->CreateMainWindow());
+            auto window = owned.window;
+            auto& documents = Access::Documents(window);
+            auto first = documents.Active();
+            Access::New(window);
+            Access::New(window);
+            auto last = documents.Active();
+            auto root = window.Content().as<FrameworkElement>();
+            auto screen = root.XamlRoot().CoordinateConverter();
+            auto native = ContentCoordinateConverter::CreateForWindowId(window.AppWindow().Id());
+            auto pointer = InputNonClientPointerSource::GetForWindowId(window.AppWindow().Id());
+            auto center = [](FrameworkElement const& element) {
+                return element.TransformToVisual(nullptr).TransformPoint(
+                    {static_cast<float>(element.ActualWidth() / 2), static_cast<float>(element.ActualHeight() / 2)});
+            };
+            auto point = screen.ConvertLocalToScreen(center(Access::View(window, first->id)));
+            ::SendMessageW(Access::Handle(window), WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(point.X, point.Y));
+            expect(fatal(documents.Active() == first));
+
+            auto closeInactive = [&](std::uint64_t id) {
+                auto tab = Access::View(window, id);
+                expect(VisualStateManager::GoToState(tab, L"CloseButtonVisible", false));
+                auto button = tab.as<IControlProtected>().GetTemplateChild(L"CloseButton").as<Button>();
+                Pump([&] {
+                    auto at = native.ConvertScreenToLocal(screen.ConvertLocalToScreen(center(button)));
+                    return button.ActualWidth() > 0 && std::ranges::any_of(pointer.GetRegionRects(NonClientRegionKind::Passthrough), [&](auto rect) {
+                        return at.X >= rect.X && at.X < rect.X + rect.Width
+                            && at.Y >= rect.Y && at.Y < rect.Y + rect.Height;
+                    });
+                });
+                Automation::Peers::ButtonAutomationPeer(button).as<Automation::Provider::IInvokeProvider>().Invoke();
+                Pump([&] { return !documents.Find(id); });
+                expect(documents.Active() == first);
+            };
+            closeInactive(last->id);
+            closeInactive(documents.Items().back()->id);
+            expect(documents.Items().size() == 1_u);
+        };
         "open dropdowns and document menus use the current theme surface"_test = [] {
             using namespace Controls;
             OwnedWindow current(App()->CreateMainWindow());

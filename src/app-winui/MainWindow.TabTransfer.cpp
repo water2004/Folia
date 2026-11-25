@@ -234,11 +234,11 @@ namespace winrt::Folia::implementation {
             auto native = Microsoft::UI::Content::ContentCoordinateConverter::CreateForWindowId(id);
             auto bounds = [](FrameworkElement const& element) { return element.TransformToVisual(nullptr).TransformBounds(
                 {0, 0, static_cast<float>(element.ActualWidth()), static_cast<float>(element.ActualHeight())}); };
-            std::vector<Windows::Graphics::RectInt32> caption;
-            auto add = [&](Windows::Foundation::Rect rect) {
+            std::vector<Windows::Graphics::RectInt32> caption, passthrough;
+            auto add = [&](auto& region, Windows::Foundation::Rect rect) {
                 if (rect.Width <= 0 || rect.Height <= 0) return;
                 auto r = native.ConvertScreenToLocal(island.ConvertLocalToScreen(rect));
-                caption.push_back({static_cast<int>(r.X), static_cast<int>(r.Y), static_cast<int>(r.Width), static_cast<int>(r.Height)});
+                region.push_back({static_cast<int>(r.X), static_cast<int>(r.Y), static_cast<int>(r.Width), static_cast<int>(r.Height)});
             };
             {
                 auto strip = bounds(window->TopChrome());
@@ -247,13 +247,37 @@ namespace winrt::Folia::implementation {
                 auto right = bounds(window->CaptionInset()).X;
                 // The shelf above the tabs and the space after the add button
                 // move the window. WinUI's tab list owns the tear-out gesture.
-                add({tabList.X, strip.Y, right - tabList.X, tabList.Y - strip.Y});
-                add({actions.X + actions.Width, tabList.Y, right - actions.X - actions.Width, tabList.Height});
-                if (tabs.CanTearOutTabs()) add(tabList);
+                add(caption, {tabList.X, strip.Y, right - tabList.X, tabList.Y - strip.Y});
+                add(caption, {actions.X + actions.Width, tabList.Y, right - actions.X - actions.Width, tabList.Height});
+                if (tabs.CanTearOutTabs()) add(caption, tabList);
+            }
+            // WinUI claims the full tab list as caption for tear-out. Keep
+            // its buttons in client input even when those rectangles overlap.
+            if (auto viewer = window->TabStripScroller()) {
+                auto parts = viewer.as<IControlProtected>();
+                for (auto name : {L"ScrollDecreaseButton", L"ScrollIncreaseButton"})
+                    if (auto arrow = parts.GetTemplateChild(name).try_as<FrameworkElement>(); arrow && arrow.Visibility() == Visibility::Visible)
+                        add(passthrough, bounds(arrow));
+                if (auto viewport = parts.GetTemplateChild(L"ScrollContentPresenter").try_as<FrameworkElement>()) {
+                    const auto clip = bounds(viewport);
+                    for (std::uint32_t index = 0; index < window->tabSource.Size(); ++index) {
+                        auto tab = tabs.ContainerFromIndex(index).try_as<Control>();
+                        if (!tab) continue;
+                        auto close = tab.as<IControlProtected>().GetTemplateChild(L"CloseButton").try_as<Button>();
+                        if (!close || close.Visibility() != Visibility::Visible) continue;
+                        auto rect = bounds(close);
+                        const auto left = (std::max)(rect.X, clip.X);
+                        const auto right = (std::min)(rect.X + rect.Width, clip.X + clip.Width);
+                        add(passthrough, {left, rect.Y, right - left, rect.Height});
+                    }
+                }
             }
             auto pointer = Microsoft::UI::Input::InputNonClientPointerSource::GetForWindowId(id);
-            auto kind = Microsoft::UI::Input::NonClientRegionKind::Caption;
-            if (!std::ranges::equal(pointer.GetRegionRects(kind), caption)) pointer.SetRegionRects(kind, caption);
+            using Microsoft::UI::Input::NonClientRegionKind;
+            if (!std::ranges::equal(pointer.GetRegionRects(NonClientRegionKind::Caption), caption))
+                pointer.SetRegionRects(NonClientRegionKind::Caption, caption);
+            if (!std::ranges::equal(pointer.GetRegionRects(NonClientRegionKind::Passthrough), passthrough))
+                pointer.SetRegionRects(NonClientRegionKind::Passthrough, passthrough);
         });
     }
     void MainWindow::RestoreIdleTabTransfer() {
@@ -322,6 +346,7 @@ namespace winrt::Folia::implementation {
         // Register the origin check before TabView attaches its move callbacks.
         UpdateTabTransferAvailability();
         DocumentColumn().SizeChanged(WindowEvent([this](auto const&, auto const&) { RefreshTabCaptionRegion(); }));
+        TopChrome().LayoutUpdated(WindowEvent([this](auto const&, auto const&) { RefreshTabCaptionRegion(); }));
         DocumentTabs().TabItemsChanged(WindowEvent([this](auto const&, auto const&) { QueueTabOrderSync(); }));
         DocumentTabs().TabTearOutWindowRequested(WindowEvent([this](auto const&, auto const& args) {
             auto items = args.Items();
