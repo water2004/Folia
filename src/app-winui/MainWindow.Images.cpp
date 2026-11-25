@@ -78,9 +78,8 @@ namespace winrt::Folia::implementation {
             co_return;
         } catch (winrt::hresult_error const& error) {
             if (!current()) co_return;
-            recentWorkspace.ForgetMissing(RecentWorkspaceKind::File, path, error.code());
             WorkspaceImage().Source(nullptr);
-            ImagePreviewMessage().Text(Localize(L"ImagePreviewFailed"));
+            ImagePreviewMessage().Text(WorkspaceOpenError(RecentWorkspaceKind::File, path, error, L"ImagePreviewFailed"));
         }
         ImagePreviewProgress().IsActive(false);
         ImagePreviewProgress().Visibility(Visibility::Collapsed);

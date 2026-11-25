@@ -49,8 +49,7 @@ namespace winrt::Folia::implementation {
             DocumentWorkspace().IsPaneOpen(true);
         } catch (winrt::hresult_error const& error) {
             if (!current()) co_return;
-            recentWorkspace.ForgetMissing(RecentWorkspaceKind::Folder, path, error.code());
-            ShowError(LocalizeFormat(L"StatusFolderFailed", {error.message()}));
+            ShowError(WorkspaceOpenError(RecentWorkspaceKind::Folder, path, error));
         } catch (std::exception const& error) {
             if (current()) ShowError(LocalizeFormat(L"StatusFolderFailed", {winrt::to_hstring(error.what())}));
         }

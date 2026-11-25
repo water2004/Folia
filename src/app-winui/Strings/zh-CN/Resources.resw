@@ -93,6 +93,8 @@
   <data name="ExternalFileDeletedMessage" xml:space="preserve"><value>本地文档仍保持打开。可通过另存为创建新副本，或继续编辑。</value></data>
   <data name="KeepLocalChanges" xml:space="preserve"><value>保留本地更改</value></data>
   <data name="StatusOpenFailed" xml:space="preserve"><value>打开失败：{0}</value></data>
+  <data name="WorkspaceFileNotFound" xml:space="preserve"><value>找不到文件：{0}</value></data>
+  <data name="WorkspaceFolderNotFound" xml:space="preserve"><value>找不到文件夹：{0}</value></data>
   <data name="StatusSavedFile" xml:space="preserve"><value>已保存 {0}</value></data>
   <data name="StatusSaveFailed" xml:space="preserve"><value>保存失败：{0}</value></data>
   <data name="MarkdownFileType" xml:space="preserve"><value>Markdown 文档</value></data>

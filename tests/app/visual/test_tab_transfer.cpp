@@ -344,7 +344,7 @@ namespace {
             Access::SetRecentHistory(window, directory.path / L"recent.json");
             Access::Open(window, directory.path / L"missing.md");
             Pump([&] { return error.IsOpen(); });
-            expect(!error.Message().empty());
+            expect(std::wstring_view(error.Message()).find(L"missing.md") != std::wstring_view::npos);
             external.IsOpen(true);
             root.UpdateLayout();
             expect(paper.ActualHeight() == initialHeight) << "showing notifications does not move the document";

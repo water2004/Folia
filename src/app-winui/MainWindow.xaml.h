@@ -144,6 +144,8 @@ namespace winrt::Folia::implementation
         void NavigateToFootnote(folia::TextPosition position);
         void HandlePointerWheel(winrt::Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args);
         void ShowError(winrt::hstring const& text);
+        winrt::hstring WorkspaceOpenError(RecentWorkspaceKind kind, std::filesystem::path const& path,
+            winrt::hresult_error const& error, wchar_t const* fallback = nullptr);
         void SetStatus(winrt::hstring const& text);
         void SetOperationProgress(
             bool active,

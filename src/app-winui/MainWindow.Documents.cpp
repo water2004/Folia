@@ -152,6 +152,16 @@ namespace winrt::Folia::implementation {
         EditorSurface().Focus(FocusState::Programmatic);
     }
 
+    winrt::hstring MainWindow::WorkspaceOpenError(RecentWorkspaceKind kind, std::filesystem::path const& path,
+            winrt::hresult_error const& error, wchar_t const* fallback) {
+        if (recentWorkspace.ForgetMissing(kind, path, error.code())) {
+            auto key = kind == RecentWorkspaceKind::Folder ? L"WorkspaceFolderNotFound" : L"WorkspaceFileNotFound";
+            return LocalizeFormat(key, {winrt::hstring(path.native())});
+        }
+        return fallback ? Localize(fallback) :
+            LocalizeFormat(kind == RecentWorkspaceKind::Folder ? L"StatusFolderFailed" : L"StatusOpenFailed", {error.message()});
+    }
+
     winrt::fire_and_forget MainWindow::OpenWorkspaceFile(std::filesystem::path path, winrt::Folia::WorkspaceOpenMode mode) {
         try {
             if (closePending || closingDocument || windowClosed || relocatingFiles) co_return;
@@ -166,7 +176,7 @@ namespace winrt::Folia::implementation {
             }
             textInputController.FocusLeave();
             auto previous = workspaceDocuments.Active();
-            auto result = workspaceDocuments.Open(std::move(path), mode);
+            auto result = workspaceDocuments.Open(path, mode);
             ActivateDocument(result.document->id);
             RefreshDocumentTabs();
             if (result.document->editor && result.document->editor->loaded)
@@ -176,8 +186,7 @@ namespace winrt::Folia::implementation {
                 // The old preview's last shared owner releases its session/cache.
             }
         } catch (winrt::hresult_error const& error) {
-            recentWorkspace.ForgetMissing(RecentWorkspaceKind::File, path, error.code());
-            ShowError(LocalizeFormat(L"StatusOpenFailed", {error.message()}));
+            ShowError(WorkspaceOpenError(RecentWorkspaceKind::File, path, error));
         }
         catch (std::exception const& error) { ShowError(LocalizeFormat(L"StatusOpenFailed", {winrt::to_hstring(error.what())})); }
     }
@@ -201,8 +210,7 @@ namespace winrt::Folia::implementation {
             }
         } catch (winrt::hresult_error const& error) {
             if (current()) {
-                recentWorkspace.ForgetMissing(RecentWorkspaceKind::File, document->path, error.code());
-                ShowError(LocalizeFormat(L"StatusOpenFailed", {error.message()}));
+                ShowError(WorkspaceOpenError(RecentWorkspaceKind::File, document->path, error));
             }
         }
         catch (std::exception const& error) { if (current()) ShowError(LocalizeFormat(L"StatusOpenFailed", {winrt::to_hstring(error.what())})); }

@@ -93,10 +93,11 @@ namespace winrt::Folia {
         Update(kind, path, true);
     }
 
-    void RecentWorkspace::ForgetMissing(RecentWorkspaceKind kind, Path const& path, winrt::hresult error) const {
-        if (error == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND) || error == HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND)
-            || (kind == RecentWorkspaceKind::Folder && error == HRESULT_FROM_WIN32(ERROR_DIRECTORY)))
-            Update(kind, path, false);
+    bool RecentWorkspace::ForgetMissing(RecentWorkspaceKind kind, Path const& path, winrt::hresult error) const {
+        bool missing = error == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND) || error == HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND)
+            || (kind == RecentWorkspaceKind::Folder && error == HRESULT_FROM_WIN32(ERROR_DIRECTORY));
+        if (missing) Update(kind, path, false);
+        return missing;
     }
 
     void RecentWorkspace::Update(RecentWorkspaceKind kind, Path path, bool remember) const {
