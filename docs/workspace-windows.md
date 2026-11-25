@@ -99,6 +99,8 @@ The native TabView measures its tabs and add button together inside the space
 reserved for the strip. The native caption buttons have a separate column.
 The native caption region is recomputed after sidebar changes because the
 whole strip can move without reporting a size change.
+The close buttons and overflow arrows register as client input regions. Their
+bounds follow the current tab-strip layout and scrolling viewport.
 The corresponding SDK sources are
 [TabView](https://github.com/microsoft/microsoft-ui-xaml/blob/693f472aeaf89c6dff66256ee6fcd453e5d553b8/controls/dev/TabView/TabView.cpp)
 and [TabViewListView](https://github.com/microsoft/microsoft-ui-xaml/blob/693f472aeaf89c6dff66256ee6fcd453e5d553b8/controls/dev/TabView/TabViewListView.cpp).
@@ -118,6 +120,10 @@ non-resizable window, a XAML animation changes the sidebar column width and the
 reading card reflows. The rail, sidebar, and title strip share the window base.
 The file explorer header holds the workspace name and commands, while the tree
 starts with the workspace's children.
+Enumeration and sorting run on a worker thread. Each expanded directory keeps a
+sorted filename list and publishes at most one page of file nodes to the native
+tree. Page links navigate through the remaining names. Collapsing a directory
+cancels its outstanding loads and releases its listing and child nodes.
 `DocumentTools` owns the toolbar's hover and keyboard focus behavior.
 Its animated clip clears space for the tools
 without resizing the editor surface. The selected tab and reading card share a

@@ -32,7 +32,7 @@ namespace winrt::Folia {
     winrt::fire_and_forget FolderExplorerController::BeginCreateAsync(std::shared_ptr<State> state, bool directory, TreeViewNode parent) {
         if (!state->tree || state->root.empty() || state->operationBusy || state->preparingEdit || state->editingNode) co_return;
         if (!parent) parent = state->tree.SelectedNode();
-        if (auto entry = Entry(parent); entry && !entry->directory) parent = state->Parent(parent);
+        if (auto entry = Entry(parent); parent && (!entry || !entry->directory)) parent = state->Parent(parent);
         if (!parent) parent = state->rootNode;
         if (!parent || !Entry(parent)) co_return;
         const auto generation = state->generation, serial = ++state->editSerial;
@@ -194,8 +194,7 @@ namespace winrt::Folia {
         for (auto root : state->tree.RootNodes()) if (auto node = find(find, root)) {
             for (auto parent = node.Parent(); parent && parent.Depth() >= 0; parent = parent.Parent()) parent.IsExpanded(true);
             state->tree.SelectedNode(node);
-            state->revealNode = winrt::make_weak(node);
-            state->revealParentRequested = false;
+            ScrollFolderExplorerNodeIntoView(state->tree, node);
             state->pendingSelection.clear();
             break;
         }
@@ -223,6 +222,10 @@ namespace winrt::Folia {
             }
             if (args.Key() == Windows::System::VirtualKey::F2) { BeginRename(state, state->tree.SelectedNode()); args.Handled(true); }
             else if (args.Key() == Windows::System::VirtualKey::Enter) {
+                if (InvokePageLink(state->tree.SelectedNode())) {
+                    args.Handled(true);
+                    return;
+                }
                 if (auto entry = Entry(state->tree.SelectedNode()); entry && !entry->directory && state->open) {
                     state->open(entry->path, true); args.Handled(true);
                 }
@@ -252,18 +255,6 @@ namespace winrt::Folia {
                             }
                         }
             }
-            if (auto node = state->revealNode.get()) {
-                auto container = state->tree.ContainerFromNode(node).try_as<FrameworkElement>();
-                if (container) {
-                    state->revealNode = {};
-                    BringIntoViewOptions options; options.AnimationDesired(false); container.StartBringIntoView(options);
-                } else if (!state->revealParentRequested && node.Parent()) {
-                    if (auto parent = state->tree.ContainerFromNode(node.Parent()).try_as<FrameworkElement>()) {
-                        state->revealParentRequested = true;
-                        BringIntoViewOptions options; options.AnimationDesired(false); options.VerticalAlignmentRatio(0); parent.StartBringIntoView(options);
-                    }
-                }
-            }
         });
         state->contextRequested = state->tree.ContextRequested([weak](auto const&, Input::ContextRequestedEventArgs const& args) {
             auto state = weak.lock();
@@ -283,7 +274,7 @@ namespace winrt::Folia {
             };
             add(L"NewFile", [weak, node](auto const&, auto const&) { if (auto state = weak.lock()) BeginCreateAsync(state, false, node); });
             add(L"NewFolder", [weak, node](auto const&, auto const&) { if (auto state = weak.lock()) BeginCreateAsync(state, true, node); });
-            if (node != state->rootNode) {
+            if (node != state->rootNode && Entry(node)) {
                 menu.Items().Append(MenuFlyoutSeparator());
                 add(L"Rename", [weak, node](auto const&, auto const&) { if (auto state = weak.lock()) BeginRename(state, node); });
             }

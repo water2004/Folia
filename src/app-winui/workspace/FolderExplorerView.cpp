@@ -19,6 +19,12 @@ namespace winrt::Folia {
             DataTemplate editMarkdown = EditorTemplate(WorkspaceIcon::Markdown);
             DataTemplate editImage = EditorTemplate(WorkspaceIcon::Image);
             DataTemplate editFolder = EditorTemplate(WorkspaceIcon::Folder);
+            DataTemplate pageLink = Markup::XamlReader::Load(LR"(
+                <DataTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+                    <Button Style="{ThemeResource SubtleButtonStyle}" Content="{Binding Content}"
+                            Command="{Binding Content}" Padding="0" MinHeight="24" HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Left" FontSize="13"/>
+                </DataTemplate>)").as<DataTemplate>();
 
             static DataTemplate Template(WorkspaceIcon icon) {
                 auto xaml = std::wstring(LR"(<DataTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -51,7 +57,8 @@ namespace winrt::Folia {
             DataTemplate SelectTemplateCore(IInspectable const& item) {
                 auto node = item.try_as<TreeViewNode>();
                 if (!node) return file;
-                auto entry = winrt::get_self<explorer_detail::FolderEntry>(node.Content().as<Windows::Foundation::IStringable>());
+                auto entry = explorer_detail::Entry(node);
+                if (!entry) return pageLink;
                 if (entry->directory) return entry->edit ? editFolder : folder;
                 auto icon = WorkspaceFileIcon(ClassifyWorkspaceFile(entry->path));
                 if (icon == WorkspaceIcon::Markdown) return entry->edit ? editMarkdown : markdown;
@@ -87,6 +94,11 @@ namespace winrt::Folia {
         Microsoft::UI::Xaml::Controls::TreeViewNode const& node) {
         if (auto container = tree.ContainerFromNode(node).try_as<Microsoft::UI::Xaml::Controls::TreeViewItem>())
             container.ContentTemplate(tree.ItemTemplateSelector().SelectTemplate(node, container));
+    }
+
+    void ScrollFolderExplorerNodeIntoView(TreeView const& tree, TreeViewNode const& node) {
+        if (auto list = tree.as<IControlProtected>().GetTemplateChild(L"ListControl").try_as<ListView>())
+            list.ScrollIntoView(node, ScrollIntoViewAlignment::Leading);
     }
 
     void UpdateFolderExplorerGuides(TreeView const& tree, TreeViewNode const& activeNode, bool visible) {

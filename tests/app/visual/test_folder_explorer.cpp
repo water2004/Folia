@@ -187,6 +187,59 @@ namespace {
             expect(f.header.DataContext().as<winrt::Windows::Foundation::IStringable>().ToString() == L"Examples");
         } catch (winrt::hresult_error const& error) { throw std::runtime_error(winrt::to_string(error.message()) + " HRESULT " + std::to_string(error.code().value)); } };
 
+        "folder explorer bounds native rows for large levels and releases collapsed children"_test = [] {
+            ExplorerWindow f;
+            auto folder = f.directory.path / L"Large";
+            auto child = folder / L"Nested";
+            std::filesystem::create_directories(child);
+            constexpr std::uint32_t count = 4096;
+            for (std::uint32_t i = 0; i < count; ++i) {
+                std::ofstream file(folder / (std::to_wstring(i) + L".md"));
+            }
+            std::ofstream(child / L"before.md") << "before";
+            f.explorer.Open(folder);
+            auto rows = f.tree.RootNodes();
+            auto isLink = [](TreeViewNode const& node) { return bool(node.Content().try_as<Input::ICommand>()); };
+            Pump([&] { return rows.Size() > 0 && isLink(rows.GetAt(rows.Size() - 1)); });
+            auto firstPageSize = rows.Size();
+            expect(firstPageSize < count) << "the first page uses fewer native nodes than the directory";
+            auto nested = f.Find(L"Nested");
+            expect(rows.GetAt(0) == nested) << "folders remain before files";
+            f.explorer.Expand(nested);
+            Pump([&] { return nested.Children().Size() == 1; });
+            nested.IsExpanded(false);
+            expect(nested.Children().Size() == 0_u && nested.HasUnrealizedChildren()) << "collapse releases the child nodes";
+            std::ofstream(child / L"after.md") << "after";
+            f.explorer.Expand(nested);
+            Pump([&] { return nested.Children().Size() == 2 && !nested.HasUnrealizedChildren(); });
+            auto next = rows.GetAt(rows.Size() - 1);
+            winrt::Folia::ScrollFolderExplorerNodeIntoView(f.tree, next);
+            Button nextButton{nullptr};
+            Pump([&] {
+                if (auto item = f.tree.ContainerFromNode(next).try_as<TreeViewItem>())
+                    nextButton = item.ContentTemplateRoot().try_as<Button>();
+                return bool(nextButton);
+            });
+            Automation::Peers::ButtonAutomationPeer(nextButton).as<Automation::Provider::IInvokeProvider>().Invoke();
+            Pump([&] { return rows.Size() > 0 && isLink(rows.GetAt(0)); });
+            expect(rows.Size() == firstPageSize + 1) << "a middle page adds one previous-page button";
+            Pump([&] { return f.tree.ContainerFromNode(rows.GetAt(1)) != nullptr; });
+            std::uint32_t oldIndex = 0;
+            expect(!rows.IndexOf(nested, oldIndex)) << "the previous page is detached";
+            rows.GetAt(0).Content().as<Input::ICommand>().Execute(nullptr);
+            Pump([&] { return rows.Size() == firstPageSize && !isLink(rows.GetAt(0)); });
+            expect(f.Find(L"Nested").HasUnrealizedChildren()) << "returning to a page reloads directory nodes lazily";
+
+            rows.GetAt(rows.Size() - 1).Content().as<Input::ICommand>().Execute(nullptr);
+            Pump([&] { return isLink(rows.GetAt(0)); });
+            auto file = rows.GetAt(1);
+            f.tree.SelectedNode(file);
+            f.explorer.RenameSelected();
+            expect(Await(f.explorer.CommitNameAsync(L"000-first.md"))) << "a file can be renamed across pages";
+            Pump([&] { return !isLink(rows.GetAt(0)) && f.tree.SelectedNode() == file; });
+            expect(f.Find(L"000-first.md") == file) << "the renamed node retains its identity and selection";
+        };
+
         "folder explorer window edits names in place and preserves rows on failed creation"_test = [] { try {
             ExplorerWindow f;
             auto newFile = f.HeaderCommand(L"NewFile");

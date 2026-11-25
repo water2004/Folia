@@ -38,6 +38,9 @@ namespace winrt::Folia {
         static void OpenRoot(std::shared_ptr<State> const& state, std::filesystem::path path);
         static void RefreshLoadedNodes(std::shared_ptr<State> const& state);
         static void CollapseNodes(std::shared_ptr<State> const& state);
+        static void ShowDirectoryPage(std::shared_ptr<State> const& state,
+            Microsoft::UI::Xaml::Controls::TreeViewNode const& node, std::size_t page);
+        static bool InvokePageLink(Microsoft::UI::Xaml::Controls::TreeViewNode const& link);
         static Windows::Foundation::IAsyncAction Populate(std::shared_ptr<State> state,
             Microsoft::UI::Xaml::Controls::TreeViewNode node);
         static Windows::Foundation::IAsyncAction PopulateAsync(std::shared_ptr<State> state,

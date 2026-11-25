@@ -14,7 +14,8 @@ namespace winrt::Folia {
         constexpr wchar_t directoryFormat[] = L"Folia.Workspace.Directory";
         TreeViewNode TargetFolder(TreeView const& tree, TreeViewNode const& root, DependencyObject const& element) {
             auto node = ExplorerNodeFromElement(tree, element);
-            if (auto entry = Entry(node); entry && !entry->directory) node = node.Parent();
+            if (auto entry = Entry(node); node && (!entry || !entry->directory)) node = node.Parent();
+            if (node && !Entry(node)) return root;
             return node ? node : root;
         }
     }

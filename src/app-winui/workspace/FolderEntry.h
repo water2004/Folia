@@ -11,14 +11,16 @@ namespace winrt::Folia::explorer_detail {
 
     // Plain commands leave icon, tooltip and accessible-name presentation to
     // the workspace header instead of XamlUICommand's automatic content replacement.
-    struct RootCommand : winrt::implements<RootCommand, Input::ICommand> {
+    struct ExplorerCommand : winrt::implements<ExplorerCommand, Input::ICommand, Windows::Foundation::IStringable> {
         std::function<void()> execute;
         std::function<bool()> enabled;
+        winrt::hstring label;
         winrt::event<Windows::Foundation::EventHandler<IInspectable>> changed;
-        explicit RootCommand(std::function<void()> action, std::function<bool()> canExecute = {})
-            : execute(std::move(action)), enabled(std::move(canExecute)) {}
+        explicit ExplorerCommand(std::function<void()> action, std::function<bool()> canExecute = {}, winrt::hstring text = {})
+            : execute(std::move(action)), enabled(std::move(canExecute)), label(std::move(text)) {}
         bool CanExecute(IInspectable const&) const { return !enabled || enabled(); }
         void Execute(IInspectable const&) const { if (CanExecute(nullptr)) execute(); }
+        winrt::hstring ToString() const { return label; }
         winrt::event_token CanExecuteChanged(Windows::Foundation::EventHandler<IInspectable> const& handler) { return changed.add(handler); }
         void CanExecuteChanged(winrt::event_token const& token) { changed.remove(token); }
         void Notify() { changed(this->get_strong().as<Input::ICommand>(), nullptr); }
@@ -30,6 +32,17 @@ namespace winrt::Folia::explorer_detail {
         bool creating = false, busy = false;
         winrt::hstring name, error;
     };
+    struct DirectoryChild {
+        std::filesystem::path name;
+        bool directory;
+    };
+    struct DirectoryListing {
+        static constexpr std::size_t PageSize = 256;
+        std::vector<DirectoryChild> children;
+        std::size_t page = 0;
+
+        std::size_t LastPage() const { return children.empty() ? 0 : (children.size() - 1) / PageSize; }
+    };
     enum class EntryMember { Name, FullPath, Refresh, Collapse, Indent, NewFile, NewFolder, EditName, EditError, EditEnabled, ErrorVisibility };
 
     // Display properties use WinUI's normal COM binding contract.
@@ -40,7 +53,8 @@ namespace winrt::Folia::explorer_detail {
         bool directory = false, root = false;
         std::uint64_t ticket = 0;
         bool loading = false, loaded = false;
-        std::stop_source stop;
+        std::stop_source stop{std::nostopstate};
+        std::unique_ptr<DirectoryListing> listing;
         std::unique_ptr<RootActions> actions;
         std::unique_ptr<NameEdit> edit;
         Windows::Foundation::IAsyncAction pending{nullptr};
@@ -140,7 +154,7 @@ namespace winrt::Folia::explorer_detail {
     }
     inline FolderEntry* Entry(Microsoft::UI::Xaml::Controls::TreeViewNode const& node) {
         if (!node) return nullptr;
-        auto value = node.Content().try_as<Windows::Foundation::IStringable>();
+        auto value = node.Content().try_as<Data::ICustomPropertyProvider>();
         return value ? winrt::get_self<FolderEntry>(value) : nullptr;
     }
     inline Microsoft::UI::Xaml::Controls::TreeViewNode Node(std::filesystem::path path, bool directory, bool root = false) {

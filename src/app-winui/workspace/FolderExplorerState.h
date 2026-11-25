@@ -19,12 +19,11 @@ namespace winrt::Folia {
         Microsoft::UI::Xaml::Controls::TreeViewNode editingNode{nullptr};
         bool preparingEdit = false, committingEdit = false, pendingEditFocus = false, selectEditName = false, operationBusy = false;
         bool guidesVisible = false;
+        bool publishing = false;
         Microsoft::UI::Dispatching::DispatcherQueueTimer hoverTimer{nullptr};
         std::uint64_t editSerial = 0;
         Microsoft::UI::Xaml::Controls::TreeViewNode hoverFolder{nullptr};
         std::filesystem::path pendingSelection;
-        winrt::weak_ref<Microsoft::UI::Xaml::Controls::TreeViewNode> revealNode;
-        bool revealParentRequested = false;
         // The workspace root owns the filesystem request, while WinUI shows its
         // children as the first visible level.
         auto Children(Microsoft::UI::Xaml::Controls::TreeViewNode const& node) const {
@@ -36,7 +35,7 @@ namespace winrt::Folia {
         void NotifyCommands() {
             if (!tree) return;
             for (auto const& command : {refresh, collapse, newFile, newFolder})
-                if (command) winrt::get_self<explorer_detail::RootCommand>(command)->Notify();
+                if (command) winrt::get_self<explorer_detail::ExplorerCommand>(command)->Notify();
         }
     };
 }
