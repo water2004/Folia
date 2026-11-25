@@ -11,7 +11,7 @@ The theme file is the normal runtime source of truth for:
 - title bar, navigation pane, scrollbar, status bar, and footnote-preview dimensions.
 - Markdown delimiter SVG artwork, icon size, and surrounding clearance.
 
-Fields are required unless documented as optional. A file with a missing required field, wrong type, invalid color, unsupported schema version, or mismatched variant is rejected as a whole. The application reports the failure in the status bar and uses one complete built-in fail-safe profile.
+Fields are required unless documented as optional. A file with a missing required field, wrong type, invalid color, unsupported schema version, or mismatched variant is rejected as a whole. The application shows the diagnostic above the workspace and uses one complete built-in fail-safe profile.
 
 Colors use `#RRGGBB` or `#RRGGBBAA`, with alpha in the final byte. Font weights use numeric OpenType/DirectWrite values from 100 through 999. Font sizes and layout values are device-independent pixels and must be finite and non-negative.
 

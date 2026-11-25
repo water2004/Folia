@@ -161,7 +161,9 @@ namespace winrt::Folia::implementation {
         OutlineList().Items().VectorChanged(WindowEvent([this](auto const&, auto const&) {
             OutlineEmptyText().Visibility(HasActiveEditor() && OutlineList().Items().Size() ? Visibility::Collapsed : Visibility::Visible);
         }));
-        SidebarTabs().SelectionChanged(WindowEvent([this](auto const&, auto const&) { UpdateWorkspaceLayout(); }));
+        auto changeSidebarPage = WindowEvent([this](auto const&, auto const&) { UpdateWorkspaceLayout(); });
+        FilesTab().Checked(changeSidebarPage);
+        OutlineTab().Checked(changeSidebarPage);
         DocumentTabs().TabItemsSource(tabSource);
         DocumentTabs().SelectionChanged(WindowEvent([this](auto const&, auto const&) {
             if (updatingTabs || windowClosed) return;
@@ -220,7 +222,7 @@ namespace winrt::Folia::implementation {
         auto width = WorkspaceHost().ActualWidth();
         DocumentWorkspace().OpenPaneLength(248);
         DocumentWorkspace().DisplayMode(width > 0 && width < 760 ? SplitViewDisplayMode::Overlay : SplitViewDisplayMode::Inline);
-        const bool outline = SidebarTabs().SelectedItem() == OutlineTab();
+        const bool outline = OutlineTab().IsChecked().GetBoolean();
         ExplorerPane().Visibility(outline ? Visibility::Collapsed : Visibility::Visible);
         OutlinePaneContent().Visibility(outline ? Visibility::Visible : Visibility::Collapsed);
         OutlineList().Visibility(HasActiveEditor() ? Visibility::Visible : Visibility::Collapsed);

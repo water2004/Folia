@@ -2,6 +2,7 @@
 #include "support/folia_test.hpp"
 #include "../support/DocumentControllerFixture.h"
 #include "App.xaml.h"
+#include "visual_window.h"
 #include "MainWindow.xaml.h"
 #include "windows/media/images/ImageSource.h"
 #include "workspace/WorkspaceIcons.h"
@@ -107,6 +108,10 @@ namespace winrt::Folia::implementation {
             Impl(window)->topBar.OnPointer(point);
             Impl(window)->bottomBar.OnPointer(point);
         }
+        static void Progress(Microsoft::UI::Xaml::Window const& window, bool active, double value) {
+            Impl(window)->SetOperationProgress(active, value, active);
+            Impl(window)->UpdateLoadingState();
+        }
         static auto OpenFileMenu(Microsoft::UI::Xaml::Window const& window) {
             auto button = Impl(window)->MainMenuButton();
             auto flyout = button.Flyout();
@@ -208,6 +213,66 @@ namespace {
             Access::Bars(window, {false, false});
             root.UpdateLayout();
             expect(workspace.ActualHeight() == height - top.ActualHeight() - bottom.ActualHeight());
+        };
+
+        "workspace operation progress presents the reported percentage and cancellation in the editor"_test = [] {
+            OwnedWindow current(App()->CreateMainWindow());
+            auto root = current.window.Content().as<FrameworkElement>();
+            auto panel = root.FindName(L"OperationPanel").as<FrameworkElement>();
+            auto ring = root.FindName(L"OperationRing").as<Controls::ProgressRing>();
+            Access::Progress(current.window, true, .41);
+            expect(panel.Visibility() == Visibility::Visible);
+            expect(ring.Value() == 41.);
+            expect(!ring.IsIndeterminate() && ring.IsActive());
+            expect(root.FindName(L"OperationPercent").as<Controls::TextBlock>().Text() == L"41%");
+            expect(root.FindName(L"CancelOperationButton").as<Controls::Button>().Visibility() == Visibility::Visible);
+            Access::Progress(current.window, false, 0.);
+            expect(panel.Visibility() == Visibility::Collapsed);
+            expect(!ring.IsActive());
+        };
+
+        "workspace sidebar switches between the folder tree and active document headings"_test = [] {
+            TestDirectory directory;
+            auto folder = directory.path / L"Notebook";
+            std::filesystem::create_directories(folder / L"Figures");
+            auto file = folder / L"Observations.md";
+            std::ofstream(file) << "# Observations\n\nA short entry.\n\n## Results\n\nNotes.\n";
+            std::ofstream(folder / L"Reading list.md") << "# Reading list";
+            OwnedWindow current(App()->CreateMainWindow());
+            auto window = current.window;
+            auto root = window.Content().as<Controls::Grid>();
+            Access::SetRecentHistory(window, directory.path / L"recent.json");
+            Access::OpenFolder(window, folder);
+            Access::Open(window, file);
+            auto pane = root.FindName(L"DocumentWorkspace").as<Controls::SplitView>();
+            auto list = root.FindName(L"OutlineList").as<Controls::ListView>();
+            auto tree = root.FindName(L"FileTree").as<Controls::TreeView>();
+            Pump([&] { return pane.IsPaneOpen() && tree.RootNodes().Size() && list.Items().Size() == 2; });
+            root.UpdateLayout();
+            auto treeRoot = tree.RootNodes().GetAt(0);
+            auto filesTab = root.FindName(L"FilesTab").as<Controls::RadioButton>();
+            auto outlineTab = root.FindName(L"OutlineTab").as<Controls::RadioButton>();
+            expect(filesTab.ActualWidth() > pane.OpenPaneLength() * .4);
+            expect(std::abs(filesTab.ActualWidth() - outlineTab.ActualWidth()) <= 1.);
+            auto snapshot = [&](wchar_t const* name) {
+                auto settled = std::chrono::steady_clock::now() + std::chrono::milliseconds(350);
+                Pump([&] { return std::chrono::steady_clock::now() >= settled; });
+                root.UpdateLayout();
+                Media::Imaging::RenderTargetBitmap bitmap;
+                Await(bitmap.RenderAsync(root));
+                auto pixels = Await(bitmap.GetPixelsAsync());
+                auto out = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
+                    / L"build/tests/workspace-chrome";
+                visual_tests::SavePng(out / name, bitmap.PixelWidth(), bitmap.PixelHeight(), pixels);
+            };
+            expect(root.FindName(L"FilesTab").as<Controls::RadioButton>().IsChecked().GetBoolean());
+            snapshot(L"sidebar-files.png");
+            root.FindName(L"OutlineTab").as<Controls::RadioButton>().IsChecked(true);
+            snapshot(L"sidebar-outline.png");
+            expect(list.Visibility() == Visibility::Visible);
+            expect(root.FindName(L"OutlineEmptyText").as<FrameworkElement>().Visibility() == Visibility::Collapsed);
+            root.FindName(L"FilesTab").as<Controls::RadioButton>().IsChecked(true);
+            expect(tree.RootNodes().GetAt(0) == treeRoot);
         };
 
         "workspace recent menus reopen a file and a folder in a new window"_test = [] {

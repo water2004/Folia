@@ -60,12 +60,15 @@
           </ResourceDictionary>
         </Grid.Resources>
         <Grid x:Name="TopChrome" VerticalAlignment="Top" Canvas.ZIndex="4" Background="{ThemeResource FoliaShellLayerBrush}" RowDefinitions="32,1">
-        <TabView x:Name="DocumentTabs"
-                 TabWidthMode="SizeToContent" CanDragTabs="True" CanReorderTabs="True" AllowDrop="True"
+            <Border Grid.RowSpan="2" Background="{ThemeResource FoliaShellBorderBrush}" Opacity="0.27" IsHitTestVisible="False"/>
+            <Border x:Name="ShellDivider" Grid.Row="1" Height="1" VerticalAlignment="Bottom" Background="{ThemeResource FoliaShellBorderBrush}" IsHitTestVisible="False"/>
+        <TabView x:Name="DocumentTabs" Grid.RowSpan="2"
+                 CloseButtonOverlayMode="OnPointerOver" TabWidthMode="SizeToContent" CanDragTabs="True" CanReorderTabs="True" AllowDrop="True"
                  Padding="0" BorderThickness="0" Background="Transparent">
             <TabView.TabItemTemplate>
                 <DataTemplate>
-                    <TabViewItem Tag="{Binding}" DataContextChanged="DocumentTabPrepared" Loaded="DocumentTabLoaded"/>
+                    <TabViewItem Tag="{Binding}" Background="{ThemeResource FoliaShellBackgroundBrush}"
+                                 DataContextChanged="DocumentTabPrepared" Loaded="DocumentTabLoaded"/>
                 </DataTemplate>
             </TabView.TabItemTemplate>
             <TabView.Resources>
@@ -125,7 +128,6 @@
                 </Grid>
             </TabView.TabStripFooter>
         </TabView>
-        <Border x:Name="ShellDivider" Grid.Row="1" Height="1" VerticalAlignment="Bottom" Background="{ThemeResource FoliaShellBorderBrush}" IsHitTestVisible="False"/>
         </Grid>
         <StackPanel Grid.Row="1">
         <InfoBar x:Name="ErrorInfoBar" Severity="Error" IsClosable="True"/>
@@ -207,11 +209,17 @@
         <Grid x:Name="WorkspaceHost" Grid.Row="3">
             <SplitView x:Name="DocumentWorkspace" DisplayMode="Inline" PanePlacement="Left" OpenPaneLength="248" IsPaneOpen="False" PaneBackground="{ThemeResource FoliaShellLayerBrush}">
                 <SplitView.Pane>
-                <Grid RowDefinitions="Auto,*" BorderBrush="{ThemeResource FoliaShellBorderBrush}" BorderThickness="0,0,1,0">
-                    <SelectorBar x:Name="SidebarTabs" Margin="4,0" HorizontalAlignment="Left">
-                        <SelectorBarItem x:Name="FilesTab" Text="Files" IsSelected="True"/>
-                        <SelectorBarItem x:Name="OutlineTab" Text="Outline"/>
-                    </SelectorBar>
+                <Grid RowDefinitions="Auto,*" Background="{ThemeResource FoliaShellLayerBrush}"
+                      BorderBrush="{ThemeResource FoliaShellBorderBrush}" BorderThickness="0,0,1,0">
+                    <Grid Margin="10,9,10,5" Padding="3" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                          ColumnDefinitions="*,*" ColumnSpacing="2">
+                        <RadioButton x:Name="FilesTab" GroupName="Navigation" Content="Files" IsChecked="True"
+                                     Background="{ThemeResource FoliaShellBackgroundBrush}" BorderBrush="{ThemeResource FoliaShellBorderBrush}"
+                                     Style="{StaticResource SidebarTabStyle}"/>
+                        <RadioButton x:Name="OutlineTab" Grid.Column="1" GroupName="Navigation" Content="Outline"
+                                     Background="{ThemeResource FoliaShellBackgroundBrush}" BorderBrush="{ThemeResource FoliaShellBorderBrush}"
+                                     Style="{StaticResource SidebarTabStyle}"/>
+                    </Grid>
                 <Grid x:Name="ExplorerPane" Grid.Row="1" RowDefinitions="Auto,*">
                     <StackPanel x:Name="FileOperationPanel" Grid.Row="0" Margin="16,8,12,8" Spacing="4" Visibility="Collapsed">
                         <TextBlock x:Name="FileOperationText" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>

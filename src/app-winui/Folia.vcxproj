@@ -212,6 +212,7 @@
     <ClInclude Include="editor\interaction\EditorKeyboardController.h" />
     <ClInclude Include="editor\document\EditorDocumentController.h" />
     <ClInclude Include="workspace\WorkspaceDocuments.h" />
+    <ClInclude Include="workspace\TabDragPresentation.h" />
     <ClInclude Include="workspace\WorkspaceEdgeBar.h" />
     <ClInclude Include="workspace\WorkspaceBarSettings.h" />
     <ClInclude Include="workspace\RecentWorkspace.h" />
@@ -726,6 +727,7 @@
     <ClCompile Include="editor\interaction\EditorCodeLanguageController.cpp" />
     <ClCompile Include="editor\document\EditorDocumentController.cpp" />
     <ClCompile Include="workspace\WorkspaceDocuments.cpp" />
+    <ClCompile Include="workspace\TabDragPresentation.cpp" />
     <ClCompile Include="workspace\WorkspaceEdgeBar.cpp" />
     <ClCompile Include="workspace\RecentWorkspace.cpp" />
     <ClCompile Include="MainWindow.Images.cpp" />

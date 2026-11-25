@@ -12,7 +12,7 @@ namespace winrt::Folia {
         return IsWorkspaceImage(kind) ? WorkspaceIcon::Image : WorkspaceIcon::Document;
     }
 
-    static Windows::Data::Json::JsonObject LoadFileIcons() {
+    static Windows::Data::Json::JsonObject LoadThemeIcons() {
         Windows::Data::Json::JsonObject icons{nullptr};
         std::ifstream file(AssetPath(std::filesystem::path(L"themes") / L"resources" / L"workspace-icons.json"), std::ios::binary);
         if (file) {
@@ -39,25 +39,28 @@ namespace winrt::Folia {
         return {};
     }
 
-    static std::wstring WorkspacePathXaml(std::wstring_view path);
-
-    std::wstring WorkspaceIconXaml(WorkspaceIcon icon) {
-        auto path = WorkspaceIconPath(icon);
-        if (icon == WorkspaceIcon::Markdown || icon == WorkspaceIcon::Image || icon == WorkspaceIcon::Source) {
-            static const auto icons = LoadFileIcons();
-            if (icons) {
-                auto packaged = icons.GetNamedString(icon == WorkspaceIcon::Source ? L"source" : icon == WorkspaceIcon::Markdown ? L"markdown" : L"image", L"");
-                if (!packaged.empty() && std::wstring_view(packaged).find_first_not_of(L"0123456789.+-, MmLlHhVvCcAaZz") == std::wstring_view::npos)
-                    return WorkspacePathXaml(packaged);
-            }
-        }
-        return WorkspacePathXaml(path);
-    }
-
     static std::wstring WorkspacePathXaml(std::wstring_view path) {
         return std::wstring(L"<Viewbox xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' Width='16' Height='16' Stretch='Uniform'><Canvas Width='20' Height='20'><Path Fill='{ThemeResource TextFillColorPrimaryBrush}' Data='")
             + std::wstring(path) + L"' Width='20' Height='20' Stretch='None'/>"
             + L"</Canvas></Viewbox>";
+    }
+
+    std::wstring WorkspaceIconXaml(WorkspaceIcon icon) {
+        const wchar_t* key = nullptr;
+        switch (icon) {
+        case WorkspaceIcon::PanelLeft: key = L"sidebar"; break;
+        case WorkspaceIcon::Source: key = L"source"; break;
+        case WorkspaceIcon::Markdown: key = L"markdown"; break;
+        case WorkspaceIcon::Image: key = L"image"; break;
+        default: break;
+        }
+        static const auto icons = LoadThemeIcons();
+        if (key && icons) {
+            auto packaged = icons.GetNamedString(key, L"");
+            if (!packaged.empty() && std::wstring_view(packaged).find_first_not_of(L"0123456789.+-, MmLlHhVvCcAaZz") == std::wstring_view::npos)
+                return WorkspacePathXaml(packaged);
+        }
+        return WorkspacePathXaml(WorkspaceIconPath(icon));
     }
 
     Microsoft::UI::Xaml::Controls::Viewbox MakeWorkspaceIcon(WorkspaceIcon icon) {

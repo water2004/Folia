@@ -113,8 +113,8 @@ namespace winrt::Folia::implementation
         FindButton().Text(Localize(L"Find"));
         ReplaceButton().Text(Localize(L"Replace"));
         tooltip(SidebarButton(), L"ToggleSidebar");
-        FilesTab().Text(Localize(L"Files"));
-        OutlineTab().Text(Localize(L"Outline"));
+        FilesTab().Content(winrt::box_value(Localize(L"Files")));
+        OutlineTab().Content(winrt::box_value(Localize(L"Outline")));
         OutlineEmptyText().Text(Localize(L"NoOutline"));
 
         OpenButton().Text(Localize(L"Open"));
@@ -517,13 +517,13 @@ namespace winrt::Folia::implementation
         auto titleBar = AppWindow().TitleBar();
         titleBar.BackgroundColor(ColorReference(colors.shell_bg));
         titleBar.ForegroundColor(ColorReference(colors.shell_fg));
-        titleBar.ButtonBackgroundColor(ColorReference(colors.shell_layer_bg));
+        titleBar.ButtonBackgroundColor(Windows::UI::Color{});
         titleBar.ButtonForegroundColor(ColorReference(colors.shell_fg));
         titleBar.ButtonHoverBackgroundColor(ColorReference(colors.shell_layer_bg));
         titleBar.ButtonHoverForegroundColor(ColorReference(colors.shell_fg));
         titleBar.ButtonPressedBackgroundColor(ColorReference(colors.shell_border));
         titleBar.ButtonPressedForegroundColor(ColorReference(colors.shell_fg));
-        titleBar.ButtonInactiveBackgroundColor(ColorReference(colors.shell_layer_bg));
+        titleBar.ButtonInactiveBackgroundColor(Windows::UI::Color{});
         titleBar.ButtonInactiveForegroundColor(ColorReference(colors.shell_muted_fg));
 
         UpdateWorkspaceLayout();

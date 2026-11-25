@@ -3,6 +3,7 @@
 #include "../support/DocumentControllerFixture.h"
 #include "MainWindow.xaml.h"
 #include "visual_window.h"
+#include <winrt/Microsoft.UI.Content.h>
 #include <winrt/Microsoft.UI.Xaml.Automation.Peers.h>
 #include <winrt/Microsoft.UI.Xaml.Automation.Provider.h>
 #include <microsoft.ui.xaml.window.h>
@@ -109,6 +110,49 @@ namespace {
             Pump([&] { return tabs.ContainerFromItem(secondItem) == nullptr; });
             expect(tabs.SelectedItem() == firstItem);
         };
+        "workspace chrome separates background tabs and preserves their width on hover"_test = [] {
+            ChromeWindow f;
+            auto tabs = f.Find<TabView>(L"DocumentTabs");
+            auto original = tabs.SelectedItem();
+            auto add = Descendant(tabs, L"AddButton").as<Button>();
+            for (int i = 0; i < 2; ++i) {
+                auto previous = tabs.SelectedItem();
+                Invoke(add);
+                Pump([&] { return previous != tabs.SelectedItem(); });
+            }
+            tabs.SelectedItem(original);
+            f.root.UpdateLayout();
+            auto selected = tabs.ContainerFromIndex(0).as<TabViewItem>();
+            auto next = tabs.ContainerFromIndex(1).as<TabViewItem>();
+            expect(Descendant(selected, L"TabSeparator").Opacity() == 0.);
+            expect(Descendant(next, L"TabSeparator").Opacity() == 1.);
+            auto width = next.ActualWidth();
+            expect(VisualStateManager::GoToState(next, L"PointerOver", false));
+            expect(Descendant(next, L"HoverSurface").Opacity() > 0.);
+            expect(VisualStateManager::GoToState(next, L"CloseButtonVisible", false));
+            f.root.UpdateLayout();
+            expect(next.ActualWidth() == width);
+            auto list = Descendant(tabs, L"TabListView").as<ListViewBase>();
+            expect(list.ItemContainerTransitions().GetAt(0).try_as<Media::Animation::RepositionThemeTransition>() != nullptr);
+            auto slot = selected.TransformToVisual(f.root).TransformPoint({0, 0});
+            winrt::Folia::TabDragPresentation feedback;
+            auto converter = f.root.XamlRoot().CoordinateConverter();
+            auto destination = converter.ConvertLocalToScreen(winrt::Windows::Foundation::Point{slot.X + 20.f, slot.Y + 10.f});
+            feedback.Start(tabs, original, 8.f, winrt::Microsoft::UI::Input::InputNonClientPointerSource::GetForWindowId(f.window.AppWindow().Id()));
+            feedback.MoveTo(destination);
+            auto artwork = Descendant(selected, L"LayoutRoot");
+            auto motion = artwork.RenderTransform().as<Media::TranslateTransform>();
+            expect(std::abs(motion.X() - (converter.ConvertScreenToLocal(destination).X - slot.X - 8.f)) < .01);
+            expect(selected.TransformToVisual(f.root).TransformPoint({0, 0}).X == slot.X);
+            feedback.Stop();
+            expect(artwork.RenderTransform().as<Media::TranslateTransform>().X() == 0.);
+            for (int i = 2; i > 0; --i) {
+                auto tab = tabs.ContainerFromIndex(i).as<TabViewItem>();
+                tabs.SelectedIndex(i);
+                Invoke(Descendant(tab, L"CloseButton").as<Button>());
+                Pump([&] { return tabs.ContainerFromIndex(i) == nullptr; });
+            }
+        };
         "workspace chrome renders the real window with one complete divider and one shared sidebar"_test = [] { try {
             ChromeWindow f;
             auto tabs = f.Find<TabView>(L"DocumentTabs");
@@ -116,7 +160,7 @@ namespace {
             auto tab = tabs.ContainerFromIndex(0).as<TabViewItem>();
             auto bounds = tab.TransformToVisual(f.root).TransformBounds({0, 0, static_cast<float>(tab.ActualWidth()), static_cast<float>(tab.ActualHeight())});
             expect(bounds.Y >= 0.f);
-            expect(bounds.Y + bounds.Height <= 32.f);
+            expect(bounds.Y + bounds.Height <= 33.f);
             expect(tab.IsSelected());
             expect(f.root.FindName(L"CloseOutlineButton") == nullptr);
             expect(!f.Find<SplitView>(L"DocumentWorkspace").IsPaneOpen());
@@ -135,6 +179,8 @@ namespace {
                 auto y = static_cast<int>((dividerBounds.Y + dividerBounds.Height * 0.6) * raster);
                 auto reference = pixels.data() + (y * bitmap.PixelWidth() + 8) * 4;
                 for (int x = 8; x < bitmap.PixelWidth() - 8; x += 32) {
+                    // The selected browser tab opens into the editor at its lower edge.
+                    if (x >= bounds.X * raster && x <= (bounds.X + bounds.Width) * raster) continue;
                     auto offset = (y * bitmap.PixelWidth() + x) * 4;
                     auto data = pixels.data() + offset;
                     expect(std::abs(int(data[0]) - int(reference[0])) < 3);
@@ -223,22 +269,21 @@ namespace {
             Pump([&] { return f.root.ActualWidth() < 700; });
             auto button = f.Find<Primitives::ToggleButton>(L"SidebarButton");
             auto pane = f.Find<SplitView>(L"DocumentWorkspace");
-            auto sides = f.Find<SelectorBar>(L"SidebarTabs");
             Automation::Peers::ToggleButtonAutomationPeer peer(button);
             auto toggle = peer.GetPattern(Automation::Peers::PatternInterface::Toggle).as<Automation::Provider::IToggleProvider>();
             toggle.Toggle();
             Pump([&] { return pane.IsPaneOpen(); });
             expect(pane.DisplayMode() == SplitViewDisplayMode::Overlay);
             expect(pane.PanePlacement() == SplitViewPanePlacement::Left);
-            auto files = f.Find<SelectorBarItem>(L"FilesTab");
-            auto outline = f.Find<SelectorBarItem>(L"OutlineTab");
-            sides.SelectedItem(outline);
+            auto files = f.Find<RadioButton>(L"FilesTab");
+            auto outline = f.Find<RadioButton>(L"OutlineTab");
+            outline.IsChecked(true);
             expect(f.Find<Grid>(L"OutlinePaneContent").Visibility() == Visibility::Visible);
             expect(f.Find<Grid>(L"ExplorerPane").Visibility() == Visibility::Collapsed);
             toggle.Toggle();
             Pump([&] { return !pane.IsPaneOpen(); });
-            expect(sides.SelectedItem() == outline);
-            sides.SelectedItem(files);
+            expect(outline.IsChecked().GetBoolean());
+            files.IsChecked(true);
             auto settle = std::chrono::steady_clock::now() + std::chrono::milliseconds(400);
             Pump([&] { return std::chrono::steady_clock::now() >= settle; });
             auto active = tabs.ContainerFromItem(tabs.SelectedItem()).as<TabViewItem>();
@@ -248,7 +293,8 @@ namespace {
                 expect(arrow.Content().try_as<Viewbox>() != nullptr) << "native overflow uses a vector chevron";
                 auto at = arrow.TransformToVisual(f.root).TransformPoint({0, 0});
                 expect(arrow.ActualWidth() == 28. && arrow.ActualHeight() == 28.) << "overflow hit target is 28 DIP";
-                expect(std::abs(at.Y + arrow.ActualHeight() / 2 - 16.) < .5) << "overflow center aligns to title strip";
+                auto center = f.Find<Grid>(L"TopChrome").ActualHeight() / 2;
+                expect(std::abs(at.Y + arrow.ActualHeight() / 2 - center) <= 1. / dpi) << "overflow center aligns to title strip";
             }
             auto activeBounds = active.TransformToVisual(f.root).TransformBounds({0, 0, static_cast<float>(active.ActualWidth()), static_cast<float>(active.ActualHeight())});
             expect(activeBounds.X >= 0.f);
@@ -291,14 +337,15 @@ namespace {
                 Media::Imaging::RenderTargetBitmap bitmap;
                 Await(bitmap.RenderAsync(icon, 80, 80));
                 auto pixels = Await(bitmap.GetPixelsAsync());
-                int ink = 0;
+                int ink = 0, clipped = 0;
                 for (int y = 0; y < bitmap.PixelHeight(); ++y)
                     for (int x = 0; x < bitmap.PixelWidth(); ++x)
                         if (pixels.data()[(y * bitmap.PixelWidth() + x) * 4 + 3] > 20) {
                             ++ink;
-                            expect(x > 0 && y > 0 && x + 1 < bitmap.PixelWidth() && y + 1 < bitmap.PixelHeight());
+                            if (!x || !y || x + 1 == bitmap.PixelWidth() || y + 1 == bitmap.PixelHeight()) ++clipped;
                         }
                 expect(ink > 50);
+                expect(clipped == 0);
                 SavePng(artifacts / (std::wstring(name) + L".png"), bitmap.PixelWidth(), bitmap.PixelHeight(), pixels);
             }
         };

@@ -45,7 +45,7 @@ namespace winrt::Folia::implementation {
             recentWorkspace.Remember(RecentWorkspaceKind::Folder, folderExplorer.RootPath());
             FileTree().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
             ExplorerEmptyState().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
-            SidebarTabs().SelectedItem(FilesTab());
+            FilesTab().IsChecked(true);
             DocumentWorkspace().IsPaneOpen(true);
         } catch (winrt::hresult_error const& error) {
             if (!current()) co_return;

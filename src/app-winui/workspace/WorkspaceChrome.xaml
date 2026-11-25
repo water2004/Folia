@@ -28,6 +28,37 @@
             </ControlTemplate>
         </Setter.Value></Setter>
     </Style>
+    <Style x:Key="SidebarTabStyle" TargetType="RadioButton">
+        <Setter Property="Height" Value="28"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="MinWidth" Value="0"/>
+        <Setter Property="MinHeight" Value="0"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="UseSystemFocusVisuals" Value="True"/>
+        <Setter Property="Template"><Setter.Value>
+            <ControlTemplate TargetType="RadioButton">
+                <Grid Background="Transparent">
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal"/>
+                            <VisualState x:Name="PointerOver"><VisualState.Setters><Setter Target="Hover.Opacity" Value="1"/></VisualState.Setters></VisualState>
+                            <VisualState x:Name="Pressed"><VisualState.Setters><Setter Target="Hover.Opacity" Value="1"/></VisualState.Setters></VisualState>
+                        </VisualStateGroup>
+                        <VisualStateGroup x:Name="CheckStates">
+                            <VisualState x:Name="Unchecked"/>
+                            <VisualState x:Name="Checked"><VisualState.Setters><Setter Target="SelectedSurface.Opacity" Value="1"/></VisualState.Setters></VisualState>
+                        </VisualStateGroup>
+                    </VisualStateManager.VisualStateGroups>
+                    <Border x:Name="Hover" Background="{ThemeResource SubtleFillColorSecondaryBrush}" CornerRadius="5" Opacity="0"/>
+                    <Border x:Name="SelectedSurface" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1" CornerRadius="5" Opacity="0"/>
+                    <ContentPresenter Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                      Foreground="{TemplateBinding Foreground}"/>
+                </Grid>
+            </ControlTemplate>
+        </Setter.Value></Setter>
+    </Style>
     <!-- Keep the native ScrollViewer and repeat-button contracts. Only the
          overflow presentation changes; selection/reordering remain TabView's. -->
     <Style x:Key="TabViewScrollButtonStyle" TargetType="RepeatButton">
@@ -91,6 +122,9 @@
         <Setter Property="IsTabStop" Value="False"/>
         <Setter Property="TabNavigation" Value="Once"/>
         <Setter Property="IsSwipeEnabled" Value="False"/>
+        <Setter Property="ItemContainerTransitions"><Setter.Value><TransitionCollection>
+            <RepositionThemeTransition IsStaggeringEnabled="False"/>
+        </TransitionCollection></Setter.Value></Setter>
         <Setter Property="SingleSelectionFollowsFocus" Value="False"/>
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
@@ -117,7 +151,7 @@
          behavior. This template owns only the editor's flat tab appearance. -->
     <Style x:Key="WorkspaceTabStyle" TargetType="TabViewItem">
         <Setter Property="MinHeight" Value="30"/>
-        <Setter Property="Margin" Value="0,2,1,0"/>
+        <Setter Property="Margin" Value="0,3,0,0"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="UseSystemFocusVisuals" Value="True"/>
@@ -127,33 +161,39 @@
                     <Grid x:Name="LayoutRoot" Height="30" Background="Transparent">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup x:Name="CommonStates">
+                                <VisualStateGroup.Transitions>
+                                    <VisualTransition From="Normal" To="PointerOver" GeneratedDuration="0:0:0.1"/>
+                                    <VisualTransition From="PointerOver" To="Normal" GeneratedDuration="0:0:0.1"/>
+                                    <VisualTransition From="Selected" To="PointerOverSelected" GeneratedDuration="0:0:0.1"/>
+                                    <VisualTransition From="PointerOverSelected" To="Selected" GeneratedDuration="0:0:0.1"/>
+                                </VisualStateGroup.Transitions>
                                 <VisualState x:Name="Normal"/>
                                 <VisualState x:Name="PointerOver"><VisualState.Setters>
-                                    <Setter Target="TabContainer.Background" Value="{ThemeResource SubtleFillColorSecondaryBrush}"/>
+                                    <Setter Target="HoverSurface.Opacity" Value="0.7"/>
                                 </VisualState.Setters></VisualState>
                                 <VisualState x:Name="Pressed"><VisualState.Setters>
-                                    <Setter Target="TabContainer.Background" Value="{ThemeResource SubtleFillColorTertiaryBrush}"/>
+                                    <Setter Target="HoverSurface.Opacity" Value="1"/>
                                 </VisualState.Setters></VisualState>
                                 <VisualState x:Name="Selected"><VisualState.Setters>
-                                    <Setter Target="TabContainer.Background" Value="{ThemeResource FoliaShellBackgroundBrush}"/>
                                     <Setter Target="SelectionIndicator.Opacity" Value="1"/>
                                 </VisualState.Setters></VisualState>
                                 <!-- CommonStates names are TabViewItem's native
                                      contract, including the modifier order. -->
                                 <VisualState x:Name="PointerOverSelected"><VisualState.Setters>
-                                    <Setter Target="TabContainer.Background" Value="{ThemeResource FoliaShellBackgroundBrush}"/>
                                     <Setter Target="SelectionIndicator.Opacity" Value="1"/>
+                                    <Setter Target="HoverSurface.Opacity" Value="0.25"/>
                                 </VisualState.Setters></VisualState>
                                 <VisualState x:Name="PressedSelected"><VisualState.Setters>
-                                    <Setter Target="TabContainer.Background" Value="{ThemeResource FoliaShellBackgroundBrush}"/>
                                     <Setter Target="SelectionIndicator.Opacity" Value="1"/>
+                                    <Setter Target="HoverSurface.Opacity" Value="0.5"/>
                                 </VisualState.Setters></VisualState>
                                 <VisualState x:Name="Disabled"><VisualState.Setters><Setter Target="LayoutRoot.Opacity" Value="0.4"/></VisualState.Setters></VisualState>
                             </VisualStateGroup>
                             <VisualStateGroup x:Name="CloseIconStates">
                                 <VisualState x:Name="CloseButtonVisible"/>
                                 <VisualState x:Name="CloseButtonCollapsed"><VisualState.Setters>
-                                    <Setter Target="CloseButton.Visibility" Value="Collapsed"/>
+                                    <Setter Target="CloseButton.Opacity" Value="0"/>
+                                    <Setter Target="CloseButton.IsHitTestVisible" Value="False"/>
                                 </VisualState.Setters></VisualState>
                             </VisualStateGroup>
                             <VisualStateGroup x:Name="DragStates">
@@ -161,9 +201,17 @@
                                 <VisualState x:Name="Dragging"><VisualState.Setters><Setter Target="LayoutRoot.Opacity" Value="0.5"/></VisualState.Setters></VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
-                        <Border x:Name="SelectionIndicator" CornerRadius="7,7,0,0" BorderThickness="1,1,1,0"
-                                BorderBrush="{ThemeResource FoliaShellBorderBrush}" Background="{ThemeResource FoliaShellBackgroundBrush}" Opacity="0"/>
-                        <Grid x:Name="TabContainer" Margin="1,1,1,0" CornerRadius="7,7,0,0" Padding="10,0,4,0" Background="Transparent"
+                        <!-- WinUI owns separator opacity for hovered, selected and adjacent tabs. -->
+                        <Border x:Name="TabSeparator" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                Width="1" Height="13" CornerRadius="0.5" Background="{ThemeResource TabViewItemSeparator}"/>
+                        <Grid x:Name="SelectionIndicator" ColumnDefinitions="5,*,5" Opacity="0" IsHitTestVisible="False">
+                            <Path Width="5" Height="5" VerticalAlignment="Bottom" Data="M0,5 Q5,5 5,0 L5,5 Z" Fill="{TemplateBinding Background}"/>
+                            <Border Grid.Column="1" CornerRadius="8,8,0,0" Background="{TemplateBinding Background}"/>
+                            <Path Grid.Column="2" Width="5" Height="5" VerticalAlignment="Bottom" Data="M0,0 Q0,5 5,5 L0,5 Z" Fill="{TemplateBinding Background}"/>
+                        </Grid>
+                        <Border x:Name="HoverSurface" CornerRadius="6" Margin="4,2,4,3" Opacity="0"
+                                Background="{ThemeResource SubtleFillColorTertiaryBrush}" IsHitTestVisible="False"/>
+                        <Grid x:Name="TabContainer" Margin="5,0" CornerRadius="8,8,0,0" Padding="9,0,4,0" Background="Transparent"
                               ColumnDefinitions="*,Auto" Control.IsTemplateFocusTarget="True">
                             <ContentPresenter x:Name="ContentPresenter" Content="" ContentTemplate="{TemplateBinding HeaderTemplate}"
                                               FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>

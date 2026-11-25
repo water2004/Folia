@@ -23,6 +23,7 @@
 #include "workspace/FolderExplorerController.h"
 #include "workspace/RecentWorkspace.h"
 #include "workspace/WorkspaceEdgeBar.h"
+#include "workspace/TabDragPresentation.h"
 
 namespace winrt::Folia::implementation
 {
@@ -176,6 +177,8 @@ namespace winrt::Folia::implementation
         bool tabPointerDown = false, tabMoveInProgress = false;
         bool updatingTabs = false;
         WorkspaceEdgeBar topBar, bottomBar;
+        TabDragPresentation dragPresentation;
+        float tabGrabOffset = 0;
         bool operationActive = false;
         bool windowClosed = false;
         Windows::Foundation::IAsyncAction imagePreviewLoad{nullptr};
