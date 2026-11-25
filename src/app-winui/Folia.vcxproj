@@ -212,6 +212,7 @@
     <ClInclude Include="editor\interaction\EditorKeyboardController.h" />
     <ClInclude Include="editor\document\EditorDocumentController.h" />
     <ClInclude Include="workspace\WorkspaceDocuments.h" />
+    <ClInclude Include="workspace\RecentWorkspace.h" />
     <ClInclude Include="workspace\WorkspaceFileKind.h" />
     <ClInclude Include="workspace\WorkspaceIcons.h" />
     <ClInclude Include="..\platform\windows\storage\WorkspaceFileOperations.h" />
@@ -723,6 +724,7 @@
     <ClCompile Include="editor\interaction\EditorCodeLanguageController.cpp" />
     <ClCompile Include="editor\document\EditorDocumentController.cpp" />
     <ClCompile Include="workspace\WorkspaceDocuments.cpp" />
+    <ClCompile Include="workspace\RecentWorkspace.cpp" />
     <ClCompile Include="MainWindow.Images.cpp" />
     <ClCompile Include="workspace\WorkspaceIcons.cpp" />
     <ClCompile Include="..\platform\windows\storage\WorkspaceFileOperations.cpp">
@@ -944,7 +946,7 @@
   <Target Name="CopyConfiguredFoliaAssets" AfterTargets="Build" Condition="'$(FoliaAssetsDirectory)'!='' and '$(FoliaDeployAssets)'=='true'">
     <ItemGroup>
       <FoliaDeployableAsset Include="$(ProjectDir)Assets\**\*"
-        Exclude="$(ProjectDir)Assets\settings.json;$(ProjectDir)Assets\themes\custom\**\*" />
+        Exclude="$(ProjectDir)Assets\settings.json;$(ProjectDir)Assets\recent-workspace.json;$(ProjectDir)Assets\recent-workspace.json.tmp;$(ProjectDir)Assets\themes\custom\**\*" />
     </ItemGroup>
     <Copy
       SourceFiles="@(FoliaDeployableAsset)"

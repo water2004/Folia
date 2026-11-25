@@ -72,12 +72,14 @@ namespace winrt::Folia::implementation {
                     {winrt::to_hstring(bitmap.PixelWidth()), winrt::to_hstring(bitmap.PixelHeight())}));
                 ImageSizeText().Visibility(Visibility::Visible);
             }
+            recentWorkspace.Remember(RecentWorkspaceKind::File, path);
             ImagePreviewMessage().Text(L"");
             SetStatus(LocalizeFormat(L"StatusOpenedFile", {winrt::hstring(path.filename().c_str())}));
         } catch (winrt::hresult_canceled const&) {
             co_return;
-        } catch (winrt::hresult_error const&) {
+        } catch (winrt::hresult_error const& error) {
             if (!current()) co_return;
+            recentWorkspace.ForgetMissing(RecentWorkspaceKind::File, path, error.code());
             WorkspaceImage().Source(nullptr);
             ImagePreviewMessage().Text(Localize(L"ImagePreviewFailed"));
         }

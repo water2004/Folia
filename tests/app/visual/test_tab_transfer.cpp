@@ -94,6 +94,21 @@ namespace winrt::Folia::implementation {
             WorkspaceOpenMode mode = WorkspaceOpenMode::Keep) {
             Impl(window)->OpenWorkspaceFile(std::move(path), mode);
         }
+        static void OpenFolder(Microsoft::UI::Xaml::Window const& window, std::filesystem::path const& path) {
+            Impl(window)->OpenWorkspaceFolder(path);
+        }
+        static void SetRecentHistory(Microsoft::UI::Xaml::Window const& window, std::filesystem::path const& path) {
+            Impl(window)->recentWorkspace = RecentWorkspace(path);
+        }
+        static auto OpenFileMenu(Microsoft::UI::Xaml::Window const& window) {
+            auto button = Impl(window)->MainMenuButton();
+            auto flyout = button.Flyout();
+            flyout.ShowAt(button);
+            return flyout;
+        }
+        static auto RecentFiles(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->RecentFilesMenu().Items(); }
+        static auto RecentFolders(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->RecentFoldersMenu().Items(); }
+        static auto FolderRoot(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->folderExplorer.RootPath(); }
         static auto Preview(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->WorkspaceImage(); }
         static auto PreviewViewer(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->ImagePreviewViewer(); }
         static auto PreviewMessage(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->ImagePreviewMessage(); }
@@ -130,6 +145,51 @@ namespace {
         return nullptr;
     }
     suite tab_transfer_tests = [] {
+        "workspace recent menus reopen a file and a folder in a new window"_test = [] {
+            TestDirectory directory;
+            auto folder = directory.path / L"资料";
+            std::filesystem::create_directory(folder);
+            auto file = folder / L"笔记.md";
+            std::ofstream(file) << "# Saved note";
+            auto history = directory.path / L"recent.json";
+            auto sameEntry = [](std::filesystem::path const& actual, std::filesystem::path const& expected) {
+                std::error_code error;
+                return !actual.empty() && std::filesystem::equivalent(actual, expected, error);
+            };
+            {
+                OwnedWindow first(App()->CreateMainWindow());
+                Access::SetRecentHistory(first.window, history);
+                Access::Open(first.window, file);
+                Access::OpenFolder(first.window, folder);
+                Pump([&] {
+                    auto saved = winrt::Folia::RecentWorkspace(history).Read();
+                    return !saved.files.empty() && !saved.folders.empty();
+                });
+            }
+
+            OwnedWindow second(App()->CreateMainWindow());
+            Access::SetRecentHistory(second.window, history);
+            auto flyout = Access::OpenFileMenu(second.window);
+            auto files = Access::RecentFiles(second.window);
+            expect(fatal(files.Size() > 0_u));
+            auto recentFile = files.GetAt(0).as<Controls::MenuFlyoutItem>();
+            expect(recentFile.Text() == L"笔记.md" && recentFile.Visibility() == Visibility::Visible);
+            recentFile.Command().Execute(recentFile.CommandParameter());
+            flyout.Hide();
+            Pump([&] {
+                auto active = Access::Documents(second.window).Active();
+                return active->editor && active->editor->loaded && sameEntry(active->path, file);
+            });
+
+            flyout = Access::OpenFileMenu(second.window);
+            auto folders = Access::RecentFolders(second.window);
+            expect(fatal(folders.Size() > 0_u));
+            auto recentFolder = folders.GetAt(0).as<Controls::MenuFlyoutItem>();
+            expect(recentFolder.Text() == L"资料" && recentFolder.Visibility() == Visibility::Visible);
+            recentFolder.Command().Execute(recentFolder.CommandParameter());
+            flyout.Hide();
+            Pump([&] { return sameEntry(Access::FolderRoot(second.window), folder); });
+        };
         "workspace image tabs decode PNG and SVG and keep the editor view separate"_test = [] {
             using namespace winrt::Folia;
             using namespace winrt::Microsoft::UI::Xaml::Media::Imaging;

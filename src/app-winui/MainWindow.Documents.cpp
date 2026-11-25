@@ -158,7 +158,8 @@ namespace winrt::Folia::implementation {
                 if (mode == winrt::Folia::WorkspaceOpenMode::Keep) {
                     auto lifetime = get_strong();
                     auto file = co_await Windows::Storage::StorageFile::GetFileFromPathAsync(path.native());
-                    co_await Windows::System::Launcher::LaunchFileAsync(file);
+                    if (co_await Windows::System::Launcher::LaunchFileAsync(file))
+                        recentWorkspace.Remember(RecentWorkspaceKind::File, path);
                 }
                 co_return;
             }
@@ -167,11 +168,16 @@ namespace winrt::Folia::implementation {
             auto result = workspaceDocuments.Open(std::move(path), mode);
             ActivateDocument(result.document->id);
             RefreshDocumentTabs();
+            if (result.document->editor && result.document->editor->loaded)
+                recentWorkspace.Remember(RecentWorkspaceKind::File, result.document->path);
             if (result.replaced) {
                 if (previous->id == *result.replaced && previous->editor) previous->editor->controller.Detach();
                 // The old preview's last shared owner releases its session/cache.
             }
-        } catch (winrt::hresult_error const& error) { SetStatus(LocalizeFormat(L"StatusOpenFailed", {error.message()})); }
+        } catch (winrt::hresult_error const& error) {
+            recentWorkspace.ForgetMissing(RecentWorkspaceKind::File, path, error.code());
+            SetStatus(LocalizeFormat(L"StatusOpenFailed", {error.message()}));
+        }
         catch (std::exception const& error) { SetStatus(LocalizeFormat(L"StatusOpenFailed", {winrt::to_hstring(error.what())})); }
     }
 
@@ -187,8 +193,16 @@ namespace winrt::Folia::implementation {
             auto file = co_await Windows::Storage::StorageFile::GetFileFromPathAsync(document->path.wstring());
             if (!current()) co_return;
             auto loaded = co_await editor.controller.OpenFileAsync(file);
-            if (current()) editor.loaded = loaded;
-        } catch (winrt::hresult_error const& error) { if (current()) SetStatus(LocalizeFormat(L"StatusOpenFailed", {error.message()})); }
+            if (current()) {
+                editor.loaded = loaded;
+                if (loaded) recentWorkspace.Remember(RecentWorkspaceKind::File, document->path);
+            }
+        } catch (winrt::hresult_error const& error) {
+            if (current()) {
+                recentWorkspace.ForgetMissing(RecentWorkspaceKind::File, document->path, error.code());
+                SetStatus(LocalizeFormat(L"StatusOpenFailed", {error.message()}));
+            }
+        }
         catch (std::exception const& error) { if (current()) SetStatus(LocalizeFormat(L"StatusOpenFailed", {winrt::to_hstring(error.what())})); }
         if (!current()) co_return;
         editor.opening = false;

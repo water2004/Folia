@@ -2,6 +2,7 @@
 #include "support/folia_test.hpp"
 #include "support/DocumentControllerFixture.h"
 #include "workspace/WorkspaceDocuments.h"
+#include "workspace/RecentWorkspace.h"
 #include "workspace/WorkspaceIcons.h"
 
 import folia.markdown.instrumentation;
@@ -12,6 +13,31 @@ namespace {
     using namespace document_tests;
 
     suite workspace_documents = [] {
+        "workspace recent files and folders persist deduplicated in separate lists"_test = [] {
+            TestDirectory fixture;
+            auto historyFile = fixture.path / L"recent.json";
+            RecentWorkspace firstWindow(historyFile), secondWindow(historyFile);
+            using Kind = RecentWorkspaceKind;
+            auto note = fixture.path / L"笔记.md";
+            auto folder = fixture.path / L"资料";
+            firstWindow.Remember(Kind::File, note);
+            secondWindow.Remember(Kind::Folder, folder / L".");
+            for (int i = 0; i < 14; ++i)
+                firstWindow.Remember(Kind::File, fixture.path / (std::to_wstring(i) + L".png"));
+            secondWindow.Remember(Kind::File, note);
+            firstWindow.Remember(Kind::File, fixture.path / L"笔记.MD");
+            auto persisted = RecentWorkspace(historyFile).Read();
+            expect(persisted.files.size() == 12_u);
+            expect(fatal(!persisted.files.empty() && persisted.folders.size() == 1_u));
+            expect(persisted.files.front() == note && persisted.folders.front() == folder);
+            expect(persisted.files.at(1) == fixture.path / L"13.png");
+            firstWindow.ForgetMissing(Kind::Folder, folder, HRESULT_FROM_WIN32(ERROR_ACCESS_DENIED));
+            expect(secondWindow.Read().folders.size() == 1_u);
+            firstWindow.ForgetMissing(Kind::File, fixture.path / L"笔记.MD", HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND));
+            expect(secondWindow.Read().files.size() == 11_u);
+            firstWindow.ForgetMissing(Kind::Folder, folder, HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND));
+            expect(secondWindow.Read().folders.empty());
+        };
         "workspace classifies files and shares the preview slot with images"_test = [] {
             expect(WorkspaceFileIcon(ClassifyWorkspaceFile(L"note.MARKDOWN")) == WorkspaceIcon::Markdown);
             expect(WorkspaceFileIcon(ClassifyWorkspaceFile(L"photo.JPEG")) == WorkspaceIcon::Image);

@@ -82,7 +82,9 @@
                             <MenuFlyoutSubItem x:Name="FileMenu" Text="File">
                                 <MenuFlyoutItem x:Name="NewButton" Text="New document" KeyboardAcceleratorTextOverride="Ctrl+N"/>
                                 <MenuFlyoutItem x:Name="OpenButton" Text="Open file" KeyboardAcceleratorTextOverride="Ctrl+O"/>
+                                <MenuFlyoutSubItem x:Name="RecentFilesMenu" Text="Open Recent File"/>
                                 <MenuFlyoutItem x:Name="OpenFolderButton" Text="Open folder" KeyboardAcceleratorTextOverride="Ctrl+Shift+O"/>
+                                <MenuFlyoutSubItem x:Name="RecentFoldersMenu" Text="Open Recent Folder"/>
                                 <MenuFlyoutSeparator/>
                                 <MenuFlyoutItem x:Name="SaveButton" Text="Save" KeyboardAcceleratorTextOverride="Ctrl+S"/>
                                 <MenuFlyoutItem x:Name="SaveAsButton" Text="Save as"/>

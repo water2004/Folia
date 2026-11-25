@@ -319,6 +319,10 @@
   <data name="NewDocument" xml:space="preserve"><value>New document</value></data>
   <data name="NextTab" xml:space="preserve"><value>Next tab</value></data>
   <data name="OpenFolder" xml:space="preserve"><value>Open folder…</value></data>
+  <data name="OpenRecentFile" xml:space="preserve"><value>Open Recent File</value></data>
+  <data name="OpenRecentFolder" xml:space="preserve"><value>Open Recent Folder</value></data>
+  <data name="NoRecentFiles" xml:space="preserve"><value>No recent files</value></data>
+  <data name="NoRecentFolders" xml:space="preserve"><value>No recent folders</value></data>
   <data name="PreparingDocument" xml:space="preserve"><value>Preparing document…</value></data>
   <data name="PreviousTab" xml:space="preserve"><value>Previous tab</value></data>
   <data name="RefreshFiles" xml:space="preserve"><value>Refresh files</value></data>

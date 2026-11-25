@@ -26,18 +26,88 @@ namespace winrt::Folia::implementation {
         try {
             Microsoft::Windows::Storage::Pickers::FolderPicker picker{AppWindow().Id()};
             if (auto folder = folderExplorer.RootPath(); !folder.empty()) picker.SuggestedFolder(folder.native());
-            if (auto folder = co_await picker.PickSingleFolderAsync()) {
-                if (windowClosed) co_return;
-                auto path = std::filesystem::path(folder.Path().c_str());
-                folderExplorer.Open(path);
-
-                FileTree().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
-                ExplorerEmptyState().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
-                explorerOpen = true;
-                UpdateWorkspaceLayout();
-            }
+            if (auto folder = co_await picker.PickSingleFolderAsync())
+                OpenWorkspaceFolder(std::filesystem::path(folder.Path().c_str()));
         } catch (winrt::hresult_error const& error) { SetStatus(LocalizeFormat(L"StatusFolderFailed", {error.message()})); }
         catch (std::exception const& error) { SetStatus(LocalizeFormat(L"StatusFolderFailed", {winrt::to_hstring(error.what())})); }
+    }
+
+    winrt::fire_and_forget MainWindow::OpenWorkspaceFolder(std::filesystem::path path) {
+        if (closePending || closingDocument || windowClosed || relocatingFiles || folderExplorer.IsBusy()) co_return;
+        auto lifetime = get_strong();
+        auto generation = ++folderOpenGeneration;
+        auto current = [&] { return !windowClosed && generation == folderOpenGeneration; };
+        try {
+            auto folder = co_await Windows::Storage::StorageFolder::GetFolderFromPathAsync(path.native());
+            if (!current() || closePending || closingDocument || relocatingFiles || folderExplorer.IsBusy()) co_return;
+            if (settingsMode) SetSettingsMode(false);
+            folderExplorer.Open(std::filesystem::path(folder.Path().c_str()));
+            recentWorkspace.Remember(RecentWorkspaceKind::Folder, folderExplorer.RootPath());
+            FileTree().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
+            ExplorerEmptyState().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
+            explorerOpen = true;
+            UpdateWorkspaceLayout();
+        } catch (winrt::hresult_error const& error) {
+            if (!current()) co_return;
+            recentWorkspace.ForgetMissing(RecentWorkspaceKind::Folder, path, error.code());
+            SetStatus(LocalizeFormat(L"StatusFolderFailed", {error.message()}));
+        } catch (std::exception const& error) {
+            if (current()) SetStatus(LocalizeFormat(L"StatusFolderFailed", {winrt::to_hstring(error.what())}));
+        }
+    }
+
+    void MainWindow::RefreshRecentMenu() {
+        using Microsoft::UI::Xaml::Visibility;
+        using namespace Microsoft::UI::Xaml::Controls;
+        auto history = recentWorkspace.Read();
+        auto populate = [&](MenuFlyoutSubItem const& menu, std::vector<std::filesystem::path> const& paths,
+            RecentWorkspaceKind kind, wchar_t const* emptyLabel) {
+            auto items = menu.Items();
+            // Keep the nested flyout's item containers stable between openings.
+            if (!items.Size()) {
+                Microsoft::UI::Xaml::Input::XamlUICommand open;
+                open.ExecuteRequested(WindowEvent([this, kind](auto const&, auto const& args) {
+                    auto selected = winrt::unbox_value_or<winrt::hstring>(args.Parameter(), L"");
+                    if (selected.empty()) return;
+                    std::filesystem::path path(selected.c_str());
+                    if (kind == RecentWorkspaceKind::File) OpenWorkspaceFile(std::move(path), WorkspaceOpenMode::Keep);
+                    else OpenWorkspaceFolder(std::move(path));
+                }));
+                for (std::size_t i = 0; i < RecentWorkspace::MaximumEntries; ++i) {
+                    MenuFlyoutItem item;
+                    item.Command(open);
+                    items.Append(item);
+                }
+            }
+            for (std::uint32_t i = 0; i < items.Size(); ++i) {
+                auto item = items.GetAt(i).as<MenuFlyoutItem>();
+                if (i >= paths.size()) {
+                    auto showEmpty = i == 0;
+                    item.Visibility(showEmpty ? Visibility::Visible : Visibility::Collapsed);
+                    item.IsEnabled(false);
+                    item.CommandParameter(nullptr);
+                    ToolTipService::SetToolTip(item, nullptr);
+                    if (showEmpty) item.Text(Localize(emptyLabel));
+                    continue;
+                }
+                auto const& path = paths[i];
+                auto name = path.filename();
+                auto label = name.empty() ? path.native() : name.native();
+                if (!name.empty() && std::ranges::count_if(paths, [&](auto const& other) {
+                        auto otherName = other.filename();
+                        return ::CompareStringOrdinal(name.c_str(), -1, otherName.c_str(), -1, TRUE) == CSTR_EQUAL;
+                    }) > 1)
+                    label += L" · " + path.parent_path().native();
+                item.Text(winrt::hstring(label));
+                auto fullPath = winrt::box_value(winrt::hstring(path.c_str()));
+                item.CommandParameter(fullPath);
+                ToolTipService::SetToolTip(item, fullPath);
+                item.IsEnabled(true);
+                item.Visibility(Visibility::Visible);
+            }
+        };
+        populate(RecentFilesMenu(), history.files, RecentWorkspaceKind::File, L"NoRecentFiles");
+        populate(RecentFoldersMenu(), history.folders, RecentWorkspaceKind::Folder, L"NoRecentFolders");
     }
     Windows::Foundation::IAsyncOperation<winrt::hstring> MainWindow::ApplyExplorerActionAsync(folia::platform::WorkspaceFileAction action) {
         if (windowClosed || closePending || closingDocument || relocatingFiles) throw winrt::hresult_illegal_method_call();

@@ -43,6 +43,7 @@ function Get-DeploymentFiles {
             }
             else {
                 if ($relative -ieq 'settings.json' -or $relative -ieq 'settings.json.tmp') { return }
+                if ($relative -ieq 'recent-workspace.json' -or $relative -ieq 'recent-workspace.json.tmp') { return }
                 if ($relative -ieq 'latex/commands.user.json' -or $relative -ieq 'latex/commands.user.json.tmp') { return }
                 if ($relative.StartsWith('themes/custom/', [System.StringComparison]::OrdinalIgnoreCase)) { return }
             }

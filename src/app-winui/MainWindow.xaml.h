@@ -21,6 +21,7 @@
 #include "MainWindow.Lifecycle.h"
 #include "workspace/WorkspaceDocuments.h"
 #include "workspace/FolderExplorerController.h"
+#include "workspace/RecentWorkspace.h"
 
 namespace winrt::Folia::implementation
 {
@@ -83,6 +84,8 @@ namespace winrt::Folia::implementation
         void ReloadWorkspaceFile();
         winrt::fire_and_forget PickWorkspaceFile();
         winrt::fire_and_forget PickWorkspaceFolder();
+        winrt::fire_and_forget OpenWorkspaceFolder(std::filesystem::path path);
+        void RefreshRecentMenu();
         Windows::Foundation::IAsyncOperation<winrt::hstring> ApplyExplorerActionAsync(folia::platform::WorkspaceFileAction action);
         void RegisterWorkspaceHandlers();
         void RefreshDocumentTabs();
@@ -142,6 +145,7 @@ namespace winrt::Folia::implementation
         winrt::hstring lastCommand;
         winrt::Folia::WorkspaceDocuments workspaceDocuments;
         winrt::Folia::FolderExplorerController folderExplorer;
+        winrt::Folia::RecentWorkspace recentWorkspace;
         winrt::Folia::EditorSurfaceRenderer editorRenderer;
         winrt::Folia::EditorScrollController scrollController;
         winrt::Folia::EditorAnimationController animationController;
@@ -173,6 +177,7 @@ namespace winrt::Folia::implementation
         bool windowClosed = false;
         Windows::Foundation::IAsyncAction imagePreviewLoad{nullptr};
         std::uint64_t imagePreviewGeneration = 0;
+        std::uint64_t folderOpenGeneration = 0;
         std::uint64_t workspaceThemeRevision = 1;
         std::unordered_map<std::uint64_t, std::shared_ptr<DocumentTab>> tabItems;
         Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> tabSource =

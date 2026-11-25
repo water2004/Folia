@@ -98,6 +98,8 @@ namespace winrt::Folia::implementation
         FormatMenu().Text(Localize(L"FormatMenu"));
         NewButton().Text(Localize(L"NewDocument"));
         OpenFolderButton().Text(Localize(L"OpenFolder"));
+        RecentFilesMenu().Text(Localize(L"OpenRecentFile"));
+        RecentFoldersMenu().Text(Localize(L"OpenRecentFolder"));
         OpenFolderPaneButton().Content(winrt::box_value(Localize(L"OpenFolder")));
         NoFolderHeading().Text(Localize(L"NoFolderHeading"));
         NoFolderHint().Text(Localize(L"NoFolderHint"));

@@ -58,6 +58,8 @@ __pycache__/
 /Assets/
 /src/app-winui/Assets/settings.json
 /src/app-winui/Assets/settings.json.tmp
+/src/app-winui/Assets/recent-workspace.json
+/src/app-winui/Assets/recent-workspace.json.tmp
 /src/app-winui/Assets/themes/custom/
 
 # Restored WinUI NuGet packages

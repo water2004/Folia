@@ -319,6 +319,10 @@
   <data name="NewDocument" xml:space="preserve"><value>新建文档</value></data>
   <data name="NextTab" xml:space="preserve"><value>下一个标签页</value></data>
   <data name="OpenFolder" xml:space="preserve"><value>打开文件夹…</value></data>
+  <data name="OpenRecentFile" xml:space="preserve"><value>打开最近文件</value></data>
+  <data name="OpenRecentFolder" xml:space="preserve"><value>打开最近文件夹</value></data>
+  <data name="NoRecentFiles" xml:space="preserve"><value>暂无最近文件</value></data>
+  <data name="NoRecentFolders" xml:space="preserve"><value>暂无最近文件夹</value></data>
   <data name="PreparingDocument" xml:space="preserve"><value>正在准备文档…</value></data>
   <data name="PreviousTab" xml:space="preserve"><value>上一个标签页</value></data>
   <data name="RefreshFiles" xml:space="preserve"><value>刷新文件列表</value></data>
