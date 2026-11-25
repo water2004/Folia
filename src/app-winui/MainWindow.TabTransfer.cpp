@@ -273,11 +273,6 @@ namespace winrt::Folia::implementation {
     void MainWindow::RegisterTabTransferHandlers() {
         tabDragEnded.Attach(Microsoft::UI::Input::InputNonClientPointerSource::GetForWindowId(AppWindow().Id()),
             WindowEvent([this](auto const&, auto const& args) {
-                const double sidebarTarget = sidebarOpen ? 1. : 0.;
-                if (sidebarMotion.fraction != sidebarTarget) {
-                    sidebarMotion.rendering.revoke();
-                    ApplySidebarFrame(sidebarTarget);
-                }
                 // A tab click can finish as client input without a non-client
                 // release. Resolve every move from its own native start point.
                 if (args.MoveSizeOperation() == Microsoft::UI::Input::MoveSizeOperation::Move) {

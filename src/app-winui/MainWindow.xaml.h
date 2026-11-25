@@ -1,5 +1,7 @@
 #pragma once
 
+#include <winrt/Microsoft.UI.Composition.h>
+
 #include "editor/session/EditorSession.h"
 #include "editor/rendering/EditorSurfaceRenderer.h"
 #include "editor/interaction/EditorScrollController.h"
@@ -106,9 +108,10 @@ namespace winrt::Folia::implementation
         void RegisterWorkspaceLayout();
         void SelectWorkspacePane(bool outline);
         void SetSidebarOpen(bool open);
-        void PlanSidebarExpansion();
-        void AdvanceSidebar();
-        void ApplySidebarFrame(double fraction);
+        void ReserveSidebarSpace();
+        void AnimateSidebarOverlay();
+        void FinishSidebarMotion();
+        void RevokeSidebarMotion();
         void LayoutSidebar();
         void ApplySidebarSurface();
         void UpdateWorkspaceAppearance(WorkspaceAppearance const& settings);
@@ -206,13 +209,11 @@ namespace winrt::Folia::implementation
         Microsoft::UI::Xaml::Controls::SystemBackdropElement selectedTabBackdrop{nullptr};
         bool sidebarOpen = false, sidebarOverlay = false, outlineSelected = false;
         bool updatingRailSelection = false;
-        struct {
-            double fraction = 0., from = 0.;
-            std::chrono::steady_clock::time_point started;
-            int targetWidth = 0, targetLeft = 0;
-            int appliedWidth = 0, appliedLeft = 0;
-            Microsoft::UI::Xaml::Media::CompositionTarget::Rendering_revoker rendering;
-        } sidebarMotion;
+        bool sidebarPresented = false;
+        int sidebarWindowExtension = 0;
+        Microsoft::UI::Composition::InsetClip sidebarClip{nullptr};
+        Microsoft::UI::Composition::CompositionScopedBatch sidebarBatch{nullptr};
+        winrt::event_token sidebarMotionCompleted{};
         TabDragPresentation dragPresentation;
         std::optional<float> tabGrabOffset;
         bool operationActive = false;

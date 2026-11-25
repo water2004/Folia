@@ -99,18 +99,17 @@ and [TabViewListView](https://github.com/microsoft/microsoft-ui-xaml/blob/693f47
 
 ## Workspace layout
 
-`MainWindow.xaml` owns the three layout regions: the activity rail, the
-sidebar, and the title strip over the reading card. `WorkspaceChrome.xaml`
+`MainWindow.xaml` owns the activity rail, sidebar, title strip, and reading
+card. `WorkspaceChrome.xaml`
 holds their control styles, and `FolderExplorer.xaml` holds the file tree
 presentation. The settings category list replaces the contents of the same
 sidebar while its tab is selected.
 
-`MainWindow.Workspace.cpp` coordinates the sidebar with the desktop work area.
-A restored window grows first toward its left edge, then toward available
-space on the right. Each animation frame updates the native window bounds,
-the pane offset and the sidebar clip together. When the window cannot grow,
-only the sidebar clip animates over the reading card. `DocumentTools` owns the toolbar's hover
-and keyboard focus behavior. Its animated clip clears space for the tools
+`MainWindow.Workspace.cpp` opens and closes the sidebar immediately in a
+resizable, restored window by moving its left edge. In a maximized or
+non-resizable window, the compositor animates the sidebar over the reading card.
+`DocumentTools` owns the toolbar's hover and keyboard focus behavior.
+Its animated clip clears space for the tools
 without resizing the editor surface. The card provides the paper tint to both
 XAML and Direct2D content.
 

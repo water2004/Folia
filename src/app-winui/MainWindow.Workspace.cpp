@@ -4,6 +4,7 @@ import std;
 #include "localization/Localization.h"
 #include "workspace/WorkspaceIcons.h"
 #include <winrt/Microsoft.UI.Xaml.Automation.h>
+#include <winrt/Microsoft.UI.Xaml.Hosting.h>
 #include <winrt/Windows.UI.ViewManagement.h>
 
 namespace winrt::Folia::implementation {
@@ -14,7 +15,7 @@ namespace winrt::Folia::implementation {
 
     namespace {
         constexpr double sidebarWidth = 216;
-        constexpr int minimumWorkspaceWidth = 480;
+        constexpr UINT sidebarResizeFlags = SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE | SWP_NOCOPYBITS;
     }
 
     void MainWindow::RegisterWorkspaceLayout() {
@@ -49,7 +50,6 @@ namespace winrt::Folia::implementation {
         SidebarButton().Unchecked(WindowEvent([this](auto const&, auto const&) { SetSidebarOpen(false); }));
         WorkspaceSidebar().Width(sidebarWidth);
         WorkspaceSidebar().HorizontalAlignment(HorizontalAlignment::Left);
-        WorkspaceSidebar().SizeChanged(WindowEvent([this](auto const&, auto const&) { LayoutSidebar(); }));
         AppWindow().Changed(WindowEvent([this](auto const&, AppWindowChangedEventArgs const& args) {
             if (args.DidPresenterChange()) LayoutSidebar();
         }));
@@ -74,118 +74,120 @@ namespace winrt::Folia::implementation {
             UpdateWorkspaceLayout();
             return;
         }
+
         sidebarOpen = open;
-        if (open && sidebarMotion.fraction == 0. && !sidebarMotion.appliedWidth) PlanSidebarExpansion();
-        sidebarMotion.rendering.revoke();
-        if (Root().IsLoaded() && AppWindow().IsVisible()
-            && Windows::UI::ViewManagement::UISettings().AnimationsEnabled()) {
-            sidebarMotion.from = sidebarMotion.fraction;
-            sidebarMotion.started = std::chrono::steady_clock::now();
-            sidebarMotion.rendering = Media::CompositionTarget::Rendering(auto_revoke, WindowEvent(
-                [this](auto const&, auto const&) { AdvanceSidebar(); }));
-        } else {
-            ApplySidebarFrame(open ? 1. : 0.);
+        RevokeSidebarMotion();
+        if (open && !sidebarPresented) {
+            sidebarPresented = true;
+            ReserveSidebarSpace();
         }
         UpdateWorkspaceLayout();
-    }
 
-    void MainWindow::PlanSidebarExpansion() {
-        auto window = AppWindow();
-        auto presenter = window.Presenter().try_as<OverlappedPresenter>();
-        auto& motion = sidebarMotion;
-        motion.targetWidth = motion.targetLeft = 0;
-        if (!window.IsVisible() || !presenter || presenter.State() != OverlappedPresenterState::Restored
-            || Root().ActualWidth() < minimumWorkspaceWidth) return;
-        auto display = DisplayArea::GetFromWindowId(window.Id(), DisplayAreaFallback::Nearest);
-        if (!display) return;
-        auto work = display.WorkArea();
-        auto position = window.Position();
-        auto size = window.Size();
-        const double dpi = static_cast<double>(::GetDpiForWindow(WindowHandle())) / 96.;
-        const int width = static_cast<int>(std::lround(sidebarWidth * dpi));
-        const int left = (std::max)(0, position.X - work.X);
-        const int right = (std::max)(0, work.X + work.Width - position.X - size.Width);
-        if (left + right < width) return;
-        motion.targetWidth = width;
-        motion.targetLeft = (std::min)(left, width);
-    }
-
-    void MainWindow::AdvanceSidebar() {
-        auto& motion = sidebarMotion;
-        auto elapsed = std::chrono::steady_clock::now() - motion.started;
-        const auto duration = sidebarOpen ? 240ms : 190ms;
-        const double progress = std::clamp(std::chrono::duration<double>(elapsed) / duration, 0., 1.);
-        const double remaining = 1. - progress;
-        const double eased = 1. - remaining * remaining * remaining;
-        ApplySidebarFrame(std::lerp(motion.from, sidebarOpen ? 1. : 0., eased));
-        if (progress == 1.) motion.rendering.revoke();
-    }
-
-    void MainWindow::ApplySidebarFrame(double fraction) {
-        auto& motion = sidebarMotion;
-        motion.fraction = fraction;
-        auto window = AppWindow();
-        auto presenter = window.Presenter().try_as<OverlappedPresenter>();
-        if (presenter && presenter.State() == OverlappedPresenterState::Restored && window.IsVisible()) {
-            const int width = static_cast<int>(std::lround(motion.targetWidth * fraction));
-            const int left = static_cast<int>(std::lround(motion.targetLeft * fraction));
-            const int grow = width - motion.appliedWidth;
-            const int move = motion.appliedLeft - left;
-            if (grow || move) {
-                RECT bounds{};
-                if (!::GetWindowRect(WindowHandle(), &bounds)) return;
-                // Update the pane offset in the same frame as the HWND bounds,
-                // so the window can grow without reflowing the paper.
-                motion.appliedWidth = width;
-                motion.appliedLeft = left;
-                LayoutSidebar();
-                if (!::SetWindowPos(WindowHandle(), nullptr, bounds.left + move, bounds.top,
-                        bounds.right - bounds.left + grow, bounds.bottom - bounds.top,
-                        SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE)) {
-                    motion.appliedWidth -= grow;
-                    motion.appliedLeft += move;
-                    motion.targetWidth = motion.appliedWidth;
-                    motion.targetLeft = motion.appliedLeft;
-                }
-            }
+        if (!sidebarOverlay || !Root().IsLoaded() || !AppWindow().IsVisible()
+            || !Windows::UI::ViewManagement::UISettings().AnimationsEnabled()) {
+            FinishSidebarMotion();
+            return;
         }
+        AnimateSidebarOverlay();
+    }
+
+    void MainWindow::AnimateSidebarOverlay() {
+        auto visual = Hosting::ElementCompositionPreview::GetElementVisual(WorkspaceSidebar());
+        auto compositor = visual.Compositor();
+        if (!sidebarClip) {
+            sidebarClip = compositor.CreateInsetClip(0, 0, static_cast<float>(sidebarWidth), 0);
+            visual.Clip(sidebarClip);
+        }
+        auto animation = compositor.CreateScalarKeyFrameAnimation();
+        animation.Duration(sidebarOpen ? 220ms : 175ms);
+        animation.StopBehavior(Microsoft::UI::Composition::AnimationStopBehavior::SetToFinalValue);
+        auto easing = compositor.CreateCubicBezierEasingFunction({0.22f, 0.65f}, {0.34f, 1.f});
+        animation.InsertExpressionKeyFrame(0.f, L"this.StartingValue");
+        animation.InsertKeyFrame(1.f, sidebarOpen ? 0.f : static_cast<float>(sidebarWidth), easing);
+        sidebarBatch = compositor.CreateScopedBatch(Microsoft::UI::Composition::CompositionBatchTypes::Animation);
+        sidebarMotionCompleted = sidebarBatch.Completed(WindowEvent([this](auto const&, auto const&) {
+            FinishSidebarMotion();
+        }));
+        sidebarClip.StartAnimation(L"RightInset", animation);
+        sidebarBatch.End();
+    }
+
+    void MainWindow::ReserveSidebarSpace() {
+        auto presenter = AppWindow().Presenter().try_as<OverlappedPresenter>();
+        if (sidebarWindowExtension || !AppWindow().IsVisible() || !presenter
+            || presenter.State() != OverlappedPresenterState::Restored || !presenter.IsResizable()) return;
+
+        RECT bounds{};
+        auto handle = WindowHandle();
+        if (!::GetWindowRect(handle, &bounds)) return;
+        const double dpi = static_cast<double>(::GetDpiForWindow(handle)) / 96.;
+        const int width = static_cast<int>(std::lround(sidebarWidth * dpi));
+        sidebarWindowExtension = width;
         LayoutSidebar();
+        // Move only the left edge so the reading card remains where it was on
+        // the desktop. The user controls where the window sits on the display.
+        if (!::SetWindowPos(handle, nullptr, bounds.left - width, bounds.top,
+                bounds.right - bounds.left + width, bounds.bottom - bounds.top,
+                sidebarResizeFlags)) {
+            sidebarWindowExtension = 0;
+        }
+        Root().UpdateLayout();
+    }
+
+    void MainWindow::RevokeSidebarMotion() {
+        if (sidebarBatch) sidebarBatch.Completed(sidebarMotionCompleted);
+        sidebarBatch = nullptr;
+    }
+
+    void MainWindow::FinishSidebarMotion() {
+        RevokeSidebarMotion();
+        if (sidebarClip) {
+            sidebarClip.StopAnimation(L"RightInset");
+            sidebarClip.RightInset(sidebarOpen ? 0.f : static_cast<float>(sidebarWidth));
+        }
+        if (sidebarOpen) return;
+        sidebarPresented = false;
+
+        auto presenter = AppWindow().Presenter().try_as<OverlappedPresenter>();
+        const bool restored = presenter && presenter.State() == OverlappedPresenterState::Restored;
+        int shrink = restored ? std::exchange(sidebarWindowExtension, 0) : 0;
+        LayoutSidebar();
+        if (!shrink) return;
+
+        RECT bounds{};
+        auto handle = WindowHandle();
+        if (!::GetWindowRect(handle, &bounds)) return;
+        const int width = bounds.right - bounds.left;
+        if (width > shrink)
+            ::SetWindowPos(handle, nullptr, bounds.left + shrink, bounds.top, width - shrink,
+                bounds.bottom - bounds.top, sidebarResizeFlags);
+        Root().UpdateLayout();
     }
 
     void MainWindow::LayoutSidebar() {
-        auto& motion = sidebarMotion;
-        const bool showing = sidebarOpen || motion.fraction > 0.;
         auto presenter = AppWindow().Presenter().try_as<OverlappedPresenter>();
         const bool restored = presenter && presenter.State() == OverlappedPresenterState::Restored;
-        const bool overlay = showing && (!restored || !motion.targetWidth);
+        const bool overlay = sidebarPresented && (!restored || !sidebarWindowExtension);
         if (sidebarOverlay != overlay) {
             sidebarOverlay = overlay;
+            if (!overlay && sidebarClip) {
+                Hosting::ElementCompositionPreview::GetElementVisual(WorkspaceSidebar()).Clip(nullptr);
+                sidebarClip = nullptr;
+            }
             ApplySidebarSurface();
         }
-        const double dpi = (std::max)(1., static_cast<double>(::GetDpiForWindow(WindowHandle())) / 96.);
-        const double docked = restored && !overlay ? (std::min)(sidebarWidth, motion.appliedWidth / dpi) : 0.;
-        const double exposed = overlay ? sidebarWidth * motion.fraction : docked;
-        if (SidebarColumn().Width().Value != docked) SidebarColumn().Width(GridLengthHelper::FromPixels(docked));
-
+        const double width = sidebarPresented && !overlay ? sidebarWidth : 0.;
+        if (SidebarColumn().Width().Value != width) SidebarColumn().Width(GridLengthHelper::FromPixels(width));
         auto sidebar = WorkspaceSidebar();
-        const double inset = sidebarWidth - exposed;
-        auto margin = sidebar.Margin();
-        margin.Left = -inset;
-        if (sidebar.Margin() != margin) sidebar.Margin(margin);
         const int span = overlay ? 2 : 1;
         if (Grid::GetColumnSpan(sidebar) != span) Grid::SetColumnSpan(sidebar, span);
-        SidebarRevealClip().Rect({static_cast<float>(inset), 0, static_cast<float>(exposed), static_cast<float>(sidebar.ActualHeight())});
-        sidebar.Visibility(showing ? Visibility::Visible : Visibility::Collapsed);
+        sidebar.Visibility(sidebarPresented ? Visibility::Visible : Visibility::Collapsed);
         sidebar.IsHitTestVisible(sidebarOpen);
     }
 
     void MainWindow::UpdateWorkspaceLayout() {
-        // If the pane was closed while maximized, remove the extension from
-        // the restored window as soon as it returns.
-        if (!sidebarOpen && sidebarMotion.fraction == 0. && sidebarMotion.appliedWidth)
-            ApplySidebarFrame(0.);
-        else
-            LayoutSidebar();
+        if (!sidebarPresented && sidebarWindowExtension) FinishSidebarMotion();
+        else LayoutSidebar();
         const bool settings = SettingsActive();
         SidebarButton().IsChecked(sidebarOpen);
         updatingRailSelection = true;

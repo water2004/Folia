@@ -113,7 +113,7 @@ namespace winrt::Folia::implementation
         {
             windowClosed = true;
             documentTools.Stop();
-            sidebarMotion.rendering.revoke();
+            RevokeSidebarMotion();
             inlineCompletion.reset();
             tabDragEnded.Reset();
             preparedTabActivation.Reset();

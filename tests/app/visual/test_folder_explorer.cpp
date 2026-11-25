@@ -120,10 +120,11 @@ namespace {
             auto rootNode = f.tree.RootNodes().GetAt(0);
             auto rootName = f.Row(rootNode).FindName(L"EntryName").as<TextBlock>();
             auto nested = f.Find(L"章节");
-            auto folderName = f.Row(nested).FindName(L"EntryName").as<TextBlock>();
-            auto x = [&](TextBlock const& text) { return text.TransformToVisual(f.tree).TransformPoint({0, 0}).X; };
+            auto folderRow = f.Row(nested);
+            auto folderName = folderRow.FindName(L"EntryName").as<TextBlock>();
+            auto x = [&](FrameworkElement const& element) { return element.TransformToVisual(f.tree).TransformPoint({0, 0}).X; };
             expect(x(rootName) <= 24.f);
-            expect(std::abs(x(folderName) - x(rootName) - 8.f) < 0.5f);
+            expect(std::abs(x(folderName) - x(folderRow) - 18.f) < 0.5f) << "folder icon occupies its own slot";
             auto node = nested;
             for (int depth = 1; depth <= 3; ++depth) {
                 f.Row(node);
@@ -131,8 +132,7 @@ namespace {
                 peer.as<Automation::Provider::IExpandCollapseProvider>().Expand();
                 Pump([&] { return node.IsExpanded() && !node.HasUnrealizedChildren(); });
                 f.root.UpdateLayout();
-                auto label = f.Row(node).FindName(L"EntryName").as<TextBlock>();
-                expect(std::abs(x(label) - x(rootName) - 8.f * depth) < 0.5f);
+                expect(std::abs(x(f.Row(node)) - x(rootName) - 8.f * depth) < 0.5f) << "indent follows depth" << depth;
                 if (depth < 3) node = node.Children().GetAt(0);
             }
             auto leaf = node.Children().GetAt(0);

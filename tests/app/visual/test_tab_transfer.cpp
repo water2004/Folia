@@ -11,6 +11,7 @@
 #include <winrt/Microsoft.UI.Content.h>
 #include <winrt/Microsoft.UI.Xaml.Automation.Peers.h>
 #include <winrt/Microsoft.UI.Xaml.Automation.Provider.h>
+#include <winrt/Microsoft.UI.Xaml.Hosting.h>
 #include <winrt/Microsoft.UI.Xaml.Media.Imaging.h>
 #include <winrt/Microsoft.UI.Xaml.Shapes.h>
 
@@ -218,7 +219,7 @@ namespace {
             expect(toolbar.Opacity() == 1.) << "pinned tools are visible";
             Pump([&] { return std::abs(view.TransformToVisual(card).TransformPoint({0,0}).Y - toolbar.ActualHeight()) <= 1.; });
         };
-        "opening the sidebar preserves the reading width"_test = [] {
+        "the outward sidebar opens immediately and preserves the reading width"_test = [] {
             OwnedWindow current(App()->CreateMainWindow());
             auto window = current.window;
             auto root = window.Content().as<FrameworkElement>();
@@ -239,41 +240,69 @@ namespace {
             }
             root.UpdateLayout();
             const auto original = card.ActualWidth();
-            const int closedWidth = appWindow.Size().Width;
+            auto bounds = [&] {
+                RECT rect{};
+                winrt::check_bool(::GetWindowRect(Access::Handle(window), &rect));
+                return rect;
+            };
+            const auto closed = bounds();
             auto readingOrigin = [&] {
                 return root.XamlRoot().CoordinateConverter().ConvertLocalToScreen(
                     card.TransformToVisual(nullptr).TransformPoint({0, 0}));
             };
             const int originalLeft = readingOrigin().X;
-            std::vector<int> frameWidths;
-            struct ResizeObserver {
-                winrt::Microsoft::UI::Windowing::AppWindow window;
-                winrt::event_token token;
-                ~ResizeObserver() { window.Changed(token); }
-            } observer{appWindow, appWindow.Changed([&](auto const&, auto const& args) {
-                if (args.DidSizeChange()) frameWidths.push_back(appWindow.Size().Width);
-            })};
-            auto clip = sidebar.Clip().as<Media::RectangleGeometry>();
             Access::Sidebar(window, true);
-            Pump([&] { return sidebar.Visibility() == Visibility::Visible && clip.Rect().Width > 215.; });
-            root.UpdateLayout();
-            expect(std::abs(card.ActualWidth() - original) <= 1.);
+            auto visual = Hosting::ElementCompositionPreview::GetElementVisual(sidebar);
+            expect(sidebar.Visibility() == Visibility::Visible && !visual.Clip()) << "the pane is shown immediately";
+            auto expanded = bounds();
+            expect(expanded.left < closed.left && expanded.right == closed.right) << "only the left window edge changes";
+            // Native bounds change synchronously; XAML arranges at the next layout pass.
+            Pump([&] { return std::abs(card.ActualWidth() - original) <= 1. && std::abs(readingOrigin().X - originalLeft) <= 1; });
             expect(rail.ActualHeight() == root.ActualHeight());
             expect(rail.TransformToVisual(root).TransformPoint({0,0}).X == 0.f);
-            const int expandedWidth = appWindow.Size().Width;
-            const bool animated = winrt::Windows::UI::ViewManagement::UISettings().AnimationsEnabled();
-            auto inBetween = [&](int width) { return closedWidth < width && width < expandedWidth; };
-            if (room) {
-                expect(expandedWidth > closedWidth);
-                expect(std::abs(readingOrigin().X - originalLeft) <= 1) << "leftward expansion keeps the reading origin on screen";
-            }
-            if (room && animated) expect(std::ranges::any_of(frameWidths, inBetween)) << "the native HWND grows in steps";
-            frameWidths.clear();
             Access::Sidebar(window, false);
-            Pump([&] { return sidebar.Visibility() == Visibility::Collapsed && appWindow.Size().Width == closedWidth; });
+            expect(sidebar.Visibility() == Visibility::Collapsed && !visual.Clip());
+            auto contracted = bounds();
+            expect(contracted.left == closed.left && contracted.right == closed.right) << "the bounds are restored immediately";
+            Pump([&] { return std::abs(card.ActualWidth() - original) <= 1. && std::abs(readingOrigin().X - originalLeft) <= 1; });
+        };
+        "the inward sidebar animates independently of window size"_test = [] {
+            OwnedWindow current(App()->CreateMainWindow());
+            auto window = current.window;
+            auto appWindow = window.AppWindow();
+            appWindow.Presenter().as<winrt::Microsoft::UI::Windowing::OverlappedPresenter>().IsResizable(false);
+            auto root = window.Content().as<FrameworkElement>();
+            auto card = root.FindName(L"ReadingCard").as<FrameworkElement>();
+            auto sidebar = root.FindName(L"WorkspaceSidebar").as<FrameworkElement>();
+            auto visual = Hosting::ElementCompositionPreview::GetElementVisual(sidebar);
             root.UpdateLayout();
-            if (room && animated) expect(std::ranges::any_of(frameWidths, inBetween)) << "the native HWND contracts in steps";
-            expect(std::abs(card.ActualWidth() - original) <= 1.);
+            const auto position = appWindow.Position();
+            const auto size = appWindow.Size();
+            const auto width = card.ActualWidth();
+            auto expectStationary = [&] {
+                expect(appWindow.Position() == position && appWindow.Size() == size);
+                expect(card.ActualWidth() == width);
+            };
+            const bool animated = winrt::Windows::UI::ViewManagement::UISettings().AnimationsEnabled();
+            Access::Sidebar(window, true);
+            expect(sidebar.Visibility() == Visibility::Visible);
+            if (animated) {
+                auto clip = visual.Clip().as<winrt::Microsoft::UI::Composition::InsetClip>();
+                Pump([&] { return clip.RightInset() == 0.f; });
+            }
+            expectStationary();
+            Access::Sidebar(window, false);
+            if (animated) {
+                expect(sidebar.Visibility() == Visibility::Visible) << "the panel stays on screen through the closing animation";
+                Access::Sidebar(window, true);
+                auto clip = visual.Clip().as<winrt::Microsoft::UI::Composition::InsetClip>();
+                Pump([&] { return clip.RightInset() == 0.f; });
+                expect(sidebar.Visibility() == Visibility::Visible) << "reopening keeps the panel visible";
+                Access::Sidebar(window, false);
+            }
+            Pump([&] { return sidebar.Visibility() == Visibility::Collapsed; });
+            expect(!visual.Clip());
+            expectStationary();
         };
         "workspace material can leave the reading surface opaque independently of the window"_test = [] {
             using namespace winrt::Microsoft::UI::Composition::SystemBackdrops;
