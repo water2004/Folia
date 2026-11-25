@@ -12,7 +12,7 @@ namespace winrt::Folia
     void EditorCodeLanguageController::Attach(
         EditorSession& session,
         EditorSurfaceRenderer& renderer,
-        winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& editorSurface,
+        winrt::Microsoft::UI::Xaml::FrameworkElement const& editorSurface,
         winrt::Microsoft::UI::Xaml::Controls::Flyout const& flyout,
         winrt::Microsoft::UI::Xaml::Controls::TextBox const& languageBox,
         winrt::Microsoft::UI::Xaml::Controls::ListView const& languages,

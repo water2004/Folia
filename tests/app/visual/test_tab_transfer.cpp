@@ -15,35 +15,14 @@
 #include <winrt/Microsoft.UI.Xaml.Media.Imaging.h>
 #include <winrt/Microsoft.UI.Xaml.Shapes.h>
 
+#pragma comment(lib, "gdi32.lib")
+
 import folia.markdown.instrumentation;
 
 namespace winrt::Folia {
     struct EditorRendererTestAccess {
-        static std::uint8_t PaperAlpha(EditorSurfaceRenderer const& renderer) {
-            auto const& resources = renderer.resources;
-            ::Microsoft::WRL::ComPtr<ID3D11Texture2D> buffer, pixel;
-            winrt::check_hresult(resources.swapChain->GetBuffer(0, IID_PPV_ARGS(&buffer)));
-            D3D11_TEXTURE2D_DESC desc{};
-            buffer->GetDesc(&desc);
-            auto x = desc.Width / 2, y = desc.Height / 2;
-            D3D11_BOX sample{x, y, 0, x + 1, y + 1, 1};
-            desc.Width = desc.Height = 1;
-            desc.Usage = D3D11_USAGE_STAGING;
-            desc.BindFlags = desc.MiscFlags = 0;
-            desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-            winrt::check_hresult(resources.d3dDevice->CreateTexture2D(&desc, nullptr, &pixel));
-            resources.d3dContext->CopySubresourceRegion(pixel.Get(), 0, 0, 0, 0, buffer.Get(), 0, &sample);
-            D3D11_MAPPED_SUBRESOURCE mapped{};
-            winrt::check_hresult(resources.d3dContext->Map(pixel.Get(), 0, D3D11_MAP_READ, 0, &mapped));
-            auto alpha = static_cast<std::uint8_t const*>(mapped.pData)[3];
-            resources.d3dContext->Unmap(pixel.Get(), 0);
-            return alpha;
-        }
-        static UINT PresentCount(EditorSurfaceRenderer const& renderer) {
-            UINT count{};
-            winrt::check_hresult(renderer.resources.swapChain->GetLastPresentCount(&count));
-            return count;
-        }
+        static bool Ready(EditorSurfaceRenderer const& renderer) { return renderer.resources.drawingSurface != nullptr; }
+        static bool PresentPending(EditorSurfaceRenderer const& renderer) { return renderer.presentPending; }
     };
 }
 
@@ -56,6 +35,7 @@ namespace winrt::Folia::implementation {
         }
         static auto& Documents(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->workspaceDocuments; }
         static auto Tabs(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->DocumentTabs(); }
+        static auto NewTabButton(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->NewTabButton(); }
         static auto Handle(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->WindowHandle(); }
         static auto About(Microsoft::UI::Xaml::Window const& window) {
             auto impl = Impl(window);
@@ -189,7 +169,7 @@ namespace {
             Access::Bars(window, {});
             window.Activate();
             Pump([&] { return window.Content().as<FrameworkElement>().IsLoaded(); });
-            Pump([&] { return Access::Renderer(window).FrameLatencyWaitableObject() != nullptr; });
+            Pump([&] { return winrt::Folia::EditorRendererTestAccess::Ready(Access::Renderer(window)); });
         }
         ~OwnedWindow() { if (window) Access::Close(window); }
     };
@@ -205,6 +185,28 @@ namespace {
         for (int i = 0; i < Media::VisualTreeHelper::GetChildrenCount(element); ++i)
             if (auto value = FirstControl<T>(Media::VisualTreeHelper::GetChild(element, i))) return value;
         return nullptr;
+    }
+
+    // Capture the compositor output. RenderTargetBitmap omits native backdrops
+    // and cannot detect a seam created by an external DXGI visual.
+    auto CaptureColors(Window const& window, std::span<winrt::Windows::Graphics::PointInt32 const> points) {
+        auto hwnd = Access::Handle(window);
+        winrt::check_hresult(::DwmFlush());
+        struct ScreenDc {
+            HDC value = ::GetDC(nullptr);
+            ~ScreenDc() { if (value) ::ReleaseDC(nullptr, value); }
+        } screen;
+        winrt::check_bool(screen.value != nullptr);
+        std::vector<std::array<int, 3>> colors;
+        colors.reserve(points.size());
+        for (auto point : points) {
+            if (::GetAncestor(::WindowFromPoint({point.X, point.Y}), GA_ROOT) != hwnd)
+                throw std::runtime_error("Reading surface test window is obscured");
+            auto pixel = ::GetPixel(screen.value, point.X, point.Y);
+            if (pixel == CLR_INVALID) throw std::runtime_error("Could not sample the reading surface");
+            colors.push_back({GetRValue(pixel), GetGValue(pixel), GetBValue(pixel)});
+        }
+        return colors;
     }
     suite tab_transfer_tests = [] {
         "document tools reveal over a stationary reading surface without moving the tabs"_test = [] {
@@ -323,6 +325,7 @@ namespace {
             auto viewport = root.FindName(L"TabViewport").as<FrameworkElement>();
             auto caption = root.FindName(L"CaptionInset").as<FrameworkElement>();
             auto tabs = Access::Tabs(window);
+            auto add = Access::NewTabButton(window);
             auto scale = root.XamlRoot().RasterizationScale();
             auto resize = [&](int width, auto settled) {
                 auto size = window.AppWindow().Size();
@@ -330,8 +333,18 @@ namespace {
                 window.AppWindow().Resize(size);
                 Pump([&] { return settled(root.ActualWidth()); });
             };
-            for (int i = 0; i < 11; ++i) Access::New(window);
             auto viewer = Access::TabScroller(window);
+            for (int i = 0; i < 3; ++i) Access::New(window);
+            auto first = Access::View(window, Access::Documents(window).Items().front()->id);
+            auto addX = [&] { return add.TransformToVisual(root).TransformPoint({0, 0}).X; };
+            resize(740, [](double width) { return width > 705. && width < 760.; });
+            const auto narrowTab = first.ActualWidth();
+            const auto narrowAdd = addX();
+            resize(1120, [](double width) { return width > 1080.; });
+            Pump([&] { return first.ActualWidth() > narrowTab + 35. && addX() > narrowAdd + 140.; });
+            resize(740, [](double width) { return width > 705. && width < 760.; });
+            Pump([&] { return std::abs(first.ActualWidth() - narrowTab) <= 1. && std::abs(addX() - narrowAdd) <= 2.; });
+            for (int i = 0; i < 8; ++i) Access::New(window);
             resize(640, [](double width) { return width < 670.; });
             Pump([&] { return viewer.ScrollableWidth() > 0 && viewer.HorizontalOffset() > 0; });
             auto initial = viewer.HorizontalOffset();
@@ -340,8 +353,11 @@ namespace {
             auto inset = caption.TransformToVisual(root).TransformPoint({0, 0}).X;
             auto right = viewport.TransformToVisual(root).TransformPoint({static_cast<float>(viewport.ActualWidth()), 0}).X;
             expect(std::abs(right - inset) <= 1.) << "the strip ends before the caption buttons";
+            expect(addX() + add.ActualWidth() <= inset) << "add remains visible next to the overflowed tabs";
             const auto oldWidth = viewport.ActualWidth();
+            const auto overflowAdd = addX();
             resize(840, [](double width) { return width > 800.; });
+            Pump([&] { return addX() > overflowAdd + 175.; });
             expect(viewport.ActualWidth() > oldWidth + 180.);
             expect(tabs.ActualWidth() <= viewport.ActualWidth() + 1.);
         };
@@ -377,6 +393,64 @@ namespace {
             expect(presenter.Background() == surface) << "document-menu background";
             menu.Hide();
         };
+        "the selected tab toolbar and editor present one reading surface"_test = [] {
+            using winrt::Folia::WindowMaterial;
+            using winrt::Windows::Foundation::Point;
+            using winrt::Microsoft::UI::Composition::SystemBackdrops::DesktopAcrylicController;
+            OwnedWindow owned(App()->CreateMainWindow());
+            auto window = owned.window;
+            window.AppWindow().Presenter().as<winrt::Microsoft::UI::Windowing::OverlappedPresenter>().IsAlwaysOnTop(true);
+            auto root = window.Content().as<FrameworkElement>();
+            Access::Theme(window, "folia.dark");
+            auto editor = root.FindName(L"EditorSurface").as<FrameworkElement>();
+            auto card = root.FindName(L"ReadingCard").as<FrameworkElement>();
+            auto tab = Access::View(window, Access::Documents(window).Active()->id);
+            Access::Edit(window, U"MMMM");
+            auto document = Access::Documents(window).Active();
+            auto end = document->editor->session.Selection().active;
+            auto start = end;
+            start.source_offset = 0;
+            auto& renderer = Access::Renderer(window);
+            auto textStart = renderer.CaretBounds(start);
+            auto textEnd = renderer.CaretBounds(end);
+            expect(fatal(textStart.has_value() && textEnd.has_value()));
+            auto origin = [&](FrameworkElement const& element) {
+                return element.TransformToVisual(root).TransformPoint({0, 0});
+            };
+            auto delta = [](auto const& a, auto const& b) {
+                return (std::max)({std::abs(a[0] - b[0]), std::abs(a[1] - b[1]), std::abs(a[2] - b[2])});
+            };
+            for (auto [base, reading] : {std::pair{WindowMaterial::Solid, WindowMaterial::Solid},
+                    {WindowMaterial::Acrylic, WindowMaterial::Acrylic}, {WindowMaterial::MicaAlt, WindowMaterial::Acrylic}}) {
+                if (reading == WindowMaterial::Acrylic && !DesktopAcrylicController::IsSupported()) continue;
+                Access::Bars(window, {false, base, reading});
+                root.UpdateLayout();
+                auto settle = std::chrono::steady_clock::now() + std::chrono::milliseconds(350);
+                Pump([&] { return std::chrono::steady_clock::now() >= settle; });
+                auto convert = root.XamlRoot().CoordinateConverter();
+                float x = origin(tab).X + static_cast<float>(tab.ActualWidth() * .75);
+                float tabEnd = origin(card).Y;
+                float editorTop = origin(editor).Y;
+                std::vector points{
+                    convert.ConvertLocalToScreen(Point{x, tabEnd - 4}),
+                    convert.ConvertLocalToScreen(Point{x, tabEnd + 4}),
+                    convert.ConvertLocalToScreen(Point{x, editorTop - 4}),
+                    convert.ConvertLocalToScreen(Point{x, editorTop + 4}),
+                };
+                auto editorOrigin = origin(editor);
+                for (float y = textStart->top; y < textStart->bottom; y += 2.f)
+                    for (float dx = 0; dx < (textEnd->left - textStart->left) / 2; dx += 2.f)
+                        points.push_back(convert.ConvertLocalToScreen(Point{
+                            editorOrigin.X + textStart->left + dx, editorOrigin.Y + y}));
+                auto colors = CaptureColors(window, points);
+                expect(delta(colors[0], colors[1]) <= 5) << std::format("tab to toolbar: {} vs {}", colors[0], colors[1]);
+                expect(delta(colors[2], colors[3]) <= 5) << std::format("toolbar to editor: {} vs {}", colors[2], colors[3]);
+                auto visible = std::ranges::count_if(std::span{colors}.subspan(4), [&](auto const& pixel) {
+                    return delta(pixel, colors[3]) >= 48;
+                });
+                expect(visible >= 6) << "text is visible within its expected DIP bounds";
+            }
+        };
         "workspace material can leave the reading surface opaque independently of the window"_test = [] {
             using namespace winrt::Microsoft::UI::Composition::SystemBackdrops;
             using winrt::Folia::WindowMaterial;
@@ -391,12 +465,6 @@ namespace {
             Access::New(window);
             auto second = tabs.SelectedItem();
             Pump([&] { return Access::View(window, Access::Documents(window).Active()->id).IsLoaded(); });
-            auto paperAlpha = [&] {
-                auto& renderer = Access::Renderer(window);
-                auto frame = renderer.UpdateWithXaml();
-                Access::Render(window);
-                return winrt::Folia::EditorRendererTestAccess::PaperAlpha(renderer);
-            };
             auto selected = [&] {
                 auto tab = Access::View(window, Access::Documents(window).Active()->id);
                 auto shape = TabPart(tab, L"SelectedBackgroundPath").as<Shapes::Path>();
@@ -415,7 +483,7 @@ namespace {
                 auto paper = root.FindName(L"ReadingTint").as<Controls::Border>().Background().as<Media::SolidColorBrush>();
                 if (!supported || highContrast) {
                     expect(window.SystemBackdrop() == nullptr);
-                    expect(paperAlpha() == 255);
+                    expect(paper.Opacity() == 1.);
                     expect(base.as<Media::SolidColorBrush>().Color() != paper.Color());
                     continue;
                 }
@@ -423,19 +491,18 @@ namespace {
                     expect(window.SystemBackdrop().try_as<Media::DesktopAcrylicBackdrop>() != nullptr);
                 else expect(window.SystemBackdrop().as<Media::MicaBackdrop>().Kind()
                     == (material == WindowMaterial::Mica ? MicaKind::Base : MicaKind::BaseAlt));
-                expect(paperAlpha() < 255) << "the editor background transmits the window material with the sidebar closed";
                 expect(paper.Opacity() < 1.);
                 Access::Bars(window, {false, material, WindowMaterial::Solid});
                 expect(window.SystemBackdrop() != nullptr && readingBackdrop.SystemBackdrop() == nullptr);
                 expect(root.as<Controls::Grid>().Background() == base) << "reading material leaves the window's base shade unchanged";
-                expect(paperAlpha() == 255) << "solid paper takes effect on the next frame";
+                expect(paper.Opacity() == 1.) << "solid paper takes effect immediately";
                 Access::Bars(window, {false, WindowMaterial::Solid, material});
                 expect(window.SystemBackdrop() == nullptr);
                 expect(readingBackdrop.SystemBackdrop() != nullptr);
                 Pump([&] { auto bounds = Access::ReadingMaterialBounds(window); return bounds && bounds->second.Width > 0; });
                 expect(Hosting::ElementCompositionPreview::GetElementVisual(readingBackdrop).Clip()
                     .try_as<winrt::Microsoft::UI::Composition::CompositionGeometricClip>() != nullptr);
-                expect(paperAlpha() < 255);
+                expect(paper.Opacity() < 1.);
                 auto old = Access::ReadingMaterialBounds(window);
                 tabs.SelectedItem(tabs.SelectedItem() == first ? second : first);
                 Pump([&] { return Access::ReadingMaterialBounds(window) != old; });
@@ -632,11 +699,10 @@ namespace {
             expect(photo->path == raster && !photo->editor);
             Pump([&] {
                 auto bitmap = Access::Preview(source.window).Source().try_as<BitmapImage>();
-                return bitmap && bitmap.PixelWidth() == 16 && Access::PreviewMessage(source.window).Text().empty();
+                return bitmap && bitmap.PixelWidth() == 16 && Access::PreviewMessage(source.window).Text().empty()
+                    && Access::Preview(source.window).ActualWidth() > 0. && Access::PreviewViewer(source.window).ViewportWidth() > 0.;
             });
-            expect(Access::Preview(source.window).ActualWidth() > 0.0);
-            expect(Access::PreviewViewer(source.window).ViewportWidth() > 0.0);
-            expect(Access::PreviewViewer(source.window).ChangeView(nullptr, nullptr, 2.0f, true));
+            expect(Access::PreviewViewer(source.window).ChangeView(nullptr, nullptr, 2.0f, true)) << "PNG receives a zoom request";
             Pump([&] { return Access::PreviewViewer(source.window).ZoomFactor() == 2.0f; });
             Access::Open(source.window, raster, WorkspaceOpenMode::Keep);
             expect(photo == Access::Documents(source.window).Active() && photo->kept);
@@ -651,7 +717,7 @@ namespace {
                 return Access::Preview(source.window).Source().try_as<SvgImageSource>()
                     && Access::PreviewMessage(source.window).Text().empty();
             });
-            expect(Access::PreviewViewer(source.window).ZoomFactor() == 1.0f);
+            expect(Access::PreviewViewer(source.window).ZoomFactor() == 1.0f) << "SVG opens at its default zoom";
             expect(Access::Documents(source.window).Items().size() == 3_u);
             Access::Tabs(source.window).SelectedItem(Access::Binding(source.window, document->id)->item);
             expect(Access::Documents(source.window).Active() == document);
@@ -694,7 +760,7 @@ namespace {
             Access::New(window);
             auto root = window.Content().as<FrameworkElement>();
             auto drag = root.FindName(L"TitleDragArea").as<FrameworkElement>();
-            auto split = root.FindName(L"NewTabButton").as<FrameworkElement>();
+            auto add = Access::NewTabButton(window);
             auto id = window.AppWindow().Id();
             auto native = winrt::Microsoft::UI::Content::ContentCoordinateConverter::CreateForWindowId(id);
             auto input = winrt::Microsoft::UI::Input::InputNonClientPointerSource::GetForWindowId(id);
@@ -711,7 +777,7 @@ namespace {
             for (bool open : {false, true, false}) {
                 Access::Sidebar(window, open);
                 root.UpdateLayout();
-                Pump([&] { return captionAt(center(drag)) && !captionAt(center(split)); });
+                Pump([&] { return captionAt(center(drag)) && !captionAt(center(add)); });
                 Access::PointerBegin(window, center(drag));
                 expect(!Access::Tabs(window).CanTearOutTabs());
                 expect(captionAt(center(drag)));
@@ -835,8 +901,7 @@ namespace {
             auto root = source.window.Content().as<FrameworkElement>(); root.UpdateLayout();
             auto count = root.FindName(L"CharacterCountText").as<Controls::TextBlock>();
             auto& renderer = Access::Renderer(source.window);
-            auto presentCount = [&] { return winrt::Folia::EditorRendererTestAccess::PresentCount(renderer); };
-            auto before = presentCount();
+            auto presentPending = [&] { return winrt::Folia::EditorRendererTestAccess::PresentPending(renderer); };
             std::vector<Visibility> selectionDuringPresentation;
             auto token = count.RegisterPropertyChangedCallback(Controls::TextBlock::TextProperty(), [&](auto const&, auto const&) {
                 auto tab = tabs.ContainerFromItem(tabs.SelectedItem()).as<Controls::TabViewItem>();
@@ -844,18 +909,18 @@ namespace {
             });
             for (auto document : {first, second, first, second}) tabs.SelectedItem(Access::Binding(source.window, document->id)->item);
             count.UnregisterPropertyChangedCallback(Controls::TextBlock::TextProperty(), token);
-            expect(presentCount() == before) << "switching must not submit intermediate document buffers";
+            expect(presentPending()) << "the final document buffer waits for the shell frame";
             expect(Access::Documents(source.window).Active() == second);
             expect(selectionDuringPresentation.size() == 4_u);
             for (auto visibility : selectionDuringPresentation) expect(visibility == Visibility::Visible) << "active tab during document update";
-            std::optional<UINT> presentedWithShell;
+            std::optional<bool> presentedWithShell;
             auto rendered = Media::CompositionTarget::Rendered(winrt::auto_revoke, [&](auto const&, auto const&) {
-                if (!presentedWithShell) presentedWithShell = presentCount();
+                if (!presentedWithShell) presentedWithShell = !presentPending();
             });
             root.InvalidateArrange();
             Pump([&] { return presentedWithShell.has_value(); });
             rendered.revoke();
-            expect(*presentedWithShell == before + 1) << "one final buffer is submitted after the shell frame";
+            expect(*presentedWithShell) << "the final buffer is submitted with the shell frame";
         };
         "tab modified indicator uses the Unicode codepoint independently of the build codepage"_test = [] {
             OwnedWindow owned(App()->CreateMainWindow());

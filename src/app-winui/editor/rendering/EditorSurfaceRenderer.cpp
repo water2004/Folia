@@ -30,13 +30,6 @@ namespace winrt::Folia
         ClearPreparedDocument();
     }
 
-    void EditorSurfaceRenderer::SetPaperOpacity(float opacity)
-    {
-        if (paperOpacity == opacity) return;
-        paperOpacity = opacity;
-        Invalidate();
-    }
-
     folia::ThemeProfile EditorSurfaceRenderer::Theme() const
     {
         return themeProfile;
@@ -169,11 +162,11 @@ namespace winrt::Folia
         }
     }
 
-    void EditorSurfaceRenderer::Initialize(winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& panel)
+    void EditorSurfaceRenderer::Initialize(winrt::Microsoft::UI::Xaml::FrameworkElement const& host)
     {
         if (resources.Ready()) return;
-        resources.Initialize(panel, styleSheet);
-        auto dispatcher = panel.DispatcherQueue();
+        resources.Initialize(host, styleSheet);
+        auto dispatcher = host.DispatcherQueue();
         mathDispatcher = dispatcher;
         AttachMathCompletion();
         renderCache.Attach(dispatcher, [this] { Invalidate(); });
@@ -197,14 +190,14 @@ namespace winrt::Folia
     }
 
     void EditorSurfaceRenderer::Resize(
-        winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& panel,
+        winrt::Microsoft::UI::Xaml::FrameworkElement const& host,
         double width,
         double height)
     {
         if (resizing) return;
         resizing = true;
         struct ResetFlag { bool& value; ~ResetFlag() { value = false; } } reset{resizing};
-        auto result = resources.Resize(panel, width, height);
+        auto result = resources.Resize(host, width, height);
         if (!result.resized) return;
         if (result.widthChanged)
         {
@@ -230,9 +223,7 @@ namespace winrt::Folia
         struct Reset { EditorSurfaceRenderer& owner; ~Reset() { owner.rendering = false; if (owner.deferredInvalidate.exchange(false)) owner.Invalidate(); } } reset{*this};
         resources.EnsureFrameResources(styleSheet);
         resources.d2dContext->BeginDraw();
-        auto paper = styleSheet.canvasColor;
-        paper.a *= paperOpacity;
-        resources.d2dContext->Clear(paper);
+        resources.d2dContext->Clear(D2D1::ColorF(0.f, 0.f, 0.f, 0.f));
         try
         {
             DrawDocument(frame);
@@ -276,8 +267,8 @@ namespace winrt::Folia
     void EditorSurfaceRenderer::PresentPendingFrame()
     {
         if (!std::exchange(presentPending, false) || !resources.Ready()) return;
-        auto presented = resources.swapChain->Present(0, 0);
-        if (presented == DXGI_ERROR_DEVICE_REMOVED || presented == DXGI_ERROR_DEVICE_RESET) {
+        auto presented = resources.Present();
+        if (FAILED(presented)) {
             ResetTextMotion();
             resources.ResetTargets();
         }

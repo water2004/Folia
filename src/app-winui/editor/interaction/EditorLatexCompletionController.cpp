@@ -12,7 +12,7 @@ namespace winrt::Folia
     void EditorLatexCompletionController::Attach(
         EditorSession& session,
         EditorSurfaceRenderer& renderer,
-        SwapChainPanel const& editorSurface,
+        FrameworkElement const& editorSurface,
         Canvas const& overlay,
         Border const& popup,
         TextBlock const& prefixLabel,

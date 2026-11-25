@@ -20,8 +20,6 @@ namespace {
     suite frame_scheduling_tests = [] {
         "frame scheduling does not wait for recurring normal UI work to drain"_test = [] {
             auto queue = winrt::Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread();
-            auto ready = winrt::handle{::CreateEventW(nullptr, TRUE, TRUE, nullptr)};
-            winrt::check_bool(ready.get() != nullptr);
             struct WorkState { std::size_t count = 0; bool active = true; };
             auto state = std::make_shared<WorkState>();
             auto work = std::make_shared<std::function<void()>>();
@@ -34,7 +32,7 @@ namespace {
             };
             std::size_t frames = 0, workAtFrame = 0;
             EditorFrameScheduler scheduler;
-            scheduler.Attach(queue, ready.get(), ::GetDesktopWindow(), [&](float) {
+            scheduler.Attach(queue, ::GetDesktopWindow(), [&](float) {
                 ++frames;
                 workAtFrame = state->count;
                 return false;
@@ -52,11 +50,9 @@ namespace {
 
         "frame scheduling samples display cadence without rendering cost"_test = [] {
             auto queue = winrt::Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread();
-            auto ready = winrt::handle{::CreateEventW(nullptr, TRUE, TRUE, nullptr)};
-            winrt::check_bool(ready.get() != nullptr);
             std::vector<float> intervals;
             EditorFrameScheduler scheduler;
-            scheduler.Attach(queue, ready.get(), ::GetDesktopWindow(), [&](float elapsed) {
+            scheduler.Attach(queue, ::GetDesktopWindow(), [&](float elapsed) {
                 expect(std::isfinite(elapsed) && elapsed > 0);
                 intervals.push_back(elapsed);
                 return intervals.size() < 40;
@@ -69,20 +65,17 @@ namespace {
             intervals.erase(intervals.begin(), intervals.begin() + 4);
             std::ranges::sort(intervals);
             auto median = intervals[intervals.size() / 2];
-            std::fprintf(stderr, "frame scheduling ready-signal cadence median_ms=%.3f p95_ms=%.3f callbacks_per_second=%.1f\n",
+            std::fprintf(stderr, "frame scheduling cadence median_ms=%.3f p95_ms=%.3f callbacks_per_second=%.1f\n",
                 median * 1000, intervals[intervals.size() * 95 / 100] * 1000, 1 / median);
-            // A manual ready event deliberately removes GPU/compositor cost.
             // These timings diagnose pacing; they are not displayed-frame FPS.
         };
 
-        "frame scheduling detach cancels a pending compositor or GPU wait"_test = [] {
+        "frame scheduling detach cancels pending timing and dispatch"_test = [] {
             auto queue = winrt::Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread();
-            auto ready = winrt::handle{::CreateEventW(nullptr, TRUE, FALSE, nullptr)};
-            winrt::check_bool(ready.get() != nullptr);
             for (int cycle = 0; cycle < 4; ++cycle) {
                 EditorFrameScheduler scheduler;
                 std::size_t frames = 0;
-                scheduler.Attach(queue, ready.get(), ::GetDesktopWindow(), [&](float) { ++frames; return true; });
+                scheduler.Attach(queue, ::GetDesktopWindow(), [&](float) { ++frames; return true; });
                 scheduler.Start();
                 std::this_thread::sleep_for(std::chrono::milliseconds(12));
                 auto start = std::chrono::steady_clock::now();

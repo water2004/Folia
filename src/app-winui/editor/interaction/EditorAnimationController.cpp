@@ -15,7 +15,7 @@ namespace winrt::Folia {
         wake.Tick([weak](auto const&, auto const&) {
             if (auto current = weak.lock(); current && current->owner) current->owner->RequestFrame();
         });
-        scheduler.Attach(queue, value.FrameLatencyWaitableObject(), hwnd,
+        scheduler.Attach(queue, hwnd,
             [weak, render = std::move(render)](float elapsed) {
                 auto current = weak.lock();
                 if (!current || !current->owner) return false;

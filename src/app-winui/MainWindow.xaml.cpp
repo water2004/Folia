@@ -93,8 +93,6 @@ namespace winrt::Folia::implementation
             ToolTipService::SetToolTip(element, winrt::box_value(Localize(resource)));
         };
 
-        Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(NewTabButton(), Localize(L"NewDocument"));
-        tooltip(NewTabButton(), L"NewDocument");
         FormatMenu().Text(Localize(L"FormatMenu"));
         OpenFolderButton().Text(Localize(L"OpenFolder"));
         RecentFilesMenu().Text(Localize(L"OpenRecentFile"));
@@ -578,7 +576,6 @@ namespace winrt::Folia::implementation
         paper.Opacity(reading == WindowMaterial::Solid ? 1. : metric(reading == WindowMaterial::Acrylic
             ? L"FoliaAcrylicReadingOpacity" : sharesBase ? L"FoliaSharedReadingMaterialOpacity" : L"FoliaReadingMaterialOpacity"));
         ReadingTint().Background(paper);
-        editorRenderer.SetPaperOpacity(reading == WindowMaterial::Solid ? 1.f : 0.f);
     }
 
     void MainWindow::UpdateTheme()

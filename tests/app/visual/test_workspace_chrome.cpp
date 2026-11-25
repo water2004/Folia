@@ -40,6 +40,7 @@ namespace {
         }
         ~ChromeWindow() { window.Close(); }
         template<class T> T Find(wchar_t const* name) { return root.FindName(name).as<T>(); }
+        Button AddTab() { return Find<TabView>(L"DocumentTabs").as<IControlProtected>().GetTemplateChild(L"AddButton").as<Button>(); }
     };
 
     FrameworkElement Descendant(DependencyObject const& parent, std::wstring_view name) {
@@ -86,7 +87,7 @@ namespace {
             ChromeWindow f;
             auto tabs = f.Find<TabView>(L"DocumentTabs");
             auto firstItem = tabs.SelectedItem();
-            Invoke(f.Find<Button>(L"NewTabButton"));
+            Invoke(f.AddTab());
             Pump([&] { return tabs.SelectedItem() != firstItem; });
             auto secondItem = tabs.SelectedItem();
             f.root.UpdateLayout();
@@ -122,7 +123,7 @@ namespace {
             ChromeWindow f;
             auto tabs = f.Find<TabView>(L"DocumentTabs");
             auto original = tabs.SelectedItem();
-            auto add = f.Find<Button>(L"NewTabButton");
+            auto add = f.AddTab();
             for (int i = 0; i < 2; ++i) {
                 auto previous = tabs.SelectedItem();
                 Invoke(add);
@@ -190,7 +191,7 @@ namespace {
             auto main = f.Find<Button>(L"DocumentActionsButton").Flyout().as<MenuFlyout>();
             expect(main.Placement() == Primitives::FlyoutPlacementMode::BottomEdgeAlignedLeft);
             for (auto item : main.Items()) if (auto sub = item.try_as<MenuFlyoutSubItem>()) expect(sub.Name() != L"InsertButton");
-            auto context = f.Find<SwapChainPanel>(L"EditorSurface").ContextFlyout().as<MenuFlyout>();
+            auto context = f.Find<Grid>(L"EditorSurface").ContextFlyout().as<MenuFlyout>();
             MenuFlyoutSubItem insertion{nullptr};
             for (auto item : context.Items()) if (auto sub = item.try_as<MenuFlyoutSubItem>(); sub && sub.Name() == L"InsertButton") insertion = sub;
             expect(insertion != nullptr);
@@ -229,6 +230,9 @@ namespace {
             auto top = f.Find<Grid>(L"TopChrome");
             auto card = f.Find<Grid>(L"ReadingCard");
             expect(leftAt.Y < top.ActualHeight());
+            auto rail = f.Find<Primitives::ToggleButton>(L"FilesTab");
+            expect(rail.TransformToVisual(f.root).TransformPoint({0, 0}).Y >= top.ActualHeight())
+                << "the activity buttons begin below the title row";
             expect(rightAt.X > leftAt.X && rightAt.Y >= top.ActualHeight())
                 << std::format("source mode origin ({}, {}), title strip height {}", rightAt.X, rightAt.Y, top.ActualHeight());
             expect(card.CornerRadius().TopLeft > 0. && card.Margin().Right > 0.);
@@ -242,7 +246,7 @@ namespace {
         "workspace chrome retains native tabs and pane controls in a narrow window"_test = [] { try {
             ChromeWindow f;
             auto tabs = f.Find<TabView>(L"DocumentTabs");
-            auto add = f.Find<Button>(L"NewTabButton");
+            auto add = f.AddTab();
             for (int i = 0; i < 6; ++i) {
                 const auto previous = tabs.TabItemsSource().as<winrt::Windows::Foundation::Collections::IVectorView<winrt::Windows::Foundation::IInspectable>>().Size();
                 Invoke(add);

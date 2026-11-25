@@ -120,20 +120,18 @@ namespace winrt::Folia
 
     void EditorFrameScheduler::Attach(
         winrt::Microsoft::UI::Dispatching::DispatcherQueue const& dispatcher,
-        HANDLE frameLatencyWaitableObject,
         HWND valueWindowHandle,
         FrameCallback callback)
     {
         Detach();
         winrt::check_bool(dispatcher != nullptr);
-        winrt::check_bool(frameLatencyWaitableObject != nullptr);
         windowHandle = valueWindowHandle;
         frameCallback = std::move(callback);
         dispatchState = std::make_shared<FrameDispatchState>();
         dispatchState->owner = this;
         dispatchState->dispatcher = dispatcher;
         dispatchState->attached.store(true, std::memory_order_release);
-        StartThread(frameLatencyWaitableObject);
+        StartThread();
     }
 
     void EditorFrameScheduler::Detach()
@@ -181,7 +179,7 @@ namespace winrt::Folia
         }
     }
 
-    void EditorFrameScheduler::StartThread(HANDLE frameLatencyWaitableObject)
+    void EditorFrameScheduler::StartThread()
     {
         frameRequestEvent = CreateEventW(nullptr, FALSE, FALSE, nullptr);
         if (!frameRequestEvent) winrt::throw_hresult(HRESULT_FROM_WIN32(GetLastError()));
@@ -214,11 +212,10 @@ namespace winrt::Folia
         auto stopEvent = schedulerStopEvent;
         auto pacingTimer = framePacingTimer;
         auto waitForClock = CompositorClock().wait;
-        frameThread = std::jthread([state, requestEvent, stopEvent, pacingTimer, frameLatencyWaitableObject, waitForClock](std::stop_token stopToken)
+        frameThread = std::jthread([state, requestEvent, stopEvent, pacingTimer, waitForClock](std::stop_token stopToken)
         {
             std::stop_callback stopCallback(stopToken, [stopEvent] { SetEvent(stopEvent); });
             HANDLE requestHandles[] = { stopEvent, requestEvent };
-            HANDLE frameHandles[] = { stopEvent, frameLatencyWaitableObject };
             HANDLE pacingHandles[] = { stopEvent, pacingTimer };
             auto lastRequestId = std::uint64_t{0};
             auto previousSubmission = std::chrono::steady_clock::time_point{};
@@ -236,10 +233,6 @@ namespace winrt::Folia
                     if (result == WAIT_OBJECT_0) break;
                     compositorPaced = result == WAIT_OBJECT_0 + 1;
                 }
-                // Wait for the compositor before checking buffer availability.
-                // Waiting for another clock tick after a buffer becomes ready
-                // can miss that tick and reduce presentation to half cadence.
-                if (WaitForMultipleObjects(2, frameHandles, FALSE, INFINITE) != WAIT_OBJECT_0 + 1) break;
                 auto now = std::chrono::steady_clock::now();
                 auto intervalSeconds = state->targetFrameIntervalSeconds.load(std::memory_order_acquire);
                 // Older Windows versions and an unavailable display retain

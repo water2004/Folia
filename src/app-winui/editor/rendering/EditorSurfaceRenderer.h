@@ -39,9 +39,9 @@ namespace winrt::Folia
         EditorSurfaceRenderer();
         ~EditorSurfaceRenderer();
 
-        void Initialize(winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& panel);
+        void Initialize(winrt::Microsoft::UI::Xaml::FrameworkElement const& host);
         void InitializeForPdf();
-        void Resize(winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& panel, double width, double height);
+        void Resize(winrt::Microsoft::UI::Xaml::FrameworkElement const& host, double width, double height);
         void Render(detail::EditorRenderFrame const& frame);
         // A document transition may draw several layouts to restore its
         // viewport. Submit its final buffer after the shell frame has rendered.
@@ -63,7 +63,6 @@ namespace winrt::Folia
             detail::EditorRenderFrame const& frame);
         void CancelPdfExport();
         void SetTheme(folia::ThemeProfile const& value);
-        void SetPaperOpacity(float opacity);
         folia::ThemeProfile Theme() const;
         void SetMediaDisplaySettings(MediaDisplaySettings const& value);
         MediaDisplaySettings const& MediaSettings() const noexcept { return mediaSettings; }
@@ -107,7 +106,6 @@ namespace winrt::Folia
         float MaximumScrollOffset() const;
         float ViewportHeight() const;
         float ViewportWidth() const;
-        HANDLE FrameLatencyWaitableObject() const;
         void FocusCaret(bool focused) {
             caretAnimation.Focus(focused);
             selectionAnimation.Focus(focused);
@@ -167,7 +165,6 @@ namespace winrt::Folia
         std::uint64_t themeRevision = 1;
         EditorStyleSheet styleSheet = CreateEditorStyleSheet(themeProfile);
         MediaDisplaySettings mediaSettings;
-        float paperOpacity = 1.f;
         EditorInteractionMap interactionMap;
         EditorCaretAnimation caretAnimation;
         EditorSelectionAnimation selectionAnimation;

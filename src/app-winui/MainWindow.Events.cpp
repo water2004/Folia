@@ -119,6 +119,7 @@ namespace winrt::Folia::implementation
             preparedTabActivation.Reset();
             EndTabDrag();
             animationController.Detach();
+            editorRootChanged.revoke();
             closingHandler.Reset();
             if (latexCommandCatalog) latexCommandCatalog->Flush();
             if (settingsView) settingsView->Detach();
@@ -155,17 +156,19 @@ namespace winrt::Folia::implementation
         EditorSurface().Loaded(WindowEvent([this](auto const&, auto const&)
         {
             InitializeEditorSurface();
+            auto root = EditorSurface().XamlRoot();
+            editorRasterizationScale = root.RasterizationScale();
+            editorRootChanged = root.Changed(winrt::auto_revoke, WindowEvent([this](auto const& sender, auto const&) {
+                auto scale = sender.RasterizationScale();
+                if (std::exchange(editorRasterizationScale, scale) == scale) return;
+                UpdateChromeMetrics();
+                ResizeEditorSurface(EditorSurface().ActualWidth(), EditorSurface().ActualHeight());
+            }));
         }));
 
         EditorSurface().SizeChanged(WindowEvent([this](auto const&, Microsoft::UI::Xaml::SizeChangedEventArgs const& args)
         {
             ResizeEditorSurface(args.NewSize().Width, args.NewSize().Height);
-        }));
-
-        EditorSurface().CompositionScaleChanged(WindowEvent([this](auto const&, auto const&)
-        {
-            UpdateChromeMetrics();
-            ResizeEditorSurface(EditorSurface().ActualWidth(), EditorSurface().ActualHeight());
         }));
 
         Root().ActualThemeChanged(WindowEvent([this](auto const&, auto const&)

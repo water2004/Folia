@@ -91,6 +91,8 @@ Every native move entry rechecks its own pointer origin before TabView handles
 the move. A tab-selection click can finish through XAML without delivering a
 non-client release, so its recorded press cannot suppress a later origin check.
 The tab strip stays visible. Only the tools in the reading card can auto-hide.
+The native TabView measures its tabs and add button together inside the space
+reserved for the strip. The native caption buttons have a separate column.
 The native caption region is recomputed after sidebar changes because the
 whole strip can move without reporting a size change.
 The corresponding SDK sources are
@@ -114,9 +116,13 @@ The file explorer header holds the workspace name and commands, while the tree
 starts with the workspace's children.
 `DocumentTools` owns the toolbar's hover and keyboard focus behavior.
 Its animated clip clears space for the tools
-without resizing the editor surface. The card provides the paper tint to both
-XAML and Direct2D content. The selected tab and reading card share a single
-backdrop when the reading material uses its own Windows backdrop.
+without resizing the editor surface. The selected tab and reading card share a
+single backdrop when the reading material uses its own Windows backdrop. The
+card supplies the paper tint under the toolbar and editor. Direct2D paints
+the editor foreground at the XAML rasterization scale into a GPU texture, then
+submits it through a premultiplied Composition drawing surface. The compositor
+blends the editor with the paper behind it and paces scrolling and caret
+animation.
 
 Child XAML controls can deliver final notifications after their window closes.
 `MainWindow::WindowEvent` locks the weak window owner during delivery and skips

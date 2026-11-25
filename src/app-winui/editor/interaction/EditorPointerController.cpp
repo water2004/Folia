@@ -27,7 +27,7 @@ namespace winrt::Folia
         EditorSurfaceRenderer& renderer,
         EditorScrollController& scroll,
         EditorTextInputController& textInput,
-        winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& surface,
+        winrt::Microsoft::UI::Xaml::FrameworkElement const& surface,
         ExecuteCommand executeCommand,
         Render render,
         OpenLink openLink,

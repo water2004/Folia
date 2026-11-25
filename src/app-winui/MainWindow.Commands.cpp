@@ -7,7 +7,7 @@ namespace winrt::Folia::implementation
 {
     void MainWindow::RegisterCommandHandlers()
     {
-        NewTabButton().Click(WindowEvent([this](auto const&, auto const&) { NewDocument(); }));
+        DocumentTabs().AddTabButtonClick(WindowEvent([this](auto const&, auto const&) { NewDocument(); }));
         OpenFolderButton().Click(WindowEvent([this](auto const&, auto const&) { PickWorkspaceFolder(); }));
         DocumentActionsButton().Flyout().Opening(WindowEvent([this](auto const&, auto const&) { RefreshRecentMenu(); }));
         SaveAsButton().Click(WindowEvent([this](auto const&, auto const&) { documentController().SaveDocumentAs(); }));

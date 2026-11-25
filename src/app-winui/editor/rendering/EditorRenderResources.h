@@ -14,24 +14,23 @@ namespace winrt::Folia
 
     struct EditorRenderResources
     {
-        ~EditorRenderResources();
-
-        void Initialize(winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& panel, EditorStyleSheet const& styleSheet);
+        void Initialize(winrt::Microsoft::UI::Xaml::FrameworkElement const& host, EditorStyleSheet const& styleSheet);
         void InitializeOffscreen(EditorStyleSheet const& styleSheet, float widthDip, float heightDip);
         // Background measurement uses the production fonts and DirectWrite
         // without creating a D3D device, swap chain, brushes or paint target.
         void InitializeTextMeasurement(EditorStyleSheet const& styleSheet, float widthDip, float heightDip);
-        EditorResizeResult Resize(winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& panel, double width, double height);
+        EditorResizeResult Resize(winrt::Microsoft::UI::Xaml::FrameworkElement const& host, double width, double height);
         void RebuildTextFormats(EditorStyleSheet const& styleSheet);
         void ResetBrushes();
         void ResetTargets();
         void EnsureFrameResources(EditorStyleSheet const& styleSheet);
+        HRESULT Present();
         bool Ready() const;
 
         ::Microsoft::WRL::ComPtr<ID3D11Device> d3dDevice;
         ::Microsoft::WRL::ComPtr<ID3D11DeviceContext> d3dContext;
-        ::Microsoft::WRL::ComPtr<IDXGISwapChain1> swapChain;
-        ::Microsoft::WRL::ComPtr<ID3D11RenderTargetView> renderTargetView;
+        winrt::Microsoft::UI::Composition::CompositionDrawingSurface drawingSurface{nullptr};
+        ::Microsoft::WRL::ComPtr<ID3D11Texture2D> renderTexture;
         ::Microsoft::WRL::ComPtr<ID2D1Factory1> d2dFactory;
         ::Microsoft::WRL::ComPtr<ID2D1Device> d2dDevice;
         ::Microsoft::WRL::ComPtr<ID2D1DeviceContext> d2dContext;
@@ -74,12 +73,8 @@ namespace winrt::Folia
         float surfaceHeightDip = 1.0f;
         float surfaceScaleX = 1.0f;
         float surfaceScaleY = 1.0f;
-        HANDLE frameLatencyWaitableObject = nullptr;
 
     private:
         void InitializeDeviceResources(EditorStyleSheet const& styleSheet);
-        float CompositionScaleX(winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& panel) const;
-        float CompositionScaleY(winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& panel) const;
-        void ApplySwapChainTransform();
     };
 }

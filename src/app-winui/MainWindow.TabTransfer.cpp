@@ -221,6 +221,8 @@ namespace winrt::Folia::implementation {
             auto tabs = window->DocumentTabs();
             auto list = tabs.as<IControlProtected>().GetTemplateChild(L"TabListView").try_as<FrameworkElement>();
             if (!list || !list.IsLoaded()) return;
+            auto button = window->NewTabButton();
+            if (!button) return;
             auto id = window->AppWindow().Id();
             auto island = tabs.XamlRoot().CoordinateConverter();
             auto native = Microsoft::UI::Content::ContentCoordinateConverter::CreateForWindowId(id);
@@ -235,9 +237,9 @@ namespace winrt::Folia::implementation {
             {
                 auto strip = bounds(window->TopChrome());
                 auto tabList = bounds(list);
-                auto actions = bounds(window->NewTabButton());
+                auto actions = bounds(button);
                 auto right = bounds(window->CaptionInset()).X;
-                // The shelf above the tabs and the space after the split button
+                // The shelf above the tabs and the space after the add button
                 // move the window. WinUI's tab list owns the tear-out gesture.
                 add({tabList.X, strip.Y, right - tabList.X, tabList.Y - strip.Y});
                 add({actions.X + actions.Width, tabList.Y, right - actions.X - actions.Width, tabList.Height});
@@ -291,7 +293,6 @@ namespace winrt::Folia::implementation {
         // Register the origin check before TabView attaches its move callbacks.
         UpdateTabTransferAvailability();
         DocumentColumn().SizeChanged(WindowEvent([this](auto const&, auto const&) { RefreshTabCaptionRegion(); }));
-        TitleDragArea().SizeChanged(WindowEvent([this](auto const&, auto const&) { RefreshTabCaptionRegion(); }));
         DocumentTabs().TabItemsChanged(WindowEvent([this](auto const&, auto const&) { QueueTabOrderSync(); }));
         DocumentTabs().TabTearOutWindowRequested(WindowEvent([this](auto const&, auto const& args) {
             auto items = args.Items();

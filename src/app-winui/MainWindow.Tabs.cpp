@@ -218,6 +218,10 @@ namespace winrt::Folia::implementation {
         return list ? list.as<IControlProtected>().GetTemplateChild(L"ScrollViewer").try_as<ScrollViewer>() : nullptr;
     }
 
+    Button MainWindow::NewTabButton() {
+        return DocumentTabs().as<IControlProtected>().GetTemplateChild(L"AddButton").try_as<Button>();
+    }
+
     bool MainWindow::ScrollTabsWithWheel(int delta) {
         auto view = TabStripScroller();
         if (!view || !delta || view.ScrollableWidth() <= 0) return false;
@@ -237,6 +241,14 @@ namespace winrt::Folia::implementation {
                     args.Handled(true);
             }))), true);
         DocumentTabs().Loaded(WindowEvent([this](auto const&, auto const&) {
+            if (auto button = NewTabButton()) {
+                button.Content(MakeWorkspaceIcon(WorkspaceIcon::Add));
+                auto label = Localize(L"NewDocument");
+                Automation::AutomationProperties::SetName(button, label);
+                ToolTipService::SetToolTip(button, box_value(label));
+            }
+            if (auto list = DocumentTabs().as<IControlProtected>().GetTemplateChild(L"TabListView").try_as<FrameworkElement>())
+                list.SizeChanged(WindowEvent([this](auto const&, auto const&) { RefreshTabCaptionRegion(); }));
             if (auto viewer = TabStripScroller()) {
                 viewer.ViewChanged(WindowEvent([this](auto const&, auto const&) { UpdateSelectedTabMaterial(); }));
                 // TabView handles ViewChanged, but resizing the viewport at offset

@@ -105,6 +105,7 @@ namespace winrt::Folia::implementation
         void UpdateDocumentTab(std::uint64_t id);
         void UpdateWorkspaceLayout();
         void UpdateChromeMetrics();
+        Microsoft::UI::Xaml::Controls::Button NewTabButton();
         void ApplyBarLayout();
         void RegisterWorkspaceLayout();
         void SelectWorkspacePane(bool outline);
@@ -176,6 +177,8 @@ namespace winrt::Folia::implementation
         winrt::Folia::FolderExplorerController folderExplorer;
         winrt::Folia::RecentWorkspace recentWorkspace;
         winrt::Folia::EditorSurfaceRenderer editorRenderer;
+        Microsoft::UI::Xaml::XamlRoot::Changed_revoker editorRootChanged;
+        double editorRasterizationScale = 0.;
         winrt::Folia::EditorScrollController scrollController;
         winrt::Folia::EditorAnimationController animationController;
         winrt::Folia::EditorTextInputController textInputController;

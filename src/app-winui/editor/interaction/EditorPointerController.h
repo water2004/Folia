@@ -25,7 +25,7 @@ namespace winrt::Folia
             EditorSurfaceRenderer& renderer,
             EditorScrollController& scroll,
             EditorTextInputController& textInput,
-            winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& surface,
+            winrt::Microsoft::UI::Xaml::FrameworkElement const& surface,
             ExecuteCommand executeCommand,
             Render render,
             OpenLink openLink,
@@ -51,7 +51,7 @@ namespace winrt::Folia
         EditorScrollController* scroll_ = nullptr;
         EditorTextInputController* textInput_ = nullptr;
         EditorSelectionDrag selectionDrag_;
-        winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel surface_{ nullptr };
+        winrt::Microsoft::UI::Xaml::FrameworkElement surface_{ nullptr };
         std::array<winrt::Microsoft::UI::Input::InputCursor, 4> cursors_{nullptr, nullptr, nullptr, nullptr};
         std::optional<Cursor> currentCursor_;
         ExecuteCommand executeCommand_;

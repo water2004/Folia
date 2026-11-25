@@ -19,7 +19,7 @@ namespace winrt::Folia
         void Attach(
             EditorSession& session,
             EditorSurfaceRenderer& renderer,
-            winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& editorSurface,
+            winrt::Microsoft::UI::Xaml::FrameworkElement const& editorSurface,
             winrt::Microsoft::UI::Xaml::Controls::Canvas const& overlay,
             winrt::Microsoft::UI::Xaml::Controls::Border const& popup,
             winrt::Microsoft::UI::Xaml::Controls::TextBlock const& prefixLabel,
@@ -42,7 +42,7 @@ namespace winrt::Folia
 
         EditorSession* session_ = nullptr;
         EditorSurfaceRenderer* renderer_ = nullptr;
-        winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel editorSurface_{ nullptr };
+        winrt::Microsoft::UI::Xaml::FrameworkElement editorSurface_{ nullptr };
         winrt::Microsoft::UI::Xaml::Controls::Canvas overlay_{ nullptr };
         winrt::Microsoft::UI::Xaml::Controls::Border popup_{ nullptr };
         winrt::Microsoft::UI::Xaml::Controls::TextBlock prefixLabel_{ nullptr };

@@ -101,12 +101,10 @@ namespace
         "math scrolling frame scheduling lets ordinary UI work run"_test = []
         {
             auto queue = winrt::Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread();
-            auto frameReady = winrt::handle{::CreateEventW(nullptr, TRUE, TRUE, nullptr)};
-            winrt::check_bool(frameReady.get() != nullptr);
             EditorFrameScheduler scheduler;
             std::size_t frames = 0;
             std::size_t inputAtFrame = 0;
-            scheduler.Attach(queue, frameReady.get(), nullptr, [&](float)
+            scheduler.Attach(queue, nullptr, [&](float)
             {
                 ++frames;
                 if (frames == 1) queue.TryEnqueue([&] { inputAtFrame = frames; });

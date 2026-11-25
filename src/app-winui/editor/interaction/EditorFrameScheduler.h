@@ -2,8 +2,7 @@
 
 namespace winrt::Folia
 {
-    // Presents UI-thread animation work at the active display cadence while
-    // pacing submissions with the renderer's frame-latency waitable object.
+    // Dispatches UI-thread animation work at the compositor's display cadence.
     struct EditorFrameScheduler
     {
         using FrameCallback = std::function<bool(float elapsedSeconds)>;
@@ -11,7 +10,6 @@ namespace winrt::Folia
         ~EditorFrameScheduler();
         void Attach(
             winrt::Microsoft::UI::Dispatching::DispatcherQueue const& dispatcher,
-            HANDLE frameLatencyWaitableObject,
             HWND windowHandle,
             FrameCallback frameCallback);
         void Detach();
@@ -21,7 +19,7 @@ namespace winrt::Folia
     private:
         struct FrameDispatchState;
 
-        void StartThread(HANDLE frameLatencyWaitableObject);
+        void StartThread();
         void StopThread();
         void RequestFrame();
         void OnFrame(std::uint64_t generation);

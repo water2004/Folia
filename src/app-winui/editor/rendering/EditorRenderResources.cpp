@@ -1,44 +1,24 @@
 #include "pch.h"
 #include "editor/rendering/EditorRenderResources.h"
+#include <winrt/Microsoft.Graphics.DirectX.h>
+#include <winrt/Microsoft.UI.Composition.Interop.h>
+#include <winrt/Microsoft.UI.Xaml.Hosting.h>
 
 namespace winrt::Folia
 {
-    EditorRenderResources::~EditorRenderResources()
+    namespace
     {
-        if (frameLatencyWaitableObject)
+        float RasterizationScale(winrt::Microsoft::UI::Xaml::FrameworkElement const& host)
         {
-            CloseHandle(frameLatencyWaitableObject);
-            frameLatencyWaitableObject = nullptr;
+            auto root = host.XamlRoot();
+            return root ? static_cast<float>(root.RasterizationScale()) : 1.f;
         }
-    }
-
-    float EditorRenderResources::CompositionScaleX(winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& panel) const
-    {
-        return (std::max)(1.0f, panel.CompositionScaleX());
-    }
-
-    float EditorRenderResources::CompositionScaleY(winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& panel) const
-    {
-        return (std::max)(1.0f, panel.CompositionScaleY());
     }
 
     bool EditorRenderResources::Ready() const
     {
         return d3dDevice && d3dContext && d2dDevice && d2dContext
             && dwriteFactory && wicFactory;
-    }
-
-    void EditorRenderResources::ApplySwapChainTransform()
-    {
-        if (!swapChain) return;
-        ::Microsoft::WRL::ComPtr<IDXGISwapChain2> swapChain2;
-        if (SUCCEEDED(swapChain.As(&swapChain2)))
-        {
-            DXGI_MATRIX_3X2_F matrix{};
-            matrix._11 = 1.0f / surfaceScaleX;
-            matrix._22 = 1.0f / surfaceScaleY;
-            winrt::check_hresult(swapChain2->SetMatrixTransform(&matrix));
-        }
     }
 
     void EditorRenderResources::ResetBrushes()
@@ -78,13 +58,8 @@ namespace winrt::Folia
             d2dContext->SetTarget(nullptr);
             d2dContext->Flush();
         }
-        if (d3dContext)
-        {
-            d3dContext->OMSetRenderTargets(0, nullptr, nullptr);
-            d3dContext->Flush();
-        }
-        renderTargetView = nullptr;
         d2dTarget = nullptr;
+        renderTexture = nullptr;
         ResetBrushes();
     }
 
@@ -141,46 +116,35 @@ namespace winrt::Folia
     }
 
     void EditorRenderResources::Initialize(
-        winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& panel,
+        winrt::Microsoft::UI::Xaml::FrameworkElement const& host,
         EditorStyleSheet const& styleSheet)
     {
-        if (swapChain) return;
+        if (drawingSurface) return;
         InitializeDeviceResources(styleSheet);
 
-        ::Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice;
-        winrt::check_hresult(d3dDevice.As(&dxgiDevice));
-        ::Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
-        winrt::check_hresult(dxgiDevice->GetAdapter(adapter.GetAddressOf()));
-        ::Microsoft::WRL::ComPtr<IDXGIFactory2> factory;
-        winrt::check_hresult(adapter->GetParent(__uuidof(IDXGIFactory2), reinterpret_cast<void**>(factory.GetAddressOf())));
-        surfaceScaleX = CompositionScaleX(panel);
-        surfaceScaleY = CompositionScaleY(panel);
-        surfaceWidthDip = static_cast<float>((std::max)(1.0, panel.ActualWidth()));
-        surfaceHeightDip = static_cast<float>((std::max)(1.0, panel.ActualHeight()));
-        auto width = (std::max)(uint32_t{ 1 }, static_cast<uint32_t>(std::ceil(panel.ActualWidth() * surfaceScaleX)));
-        auto height = (std::max)(uint32_t{ 1 }, static_cast<uint32_t>(std::ceil(panel.ActualHeight() * surfaceScaleY)));
-        DXGI_SWAP_CHAIN_DESC1 desc{};
-        desc.Width = width;
-        desc.Height = height;
-        desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-        desc.SampleDesc.Count = 1;
-        desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        desc.BufferCount = 2;
-        desc.Scaling = DXGI_SCALING_STRETCH;
-        desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-        desc.AlphaMode = DXGI_ALPHA_MODE_PREMULTIPLIED;
-        desc.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
-        winrt::check_hresult(factory->CreateSwapChainForComposition(d3dDevice.Get(), &desc, nullptr, swapChain.GetAddressOf()));
-        ::Microsoft::WRL::ComPtr<IDXGISwapChain2> swapChain2;
-        winrt::check_hresult(swapChain.As(&swapChain2));
-        winrt::check_hresult(swapChain2->SetMaximumFrameLatency(1));
-        frameLatencyWaitableObject = swapChain2->GetFrameLatencyWaitableObject();
-        if (!frameLatencyWaitableObject) winrt::throw_hresult(E_FAIL);
-        surfaceWidth = width;
-        surfaceHeight = height;
-        ApplySwapChainTransform();
-        auto panelNative = panel.as<ISwapChainPanelNative>();
-        winrt::check_hresult(panelNative->SetSwapChain(swapChain.Get()));
+        surfaceScaleX = surfaceScaleY = RasterizationScale(host);
+        surfaceWidthDip = static_cast<float>((std::max)(1.0, host.ActualWidth()));
+        surfaceHeightDip = static_cast<float>((std::max)(1.0, host.ActualHeight()));
+        surfaceWidth = static_cast<uint32_t>(std::ceil(surfaceWidthDip * surfaceScaleX));
+        surfaceHeight = static_cast<uint32_t>(std::ceil(surfaceHeightDip * surfaceScaleY));
+
+        // A composition drawing surface blends with the XAML paper underneath.
+        // DXGI swap-chain surfaces are presented as external content in WinUI.
+        using winrt::Microsoft::UI::Xaml::Hosting::ElementCompositionPreview;
+        using namespace winrt::Microsoft::UI::Composition;
+        using namespace winrt::Microsoft::Graphics::DirectX;
+        auto compositor = ElementCompositionPreview::GetElementVisual(host).Compositor();
+        CompositionGraphicsDevice graphicsDevice{nullptr};
+        winrt::check_hresult(compositor.as<ICompositorInterop>()->CreateGraphicsDevice(d2dDevice.Get(), &graphicsDevice));
+        drawingSurface = graphicsDevice.CreateDrawingSurface(
+            {static_cast<float>(surfaceWidth), static_cast<float>(surfaceHeight)},
+            DirectXPixelFormat::B8G8R8A8UIntNormalized, DirectXAlphaMode::Premultiplied);
+        auto brush = compositor.CreateSurfaceBrush(drawingSurface);
+        brush.Stretch(CompositionStretch::Fill);
+        auto visual = compositor.CreateSpriteVisual();
+        visual.RelativeSizeAdjustment({1.f, 1.f});
+        visual.Brush(brush);
+        ElementCompositionPreview::SetElementChildVisual(host, visual);
     }
 
     void EditorRenderResources::InitializeOffscreen(
@@ -213,47 +177,42 @@ namespace winrt::Folia
         RebuildTextFormats(styleSheet);
     }
 
-    EditorResizeResult EditorRenderResources::Resize(winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& panel, double width, double height)
+    EditorResizeResult EditorRenderResources::Resize(winrt::Microsoft::UI::Xaml::FrameworkElement const& host, double width, double height)
     {
-        if (!swapChain || !std::isfinite(width) || !std::isfinite(height) || width <= 0.0 || height <= 0.0) return {};
-        auto newScaleX = CompositionScaleX(panel);
-        auto newScaleY = CompositionScaleY(panel);
+        if (!drawingSurface || !std::isfinite(width) || !std::isfinite(height) || width <= 0.0 || height <= 0.0) return {};
+        auto scale = RasterizationScale(host);
         auto newWidthDip = static_cast<float>((std::max)(1.0, width));
         auto newHeightDip = static_cast<float>((std::max)(1.0, height));
-        auto newWidth = (std::max)(uint32_t{ 1 }, static_cast<uint32_t>(std::ceil(width * newScaleX)));
-        auto newHeight = (std::max)(uint32_t{ 1 }, static_cast<uint32_t>(std::ceil(height * newScaleY)));
+        auto newWidth = (std::max)(uint32_t{ 1 }, static_cast<uint32_t>(std::ceil(width * scale)));
+        auto newHeight = (std::max)(uint32_t{ 1 }, static_cast<uint32_t>(std::ceil(height * scale)));
         if (newWidth == surfaceWidth && newHeight == surfaceHeight && newWidthDip == surfaceWidthDip
-            && newHeightDip == surfaceHeightDip && newScaleX == surfaceScaleX && newScaleY == surfaceScaleY) return {};
+            && newHeightDip == surfaceHeightDip && scale == surfaceScaleX) return {};
         EditorResizeResult result{ true, newWidthDip != surfaceWidthDip };
+        if (newWidth != surfaceWidth || newHeight != surfaceHeight)
+            drawingSurface.Resize({static_cast<int32_t>(newWidth), static_cast<int32_t>(newHeight)});
         ResetTargets();
-        if (FAILED(swapChain->ResizeBuffers(
-                0,
-                newWidth,
-                newHeight,
-                DXGI_FORMAT_UNKNOWN,
-                DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT))) return {};
         surfaceWidth = newWidth;
         surfaceHeight = newHeight;
         surfaceWidthDip = newWidthDip;
         surfaceHeightDip = newHeightDip;
-        surfaceScaleX = newScaleX;
-        surfaceScaleY = newScaleY;
-        ApplySwapChainTransform();
+        surfaceScaleX = surfaceScaleY = scale;
         return result;
     }
 
     void EditorRenderResources::EnsureFrameResources(EditorStyleSheet const& styleSheet)
     {
-        if (swapChain && !renderTargetView)
+        if (drawingSurface && !d2dTarget)
         {
-            ::Microsoft::WRL::ComPtr<ID3D11Texture2D> backBuffer;
-            winrt::check_hresult(swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf())));
-            winrt::check_hresult(d3dDevice->CreateRenderTargetView(backBuffer.Get(), nullptr, renderTargetView.GetAddressOf()));
-        }
-        if (swapChain && !d2dTarget)
-        {
+            D3D11_TEXTURE2D_DESC desc{};
+            desc.Width = surfaceWidth;
+            desc.Height = surfaceHeight;
+            desc.MipLevels = desc.ArraySize = 1;
+            desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+            desc.SampleDesc.Count = 1;
+            desc.BindFlags = D3D11_BIND_RENDER_TARGET;
+            winrt::check_hresult(d3dDevice->CreateTexture2D(&desc, nullptr, renderTexture.ReleaseAndGetAddressOf()));
             ::Microsoft::WRL::ComPtr<IDXGISurface> surface;
-            winrt::check_hresult(swapChain->GetBuffer(0, __uuidof(IDXGISurface), reinterpret_cast<void**>(surface.GetAddressOf())));
+            winrt::check_hresult(renderTexture.As(&surface));
             D2D1_BITMAP_PROPERTIES1 properties{};
             properties.pixelFormat = { DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED };
             properties.dpiX = 96.0f * surfaceScaleX;
@@ -293,5 +252,26 @@ namespace winrt::Folia
             for (std::size_t index = 0; index < syntaxBrushes.size(); ++index)
                 winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.syntaxColors[index], syntaxBrushes[index].GetAddressOf()));
         }
+    }
+
+    HRESULT EditorRenderResources::Present()
+    {
+        if (!drawingSurface || !renderTexture) return S_FALSE;
+        auto interop = drawingSurface.as<winrt::Microsoft::UI::Composition::ICompositionDrawingSurfaceInterop>();
+        ::Microsoft::WRL::ComPtr<IDXGISurface> destination;
+        POINT offset{};
+        auto result = interop->BeginDraw(nullptr, IID_PPV_ARGS(destination.GetAddressOf()), &offset);
+        if (FAILED(result)) return result;
+
+        // The compositor may allocate this surface inside a larger texture.
+        // Copy within its update rectangle without changing the editor's DIPs.
+        ::Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
+        result = destination.As(&texture);
+        if (SUCCEEDED(result)) {
+            D3D11_BOX region{0, 0, 0, surfaceWidth, surfaceHeight, 1};
+            d3dContext->CopySubresourceRegion(texture.Get(), 0, offset.x, offset.y, 0, renderTexture.Get(), 0, &region);
+        }
+        auto end = interop->EndDraw();
+        return FAILED(result) ? result : end;
     }
 }

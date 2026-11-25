@@ -35,7 +35,6 @@ namespace winrt::Folia::implementation {
         configure(OutlineTab(), WorkspaceIcon::Outline, L"Outline");
         configure(SettingsButton(), WorkspaceIcon::Settings, L"Settings");
         configure(SidebarButton(), WorkspaceIcon::PanelLeft, L"ToggleSidebar");
-        configure(NewTabButton(), WorkspaceIcon::Add, L"NewDocument");
         configure(DocumentActionsButton(), WorkspaceIcon::More, L"FileMenu");
         configure(SourceModeButton(), WorkspaceIcon::Source, L"SourceMode");
         configure(FolderNewFileButton(), WorkspaceIcon::NewFile, L"NewFile");

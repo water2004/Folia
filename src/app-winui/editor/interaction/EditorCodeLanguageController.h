@@ -13,7 +13,7 @@ namespace winrt::Folia
         void Attach(
             EditorSession& session,
             EditorSurfaceRenderer& renderer,
-            winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& editorSurface,
+            winrt::Microsoft::UI::Xaml::FrameworkElement const& editorSurface,
             winrt::Microsoft::UI::Xaml::Controls::Flyout const& flyout,
             winrt::Microsoft::UI::Xaml::Controls::TextBox const& languageBox,
             winrt::Microsoft::UI::Xaml::Controls::ListView const& languages,
@@ -32,7 +32,7 @@ namespace winrt::Folia
 
         EditorSession* session_ = nullptr;
         EditorSurfaceRenderer* renderer_ = nullptr;
-        winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel editorSurface_{ nullptr };
+        winrt::Microsoft::UI::Xaml::FrameworkElement editorSurface_{ nullptr };
         winrt::Microsoft::UI::Xaml::Controls::Flyout flyout_{ nullptr };
         winrt::Microsoft::UI::Xaml::Controls::TextBox languageBox_{ nullptr };
         winrt::Microsoft::UI::Xaml::Controls::ListView languages_{ nullptr };

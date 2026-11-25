@@ -33,7 +33,7 @@
             <SolidColorBrush x:Key="FoliaWorkspaceBaseBrush"/>
             <SolidColorBrush x:Key="FoliaReadingSurfaceBrush"/>
             <StaticResource x:Key="TabViewItemHeaderBackgroundSelected" ResourceKey="FoliaReadingSurfaceBrush"/>
-            <x:Double x:Key="WorkspaceTabHeight">32</x:Double>
+            <x:Double x:Key="WorkspaceTabHeight">36</x:Double>
             <FontFamily x:Key="FoliaUiFontFamily">Segoe UI Variable Text</FontFamily>
             <FontFamily x:Key="FoliaMonoFontFamily">Cascadia Mono</FontFamily>
             <x:Double x:Key="FoliaUiFontSize">14</x:Double>
@@ -75,12 +75,13 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Grid x:Name="WorkspaceRail" Padding="5,0,5,8" RowDefinitions="Auto,*,Auto" Canvas.ZIndex="2">
-                <StackPanel Spacing="5">
+            <Grid x:Name="WorkspaceRail" Padding="5,0,5,8" RowDefinitions="Auto,Auto,*,Auto" Canvas.ZIndex="2">
+                <Border Height="{StaticResource WorkspaceTabHeight}"/>
+                <StackPanel Grid.Row="1" Spacing="5">
                     <ToggleButton x:Name="FilesTab" Style="{StaticResource WorkspaceRailButtonStyle}"/>
                     <ToggleButton x:Name="OutlineTab" Style="{StaticResource WorkspaceRailButtonStyle}"/>
                 </StackPanel>
-                <Button x:Name="SettingsButton" Grid.Row="2" Style="{StaticResource WorkspaceRailActionStyle}"/>
+                <Button x:Name="SettingsButton" Grid.Row="3" Style="{StaticResource WorkspaceRailActionStyle}"/>
             </Grid>
             <ScrollViewer x:Name="SidebarSlot" Grid.Column="1" Width="0" Padding="0"
                           HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled"
@@ -109,7 +110,7 @@
                 </StackPanel>
                 <TreeView x:Name="FileTree" Grid.Row="2" Margin="1,3,2,8" Style="{StaticResource ExplorerTreeStyle}" Visibility="Collapsed"/>
             </Grid>
-            <Grid x:Name="OutlinePaneContent" Padding="4,32,4,4" Visibility="Collapsed">
+            <Grid x:Name="OutlinePaneContent" Padding="4,36,4,4" Visibility="Collapsed">
                 <ListView x:Name="OutlineList" Background="Transparent" SelectionMode="Single"
                           ItemContainerStyle="{StaticResource WorkspaceNavigationItemStyle}"
                           ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollMode="Enabled"/>
@@ -127,7 +128,7 @@
         <Grid.Clip><RectangleGeometry x:Name="TabViewportClip"/></Grid.Clip>
         <TabView x:Name="DocumentTabs"
                  MinWidth="0"
-                 IsAddTabButtonVisible="False" CloseButtonOverlayMode="OnPointerOver" TabWidthMode="Equal" CanDragTabs="True" CanReorderTabs="True" AllowDrop="True"
+                 IsAddTabButtonVisible="True" CloseButtonOverlayMode="OnPointerOver" TabWidthMode="Equal" CanDragTabs="True" CanReorderTabs="True" AllowDrop="True"
                  Padding="0" BorderThickness="0" Background="Transparent">
             <TabView.TabItemTemplate>
                 <DataTemplate>
@@ -148,14 +149,12 @@
                 <SolidColorBrush x:Key="TabViewBorderBrush" Color="Transparent"/>
                 <SolidColorBrush x:Key="TabViewSelectedItemBorderBrush" Color="Transparent"/>
                 <Thickness x:Key="TabViewSelectedItemBorderThickness">0</Thickness>
-                <x:Double x:Key="TabViewItemMinWidth">104</x:Double>
-                <x:Double x:Key="TabViewItemMaxWidth">200</x:Double>
+                <Style x:Key="TabViewButtonStyle" TargetType="Button" BasedOn="{StaticResource WorkspaceToolActionStyle}"/>
+                <Thickness x:Key="TabViewItemAddButtonContainerPadding">4,5,4,5</Thickness>
             </TabView.Resources>
             <TabView.TabStripFooter>
-                <Grid Height="{StaticResource WorkspaceTabHeight}" ColumnDefinitions="Auto,*">
-                    <Button x:Name="NewTabButton" Style="{StaticResource WorkspaceToolActionStyle}" Margin="4,0"/>
-                    <Border x:Name="TitleDragArea" Grid.Column="1" Background="Transparent" MinWidth="36"/>
-                </Grid>
+                <Border x:Name="TitleDragArea" Height="{StaticResource WorkspaceTabHeight}" Width="36"
+                        HorizontalAlignment="Left" Background="Transparent"/>
             </TabView.TabStripFooter>
         </TabView>
         </Grid>
@@ -274,12 +273,12 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition x:Name="EditorScrollBarColumn" Width="16"/>
                     </Grid.ColumnDefinitions>
-                    <SwapChainPanel x:Name="EditorSurface" Grid.Column="0" KeyboardAcceleratorPlacementMode="Hidden">
+                    <Grid x:Name="EditorSurface" Grid.Column="0" Background="Transparent" KeyboardAcceleratorPlacementMode="Hidden">
                         <FlyoutBase.AttachedFlyout>
                             <Flyout x:Name="CodeLanguageFlyout" Placement="BottomEdgeAlignedLeft"
                                     FlyoutPresenterStyle="{StaticResource CodeLanguagePickerPresenterStyle}"/>
                         </FlyoutBase.AttachedFlyout>
-                        <SwapChainPanel.ContextFlyout>
+                        <Grid.ContextFlyout>
                             <MenuFlyout MenuFlyoutPresenterStyle="{StaticResource FoliaMenuPresenterStyle}">
                                 <MenuFlyoutItem x:Name="UndoButton" Text="Undo" KeyboardAcceleratorTextOverride="Ctrl+Z"/>
                                 <MenuFlyoutItem x:Name="RedoButton" Text="Redo" KeyboardAcceleratorTextOverride="Ctrl+Y"/>
@@ -330,8 +329,8 @@
                                     </MenuFlyoutSubItem>
                                 </MenuFlyoutSubItem>
                             </MenuFlyout>
-                        </SwapChainPanel.ContextFlyout>
-                    </SwapChainPanel>
+                        </Grid.ContextFlyout>
+                    </Grid>
                     <ScrollBar
                         x:Name="EditorScrollBar"
                         Grid.Column="1"
