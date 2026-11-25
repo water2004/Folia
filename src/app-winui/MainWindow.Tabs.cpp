@@ -125,7 +125,15 @@ namespace winrt::Folia::implementation {
 
     void MainWindow::DocumentTabLoaded(Windows::Foundation::IInspectable const& sender, RoutedEventArgs const&) {
         if (windowClosed) return;
-        UpdateDocumentTab(winrt::unbox_value<std::uint64_t>(sender.as<TabViewItem>().DataContext()));
+        auto tab = sender.as<TabViewItem>();
+        auto id = winrt::unbox_value<std::uint64_t>(tab.DataContext());
+        auto item = tabItems.find(id);
+        if (item != tabItems.end())
+            if (auto close = tab.as<IControlProtected>().GetTemplateChild(L"CloseButton").try_as<Button>())
+                item->second->closeButtonSizeChanged = close.SizeChanged(winrt::auto_revoke,
+                    WindowEvent([this](auto const&, auto const&) { RefreshTabCaptionRegion(); }));
+        UpdateDocumentTab(id);
+        RefreshTabCaptionRegion();
         UpdateSelectedTabMaterial();
     }
 
@@ -250,7 +258,10 @@ namespace winrt::Folia::implementation {
             if (auto list = DocumentTabs().as<IControlProtected>().GetTemplateChild(L"TabListView").try_as<FrameworkElement>())
                 list.SizeChanged(WindowEvent([this](auto const&, auto const&) { RefreshTabCaptionRegion(); }));
             if (auto viewer = TabStripScroller()) {
-                viewer.ViewChanged(WindowEvent([this](auto const&, auto const&) { UpdateSelectedTabMaterial(); }));
+                viewer.ViewChanged(WindowEvent([this](auto const&, auto const&) {
+                    UpdateSelectedTabMaterial();
+                    RefreshTabCaptionRegion();
+                }));
                 // TabView handles ViewChanged, but resizing the viewport at offset
                 // zero can expose more tabs without raising that event.
                 viewer.RegisterPropertyChangedCallback(ScrollViewer::ScrollableWidthProperty(), [](DependencyObject const& sender, DependencyProperty const&) {
@@ -268,6 +279,7 @@ namespace winrt::Folia::implementation {
             }
         }));
         DocumentTabs().SelectionChanged(WindowEvent([this](auto const&, auto const&) {
+            RefreshTabCaptionRegion();
             if (updatingTabs || windowClosed) return;
             if (auto item = DocumentTabs().SelectedItem()) ActivateDocument(winrt::unbox_value<std::uint64_t>(item));
         }));

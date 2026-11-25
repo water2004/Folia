@@ -30,15 +30,16 @@ namespace winrt::Folia {
         if (lifetime) lifetime->owner = nullptr;
         if (wake) wake.Stop();
         scheduler.Detach(); wake = nullptr; uiSettings = nullptr; lifetime.reset(); renderer = nullptr; scroll = nullptr;
+        paused = false;
     }
-    void EditorAnimationController::RequestFrame() { scheduler.Start(); }
+    void EditorAnimationController::RequestFrame() { if (!paused) scheduler.Start(); }
     void EditorAnimationController::PrepareRender() {
         if (!renderer || !uiSettings) return;
         auto blink = ::GetCaretBlinkTime();
         renderer->ConfigureCaret(uiSettings.AnimationsEnabled(), blink == INFINITE || blink == 0 ? 0 : blink / 1000.0);
     }
     void EditorAnimationController::Rendered() {
-        if (!renderer || !wake) return;
+        if (!renderer || !wake || paused) return;
         wake.Stop();
         auto const& frame = renderer->CaretAnimationFrame();
         if (frame.animating || renderer->SelectionAnimating()) RequestFrame();
@@ -52,5 +53,12 @@ namespace winrt::Folia {
         if (!renderer) return;
         renderer->FocusCaret(focused);
         RequestFrame();
+    }
+    void EditorAnimationController::SetPaused(bool value) {
+        if (std::exchange(paused, value) == value) return;
+        if (paused) {
+            if (wake) wake.Stop();
+            scheduler.Stop();
+        } else RequestFrame();
     }
 }

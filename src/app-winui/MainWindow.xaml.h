@@ -54,6 +54,7 @@ namespace winrt::Folia::implementation
         friend struct App;
         struct DocumentTab {
             Windows::Foundation::IInspectable item{nullptr};
+            Microsoft::UI::Xaml::FrameworkElement::SizeChanged_revoker closeButtonSizeChanged;
             winrt::weak_ref<MainWindow> owner;
             winrt::weak_ref<MainWindow> tearOutWindow;
         };

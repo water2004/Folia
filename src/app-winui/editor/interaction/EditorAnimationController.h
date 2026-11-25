@@ -15,6 +15,7 @@ namespace winrt::Folia {
         void PrepareRender();
         void Rendered();
         void Focus(bool focused);
+        void SetPaused(bool value);
     private:
         struct Lifetime { EditorAnimationController* owner = nullptr; };
         std::shared_ptr<Lifetime> lifetime;
@@ -23,5 +24,6 @@ namespace winrt::Folia {
         Windows::UI::ViewManagement::UISettings uiSettings{nullptr};
         EditorSurfaceRenderer* renderer = nullptr;
         EditorScrollController* scroll = nullptr;
+        bool paused = false;
     };
 }

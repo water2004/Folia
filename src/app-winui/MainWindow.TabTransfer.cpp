@@ -299,6 +299,7 @@ namespace winrt::Folia::implementation {
     }
     void MainWindow::ExitTabMove() {
         tabMoveInProgress = false;
+        animationController.SetPaused(false);
         EndTabDrag();
         EndTabPointerGesture();
     }
@@ -334,7 +335,13 @@ namespace winrt::Folia::implementation {
                 } else tabGrabOffset.reset();
             }),
             WindowEvent([this](auto const&, auto const&) { ExitTabMove(); }),
-            WindowEvent([this](auto const& pointer, auto const&) { EnterTabMove(pointer); }),
+            WindowEvent([this](auto const& pointer, auto const& args) {
+                EnterTabMove(pointer);
+                // DWM already moves the retained surface with the window.
+                // Idle caret and selection animations need no editor redraw here.
+                if (args.MoveSizeOperation() == Microsoft::UI::Input::MoveSizeOperation::Move && !tabGrabOffset)
+                    animationController.SetPaused(true);
+            }),
             WindowEvent([this](auto const&, auto const&) {
                 POINT point{};
                 if (::GetCursorPos(&point)) BeginTabPointerGesture({point.x, point.y});
@@ -346,8 +353,10 @@ namespace winrt::Folia::implementation {
         // Register the origin check before TabView attaches its move callbacks.
         UpdateTabTransferAvailability();
         DocumentColumn().SizeChanged(WindowEvent([this](auto const&, auto const&) { RefreshTabCaptionRegion(); }));
-        TopChrome().LayoutUpdated(WindowEvent([this](auto const&, auto const&) { RefreshTabCaptionRegion(); }));
-        DocumentTabs().TabItemsChanged(WindowEvent([this](auto const&, auto const&) { QueueTabOrderSync(); }));
+        DocumentTabs().TabItemsChanged(WindowEvent([this](auto const&, auto const&) {
+            QueueTabOrderSync();
+            RefreshTabCaptionRegion();
+        }));
         DocumentTabs().TabTearOutWindowRequested(WindowEvent([this](auto const&, auto const& args) {
             auto items = args.Items();
             if (items.size() == 1)

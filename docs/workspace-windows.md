@@ -100,7 +100,9 @@ reserved for the strip. The native caption buttons have a separate column.
 The native caption region is recomputed after sidebar changes because the
 whole strip can move without reporting a size change.
 The close buttons and overflow arrows register as client input regions. Their
-bounds follow the current tab-strip layout and scrolling viewport.
+bounds follow changes to tab geometry and the tab-strip scrolling viewport.
+During a native caption move, DWM moves the existing editor surface and the
+editor animation clock pauses until the move ends.
 The corresponding SDK sources are
 [TabView](https://github.com/microsoft/microsoft-ui-xaml/blob/693f472aeaf89c6dff66256ee6fcd453e5d553b8/controls/dev/TabView/TabView.cpp)
 and [TabViewListView](https://github.com/microsoft/microsoft-ui-xaml/blob/693f472aeaf89c6dff66256ee6fcd453e5d553b8/controls/dev/TabView/TabViewListView.cpp).
@@ -120,6 +122,9 @@ non-resizable window, a XAML animation changes the sidebar column width and the
 reading card reflows. The rail, sidebar, and title strip share the window base.
 The file explorer header holds the workspace name and commands, while the tree
 starts with the workspace's children.
+The sidebar width animation clips its pane in a grid. The file tree owns its
+scrolling viewport. Indent guides update when a row is prepared or the selected
+branch, hover state, or foreground changes.
 Enumeration and sorting run on a worker thread. Each expanded directory keeps a
 sorted filename list and publishes at most one page of file nodes to the native
 tree. Page links navigate through the remaining names. Collapsing a directory
