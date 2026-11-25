@@ -3,6 +3,9 @@
 #include "settings/views/SettingsViewSupport.h"
 #include "localization/Localization.h"
 #include "storage/AssetPaths.h"
+#include <winrt/Microsoft.UI.Text.h>
+#include <winrt/Microsoft.UI.Xaml.Automation.h>
+#include <wil/resource.h>
 
 namespace winrt::Folia
 {
@@ -11,7 +14,6 @@ namespace winrt::Folia
     using settings_ui::FileUri;
     using settings_ui::PageHeading;
     using settings_ui::PagePanel;
-    using settings_ui::ReadUtf8Lines;
     using settings_ui::Text;
 
     UIElement SettingsView::BuildLicensesPage()
@@ -44,22 +46,12 @@ namespace winrt::Folia
         Grid::SetRow(licenseSelector_, 1);
         page.Children().Append(licenseSelector_);
 
-        licenseList_.ItemTemplate(Application::Current().Resources().Lookup(box_value(L"SettingsLicenseLineTemplate")).as<DataTemplate>());
-        licenseList_.ItemContainerStyle(settings_ui::ResourceStyle(L"SettingsLicenseLineStyle"));
-        licenseList_.SelectionMode(ListViewSelectionMode::None);
-        licenseList_.IsItemClickEnabled(false);
-        licenseList_.CanDragItems(false);
-        licenseList_.CanReorderItems(false);
-        licenseList_.HorizontalAlignment(HorizontalAlignment::Stretch);
-        licenseList_.VerticalAlignment(VerticalAlignment::Stretch);
-        ScrollViewer::SetHorizontalScrollMode(licenseList_, ScrollMode::Disabled);
-        ScrollViewer::SetHorizontalScrollBarVisibility(
-            licenseList_, ScrollBarVisibility::Disabled);
-        ScrollViewer::SetVerticalScrollMode(licenseList_, ScrollMode::Enabled);
-        ScrollViewer::SetVerticalScrollBarVisibility(licenseList_, ScrollBarVisibility::Auto);
-
-        Grid::SetRow(licenseList_, 2);
-        page.Children().Append(licenseList_);
+        // Present the notice as a document in both XAML and UI Automation.
+        licenseText_.Document().UndoLimit(0);
+        licenseText_.Style(settings_ui::ResourceStyle(L"SettingsLicenseDocumentStyle"));
+        Automation::AutomationProperties::SetName(licenseText_, Localize(L"LicenseDocument"));
+        Grid::SetRow(licenseText_, 2);
+        page.Children().Append(licenseText_);
         licenseStatus_.TextWrapping(TextWrapping::Wrap);
         Grid::SetRow(licenseStatus_, 3);
         page.Children().Append(licenseStatus_);
@@ -137,23 +129,40 @@ namespace winrt::Folia
 
     void SettingsView::LoadSelectedLicense()
     {
+        using Microsoft::UI::Text::TextSetOptions;
         auto const index = licenseSelector_.SelectedIndex();
         if (index < 0 || index > 1 || index == loadedLicenseIndex_) return;
+        auto showError = [&](hstring const& detail) {
+            licenseText_.Visibility(Visibility::Collapsed);
+            loadedLicenseIndex_ = -1;
+            licenseStatus_.Text(LocalizeFormat(L"UnableLoadLicense", {detail}));
+        };
         try
         {
             auto const file = index == 0 ? L"LICENSE.txt" : L"THIRD-PARTY-NOTICES.txt";
-            auto const path = AssetPath(std::filesystem::path(L"licenses") / file);
-            licenseLines_ = ReadUtf8Lines(path);
-            licenseList_.ItemsSource(licenseLines_);
+            std::ifstream stream(AssetPath(std::filesystem::path(L"licenses") / file), std::ios::binary);
+            if (!stream) throw std::runtime_error("cannot open text asset");
+            const std::string source{std::istreambuf_iterator<char>{stream}, std::istreambuf_iterator<char>{}};
+            std::string_view utf8 = source;
+            if (utf8.starts_with("\xEF\xBB\xBF")) utf8.remove_prefix(3);
+            const auto text = winrt::to_hstring(utf8);
+            // The native text object rejects programmatic writes in read-only mode.
+            licenseText_.IsReadOnly(false);
+            auto restoreReadOnly = wil::scope_exit([&] { licenseText_.IsReadOnly(true); });
+            auto document = licenseText_.Document();
+            document.SetText(TextSetOptions::None, text);
+            document.Selection().SetRange(0, 0);
+            licenseText_.Visibility(Visibility::Visible);
             licenseStatus_.Text({});
             loadedLicenseIndex_ = index;
         }
+        catch (hresult_error const& error)
+        {
+            showError(error.message());
+        }
         catch (std::exception const& error)
         {
-            licenseLines_ = nullptr;
-            licenseList_.ItemsSource(nullptr);
-            licenseStatus_.Text(LocalizeFormat(
-                L"UnableLoadLicense", {winrt::to_hstring(error.what())}));
+            showError(winrt::to_hstring(error.what()));
         }
     }
 }

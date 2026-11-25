@@ -28,8 +28,8 @@ TextBlock Description(DependencyObject const& parent, winrt::hstring const& text
     return nullptr;
 }
 template<class T> T Field(DependencyObject const& parent, winrt::hstring const& label) {
-    if (auto value = parent.try_as<T>(); value && value.Header()
-        && winrt::unbox_value<winrt::hstring>(value.Header()) == label) return value;
+    if (auto value = parent.try_as<T>(); value && (Automation::AutomationProperties::GetName(value) == label
+        || (value.Header() && winrt::unbox_value<winrt::hstring>(value.Header()) == label))) return value;
     for (int i = 0; i < Media::VisualTreeHelper::GetChildrenCount(parent); ++i)
         if (auto found = Field<T>(Media::VisualTreeHelper::GetChild(parent, i), label)) return found;
     return nullptr;
@@ -78,9 +78,8 @@ struct CompletionPage {
     CompletionPage(std::string base, std::string model = {}, std::string effort = {}, int protocol = 0) {
         winrt::Folia::AppSettings initial;
         initial.completion = {true, std::move(base), std::move(model), protocol, std::move(effort)};
-        ListView settingsMenu;
         ContentControl pageHost;
-        view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, pageHost, initial,
+        view = std::make_shared<winrt::Folia::SettingsView>(pageHost, initial,
             std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
             folia::Theme::Light, nullptr, [this](auto const& settings) -> std::optional<winrt::hstring> {
                 applied = settings;
@@ -88,9 +87,8 @@ struct CompletionPage {
             });
         window.Content(root); root.Children().Append(pageHost); window.AppWindow().Resize({1120, 900}); window.Activate();
         Pump([&] { return root.IsLoaded() && root.ActualWidth() > 100; });
-        for (auto entry : view->Root().Items())
-            if (winrt::unbox_value<winrt::hstring>(entry.as<ListViewItem>().Tag()) == L"completion") view->Root().SelectedItem(entry);
-        root.UpdateLayout(); page = pageHost.Content().as<FrameworkElement>();
+        view->Navigate(winrt::Folia::SettingsView::Page::Completion);
+        root.UpdateLayout(); page = view->PageContent().as<FrameworkElement>();
         Pump([&] { root.UpdateLayout(); return First<TextBlock>(page).ActualWidth() > 0; });
         Field<PasswordBox>(page, winrt::Folia::Localize(L"AIKey")).Password(L"fixture-key");
     }
@@ -111,9 +109,8 @@ suite settings_style_tests = [] {
         Grid root;
         window.Content(root);
         std::optional<winrt::Folia::AppSettings> applied;
-        ListView settingsMenu;
         ContentControl pageHost;
-        auto view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, pageHost, winrt::Folia::AppSettings{},
+        auto view = std::make_shared<winrt::Folia::SettingsView>(pageHost, winrt::Folia::AppSettings{},
             std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
             folia::Theme::Light, nullptr, [&](auto const& settings) -> std::optional<winrt::hstring> {
                 applied = settings;
@@ -124,8 +121,9 @@ suite settings_style_tests = [] {
         root.Children().Append(pageHost);
         window.Activate();
         Pump([&] { return root.IsLoaded(); });
+        view->Navigate(winrt::Folia::SettingsView::Page::General);
         root.UpdateLayout();
-        auto page = pageHost.Content().as<FrameworkElement>();
+        auto page = view->PageContent().as<FrameworkElement>();
         auto width = Field<ComboBox>(page, winrt::Folia::Localize(L"ImageMaximumWidth"));
         auto theme = Field<ComboBox>(page, winrt::Folia::Localize(L"MermaidTheme"));
         expect(fatal(width && theme));
@@ -237,7 +235,7 @@ suite settings_style_tests = [] {
         auto fetch = Action(fixture.page, winrt::Folia::Localize(L"AIFetchModels"));
         InvokeAction(fetch); Pump([&] { return server.received.load(); });
         expect(!fetch.IsEnabled());
-        fixture.view->Root().SelectedItem(fixture.view->Root().Items().GetAt(0));
+        fixture.view->Navigate(winrt::Folia::SettingsView::Page::Home);
         Pump([&] { return server.client.load() == INVALID_SOCKET; });
         expect(fetch.IsEnabled());
     };
@@ -258,18 +256,15 @@ suite settings_style_tests = [] {
         completion_tests::Server server({}, 200, true, "application/json");
         Window window; Grid root; window.Content(root);
         winrt::Folia::AppSettings initial; initial.completion.baseUrl = server.baseUrl; initial.completion.model = "fixture";
-        ListView settingsMenu;
         ContentControl pageHost;
-        auto view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, pageHost, initial,
+        auto view = std::make_shared<winrt::Folia::SettingsView>(pageHost, initial,
             std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
             folia::Theme::Light, nullptr, [](auto const&) -> std::optional<winrt::hstring> { return {}; });
         struct Cleanup { Window window; std::shared_ptr<winrt::Folia::SettingsView> view;
             ~Cleanup() { view->Detach(); window.Close(); } } cleanup{window, view};
         root.Children().Append(pageHost); window.Activate(); Pump([&] { return root.IsLoaded(); });
-        auto navigation = view->Root();
-        for (auto entry : navigation.Items())
-            if (winrt::unbox_value<winrt::hstring>(entry.as<ListViewItem>().Tag()) == L"completion") navigation.SelectedItem(entry);
-        root.UpdateLayout(); auto page = pageHost.Content().as<FrameworkElement>();
+        view->Navigate(winrt::Folia::SettingsView::Page::Completion);
+        root.UpdateLayout(); auto page = view->PageContent().as<FrameworkElement>();
         Field<PasswordBox>(page, winrt::Folia::Localize(L"AIKey")).Password(L"fixture-key");
         auto fetch = Action(page, winrt::Folia::Localize(L"AIFetchModels")); InvokeAction(fetch);
         Pump([&] { return server.received.load(); }); expect(!fetch.IsEnabled());
@@ -284,18 +279,15 @@ suite settings_style_tests = [] {
         std::optional<winrt::Folia::AppSettings> applied;
         winrt::Folia::AppSettings initial;
         initial.completion.baseUrl = server.baseUrl; initial.completion.model = "fixture";
-        ListView settingsMenu;
         ContentControl pageHost;
-        auto view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, pageHost, initial,
+        auto view = std::make_shared<winrt::Folia::SettingsView>(pageHost, initial,
             std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
             folia::Theme::Light, nullptr, [&](auto const& settings) -> std::optional<winrt::hstring> { applied = settings; return {}; });
         struct Cleanup { Window window; std::shared_ptr<winrt::Folia::SettingsView> view;
             ~Cleanup() { view->Detach(); window.Close(); } } cleanup{window, view};
         root.Children().Append(pageHost); window.Activate(); Pump([&] { return root.IsLoaded(); });
-        auto navigation = view->Root();
-        for (auto entry : navigation.Items())
-            if (winrt::unbox_value<winrt::hstring>(entry.as<ListViewItem>().Tag()) == L"completion") navigation.SelectedItem(entry);
-        root.UpdateLayout(); auto page = pageHost.Content().as<FrameworkElement>();
+        view->Navigate(winrt::Folia::SettingsView::Page::Completion);
+        root.UpdateLayout(); auto page = view->PageContent().as<FrameworkElement>();
         auto protocol = Field<ComboBox>(page, winrt::Folia::Localize(L"AIProtocol"));
         auto reasoning = Field<TextBox>(page, winrt::Folia::Localize(L"AIReasoning"));
         auto eagerness = Field<ComboBox>(page, winrt::Folia::Localize(L"AIEagerness"));
@@ -342,7 +334,7 @@ suite settings_style_tests = [] {
         expect(applied->completion.model == "fixture") << "save uses model ID, not its display name";
         expect(applied->completion.eagerness == folia::completion::Eagerness::Proactive);
         view->Reset(*applied, folia::Theme::Light);
-        root.UpdateLayout(); page = pageHost.Content().as<FrameworkElement>();
+        root.UpdateLayout(); page = view->PageContent().as<FrameworkElement>();
         expect(Field<TextBox>(page, winrt::Folia::Localize(L"AIContextKB")).Text() == L"16");
         model = Field<TextBox>(page, winrt::Folia::Localize(L"AIModel"));
         expect(model.Text() == L"fixture");
@@ -364,21 +356,20 @@ suite settings_style_tests = [] {
     };
     "settings pages share typography and render AI forms without enclosing borders"_test = [] {
         Window window; Grid root; window.Content(root); window.Title(L"Folia settings style test");
-        ListView settingsMenu;
         ContentControl pageHost;
-        auto view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, pageHost, winrt::Folia::AppSettings{},
+        auto view = std::make_shared<winrt::Folia::SettingsView>(pageHost, winrt::Folia::AppSettings{},
             std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
             folia::Theme::Light, nullptr, [](auto const&) -> std::optional<winrt::hstring> { return {}; });
         struct Cleanup { Window window; std::shared_ptr<winrt::Folia::SettingsView> view;
             ~Cleanup() { view->Detach(); window.Close(); } } cleanup{window, view};
         root.Children().Append(pageHost); window.Activate();
         Pump([&] { return root.IsLoaded(); });
-        auto navigation = view->Root();
-        for (auto entry : navigation.Items()) {
-            navigation.SelectedItem(entry); root.UpdateLayout();
-            auto page = pageHost.Content().as<FrameworkElement>();
+        using Page = winrt::Folia::SettingsView::Page;
+        for (auto category : {Page::Home, Page::General, Page::Themes, Page::Shortcuts, Page::Latex, Page::Completion, Page::Licenses, Page::About}) {
+            view->Navigate(category); root.UpdateLayout();
+            auto page = view->PageContent().as<FrameworkElement>();
             auto heading = First<TextBlock>(page); expect(heading != nullptr);
-            if (heading) expect(heading.FontSize() == 24.0) << "page " << winrt::to_string(winrt::unbox_value<winrt::hstring>(entry.as<ListViewItem>().Tag()));
+            if (heading) expect(heading.FontSize() == 24.0) << "page " << static_cast<int>(category);
         }
         for (auto theme : {ElementTheme::Light, ElementTheme::Dark}) {
             auto profile = winrt::Folia::LoadThemeProfile(theme == ElementTheme::Light ? folia::Theme::Light : folia::Theme::Dark).profile;
@@ -398,14 +389,13 @@ suite settings_style_tests = [] {
             root.Background(Media::SolidColorBrush({colors.shell_bg.a, colors.shell_bg.r, colors.shell_bg.g, colors.shell_bg.b}));
             root.RequestedTheme(theme);
             Pump([&] { return root.ActualTheme() == theme; }); root.UpdateLayout();
-            for (auto entry : navigation.Items())
-                if (winrt::unbox_value<winrt::hstring>(entry.as<ListViewItem>().Tag()) == L"completion") navigation.SelectedItem(entry);
+            view->Navigate(Page::Completion);
             for (int width : {1120, 720}) {
                 HWND handle{}; winrt::check_hresult(window.as<::IWindowNative>()->get_WindowHandle(&handle));
                 auto scale = double(GetDpiForWindow(handle)) / 96.;
                 window.AppWindow().Resize({static_cast<int>(width * scale), static_cast<int>(900 * scale)});
                 Pump([&] { return std::abs(root.ActualWidth() - width) < 20.; }); root.UpdateLayout();
-                auto scroll = pageHost.Content().as<ScrollViewer>();
+                auto scroll = view->PageContent().as<ScrollViewer>();
                 auto panel = First<StackPanel>(scroll.Content().as<UIElement>());
                 for (auto child : panel.Children()) expect(!child.try_as<Border>()) << "AI sections must not use a page-sized frame";
                 auto description = Description(panel, winrt::Folia::Localize(L"AICompletionDescription"));

@@ -129,7 +129,9 @@
   <data name="MermaidFollowFolia" xml:space="preserve"><value>Follow Folia theme</value></data>
   <data name="MermaidThemeDescription" xml:space="preserve"><value>A theme set in the Mermaid source overrides this choice.</value></data>
   <data name="LanguageSavedRestart" xml:space="preserve"><value>Language saved. Restart Folia to apply it.</value></data>
-  <data name="ThemesDescription" xml:space="preserve"><value>Choose a built-in theme or import a complete JSON profile. Selection only changes the preview until Apply.</value></data>
+  <data name="ThemesDescription" xml:space="preserve"><value>Choose a theme to preview it, then select Apply. To import a theme, select its JSON profile with the matching PNG in the same folder.</value></data>
+  <data name="IncompatibleThemePackage" xml:space="preserve"><value>Incompatible theme package: {0}. A matching PNG preview is required.</value></data>
+  <data name="PreviewTheme" xml:space="preserve"><value>Preview theme</value></data>
   <data name="LicensesDescription" xml:space="preserve"><value>Review the Folia license and notices for bundled third-party software.</value></data>
   <data name="LicenseDocument" xml:space="preserve"><value>Document</value></data>
   <data name="FoliaLicense" xml:space="preserve"><value>Folia — MIT License</value></data>
@@ -149,8 +151,6 @@
   <data name="AutomaticThemeDescription" xml:space="preserve"><value>Automatic light, dark, and high contrast</value></data>
   <data name="BuiltIn" xml:space="preserve"><value>Built-in</value></data>
   <data name="Custom" xml:space="preserve"><value>Custom</value></data>
-  <data name="ThemePreviewBody" xml:space="preserve"><value>Markdown can be calm, readable, and expressive.</value></data>
-  <data name="ThemePreviewQuote" xml:space="preserve"><value>A theme preview uses the profile's real fonts and colors.</value></data>
   <data name="LightProfile" xml:space="preserve"><value>Light profile</value></data>
   <data name="HighContrastProfile" xml:space="preserve"><value>High contrast profile</value></data>
   <data name="DarkProfile" xml:space="preserve"><value>Dark profile</value></data>

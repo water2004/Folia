@@ -372,7 +372,7 @@ namespace winrt::Folia
         } guard{editorDialogOpen_};
 
         ContentDialog dialog;
-        dialog.XamlRoot(navigation_.XamlRoot());
+        dialog.XamlRoot(pageHost_.XamlRoot());
         dialog.Title(box_value(Localize(existing
             ? L"EditInsertionAction" : L"CustomInsertionAction")));
         dialog.PrimaryButtonText(Localize(existing

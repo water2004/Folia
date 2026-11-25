@@ -107,7 +107,7 @@ namespace winrt::Folia::implementation {
         const bool leavingSettings = previous->kind == WorkspaceTabKind::Settings;
         if (enteringSettings) previousDocumentTab = previous->id;
         workspaceDocuments.Activate(id);
-        if (enteringSettings || leavingSettings) ShowSettingsNavigation(enteringSettings);
+        if (enteringSettings || leavingSettings) ShowSettingsPage(enteringSettings);
         UpdateWorkspaceContent();
         ExternalChangeInfoBar().IsOpen(false);
         SetOperationProgress(false);

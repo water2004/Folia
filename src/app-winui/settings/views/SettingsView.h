@@ -13,10 +13,10 @@ namespace winrt::Folia
     {
     public:
         using ApplySettings = std::function<std::optional<winrt::hstring>(AppSettings const&)>;
+        enum class Page { Home, General, Shortcuts, Latex, Completion, Themes, Licenses, About };
 
         SettingsView(
-            Microsoft::UI::Xaml::Controls::ListView const& navigation,
-            Microsoft::UI::Xaml::Controls::ContentControl const& pageHost,
+            Microsoft::UI::Xaml::Controls::ContentControl const& host,
             AppSettings settings,
             std::shared_ptr<ThemeCatalog> catalog,
             std::shared_ptr<LatexCommandCatalog> latexCatalog,
@@ -24,7 +24,9 @@ namespace winrt::Folia
             HWND owner,
             ApplySettings applySettings);
 
-        winrt::Microsoft::UI::Xaml::Controls::ListView Root() const { return navigation_; }
+        void Navigate(Page page);
+        void Focus();
+        winrt::Microsoft::UI::Xaml::UIElement PageContent() const { return pageHost_.Content().as<winrt::Microsoft::UI::Xaml::UIElement>(); }
         void Reset(AppSettings settings, folia::Theme systemVariant);
         void SetSystemVariant(folia::Theme variant);
         void CancelShortcutCapture();
@@ -33,7 +35,7 @@ namespace winrt::Folia
         void Detach();
 
     private:
-        void Build();
+        winrt::Microsoft::UI::Xaml::UIElement BuildHomePage();
         winrt::Microsoft::UI::Xaml::UIElement BuildGeneralPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildCompletionPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildShortcutsPage();
@@ -41,7 +43,6 @@ namespace winrt::Folia
         winrt::Microsoft::UI::Xaml::UIElement BuildThemesPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildLicensesPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildAboutPage();
-        void Navigate(winrt::hstring const& page);
         void LoadSelectedLicense();
         void RefreshThemeList();
         void UpdateThemePreview();
@@ -87,9 +88,14 @@ namespace winrt::Folia
         folia::Theme systemVariant_ = folia::Theme::Dark;
         HWND owner_ = nullptr;
         ApplySettings applySettings_;
-        winrt::Microsoft::UI::Xaml::Controls::ListView navigation_;
-        winrt::Microsoft::UI::Xaml::Controls::ContentControl pageHost_;
-        winrt::Microsoft::UI::Xaml::Controls::ListView::SelectionChanged_revoker navigationChanged_;
+        winrt::Microsoft::UI::Xaml::Controls::ContentControl pageHost_{nullptr};
+        winrt::Microsoft::UI::Xaml::Controls::Button homeButton_;
+        winrt::Microsoft::UI::Xaml::Controls::TextBlock pageCrumb_;
+        winrt::Microsoft::UI::Xaml::FrameworkElement pageNavigation_{nullptr};
+        std::vector<std::pair<Page, winrt::Microsoft::UI::Xaml::Controls::Button>> categoryButtons_;
+        std::vector<winrt::Microsoft::UI::Xaml::Controls::Button::Click_revoker> navigationClicks_;
+        Page currentPage_ = Page::Home;
+        winrt::Microsoft::UI::Xaml::UIElement homePage_{nullptr};
         winrt::Microsoft::UI::Xaml::UIElement generalPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::UIElement completionPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::UIElement shortcutsPage_{ nullptr };
@@ -98,18 +104,16 @@ namespace winrt::Folia
         winrt::Microsoft::UI::Xaml::UIElement licensesPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::UIElement aboutPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::Controls::ToggleSwitch latexSuggestionsToggle_;
-        winrt::Microsoft::UI::Xaml::Controls::CheckBox autoHideTools_;
+        winrt::Microsoft::UI::Xaml::Controls::ToggleSwitch autoHideTools_;
         winrt::Microsoft::UI::Xaml::Controls::ComboBox materialCombo_{nullptr}, readingMaterialCombo_{nullptr};
         winrt::Microsoft::UI::Xaml::Controls::ComboBox languageCombo_;
         winrt::Microsoft::UI::Xaml::Controls::ComboBox imageWidthCombo_{nullptr};
         winrt::Microsoft::UI::Xaml::Controls::ComboBox mermaidThemeCombo_{nullptr};
-        winrt::Microsoft::UI::Xaml::Controls::ListView themeList_;
-        winrt::Microsoft::UI::Xaml::Controls::Border themePreview_;
+        winrt::Microsoft::UI::Xaml::Controls::ComboBox themePicker_{nullptr};
+        winrt::Microsoft::UI::Xaml::Controls::Image themePreview_;
         winrt::Microsoft::UI::Xaml::Controls::ComboBox licenseSelector_;
-        winrt::Microsoft::UI::Xaml::Controls::ListView licenseList_;
+        winrt::Microsoft::UI::Xaml::Controls::RichEditBox licenseText_;
         winrt::Microsoft::UI::Xaml::Controls::TextBlock licenseStatus_;
-        winrt::Windows::Foundation::Collections::IObservableVector<winrt::Windows::Foundation::IInspectable>
-            licenseLines_{ nullptr };
         winrt::Microsoft::UI::Xaml::Controls::Button applyThemeButton_;
         winrt::Microsoft::UI::Xaml::Controls::Button removeThemeButton_;
         winrt::Microsoft::UI::Xaml::Controls::TextBlock generalStatus_;

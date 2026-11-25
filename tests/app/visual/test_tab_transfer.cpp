@@ -60,11 +60,7 @@ namespace winrt::Folia::implementation {
         static auto About(Microsoft::UI::Xaml::Window const& window) {
             auto impl = Impl(window);
             impl->OpenSettingsTab();
-            auto nav = impl->settingsView->Root();
-            for (auto item : nav.Items()) {
-                auto entry = item.as<Microsoft::UI::Xaml::Controls::ListViewItem>();
-                if (winrt::unbox_value<winrt::hstring>(entry.Tag()) == L"about") nav.SelectedItem(entry);
-            }
+            impl->settingsView->Navigate(winrt::Folia::SettingsView::Page::About);
             window.Content().as<Microsoft::UI::Xaml::FrameworkElement>().UpdateLayout();
             return impl->SettingsViewHost();
         }
@@ -338,6 +334,9 @@ namespace {
                     : material != WindowMaterial::Solid && MicaController::IsSupported();
                 Access::Bars(window, {false, material, {}});
                 expect(selected() == nullptr && readingBackdrop.SystemBackdrop() == nullptr);
+                auto base = root.as<Controls::Grid>().Background().as<Media::SolidColorBrush>();
+                auto paper = root.FindName(L"ReadingTint").as<Controls::Border>().Background().as<Media::SolidColorBrush>();
+                expect(base.Color() != paper.Color()) << "the reading card remains distinct when both surfaces share a material";
                 if (!supported || highContrast) {
                     expect(window.SystemBackdrop() == nullptr);
                     expect(paperAlpha() == 255);
@@ -348,6 +347,7 @@ namespace {
                 else expect(window.SystemBackdrop().as<Media::MicaBackdrop>().Kind()
                     == (material == WindowMaterial::Mica ? MicaKind::Base : MicaKind::BaseAlt));
                 expect(paperAlpha() < 255) << "the editor background transmits the window material with the sidebar closed";
+                expect(base.Opacity() < 1. && paper.Opacity() < 1.) << "both tints keep the shared material visible";
                 Access::Bars(window, {false, material, WindowMaterial::Solid});
                 expect(window.SystemBackdrop() != nullptr && readingBackdrop.SystemBackdrop() == nullptr && selected() == nullptr);
                 expect(paperAlpha() == 255) << "solid paper takes effect on the next frame";

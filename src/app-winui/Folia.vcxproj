@@ -882,7 +882,7 @@
     <None Include="Assets\branding\Folia.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Assets\themes\*.json">
+    <None Include="Assets\themes\*.json;Assets\themes\*.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Assets\themes\resources\workspace-icons.json">

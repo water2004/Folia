@@ -82,7 +82,7 @@ function Write-Component {
     $Writer.WriteAttributeString('Bitness', 'always64')
 
     if ($Record.Kind -eq 'Asset' -and (
-        ($Record.Directory -ieq 'themes' -and [System.IO.Path]::GetExtension($Record.Name) -ieq '.json') -or
+        ($Record.Directory -ieq 'themes' -and [System.IO.Path]::GetExtension($Record.Name) -iin @('.json', '.png')) -or
         $Record.Relative -ieq 'latex/commands.json' -or $Record.Relative -ieq 'completion.json')) {
         # Built-in themes, command catalogs and prompt defaults are application resources.
         # Remove exactly this packaged file before InstallFiles, including on

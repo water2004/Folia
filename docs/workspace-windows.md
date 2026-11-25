@@ -102,8 +102,9 @@ and [TabViewListView](https://github.com/microsoft/microsoft-ui-xaml/blob/693f47
 `MainWindow.xaml` owns the activity rail, sidebar, title strip, and reading
 card. `WorkspaceChrome.xaml`
 holds their control styles, and `FolderExplorer.xaml` holds the file tree
-presentation. The settings category list replaces the contents of the same
-sidebar while its tab is selected.
+presentation. Settings categories live in the settings tab. The workspace
+sidebar keeps its state across tab changes, and its controls activate the
+previous document before acting on the workspace.
 
 `MainWindow.Workspace.cpp` opens and closes the sidebar immediately in a
 resizable, restored window by moving its left edge. In a maximized or

@@ -93,16 +93,15 @@ namespace winrt::Folia::implementation
         else ActivateDocument(tab->id);
     }
 
-    void MainWindow::ShowSettingsNavigation(bool enabled)
+    void MainWindow::ShowSettingsPage(bool enabled)
     {
         if (enabled)
         {
-            documentSidebarWasOpen = sidebarOpen;
             animationController.Focus(false);
             if (!settingsView)
             {
                 settingsView = std::make_shared<winrt::Folia::SettingsView>(
-                    SettingsNavigation(), SettingsViewHost(),
+                    SettingsViewHost(),
                     appSettings,
                     themeCatalog,
                     latexCommandCatalog,
@@ -110,24 +109,16 @@ namespace winrt::Folia::implementation
                     WindowHandle(),
                     [this](winrt::Folia::AppSettings const& changed) { return ApplySettings(changed); });
             }
-            DocumentNavigation().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
-            SettingsNavigation().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
-            SetSidebarOpen(true);
-            UpdateWorkspaceLayout();
             DocumentPages().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
             SettingsViewHost().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
             ApplyBarLayout();
             Title(Localize(L"WindowTitleSettings"));
-            SettingsNavigation().Focus(Microsoft::UI::Xaml::FocusState::Programmatic);
+            settingsView->Focus();
             return;
         }
 
         settingsView->CancelShortcutCapture();
         SettingsViewHost().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
-        SettingsNavigation().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
-        DocumentNavigation().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
-        SetSidebarOpen(documentSidebarWasOpen);
-        UpdateWorkspaceLayout();
         DocumentPages().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
         ApplyBarLayout();
     }

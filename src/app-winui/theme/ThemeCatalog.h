@@ -12,6 +12,7 @@ namespace winrt::Folia
     {
         folia::ThemeProfile profile;
         std::filesystem::path path;
+        std::filesystem::path preview;
         bool builtIn = false;
     };
 
@@ -21,8 +22,10 @@ namespace winrt::Folia
         void Refresh();
         std::vector<ThemeEntry> const& Entries() const { return entries_; }
         std::vector<winrt::hstring> const& Diagnostics() const { return diagnostics_; }
+        ThemeEntry const* Find(std::string_view id) const;
+        std::filesystem::path Preview(std::string_view id, folia::Theme systemVariant) const;
         ThemeLoadResult Resolve(std::string_view id, folia::Theme systemVariant) const;
-        std::optional<winrt::hstring> Import(std::filesystem::path const& source);
+        std::optional<winrt::hstring> Import(std::filesystem::path const& source, std::string& importedId);
         std::optional<winrt::hstring> Remove(std::string_view id);
 
         static std::filesystem::path CustomThemeDirectory();

@@ -129,7 +129,9 @@
   <data name="MermaidFollowFolia" xml:space="preserve"><value>跟随折笺主题</value></data>
   <data name="MermaidThemeDescription" xml:space="preserve"><value>如果 Mermaid 源码指定了主题，以源码为准。</value></data>
   <data name="LanguageSavedRestart" xml:space="preserve"><value>语言设置已保存。重启折笺后生效。</value></data>
-  <data name="ThemesDescription" xml:space="preserve"><value>选择内置主题或导入完整的 JSON 配置。选择只会更新预览，点击“应用”后才会生效。</value></data>
+  <data name="ThemesDescription" xml:space="preserve"><value>选择主题查看预览，然后点击“应用”。导入时请选择 JSON 配置，并将同名 PNG 预览图放在同一目录。</value></data>
+  <data name="IncompatibleThemePackage" xml:space="preserve"><value>不兼容的主题包：{0}。主题包必须包含同名的 PNG 预览图。</value></data>
+  <data name="PreviewTheme" xml:space="preserve"><value>预览主题</value></data>
   <data name="LicensesDescription" xml:space="preserve"><value>查看折笺的许可证及随应用分发的第三方软件许可声明。</value></data>
   <data name="LicenseDocument" xml:space="preserve"><value>许可文档</value></data>
   <data name="FoliaLicense" xml:space="preserve"><value>折笺 — MIT 许可证</value></data>
@@ -149,8 +151,6 @@
   <data name="AutomaticThemeDescription" xml:space="preserve"><value>自动切换浅色、深色和高对比度</value></data>
   <data name="BuiltIn" xml:space="preserve"><value>内置</value></data>
   <data name="Custom" xml:space="preserve"><value>自定义</value></data>
-  <data name="ThemePreviewBody" xml:space="preserve"><value>Markdown 可以安静、清晰而富有表现力。</value></data>
-  <data name="ThemePreviewQuote" xml:space="preserve"><value>主题预览会使用配置中的真实字体和颜色。</value></data>
   <data name="LightProfile" xml:space="preserve"><value>浅色配置</value></data>
   <data name="HighContrastProfile" xml:space="preserve"><value>高对比度配置</value></data>
   <data name="DarkProfile" xml:space="preserve"><value>深色配置</value></data>

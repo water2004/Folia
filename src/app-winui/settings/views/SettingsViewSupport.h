@@ -163,57 +163,46 @@ namespace winrt::Folia::settings_ui
             L"file:///" + winrt::hstring(path.generic_wstring()));
     }
 
-    inline winrt::Windows::Foundation::Collections::IObservableVector<
-        winrt::Windows::Foundation::IInspectable>
-        ReadUtf8Lines(std::filesystem::path const& path)
-    {
-        std::ifstream stream(path, std::ios::binary);
-        if (!stream) throw std::runtime_error("cannot open text asset");
-        std::string source(
-            std::istreambuf_iterator<char>{stream},
-            std::istreambuf_iterator<char>{});
-        if (source.starts_with("\xEF\xBB\xBF")) source.erase(0, 3);
 
-        auto lines = winrt::single_threaded_observable_vector<
-            winrt::Windows::Foundation::IInspectable>();
-        std::size_t start = 0;
-        while (start <= source.size())
-        {
-            auto end = source.find('\n', start);
-            if (end == std::string::npos) end = source.size();
-            auto length = end - start;
-            if (length != 0 && source[start + length - 1] == '\r') --length;
-            lines.Append(winrt::box_value(winrt::to_hstring(
-                std::string_view{source}.substr(start, length))));
-            if (end == source.size()) break;
-            start = end + 1;
-        }
-        return lines;
+    inline Controls::Border SectionCard(Xaml::UIElement const& child)
+    {
+        Controls::Border card;
+        card.Style(ResourceStyle(L"SettingsSectionCardStyle"));
+        card.Child(child);
+        return card;
     }
 
-    inline Controls::ListViewItem NavigationItem(
-        winrt::hstring const& label,
-        winrt::hstring const& tag,
-        wchar_t const* glyph)
+    inline Controls::Grid OptionRow(winrt::hstring const& title, Xaml::FrameworkElement const& control,
+        winrt::hstring const& description = {})
     {
-        Controls::ListViewItem item;
-        Controls::StackPanel content;
-        content.Orientation(Controls::Orientation::Horizontal);
-        content.Spacing(10);
-        item.Tag(winrt::box_value(tag));
-        Controls::FontIcon icon;
-        icon.Glyph(glyph);
-        icon.FontSize(15);
-        icon.Width(18);
-        Controls::TextBlock text;
-        text.Text(label);
-        text.FontSize(13);
-        text.VerticalAlignment(Microsoft::UI::Xaml::VerticalAlignment::Center);
-        content.Children().Append(icon);
-        content.Children().Append(text);
-        item.Content(content);
-        Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(item, label);
-        return item;
+        Controls::Grid row;
+        row.Style(ResourceStyle(L"SettingsOptionRowStyle"));
+        Controls::ColumnDefinition labels, value;
+        labels.Width(Xaml::GridLengthHelper::FromValueAndType(3, Xaml::GridUnitType::Star));
+        value.Width(Xaml::GridLengthHelper::FromValueAndType(2, Xaml::GridUnitType::Star));
+        value.MaxWidth(Metric(L"SettingsOptionControlWidth"));
+        row.ColumnDefinitions().Append(labels);
+        row.ColumnDefinitions().Append(value);
+        Controls::StackPanel copy;
+        copy.VerticalAlignment(Xaml::VerticalAlignment::Center);
+        copy.Children().Append(Text(title));
+        if (!description.empty()) copy.Children().Append(Hint(description));
+        row.Children().Append(copy);
+        Controls::Grid::SetColumn(control, 1);
+        control.VerticalAlignment(Xaml::VerticalAlignment::Center);
+        Xaml::Automation::AutomationProperties::SetName(control, title);
+        row.Children().Append(control);
+        return row;
+    }
+
+    inline Controls::Expander OptionGroup(winrt::hstring const& title, Xaml::UIElement const& options)
+    {
+        Controls::Expander group;
+        group.Style(ResourceStyle(L"SettingsOptionGroupStyle"));
+        group.Header(Text(title));
+        group.Content(options);
+        group.IsExpanded(true);
+        return group;
     }
 
     inline Controls::StackPanel PagePanel()

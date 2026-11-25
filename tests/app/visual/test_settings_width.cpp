@@ -3,6 +3,8 @@
 #include "../support/DocumentControllerFixture.h"
 #include "settings/views/SettingsView.h"
 #include "visual_window.h"
+#include <winrt/Microsoft.UI.Text.h>
+#include <winrt/Microsoft.UI.Xaml.Automation.Peers.h>
 
 namespace {
     using namespace boost::ut;
@@ -18,7 +20,40 @@ namespace {
     }
 
     suite settings_width_tests = [] {
-        "settings center the shared content column and keep native list scrollbars at the page edge"_test = [] {
+        "theme import requires both a valid profile and a PNG preview"_test = [] {
+            TestDirectory directory;
+            auto const profilePath = winrt::Folia::BuiltinThemeProfilePath(folia::Theme::Light);
+            std::ifstream input(profilePath, std::ios::binary);
+            expect(fatal(bool(input)));
+            std::string profile{std::istreambuf_iterator<char>{input}, std::istreambuf_iterator<char>{}};
+            auto id = directory.path.filename().string();
+            id = "folia-test-" + id.substr(1, id.size() - 2);
+            profile.replace(profile.find("folia.light"), std::string_view("folia.light").size(), id);
+            auto source = directory.path / L"sample.json";
+            auto preview = directory.path / L"sample.png";
+            std::ofstream(source, std::ios::binary) << profile;
+            winrt::Folia::ThemeCatalog catalog;
+            catalog.Refresh();
+            std::string imported;
+            expect(catalog.Import(source, imported).has_value());
+            std::ofstream(preview, std::ios::binary) << "not a PNG";
+            expect(catalog.Import(source, imported).has_value());
+            auto builtInPreview = profilePath;
+            std::filesystem::copy_file(builtInPreview.replace_extension(L".png"), preview,
+                std::filesystem::copy_options::overwrite_existing);
+            auto error = catalog.Import(source, imported);
+            expect(!error) << (error ? winrt::to_string(*error) : std::string{});
+            if (error) return;
+            struct Cleanup {
+                winrt::Folia::ThemeCatalog& catalog;
+                std::string const& id;
+                ~Cleanup() { catalog.Remove(id); }
+            } cleanup{catalog, imported};
+            expect(imported == id);
+            expect(std::filesystem::exists(catalog.Preview(id, folia::Theme::Light)));
+            expect(catalog.Find(id) && !catalog.Find(id)->builtIn);
+        };
+        "settings center the shared content column and keep native list scrollbars at the page edge"_test = [] { try {
             Window window;
             window.Title(L"Folia settings layout test");
             Grid host, root;
@@ -32,9 +67,8 @@ namespace {
             root.VerticalAlignment(VerticalAlignment::Top);
             root.Width(1120);
             root.Height(800);
-            ListView settingsMenu;
             ContentControl pageHost;
-            auto view = std::make_shared<winrt::Folia::SettingsView>(settingsMenu, pageHost, winrt::Folia::AppSettings{},
+            auto view = std::make_shared<winrt::Folia::SettingsView>(pageHost, winrt::Folia::AppSettings{},
                 std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
                 folia::Theme::Light, nullptr, [](auto const&) -> std::optional<winrt::hstring> { return {}; });
             struct Cleanup {
@@ -45,15 +79,18 @@ namespace {
             root.Children().Append(pageHost);
             window.Activate();
             Pump([&] { return root.IsLoaded(); });
-            auto navigation = view->Root();
-            for (auto entry : navigation.Items()) {
-                navigation.SelectedItem(entry);
-                const auto name = winrt::to_string(winrt::unbox_value<winrt::hstring>(entry.as<ListViewItem>().Tag()));
+            using Page = winrt::Folia::SettingsView::Page;
+            constexpr std::pair<Page, std::string_view> pages[] = {
+                {Page::Home, "home"}, {Page::General, "general"}, {Page::Themes, "themes"}, {Page::Shortcuts, "shortcuts"},
+                {Page::Latex, "latex"}, {Page::Completion, "completion"}, {Page::Licenses, "licenses"}, {Page::About, "about"},
+            };
+            for (auto [category, name] : pages) {
+                view->Navigate(category);
                 for (const auto width : {1120, 1800, 2400, 720, 1120}) {
                     root.Width(width);
                     root.UpdateLayout();
                     expect(std::abs(root.ActualWidth() - width) < 1.) << name << width;
-                    auto page = pageHost.Content().as<FrameworkElement>();
+                    auto page = view->PageContent().as<FrameworkElement>();
                     auto content = First<ContentPresenter>(page, L"PageContent");
                     expect(fatal(content != nullptr));
                     const auto origin = content.TransformToVisual(page).TransformPoint({0, 0});
@@ -78,12 +115,19 @@ namespace {
                     root.Width(1800);
                     root.Height(700);
                     root.UpdateLayout();
-                    auto page = pageHost.Content().as<FrameworkElement>();
-                    auto list = First<ListView>(page);
-                    const auto listHeight = list.ActualHeight();
-                    root.Height(1000);
-                    root.UpdateLayout();
-                    expect(list.ActualHeight() > listHeight + 250.) << "theme list follows the viewport height";
+                    auto page = view->PageContent().as<FrameworkElement>();
+                    auto preview = First<winrt::Microsoft::UI::Xaml::Controls::Image>(page);
+                    expect(fatal(preview != nullptr));
+                    Pump([&] { auto bitmap = preview.Source().try_as<Media::Imaging::BitmapImage>(); return bitmap && bitmap.PixelWidth() > 0; });
+                    expect(preview.Stretch() == Media::Stretch::Uniform) << "previews preserve the image aspect ratio";
+                    auto picker = First<ComboBox>(page);
+                    expect(fatal(picker && picker.ActualWidth() <= 241.));
+                    picker.IsDropDownOpen(true);
+                    auto popup = picker.as<winrt::Microsoft::UI::Xaml::Controls::IControlProtected>()
+                        .GetTemplateChild(L"PopupBorder").as<Border>();
+                    auto popupBrush = popup.Background().try_as<Media::SolidColorBrush>();
+                    expect(popupBrush && popupBrush.Color().A == 255 && popupBrush.Opacity() == 1.) << "theme popup has an opaque surface";
+                    picker.IsDropDownOpen(false);
                     auto button = First<Button>(page);
                     expect(fatal(button != nullptr));
                     for (const auto width : {1800, 720, 1800}) {
@@ -95,26 +139,36 @@ namespace {
                                 auto control = action.as<Button>();
                                 const auto bounds = control.TransformToVisual(page).TransformBounds({0, 0,
                                     static_cast<float>(control.ActualWidth()), static_cast<float>(control.ActualHeight())});
-                                expect(bounds.X >= 0 && bounds.X + bounds.Width <= page.ActualWidth() + 1.);
+                                expect(bounds.X >= 0 && bounds.X + bounds.Width <= page.ActualWidth() + 1.) << "theme actions fit horizontally";
                                 expect(bounds.Y >= 0 && bounds.Y + bounds.Height <= page.ActualHeight() + 1.)
                                     << "theme actions leave the viewport at " << width << 'x' << height;
                             }
                         }
                     }
                 }
-                // Save native rendering for the pages with distinct scroll layouts.
-                if (name == "general" || name == "themes" || name == "shortcuts" || name == "latex") {
-                    window.AppWindow().Resize({1600, 1000});
-                    root.Width(host.ActualWidth());
-                    root.Height(host.ActualHeight());
-                    root.UpdateLayout();
-                    Media::Imaging::RenderTargetBitmap image;
-                    Await(image.RenderAsync(root));
-                    visual_tests::SavePng(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
-                        / "build/tests/settings-layout" / (name + ".png"),
-                        image.PixelWidth(), image.PixelHeight(), Await(image.GetPixelsAsync()));
+                if (name == "licenses") {
+                    auto page = view->PageContent().as<FrameworkElement>();
+                    auto text = First<RichEditBox>(page);
+                    auto selector = First<ComboBox>(page);
+                    expect(fatal(text != nullptr && selector != nullptr));
+                    expect(text.IsReadOnly()) << "license text is read-only";
+                    auto peer = Automation::Peers::FrameworkElementAutomationPeer::CreatePeerForElement(text);
+                    expect(fatal(peer != nullptr));
+                    expect(!peer.GetName().empty()) << "license document has an accessibility name";
+                    auto content = [&] {
+                        winrt::hstring value;
+                        text.Document().GetText(winrt::Microsoft::UI::Text::TextGetOptions::None, value);
+                        return value;
+                    };
+                    expect(std::wstring_view{content()}.starts_with(L"MIT License")) << "MIT license is the initial document";
+                    selector.SelectedIndex(1);
+                    expect(content().size() > 1'000'000u) << "the bundled notices are loaded in full";
+                    selector.SelectedIndex(0);
+                    expect(std::wstring_view{content()}.starts_with(L"MIT License")) << "switching back restores the MIT license";
                 }
             }
-        };
+        } catch (winrt::hresult_error const& error) {
+            throw std::runtime_error(winrt::to_string(error.message()) + " HRESULT " + std::to_string(error.code().value));
+        } };
     };
 }

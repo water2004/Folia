@@ -18,13 +18,10 @@ namespace winrt::Folia
     UIElement SettingsView::BuildGeneralPage()
     {
         auto panel = PagePanel();
+        panel.Style(settings_ui::ResourceStyle(L"SettingsOptionPageStyle"));
         panel.Children().Append(settings_ui::PageHeader(Localize(L"General"), Localize(L"GeneralDescription")));
 
-        auto languageSection = settings_ui::SectionPanel();
-        auto languageHeading = settings_ui::SectionHeading(Localize(L"Language"));
-        languageSection.Children().Append(languageHeading);
         languageCombo_ = settings_ui::Choice();
-        languageCombo_.Header(box_value(Localize(L"ApplicationLanguage")));
         languageCombo_.Style(settings_ui::ResourceStyle(L"SettingsComboBoxStyle"));
         languageCombo_.Items().Append(box_value(Localize(L"FollowWindowsLanguage")));
         languageCombo_.Items().Append(box_value(Localize(L"EnglishLanguage")));
@@ -38,54 +35,45 @@ namespace winrt::Folia
             settings_.languageId = LanguageIds[static_cast<std::size_t>(index)];
             ApplyLanguageSetting();
         });
-        languageSection.Children().Append(languageCombo_);
-        languageSection.Children().Append(settings_ui::Hint(Localize(L"LanguageRestartDescription")));
-        panel.Children().Append(languageSection);
+        panel.Children().Append(settings_ui::SectionCard(settings_ui::OptionRow(Localize(L"ApplicationLanguage"),
+            languageCombo_, Localize(L"LanguageRestartDescription"))));
 
-        auto appearance = settings_ui::SectionPanel();
-        appearance.Children().Append(settings_ui::SectionHeading(Localize(L"WindowAppearance")));
+        StackPanel appearance;
         auto materialChoice = [&](wchar_t const* label, bool allowInherit) {
             auto combo = settings_ui::Choice();
-            combo.Header(box_value(Localize(label)));
             combo.Style(settings_ui::ResourceStyle(L"SettingsComboBoxStyle"));
             if (allowInherit) combo.Items().Append(box_value(Localize(L"MaterialFollowWindow")));
             for (auto const& choice : windowMaterials) combo.Items().Append(box_value(Localize(choice.label)));
-            appearance.Children().Append(combo);
+            appearance.Children().Append(settings_ui::OptionRow(Localize(label), combo));
             return combo;
         };
         materialCombo_ = materialChoice(L"WindowMaterial", false);
         readingMaterialCombo_ = materialChoice(L"ReadingMaterial", true);
-        auto addToggle = [this, &appearance](CheckBox const& check, wchar_t const* key) {
-            check.Content(box_value(Localize(key)));
-            check.Click([this](auto const&, auto const&) { ApplyAppearanceSetting(); });
-            appearance.Children().Append(check);
-        };
-        addToggle(autoHideTools_, L"AutoHideDocumentTools");
+        autoHideTools_.HorizontalAlignment(HorizontalAlignment::Right);
+        appearance.Children().Append(settings_ui::OptionRow(Localize(L"AutoHideDocumentTools"), autoHideTools_));
         UpdateWorkspaceAppearance(settings_.appearance);
+        autoHideTools_.Toggled([this](auto const&, auto const&) { ApplyAppearanceSetting(); });
         auto changed = [this](auto const&, auto const&) { ApplyAppearanceSetting(); };
         materialCombo_.SelectionChanged(changed);
         readingMaterialCombo_.SelectionChanged(changed);
-        panel.Children().Append(appearance);
+        panel.Children().Append(settings_ui::OptionGroup(Localize(L"WindowAppearance"), appearance));
 
-        auto mediaSection = settings_ui::SectionPanel();
-        mediaSection.Children().Append(settings_ui::SectionHeading(Localize(L"DocumentMedia")));
+        StackPanel mediaSection;
         imageWidthCombo_ = settings_ui::Choice();
-        imageWidthCombo_.Header(box_value(Localize(L"ImageMaximumWidth")));
         imageWidthCombo_.Style(settings_ui::ResourceStyle(L"SettingsComboBoxStyle"));
         for (auto width : MediaDisplaySettings::imageWidths)
             imageWidthCombo_.Items().Append(box_value(hstring(std::to_wstring(width) + L"%")));
-        mediaSection.Children().Append(imageWidthCombo_);
-        mediaSection.Children().Append(settings_ui::Hint(Localize(L"ImageMaximumWidthDescription")));
+        mediaSection.Children().Append(settings_ui::OptionRow(Localize(L"ImageMaximumWidth"), imageWidthCombo_,
+            Localize(L"ImageMaximumWidthDescription")));
 
         mermaidThemeCombo_ = settings_ui::Choice();
-        mermaidThemeCombo_.Header(box_value(Localize(L"MermaidTheme")));
         mermaidThemeCombo_.Style(settings_ui::ResourceStyle(L"SettingsComboBoxStyle"));
         mermaidThemeCombo_.Items().Append(box_value(Localize(L"MermaidFollowFolia")));
         for (auto const& name : folia::platform::MermaidRenderer::ThemeNames())
             mermaidThemeCombo_.Items().Append(box_value(winrt::to_hstring(name)));
-        mediaSection.Children().Append(mermaidThemeCombo_);
-        mediaSection.Children().Append(settings_ui::Hint(Localize(L"MermaidThemeDescription")));
-        panel.Children().Append(mediaSection);
+        mediaSection.Children().Append(settings_ui::OptionRow(Localize(L"MermaidTheme"), mermaidThemeCombo_,
+            Localize(L"MermaidThemeDescription")));
+        panel.Children().Append(settings_ui::OptionGroup(Localize(L"DocumentMedia"), mediaSection));
 
         RefreshMediaControls();
         imageWidthCombo_.SelectionChanged([this](auto const&, SelectionChangedEventArgs const&)
@@ -124,7 +112,7 @@ namespace winrt::Folia
             ? std::ranges::find(windowMaterials, *appearance.readingMaterial, &WindowMaterialChoice::value)
             : windowMaterials.end();
         readingMaterialCombo_.SelectedIndex(reading == windowMaterials.end() ? 0 : 1 + static_cast<int>(reading - windowMaterials.begin()));
-        autoHideTools_.IsChecked(appearance.autoHideTools);
+        autoHideTools_.IsOn(appearance.autoHideTools);
         refreshing_ = wasRefreshing;
     }
 
@@ -136,7 +124,7 @@ namespace winrt::Folia
         if (index < 0 || static_cast<size_t>(index) >= windowMaterials.size()
             || reading < 0 || static_cast<size_t>(reading) > windowMaterials.size()) return;
         auto proposed = appliedSettings_;
-        proposed.appearance = {autoHideTools_.IsChecked().GetBoolean(),
+        proposed.appearance = {autoHideTools_.IsOn(),
             windowMaterials[index].value, reading ? std::optional{windowMaterials[reading - 1].value} : std::nullopt};
         if (proposed.appearance == appliedSettings_.appearance) return;
         if (auto error = applySettings_(proposed)) {

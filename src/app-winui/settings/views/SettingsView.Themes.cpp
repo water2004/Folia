@@ -7,99 +7,54 @@ namespace winrt::Folia
 {
     using namespace Microsoft::UI::Xaml;
     using namespace Microsoft::UI::Xaml::Controls;
-    using settings_ui::Brush;
-    using settings_ui::Font;
-    using settings_ui::PageHeading;
-    using settings_ui::Text;
-
     UIElement SettingsView::BuildThemesPage()
     {
-        Grid page;
-        page.Style(settings_ui::ResourceStyle(L"SettingsGridPageStyle"));
-        for (int i = 0; i < 4; ++i) {
-            RowDefinition row;
-            row.Height(i == 1 ? GridLengthHelper::FromValueAndType(1, GridUnitType::Star)
-                : GridLengthHelper::Auto());
-            page.RowDefinitions().Append(row);
-        }
+        auto page = settings_ui::PagePanel();
         page.Children().Append(settings_ui::PageHeader(Localize(L"Themes"), Localize(L"ThemesDescription")));
-
-        Grid content;
-        content.ColumnSpacing(settings_ui::Metric(L"SettingsSectionGap"));
-        RowDefinition listRow, previewRow;
-        listRow.Height(GridLengthHelper::FromValueAndType(1, GridUnitType::Star));
-        previewRow.Height(GridLengthHelper::Auto());
-        content.RowDefinitions().Append(listRow);
-        content.RowDefinitions().Append(previewRow);
-        ColumnDefinition listColumn;
-        listColumn.Width(GridLengthHelper::FromPixels(settings_ui::Metric(L"SettingsThemeListWidth")));
-        ColumnDefinition previewColumn;
-        previewColumn.Width(GridLengthHelper::FromValueAndType(1, GridUnitType::Star));
-        content.ColumnDefinitions().Append(listColumn);
-        content.ColumnDefinitions().Append(previewColumn);
-        themeList_.SelectionMode(ListViewSelectionMode::Single);
-        themeList_.Style(settings_ui::ResourceStyle(L"SettingsThemeListStyle"));
-        themeList_.SelectionChanged([this](auto const&, SelectionChangedEventArgs const&)
+        auto controls = settings_ui::SectionPanel();
+        themePicker_ = settings_ui::Choice();
+        themePicker_.Style(settings_ui::ResourceStyle(L"SettingsComboBoxStyle"));
+        themePicker_.SelectionChanged([this](auto const&, SelectionChangedEventArgs const&)
         {
-            auto index = themeList_.SelectedIndex();
+            auto index = themePicker_.SelectedIndex();
             if (index < 0 || static_cast<std::size_t>(index) >= themeIds_.size()) return;
             if (refreshing_) return;
             settings_.themeId = themeIds_[static_cast<std::size_t>(index)];
             UpdateThemePreview();
         });
-        content.Children().Append(themeList_);
+        controls.Children().Append(settings_ui::OptionRow(Localize(L"PreviewTheme"), themePicker_));
 
         StackPanel buttons;
         buttons.Orientation(Orientation::Horizontal);
+        buttons.HorizontalAlignment(HorizontalAlignment::Right);
         buttons.Spacing(8);
         applyThemeButton_.Content(box_value(Localize(L"Apply")));
         applyThemeButton_.Click([this](auto const&, auto const&) { ApplyPendingTheme(); });
         applyThemeButton_.Style(settings_ui::ResourceStyle(L"SettingsPrimaryButtonStyle"));
         Button importButton;
+        importButton.Style(settings_ui::ResourceStyle(L"SettingsSecondaryButtonStyle"));
         importButton.Content(box_value(Localize(L"Import")));
         importButton.Click([this](auto const&, auto const&) { ImportThemeAsync(); });
         removeThemeButton_.Content(box_value(Localize(L"Remove")));
+        removeThemeButton_.Style(settings_ui::ResourceStyle(L"SettingsSecondaryButtonStyle"));
         removeThemeButton_.Click([this](auto const&, auto const&) { RemoveSelectedTheme(); });
         buttons.Children().Append(applyThemeButton_);
         buttons.Children().Append(importButton);
         buttons.Children().Append(removeThemeButton_);
-        Grid::SetRow(buttons, 2);
-        page.Children().Append(buttons);
-        themeStatus_.TextWrapping(TextWrapping::Wrap);
-        Grid::SetRow(themeStatus_, 3);
-        page.Children().Append(themeStatus_);
+        controls.Children().Append(buttons);
+        controls.Children().Append(themeStatus_);
+        page.Children().Append(settings_ui::SectionCard(controls));
 
-        themePreview_.CornerRadius(CornerRadius{10});
-        themePreview_.BorderThickness(Thickness{1});
-        ScrollViewer preview;
-        preview.Style(settings_ui::ResourceStyle(L"SettingsPageScrollStyle"));
-        preview.VerticalContentAlignment(VerticalAlignment::Top);
-        preview.Content(themePreview_);
-        Grid::SetColumn(preview, 1);
-        content.Children().Append(preview);
-        content.SizeChanged([preview = winrt::make_weak(preview),
-            breakpoint = settings_ui::Metric(L"SettingsWidePageWidth"),
-            listWidth = settings_ui::Metric(L"SettingsThemeListWidth"),
-            gap = settings_ui::Metric(L"SettingsSectionGap")](auto const& sender, SizeChangedEventArgs const& args) {
-            auto scroll = preview.get(); if (!scroll) return;
-            auto grid = sender.template as<Grid>();
-            bool stacked = args.NewSize().Width < breakpoint;
-            auto row = stacked ? 1 : 0;
-            if (Grid::GetRow(scroll) == row) return;
-            grid.RowDefinitions().GetAt(1).Height(stacked
-                ? GridLengthHelper::FromValueAndType(1, GridUnitType::Star) : GridLengthHelper::Auto());
-            grid.ColumnDefinitions().GetAt(0).Width(stacked
-                ? GridLengthHelper::FromValueAndType(1, GridUnitType::Star) : GridLengthHelper::FromPixels(listWidth));
-            grid.ColumnDefinitions().GetAt(1).Width(stacked ? GridLengthHelper::FromPixels(0)
-                : GridLengthHelper::FromValueAndType(1, GridUnitType::Star));
-            Grid::SetRow(scroll, row); Grid::SetColumn(scroll, stacked ? 0 : 1);
-            grid.RowSpacing(stacked ? gap : 0);
-            grid.ColumnSpacing(stacked ? 0 : gap);
+        Border preview;
+        preview.Style(settings_ui::ResourceStyle(L"SettingsThemePreviewStyle"));
+        themePreview_.Stretch(Media::Stretch::Uniform);
+        themePreview_.ImageFailed([this](auto const&, auto const&) {
+            SetThemeStatus(LocalizeFormat(L"IncompatibleThemePackage", {winrt::to_hstring(settings_.themeId)}), true);
         });
-        Grid::SetRow(content, 1);
-        page.Children().Append(content);
+        preview.Child(themePreview_);
+        page.Children().Append(preview);
         RefreshThemeList();
-        return settings_ui::PageViewport(page);
+        return settings_ui::PageScroll(page);
     }
 
     void SettingsView::RefreshThemeList()
@@ -108,23 +63,15 @@ namespace winrt::Folia
         struct ResetRefreshing { bool& value; ~ResetRefreshing() { value = false; } } reset{refreshing_};
         catalog_->Refresh();
         themeIds_.clear();
-        themeList_.Items().Clear();
+        themePicker_.Items().Clear();
 
         auto append = [&](hstring const& name, hstring const& detail, std::string id)
         {
-            StackPanel content;
-            content.Spacing(2);
-            auto title = Text(name);
-            title.FontWeight(winrt::Windows::UI::Text::FontWeights::SemiBold());
-            auto subtitle = settings_ui::Hint(detail);
-            subtitle.Opacity(0.7);
-            content.Children().Append(title);
-            content.Children().Append(subtitle);
-            ListViewItem item;
-            item.HorizontalContentAlignment(HorizontalAlignment::Stretch);
-            item.Content(content);
+            ComboBoxItem item;
+            item.Content(box_value(name));
+            Automation::AutomationProperties::SetHelpText(item, detail);
             themeIds_.push_back(std::move(id));
-            themeList_.Items().Append(item);
+            themePicker_.Items().Append(item);
         };
 
         append(Localize(L"FollowWindowsTheme"), Localize(L"AutomaticThemeDescription"), "system");
@@ -139,12 +86,11 @@ namespace winrt::Folia
         auto found = std::ranges::find(themeIds_, settings_.themeId);
         if (found == themeIds_.end())
         {
-            settings_.themeId = "system";
-            themeList_.SelectedIndex(0);
+            themePicker_.SelectedIndex(-1);
         }
         else
         {
-            themeList_.SelectedIndex(
+            themePicker_.SelectedIndex(
                 static_cast<std::int32_t>(std::distance(themeIds_.begin(), found)));
         }
         UpdateThemePreview();
@@ -152,68 +98,10 @@ namespace winrt::Folia
 
     void SettingsView::UpdateThemePreview()
     {
-        auto resolved = catalog_->Resolve(settings_.themeId, systemVariant_);
-        auto const& profile = resolved.profile;
-        auto const& colors = profile.colors;
-
-        StackPanel preview;
-        preview.Padding(Thickness{24});
-        preview.Spacing(16);
-        auto title = Text(winrt::to_hstring(profile.name), profile.typography.heading2.size);
-        title.FontFamily(Font(profile.typography.heading2.family));
-        title.FontWeight(winrt::Windows::UI::Text::FontWeight{profile.typography.heading2.weight});
-        title.Foreground(Brush(colors.heading_fg));
-        preview.Children().Append(title);
-
-        auto body = Text(Localize(L"ThemePreviewBody"), profile.typography.body.size);
-        body.FontFamily(Font(profile.typography.body.family));
-        body.Foreground(Brush(colors.fg));
-        preview.Children().Append(body);
-
-        Border code;
-        code.Padding(Thickness{14, 10, 14, 10});
-        code.CornerRadius(CornerRadius{6});
-        code.Background(Brush(colors.code_block_bg));
-        auto codeText = Text(L"auto answer = 42;", profile.typography.code.size);
-        codeText.FontFamily(Font(profile.typography.code.family));
-        codeText.Foreground(Brush(colors.code_block_fg));
-        code.Child(codeText);
-        preview.Children().Append(code);
-
-        Grid quote;
-        quote.ColumnSpacing(12);
-        ColumnDefinition barColumn;
-        barColumn.Width(GridLengthHelper::FromPixels(
-            (std::max)(3.0f, profile.layout.quote_border_width)));
-        ColumnDefinition textColumn;
-        textColumn.Width(GridLengthHelper::FromValueAndType(1, GridUnitType::Star));
-        quote.ColumnDefinitions().Append(barColumn);
-        quote.ColumnDefinitions().Append(textColumn);
-        Border bar;
-        bar.Background(Brush(colors.blockquote_border));
-        quote.Children().Append(bar);
-        auto quoteText = Text(Localize(L"ThemePreviewQuote"), profile.typography.body.size);
-        quoteText.Foreground(Brush(colors.fg));
-        Grid::SetColumn(quoteText, 1);
-        quote.Children().Append(quoteText);
-        preview.Children().Append(quote);
-
-        auto metadata = Text(
-            profile.variant == folia::Theme::Light ? Localize(L"LightProfile")
-                : profile.variant == folia::Theme::HighContrast
-                    ? Localize(L"HighContrastProfile")
-                    : Localize(L"DarkProfile"),
-            12);
-        metadata.Foreground(Brush(colors.muted_fg));
-        preview.Children().Append(metadata);
-
-        themePreview_.Background(Brush(colors.bg));
-        themePreview_.BorderBrush(Brush(colors.shell_border));
-        themePreview_.Child(preview);
-
+        auto path = catalog_->Preview(settings_.themeId, systemVariant_);
+        themePreview_.Source(path.empty() ? nullptr : Media::Imaging::BitmapImage(settings_ui::FileUri(path)));
         UpdateThemeActions();
-        if (!resolved.loadedFromFile && !resolved.diagnostic.empty())
-            SetThemeStatus(resolved.diagnostic, true);
+        if (path.empty()) SetThemeStatus(LocalizeFormat(L"IncompatibleThemePackage", {winrt::to_hstring(settings_.themeId)}), true);
         else if (!catalog_->Diagnostics().empty())
             SetThemeStatus(catalog_->Diagnostics().front(), true);
         else
@@ -239,14 +127,8 @@ namespace winrt::Folia
             check_hresult(initialize->Initialize(owner_));
             auto file = co_await picker.PickSingleFileAsync();
             if (detached_ || !file) co_return;
-            auto parsed = LoadThemeFile(std::filesystem::path(file.Path().c_str()));
-            if (!parsed.profile)
-            {
-                SetThemeStatus(parsed.diagnostic, true);
-                co_return;
-            }
-            auto id = parsed.profile->id;
-            if (auto error = catalog_->Import(std::filesystem::path(file.Path().c_str())))
+            std::string id;
+            if (auto error = catalog_->Import(std::filesystem::path(file.Path().c_str()), id))
             {
                 SetThemeStatus(*error, true);
                 co_return;
@@ -270,7 +152,7 @@ namespace winrt::Folia
 
     void SettingsView::RemoveSelectedTheme()
     {
-        auto index = themeList_.SelectedIndex();
+        auto index = themePicker_.SelectedIndex();
         if (index <= 0 || static_cast<std::size_t>(index) >= themeIds_.size()) return;
         auto id = themeIds_[static_cast<std::size_t>(index)];
         if (id == appliedSettings_.themeId)
@@ -306,13 +188,8 @@ namespace winrt::Folia
 
     void SettingsView::UpdateThemeActions()
     {
-        applyThemeButton_.IsEnabled(settings_.themeId != appliedSettings_.themeId);
-        auto index = themeList_.SelectedIndex();
-        auto removable = index > 0
-            && static_cast<std::size_t>(index) < themeIds_.size()
-            && static_cast<std::size_t>(index - 1) < catalog_->Entries().size()
-            && !catalog_->Entries()[static_cast<std::size_t>(index - 1)].builtIn
-            && themeIds_[static_cast<std::size_t>(index)] != appliedSettings_.themeId;
-        removeThemeButton_.IsEnabled(removable);
+        applyThemeButton_.IsEnabled(themePicker_.SelectedIndex() >= 0 && settings_.themeId != appliedSettings_.themeId);
+        auto entry = catalog_->Find(settings_.themeId);
+        removeThemeButton_.IsEnabled(entry && !entry->builtIn && settings_.themeId != appliedSettings_.themeId);
     }
 }

@@ -557,12 +557,25 @@ namespace winrt::Folia::implementation
 
         auto const& colors = themeProfile.colors;
         auto resources = Root().Resources();
+        auto metric = [&](wchar_t const* key) { return unbox_value<double>(resources.Lookup(box_value(key))); };
+        auto shellTone = colors.shell_bg;
+        if (sharesBase) {
+            const auto amount = metric(L"FoliaSharedBaseTintBlend");
+            auto blend = [amount](auto from, auto to) {
+                return static_cast<std::uint8_t>(std::lround(std::lerp(static_cast<double>(from), static_cast<double>(to), amount)));
+            };
+            shellTone = highContrast ? colors.shell_layer_bg : folia::Color{
+                blend(shellTone.r, colors.shell_fg.r), blend(shellTone.g, colors.shell_fg.g), blend(shellTone.b, colors.shell_fg.b)};
+        }
+        UpdateBrushResource(resources, L"FoliaWorkspaceBaseBrush", shellTone);
+        auto base = resources.Lookup(box_value(L"FoliaWorkspaceBaseBrush")).as<media::SolidColorBrush>();
+        base.Opacity(material == WindowMaterial::Solid ? 1. : metric(L"FoliaSharedBaseTintOpacity"));
+        Root().Background(material == WindowMaterial::Solid || sharesBase ? base : nullptr);
+
         UpdateBrushResource(resources, L"FoliaReadingSurfaceBrush", colors.bg);
-        Root().Background(material == WindowMaterial::Solid
-            ? resources.Lookup(box_value(L"FoliaShellBackgroundBrush")).as<media::Brush>() : nullptr);
         auto paper = resources.Lookup(box_value(L"FoliaReadingSurfaceBrush")).as<media::SolidColorBrush>();
         paper.Opacity(reading == WindowMaterial::Solid
-            ? 1. : unbox_value<double>(resources.Lookup(box_value(L"FoliaReadingMaterialOpacity"))));
+            ? 1. : metric(sharesBase ? L"FoliaSharedReadingMaterialOpacity" : L"FoliaReadingMaterialOpacity"));
         ReadingTint().Background(paper);
         editorRenderer.SetPaperOpacity(reading == WindowMaterial::Solid ? 1.f : 0.f);
         ApplySidebarSurface();

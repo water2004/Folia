@@ -46,8 +46,15 @@ namespace winrt::Folia::implementation {
         };
         watchPane(FilesTab(), false);
         watchPane(OutlineTab(), true);
-        SidebarButton().Checked(WindowEvent([this](auto const&, auto const&) { SetSidebarOpen(true); }));
-        SidebarButton().Unchecked(WindowEvent([this](auto const&, auto const&) { SetSidebarOpen(false); }));
+        auto toggleSidebar = [this](bool open) {
+            return WindowEvent([this, open](auto const&, auto const&) {
+                if (updatingRailSelection) return;
+                if (SettingsActive()) ReturnToDocumentTab();
+                SetSidebarOpen(open);
+            });
+        };
+        SidebarButton().Checked(toggleSidebar(true));
+        SidebarButton().Unchecked(toggleSidebar(false));
         WorkspaceSidebar().Width(sidebarWidth);
         WorkspaceSidebar().HorizontalAlignment(HorizontalAlignment::Left);
         AppWindow().Changed(WindowEvent([this](auto const&, AppWindowChangedEventArgs const& args) {
@@ -188,11 +195,10 @@ namespace winrt::Folia::implementation {
     void MainWindow::UpdateWorkspaceLayout() {
         if (!sidebarPresented && sidebarWindowExtension) FinishSidebarMotion();
         else LayoutSidebar();
-        const bool settings = SettingsActive();
-        SidebarButton().IsChecked(sidebarOpen);
         updatingRailSelection = true;
-        FilesTab().IsChecked(sidebarOpen && !settings && !outlineSelected);
-        OutlineTab().IsChecked(sidebarOpen && !settings && outlineSelected);
+        SidebarButton().IsChecked(sidebarOpen);
+        FilesTab().IsChecked(sidebarOpen && !outlineSelected);
+        OutlineTab().IsChecked(sidebarOpen && outlineSelected);
         updatingRailSelection = false;
         ExplorerPane().Visibility(outlineSelected ? Visibility::Collapsed : Visibility::Visible);
         OutlinePaneContent().Visibility(outlineSelected ? Visibility::Visible : Visibility::Collapsed);

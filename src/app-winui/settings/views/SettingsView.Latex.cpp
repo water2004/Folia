@@ -128,7 +128,7 @@ namespace winrt::Folia
         } guard{editorDialogOpen_};
 
         ContentDialog dialog;
-        dialog.XamlRoot(navigation_.XamlRoot());
+        dialog.XamlRoot(pageHost_.XamlRoot());
         dialog.Title(box_value(Localize(command ? L"EditLatexCommand" : L"CustomLatexCommand")));
         dialog.PrimaryButtonText(Localize(command ? L"SaveCommand" : L"AddCommand"));
         dialog.CloseButtonText(Localize(L"Cancel"));

@@ -20,6 +20,10 @@
             <SolidColorBrush x:Key="FoliaShellMutedForegroundBrush" Color="#8B95AA"/>
             <SolidColorBrush x:Key="FoliaShellAccentBrush" Color="#7AA2F7"/>
             <x:Double x:Key="FoliaReadingMaterialOpacity">0.40</x:Double>
+            <x:Double x:Key="FoliaSharedReadingMaterialOpacity">0.58</x:Double>
+            <x:Double x:Key="FoliaSharedBaseTintOpacity">0.68</x:Double>
+            <x:Double x:Key="FoliaSharedBaseTintBlend">0.12</x:Double>
+            <SolidColorBrush x:Key="FoliaWorkspaceBaseBrush"/>
             <SolidColorBrush x:Key="FoliaReadingSurfaceBrush"/>
             <StaticResource x:Key="TabViewItemHeaderBackgroundSelected" ResourceKey="FoliaReadingSurfaceBrush"/>
             <x:Double x:Key="WorkspaceTabHeight">32</x:Double>
@@ -75,7 +79,6 @@
             <Grid x:Name="WorkspaceSidebar" Grid.Column="1" Margin="0,36,0,0" Padding="4,0,6,7" Visibility="Collapsed" Canvas.ZIndex="1">
             <SystemBackdropElement x:Name="FloatingSidebarBackdrop" CornerRadius="8" IsHitTestVisible="False"/>
             <Border x:Name="FloatingSidebarTint" CornerRadius="8" IsHitTestVisible="False"/>
-            <Grid x:Name="DocumentNavigation">
             <Grid x:Name="ExplorerPane" RowDefinitions="Auto,*">
                 <StackPanel x:Name="FileOperationPanel" Grid.Row="0" Margin="16,8,12,8" Spacing="4" Visibility="Collapsed">
                     <TextBlock x:Name="FileOperationText" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
@@ -95,10 +98,6 @@
                 <TextBlock x:Name="OutlineEmptyText" Margin="12,12" FontSize="13"
                            Foreground="{ThemeResource FoliaShellMutedForegroundBrush}" TextWrapping="Wrap" Visibility="Collapsed"/>
             </Grid>
-            </Grid>
-                <ListView x:Name="SettingsNavigation" Visibility="Collapsed" Background="Transparent"
-                          SelectionMode="Single" SingleSelectionFollowsFocus="True" IsItemClickEnabled="False"
-                          ItemContainerStyle="{StaticResource WorkspaceNavigationItemStyle}"/>
             </Grid>
         <Grid x:Name="DocumentColumn" Grid.Column="2" RowDefinitions="Auto,*" MinWidth="0">
         <Grid x:Name="TopChrome" ColumnDefinitions="Auto,*" Height="36" Canvas.ZIndex="2">

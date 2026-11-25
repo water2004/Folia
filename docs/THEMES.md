@@ -1,6 +1,8 @@
 # Theme configuration
 
-The application loads built-in themes from `Assets/themes` and manages imported themes in `Assets/themes/custom`. The repository ships complete neutral (`light`, `dark`, and `high-contrast`) and distinctive (`inkstone-paper`, `moss-linen`, `arctic-night`, and `ember-night`) profiles; MSBuild copies them to the configured Assets directory. Imported profiles can be previewed, selected, replaced by ID, and removed from the native full-window Settings view. Built-in profiles cannot be removed.
+The application loads built-in themes from `Assets/themes` and manages imported themes in `Assets/themes/custom`. Each theme package contains a JSON profile and a PNG preview with the same filename stem. To import `example.json`, place `example.png` beside it and select the JSON file under **Settings → Themes**. A missing preview or an invalid package is reported as incompatible. Folia displays the supplied PNG at its original aspect ratio.
+
+The repository ships `light`, `dark`, `high-contrast`, `inkstone-paper`, `moss-linen`, `arctic-night`, and `ember-night`. MSBuild copies both files for each built-in theme. Imported packages can be replaced by ID or removed under **Settings → Themes**.
 
 The theme file is the normal runtime source of truth for:
 
@@ -36,8 +38,7 @@ Required icon keys: `star`, `doubleStar`, `underscore`, `doubleUnderscore`,
 The `doubleEquals` icon represents a complete highlight delimiter (`==`).
 Themes that omit it use the bundled SVG.
 Use native Direct2D-supported SVG shapes and paths; fonts, HTML and external
-assets are unnecessary. The entire theme remains one portable JSON file, so
-the existing import flow also copies its artwork. There is no file access
+assets are unnecessary. Marker artwork stays embedded in the portable JSON profile. There is no file access
 during drawing. Applying another theme clears both icon resources and text
 layouts so artwork, size, and hit testing change together.
 
@@ -46,7 +47,7 @@ complete `syntaxMarkers` object from a shipped theme before customizing it.
 Older or incomplete profiles receive the existing whole-profile diagnostic;
 Folia does not silently mix their settings with another theme's artwork.
 
-MSI treats the built-in `themes/*.json` files as application resources. Its
+MSI treats the built-in `themes/*.json` and `themes/*.png` files as application resources. Its
 generated payload replaces each exact packaged filename on install/upgrade
 and repair, including same-version upgrades. `themes/custom/` and
 `settings.json` are excluded from the MSI payload and replacement rules.

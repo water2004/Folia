@@ -44,9 +44,8 @@ namespace
             auto themes = std::make_shared<ThemeCatalog>();
             auto latex = std::make_shared<LatexCommandCatalog>();
             AppSettings settings;
-            ListView settingsMenu;
             ContentControl pageHost;
-            auto view = std::make_shared<SettingsView>(settingsMenu, pageHost, settings, themes, latex, folia::Theme::Light,
+            auto view = std::make_shared<SettingsView>(pageHost, settings, themes, latex, folia::Theme::Light,
                 nullptr, [](auto const&) -> std::optional<winrt::hstring> { return std::nullopt; });
             Window window;
             window.Content(pageHost);
@@ -58,19 +57,10 @@ namespace
                 Window window;
                 ~DetachView() { view->Detach(); window.Close(); }
             } detach{view, window};
-            auto navigation = view->Root();
-            for (auto const& item : navigation.Items())
-            {
-                auto entry = item.as<ListViewItem>();
-                if (winrt::unbox_value<winrt::hstring>(entry.Tag()) == L"shortcuts")
-                {
-                    navigation.SelectedItem(entry);
-                    break;
-                }
-            }
+            view->Navigate(SettingsView::Page::Shortcuts);
             SettleSettingsControls();
             pageHost.UpdateLayout();
-            auto content = pageHost.Content().try_as<UIElement>();
+            auto content = view->PageContent();
             expect(static_cast<bool>(content)) << "settings navigation must expose content";
             if (!content) return;
             for (int iteration = 0; iteration < 2; ++iteration)

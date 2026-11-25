@@ -19,6 +19,7 @@ namespace winrt::Folia
     };
 
     std::filesystem::path BuiltinThemeDirectory();
+    std::filesystem::path BuiltinThemeProfilePath(folia::Theme variant);
     ThemeFileLoadResult LoadThemeFile(std::filesystem::path const& path);
     ThemeLoadResult LoadThemeProfile(folia::Theme variant);
     std::shared_ptr<const folia::SyntaxMarkerTheme> DefaultSyntaxMarkerTheme();

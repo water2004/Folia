@@ -137,7 +137,7 @@ namespace winrt::Folia::implementation
         bool SettingsActive() const noexcept { return workspaceDocuments.Active()->kind == WorkspaceTabKind::Settings; }
         void OpenSettingsTab();
         void ReturnToDocumentTab();
-        void ShowSettingsNavigation(bool enabled);
+        void ShowSettingsPage(bool enabled);
         void SetDocumentCommandsVisible(bool visible);
         std::optional<winrt::hstring> ApplySettings(winrt::Folia::AppSettings const& settings);
         void UpdateMediaSettings(winrt::Folia::MediaDisplaySettings const& settings);
@@ -194,7 +194,6 @@ namespace winrt::Folia::implementation
         folia::ThemeProfile themeProfile = folia::default_theme_profile();
         bool updatingTheme = false;
         std::optional<std::uint64_t> previousDocumentTab;
-        bool documentSidebarWasOpen = false;
         bool closePending = false;
         bool closeApproved = false;
         bool closingDocument = false;

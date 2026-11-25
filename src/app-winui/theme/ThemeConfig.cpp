@@ -310,6 +310,11 @@ namespace winrt::Folia
         return AssetPath(L"themes");
     }
 
+    std::filesystem::path BuiltinThemeProfilePath(folia::Theme variant)
+    {
+        return BuiltinThemeDirectory() / ThemeFileName(variant);
+    }
+
     ThemeFileLoadResult LoadThemeFile(std::filesystem::path const& path)
     {
         try
@@ -331,7 +336,7 @@ namespace winrt::Folia
 
     ThemeLoadResult LoadThemeProfile(folia::Theme variant)
     {
-        auto loaded = LoadThemeFile(BuiltinThemeDirectory() / ThemeFileName(variant));
+        auto loaded = LoadThemeFile(BuiltinThemeProfilePath(variant));
         if (loaded.profile && loaded.profile->variant == variant)
         {
             return { std::move(*loaded.profile), true, {} };

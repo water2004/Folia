@@ -11,12 +11,28 @@
     <StaticResource x:Key="FoliaShellLayerBrush" ResourceKey="SubtleFillColorSecondaryBrush"/>
     <StaticResource x:Key="FoliaShellBorderBrush" ResourceKey="DividerStrokeColorDefaultBrush"/>
     <x:Double x:Key="SettingsSectionGap">24</x:Double>
-    <x:Double x:Key="SettingsWidePageWidth">720</x:Double>
-    <x:Double x:Key="SettingsThemeListWidth">260</x:Double>
+    <x:Double x:Key="SettingsOptionControlWidth">240</x:Double>
     <x:Double x:Key="SettingsModelPickerWidth">320</x:Double>
     <x:Double x:Key="SettingsModelPickerMaxHeight">320</x:Double>
     <x:Double x:Key="SettingsPageWidth">1008</x:Double>
     <x:Double x:Key="SettingsContentWidth">960</x:Double>
+    <DataTemplate x:Key="SettingsRootTemplate">
+        <Grid>
+            <Grid.Resources>
+                <StaticResource x:Key="ComboBoxDropDownBackground" ResourceKey="SolidBackgroundFillColorSecondaryBrush"/>
+            </Grid.Resources>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <ContentControl x:Name="SettingsPageContent" Grid.Row="1"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                <ContentControl.ContentTransitions>
+                    <EntranceThemeTransition FromVerticalOffset="10" IsStaggeringEnabled="False"/>
+                </ContentControl.ContentTransitions>
+            </ContentControl>
+        </Grid>
+    </DataTemplate>
     <!-- Scrollers occupy the page. Their content shares a centered column. -->
     <DataTemplate x:Key="SettingsPageViewportTemplate">
         <Grid>
@@ -51,6 +67,15 @@
         <Setter Property="Margin" Value="24"/><Setter Property="Spacing" Value="24"/>
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
     </Style>
+    <Style x:Key="SettingsOptionPageStyle" TargetType="StackPanel" BasedOn="{StaticResource SettingsPageStyle}">
+        <Setter Property="ChildrenTransitions">
+            <Setter.Value>
+                <TransitionCollection>
+                    <RepositionThemeTransition IsStaggeringEnabled="False"/>
+                </TransitionCollection>
+            </Setter.Value>
+        </Setter>
+    </Style>
     <Style x:Key="SettingsGridPageStyle" TargetType="Grid">
         <Setter Property="Margin" Value="24"/><Setter Property="RowSpacing" Value="24"/>
     </Style>
@@ -60,17 +85,78 @@
     <Style x:Key="SettingsPageHeaderStyle" TargetType="StackPanel">
         <Setter Property="Spacing" Value="8"/>
     </Style>
+    <Style x:Key="SettingsCategoryListStyle" TargetType="StackPanel">
+        <Setter Property="Spacing" Value="7"/>
+    </Style>
+    <Style x:Key="SettingsCategoryButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="Padding" Value="16,13"/>
+        <Setter Property="MinHeight" Value="68"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Background" Value="{ThemeResource FoliaShellLayerBrush}"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource FoliaShellBorderBrush}"/>
+    </Style>
+    <Style x:Key="SettingsCategoryRowStyle" TargetType="Grid">
+        <Setter Property="ColumnSpacing" Value="16"/>
+    </Style>
+    <Style x:Key="SettingsCategoryIconStyle" TargetType="FontIcon">
+        <Setter Property="Width" Value="26"/>
+        <Setter Property="FontSize" Value="19"/>
+        <Setter Property="Foreground" Value="{ThemeResource FoliaShellForegroundBrush}"/>
+    </Style>
+    <Style x:Key="SettingsNavigationArrowStyle" TargetType="FontIcon">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="{ThemeResource FoliaShellMutedForegroundBrush}"/>
+    </Style>
+    <Style x:Key="SettingsCategoryTitleStyle" TargetType="TextBlock" BasedOn="{StaticResource SettingsBodyTextStyle}">
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+    <Style x:Key="SettingsHomeButtonStyle" TargetType="Button" BasedOn="{StaticResource SubtleButtonStyle}">
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="Padding" Value="10,6"/>
+    </Style>
+    <Style x:Key="SettingsBreadcrumbStyle" TargetType="StackPanel">
+        <Setter Property="Margin" Value="14,12,24,0"/>
+        <Setter Property="Spacing" Value="8"/>
+    </Style>
+    <Style x:Key="SettingsOptionRowStyle" TargetType="Grid">
+        <Setter Property="Padding" Value="16,10"/>
+        <Setter Property="ColumnSpacing" Value="12"/>
+        <Setter Property="MinHeight" Value="54"/>
+    </Style>
+    <Style x:Key="SettingsOptionGroupStyle" TargetType="Expander">
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+    <Style x:Key="SettingsSectionCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource FoliaShellLayerBrush}"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource FoliaShellBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="16"/>
+    </Style>
+    <Style x:Key="SettingsThemePreviewStyle" TargetType="Border">
+        <Setter Property="BorderBrush" Value="{ThemeResource FoliaShellBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="9"/>
+    </Style>
     <Style x:Key="SettingsSectionGridStyle" TargetType="Grid">
         <Setter Property="RowSpacing" Value="24"/>
     </Style>
-    <DataTemplate x:Key="SettingsLicenseLineTemplate">
-        <TextBlock Text="{Binding}" Style="{StaticResource SettingsBodyTextStyle}"
-                   FontFamily="{ThemeResource FoliaMonoFontFamily}" MinHeight="20"/>
-    </DataTemplate>
-    <Style x:Key="SettingsLicenseLineStyle" TargetType="ListViewItem">
-        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-        <Setter Property="Padding" Value="0"/><Setter Property="MinHeight" Value="20"/>
-        <Setter Property="IsTabStop" Value="False"/>
+    <Style x:Key="SettingsLicenseDocumentStyle" TargetType="RichEditBox" BasedOn="{StaticResource DefaultRichEditBoxStyle}">
+        <Setter Property="FontFamily" Value="{ThemeResource FoliaMonoFontFamily}"/>
+        <Setter Property="FontSize" Value="{ThemeResource FoliaUiFontSize}"/>
+        <Setter Property="Foreground" Value="{ThemeResource FoliaShellForegroundBrush}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="IsReadOnly" Value="True"/>
+        <Setter Property="IsSpellCheckEnabled" Value="False"/>
+        <Setter Property="IsTextPredictionEnabled" Value="False"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
     </Style>
     <Style x:Key="SettingsTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
         <Setter Property="MinWidth" Value="0"/>
@@ -137,10 +223,5 @@
         <Setter Property="Padding" Value="6,2"/><Setter Property="CornerRadius" Value="4"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="Background" Value="{ThemeResource FoliaShellLayerBrush}"/>
-    </Style>
-    <Style x:Key="SettingsThemeListStyle" TargetType="ListView">
-        <Setter Property="ScrollViewer.HorizontalScrollMode" Value="Disabled"/>
-        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
-        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
     </Style>
 </ResourceDictionary>
