@@ -113,7 +113,7 @@ struct ThemeLayout {
     float title_bar_height = 40.0f;
     float navigation_open_width = 280.0f;
     float scrollbar_width = 16.0f;
-    float status_bar_min_height = 32.0f;
+    float status_bar_min_height = 24.0f;
     float footnote_preview_width = 360.0f;
     float footnote_preview_spacing = 8.0f;
 };

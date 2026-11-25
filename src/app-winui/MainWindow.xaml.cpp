@@ -68,7 +68,7 @@ namespace winrt::Folia::implementation
         editorRenderer.SetMediaDisplaySettings(appSettings.media);
         themeCatalog->Refresh();
         ExtendsContentIntoTitleBar(true);
-        AppWindow().TitleBar().PreferredHeightOption(Microsoft::UI::Windowing::TitleBarHeightOption::Tall);
+        AppWindow().TitleBar().PreferredHeightOption(Microsoft::UI::Windowing::TitleBarHeightOption::Standard);
         SetTitleBar(TitleDragArea());
         RegisterCommandHandlers();
         InitializeTextInput();
@@ -77,10 +77,10 @@ namespace winrt::Folia::implementation
         RegisterWorkspaceHandlers();
         UpdateSourceModeUi();
         UpdateDocumentInfo();
-        if (!loadedSettings.diagnostic.empty()) SetStatus(loadedSettings.diagnostic);
-        else if (!themeCatalog->Diagnostics().empty()) SetStatus(themeCatalog->Diagnostics().front());
+        if (!loadedSettings.diagnostic.empty()) ShowError(loadedSettings.diagnostic);
+        else if (!themeCatalog->Diagnostics().empty()) ShowError(themeCatalog->Diagnostics().front());
         else if (!latexCommandCatalog->Diagnostics().empty())
-            SetStatus(latexCommandCatalog->Diagnostics().front());
+            ShowError(latexCommandCatalog->Diagnostics().front());
         if (!initialDocumentPath.empty()) OpenWorkspaceFile(std::filesystem::path(initialDocumentPath.c_str()), winrt::Folia::WorkspaceOpenMode::Keep);
     }
 
@@ -112,8 +112,10 @@ namespace winrt::Folia::implementation
         EditPasteButton().Text(Localize(L"Paste"));
         FindButton().Text(Localize(L"Find"));
         ReplaceButton().Text(Localize(L"Replace"));
-        tooltip(ExplorerPaneButton(), L"Files");
-        tooltip(OutlinePaneButton(), L"ToggleOutline");
+        tooltip(SidebarButton(), L"ToggleSidebar");
+        FilesTab().Text(Localize(L"Files"));
+        OutlineTab().Text(Localize(L"Outline"));
+        OutlineEmptyText().Text(Localize(L"NoOutline"));
 
         OpenButton().Text(Localize(L"Open"));
         tooltip(OpenButton(), L"OpenTooltip");
@@ -161,12 +163,11 @@ namespace winrt::Folia::implementation
         TocButton().Text(Localize(L"TableOfContents"));
         SettingsButton().Text(Localize(L"Settings"));
         tooltip(SettingsButton(), L"Settings");
-        OutlineHeadingText().Text(Localize(L"Outline"));
         CutMenuItem().Text(Localize(L"Cut"));
         CopyMenuItem().Text(Localize(L"Copy"));
         PasteMenuItem().Text(Localize(L"Paste"));
         SelectAllMenuItem().Text(Localize(L"SelectAll"));
-        tooltip(CancelOperationButton(), L"CancelOperation");
+        CancelOperationButton().Content(winrt::box_value(Localize(L"CancelOperation")));
         tooltip(EncodingButton(), L"SelectFileEncoding");
         tooltip(SourceModeButton(), L"SourceMode");
         FindQueryBox().PlaceholderText(Localize(L"Find"));
@@ -179,7 +180,6 @@ namespace winrt::Folia::implementation
         tooltip(FindNextButton(), L"NextMatch");
         tooltip(CloseFindButton(), L"Close");
         LatexSuggestionHint().Text(Localize(L"LatexSuggestionHint"));
-        SetStatus(Localize(L"Ready"));
     }
 
     winrt::hstring MainWindow::LocalizedDocumentName()
@@ -193,9 +193,6 @@ namespace winrt::Folia::implementation
         auto const displayName = LocalizedDocumentName();
         auto active = workspaceDocuments.Active();
         if (active->editor) workspaceDocuments.RefreshPath(active->id);
-        auto const detail = active->path.empty() ? displayName : winrt::hstring(active->path.c_str());
-        DocumentNameText().Text(displayName);
-        Microsoft::UI::Xaml::Controls::ToolTipService::SetToolTip(DocumentNameText(), winrt::box_value(detail));
         if (!settingsMode) Title(LocalizeFormat(L"WindowTitleDocument", { displayName }));
         if (!active->editor) { UpdateDocumentTab(active->id); return; }
         CharacterCountText().Text(LocalizeFormat(
@@ -235,7 +232,6 @@ namespace winrt::Folia::implementation
         editorRenderer.ResetDocumentCaches();
         UpdateSourceModeUi();
         UpdateDocumentInfo();
-        SetStatus(Localize(editorSession().IsSourceMode() ? L"SourceMode" : L"RenderedMode"));
         sidebarController.Refresh();
         textInputController.NotifyTextChanged();
         if (FindReplaceBar().Visibility() == Microsoft::UI::Xaml::Visibility::Visible)
@@ -386,8 +382,13 @@ namespace winrt::Folia::implementation
 
     void MainWindow::SetStatus(winrt::hstring const& text)
     {
-        lastCommand = text;
-        StatusText().Text(text);
+        DocumentLoadingText().Text(text);
+    }
+
+    void MainWindow::ShowError(winrt::hstring const& text)
+    {
+        ErrorInfoBar().Message(text);
+        ErrorInfoBar().IsOpen(true);
     }
 
     void MainWindow::SetOperationProgress(
@@ -395,12 +396,15 @@ namespace winrt::Folia::implementation
         std::optional<double> value,
         bool cancellable)
     {
-        OperationProgressBar().Visibility(active
-            ? Microsoft::UI::Xaml::Visibility::Visible
-            : Microsoft::UI::Xaml::Visibility::Collapsed);
-        OperationProgressBar().IsIndeterminate(active && !value.has_value());
-        if (value) OperationProgressBar().Value(
-            (std::clamp)(*value, 0.0, 1.0) * 100.0);
+        operationActive = active;
+        if (value) {
+            auto percent = static_cast<int>(std::lround(std::clamp(*value, 0.0, 1.0) * 100));
+            OperationRing().Value(percent);
+            OperationPercent().Text(winrt::to_hstring(percent) + L"%");
+        } else {
+            OperationPercent().Text(L"");
+            if (!active) OperationRing().Value(0);
+        }
         CancelOperationButton().Visibility(active && cancellable
             ? Microsoft::UI::Xaml::Visibility::Visible
             : Microsoft::UI::Xaml::Visibility::Collapsed);
@@ -441,7 +445,7 @@ namespace winrt::Folia::implementation
         }
         catch (winrt::hresult_error const& error)
         {
-            SetStatus(LocalizeFormat(L"ResizeFailed", { error.message() }));
+            ShowError(LocalizeFormat(L"ResizeFailed", { error.message() }));
         }
     }
 
@@ -469,11 +473,11 @@ namespace winrt::Folia::implementation
         }
         catch (winrt::hresult_error const& error)
         {
-            SetStatus(LocalizeFormat(L"RenderFailed", { error.message() }));
+            ShowError(LocalizeFormat(L"RenderFailed", { error.message() }));
         }
         catch (std::exception const& error)
         {
-            SetStatus(LocalizeFormat(L"RenderFailed", { winrt::to_hstring(error.what()) }));
+            ShowError(LocalizeFormat(L"RenderFailed", { winrt::to_hstring(error.what()) }));
         }
     }
 
@@ -513,13 +517,13 @@ namespace winrt::Folia::implementation
         auto titleBar = AppWindow().TitleBar();
         titleBar.BackgroundColor(ColorReference(colors.shell_bg));
         titleBar.ForegroundColor(ColorReference(colors.shell_fg));
-        titleBar.ButtonBackgroundColor(ColorReference(colors.shell_bg));
+        titleBar.ButtonBackgroundColor(ColorReference(colors.shell_layer_bg));
         titleBar.ButtonForegroundColor(ColorReference(colors.shell_fg));
         titleBar.ButtonHoverBackgroundColor(ColorReference(colors.shell_layer_bg));
         titleBar.ButtonHoverForegroundColor(ColorReference(colors.shell_fg));
         titleBar.ButtonPressedBackgroundColor(ColorReference(colors.shell_border));
         titleBar.ButtonPressedForegroundColor(ColorReference(colors.shell_fg));
-        titleBar.ButtonInactiveBackgroundColor(ColorReference(colors.shell_bg));
+        titleBar.ButtonInactiveBackgroundColor(ColorReference(colors.shell_layer_bg));
         titleBar.ButtonInactiveForegroundColor(ColorReference(colors.shell_muted_fg));
 
         UpdateWorkspaceLayout();
@@ -527,7 +531,6 @@ namespace winrt::Folia::implementation
         EditorScrollBarColumn().Width(Microsoft::UI::Xaml::GridLengthHelper::FromPixels(themeProfile.layout.scrollbar_width));
         scrollController.SetWidth(themeProfile.layout.scrollbar_width);
         StatusBar().MinHeight(themeProfile.layout.status_bar_min_height);
-        SourceModeButton().FontFamily(Font(themeProfile.typography.ui_monospace.family));
     }
 
     void MainWindow::UpdateTheme()
@@ -563,7 +566,7 @@ namespace winrt::Folia::implementation
             settingsView->SetSystemVariant(systemVariant);
             settingsView->SetNavigationWidth(themeProfile.layout.navigation_open_width);
         }
-        if (!loaded.diagnostic.empty()) SetStatus(loaded.diagnostic);
+        if (!loaded.diagnostic.empty()) ShowError(loaded.diagnostic);
         RenderEditorSurface();
     }
 

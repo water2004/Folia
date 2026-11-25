@@ -197,13 +197,13 @@ namespace winrt::Folia::implementation
         }
         catch (winrt::hresult_error const& error)
         {
-            SetStatus(LocalizeFormat(
+            ShowError(LocalizeFormat(
                 saveWithEncoding ? L"StatusSaveFailed" : L"StatusOpenFailed",
                 { error.message() }));
         }
         catch (std::exception const& error)
         {
-            SetStatus(LocalizeFormat(
+            ShowError(LocalizeFormat(
                 saveWithEncoding ? L"StatusSaveFailed" : L"StatusOpenFailed",
                 { winrt::to_hstring(error.what()) }));
         }

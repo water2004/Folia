@@ -14,7 +14,7 @@
     <Grid
         x:Name="Root"
         KeyboardAcceleratorPlacementMode="Hidden"
-        RowDefinitions="48,1,Auto,Auto,*,Auto">
+        RowDefinitions="Auto,Auto,Auto,*,Auto">
         <Grid.Resources>
           <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="workspace/WorkspaceChrome.xaml"/><ResourceDictionary Source="workspace/FolderExplorer.xaml"/></ResourceDictionary.MergedDictionaries>
@@ -59,9 +59,10 @@
             </Style>
           </ResourceDictionary>
         </Grid.Resources>
-        <TabView x:Name="DocumentTabs" Grid.RowSpan="6" VerticalAlignment="Stretch"
+        <Grid x:Name="TopChrome" VerticalAlignment="Top" Canvas.ZIndex="4" Background="{ThemeResource FoliaShellLayerBrush}" RowDefinitions="32,1">
+        <TabView x:Name="DocumentTabs"
                  TabWidthMode="SizeToContent" CanDragTabs="True" CanReorderTabs="True" AllowDrop="True"
-                 Padding="0,6,0,6" BorderThickness="0" Background="Transparent">
+                 Padding="0" BorderThickness="0" Background="Transparent">
             <TabView.TabItemTemplate>
                 <DataTemplate>
                     <TabViewItem Tag="{Binding}" DataContextChanged="DocumentTabPrepared" Loaded="DocumentTabLoaded"/>
@@ -69,10 +70,10 @@
             </TabView.TabItemTemplate>
             <TabView.Resources>
                 <SolidColorBrush x:Key="TabViewBorderBrush" Color="Transparent"/>
-                <Thickness x:Key="TabViewItemAddButtonContainerPadding">4,12,4,12</Thickness>
+                <Thickness x:Key="TabViewItemAddButtonContainerPadding">3,2,3,2</Thickness>
             </TabView.Resources>
             <TabView.TabStripHeader>
-                <Button x:Name="MainMenuButton" Height="32" Margin="8,8,12,8" Padding="10,0" Style="{StaticResource SubtleButtonStyle}">
+                <Button x:Name="MainMenuButton" Height="28" MinHeight="0" Margin="5,2,6,2" Padding="8,0" Style="{StaticResource SubtleButtonStyle}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <TextBlock x:Name="MainMenuLabel" Text="Folia" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         <FontIcon Glyph="&#xE70D;" FontSize="10"/>
@@ -118,18 +119,18 @@
                 </Button>
             </TabView.TabStripHeader>
             <TabView.TabStripFooter>
-                <Grid Height="48" MinWidth="124" ColumnDefinitions="*,Auto,Auto,Auto">
-                    <Border x:Name="TitleDragArea" Background="Transparent" MinWidth="48"/>
-                    <ToggleButton x:Name="ExplorerPaneButton" Grid.Column="1" Width="28" Height="28" Margin="0,0,2,0" Style="{StaticResource WorkspacePaneToggleStyle}" VerticalAlignment="Center"/>
-                    <ToggleButton x:Name="OutlinePaneButton" Grid.Column="2" Width="28" Height="28" Margin="0,0,8,0" Style="{StaticResource WorkspacePaneToggleStyle}" VerticalAlignment="Center"/>
-                    <Border x:Name="CaptionInset" Grid.Column="3" Width="138"/>
+                <Grid Height="32" ColumnDefinitions="*,Auto">
+                    <Border x:Name="TitleDragArea" Background="Transparent" MinWidth="36"/>
+                    <Border x:Name="CaptionInset" Grid.Column="1" Width="138"/>
                 </Grid>
             </TabView.TabStripFooter>
         </TabView>
         <Border x:Name="ShellDivider" Grid.Row="1" Height="1" VerticalAlignment="Bottom" Background="{ThemeResource FoliaShellBorderBrush}" IsHitTestVisible="False"/>
+        </Grid>
+        <StackPanel Grid.Row="1">
+        <InfoBar x:Name="ErrorInfoBar" Severity="Error" IsClosable="True"/>
         <InfoBar
             x:Name="ExternalChangeInfoBar"
-            Grid.Row="2"
             IsClosable="False"
             IsOpen="False"
             Severity="Warning"
@@ -141,10 +142,11 @@
                 </StackPanel>
             </InfoBar.Content>
         </InfoBar>
+        </StackPanel>
 
         <Border
             x:Name="FindReplaceBar"
-            Grid.Row="3"
+            Grid.Row="2"
             Padding="10,8"
             Background="{ThemeResource FoliaShellLayerBrush}"
             BorderBrush="{ThemeResource FoliaShellBorderBrush}"
@@ -202,10 +204,15 @@
             </Grid>
         </Border>
 
-        <Grid x:Name="WorkspaceHost" Grid.Row="4">
+        <Grid x:Name="WorkspaceHost" Grid.Row="3">
             <SplitView x:Name="DocumentWorkspace" DisplayMode="Inline" PanePlacement="Left" OpenPaneLength="248" IsPaneOpen="False" PaneBackground="{ThemeResource FoliaShellLayerBrush}">
                 <SplitView.Pane>
-                <Grid x:Name="ExplorerPane" Background="{ThemeResource FoliaShellLayerBrush}" RowDefinitions="Auto,*" BorderBrush="{ThemeResource FoliaShellBorderBrush}" BorderThickness="0,0,1,0">
+                <Grid RowDefinitions="Auto,*" BorderBrush="{ThemeResource FoliaShellBorderBrush}" BorderThickness="0,0,1,0">
+                    <SelectorBar x:Name="SidebarTabs" Margin="4,0" HorizontalAlignment="Left">
+                        <SelectorBarItem x:Name="FilesTab" Text="Files" IsSelected="True"/>
+                        <SelectorBarItem x:Name="OutlineTab" Text="Outline"/>
+                    </SelectorBar>
+                <Grid x:Name="ExplorerPane" Grid.Row="1" RowDefinitions="Auto,*">
                     <StackPanel x:Name="FileOperationPanel" Grid.Row="0" Margin="16,8,12,8" Spacing="4" Visibility="Collapsed">
                         <TextBlock x:Name="FileOperationText" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
                         <ProgressBar x:Name="FileOperationProgress" Height="2" MinHeight="2" IsIndeterminate="True"/>
@@ -217,34 +224,15 @@
                     </StackPanel>
                     <TreeView x:Name="FileTree" Grid.Row="1" Margin="6,6,6,8" Style="{StaticResource ExplorerTreeStyle}" Visibility="Collapsed"/>
                 </Grid>
+                <Grid x:Name="OutlinePaneContent" Grid.Row="1" Padding="6,2,6,8" Visibility="Collapsed">
+                    <ListView x:Name="OutlineList" Background="Transparent" SelectionMode="Single"
+                              ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollMode="Enabled"/>
+                    <TextBlock x:Name="OutlineEmptyText" Margin="12,12" FontSize="13"
+                               Foreground="{ThemeResource FoliaShellMutedForegroundBrush}" TextWrapping="Wrap" Visibility="Collapsed"/>
+                </Grid>
+                </Grid>
                 </SplitView.Pane>
                 <SplitView.Content>
-                  <SplitView x:Name="OutlineSplitView" DisplayMode="Inline" PanePlacement="Right" OpenPaneLength="252" IsPaneOpen="False" PaneBackground="{ThemeResource FoliaShellLayerBrush}">
-                   <SplitView.Pane>
-                <Grid
-                        x:Name="OutlinePaneContent"
-                        Padding="8,0,8,8"
-                        Background="{ThemeResource FoliaShellLayerBrush}"
-                        BorderBrush="{ThemeResource FoliaShellBorderBrush}" BorderThickness="1,0,0,0"
-                        RowDefinitions="Auto,*">
-                        <Grid Height="42" ColumnDefinitions="*">
-                          <TextBlock
-                            x:Name="OutlineHeadingText"
-                            Margin="8,0,8,0" VerticalAlignment="Center"
-                            FontWeight="SemiBold" FontSize="13"
-                            Text="Outline"/>
-
-                        </Grid>
-                        <ListView
-                            x:Name="OutlineList"
-                            Grid.Row="1"
-                            Background="Transparent"
-                            ScrollViewer.VerticalScrollBarVisibility="Auto"
-                            ScrollViewer.VerticalScrollMode="Enabled"
-                            SelectionMode="Single"/>
-                </Grid>
-                   </SplitView.Pane>
-                   <SplitView.Content>
                 <Grid>
                 <Grid x:Name="EditorPane">
 
@@ -374,10 +362,20 @@
                     </Grid>
                 </Border>
             </Canvas>
-                  <Border x:Name="DocumentLoadingOverlay" Canvas.ZIndex="30" Visibility="Collapsed" Background="{ThemeResource FoliaShellBackgroundBrush}">
-                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
-                        <ProgressRing IsActive="True" Width="24" Height="24"/>
-                        <TextBlock x:Name="DocumentLoadingText" Text="{Binding Text, ElementName=StatusText}" TextWrapping="Wrap" TextAlignment="Center" Margin="24,0"/>
+                  <Grid x:Name="DocumentLoadingOverlay" Canvas.ZIndex="30" Visibility="Collapsed"
+                        Background="{ThemeResource FoliaShellBackgroundBrush}"/>
+                  <Border x:Name="OperationPanel" Canvas.ZIndex="31" Visibility="Collapsed" HorizontalAlignment="Center"
+                          VerticalAlignment="Center" Padding="18,12" CornerRadius="8" Background="{ThemeResource FoliaShellBackgroundBrush}">
+                    <StackPanel HorizontalAlignment="Center" Spacing="8">
+                        <Grid Width="52" Height="52" HorizontalAlignment="Center">
+                            <ProgressRing x:Name="OperationRing" Width="52" Height="52" IsIndeterminate="False" IsActive="False"
+                                          Minimum="0" Maximum="100" Foreground="{ThemeResource FoliaShellAccentBrush}"
+                                          Background="{ThemeResource FoliaShellBorderBrush}"/>
+                            <TextBlock x:Name="OperationPercent" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <TextBlock x:Name="DocumentLoadingText" FontSize="13" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <Button x:Name="CancelOperationButton" Style="{StaticResource SubtleButtonStyle}" HorizontalAlignment="Center"
+                                FontSize="12" MinHeight="24" Padding="8,2" Visibility="Collapsed"/>
                     </StackPanel>
                   </Border>
                 </Grid>
@@ -400,107 +398,31 @@
                 </Grid>
                 </Grid>
 
-                   </SplitView.Content>
-                  </SplitView>
                 </SplitView.Content>
             </SplitView>
             <Grid x:Name="SettingsViewHost" Visibility="Collapsed"/>
         </Grid>
 
-        <Grid
-            x:Name="StatusBar"
-            Grid.Row="5"
-            MinHeight="32"
-            Padding="10,3,8,3"
-            Background="{ThemeResource FoliaShellLayerBrush}"
-            BorderBrush="{ThemeResource FoliaShellBorderBrush}"
-            BorderThickness="0,1,0,0"
-            ColumnDefinitions="*,Auto,Auto,Auto,Auto">
-            <TextBlock
-                x:Name="StatusText"
-                VerticalAlignment="Center"
-                Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"
-                Text="Ready"
-                TextTrimming="CharacterEllipsis"/>
-            <StackPanel x:Name="CompletionStatusPanel" Grid.Column="1" Orientation="Horizontal"
-                        Spacing="6" Margin="12,0" VerticalAlignment="Center" Visibility="Collapsed">
-                <ProgressRing x:Name="CompletionProgressRing" Style="{StaticResource FoliaCompletionProgressStyle}"
-                              IsActive="False" Visibility="Collapsed"/>
-                <TextBlock x:Name="CompletionStatusText" MaxWidth="200" TextTrimming="CharacterEllipsis"
+        <Grid x:Name="StatusBar" Grid.Row="4" Canvas.ZIndex="4" VerticalAlignment="Bottom" MinHeight="24" Padding="5,0,7,0"
+              Background="{ThemeResource FoliaShellLayerBrush}" BorderBrush="{ThemeResource FoliaShellBorderBrush}"
+              BorderThickness="0,1,0,0" ColumnDefinitions="Auto,*,Auto">
+            <StackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+                <ToggleButton x:Name="SidebarButton" Style="{StaticResource WorkspacePaneToggleStyle}"
+                              IsChecked="{Binding IsPaneOpen, ElementName=DocumentWorkspace, Mode=TwoWay}"/>
+                <ToggleButton x:Name="SourceModeButton" Style="{StaticResource WorkspacePaneToggleStyle}"/>
+            </StackPanel>
+            <StackPanel x:Name="CompletionStatusPanel" Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal"
+                        Spacing="4" Margin="6,0" VerticalAlignment="Center" Visibility="Collapsed">
+                <ProgressRing x:Name="CompletionProgressRing" Style="{StaticResource FoliaCompletionProgressStyle}" IsActive="False" Visibility="Collapsed"/>
+                <TextBlock x:Name="CompletionStatusText" FontSize="12" MaxWidth="200" TextTrimming="CharacterEllipsis"
                            VerticalAlignment="Center" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
             </StackPanel>
-            <ProgressBar
-                x:Name="OperationProgressBar"
-                Grid.Column="2"
-                Width="160"
-                Margin="12,0"
-                VerticalAlignment="Center"
-                Foreground="{ThemeResource FoliaShellAccentBrush}"
-                IsIndeterminate="True"
-                IsTabStop="False"
-                Maximum="100"
-                Minimum="0"
-                Visibility="Collapsed"/>
-            <Button
-                x:Name="CancelOperationButton"
-                Grid.Column="3"
-                Width="16"
-                Height="16"
-                MinWidth="16"
-                MinHeight="16"
-                Margin="0,0,8,0"
-                Padding="0"
-                VerticalAlignment="Center"
-                Background="Black"
-                BorderThickness="0"
-                CornerRadius="8"
-                HorizontalContentAlignment="Center"
-                IsTabStop="False"
-                ToolTipService.ToolTip="Cancel operation"
-                VerticalContentAlignment="Center"
-                Visibility="Collapsed">
-                <FontIcon
-                    FontFamily="Segoe Fluent Icons"
-                    FontSize="8"
-                    Foreground="White"
-                    Glyph="&#xE711;"/>
-            </Button>
-            <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="14">
-                <TextBlock
-                    x:Name="DocumentNameText"
-                    MaxWidth="320"
-                    VerticalAlignment="Center"
-                    Text="Untitled.md"
-                    TextTrimming="CharacterEllipsis"/>
-                <TextBlock
-                    x:Name="CharacterCountText"
-                    VerticalAlignment="Center"
-                    Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"
-                    Text="0 characters"/>
-                <TextBlock
-                    x:Name="RevisionText"
-                    VerticalAlignment="Center"
-                    Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"
-                    Text="Revision 0"/>
-                <TextBlock x:Name="ImageSizeText" VerticalAlignment="Center"
-                           Foreground="{ThemeResource FoliaShellMutedForegroundBrush}" Visibility="Collapsed"/>
-                <Button
-                    x:Name="EncodingButton"
-                    MinHeight="24"
-                    Padding="6,0"
-                    VerticalAlignment="Center"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Content="UTF-8"
-                    Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"
-                    ToolTipService.ToolTip="Select file encoding"/>
-                <ToggleButton
-                    x:Name="SourceModeButton"
-                    MinWidth="36"
-                    Padding="8,2"
-                    FontFamily="{ThemeResource FoliaMonoFontFamily}"
-                    Content="&lt;/&gt;"
-                    ToolTipService.ToolTip="Source mode"/>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <TextBlock x:Name="CharacterCountText" FontSize="12" VerticalAlignment="Center" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
+                <TextBlock x:Name="RevisionText" FontSize="12" VerticalAlignment="Center" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
+                <TextBlock x:Name="ImageSizeText" FontSize="12" VerticalAlignment="Center" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}" Visibility="Collapsed"/>
+                <Button x:Name="EncodingButton" FontSize="12" MinHeight="22" Height="22" Padding="5,0" Style="{StaticResource SubtleButtonStyle}"
+                        Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
             </StackPanel>
         </Grid>
     </Grid>

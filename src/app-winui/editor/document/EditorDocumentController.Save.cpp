@@ -68,9 +68,9 @@ namespace winrt::Folia {
             }
             co_return current();
         } catch (winrt::hresult_error const& error) {
-            if (current() && state->setStatus) state->setStatus(LocalizeFormat(L"StatusSaveFailed", {error.message()}));
+            if (current() && state->showError) state->showError(LocalizeFormat(L"StatusSaveFailed", {error.message()}));
         } catch (std::exception const& error) {
-            if (current() && state->setStatus) state->setStatus(LocalizeFormat(L"StatusSaveFailed", {winrt::to_hstring(error.what())}));
+            if (current() && state->showError) state->showError(LocalizeFormat(L"StatusSaveFailed", {winrt::to_hstring(error.what())}));
         }
         co_return false;
     }
@@ -127,9 +127,9 @@ namespace winrt::Folia {
             if (state->setStatus) state->setStatus(LocalizeFormat(L"StatusSavedFile", {file.Name()}));
             co_return true;
         } catch (winrt::hresult_error const& error) {
-            if (current() && state->setStatus) state->setStatus(LocalizeFormat(L"StatusSaveFailed", {error.message()}));
+            if (current() && state->showError) state->showError(LocalizeFormat(L"StatusSaveFailed", {error.message()}));
         } catch (std::exception const& error) {
-            if (current() && state->setStatus) state->setStatus(LocalizeFormat(L"StatusSaveFailed", {winrt::to_hstring(error.what())}));
+            if (current() && state->showError) state->showError(LocalizeFormat(L"StatusSaveFailed", {winrt::to_hstring(error.what())}));
         }
         co_return false;
     }

@@ -123,11 +123,11 @@ namespace winrt::Folia
         }
         BeginPendingReload(state, generation);
         } catch (winrt::hresult_error const& error) {
-            if (dispatcher && dispatcher.HasThreadAccess() && Active(state, generation) && state->setStatus)
-                state->setStatus(LocalizeFormat(L"StatusReloadFailed", {error.message()}));
+            if (dispatcher && dispatcher.HasThreadAccess() && Active(state, generation) && state->showError)
+                state->showError(LocalizeFormat(L"StatusReloadFailed", {error.message()}));
         } catch (std::exception const& error) {
-            if (dispatcher && dispatcher.HasThreadAccess() && Active(state, generation) && state->setStatus)
-                state->setStatus(LocalizeFormat(L"StatusReloadFailed", {winrt::to_hstring(error.what())}));
+            if (dispatcher && dispatcher.HasThreadAccess() && Active(state, generation) && state->showError)
+                state->showError(LocalizeFormat(L"StatusReloadFailed", {winrt::to_hstring(error.what())}));
         }
     }
 
@@ -165,7 +165,7 @@ namespace winrt::Folia
             {
                 state->reloadState.DiscardPending();
                 if (state->setProgress) state->setProgress(false, std::nullopt, false);
-                if (state->setStatus) state->setStatus(LocalizeFormat(
+                if (state->showError) state->showError(LocalizeFormat(
                     L"StatusReloadFailed", { error.message() }));
             }
         }
@@ -175,7 +175,7 @@ namespace winrt::Folia
             {
                 state->reloadState.DiscardPending();
                 if (state->setProgress) state->setProgress(false, std::nullopt, false);
-                if (state->setStatus) state->setStatus(LocalizeFormat(
+                if (state->showError) state->showError(LocalizeFormat(
                     L"StatusReloadFailed", { winrt::to_hstring(error.what()) }));
             }
         }

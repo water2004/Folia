@@ -95,7 +95,6 @@ namespace winrt::Folia::implementation {
         tab.Tag(found->second->item);
         if (!tab.Header().try_as<StackPanel>()) {
             tab.Style(Root().Resources().Lookup(winrt::box_value(L"WorkspaceTabStyle")).as<Style>());
-            tab.BorderBrush(Root().Resources().Lookup(winrt::box_value(L"FoliaShellAccentBrush")).as<Media::Brush>());
             StackPanel header;
             header.Orientation(Orientation::Horizontal);
             header.Spacing(8);
@@ -146,8 +145,8 @@ namespace winrt::Folia::implementation {
                 workspaceDocuments.Remove(id);
                 RefreshDocumentTabs();
             }
-        } catch (winrt::hresult_error const& error) { SetStatus(LocalizeFormat(L"StatusSaveFailed", {error.message()})); }
-        catch (std::exception const& error) { SetStatus(LocalizeFormat(L"StatusSaveFailed", {winrt::to_hstring(error.what())})); }
+        } catch (winrt::hresult_error const& error) { ShowError(LocalizeFormat(L"StatusSaveFailed", {error.message()})); }
+        catch (std::exception const& error) { ShowError(LocalizeFormat(L"StatusSaveFailed", {winrt::to_hstring(error.what())})); }
         closingDocument = false;
         if (!windowClosed) UpdateLoadingState();
     }
@@ -155,27 +154,14 @@ namespace winrt::Folia::implementation {
     void MainWindow::RegisterWorkspaceHandlers() {
         using winrt::Folia::MakeWorkspaceIcon;
         using winrt::Folia::WorkspaceIcon;
-        ExplorerPaneButton().Content(MakeWorkspaceIcon(WorkspaceIcon::PanelLeft));
-        OutlinePaneButton().Content(MakeWorkspaceIcon(WorkspaceIcon::PanelRight));
-        Automation::AutomationProperties::SetName(ExplorerPaneButton(), Localize(L"Files"));
-        Automation::AutomationProperties::SetName(OutlinePaneButton(), Localize(L"ToggleOutline"));
-        ExplorerPaneButton().Click(WindowEvent([this](auto const&, auto const&) {
-            explorerOpen = ExplorerPaneButton().IsChecked().GetBoolean();
-            UpdateWorkspaceLayout();
+        SidebarButton().Content(MakeWorkspaceIcon(WorkspaceIcon::PanelLeft));
+        SourceModeButton().Content(MakeWorkspaceIcon(WorkspaceIcon::Source));
+        Automation::AutomationProperties::SetName(SidebarButton(), Localize(L"ToggleSidebar"));
+        Automation::AutomationProperties::SetName(SourceModeButton(), Localize(L"SourceMode"));
+        OutlineList().Items().VectorChanged(WindowEvent([this](auto const&, auto const&) {
+            OutlineEmptyText().Visibility(HasActiveEditor() && OutlineList().Items().Size() ? Visibility::Collapsed : Visibility::Visible);
         }));
-        OutlinePaneButton().Click(WindowEvent([this](auto const&, auto const&) {
-            outlineOpen = OutlinePaneButton().IsChecked().GetBoolean();
-            UpdateWorkspaceLayout();
-        }));
-        DocumentWorkspace().PaneClosing(WindowEvent([this](auto const&, auto const&) {
-            explorerOpen = false;
-            ExplorerPaneButton().IsChecked(explorerOpen);
-        }));
-        OutlineSplitView().PaneClosing(WindowEvent([this](auto const&, auto const&) {
-            if (!HasActiveEditor()) return;
-            outlineOpen = false;
-            OutlinePaneButton().IsChecked(outlineOpen);
-        }));
+        SidebarTabs().SelectionChanged(WindowEvent([this](auto const&, auto const&) { UpdateWorkspaceLayout(); }));
         DocumentTabs().TabItemsSource(tabSource);
         DocumentTabs().SelectionChanged(WindowEvent([this](auto const&, auto const&) {
             if (updatingTabs || windowClosed) return;
@@ -193,7 +179,7 @@ namespace winrt::Folia::implementation {
         folderExplorer.Attach(FileTree(), [weak = get_weak()](auto path, bool keep) {
             if (auto window = weak.get()) window->OpenWorkspaceFile(std::move(path), keep ? winrt::Folia::WorkspaceOpenMode::Keep : winrt::Folia::WorkspaceOpenMode::Preview);
         }, [weak = get_weak()](auto error) {
-            if (auto window = weak.get()) window->SetStatus(LocalizeFormat(L"StatusFolderFailed", {error}));
+            if (auto window = weak.get()) window->ShowError(LocalizeFormat(L"StatusFolderFailed", {error}));
         });
         folderExplorer.SetOperationHandler([weak = get_weak()](folia::platform::WorkspaceFileAction action) -> Windows::Foundation::IAsyncOperation<winrt::hstring> {
             auto window = weak.get();
@@ -234,11 +220,10 @@ namespace winrt::Folia::implementation {
         auto width = WorkspaceHost().ActualWidth();
         DocumentWorkspace().OpenPaneLength(248);
         DocumentWorkspace().DisplayMode(width > 0 && width < 760 ? SplitViewDisplayMode::Overlay : SplitViewDisplayMode::Inline);
-        OutlineSplitView().DisplayMode(width > 0 && width < 1040 ? SplitViewDisplayMode::Overlay : SplitViewDisplayMode::Inline);
-        DocumentWorkspace().IsPaneOpen(explorerOpen);
-        OutlineSplitView().IsPaneOpen(outlineOpen && HasActiveEditor());
-        ExplorerPaneButton().IsChecked(explorerOpen);
-        OutlinePaneButton().IsEnabled(HasActiveEditor());
-        OutlinePaneButton().IsChecked(outlineOpen && HasActiveEditor());
+        const bool outline = SidebarTabs().SelectedItem() == OutlineTab();
+        ExplorerPane().Visibility(outline ? Visibility::Collapsed : Visibility::Visible);
+        OutlinePaneContent().Visibility(outline ? Visibility::Visible : Visibility::Collapsed);
+        OutlineList().Visibility(HasActiveEditor() ? Visibility::Visible : Visibility::Collapsed);
+        OutlineEmptyText().Visibility(HasActiveEditor() && OutlineList().Items().Size() ? Visibility::Collapsed : Visibility::Visible);
     }
 }

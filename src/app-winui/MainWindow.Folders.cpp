@@ -17,7 +17,7 @@ namespace winrt::Folia::implementation {
             winrt::check_hresult(picker.as<IInitializeWithWindow>()->Initialize(WindowHandle()));
             if (auto file = co_await picker.PickSingleFileAsync())
                 OpenWorkspaceFile(std::filesystem::path(file.Path().c_str()), winrt::Folia::WorkspaceOpenMode::Keep);
-        } catch (winrt::hresult_error const& error) { SetStatus(LocalizeFormat(L"StatusOpenFailed", {error.message()})); }
+        } catch (winrt::hresult_error const& error) { ShowError(LocalizeFormat(L"StatusOpenFailed", {error.message()})); }
     }
 
     winrt::fire_and_forget MainWindow::PickWorkspaceFolder() {
@@ -28,8 +28,8 @@ namespace winrt::Folia::implementation {
             if (auto folder = folderExplorer.RootPath(); !folder.empty()) picker.SuggestedFolder(folder.native());
             if (auto folder = co_await picker.PickSingleFolderAsync())
                 OpenWorkspaceFolder(std::filesystem::path(folder.Path().c_str()));
-        } catch (winrt::hresult_error const& error) { SetStatus(LocalizeFormat(L"StatusFolderFailed", {error.message()})); }
-        catch (std::exception const& error) { SetStatus(LocalizeFormat(L"StatusFolderFailed", {winrt::to_hstring(error.what())})); }
+        } catch (winrt::hresult_error const& error) { ShowError(LocalizeFormat(L"StatusFolderFailed", {error.message()})); }
+        catch (std::exception const& error) { ShowError(LocalizeFormat(L"StatusFolderFailed", {winrt::to_hstring(error.what())})); }
     }
 
     winrt::fire_and_forget MainWindow::OpenWorkspaceFolder(std::filesystem::path path) {
@@ -45,14 +45,14 @@ namespace winrt::Folia::implementation {
             recentWorkspace.Remember(RecentWorkspaceKind::Folder, folderExplorer.RootPath());
             FileTree().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
             ExplorerEmptyState().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
-            explorerOpen = true;
-            UpdateWorkspaceLayout();
+            SidebarTabs().SelectedItem(FilesTab());
+            DocumentWorkspace().IsPaneOpen(true);
         } catch (winrt::hresult_error const& error) {
             if (!current()) co_return;
             recentWorkspace.ForgetMissing(RecentWorkspaceKind::Folder, path, error.code());
-            SetStatus(LocalizeFormat(L"StatusFolderFailed", {error.message()}));
+            ShowError(LocalizeFormat(L"StatusFolderFailed", {error.message()}));
         } catch (std::exception const& error) {
-            if (current()) SetStatus(LocalizeFormat(L"StatusFolderFailed", {winrt::to_hstring(error.what())}));
+            if (current()) ShowError(LocalizeFormat(L"StatusFolderFailed", {winrt::to_hstring(error.what())}));
         }
     }
 

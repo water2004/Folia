@@ -39,6 +39,7 @@ namespace winrt::Folia
             Render render;
             WindowHandle windowHandle;
             SetExternalChange setExternalChange;
+            SetStatus showError{};
         };
         void Attach(EditorSession& session, Presentation presentation);
         void RebindPresentation(Presentation presentation);

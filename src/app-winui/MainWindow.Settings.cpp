@@ -28,7 +28,7 @@ namespace winrt::Folia::implementation
     {
         if (auto saveError = winrt::Folia::SaveAppSettings(settings))
         {
-            SetStatus(*saveError);
+            ShowError(*saveError);
             return saveError;
         }
         auto themeChanged = appSettings.themeId != settings.themeId;

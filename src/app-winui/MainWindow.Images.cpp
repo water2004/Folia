@@ -74,7 +74,6 @@ namespace winrt::Folia::implementation {
             }
             recentWorkspace.Remember(RecentWorkspaceKind::File, path);
             ImagePreviewMessage().Text(L"");
-            SetStatus(LocalizeFormat(L"StatusOpenedFile", {winrt::hstring(path.filename().c_str())}));
         } catch (winrt::hresult_canceled const&) {
             co_return;
         } catch (winrt::hresult_error const& error) {

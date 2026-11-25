@@ -38,6 +38,7 @@ namespace winrt::Folia
         state_->textInput = &value.textInput;
         state_->executeCommand = std::move(value.executeCommand);
         state_->setStatus = std::move(value.setStatus);
+        state_->showError = value.showError ? std::move(value.showError) : state_->setStatus;
         state_->setProgress = std::move(value.setProgress);
         state_->documentChanged = std::move(value.documentChanged);
         state_->render = std::move(value.render);
@@ -75,6 +76,7 @@ namespace winrt::Folia
         state_->textInput = nullptr;
         state_->executeCommand = {};
         state_->setStatus = {};
+        state_->showError = {};
         state_->setProgress = {};
         state_->documentChanged = {};
         state_->render = {};
@@ -225,13 +227,13 @@ namespace winrt::Folia
         catch (winrt::hresult_error const& error) {
             if (Active(state, generation)) {
                 if (state->setProgress) state->setProgress(false, std::nullopt, false);
-                if (state->setStatus) state->setStatus(LocalizeFormat(L"StatusOpenFailed", {error.message()}));
+                if (state->showError) state->showError(LocalizeFormat(L"StatusOpenFailed", {error.message()}));
             }
         }
         catch (std::exception const& error) {
             if (Active(state, generation)) {
                 if (state->setProgress) state->setProgress(false, std::nullopt, false);
-                if (state->setStatus) state->setStatus(LocalizeFormat(L"StatusOpenFailed", {winrt::to_hstring(error.what())}));
+                if (state->showError) state->showError(LocalizeFormat(L"StatusOpenFailed", {winrt::to_hstring(error.what())}));
             }
         }
         co_return Active(state, generation) && state->documentSerial != identity;
@@ -262,7 +264,7 @@ namespace winrt::Folia
             if (Active(state, generation))
             {
                 if (state->setProgress) state->setProgress(false, std::nullopt, false);
-                if (state->setStatus) state->setStatus(LocalizeFormat(L"StatusOpenFailed", { error.message() }));
+                if (state->showError) state->showError(LocalizeFormat(L"StatusOpenFailed", { error.message() }));
             }
         }
         catch (std::exception const& error)
@@ -270,7 +272,7 @@ namespace winrt::Folia
             if (Active(state, generation))
             {
                 if (state->setProgress) state->setProgress(false, std::nullopt, false);
-                if (state->setStatus) state->setStatus(LocalizeFormat(
+                if (state->showError) state->showError(LocalizeFormat(
                     L"StatusOpenFailed", { winrt::to_hstring(error.what()) }));
             }
         }
@@ -295,7 +297,7 @@ namespace winrt::Folia
             if (Active(state, generation))
             {
                 if (state->setProgress) state->setProgress(false, std::nullopt, false);
-                if (state->setStatus) state->setStatus(LocalizeFormat(L"StatusOpenFailed", { error.message() }));
+                if (state->showError) state->showError(LocalizeFormat(L"StatusOpenFailed", { error.message() }));
             }
         }
         catch (std::exception const& error)
@@ -303,7 +305,7 @@ namespace winrt::Folia
             if (Active(state, generation))
             {
                 if (state->setProgress) state->setProgress(false, std::nullopt, false);
-                if (state->setStatus) state->setStatus(LocalizeFormat(
+                if (state->showError) state->showError(LocalizeFormat(
                     L"StatusOpenFailed", { winrt::to_hstring(error.what()) }));
             }
         }
@@ -330,7 +332,7 @@ namespace winrt::Folia
             if (Active(state, generation))
             {
                 if (state->setProgress) state->setProgress(false, std::nullopt, false);
-                if (state->setStatus) state->setStatus(LocalizeFormat(L"StatusOpenFailed", { error.message() }));
+                if (state->showError) state->showError(LocalizeFormat(L"StatusOpenFailed", { error.message() }));
             }
         }
         catch (std::exception const& error)
@@ -338,7 +340,7 @@ namespace winrt::Folia
             if (Active(state, generation))
             {
                 if (state->setProgress) state->setProgress(false, std::nullopt, false);
-                if (state->setStatus) state->setStatus(LocalizeFormat(
+                if (state->showError) state->showError(LocalizeFormat(
                     L"StatusOpenFailed", { winrt::to_hstring(error.what()) }));
             }
         }
@@ -632,8 +634,8 @@ namespace winrt::Folia
         }
         catch (winrt::hresult_error const& error)
         {
-            if (Active(state, generation) && state->setStatus)
-                state->setStatus(LocalizeFormat(L"StatusImageInsertFailed", { error.message() }));
+            if (Active(state, generation) && state->showError)
+                state->showError(LocalizeFormat(L"StatusImageInsertFailed", { error.message() }));
         }
     }
 
@@ -666,8 +668,8 @@ namespace winrt::Folia
         }
         catch (winrt::hresult_error const& error)
         {
-            if (Active(state, generation) && state->setStatus)
-                state->setStatus(LocalizeFormat(L"StatusOpenLinkFailed", { error.message() }));
+            if (Active(state, generation) && state->showError)
+                state->showError(LocalizeFormat(L"StatusOpenLinkFailed", { error.message() }));
         }
     }
 

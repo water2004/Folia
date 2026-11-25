@@ -59,7 +59,8 @@ namespace winrt::Folia::implementation {
                     window->ReloadExternalButton().Visibility(deleted ? Visibility::Collapsed : Visibility::Visible);
                     window->ExternalChangeInfoBar().IsOpen(visible);
                 }
-            }};
+            },
+            [active](auto const& message) { if (auto window = active()) window->ShowError(message); }};
         auto& editor = *document->editor;
         if (editor.controllerAttached) editor.controller.RebindPresentation(std::move(presentation));
         else editor.controller.Attach(editor.session, std::move(presentation));
@@ -176,9 +177,9 @@ namespace winrt::Folia::implementation {
             }
         } catch (winrt::hresult_error const& error) {
             recentWorkspace.ForgetMissing(RecentWorkspaceKind::File, path, error.code());
-            SetStatus(LocalizeFormat(L"StatusOpenFailed", {error.message()}));
+            ShowError(LocalizeFormat(L"StatusOpenFailed", {error.message()}));
         }
-        catch (std::exception const& error) { SetStatus(LocalizeFormat(L"StatusOpenFailed", {winrt::to_hstring(error.what())})); }
+        catch (std::exception const& error) { ShowError(LocalizeFormat(L"StatusOpenFailed", {winrt::to_hstring(error.what())})); }
     }
 
     winrt::fire_and_forget MainWindow::LoadWorkspaceDocument(std::shared_ptr<winrt::Folia::WorkspaceDocument> document) {
@@ -187,6 +188,7 @@ namespace winrt::Folia::implementation {
         auto lifetime = get_strong();
         const auto ticket = ++editor.openSerial;
         editor.opening = true;
+        DocumentLoadingText().Text(Localize(L"PreparingDocument"));
         UpdateLoadingState();
         auto current = [&] { return IsActiveDocument(document->id) && workspaceDocuments.Find(document->id) == document && ticket == editor.openSerial; };
         try {
@@ -200,10 +202,10 @@ namespace winrt::Folia::implementation {
         } catch (winrt::hresult_error const& error) {
             if (current()) {
                 recentWorkspace.ForgetMissing(RecentWorkspaceKind::File, document->path, error.code());
-                SetStatus(LocalizeFormat(L"StatusOpenFailed", {error.message()}));
+                ShowError(LocalizeFormat(L"StatusOpenFailed", {error.message()}));
             }
         }
-        catch (std::exception const& error) { if (current()) SetStatus(LocalizeFormat(L"StatusOpenFailed", {winrt::to_hstring(error.what())})); }
+        catch (std::exception const& error) { if (current()) ShowError(LocalizeFormat(L"StatusOpenFailed", {winrt::to_hstring(error.what())})); }
         if (!current()) co_return;
         editor.opening = false;
         SetOperationProgress(false);
@@ -218,6 +220,10 @@ namespace winrt::Folia::implementation {
         DocumentTabs().CanDragTabs(movable);
         auto const& editor = workspaceDocuments.Active()->editor;
         bool loading = editor && (editor->opening || editor->controller.IsLoading());
+        auto showProgress = loading || operationActive;
+        OperationPanel().Visibility(showProgress ? Visibility::Visible : Visibility::Collapsed);
+        OperationRing().IsActive(showProgress);
+        OperationPanel().VerticalAlignment(loading ? VerticalAlignment::Center : VerticalAlignment::Bottom);
         DocumentLoadingOverlay().Visibility(loading ? Visibility::Visible : Visibility::Collapsed);
         SaveButton().IsEnabled(editor && !loading);
         SaveAsButton().IsEnabled(editor && !loading);

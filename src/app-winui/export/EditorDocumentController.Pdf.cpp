@@ -244,7 +244,7 @@ namespace winrt::Folia
                 }
                 state->pdfOutputPath.clear();
                 if (state->setProgress) state->setProgress(false, std::nullopt, false);
-                if (state->setStatus) state->setStatus(LocalizeFormat(L"StatusPdfFailed", { error.message() }));
+                if (state->showError) state->showError(LocalizeFormat(L"StatusPdfFailed", { error.message() }));
             }
         }
         catch (std::exception const& error)
@@ -261,7 +261,7 @@ namespace winrt::Folia
                 }
                 state->pdfOutputPath.clear();
                 if (state->setProgress) state->setProgress(false, std::nullopt, false);
-                if (state->setStatus) state->setStatus(LocalizeFormat(
+                if (state->showError) state->showError(LocalizeFormat(
                     L"StatusPdfFailed", { winrt::to_hstring(error.what()) }));
             }
         }

@@ -392,4 +392,6 @@
   <data name="ShortcutSelectParagraphEnd" xml:space="preserve"><value>选择至后一段</value></data>
   <data name="ShortcutDeleteWordBackward" xml:space="preserve"><value>删除前一个词</value></data>
   <data name="ShortcutDeleteWordForward" xml:space="preserve"><value>删除后一个词</value></data>
+  <data name="ToggleSidebar" xml:space="preserve"><value>展开或收起侧栏</value></data>
+  <data name="NoOutline" xml:space="preserve"><value>当前文档没有标题。</value></data>
 </root>

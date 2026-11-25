@@ -30,6 +30,7 @@ namespace winrt::Folia
         EditorTextInputController* textInput = nullptr;
         ExecuteCommand executeCommand;
         SetStatus setStatus;
+        SetStatus showError;
         SetProgress setProgress;
         DocumentChanged documentChanged;
         Render render;

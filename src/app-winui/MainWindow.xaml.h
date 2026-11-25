@@ -135,6 +135,7 @@ namespace winrt::Folia::implementation
             winrt::Windows::Foundation::Point position);
         void NavigateToFootnote(folia::TextPosition position);
         void HandlePointerWheel(winrt::Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args);
+        void ShowError(winrt::hstring const& text);
         void SetStatus(winrt::hstring const& text);
         void SetOperationProgress(
             bool active,
@@ -142,7 +143,6 @@ namespace winrt::Folia::implementation
             bool cancellable = false);
         HWND WindowHandle();
 
-        winrt::hstring lastCommand;
         winrt::Folia::WorkspaceDocuments workspaceDocuments;
         winrt::Folia::FolderExplorerController folderExplorer;
         winrt::Folia::RecentWorkspace recentWorkspace;
@@ -172,8 +172,7 @@ namespace winrt::Folia::implementation
         bool selectedTabVisibilityPending = false;
         bool tabPointerDown = false, tabMoveInProgress = false;
         bool updatingTabs = false;
-        bool explorerOpen = false;
-        bool outlineOpen = false;
+        bool operationActive = false;
         bool windowClosed = false;
         Windows::Foundation::IAsyncAction imagePreviewLoad{nullptr};
         std::uint64_t imagePreviewGeneration = 0;

@@ -119,7 +119,7 @@
     "titleBarHeight": 40,
     "navigationOpenWidth": 280,
     "scrollbarWidth": 16,
-    "statusBarMinHeight": 32,
+    "statusBarMinHeight": 24,
     "footnotePreviewWidth": 360,
     "footnotePreviewSpacing": 8
   },

@@ -59,7 +59,7 @@
     "footnoteMargin": 10, "footnotePaddingVertical": 10, "footnotePaddingHorizontal": 16,
     "unsupportedMargin": 10, "unsupportedPaddingVertical": 6, "unsupportedPaddingLeft": 14, "extensionMargin": 5,
     "titleBarHeight": 40, "navigationOpenWidth": 292, "scrollbarWidth": 16,
-    "statusBarMinHeight": 32, "footnotePreviewWidth": 380, "footnotePreviewSpacing": 10
+    "statusBarMinHeight": 24, "footnotePreviewWidth": 380, "footnotePreviewSpacing": 10
   },
   "syntaxMarkers": {
     "sizeEm": 1.05,

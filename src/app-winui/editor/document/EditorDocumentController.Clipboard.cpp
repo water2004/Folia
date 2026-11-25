@@ -76,14 +76,14 @@ namespace winrt::Folia {
             }
             if (current() && !command.text.empty() && state->executeCommand)
                 inserted = state->executeCommand(command);
-            if (!inserted && Active(state, generation) && state->setStatus && !current())
-                state->setStatus(Localize(L"StatusPasteContextChanged"));
+            if (!inserted && Active(state, generation) && state->showError && !current())
+                state->showError(Localize(L"StatusPasteContextChanged"));
         } catch (winrt::hresult_error const& error) {
-            if (Active(state, generation) && state->setStatus)
-                state->setStatus(LocalizeFormat(L"StatusPasteFailed", {error.message()}));
+            if (Active(state, generation) && state->showError)
+                state->showError(LocalizeFormat(L"StatusPasteFailed", {error.message()}));
         } catch (std::exception const& error) {
-            if (Active(state, generation) && state->setStatus)
-                state->setStatus(LocalizeFormat(L"StatusPasteFailed", {winrt::to_hstring(error.what())}));
+            if (Active(state, generation) && state->showError)
+                state->showError(LocalizeFormat(L"StatusPasteFailed", {winrt::to_hstring(error.what())}));
         }
         if (!inserted)
             for (auto const& image : created)

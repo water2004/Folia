@@ -109,14 +109,14 @@ namespace {
             Pump([&] { return tabs.ContainerFromItem(secondItem) == nullptr; });
             expect(tabs.SelectedItem() == firstItem);
         };
-        "workspace chrome renders the real window with one complete divider and one outline toggle"_test = [] { try {
+        "workspace chrome renders the real window with one complete divider and one shared sidebar"_test = [] { try {
             ChromeWindow f;
             auto tabs = f.Find<TabView>(L"DocumentTabs");
             expect(tabs.TabItemsSource().as<winrt::Windows::Foundation::Collections::IVectorView<winrt::Windows::Foundation::IInspectable>>().Size() == 1_u);
             auto tab = tabs.ContainerFromIndex(0).as<TabViewItem>();
             auto bounds = tab.TransformToVisual(f.root).TransformBounds({0, 0, static_cast<float>(tab.ActualWidth()), static_cast<float>(tab.ActualHeight())});
             expect(bounds.Y >= 0.f);
-            expect(bounds.Y + bounds.Height <= 48.f);
+            expect(bounds.Y + bounds.Height <= 32.f);
             expect(tab.IsSelected());
             expect(f.root.FindName(L"CloseOutlineButton") == nullptr);
             expect(!f.Find<SplitView>(L"DocumentWorkspace").IsPaneOpen());
@@ -159,7 +159,7 @@ namespace {
             auto divider = f.Find<Border>(L"ShellDivider");
             auto rect = divider.TransformToVisual(f.root).TransformBounds({0, 0, static_cast<float>(divider.ActualWidth()), static_cast<float>(divider.ActualHeight())});
             expect(Grid::GetRow(divider) == 1_i);
-            expect(rect.Y >= 48.f);
+            expect(rect.Y == 32.f);
             expect(rect.Height == 1.f);
             expect(rect.Width == f.root.ActualWidth());
             // Activate the deployed desktop picker factory against the real
@@ -170,7 +170,7 @@ namespace {
             expect(std::filesystem::path(picker.SuggestedFolder().c_str()) == folder.path);
         };
 
-        "workspace chrome keeps text at native scale and layout buttons beside the captions"_test = [] {
+        "workspace chrome keeps text at native scale and pairs the sidebar and source buttons in the footer"_test = [] {
             ChromeWindow f;
             auto tabs = f.Find<TabView>(L"DocumentTabs");
             auto selected = tabs.ContainerFromItem(tabs.SelectedItem()).as<TabViewItem>();
@@ -188,14 +188,15 @@ namespace {
             const double raster = f.root.XamlRoot().RasterizationScale();
             expect(std::abs(origin.X * raster - std::round(origin.X * raster)) < 0.01);
             expect(std::abs(origin.Y * raster - std::round(origin.Y * raster)) < 0.01);
-            auto left = f.Find<Primitives::ToggleButton>(L"ExplorerPaneButton");
-            auto right = f.Find<Primitives::ToggleButton>(L"OutlinePaneButton");
+            auto left = f.Find<Primitives::ToggleButton>(L"SidebarButton");
+            auto right = f.Find<Primitives::ToggleButton>(L"SourceModeButton");
             auto leftAt = left.TransformToVisual(f.root).TransformPoint({0, 0});
             auto rightAt = right.TransformToVisual(f.root).TransformPoint({0, 0});
             expect(rightAt.X - leftAt.X == 30.f);
             expect(rightAt.Y == leftAt.Y);
-            auto inset = f.Find<Border>(L"CaptionInset");
-            expect(std::abs(rightAt.X + right.ActualWidth() + 8 - (f.root.ActualWidth() - inset.ActualWidth())) < 1.);
+            expect(leftAt.X <= 8.f);
+            expect(leftAt.Y >= f.root.ActualHeight() - 26.);
+            expect(f.Find<Grid>(L"StatusBar").ActualHeight() <= 25.);
             Capture native(f.root, raster);
             auto artifacts = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path() / L"build/tests/workspace-chrome";
             SavePng(artifacts / L"native-scale.png", native.bitmap.PixelWidth(), native.bitmap.PixelHeight(), native.pixels);
@@ -220,26 +221,24 @@ namespace {
             const auto dpi = f.root.XamlRoot().RasterizationScale();
             f.window.AppWindow().Resize({static_cast<int>(680 * dpi), static_cast<int>(600 * dpi)});
             Pump([&] { return f.root.ActualWidth() < 700; });
-            for (auto name : {L"ExplorerPaneButton", L"OutlinePaneButton"}) {
-                auto button = f.Find<Primitives::ToggleButton>(name);
-                Automation::Peers::ToggleButtonAutomationPeer peer(button);
-                auto provider = peer.GetPattern(Automation::Peers::PatternInterface::Toggle).as<Automation::Provider::IToggleProvider>();
-                provider.Toggle();
-                Pump([&] { return button.IsChecked().GetBoolean(); });
-                auto pane = f.Find<SplitView>(name == std::wstring_view(L"ExplorerPaneButton") ? L"DocumentWorkspace" : L"OutlineSplitView");
-                expect(pane.IsPaneOpen());
-                expect(pane.DisplayMode() == SplitViewDisplayMode::Overlay);
-                provider.Toggle();
-                Pump([&] { return !button.IsChecked().GetBoolean(); });
-                expect(!pane.IsPaneOpen());
-            }
-            for (auto name : {L"ExplorerPaneButton", L"OutlinePaneButton"}) {
-                auto button = f.Find<Primitives::ToggleButton>(name);
-                auto at = button.TransformToVisual(f.root).TransformPoint({0, 0});
-                expect(at.X >= 0.f);
-                expect(at.X + button.ActualWidth() <= f.root.ActualWidth());
-                expect(at.Y >= 0.f && at.Y + button.ActualHeight() <= 48.f);
-            }
+            auto button = f.Find<Primitives::ToggleButton>(L"SidebarButton");
+            auto pane = f.Find<SplitView>(L"DocumentWorkspace");
+            auto sides = f.Find<SelectorBar>(L"SidebarTabs");
+            Automation::Peers::ToggleButtonAutomationPeer peer(button);
+            auto toggle = peer.GetPattern(Automation::Peers::PatternInterface::Toggle).as<Automation::Provider::IToggleProvider>();
+            toggle.Toggle();
+            Pump([&] { return pane.IsPaneOpen(); });
+            expect(pane.DisplayMode() == SplitViewDisplayMode::Overlay);
+            expect(pane.PanePlacement() == SplitViewPanePlacement::Left);
+            auto files = f.Find<SelectorBarItem>(L"FilesTab");
+            auto outline = f.Find<SelectorBarItem>(L"OutlineTab");
+            sides.SelectedItem(outline);
+            expect(f.Find<Grid>(L"OutlinePaneContent").Visibility() == Visibility::Visible);
+            expect(f.Find<Grid>(L"ExplorerPane").Visibility() == Visibility::Collapsed);
+            toggle.Toggle();
+            Pump([&] { return !pane.IsPaneOpen(); });
+            expect(sides.SelectedItem() == outline);
+            sides.SelectedItem(files);
             auto settle = std::chrono::steady_clock::now() + std::chrono::milliseconds(400);
             Pump([&] { return std::chrono::steady_clock::now() >= settle; });
             auto active = tabs.ContainerFromItem(tabs.SelectedItem()).as<TabViewItem>();
@@ -249,11 +248,11 @@ namespace {
                 expect(arrow.Content().try_as<Viewbox>() != nullptr) << "native overflow uses a vector chevron";
                 auto at = arrow.TransformToVisual(f.root).TransformPoint({0, 0});
                 expect(arrow.ActualWidth() == 28. && arrow.ActualHeight() == 28.) << "overflow hit target is 28 DIP";
-                expect(std::abs(at.Y + arrow.ActualHeight() / 2 - 24.) < .5) << "overflow center aligns to title strip";
+                expect(std::abs(at.Y + arrow.ActualHeight() / 2 - 16.) < .5) << "overflow center aligns to title strip";
             }
             auto activeBounds = active.TransformToVisual(f.root).TransformBounds({0, 0, static_cast<float>(active.ActualWidth()), static_cast<float>(active.ActualHeight())});
             expect(activeBounds.X >= 0.f);
-            expect(activeBounds.X + activeBounds.Width <= f.Find<Primitives::ToggleButton>(L"ExplorerPaneButton").TransformToVisual(f.root).TransformPoint({0, 0}).X);
+            expect(activeBounds.X + activeBounds.Width <= f.Find<Border>(L"TitleDragArea").TransformToVisual(f.root).TransformPoint({0, 0}).X);
             auto indicator = Descendant(active, L"SelectionIndicator");
             expect(indicator.Opacity() == 1.);
             Capture narrow(f.root, f.root.XamlRoot().RasterizationScale());
@@ -283,47 +282,32 @@ namespace {
             }
         } catch (winrt::hresult_error const& error) { throw std::runtime_error(winrt::to_string(error.message()) + " HRESULT " + std::to_string(error.code().value)); } };
 
-        "workspace chrome pane icons have aligned complete mirrored contours"_test = [] {
+        "workspace chrome footer icons have distinct complete silhouettes"_test = [] {
             ChromeWindow f;
-            auto left = f.Find<Primitives::ToggleButton>(L"ExplorerPaneButton");
-            auto right = f.Find<Primitives::ToggleButton>(L"OutlinePaneButton");
-            auto leftIcon = left.Content().as<Viewbox>(), rightIcon = right.Content().as<Viewbox>();
-            Media::Imaging::RenderTargetBitmap a, b;
-            Await(a.RenderAsync(leftIcon));
-            Await(b.RenderAsync(rightIcon));
-            auto ap = Await(a.GetPixelsAsync()), bp = Await(b.GetPixelsAsync());
-            expect(a.PixelWidth() == b.PixelWidth());
-            expect(a.PixelHeight() == b.PixelHeight());
-            int delta = 0, topA = a.PixelHeight(), topB = b.PixelHeight(), bottomA = -1, bottomB = -1;
-            for (int y = 0; y < a.PixelHeight(); ++y) for (int x = 0; x < a.PixelWidth(); ++x) {
-                int av = ap.data()[(y * a.PixelWidth() + x) * 4 + 3];
-                int bv = bp.data()[(y * b.PixelWidth() + b.PixelWidth() - 1 - x) * 4 + 3];
-                delta += std::abs(av - bv);
-                if (av > 8) { topA = (std::min)(topA, y); bottomA = (std::max)(bottomA, y); }
-                if (bv > 8) { topB = (std::min)(topB, y); bottomB = (std::max)(bottomB, y); }
-            }
-            // Compare the entire alpha mask, including all four corners. The
-            // former upstream pair differs in height and fails this comparison.
-            expect(delta == 0);
-            expect(topA == topB);
-            expect(bottomA == bottomB);
-            expect(topA > 0 && bottomA < a.PixelHeight() - 1);
-            auto atA = leftIcon.TransformToVisual(f.root).TransformPoint({0, 0});
-            auto atB = rightIcon.TransformToVisual(f.root).TransformPoint({0, 0});
-            expect(atA.Y == atB.Y);
-            Capture native(f.root, f.root.XamlRoot().RasterizationScale());
-            auto at = left.TransformToVisual(f.root).TransformPoint({0, 0});
-            auto first = static_cast<std::uint32_t>(at.Y * native.scale) * native.bitmap.PixelWidth()
-                + static_cast<std::uint32_t>(at.X * native.scale);
             auto artifacts = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path() / L"build/tests/workspace-chrome";
-            SavePng(artifacts / L"pane-pair-native.png", static_cast<std::uint32_t>(58 * native.scale),
-                static_cast<std::uint32_t>(28 * native.scale), native.pixels, native.bitmap.PixelWidth(), first);
+            for (auto name : {L"SidebarButton", L"SourceModeButton"}) {
+                auto button = f.Find<Primitives::ToggleButton>(name);
+                auto icon = button.Content().as<Viewbox>();
+                Media::Imaging::RenderTargetBitmap bitmap;
+                Await(bitmap.RenderAsync(icon, 80, 80));
+                auto pixels = Await(bitmap.GetPixelsAsync());
+                int ink = 0;
+                for (int y = 0; y < bitmap.PixelHeight(); ++y)
+                    for (int x = 0; x < bitmap.PixelWidth(); ++x)
+                        if (pixels.data()[(y * bitmap.PixelWidth() + x) * 4 + 3] > 20) {
+                            ++ink;
+                            expect(x > 0 && y > 0 && x + 1 < bitmap.PixelWidth() && y + 1 < bitmap.PixelHeight());
+                        }
+                expect(ink > 50);
+                SavePng(artifacts / (std::wstring(name) + L".png"), bitmap.PixelWidth(), bitmap.PixelHeight(), pixels);
+            }
         };
 
         "workspace chrome icons retain the right and bottom SVG strokes in actual pixels"_test = [] { try {
             ChromeWindow f;
             auto background = f.root.Resources().Lookup(winrt::box_value(L"FoliaShellLayerBrush")).as<Media::SolidColorBrush>().Color();
-            for (auto name : {L"ExplorerPaneButton", L"OutlinePaneButton"}) {
+            {
+                auto name = L"SidebarButton";
                 auto icon = f.Find<Primitives::ToggleButton>(name).Content().as<Viewbox>();
                 auto canvas = icon.Child().as<Canvas>();
                 auto path = canvas.Children().GetAt(0).as<Shapes::Path>();

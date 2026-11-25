@@ -392,4 +392,6 @@
   <data name="ShortcutSelectParagraphEnd" xml:space="preserve"><value>Select to next paragraph</value></data>
   <data name="ShortcutDeleteWordBackward" xml:space="preserve"><value>Delete previous word</value></data>
   <data name="ShortcutDeleteWordForward" xml:space="preserve"><value>Delete next word</value></data>
+  <data name="ToggleSidebar" xml:space="preserve"><value>Toggle sidebar</value></data>
+  <data name="NoOutline" xml:space="preserve"><value>No headings in this document.</value></data>
 </root>

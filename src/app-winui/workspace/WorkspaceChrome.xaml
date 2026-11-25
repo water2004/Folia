@@ -7,6 +7,8 @@
         <Setter Property="IsTabStop" Value="False"/>
     </Style>
     <Style x:Key="WorkspacePaneToggleStyle" TargetType="ToggleButton">
+        <Setter Property="Width" Value="28"/><Setter Property="Height" Value="22"/>
+        <Setter Property="MinWidth" Value="0"/><Setter Property="MinHeight" Value="0"/>
         <Setter Property="UseSystemFocusVisuals" Value="True"/>
         <Setter Property="Template"><Setter.Value>
             <ControlTemplate TargetType="ToggleButton">
@@ -114,15 +116,15 @@
     <!-- Native TabView retains selection, overflow, reorder, keyboard and close
          behavior. This template owns only the editor's flat tab appearance. -->
     <Style x:Key="WorkspaceTabStyle" TargetType="TabViewItem">
-        <Setter Property="MinHeight" Value="36"/>
-        <Setter Property="Margin" Value="0,0,4,0"/>
+        <Setter Property="MinHeight" Value="30"/>
+        <Setter Property="Margin" Value="0,2,1,0"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="UseSystemFocusVisuals" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TabViewItem">
-                    <Grid x:Name="LayoutRoot" Height="36" Background="Transparent">
+                    <Grid x:Name="LayoutRoot" Height="30" Background="Transparent">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup x:Name="CommonStates">
                                 <VisualState x:Name="Normal"/>
@@ -133,17 +135,17 @@
                                     <Setter Target="TabContainer.Background" Value="{ThemeResource SubtleFillColorTertiaryBrush}"/>
                                 </VisualState.Setters></VisualState>
                                 <VisualState x:Name="Selected"><VisualState.Setters>
-                                    <Setter Target="TabContainer.Background" Value="{ThemeResource SubtleFillColorSecondaryBrush}"/>
+                                    <Setter Target="TabContainer.Background" Value="{ThemeResource FoliaShellBackgroundBrush}"/>
                                     <Setter Target="SelectionIndicator.Opacity" Value="1"/>
                                 </VisualState.Setters></VisualState>
                                 <!-- CommonStates names are TabViewItem's native
                                      contract, including the modifier order. -->
                                 <VisualState x:Name="PointerOverSelected"><VisualState.Setters>
-                                    <Setter Target="TabContainer.Background" Value="{ThemeResource SubtleFillColorTertiaryBrush}"/>
+                                    <Setter Target="TabContainer.Background" Value="{ThemeResource FoliaShellBackgroundBrush}"/>
                                     <Setter Target="SelectionIndicator.Opacity" Value="1"/>
                                 </VisualState.Setters></VisualState>
                                 <VisualState x:Name="PressedSelected"><VisualState.Setters>
-                                    <Setter Target="TabContainer.Background" Value="{ThemeResource SubtleFillColorTertiaryBrush}"/>
+                                    <Setter Target="TabContainer.Background" Value="{ThemeResource FoliaShellBackgroundBrush}"/>
                                     <Setter Target="SelectionIndicator.Opacity" Value="1"/>
                                 </VisualState.Setters></VisualState>
                                 <VisualState x:Name="Disabled"><VisualState.Setters><Setter Target="LayoutRoot.Opacity" Value="0.4"/></VisualState.Setters></VisualState>
@@ -159,16 +161,16 @@
                                 <VisualState x:Name="Dragging"><VisualState.Setters><Setter Target="LayoutRoot.Opacity" Value="0.5"/></VisualState.Setters></VisualState>
                             </VisualStateGroup>
                         </VisualStateManager.VisualStateGroups>
-                        <Grid x:Name="TabContainer" CornerRadius="6" Padding="10,0,4,0" Background="Transparent"
+                        <Border x:Name="SelectionIndicator" CornerRadius="7,7,0,0" BorderThickness="1,1,1,0"
+                                BorderBrush="{ThemeResource FoliaShellBorderBrush}" Background="{ThemeResource FoliaShellBackgroundBrush}" Opacity="0"/>
+                        <Grid x:Name="TabContainer" Margin="1,1,1,0" CornerRadius="7,7,0,0" Padding="10,0,4,0" Background="Transparent"
                               ColumnDefinitions="*,Auto" Control.IsTemplateFocusTarget="True">
                             <ContentPresenter x:Name="ContentPresenter" Content="" ContentTemplate="{TemplateBinding HeaderTemplate}"
                                               FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
-                            <Button x:Name="CloseButton" Grid.Column="1" Width="28" Height="28" MinWidth="28" MinHeight="28"
+                            <Button x:Name="CloseButton" Grid.Column="1" Width="24" Height="24" MinWidth="24" MinHeight="24"
                                     Margin="8,0,0,0" Padding="0" IsTabStop="False" Style="{StaticResource SubtleButtonStyle}">
                                 <FontIcon Glyph="&#xE711;" FontSize="10"/>
                             </Button>
-                            <Border x:Name="SelectionIndicator" Grid.ColumnSpan="2" Height="2" CornerRadius="1"
-                                    Margin="0,0,6,0" VerticalAlignment="Bottom" Background="{TemplateBinding BorderBrush}" Opacity="0"/>
                         </Grid>
                     </Grid>
                 </ControlTemplate>

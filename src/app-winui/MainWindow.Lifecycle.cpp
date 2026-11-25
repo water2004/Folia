@@ -35,9 +35,9 @@ namespace winrt::Folia::implementation {
                 if (document->editor && !co_await document->editor->controller.ConfirmCloseAsync()) { approved = false; break; }
             if (approved) { closeApproved = true; Close(); }
         } catch (winrt::hresult_error const& error) {
-            SetStatus(LocalizeFormat(L"StatusSaveFailed", {error.message()}));
+            ShowError(LocalizeFormat(L"StatusSaveFailed", {error.message()}));
         } catch (std::exception const& error) {
-            SetStatus(LocalizeFormat(L"StatusSaveFailed", {winrt::to_hstring(error.what())}));
+            ShowError(LocalizeFormat(L"StatusSaveFailed", {winrt::to_hstring(error.what())}));
         }
         closePending = false;
         if (!windowClosed) UpdateLoadingState();
