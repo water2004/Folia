@@ -16,6 +16,9 @@ namespace winrt::Folia {
         Microsoft::UI::Xaml::Input::ICommand refresh{nullptr}, collapse{nullptr}, newFile{nullptr}, newFolder{nullptr};
         winrt::event_token expanding{}, collapsed{}, invoked{}, doubleTapped{}, keyDown{};
         winrt::event_token lostFocus{}, layoutUpdated{}, contextRequested{}, pointerEntered{}, pointerExited{}, selectionChanged{}, dragStarting{}, dragOver{}, drop{}, dragLeave{};
+        winrt::event_token listLoaded{};
+        Microsoft::UI::Xaml::Controls::ListViewBase::ContainerContentChanging_revoker rowPrepared;
+        std::int64_t foregroundChanged = 0;
         Microsoft::UI::Xaml::Controls::TreeViewNode editingNode{nullptr};
         bool preparingEdit = false, committingEdit = false, pendingEditFocus = false, selectEditName = false, operationBusy = false;
         bool guidesVisible = false;

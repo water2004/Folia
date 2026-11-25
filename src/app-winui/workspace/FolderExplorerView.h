@@ -9,6 +9,10 @@ namespace winrt::Folia {
     void ScrollFolderExplorerNodeIntoView(Microsoft::UI::Xaml::Controls::TreeView const& tree,
         Microsoft::UI::Xaml::Controls::TreeViewNode const& node);
     void ConfigureFolderExplorerView(Microsoft::UI::Xaml::Controls::TreeView const& tree);
+    Microsoft::UI::Xaml::Controls::ListView FolderExplorerList(Microsoft::UI::Xaml::Controls::TreeView const& tree);
     void UpdateFolderExplorerGuides(Microsoft::UI::Xaml::Controls::TreeView const& tree,
         Microsoft::UI::Xaml::Controls::TreeViewNode const& activeBranch, bool visible);
+    void UpdateFolderExplorerRowGuides(Microsoft::UI::Xaml::Controls::TreeView const& tree,
+        Microsoft::UI::Xaml::Controls::TreeViewItem const& row,
+        Microsoft::UI::Xaml::Controls::TreeViewNode const& node, bool visible);
 }

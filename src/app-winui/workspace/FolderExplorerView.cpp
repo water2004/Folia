@@ -69,6 +69,48 @@ namespace winrt::Folia {
                 return SelectTemplateCore(item);
             }
         };
+
+        TreeViewNode GuideBranch(TreeViewNode const& selected) {
+            if (auto entry = explorer_detail::Entry(selected); entry && entry->directory
+                && selected.IsExpanded() && selected.Children().Size()) return selected;
+            return selected ? selected.Parent() : nullptr;
+        }
+
+        void DrawRowGuides(TreeViewItem const& row, TreeViewNode const& node, TreeViewNode const& branch,
+            Media::Brush const& foreground, bool visible) {
+            const auto depth = node ? (std::max)(0, node.Depth()) : 0;
+            bool inBranch = false;
+            if (branch && branch.Depth() >= 0 && node) {
+                for (auto parent = node.Parent(); parent && parent.Depth() >= branch.Depth(); parent = parent.Parent())
+                    if (parent == branch) { inBranch = true; break; }
+            }
+            const auto visibility = depth && (visible || inBranch) ? Visibility::Visible : Visibility::Collapsed;
+            auto control = row.as<IControlProtected>();
+            auto guides = control.GetTemplateChild(L"IndentGuides").try_as<Canvas>();
+            if (!guides && visibility == Visibility::Visible) {
+                row.ApplyTemplate();
+                guides = control.GetTemplateChild(L"IndentGuides").try_as<Canvas>();
+            }
+            if (!guides) return;
+            if (guides.Visibility() != visibility) guides.Visibility(visibility);
+            if (visibility == Visibility::Collapsed) return;
+
+            auto lines = guides.Children();
+            while (lines.Size() > static_cast<unsigned>(depth)) lines.RemoveAtEnd();
+            while (lines.Size() < static_cast<unsigned>(depth)) {
+                Border line;
+                line.Width(1);
+                Canvas::SetLeft(line, 9 + lines.Size() * 8.);
+                lines.Append(line);
+            }
+            for (unsigned index = 0; index < lines.Size(); ++index) {
+                auto line = lines.GetAt(index).as<Border>();
+                if (line.Height() != row.Height()) line.Height(row.Height());
+                if (line.Background() != foreground) line.Background(foreground);
+                const double opacity = inBranch && static_cast<int>(index) == branch.Depth() ? .4 : visible ? .13 : 0.;
+                if (std::abs(line.Opacity() - opacity) > .001) line.Opacity(opacity);
+            }
+        }
     }
 
     Microsoft::UI::Xaml::Controls::TreeViewNode ExplorerNodeFromElement(
@@ -96,48 +138,27 @@ namespace winrt::Folia {
             container.ContentTemplate(tree.ItemTemplateSelector().SelectTemplate(node, container));
     }
 
+    ListView FolderExplorerList(TreeView const& tree) {
+        return tree.as<IControlProtected>().GetTemplateChild(L"ListControl").try_as<ListView>();
+    }
+
     void ScrollFolderExplorerNodeIntoView(TreeView const& tree, TreeViewNode const& node) {
-        if (auto list = tree.as<IControlProtected>().GetTemplateChild(L"ListControl").try_as<ListView>())
+        if (auto list = FolderExplorerList(tree))
             list.ScrollIntoView(node, ScrollIntoViewAlignment::Leading);
     }
 
+    void UpdateFolderExplorerRowGuides(TreeView const& tree, TreeViewItem const& row, TreeViewNode const& node, bool visible) {
+        DrawRowGuides(row, node, GuideBranch(tree.SelectedNode()), tree.Foreground(), visible);
+    }
+
     void UpdateFolderExplorerGuides(TreeView const& tree, TreeViewNode const& activeNode, bool visible) {
-        // Match VS Code AbstractTree's active-branch rule: an expanded folder
-        // with children owns its guides; files/collapsed/empty nodes use parent.
-        auto activeBranch = activeNode;
-        if (auto entry = explorer_detail::Entry(activeBranch); entry &&
-            (!entry->directory || !activeBranch.IsExpanded() || activeBranch.Children().Size() == 0)) activeBranch = activeBranch.Parent();
-        // Walk only native realized controls, never the directory model. Each
-        // virtualized row owns at most depth lines; no document layout changes.
-        auto visit = [&](auto const& self, DependencyObject const& element, TreeViewNode node) -> void {
-            if (auto item = element.try_as<TreeViewItem>()) node = tree.NodeFromContainer(item);
-            if (auto canvas = element.try_as<Canvas>(); canvas && canvas.Name() == L"IndentGuides") {
-                const auto depth = node ? (std::max)(0, node.Depth()) : 0;
-                bool inBranch = false;
-                for (auto parent = node ? node.Parent() : nullptr; parent && parent.Depth() >= 0; parent = parent.Parent())
-                    if (parent == activeBranch) { inBranch = true; break; }
-                auto visibility = depth && (visible || inBranch) ? Visibility::Visible : Visibility::Collapsed;
-                if (canvas.Visibility() != visibility) canvas.Visibility(visibility);
-                if (visibility == Visibility::Collapsed) return;
-                while (canvas.Children().Size() > static_cast<unsigned>(depth)) canvas.Children().RemoveAtEnd();
-                while (canvas.Children().Size() < static_cast<unsigned>(depth)) {
-                    Border line; line.Width(1); line.Background(tree.Foreground());
-                    Canvas::SetLeft(line, 9 + canvas.Children().Size() * 8.);
-                    canvas.Children().Append(line);
-                }
-                for (unsigned index = 0; index < canvas.Children().Size(); ++index) {
-                    auto line = canvas.Children().GetAt(index).as<Border>();
-                    if (line.Height() != canvas.ActualHeight()) line.Height(canvas.ActualHeight());
-                    if (line.Background() != tree.Foreground()) line.Background(tree.Foreground());
-                    const double opacity = inBranch && activeBranch && static_cast<int>(index) == activeBranch.Depth() ? .4 : visible ? .13 : 0.;
-                    if (std::abs(line.Opacity() - opacity) > .001) line.Opacity(opacity);
-                }
-                return;
-            }
-            for (int index = 0, count = Media::VisualTreeHelper::GetChildrenCount(element); index < count; ++index)
-                self(self, Media::VisualTreeHelper::GetChild(element, index), node);
-        };
-        visit(visit, tree, nullptr);
+        auto list = FolderExplorerList(tree);
+        auto panel = list ? list.ItemsPanelRoot() : nullptr;
+        if (!panel) return;
+        const auto branch = GuideBranch(activeNode);
+        const auto foreground = tree.Foreground();
+        for (auto item : panel.Children())
+            if (auto row = item.try_as<TreeViewItem>()) DrawRowGuides(row, tree.NodeFromContainer(row), branch, foreground, visible);
     }
 
     void ConfigureFolderExplorerView(Microsoft::UI::Xaml::Controls::TreeView const& tree) {

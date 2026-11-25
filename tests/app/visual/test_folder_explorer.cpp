@@ -354,5 +354,25 @@ namespace {
             visual_tests::SavePng(artifacts / L"hover-guides-native.png", bitmap.PixelWidth(), bitmap.PixelHeight(), pixels);
             winrt::Folia::UpdateFolderExplorerGuides(f.tree, nullptr, false);
         } catch (winrt::hresult_error const& error) { throw std::runtime_error(winrt::to_string(error.message()) + " HRESULT " + std::to_string(error.code().value)); } };
+
+        "folder explorer updates active guides as offscreen rows are realized"_test = [] {
+            ExplorerWindow f;
+            auto folder = f.Find(L"章节");
+            for (unsigned i = 0; i < 100; ++i) {
+                std::ofstream file(f.folder / L"章节" / (std::to_wstring(i) + L".md"));
+            }
+            f.explorer.Expand(folder);
+            Pump([&] { return !folder.HasUnrealizedChildren(); });
+            f.tree.SelectedNode(folder);
+            auto child = folder.Children().GetAt(folder.Children().Size() - 1);
+            expect(f.tree.ContainerFromNode(child) == nullptr);
+            winrt::Folia::ScrollFolderExplorerNodeIntoView(f.tree, child);
+            Pump([&] {
+                auto row = f.tree.ContainerFromNode(child).try_as<TreeViewItem>();
+                auto guides = row ? row.as<IControlProtected>().GetTemplateChild(L"IndentGuides").try_as<Canvas>() : nullptr;
+                return guides && guides.Visibility() == Visibility::Visible && guides.Children().Size() == 1
+                    && std::abs(guides.Children().GetAt(0).Opacity() - .4) < .001;
+            });
+        };
     };
 }

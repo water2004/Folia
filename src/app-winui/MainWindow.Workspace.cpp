@@ -61,6 +61,10 @@ namespace winrt::Folia::implementation {
         SidebarButton().Unchecked(toggleSidebar(false));
         WorkspaceSidebar().Width(sidebarWidth);
         WorkspaceSidebar().HorizontalAlignment(HorizontalAlignment::Left);
+        SidebarSlot().SizeChanged(WindowEvent([this](auto const&, SizeChangedEventArgs const& args) {
+            auto size = args.NewSize();
+            SidebarSlotClip().Rect({0, 0, size.Width, size.Height});
+        }));
         documentTools.Attach(ReadingCard(), DocumentToolbar(), DocumentViewport());
         for (auto const& flyout : {EncodingButton().Flyout(), DocumentActionsButton().Flyout()}) {
             flyout.Opening(WindowEvent([this](auto const&, auto const&) { documentTools.HoldOpen(true); }));

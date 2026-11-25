@@ -202,15 +202,39 @@ namespace winrt::Folia {
 
     void FolderExplorerController::RegisterEditingHandlers(std::shared_ptr<State> const& state) {
         auto weak = std::weak_ptr<State>(state);
-        state->pointerEntered = state->tree.PointerEntered([weak](auto const&, auto const&) {
-            if (auto state = weak.lock()) { state->guidesVisible = true; UpdateFolderExplorerGuides(state->tree, state->tree.SelectedNode(), true); }
+        auto refreshGuides = [weak](auto const&, auto const&) {
+            if (auto state = weak.lock(); state && state->tree)
+                UpdateFolderExplorerGuides(state->tree, state->tree.SelectedNode(), state->guidesVisible);
+        };
+        auto observeRows = [weak, refreshGuides](auto const& sender, auto const& args) {
+            auto state = weak.lock();
+            if (!state || !state->tree) return;
+            if (auto list = FolderExplorerList(state->tree)) {
+                state->rowPrepared = list.ContainerContentChanging(winrt::auto_revoke,
+                    [weak](auto const&, ContainerContentChangingEventArgs const& rowArgs) {
+                        auto state = weak.lock();
+                        if (!state || !state->tree || rowArgs.InRecycleQueue()) return;
+                        if (auto row = rowArgs.ItemContainer().try_as<TreeViewItem>())
+                            UpdateFolderExplorerRowGuides(state->tree, row, rowArgs.Item().try_as<TreeViewNode>(), state->guidesVisible);
+                    });
+            }
+            refreshGuides(sender, args);
+        };
+        state->listLoaded = state->tree.Loaded(observeRows);
+        if (state->tree.IsLoaded()) observeRows(nullptr, nullptr);
+        state->foregroundChanged = state->tree.RegisterPropertyChangedCallback(Control::ForegroundProperty(), refreshGuides);
+        state->pointerEntered = state->tree.PointerEntered([weak, refreshGuides](auto const& sender, auto const& args) {
+            if (auto state = weak.lock(); state && !std::exchange(state->guidesVisible, true)) refreshGuides(sender, args);
         });
-        state->pointerExited = state->tree.PointerExited([weak](auto const&, auto const&) {
-            if (auto state = weak.lock()) { state->guidesVisible = false; UpdateFolderExplorerGuides(state->tree, state->tree.SelectedNode(), false); }
+        state->pointerExited = state->tree.PointerExited([weak, refreshGuides](auto const& sender, Input::PointerRoutedEventArgs const& args) {
+            auto state = weak.lock();
+            if (!state || !state->tree || !state->guidesVisible) return;
+            const auto point = args.GetCurrentPoint(state->tree).Position();
+            if (point.X >= 0 && point.X < state->tree.ActualWidth() && point.Y >= 0 && point.Y < state->tree.ActualHeight()) return;
+            state->guidesVisible = false;
+            refreshGuides(sender, args);
         });
-        state->selectionChanged = state->tree.SelectionChanged([weak](auto const&, auto const&) {
-            if (auto state = weak.lock()) UpdateFolderExplorerGuides(state->tree, state->tree.SelectedNode(), state->guidesVisible);
-        });
+        state->selectionChanged = state->tree.SelectionChanged(refreshGuides);
         state->keyDown = state->tree.KeyDown([weak](auto const&, Input::KeyRoutedEventArgs const& args) {
             auto state = weak.lock();
             if (!state) return;
@@ -239,22 +263,17 @@ namespace winrt::Folia {
         });
         state->layoutUpdated = state->tree.LayoutUpdated([weak](auto const&, auto const&) {
             auto state = weak.lock();
-            if (!state || !state->tree) return;
-            if (state->guidesVisible || state->tree.SelectedNode()) UpdateFolderExplorerGuides(state->tree, state->tree.SelectedNode(), true);
-            if (state->pendingEditFocus && state->editingNode) {
-                if (auto container = state->tree.ContainerFromNode(state->editingNode).try_as<TreeViewItem>())
-                    if (auto root = container.ContentTemplateRoot().try_as<FrameworkElement>())
-                        if (auto editor = root.FindName(L"EntryEditor").try_as<TextBox>()) {
-                            state->pendingEditFocus = false;
-                            editor.Focus(FocusState::Programmatic);
-                            if (state->selectEditName) {
-                                auto entry = Entry(state->editingNode);
-                                auto count = entry && !entry->directory ? std::filesystem::path(editor.Text().c_str()).stem().native().size() : editor.Text().size();
-                                editor.Select(0, static_cast<int>(count));
-                                state->selectEditName = false;
-                            }
-                        }
-            }
+            if (!state || !state->tree || !state->pendingEditFocus || !state->editingNode) return;
+            auto container = state->tree.ContainerFromNode(state->editingNode).try_as<TreeViewItem>();
+            auto root = container ? container.ContentTemplateRoot().try_as<FrameworkElement>() : nullptr;
+            auto editor = root ? root.FindName(L"EntryEditor").try_as<TextBox>() : nullptr;
+            if (!editor) return;
+            state->pendingEditFocus = false;
+            editor.Focus(FocusState::Programmatic);
+            if (!std::exchange(state->selectEditName, false)) return;
+            auto entry = Entry(state->editingNode);
+            auto count = entry && !entry->directory ? std::filesystem::path(editor.Text().c_str()).stem().native().size() : editor.Text().size();
+            editor.Select(0, static_cast<int>(count));
         });
         state->contextRequested = state->tree.ContextRequested([weak](auto const&, Input::ContextRequestedEventArgs const& args) {
             auto state = weak.lock();

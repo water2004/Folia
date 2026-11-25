@@ -88,6 +88,7 @@ namespace winrt::Folia {
             entry->listing.reset();
             node.Children().Clear();
             node.HasUnrealizedChildren(true);
+            UpdateFolderExplorerGuides(state->tree, state->tree.SelectedNode(), state->guidesVisible);
         });
         state_->invoked = tree.ItemInvoked([weak](auto const&, TreeViewItemInvokedEventArgs const& args) {
             auto state = weak.lock();
@@ -124,6 +125,7 @@ namespace winrt::Folia {
         if (state_->hoverTimer) { state_->hoverTimer.Stop(); state_->hoverTimer = nullptr; }
         state_->stop.request_stop();
         ++state_->generation;
+        state_->rowPrepared.revoke();
         if (auto tree = state_->tree) {
             tree.Expanding(state_->expanding);
             tree.Collapsed(state_->collapsed);
@@ -132,6 +134,8 @@ namespace winrt::Folia {
             tree.KeyDown(state_->keyDown);
             tree.LostFocus(state_->lostFocus);
             tree.LayoutUpdated(state_->layoutUpdated);
+            tree.Loaded(state_->listLoaded);
+            tree.UnregisterPropertyChangedCallback(Control::ForegroundProperty(), state_->foregroundChanged);
             tree.ContextRequested(state_->contextRequested);
             tree.PointerEntered(state_->pointerEntered);
             tree.PointerExited(state_->pointerExited);

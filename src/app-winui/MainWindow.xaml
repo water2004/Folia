@@ -83,10 +83,8 @@
                 </StackPanel>
                 <Button x:Name="SettingsButton" Grid.Row="3" Style="{StaticResource WorkspaceRailActionStyle}"/>
             </Grid>
-            <ScrollViewer x:Name="SidebarSlot" Grid.Column="1" Width="0" Padding="0"
-                          HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled"
-                          VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled"
-                          IsTabStop="False" HorizontalContentAlignment="Left" VerticalContentAlignment="Stretch">
+            <Grid x:Name="SidebarSlot" Grid.Column="1" Width="0">
+            <Grid.Clip><RectangleGeometry x:Name="SidebarSlotClip"/></Grid.Clip>
             <Grid x:Name="WorkspaceSidebar" Padding="4,0,6,7" Visibility="Collapsed">
             <Grid x:Name="ExplorerPane" RowDefinitions="Auto,Auto,*">
                 <Grid x:Name="FolderHeader" Height="{StaticResource WorkspaceTabHeight}" Padding="8,0,0,0" ColumnDefinitions="*,Auto,Auto,Auto,Auto"
@@ -118,7 +116,7 @@
                            Foreground="{ThemeResource FoliaShellMutedForegroundBrush}" TextWrapping="Wrap" Visibility="Collapsed"/>
             </Grid>
             </Grid>
-            </ScrollViewer>
+            </Grid>
         <Grid x:Name="DocumentColumn" Grid.Column="2" RowDefinitions="Auto,*" MinWidth="0">
         <SystemBackdropElement x:Name="ReadingBackdrop" Grid.RowSpan="2"
                                IsHitTestVisible="False" Visibility="Collapsed"/>
