@@ -1,6 +1,14 @@
 # 当前开发交接
 
-## 当前任务：测试系统重构（2026-11-24，已完成）
+## 当前任务：宽度变化时保留公式呈现（2026-11-26）
+
+- 表格阶段已分批本地提交 `b83ee993` 和 `4f45982f`。新任务只修 WinUI 窗口/侧栏宽度变化时的公式闪回源码。
+- 根因是 WinUI 数学缓存按精确容器宽度索引，重排为同一公式请求不同宽度时，块所有权释放原 SVG。普通公式应复用仍适用的原生几何和 SVG，DirectWrite 负责新宽度下的呈现。确实依赖宽度的公式继续使用原生排版，并在新结果可画之前保留上一份完成结果。不能固定一个虚假宽度、缩放编号公式或按 TeX 文本猜依赖。
+- 代码已实现：Common 布局输出可复用的宽度范围，经新增的 C ABI 查询传到 WinUI。视口只更新文本排版与可见 SVG 需求，带编号或已经折行的公式在宽度变体就绪前继续画已有结果。打开文件期间改变宽度直接采用后台结果，首帧负责按实际宽度重排。
+- 已通过 Release 原生 SVG/C ABI 套件、WinUI Release 构建、36 项 WinUI 编辑器测试、连续改宽逐帧可画回归以及标签切换释放 SVG 需求回归。首次准备仍只保留几何，已有 SVG 正在等待替换时可预载新结果。日志在 `build/math-width-{bridge-tests-final,winui-build-final,editor-tests-final,visual-tests-final,workspace-tests}.log`。
+- 当前任务完成。已验证的应用产物是 `build/app-winui/bin/x64/Release/Folia.exe`，自动化测试驱动编辑视口宽度，未手动拖拽桌面窗口或操作侧栏。无活动 agents、构建或测试。下一步仅按新反馈继续。
+
+## 历史任务：测试系统重构（2026-11-24，已完成）
 
 - Windows 主分支集成以重构分支 `f3b073b9` 为基线。修正测试语料的路径校验、跨盘符诊断路径和 Windows 临时目录短路径处理。统一入口的 core、conformance、tooling 三套在 MSVC 下通过 19/19 个 CTest 条目，包括 Math Python 工具回归。主工程 Release Math DLL 构建通过。日志位于 `build/portable-test-merge/`。
 - 在既有 `refactor/portable-test-system` 上完成；master 基线仍为 `2ba389aa34a5c2f23500dc552b9fab9c434a0cdd`。本次从 `c603f4db` 续做，所有完成批次均独立提交并立即推送，提交带 `[skip ci]`。本次续做未改 CI，master 与标签未动；此前分支已同步 Mermaid workflow 的 Python 比较入口/依赖，触发配置与 master 相同。分支 Actions 查询为 0 次运行。

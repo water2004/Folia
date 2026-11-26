@@ -23,6 +23,8 @@ class CommonOutputJax {
     // No linebreak constraint exists until getLinebreakWidth runs. NaN keeps
     // width comparisons inactive, as in Source's unset mathematical width.
     double containerWidth_ = std::numeric_limits<double>::quiet_NaN();
+    std::optional<double> reusableWidthFrom_ = 0.0;
+    bool usesContainerLinebreakWidth_ = false;
     // Reverse destruction: visitor first, then factory and its wrappers.
     std::unique_ptr<CommonWrapperFactory> factory_;
     std::unique_ptr<Linebreaks> linebreaks_;
@@ -55,6 +57,12 @@ class CommonOutputJax {
     mml::MmlDocument &document() const noexcept;
     double pxPerEm() const;
     double containerWidth() const noexcept;
+    std::optional<double> reusableWidthFrom() const noexcept { return reusableWidthFrom_; }
+    bool usesContainerLinebreakWidth() const noexcept { return usesContainerLinebreakWidth_; }
+    void requireExactContainerWidth() noexcept { reusableWidthFrom_.reset(); }
+    void requireMinimumContainerWidth(double width) noexcept {
+        if (reusableWidthFrom_) *reusableWidthFrom_ = std::max(*reusableWidthFrom_, width);
+    }
     CommonWrapperFactory const &factory() const noexcept;
     FontRepository const &fonts() const noexcept;
     FontFaceData const &face() const noexcept;

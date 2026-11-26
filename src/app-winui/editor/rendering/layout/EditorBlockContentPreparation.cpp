@@ -164,10 +164,8 @@ namespace winrt::Folia
         auto purpose = editing ? folia::platform::MathRenderPurpose::Preview : folia::platform::MathRenderPurpose::Document;
         auto tex = folia::cps_to_utf8(special.tex);
         auto color = SvgColor(svgColor);
-        auto math = highPriority
-            ? mathJax.Render(tex, true, fontSize, containerWidth, color, {}, purpose)
-            : mathJax.Lookup(tex, true, fontSize, containerWidth, color, purpose);
-        display.pendingMath = !math;
+        auto [math, pending] = mathJax.Layout(tex, true, fontSize, containerWidth, color, highPriority, purpose);
+        display.pendingMath = pending;
         if (editing)
         {
             AppendMathBlockSource(display, block, continuationIndentColumns);

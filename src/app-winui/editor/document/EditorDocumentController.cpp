@@ -573,8 +573,8 @@ namespace winrt::Folia
             }
             if (loadFailure) std::rethrow_exception(loadFailure);
             if (state->renderer->MatchesMathPreparationContext(context)) break;
-            // Only formula inputs depend on this context; ordinary blocks
-            // continue through the existing viewport materialization path.
+            // Theme and media changes invalidate the background preparation.
+            // A resize is handled by the viewport when it adopts the result.
             preparation.reset();
         }
         auto versionAfterParse = folia::platform::reload::query_watched_file_version(

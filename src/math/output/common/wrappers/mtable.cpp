@@ -805,6 +805,7 @@ double CommonMtable::getWidth() {
 void CommonMtable::adjustWideTable() {
     if (text8(attr(*this, u"width"), u"auto") != "auto")
         return;
+    if (std::isfinite(containerWidth())) jax().requireExactContainerWidth();
     const auto [pad, align, shift] = getPadAlignShift(text8(attr(*this, u"side"), u"right"));
     (void)shift;
     const double available =
@@ -869,6 +870,7 @@ double CommonMtable::getWrapWidth(std::size_t) {
 bool CommonMtable::setChildPWidths(bool, std::optional<double> cwidth, bool) {
     if (!percentText(text8(attr(*this, u"width"))))
         return false;
+    jax().requireExactContainerWidth();
     if (!hasLabels) {
         bbox.pwidth.clear();
         if (!container)

@@ -8,12 +8,15 @@ namespace folia::math::output::common {
 double CommonMath::getWrapWidth(std::size_t) {
     if (parent)
         return getBBox().w;
+    jax().requireExactContainerWidth();
     return metrics().containerWidth / jax().pxPerEm();
 }
 
 bool CommonMath::setChildPWidths(bool recompute, std::optional<double> width, bool) {
     // The numerical part of Source SvgMath.setChildPWidths belongs to the
     // shared layout: both output backends consume the same resolved widths.
+    if (!parent && !recompute && std::ranges::any_of(childNodes, [](auto* child) { return !child->bbox.pwidth.empty(); }))
+        jax().requireExactContainerWidth();
     return CommonWrapper::setChildPWidths(
         recompute, parent ? width : metrics().containerWidth / jax().pxPerEm(), false);
 }
@@ -27,9 +30,14 @@ void CommonMath::computeBBox(BBox &box, bool recompute) {
 
     const double width = containerWidth();
     if (box.w > width) {
+        jax().requireExactContainerWidth();
         if (childNodes.empty())
             throw std::logic_error("linebreak math wrapper has no children");
         childNodes.front()->breakToWidth(width);
+    } else if (!jax().usesContainerLinebreakWidth()) {
+        jax().requireExactContainerWidth();
+    } else {
+        jax().requireMinimumContainerWidth(box.w * jax().pxPerEm());
     }
     if (childNodes.empty())
         throw std::logic_error("linebreak math wrapper has no children");

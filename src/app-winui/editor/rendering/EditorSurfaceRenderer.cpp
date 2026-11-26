@@ -197,13 +197,9 @@ namespace winrt::Folia
         if (resizing) return;
         resizing = true;
         struct ResetFlag { bool& value; ~ResetFlag() { value = false; } } reset{resizing};
-        auto result = resources.Resize(host, width, height);
-        if (!result.resized) return;
-        if (result.widthChanged)
-        {
-            renderCache.ClearTextLayouts();
-            ClearPreparedDocument();
-        }
+        if (!resources.Resize(host, width, height)) return;
+        // The preparation pass reconciles the effective document width,
+        // keeping the prior geometry available for scroll anchoring.
         scrollState.Clamp(MaximumScrollOffset());
     }
 

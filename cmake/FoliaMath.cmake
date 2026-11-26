@@ -514,6 +514,7 @@ FoliaNativeMathRenderSvgBatch
 FoliaNativeMathRenderSvgFragment
 FoliaNativeMathResultSvg
 FoliaNativeMathResultFragmentMetrics
+FoliaNativeMathResultReusableWidthFrom
 FoliaNativeMathResultError
 FoliaNativeMathResultDestroy
 ")

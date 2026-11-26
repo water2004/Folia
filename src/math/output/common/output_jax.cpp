@@ -334,8 +334,12 @@ void CommonOutputJax::finishScene(scene::Builder &builder, CommonWrapper &root,
     if (overflow && *overflow == u"scale" && metrics_.display) {
         const double width = root.getOuterBBox().w;
         const double available = std::max(0.0, metrics_.containerWidth - 4) / pxPerEm();
-        if (width > available && width)
+        if (width > available && width) {
+            requireExactContainerWidth();
             fontScale *= available / width;
+        } else if (width > 0) {
+            requireMinimumContainerWidth(width * pxPerEm() + 4);
+        }
     }
     auto displayLayout = builder.display_layout();
     displayLayout.font_scale = fontScale;
@@ -345,6 +349,7 @@ void CommonOutputJax::finishScene(scene::Builder &builder, CommonWrapper &root,
     // original pwidth spelling alongside its resolved numeric percentage.
     const auto &rootBBox = root.getBBox();
     if (!rootBBox.pwidth.empty()) {
+        requireExactContainerWidth();
         if (!frame.inline_fragments.empty())
             throw std::logic_error("percentage frame cannot coexist with inline fragments");
         lengths::LengthContext percentContext;
@@ -476,6 +481,7 @@ double CommonOutputJax::getLinebreakWidth() {
     } else {
         selected = utf16::decode(options_.linebreaks.width).text;
     }
+    usesContainerLinebreakWidth_ = selected == u"100%";
     const double relativeWidth = metrics_.containerWidth / pxPerEm();
     lengths::LengthContext context;
     context.size_em = relativeWidth;

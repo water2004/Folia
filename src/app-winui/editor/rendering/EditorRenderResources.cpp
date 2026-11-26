@@ -179,17 +179,16 @@ namespace winrt::Folia
         RebuildTextFormats(styleSheet);
     }
 
-    EditorResizeResult EditorRenderResources::Resize(winrt::Microsoft::UI::Xaml::FrameworkElement const& host, double width, double height)
+    bool EditorRenderResources::Resize(winrt::Microsoft::UI::Xaml::FrameworkElement const& host, double width, double height)
     {
-        if (!drawingSurface || !std::isfinite(width) || !std::isfinite(height) || width <= 0.0 || height <= 0.0) return {};
+        if (!drawingSurface || !std::isfinite(width) || !std::isfinite(height) || width <= 0.0 || height <= 0.0) return false;
         auto scale = RasterizationScale(host);
         auto newWidthDip = static_cast<float>((std::max)(1.0, width));
         auto newHeightDip = static_cast<float>((std::max)(1.0, height));
         auto newWidth = (std::max)(uint32_t{ 1 }, static_cast<uint32_t>(std::ceil(width * scale)));
         auto newHeight = (std::max)(uint32_t{ 1 }, static_cast<uint32_t>(std::ceil(height * scale)));
         if (newWidth == surfaceWidth && newHeight == surfaceHeight && newWidthDip == surfaceWidthDip
-            && newHeightDip == surfaceHeightDip && scale == surfaceScaleX) return {};
-        EditorResizeResult result{ true, newWidthDip != surfaceWidthDip };
+            && newHeightDip == surfaceHeightDip && scale == surfaceScaleX) return false;
         if (newWidth != surfaceWidth || newHeight != surfaceHeight)
             drawingSurface.Resize({static_cast<int32_t>(newWidth), static_cast<int32_t>(newHeight)});
         ResetTargets();
@@ -198,7 +197,7 @@ namespace winrt::Folia
         surfaceWidthDip = newWidthDip;
         surfaceHeightDip = newHeightDip;
         surfaceScaleX = surfaceScaleY = scale;
-        return result;
+        return true;
     }
 
     void EditorRenderResources::EnsureFrameResources(EditorStyleSheet const& styleSheet)

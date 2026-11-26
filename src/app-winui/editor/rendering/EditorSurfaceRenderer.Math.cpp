@@ -20,7 +20,7 @@ namespace winrt::Folia
     bool EditorSurfaceRenderer::MatchesMathPreparationContext(EditorMathPreparationContext const& context) const
     {
         return context.ready && resources.Ready() && context.themeRevision == themeRevision
-            && context.surfaceWidth == resources.surfaceWidthDip && context.media == mediaSettings;
+            && context.media == mediaSettings;
     }
 
     std::unique_ptr<EditorMathPreparation> EditorSurfaceRenderer::PrepareMath(
@@ -166,8 +166,8 @@ namespace winrt::Folia
         mathJax = std::move(preparation->math);
         preparedDocument = std::move(preparation->document);
         if (preparedDocument) totalDocumentHeight = preparedDocument->totalHeight;
-        // The viewport path only creates visible visual resources from the
-        // already measured geometry; reflow after edits remains fragment-local.
+        // The first frame reconciles the measured document with the current
+        // viewport width and retains the math cache across that reflow.
         AttachMathCompletion();
     }
 

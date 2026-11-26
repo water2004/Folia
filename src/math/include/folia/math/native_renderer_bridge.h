@@ -101,6 +101,10 @@ int FoliaNativeMathResultFragmentMetrics(
     FoliaNativeMathResult const* result,
     FoliaNativeMathSvgMetrics* metrics);
 
+// Returns 1 and the inclusive lower bound in CSS pixels when this result can
+// be reused at other widths. Otherwise it is valid at its input width only.
+int FoliaNativeMathResultReusableWidthFrom(FoliaNativeMathResult const* result, double* width);
+
 char const* FoliaNativeMathResultSvg(
     FoliaNativeMathResult const* result,
     size_t* size);

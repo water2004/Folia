@@ -17,6 +17,7 @@ struct FoliaNativeMathResult {
     std::string svg;
     std::string error;
     std::optional<FoliaNativeMathSvgMetrics> fragmentMetrics;
+    std::optional<double> reusableWidthFrom;
 };
 
 extern "C" FoliaNativeMathStatus
@@ -130,6 +131,7 @@ FoliaNativeMathStatus renderSvgBatch(FoliaNativeMathRenderer *renderer,
                             FoliaNativeMathSvgMetrics{metrics.width, metrics.height,
                                                      metrics.baseline};
                     }
+                    result->reusableWidthFrom = rendered[i].result->reusableWidthFrom;
                     result->svg = std::move(rendered[i].result->svg);
                     statuses[target] = FOLIA_NATIVE_MATH_OK;
                 }
@@ -209,6 +211,12 @@ extern "C" int FoliaNativeMathResultFragmentMetrics(FoliaNativeMathResult const 
     if (!result || !result->fragmentMetrics)
         return 0;
     *metrics = *result->fragmentMetrics;
+    return 1;
+}
+
+extern "C" int FoliaNativeMathResultReusableWidthFrom(FoliaNativeMathResult const *result, double *width) {
+    if (!result || !width || !result->reusableWidthFrom) return 0;
+    *width = *result->reusableWidthFrom;
     return 1;
 }
 

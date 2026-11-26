@@ -55,11 +55,13 @@ class SceneOutput final : public core::MathOutputJaxService {
     LiteMeasurement measurement_;
     DOMDocumentRef htmlDocument_;
     common::HtmlMeasurement htmlMeasurement_;
+    std::optional<double> reusableWidthFrom_;
 
     common::CommonOutputJaxConfig config() const;
 
   public:
     SceneOutput(common::FontRepository const &, adaptors::lite::LiteAdaptor &, RenderOptions);
+    std::optional<double> reusableWidthFrom() const { return reusableWidthFrom_; }
     scene::Scene typeset(core::MathItem &, mml::MmlDocument &) override;
     scene::Scene escaped(core::MathItem &, mml::MmlDocument &) override;
     BBox getBBox(core::MathItem &, mml::MmlDocument &) override;
@@ -98,8 +100,13 @@ struct Renderer::State {
             throw RenderError("WrongThread", "Renderer used from a non-owning thread");
     }
 
-    output::scene::Scene buildScene(std::u16string_view source, RenderOptions options,
-                                   fonts::NewcmFontDataBundle const& fontData) {
+    struct PreparedScene {
+        scene::Scene scene;
+        std::optional<double> reusableWidthFrom;
+    };
+
+    PreparedScene buildScene(std::u16string_view source, RenderOptions options,
+                             fonts::NewcmFontDataBundle const& fontData) {
         cancellation::checkpoint(cancellation::CheckpointStage::TeX);
         mml::MmlDocument document;
         tex::TeXRequest request(*input, document.factory());
@@ -117,7 +124,7 @@ struct Renderer::State {
         cancellation::checkpoint(cancellation::CheckpointStage::Scene);
         if (!expression.typesetRoot)
             throw std::logic_error("Common output did not produce an owned Scene");
-        return std::move(*expression.typesetRoot);
+        return {std::move(*expression.typesetRoot), output.reusableWidthFrom()};
     }
 };
 
@@ -153,6 +160,7 @@ scene::Scene SceneOutput::typeset(core::MathItem &math, mml::MmlDocument &docume
     common::LayoutJob job(document, config(), measurement_, svg::SvgWrapperFactory::defaultNodes(),
                           makeLinebreakVisitor);
     auto result = job.buildScene();
+    reusableWidthFrom_ = job.jax().reusableWidthFrom();
     cancellation::checkpoint(cancellation::CheckpointStage::Scene);
     return result;
 }
@@ -185,7 +193,7 @@ RenderResult Renderer::State::render(std::u16string_view source, std::stop_token
     validateOptions(options);
     cancellation::Scope scope(request);
     try {
-        auto completedScene = buildScene(source, options, fontData);
+        auto [completedScene, reusableWidthFrom] = buildScene(source, options, fontData);
         cancellation::checkpoint(cancellation::CheckpointStage::Serialization);
         svg::SvgWriteOptions writeOptions;
         writeOptions.font_cache = svg::FontCacheMode::none;
@@ -194,7 +202,7 @@ RenderResult Renderer::State::render(std::u16string_view source, std::stop_token
         writeOptions.id_prefix = options.svgIdPrefix;
         auto svgText = svg::write(completedScene, writeOptions);
         request.checkpoint();
-        return {std::move(svgText), std::move(completedScene)};
+        return {std::move(svgText), std::move(completedScene), reusableWidthFrom};
     } catch (cancellation::Cancelled const &) {
         unusable = true;
         throw RenderError("Cancelled", "Math rendering cancelled; renderer session is unusable");
@@ -216,9 +224,9 @@ scene::Scene Renderer::State::renderScene(std::u16string_view source, std::stop_
     cancellation::Scope scope(request);
     try {
         const auto fontData = fonts::makeNewcmFontData(fontSource);
-        auto result = buildScene(source, options, fontData);
+        auto prepared = buildScene(source, options, fontData);
         request.checkpoint();
-        return result;
+        return std::move(prepared.scene);
     } catch (cancellation::Cancelled const &) {
         unusable = true;
         throw RenderError("Cancelled", "Math rendering cancelled; renderer session is unusable");

@@ -18,6 +18,21 @@ struct EditorRendererTestAccess {
     static auto const& Display(EditorSurfaceRenderer& renderer) {
         return renderer.preparedDocument->blocks.front().Visuals().display.text;
     }
+    static auto MathFragments(EditorSurfaceRenderer& renderer, std::size_t blockIndex) {
+        std::vector<std::uint64_t> ids;
+        auto const& block = renderer.preparedDocument->blocks[blockIndex];
+        for (auto const& overlay : block.Visuals().display.mathOverlays) {
+            ids.push_back(overlay.fragment.renderId);
+            boost::ut::expect(bool(renderer.mathJax.GetSvg(overlay.fragment.renderId)));
+        }
+        return ids;
+    }
+    static void CompleteMathWork(EditorSurfaceRenderer& renderer) {
+        renderer.mathJax.WaitForIdle();
+        // This fixture drives frames synchronously while the UI dispatch queue
+        // is occupied by the test. Publish the worker completion to the pass.
+        ++renderer.embeddedGeneration;
+    }
     static void CheckVisibleGlyphs(EditorSurfaceRenderer& renderer) {
         auto const& block = renderer.preparedDocument->blocks.front();
         folia::platform::editor::EditorTextPaintStatistics stats;
@@ -98,6 +113,43 @@ void CheckLongParagraph(std::size_t bytes) {
         expect(session.Selection() == folia::TextSelection::caret(caret));
 }
 suite large_document_interaction_tests = [] {
+    "viewport reflow keeps inline and display math drawable on every frame"_test = [] {
+        winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel panel;
+        EditorSession session;
+        session.SetText(L"Start here.\n\nA formula $x+y$ in a paragraph.\n\n$$\na+b=c\\tag{4.9}\n$$");
+        const auto source = session.TextUtf8();
+        const auto selection = session.Selection();
+        EditorSurfaceRenderer renderer;
+        renderer.Initialize(panel);
+        renderer.Resize(panel, 980, 600);
+        auto context = renderer.CaptureMathPreparationContext();
+        auto preparation = EditorSurfaceRenderer::PrepareMath(session.RenderFrame(), context, {}, {});
+        renderer.Resize(panel, 920, 600);
+        renderer.AdoptMathPreparation(std::move(preparation));
+        renderer.Render(session.RenderFrame());
+        EditorRendererTestAccess::CompleteMathWork(renderer);
+        renderer.Render(session.RenderFrame());
+        EditorRendererTestAccess::CompleteMathWork(renderer);
+        renderer.Render(session.RenderFrame());
+        auto inlineIds = EditorRendererTestAccess::MathFragments(renderer, 1);
+        auto displayIds = EditorRendererTestAccess::MathFragments(renderer, 2);
+        expect(fatal(!inlineIds.empty() && !displayIds.empty()));
+
+        for (auto width : {650, 640, 630, 890, 910}) {
+            renderer.Resize(panel, width, 600);
+            renderer.Render(session.RenderFrame());
+            expect(EditorRendererTestAccess::MathFragments(renderer, 1) == inlineIds);
+            expect(!EditorRendererTestAccess::MathFragments(renderer, 2).empty());
+        }
+        EditorRendererTestAccess::CompleteMathWork(renderer);
+        renderer.Render(session.RenderFrame());
+        EditorRendererTestAccess::CompleteMathWork(renderer);
+        renderer.Render(session.RenderFrame());
+        auto finalDisplay = EditorRendererTestAccess::MathFragments(renderer, 2);
+        expect(!finalDisplay.empty() && finalDisplay != displayIds);
+        expect(session.Selection() == selection && session.TextUtf8() == source);
+    };
+
     "caret presentation invalidates layout only when CST presentation changes"_test = [] {
         for (auto text : {L"left **bold** right", L"> left **bold** right", L"- left **bold** right",
             L"left [title](url) right", L"left ![alt](absent.png) right"}) {

@@ -20,6 +20,9 @@ struct RenderOptions {
 struct RenderResult {
     std::string svg;
     output::scene::Scene scene;
+    // Identical geometry for all container widths at or above this bound.
+    // An empty value means the rendered geometry is valid at the input width only.
+    std::optional<double> reusableWidthFrom;
 };
 struct RenderInput {
     std::u16string_view tex;

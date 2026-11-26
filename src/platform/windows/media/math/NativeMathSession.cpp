@@ -173,6 +173,9 @@ std::vector<MathJaxSvg> NativeMathSession::RenderBatch(std::span<NativeMathInput
             {
                 results.push_back(ParseMathJaxSvgOutput(std::string_view(bytes ? bytes : "", size),
                                                         input.display, input.em, input.containerWidth));
+                double width = 0;
+                if (FoliaNativeMathResultReusableWidthFrom(nativeResult, &width))
+                    results.back().reusableWidthFrom = width;
             }
             catch (std::bad_alloc const &)
             {

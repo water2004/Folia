@@ -59,11 +59,48 @@ namespace folia::platform
         auto current = CurrentState();
         if (!current) return {};
         std::scoped_lock lock(current->mutex);
-        auto key = State::MakeKey(tex, display, em, containerWidth, color, purpose);
-        auto found = current->index.find(key);
+        auto found = current->index.find(State::MakeKey(tex, display, em, color, purpose));
         if (found == current->index.end()) return {};
-        if (current->activeOwner) current->blockEntries.insert(found->second->id);
-        return found->second->result;
+        auto entry = State::FindCompatible(found->second, containerWidth);
+        if (!entry) return {};
+        if (current->activeOwner) current->blockEntries.insert(entry->id);
+        return entry->result;
+    }
+
+    MathJaxLayoutResult MathJaxRenderer::Layout(std::string_view tex, bool display, float em,
+        float width, std::string_view color, bool visible, MathRenderPurpose purpose)
+    {
+        auto current = CurrentState();
+        if (!current) return {};
+        auto requested = visible ? current->Request(tex, display, em, width, color, {}, purpose, nullptr, true) : nullptr;
+        std::scoped_lock lock(current->mutex);
+        auto found = requested ? current->index.find(requested->key)
+            : current->index.find(State::MakeKey(tex, display, em, color, purpose));
+        if (found == current->index.end()) return {{}, true};
+        auto desired = State::FindCompatible(found->second, width);
+        auto retain = [&](const std::shared_ptr<State::Entry>& entry, bool pending) {
+            if (current->activeOwner) current->blockEntries.insert(entry->id);
+            return MathJaxLayoutResult{entry->result, pending};
+        };
+        if (desired && desired->result && (!visible || current->ReadyToDraw(*desired)
+            || desired->result->errorKind == MathJaxErrorKind::Infrastructure)) return retain(desired, false);
+
+        std::shared_ptr<State::Entry> drawn;
+        for (auto const& variant : found->second | std::views::values)
+            if (variant != desired && current->ReadyToDraw(*variant)
+                && (!drawn || std::abs(variant->width - width) < std::abs(drawn->width - width))) drawn = variant;
+        if (!drawn) return desired ? retain(desired, !desired->result) : MathJaxLayoutResult{{}, true};
+        if (auto replacement = desired ? desired : requested; visible && replacement)
+        {
+            // Keep drawing the old SVG until the replacement payload arrives.
+            // The replacement may still be rendering or already on disk.
+            if (current->activeOwner) current->blockEntries.insert(replacement->id);
+            replacement->viewportDemand = current->viewportGeneration + 1;
+            for (auto id : replacement->fragmentIds)
+                if (auto svg = current->svgRefs.find(id); svg != current->svgRefs.end() && !svg->second.resident)
+                    current->QueueReadLocked(id, svg->second);
+        }
+        return retain(drawn, true);
     }
 
     std::shared_ptr<MathJaxSvg const> MathJaxRenderer::Prepare(
@@ -157,7 +194,7 @@ namespace folia::platform
         auto current = CurrentState();
         if (!current) return result;
         std::scoped_lock lock(current->mutex);
-        result.entries = current->index.size();
+        result.entries = current->entriesById.size();
         result.svgBytes = current->residentSvgBytes + current->previewSvgBytes;
         result.nativeRenders = current->nativeRenders;
         result.nativeBatches = current->nativeBatches;

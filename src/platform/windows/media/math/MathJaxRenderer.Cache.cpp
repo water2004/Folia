@@ -17,20 +17,36 @@ namespace folia::platform
     }
 
     std::string MathJaxRenderer::State::MakeKey(std::string_view tex, bool display,
-        float em, float width, std::string_view color, MathRenderPurpose purpose)
+        float em, std::string_view color, MathRenderPurpose purpose)
     {
         std::string key = std::to_string(tex.size()) + ':' + std::string(tex);
         key.push_back(display ? '1' : '0');
         key.append(reinterpret_cast<char const*>(&em), sizeof(em));
-        key.append(reinterpret_cast<char const*>(&width), sizeof(width));
         key.push_back(purpose == MathRenderPurpose::Preview ? 'P' : 'D');
         key.append(color);
         return key;
     }
 
+    std::uint32_t MathJaxRenderer::State::WidthKey(float width)
+    {
+        return std::bit_cast<std::uint32_t>(width);
+    }
+
+    std::shared_ptr<MathJaxRenderer::State::Entry> MathJaxRenderer::State::FindCompatible(
+        WidthVariants const& variants, float width)
+    {
+        auto exact = variants.find(WidthKey(width));
+        if (exact != variants.end() && exact->second->result) return exact->second;
+        for (auto const& variant : variants | std::views::values)
+            if (variant->result && variant->result->errorKind != MathJaxErrorKind::Infrastructure
+                && variant->result->reusableWidthFrom && width >= *variant->result->reusableWidthFrom)
+                return variant;
+        return exact == variants.end() ? std::shared_ptr<Entry>{} : exact->second;
+    }
+
     std::shared_ptr<MathJaxRenderer::State::Entry> MathJaxRenderer::State::Request(
         std::string_view tex, bool display, float em, float width,
-        std::string_view color, std::stop_token stop, MathRenderPurpose purpose, std::vector<Job>* batch)
+        std::string_view color, std::stop_token stop, MathRenderPurpose purpose, std::vector<Job>* batch, bool visible)
     {
         if (stop.stop_requested()) throw winrt::hresult_canceled();
         if (purpose != MathRenderPurpose::Document && purpose != MathRenderPurpose::Preview)
@@ -39,14 +55,21 @@ namespace folia::platform
         if (stopping || workerFinished) throw winrt::hresult_canceled();
         if (!stop.stop_possible()) stop = preparationStop;
         if (stop.stop_requested()) throw winrt::hresult_canceled();
-        auto key = MakeKey(tex, display, em, width, color, purpose);
+        auto key = MakeKey(tex, display, em, color, purpose);
         if (stop.stop_requested()) throw winrt::hresult_canceled();
 
-        if (auto found = index.find(key); found != index.end())
-        {
-            auto entry = found->second;
+        auto retain = [&](const std::shared_ptr<Entry>& entry) {
             if (activeOwner) blockEntries.insert(entry->id);
             return entry;
+        };
+        if (auto found = index.find(key); found != index.end())
+        {
+            if (auto entry = FindCompatible(found->second, width)) return retain(entry);
+            // Finish one width of this formula while input is moving. The
+            // completion repaint will request the latest width if necessary.
+            if (visible)
+                for (const auto& entry : found->second | std::views::values)
+                    if (entry->pending) return retain(entry);
         }
 
         // Acquire the runtime lease on the requester's thread before the
@@ -57,20 +80,14 @@ namespace folia::platform
         entry->id = nextEntryId++;
         if (entry->id == 0) entry->id = nextEntryId++;
         entry->key = key;
+        entry->width = width;
         entry->purpose = purpose;
         entry->unowned = !activeOwner.has_value();
-        bool inIndex = false;
         bool byId = false;
         bool inBlock = false;
         try
         {
-            inIndex = index.emplace(key, entry).second;
-            if (!inIndex)
-            {
-                auto existing = index.at(key);
-                if (activeOwner) blockEntries.insert(existing->id);
-                return existing;
-            }
+            index[key].emplace(WidthKey(width), entry);
             byId = entriesById.emplace(entry->id, entry).second;
             if (!byId) throw std::logic_error("Duplicate MathJax cache entry id");
             if (activeOwner) inBlock = blockEntries.insert(entry->id).second;
@@ -90,7 +107,10 @@ namespace folia::platform
         {
             if (inBlock) blockEntries.erase(entry->id);
             if (byId) entriesById.erase(entry->id);
-            if (inIndex) index.erase(key);
+            if (auto bucket = index.find(key); bucket != index.end()) {
+                bucket->second.erase(WidthKey(width));
+                if (bucket->second.empty()) index.erase(bucket);
+            }
             throw;
         }
         ++pending;
@@ -148,8 +168,10 @@ namespace folia::platform
     {
         cancelAfterUnlock.push_back(entry);
         entry->removed = true;
-        auto found = index.find(entry->key);
-        if (found != index.end() && found->second->id == entry->id) index.erase(found);
+        if (auto bucket = index.find(entry->key); bucket != index.end()) {
+            bucket->second.erase(WidthKey(entry->width));
+            if (bucket->second.empty()) index.erase(bucket);
+        }
         entriesById.erase(entry->id);
         for (auto owner : entry->owners)
             if (auto membership = ownerEntries.find(owner); membership != ownerEntries.end())
@@ -275,7 +297,19 @@ namespace folia::platform
 
     bool MathJaxRenderer::State::NeedsSvgLocked(std::uint64_t id, SvgRef const& ref) const
     {
-        return ref.fullReaders != 0 || visibleSvgIds.contains(id);
+        if (ref.fullReaders != 0 || visibleSvgIds.contains(id)) return true;
+        const auto entry = entriesById.find(ref.entryId);
+        return entry != entriesById.end() && entry->second->viewportDemand != 0
+            && entry->second->viewportDemand >= viewportGeneration;
+    }
+
+    bool MathJaxRenderer::State::ReadyToDraw(Entry const& entry) const
+    {
+        return entry.result && static_cast<bool>(*entry.result)
+            && std::ranges::all_of(entry.fragmentIds, [&](std::uint64_t id) {
+                auto found = svgRefs.find(id);
+                return found != svgRefs.end() && (found->second.resident || found->second.preview);
+            });
     }
 
     void MathJaxRenderer::State::ReleaseUnusedSvgLocked()
@@ -316,6 +350,7 @@ namespace folia::platform
     {
         std::scoped_lock lock(mutex);
         if (stopping) return;
+        ++viewportGeneration;
         std::unordered_set<std::uint64_t> wanted;
         wanted.reserve(ids.size());
         for (auto id : ids)
@@ -432,19 +467,19 @@ namespace folia::platform
 
     void MathJaxRenderer::State::Stop() noexcept
     {
-        std::unordered_map<std::string, std::shared_ptr<Entry>> oldEntries;
+        std::unordered_map<std::uint64_t, std::shared_ptr<Entry>> oldEntries;
         {
             std::scoped_lock lock(mutex);
             if (stopping) return;
             stopping = true;
             completion = {};
-            for (auto& [key, entry] : index)
+            for (auto& [id, entry] : entriesById)
             {
                 entry->removed = true;
                 entry->pending = false;
             }
-            oldEntries.swap(index);
-            entriesById.clear();
+            oldEntries.swap(entriesById);
+            index.clear();
             svgRefs.clear();
             visibleSvgIds.clear();
             residentSvgIds.clear();

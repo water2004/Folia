@@ -51,12 +51,19 @@ namespace folia::platform
         float height = 0.0f;
         float verticalAlign = 0.0f;
         bool display = false;
+        std::optional<double> reusableWidthFrom;
 
         explicit operator bool() const
         {
             return errorKind != MathJaxErrorKind::Infrastructure
                 && !fragments.empty() && width > 0.0f && height > 0.0f;
         }
+    };
+
+    struct MathJaxLayoutResult
+    {
+        std::shared_ptr<MathJaxSvg const> svg;
+        bool pending = false;
     };
 
     // Document-owned, asynchronous native math cache. All native rendering
@@ -102,6 +109,10 @@ namespace folia::platform
         std::shared_ptr<MathJaxSvg const> Lookup(
             std::string_view tex, bool display, float em, float containerWidth,
             std::string_view color, MathRenderPurpose purpose = MathRenderPurpose::Document);
+        // Visible layout can keep drawing a completed width variant while a
+        // replacement is being prepared. Offscreen layout only does lookups.
+        MathJaxLayoutResult Layout(std::string_view tex, bool display, float em, float containerWidth,
+            std::string_view color, bool visible, MathRenderPurpose purpose);
         std::shared_ptr<MathJaxSvg const> Prepare(
             std::string_view tex,
             bool display,

@@ -6,12 +6,6 @@
 
 namespace winrt::Folia
 {
-    struct EditorResizeResult
-    {
-        bool resized = false;
-        bool widthChanged = false;
-    };
-
     struct EditorRenderResources
     {
         void Initialize(winrt::Microsoft::UI::Xaml::FrameworkElement const& host, EditorStyleSheet const& styleSheet);
@@ -19,7 +13,7 @@ namespace winrt::Folia
         // Background measurement uses the production fonts and DirectWrite
         // without creating a D3D device, swap chain, brushes or paint target.
         void InitializeTextMeasurement(EditorStyleSheet const& styleSheet, float widthDip, float heightDip);
-        EditorResizeResult Resize(winrt::Microsoft::UI::Xaml::FrameworkElement const& host, double width, double height);
+        bool Resize(winrt::Microsoft::UI::Xaml::FrameworkElement const& host, double width, double height);
         void RebuildTextFormats(EditorStyleSheet const& styleSheet);
         void ResetBrushes();
         void ResetTargets();

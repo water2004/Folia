@@ -270,9 +270,7 @@ namespace folia::platform
 
         {
             std::scoped_lock lock(mutex);
-            auto current = index.find(entry->key);
-            bool valid = !stopping && current != index.end()
-                && current->second->id == entry->id && !entry->cancel.stop_requested();
+            bool valid = !stopping && !entry->removed && !entry->cancel.stop_requested();
             if (valid && !canceled && cached)
             {
                 if (entry->purpose == MathRenderPurpose::Document
@@ -328,7 +326,7 @@ namespace folia::platform
                     AddSaturated(deadBytes, range.size);
                 }
                 if (!written.empty()) compactionRequested = true;
-                if (!entry->removed && current != index.end() && current->second->id == entry->id)
+                if (!entry->removed)
                     RemoveEntryLocked(entry, cancelAfterUnlock);
                 entry->pending = false;
                 // Canceled/removed work publishes no new visible state. A
@@ -508,7 +506,7 @@ namespace folia::platform
         {
             std::scoped_lock lock(mutex);
             stopping = true;
-            for (auto& [key, entry] : index)
+            for (auto& [id, entry] : entriesById)
             {
                 entry->removed = true;
                 entry->pending = false;

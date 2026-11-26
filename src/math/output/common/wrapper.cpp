@@ -1385,6 +1385,7 @@ std::pair<std::string, double> CommonWrapper::processIndent(std::string_view ali
                 indent.erase(0, 2);
         }
     }
+    if (!width && indent.contains('%')) jax().requireExactContainerWidth();
     return {align,
             length2em(LengthInput(decodeUtf8(indent)), width.value_or(metrics().containerWidth))};
 }

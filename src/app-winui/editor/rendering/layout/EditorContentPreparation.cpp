@@ -278,10 +278,8 @@ namespace winrt::Folia
                 auto color = SvgColor(foreground);
                 // highPriority identifies the visible band. Offscreen layout
                 // reuses existing geometry and must not restart canceled jobs.
-                auto math = highPriority
-                    ? mathJax.Render(tex, displayMath, fontSize, containerWidth, color, {}, purpose)
-                    : mathJax.Lookup(tex, displayMath, fontSize, containerWidth, color, purpose);
-                display.pendingMath = display.pendingMath || !math;
+                auto [math, pending] = mathJax.Layout(tex, displayMath, fontSize, containerWidth, color, highPriority, purpose);
+                display.pendingMath = display.pendingMath || pending;
                 auto delimiterLength = item.special().display == folia::MathDisplayMode::Block
                     ? std::size_t{0}
                     : item.special().math_delim == folia::MathDelimiter::InlineParen ? std::size_t{2} : std::size_t{1};

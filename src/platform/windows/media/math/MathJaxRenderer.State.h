@@ -18,6 +18,8 @@ namespace folia::platform
         {
             std::uint64_t id = 0;
             std::string key;
+            float width = 0.0f;
+            std::uint64_t viewportDemand = 0;
             MathRenderPurpose purpose = MathRenderPurpose::Document;
             std::unordered_set<std::uint64_t> owners;
             std::vector<std::uint64_t> fragmentIds;
@@ -56,11 +58,15 @@ namespace folia::platform
         };
 
         void StartWorker();
+        using WidthVariants = std::unordered_map<std::uint32_t, std::shared_ptr<Entry>>;
         static std::string MakeKey(std::string_view tex, bool display, float em,
-            float width, std::string_view color, MathRenderPurpose purpose);
+            std::string_view color, MathRenderPurpose purpose);
+        static std::uint32_t WidthKey(float width);
+        static std::shared_ptr<Entry> FindCompatible(WidthVariants const& variants, float width);
+        bool ReadyToDraw(Entry const& entry) const;
         std::shared_ptr<Entry> Request(std::string_view tex, bool display, float em,
             float width, std::string_view color, std::stop_token stop,
-            MathRenderPurpose purpose, std::vector<Job>* batch = nullptr);
+            MathRenderPurpose purpose, std::vector<Job>* batch = nullptr, bool visible = false);
         void SubmitBatch(std::vector<Job>& items);
         void CompleteBatch(Job const& job, NativeMathSession& session,
             SvgNormalizer& normalizer, std::unique_ptr<MathSvgStore>& store,
@@ -104,7 +110,7 @@ namespace folia::platform
         std::condition_variable_any wake;
         std::condition_variable_any ready;
         std::condition_variable_any idle;
-        std::unordered_map<std::string, std::shared_ptr<Entry>> index;
+        std::unordered_map<std::string, WidthVariants> index;
         std::unordered_map<std::uint64_t, std::shared_ptr<Entry>> entriesById;
         std::unordered_map<std::uint64_t, SvgRef> svgRefs;
         std::unordered_set<std::uint64_t> visibleSvgIds;
@@ -133,6 +139,7 @@ namespace folia::platform
         std::uint64_t deadBytes = 0;
         std::uint64_t nextEntryId = 1;
         std::uint64_t nextSvgGeneration = 1;
+        std::uint64_t viewportGeneration = 0;
         bool stopping = false;
         bool workerFinished = false;
         bool workerBusy = false;
