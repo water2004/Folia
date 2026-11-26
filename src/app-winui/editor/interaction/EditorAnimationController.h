@@ -9,7 +9,7 @@ namespace winrt::Folia {
     public:
         ~EditorAnimationController();
         void Attach(EditorSurfaceRenderer& renderer, EditorScrollController& scroll,
-            Microsoft::UI::Dispatching::DispatcherQueue const& queue, HWND hwnd, std::function<void()> render);
+            Microsoft::UI::Dispatching::DispatcherQueue const& queue, std::function<void()> render);
         void Detach();
         void RequestFrame();
         void PrepareRender();

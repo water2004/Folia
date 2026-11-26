@@ -5,7 +5,7 @@ import std;
 namespace winrt::Folia {
     EditorAnimationController::~EditorAnimationController() { Detach(); }
     void EditorAnimationController::Attach(EditorSurfaceRenderer& value, EditorScrollController& scrollValue,
-        Microsoft::UI::Dispatching::DispatcherQueue const& queue, HWND hwnd, std::function<void()> render) {
+        Microsoft::UI::Dispatching::DispatcherQueue const& queue, std::function<void()> render) {
         Detach(); renderer = &value; scroll = &scrollValue;
         renderer->FocusCaret(false);
         uiSettings = Windows::UI::ViewManagement::UISettings();
@@ -15,7 +15,7 @@ namespace winrt::Folia {
         wake.Tick([weak](auto const&, auto const&) {
             if (auto current = weak.lock(); current && current->owner) current->owner->RequestFrame();
         });
-        scheduler.Attach(queue, hwnd,
+        scheduler.Attach(
             [weak, render = std::move(render)](float elapsed) {
                 auto current = weak.lock();
                 if (!current || !current->owner) return false;

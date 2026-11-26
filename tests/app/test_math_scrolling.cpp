@@ -3,7 +3,6 @@
 #include <winrt/Microsoft.UI.Xaml.Hosting.h>
 #include "editor/rendering/EditorSurfaceRenderer.h"
 #include "editor/session/EditorSession.h"
-#include "editor/interaction/EditorFrameScheduler.h"
 #include "editor/rendering/layout/EditorContentPreparation.h"
 
 using namespace boost::ut;
@@ -96,39 +95,6 @@ namespace
             expect(display.pendingMath);
             expect(math.Snapshot().entries == 0_u);
             expect(math.Snapshot().nativeBatches == 0_u);
-        };
-
-        "math scrolling frame scheduling lets ordinary UI work run"_test = []
-        {
-            auto queue = winrt::Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread();
-            EditorFrameScheduler scheduler;
-            std::size_t frames = 0;
-            std::size_t inputAtFrame = 0;
-            scheduler.Attach(queue, nullptr, [&](float)
-            {
-                ++frames;
-                if (frames == 1) queue.TryEnqueue([&] { inputAtFrame = frames; });
-                if (frames < 12) scheduler.Start();
-                // A costly frame can outlast the display interval; another
-                // scroll update may already have requested its successor.
-                std::this_thread::sleep_for(std::chrono::milliseconds(25));
-                return frames < 12;
-            });
-            scheduler.Start();
-            auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(3);
-            while ((!inputAtFrame || frames < 12) && std::chrono::steady_clock::now() < deadline)
-            {
-                MSG message{};
-                if (::PeekMessageW(&message, nullptr, 0, 0, PM_REMOVE))
-                {
-                    ::TranslateMessage(&message);
-                    ::DispatchMessageW(&message);
-                }
-            }
-            scheduler.Detach();
-            expect(frames == 12_u);
-            expect(inputAtFrame > 0_u && inputAtFrame <= 2_u);
-            std::cout << "math scroll input served at frame=" << inputAtFrame << '\n';
         };
 
         "math scrolling returns to input queue before deferred layout frames"_test = []

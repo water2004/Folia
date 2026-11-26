@@ -32,7 +32,7 @@ namespace {
             };
             std::size_t frames = 0, workAtFrame = 0;
             EditorFrameScheduler scheduler;
-            scheduler.Attach(queue, ::GetDesktopWindow(), [&](float) {
+            scheduler.Attach([&](float) {
                 ++frames;
                 workAtFrame = state->count;
                 return false;
@@ -49,10 +49,9 @@ namespace {
         };
 
         "frame scheduling samples display cadence without rendering cost"_test = [] {
-            auto queue = winrt::Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread();
             std::vector<float> intervals;
             EditorFrameScheduler scheduler;
-            scheduler.Attach(queue, ::GetDesktopWindow(), [&](float elapsed) {
+            scheduler.Attach([&](float elapsed) {
                 expect(std::isfinite(elapsed) && elapsed > 0);
                 intervals.push_back(elapsed);
                 return intervals.size() < 40;
@@ -70,19 +69,42 @@ namespace {
             // These timings diagnose pacing; they are not displayed-frame FPS.
         };
 
-        "frame scheduling detach cancels pending timing and dispatch"_test = [] {
-            auto queue = winrt::Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread();
+        "frame scheduling detach cancels a pending compositor or GPU wait"_test = [] {
             for (int cycle = 0; cycle < 4; ++cycle) {
                 EditorFrameScheduler scheduler;
                 std::size_t frames = 0;
-                scheduler.Attach(queue, ::GetDesktopWindow(), [&](float) { ++frames; return true; });
+                scheduler.Attach([&](float) { ++frames; return true; });
                 scheduler.Start();
-                std::this_thread::sleep_for(std::chrono::milliseconds(12));
+                bool anotherFrame = false;
+                auto revoker = winrt::Microsoft::UI::Xaml::Media::CompositionTarget::Rendering(winrt::auto_revoke,
+                    [&](auto const&, auto const&) { anotherFrame = true; });
                 auto start = std::chrono::steady_clock::now();
                 scheduler.Detach();
                 expect(std::chrono::steady_clock::now() - start < std::chrono::milliseconds(500));
+                PumpFrames([&] { return anotherFrame; });
+                expect(anotherFrame);
                 expect(frames == 0_u);
             }
+        };
+
+        "math scrolling frame scheduling lets ordinary UI work run"_test = [] {
+            auto queue = winrt::Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread();
+            EditorFrameScheduler scheduler;
+            std::size_t frames = 0;
+            std::size_t inputAtFrame = 0;
+            scheduler.Attach([&](float) {
+                ++frames;
+                if (frames == 1) queue.TryEnqueue([&] { inputAtFrame = frames; });
+                if (frames < 12) scheduler.Start();
+                // A costly frame can outlast the display interval.
+                std::this_thread::sleep_for(std::chrono::milliseconds(25));
+                return frames < 12;
+            });
+            scheduler.Start();
+            PumpFrames([&] { return inputAtFrame && frames == 12; });
+            scheduler.Detach();
+            expect(frames == 12_u);
+            expect(inputAtFrame > 0_u && inputAtFrame <= 2_u);
         };
     };
 }

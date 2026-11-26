@@ -2,38 +2,28 @@
 
 namespace winrt::Folia
 {
-    // Dispatches UI-thread animation work at the compositor's display cadence.
+    // Runs animation work during the WinUI render pass.
     struct EditorFrameScheduler
     {
         using FrameCallback = std::function<bool(float elapsedSeconds)>;
 
+        EditorFrameScheduler() = default;
+        EditorFrameScheduler(EditorFrameScheduler const&) = delete;
+        EditorFrameScheduler& operator=(EditorFrameScheduler const&) = delete;
         ~EditorFrameScheduler();
-        void Attach(
-            winrt::Microsoft::UI::Dispatching::DispatcherQueue const& dispatcher,
-            HWND windowHandle,
-            FrameCallback frameCallback);
+        void Attach(FrameCallback frameCallback);
         void Detach();
         void Start();
         void Stop();
 
     private:
-        struct FrameDispatchState;
+        struct InitialFrame { EditorFrameScheduler* owner; };
+        void OnFrame();
 
-        void StartThread();
-        void StopThread();
-        void RequestFrame();
-        void OnFrame(std::uint64_t generation);
-
-        std::shared_ptr<FrameDispatchState> dispatchState;
-        std::jthread frameThread;
-        HANDLE frameRequestEvent = nullptr;
-        HANDLE schedulerStopEvent = nullptr;
-        HANDLE framePacingTimer = nullptr;
-        HWND windowHandle = nullptr;
+        winrt::event_token renderingToken{};
+        std::shared_ptr<InitialFrame> initialFrame;
         FrameCallback frameCallback;
-        std::uint64_t generation = 0;
         std::chrono::steady_clock::time_point lastFrame{};
-        bool running = false;
         bool compositorBoostActive = false;
     };
 }

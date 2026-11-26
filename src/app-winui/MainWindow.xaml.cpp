@@ -421,7 +421,7 @@ namespace winrt::Folia::implementation
         scrollController.Attach(editorRenderer, EditorScrollBar(), EditorScrollBarColumn(), [weak = get_weak()] {
             if (auto owner = weak.get(); owner && !owner->windowClosed) owner->animationController.RequestFrame();
         });
-        animationController.Attach(editorRenderer, scrollController, DispatcherQueue(), WindowHandle(), render);
+        animationController.Attach(editorRenderer, scrollController, DispatcherQueue(), render);
         editorRenderer.SetInvalidateCallback(render);
         RenderEditorSurface();
         EditorSurface().Focus(Microsoft::UI::Xaml::FocusState::Programmatic);

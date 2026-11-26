@@ -1,348 +1,78 @@
 #include "pch.h"
 #include "editor/interaction/EditorFrameScheduler.h"
 
-import folia.platform.editor_frame_pacing;
-
 namespace winrt::Folia
 {
     namespace
     {
-        struct CompositorClockApi
-        {
-            CompositorClockApi() = default;
-            CompositorClockApi(CompositorClockApi const&) = delete;
-            CompositorClockApi& operator=(CompositorClockApi const&) = delete;
-            using Wait = DWORD(WINAPI*)(UINT, HANDLE const*, DWORD);
-            using Boost = HRESULT(WINAPI*)(BOOL);
-            HMODULE module = LoadLibraryExW(L"dcomp.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
-            Wait wait = module ? reinterpret_cast<Wait>(GetProcAddress(module, "DCompositionWaitForCompositorClock")) : nullptr;
-            Boost boost = module ? reinterpret_cast<Boost>(GetProcAddress(module, "DCompositionBoostCompositorClock")) : nullptr;
-            ~CompositorClockApi() { if (module) FreeLibrary(module); }
-        };
+        using Boost = HRESULT(WINAPI*)(BOOL);
 
-        CompositorClockApi const& CompositorClock()
+        Boost CompositorBoost()
         {
-            static const CompositorClockApi api;
-            return api;
-        }
-
-        float DisplayRefreshInterval(HWND window)
-        {
-            if (!window) return 1.0f / 60.0f;
-            auto monitor = MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST);
-            MONITORINFOEXW info{};
-            info.cbSize = sizeof(info);
-            if (monitor && GetMonitorInfoW(monitor, &info))
-            {
-                auto queryFlags = static_cast<UINT32>(
-                    QDC_ONLY_ACTIVE_PATHS
-                    | QDC_VIRTUAL_MODE_AWARE
-                    | QDC_VIRTUAL_REFRESH_RATE_AWARE);
-                for (auto attempt = 0; attempt < 3; ++attempt)
-                {
-                    UINT32 pathCount = 0;
-                    UINT32 modeCount = 0;
-                    if (GetDisplayConfigBufferSizes(queryFlags, &pathCount, &modeCount) != ERROR_SUCCESS) break;
-                    std::vector<DISPLAYCONFIG_PATH_INFO> paths(pathCount);
-                    std::vector<DISPLAYCONFIG_MODE_INFO> modes(modeCount);
-                    auto result = QueryDisplayConfig(
-                        queryFlags,
-                        &pathCount,
-                        paths.data(),
-                        &modeCount,
-                        modes.data(),
-                        nullptr);
-                    if (result == ERROR_INSUFFICIENT_BUFFER) continue;
-                    if (result != ERROR_SUCCESS) break;
-                    paths.resize(pathCount);
-                    modes.resize(modeCount);
-                    for (auto const& path : paths)
-                    {
-                        DISPLAYCONFIG_SOURCE_DEVICE_NAME sourceName{};
-                        sourceName.header.type = DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME;
-                        sourceName.header.size = sizeof(sourceName);
-                        sourceName.header.adapterId = path.sourceInfo.adapterId;
-                        sourceName.header.id = path.sourceInfo.id;
-                        if (DisplayConfigGetDeviceInfo(&sourceName.header) != ERROR_SUCCESS
-                            || _wcsicmp(sourceName.viewGdiDeviceName, info.szDevice) != 0) continue;
-                        for (auto const& modeInfo : modes)
-                        {
-                            if (modeInfo.infoType != DISPLAYCONFIG_MODE_INFO_TYPE_TARGET
-                                || modeInfo.id != path.targetInfo.id
-                                || modeInfo.adapterId.HighPart != path.targetInfo.adapterId.HighPart
-                                || modeInfo.adapterId.LowPart != path.targetInfo.adapterId.LowPart) continue;
-                            auto const& physicalRate = modeInfo.targetMode.targetVideoSignalInfo.vSyncFreq;
-                            if (physicalRate.Denominator == 0) break;
-                            auto physicalHertz = static_cast<float>(physicalRate.Numerator)
-                                / static_cast<float>(physicalRate.Denominator);
-                            if (physicalHertz >= 30.0f && physicalHertz <= 500.0f)
-                                return 1.0f / physicalHertz;
-                            break;
-                        }
-                        auto const& rate = path.targetInfo.refreshRate;
-                        if (rate.Denominator == 0) break;
-                        auto hertz = static_cast<float>(rate.Numerator)
-                            / static_cast<float>(rate.Denominator);
-                        if (hertz >= 30.0f && hertz <= 500.0f) return 1.0f / hertz;
-                        break;
-                    }
-                    break;
-                }
-            }
-            DEVMODEW mode{};
-            mode.dmSize = sizeof(mode);
-            if (!monitor
-                || info.szDevice[0] == L'\0'
-                || !EnumDisplaySettingsW(info.szDevice, ENUM_CURRENT_SETTINGS, &mode)
-                || mode.dmDisplayFrequency < 30
-                || mode.dmDisplayFrequency > 500) return 1.0f / 60.0f;
-            return 1.0f / static_cast<float>(mode.dmDisplayFrequency);
+            struct Library {
+                HMODULE module = LoadLibraryExW(L"dcomp.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
+                Boost boost = module ? reinterpret_cast<Boost>(GetProcAddress(module, "DCompositionBoostCompositorClock")) : nullptr;
+                ~Library() { if (module) FreeLibrary(module); }
+            };
+            static const Library library;
+            return library.boost;
         }
     }
-
-    struct EditorFrameScheduler::FrameDispatchState
-    {
-        std::atomic_bool attached = false;
-        std::atomic_uint64_t generation = 0;
-        std::atomic_uint64_t requestedGeneration = 0;
-        std::atomic_uint64_t requestedFrameId = 0;
-        std::atomic_uint64_t frameSequence = 0;
-        std::atomic_uint64_t outstandingFrameId = 0;
-        std::atomic<float> targetFrameIntervalSeconds = 1.0f / 60.0f;
-        EditorFrameScheduler* owner = nullptr;
-        winrt::Microsoft::UI::Dispatching::DispatcherQueue dispatcher{ nullptr };
-    };
 
     EditorFrameScheduler::~EditorFrameScheduler()
     {
-        Detach();
+        Stop();
     }
 
-    void EditorFrameScheduler::Attach(
-        winrt::Microsoft::UI::Dispatching::DispatcherQueue const& dispatcher,
-        HWND valueWindowHandle,
-        FrameCallback callback)
+    void EditorFrameScheduler::Attach(FrameCallback callback)
     {
-        Detach();
-        winrt::check_bool(dispatcher != nullptr);
-        windowHandle = valueWindowHandle;
+        Stop();
         frameCallback = std::move(callback);
-        dispatchState = std::make_shared<FrameDispatchState>();
-        dispatchState->owner = this;
-        dispatchState->dispatcher = dispatcher;
-        dispatchState->attached.store(true, std::memory_order_release);
-        StartThread();
     }
 
     void EditorFrameScheduler::Detach()
     {
         Stop();
-        StopThread();
         frameCallback = {};
-        windowHandle = nullptr;
     }
 
     void EditorFrameScheduler::Start()
     {
-        if (!dispatchState) return;
-        if (running)
-        {
-            RequestFrame();
-            return;
-        }
-        dispatchState->targetFrameIntervalSeconds.store(
-            DisplayRefreshInterval(windowHandle),
-            std::memory_order_release);
-        auto const& clock = CompositorClock();
-        if (clock.wait && clock.boost)
-            compositorBoostActive = SUCCEEDED(clock.boost(TRUE));
-        running = true;
+        if (!frameCallback || renderingToken.value) return;
+
+        // Publish animated editor surfaces in the same rendering pass as the
+        // XAML scene. An independent display wait can run at the right rate
+        // and still submit between commits, causing the compositor to merge frames.
         lastFrame = std::chrono::steady_clock::now();
-        generation = dispatchState->generation.fetch_add(1, std::memory_order_acq_rel) + 1;
-        RequestFrame();
+        renderingToken = Microsoft::UI::Xaml::Media::CompositionTarget::Rendering(
+            [this](auto const&, auto const&) { OnFrame(); });
+        if (auto boost = CompositorBoost()) compositorBoostActive = SUCCEEDED(boost(TRUE));
+
+        // Give the input that starts motion a response even if normal-priority
+        // work is queued ahead of the first XAML rendering pass. The first
+        // callback consumes this request, and later frames use only XAML.
+        initialFrame = std::make_shared<InitialFrame>(this);
+        auto queue = Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread();
+        if (!queue.TryEnqueue([pending = std::weak_ptr{initialFrame}] {
+            if (auto frame = pending.lock()) frame->owner->OnFrame();
+        })) initialFrame.reset();
     }
 
     void EditorFrameScheduler::Stop()
     {
-        if (!running) return;
-        running = false;
-        if (compositorBoostActive)
-        {
-            CompositorClock().boost(FALSE);
-            compositorBoostActive = false;
-        }
-        lastFrame = {};
-        if (dispatchState)
-        {
-            dispatchState->outstandingFrameId.store(0, std::memory_order_release);
-            dispatchState->generation.fetch_add(1, std::memory_order_acq_rel);
-        }
+        if (!renderingToken.value) return;
+        initialFrame.reset();
+        Microsoft::UI::Xaml::Media::CompositionTarget::Rendering(std::exchange(renderingToken, {}));
+        if (std::exchange(compositorBoostActive, false)) CompositorBoost()(FALSE);
     }
 
-    void EditorFrameScheduler::StartThread()
+    void EditorFrameScheduler::OnFrame()
     {
-        frameRequestEvent = CreateEventW(nullptr, FALSE, FALSE, nullptr);
-        if (!frameRequestEvent) winrt::throw_hresult(HRESULT_FROM_WIN32(GetLastError()));
-        schedulerStopEvent = CreateEventW(nullptr, TRUE, FALSE, nullptr);
-        if (!schedulerStopEvent)
-        {
-            auto error = HRESULT_FROM_WIN32(GetLastError());
-            CloseHandle(frameRequestEvent);
-            frameRequestEvent = nullptr;
-            winrt::throw_hresult(error);
-        }
-        framePacingTimer = CreateWaitableTimerExW(
-            nullptr,
-            nullptr,
-            CREATE_WAITABLE_TIMER_HIGH_RESOLUTION,
-            TIMER_ALL_ACCESS);
-        if (!framePacingTimer) framePacingTimer = CreateWaitableTimerW(nullptr, FALSE, nullptr);
-        if (!framePacingTimer)
-        {
-            auto error = HRESULT_FROM_WIN32(GetLastError());
-            CloseHandle(frameRequestEvent);
-            CloseHandle(schedulerStopEvent);
-            frameRequestEvent = nullptr;
-            schedulerStopEvent = nullptr;
-            winrt::throw_hresult(error);
-        }
-
-        auto state = dispatchState;
-        auto requestEvent = frameRequestEvent;
-        auto stopEvent = schedulerStopEvent;
-        auto pacingTimer = framePacingTimer;
-        auto waitForClock = CompositorClock().wait;
-        frameThread = std::jthread([state, requestEvent, stopEvent, pacingTimer, waitForClock](std::stop_token stopToken)
-        {
-            std::stop_callback stopCallback(stopToken, [stopEvent] { SetEvent(stopEvent); });
-            HANDLE requestHandles[] = { stopEvent, requestEvent };
-            HANDLE pacingHandles[] = { stopEvent, pacingTimer };
-            auto lastRequestId = std::uint64_t{0};
-            auto previousSubmission = std::chrono::steady_clock::time_point{};
-            while (!stopToken.stop_requested())
-            {
-                if (WaitForMultipleObjects(2, requestHandles, FALSE, INFINITE) != WAIT_OBJECT_0 + 1) break;
-                auto frameId = state->requestedFrameId.load(std::memory_order_acquire);
-                auto requestedGeneration = state->requestedGeneration.load(std::memory_order_acquire);
-                if (frameId == 0 || frameId == lastRequestId) continue;
-                lastRequestId = frameId;
-                bool compositorPaced = false;
-                if (waitForClock)
-                {
-                    auto result = waitForClock(1, &stopEvent, INFINITE);
-                    if (result == WAIT_OBJECT_0) break;
-                    compositorPaced = result == WAIT_OBJECT_0 + 1;
-                }
-                auto now = std::chrono::steady_clock::now();
-                auto intervalSeconds = state->targetFrameIntervalSeconds.load(std::memory_order_acquire);
-                // Older Windows versions and an unavailable display retain
-                // the high-resolution timer; active compositor pacing needs
-                // no second timer based on a separately queried refresh rate.
-                if (!compositorPaced && previousSubmission.time_since_epoch().count() != 0)
-                {
-                    auto deadline = folia::platform::editor::FramePacingDeadline(previousSubmission, intervalSeconds);
-                    if (now < deadline)
-                    {
-                        auto waitDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(deadline - now).count();
-                        LARGE_INTEGER dueTime{};
-                        dueTime.QuadPart = -(std::max)(std::int64_t{1}, waitDuration / 100);
-                        if (!SetWaitableTimer(pacingTimer, &dueTime, 0, nullptr, nullptr, FALSE)) break;
-                        if (WaitForMultipleObjects(2, pacingHandles, FALSE, INFINITE) != WAIT_OBJECT_0 + 1) break;
-                        now = std::chrono::steady_clock::now();
-                    }
-                    else if (now - previousSubmission > (deadline - previousSubmission) * 2)
-                    {
-                        previousSubmission = {};
-                    }
-                }
-                previousSubmission = now;
-                if (!state->attached.load(std::memory_order_acquire)) break;
-                // Scroll frames share the normal UI queue so recurring UI work
-                // cannot postpone them until idle. Display pacing and the single
-                // outstanding request still bound submissions between input turns.
-                auto queued = state->dispatcher.TryEnqueue(
-                    winrt::Microsoft::UI::Dispatching::DispatcherQueuePriority::Normal,
-                    [state, requestedGeneration, frameId]
-                    {
-                        auto expected = frameId;
-                        state->outstandingFrameId.compare_exchange_strong(
-                            expected,
-                            0,
-                            std::memory_order_acq_rel);
-                        if (!state->attached.load(std::memory_order_acquire)
-                            || state->generation.load(std::memory_order_acquire) != requestedGeneration
-                            || !state->owner) return;
-                        state->owner->OnFrame(requestedGeneration);
-                    });
-                if (!queued)
-                {
-                    auto expected = frameId;
-                    state->outstandingFrameId.compare_exchange_strong(
-                        expected,
-                        0,
-                        std::memory_order_acq_rel);
-                }
-            }
-        });
-    }
-
-    void EditorFrameScheduler::StopThread()
-    {
-        if (dispatchState)
-        {
-            dispatchState->attached.store(false, std::memory_order_release);
-            dispatchState->generation.fetch_add(1, std::memory_order_acq_rel);
-            dispatchState->outstandingFrameId.store(0, std::memory_order_release);
-            dispatchState->owner = nullptr;
-        }
-        if (frameThread.joinable())
-        {
-            frameThread.request_stop();
-            if (schedulerStopEvent) SetEvent(schedulerStopEvent);
-            frameThread.join();
-        }
-        if (frameRequestEvent) CloseHandle(frameRequestEvent);
-        if (schedulerStopEvent) CloseHandle(schedulerStopEvent);
-        if (framePacingTimer) CloseHandle(framePacingTimer);
-        frameRequestEvent = nullptr;
-        schedulerStopEvent = nullptr;
-        framePacingTimer = nullptr;
-        dispatchState.reset();
-    }
-
-    void EditorFrameScheduler::RequestFrame()
-    {
-        if (!running || !dispatchState || !frameRequestEvent) return;
-        auto expected = std::uint64_t{0};
-        auto frameId = dispatchState->frameSequence.fetch_add(1, std::memory_order_acq_rel) + 1;
-        if (!dispatchState->outstandingFrameId.compare_exchange_strong(
-                expected,
-                frameId,
-                std::memory_order_acq_rel)) return;
-        dispatchState->requestedGeneration.store(generation, std::memory_order_release);
-        dispatchState->requestedFrameId.store(frameId, std::memory_order_release);
-        if (!SetEvent(frameRequestEvent))
-        {
-            expected = frameId;
-            dispatchState->outstandingFrameId.compare_exchange_strong(
-                expected,
-                0,
-                std::memory_order_acq_rel);
-        }
-    }
-
-    void EditorFrameScheduler::OnFrame(std::uint64_t requestedGeneration)
-    {
-        if (!running || requestedGeneration != generation) return;
-        auto nominalFrameInterval = dispatchState
-            ? dispatchState->targetFrameIntervalSeconds.load(std::memory_order_acquire)
-            : 1.0f / 60.0f;
+        if (!renderingToken.value) return;
+        initialFrame.reset();
+        auto token = renderingToken;
         auto now = std::chrono::steady_clock::now();
-        auto elapsed = lastFrame.time_since_epoch().count() == 0
-            ? nominalFrameInterval
-            : std::chrono::duration<float>(now - lastFrame).count();
-        lastFrame = now;
-        if (frameCallback && frameCallback(elapsed)) RequestFrame();
-        else Stop();
+        auto elapsed = std::chrono::duration<float>(now - std::exchange(lastFrame, now)).count();
+        if (!frameCallback(elapsed) && token.value == renderingToken.value) Stop();
     }
 }
