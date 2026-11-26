@@ -54,8 +54,8 @@ the user did not change.
   document. Create files and folders or rename with F2 directly in the tree;
   drag onto a folder to move, or hold Ctrl to copy. Long operations show progress,
   and moving an open document preserves its unsaved edits and undo history.
-  The title bar holds the tabs and main menu; file browsing and the
-  document outline have separate animated sidebars.
+  Files and Outline share one animated sidebar. A toolbar below the tabs
+  provides document actions and can reveal itself on hover.
 - **Encoding aware** — ICU-based charset detection ranks likely encodings when
   reopening a file, while explicit conversion saves in any installed ICU
   encoding and preserves the selected encoding on subsequent saves.
@@ -106,7 +106,7 @@ powershell -ExecutionPolicy Bypass -File .\build_app.ps1 -Configuration Release 
 Build the per-user x64 MSI with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.7.4
+powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.8.0
 ```
 
 The installer creates a self-contained Windows App SDK build, so the target
@@ -130,7 +130,7 @@ Normal developer builds continue to use their existing Assets location.
 Build the self-contained x64 portable ZIP with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\build_portable.ps1 -Version 0.7.4
+powershell -ExecutionPolicy Bypass -File .\build_portable.ps1 -Version 0.8.0
 ```
 
 Extract `build/portable/Folia-<version>-x64-portable.zip` to a writable folder and

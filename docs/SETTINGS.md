@@ -1,24 +1,20 @@
 # Settings
 
 The gear at the bottom of the activity rail opens one Settings tab per window.
-Its categories use the same left sidebar as Files and Outline. Switching back
-restores the document’s sidebar and selected view. Escape returns to the
-previous document when the current control does not handle it. Pages share
-theme typography and form styles. Long shortcut, LaTeX and license lists use
-native virtualization; ordinary forms use one page scroll surface. Closed choices
-leave the wheel to the page, and numeric AI budgets use plain integer inputs.
-All pages share a centered content column capped by the page viewport template.
-Form pages scroll across the full page width. Shortcut and LaTeX lists also keep
-their native scrollbars at the page edge, with centered headers and rows inside
-the same content width. The lists retain a finite height and virtualize their
-rows. The theme page reserves automatic-height rows for its heading and actions.
-The theme list and preview share the remaining finite height and scroll inside
-their own viewports. Narrow pages stack these viewports vertically.
+The Settings home page lists its categories, and the breadcrumb returns to
+that page. Select a document tab or a workspace rail control to leave Settings.
+Files and Outline keep their shared workspace sidebar. Settings pages use a
+centered content column and share typography and form styles. Shortcut and
+LaTeX lists keep native scrollbars at the page edge and virtualize their rows.
+Closed choices leave wheel scrolling to the page, and numeric AI budgets use
+integer inputs. On the Themes page, choose a profile to see its packaged PNG
+preview, then select **Apply**.
 
 Under **General → Window appearance**, the window and reading area can use Mica,
 Mica Alt, desktop acrylic, or the Folia theme's solid color. The reading area
-defaults to **Follow window**. The activity rail, sidebar, and title bar share
-the window material. The rounded reading card uses the reading material.
+defaults to **Follow window**. The activity rail, sidebar, and tab strip share
+the window material. The selected tab, document toolbar, and editor use the
+reading material.
 **Auto-hide document tools** reveals the file information and editor actions
 just below the tabs on hover or keyboard focus. The tabs remain visible and
 hovering over the tools does not resize the document.
