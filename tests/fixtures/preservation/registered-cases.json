@@ -7363,6 +7363,7 @@
     {
       "name": "frame pacing preserves its interval across clock uptimes and refresh rates",
       "count": 1,
+      "replaced_by": "frame scheduling samples display cadence without rendering cost",
       "original_files": [
         "tests/platform/test_editor_frame_pacing.cpp"
       ]
@@ -15973,6 +15974,7 @@
     {
       "name": "settings opens directly from the application menu and returns through native Back",
       "count": 1,
+      "replaced_by": "settings navigation stays in one tab and workspace controls return to the document",
       "original_files": [
         "tests/app/visual/test_settings_navigation.cpp"
       ]
@@ -19529,6 +19531,7 @@
     {
       "name": "workspace chrome keeps text at native scale and layout buttons beside the captions",
       "count": 1,
+      "replaced_by": "workspace chrome keeps text at native scale and separates title and document actions",
       "original_files": [
         "tests/app/visual/test_workspace_chrome.cpp"
       ]
@@ -19536,6 +19539,7 @@
     {
       "name": "workspace chrome pane icons have aligned complete mirrored contours",
       "count": 1,
+      "replaced_by": "workspace chrome sidebar and source icons have distinct complete silhouettes",
       "original_files": [
         "tests/app/visual/test_workspace_chrome.cpp"
       ]
@@ -19543,6 +19547,7 @@
     {
       "name": "workspace chrome renders the real window with one complete divider and one outline toggle",
       "count": 1,
+      "replaced_by": "workspace chrome retains native tabs and pane controls in a narrow window",
       "original_files": [
         "tests/app/visual/test_workspace_chrome.cpp"
       ]

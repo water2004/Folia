@@ -57,16 +57,6 @@ namespace winrt::Folia::implementation
         return std::nullopt;
     }
 
-
-    void MainWindow::UpdateWorkspaceAppearance(WorkspaceAppearance const& settings)
-    {
-        if (appSettings.appearance == settings) return;
-        appSettings.appearance = settings;
-        ApplyBarLayout();
-        ApplyWorkspaceMaterial();
-        if (settingsView) settingsView->UpdateWorkspaceAppearance(settings);
-    }
-
     void MainWindow::UpdateMediaSettings(winrt::Folia::MediaDisplaySettings const& settings)
     {
         if (appSettings.media == settings) return;

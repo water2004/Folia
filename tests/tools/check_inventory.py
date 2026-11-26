@@ -22,8 +22,12 @@ def registrations(root: Path) -> Counter:
 
 
 def check_names(current: Counter, cases: list) -> list[str]:
-    return [f"Missing test registration: {row['name']} ({current[row['name']]}/{row['count']})"
-            for row in cases if current[row["name"]] < row["count"]]
+    failures = []
+    for row in cases:
+        name = row.get("replaced_by", row["name"])
+        if current[name] < row["count"]:
+            failures.append(f"Missing test registration: {name} ({current[name]}/{row['count']})")
+    return failures
 
 
 def source_status(data: bytes, expected: str, added_import: str | None = None) -> str:

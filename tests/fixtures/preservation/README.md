@@ -24,6 +24,8 @@ The `tooling` suite includes both preservation test modules. The optional
 Windows files recorded for this refactor without building the Windows SDK tests.
 Registration checks preserve repeated test names as repeated registrations;
 corpus records are checked separately by their readers and the fixture guard.
+When behavior changes, `replaced_by` can name the current regression that
+replaces a historical test. The original name and file remain recorded.
 
 The 120-file baseline includes SDK-free policy tests historically run by the
 Windows runner. The audit retains every original hash: 118 files are unchanged

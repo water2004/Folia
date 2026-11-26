@@ -7,7 +7,6 @@ target_sources(folia_test_editor_policies PUBLIC FILE_SET CXX_MODULES
     FILES
         "${FOLIA_SOURCE_ROOT}/src/platform/windows/editor/layout/editor_display_mapping.ixx"
         "${FOLIA_SOURCE_ROOT}/src/platform/windows/editor/layout/editor_priority_work_queue.ixx"
-        "${FOLIA_SOURCE_ROOT}/src/platform/windows/editor/interaction/editor_frame_pacing.ixx"
         "${FOLIA_SOURCE_ROOT}/src/platform/windows/editor/interaction/editor_latex_completion_session.ixx"
         "${FOLIA_SOURCE_ROOT}/src/platform/windows/editor/interaction/editor_scroll_state.ixx"
         "${FOLIA_SOURCE_ROOT}/src/platform/windows/editor/interaction/editor_selection_drag_model.ixx"
@@ -22,7 +21,6 @@ endif()
 add_executable(FoliaPortablePolicyTests
     "${FOLIA_SOURCE_ROOT}/tests/main.cpp"
     "${FOLIA_SOURCE_ROOT}/tests/platform/test_display_mapping.cpp"
-    "${FOLIA_SOURCE_ROOT}/tests/platform/test_editor_frame_pacing.cpp"
     "${FOLIA_SOURCE_ROOT}/tests/platform/test_editor_latex_completion_session.cpp"
     "${FOLIA_SOURCE_ROOT}/tests/platform/test_editor_priority_work_queue.cpp"
     "${FOLIA_SOURCE_ROOT}/tests/platform/test_editor_scroll_state.cpp"

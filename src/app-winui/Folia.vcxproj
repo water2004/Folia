@@ -488,9 +488,6 @@
     <ClCompile Include="..\platform\windows\editor\interaction\editor_scroll_state.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\platform\windows\editor\interaction\editor_frame_pacing.ixx">
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="..\core\query\search.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -832,6 +829,7 @@
     <ClCompile Include="MainWindow.xaml.cpp">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </ClCompile>
+    <ClCompile Include="MainWindow.Appearance.cpp" />
     <ClCompile Include="MainWindow.Events.cpp" />
     <ClCompile Include="MainWindow.Encoding.cpp" />
     <ClCompile Include="MainWindow.Commands.cpp" />

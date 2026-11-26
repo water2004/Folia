@@ -20,6 +20,12 @@ class InventoryTests(unittest.TestCase):
         self.assertEqual(len(check_inventory.check_names(Counter(original=1), baseline)), 1)
         self.assertEqual(len(check_inventory.check_names(Counter(), baseline)), 1)
 
+    def test_replaced_registration_requires_the_current_test(self):
+        baseline = [{"name": "old scheduler", "count": 1, "replaced_by": "WinUI scheduler"}]
+        self.assertEqual(check_inventory.check_names(Counter({"WinUI scheduler": 1}), baseline), [])
+        self.assertEqual(check_inventory.check_names(Counter({"old scheduler": 1}), baseline),
+                         ["Missing test registration: WinUI scheduler (0/1)"])
+
     def import_report(self, current: bytes):
         baseline = b'"retained"_test = [] { expect(value == 42); };\n'
         relative = "tests/platform/policy.cpp"

@@ -99,47 +99,6 @@ namespace winrt::Folia::implementation {
         UpdateSelectedTabBackdrop();
     }
 
-    void MainWindow::UpdateSelectedTabBackdrop() {
-        if (!ReadingBackdrop().SystemBackdrop()) {
-            SelectedTabBackdropFrame().Visibility(Visibility::Collapsed);
-            return;
-        }
-        if (selectedTabBackdropUpdatePending || windowClosed) return;
-        selectedTabBackdropUpdatePending = DispatcherQueue().TryEnqueue([weak = get_weak()] {
-            auto window = weak.get();
-            if (!window) return;
-            window->selectedTabBackdropUpdatePending = false;
-            if (window->windowClosed || !window->ReadingBackdrop().SystemBackdrop()) return;
-            auto frame = window->SelectedTabBackdropFrame();
-            auto tabs = window->DocumentTabs();
-            auto tab = tabs.ContainerFromItem(tabs.SelectedItem()).try_as<FrameworkElement>();
-            auto viewer = window->TabStripScroller();
-            auto viewport = viewer ? viewer.as<IControlProtected>().GetTemplateChild(L"ScrollContentPresenter").try_as<FrameworkElement>() : nullptr;
-            if (!tab || !tab.IsLoaded() || !viewport) {
-                frame.Visibility(Visibility::Collapsed);
-                return;
-            }
-            auto origin = window->TabBackdropLayer();
-            auto bounds = [&](FrameworkElement const& element) {
-                return element.TransformToVisual(origin).TransformBounds({0, 0,
-                    static_cast<float>(element.ActualWidth()), static_cast<float>(element.ActualHeight())});
-            };
-            auto item = bounds(tab);
-            auto visible = bounds(viewport);
-            auto left = (std::max)(item.X, visible.X);
-            auto right = (std::min)(item.X + item.Width, visible.X + visible.Width);
-            auto top = (std::max)(0.f, item.Y);
-            auto bottom = (std::min)(item.Y + item.Height, static_cast<float>(origin.ActualHeight()));
-            if (right <= left || bottom <= top) {
-                frame.Visibility(Visibility::Collapsed);
-                return;
-            }
-            frame.Margin({left, top, 0, 0});
-            frame.Width(right - left);
-            frame.Height(bottom - top);
-            frame.Visibility(Visibility::Visible);
-        });
-    }
     void MainWindow::DocumentTabPrepared(FrameworkElement const& sender, DataContextChangedEventArgs const&) {
         if (windowClosed) return;
         auto tab = sender.as<TabViewItem>();

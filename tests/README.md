@@ -53,10 +53,10 @@ header-only Boost.UT substitute nor concatenated source files are used.
 
 Selecting `math` and `mermaid` together also builds and runs
 `FoliaMermaidMathTests` against the actual Math shared library. `--suite all`
-selects every portable suite. The core gate also runs the 41 existing tests in
-seven SDK-free policy files under `platform/`: display mapping, frame pacing,
-LaTeX/snippet sessions, priority queues, scrolling and selection dragging. These
-files remain part of the existing Windows suite as well.
+selects every portable suite. The core gate also runs the SDK-free policy tests
+under `platform/` for display mapping, LaTeX/snippet sessions, priority queues,
+scrolling and selection dragging. The WinUI frame scheduling tests run in the
+visual application suite so they can use the compositor's rendering callbacks.
 
 `FoliaMarkdownConsumer` retains four library-only consumer cases and links
 `folia::markdown`. Its `tests/libraries/markdown` standalone entry configures only
@@ -161,8 +161,8 @@ python tests/tools/check_fixtures.py
 python -m unittest discover -s tests/tools -p test_fixtures.py
 ```
 
-The registration inventory retains all 2,811 literal Boost.UT names from the
-refactor's master baseline, including multiplicity. Its optional
+The registration inventory tracks the refactor's 2,811 original Boost.UT
+registrations, including multiplicity and any documented replacement tests. Its optional
 `--windows-baseline` audit retains the original hashes for all 120 historical
 Windows-runner test/support files: 118 are unchanged under the recorded
 CRLF-to-LF hash policy. The two SDK-free LaTeX/snippet policy tests each add one
