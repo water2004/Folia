@@ -59,6 +59,9 @@ namespace winrt::Folia::implementation {
             return Impl(window)->ContainsTabDragPoint(point);
         }
         static void PointerBegin(Microsoft::UI::Xaml::Window const& window, Windows::Graphics::PointInt32 point) { Impl(window)->BeginTabPointerGesture(point); }
+        static bool MiddleMouse(WPARAM message, MOUSEHOOKSTRUCT const& mouse) {
+            return App::RouteTabMiddleButton(message, mouse);
+        }
         static void Sidebar(Microsoft::UI::Xaml::Window const& window, bool open) { Impl(window)->SetSidebarOpen(open); }
         static bool ScrollTabs(Microsoft::UI::Xaml::Window const& window, int delta) { return Impl(window)->ScrollTabsWithWheel(delta); }
         static auto TabScroller(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->TabStripScroller(); }
@@ -942,6 +945,63 @@ namespace {
                 Access::PointerEnd(window);
                 Pump([&] { return Access::Tabs(window).CanTearOutTabs(); });
             }
+        };
+        "middle mouse closes the pressed caption tab only on a matching release"_test = [] {
+            OwnedWindow current(App()->CreateMainWindow());
+            auto window = current.window;
+            auto root = window.Content().as<FrameworkElement>();
+            auto tabs = Access::Tabs(window);
+            auto selected = tabs.SelectedItem();
+            Access::New(window);
+            auto inactive = tabs.SelectedItem();
+            tabs.SelectedItem(selected);
+            root.UpdateLayout();
+            auto getCenter = [&](FrameworkElement const& element) {
+                return root.XamlRoot().CoordinateConverter().ConvertLocalToScreen(
+                    element.TransformToVisual(root).TransformPoint({static_cast<float>(element.ActualWidth() / 2),
+                        static_cast<float>(element.ActualHeight() / 2)}));
+            };
+            auto target = getCenter(tabs.ContainerFromItem(inactive).as<FrameworkElement>());
+            auto other = getCenter(tabs.ContainerFromItem(selected).as<FrameworkElement>());
+            auto blank = getCenter(root.FindName(L"TitleDragArea").as<FrameworkElement>());
+            auto hwnd = Access::Handle(window);
+            auto id = window.AppWindow().Id();
+            auto nonClient = winrt::Microsoft::UI::Input::InputNonClientPointerSource::GetForWindowId(id);
+            auto native = winrt::Microsoft::UI::Content::ContentCoordinateConverter::CreateForWindowId(id);
+            auto captionPoint = native.ConvertScreenToLocal(target);
+            Pump([&] {
+                return std::ranges::any_of(nonClient.GetRegionRects(winrt::Microsoft::UI::Input::NonClientRegionKind::Caption),
+                    [&](auto rect) {
+                        return captionPoint.X >= rect.X && captionPoint.X < rect.X + rect.Width
+                            && captionPoint.Y >= rect.Y && captionPoint.Y < rect.Y + rect.Height;
+                    });
+            });
+            // Resolve the caption HWND from the screen point, as Windows does,
+            // without moving the desktop pointer in the regression suite.
+            auto press = [&](auto point) {
+                POINT screen{point.X, point.Y};
+                return Access::MiddleMouse(WM_NCMBUTTONDOWN, {screen, ::WindowFromPoint(screen), HTCAPTION, 0});
+            };
+            auto release = [&](auto point) {
+                return Access::MiddleMouse(WM_MBUTTONUP, {{point.X, point.Y}, hwnd, HTCLIENT, 0});
+            };
+            expect(!press(blank));
+            expect(::GetCapture() != hwnd);
+            expect(press(target));
+            expect(::GetCapture() == hwnd);
+            expect(Access::Items(window).Size() == 2_u);
+            expect(release(other));
+            expect(::GetCapture() != hwnd);
+            expect(press(target));
+            ::SendMessageW(hwnd, WM_CANCELMODE, 0, 0);
+            expect(::GetCapture() != hwnd);
+            expect(!release(target));
+            expect(Access::Items(window).Size() == 2_u);
+            expect(press(target));
+            expect(release(target));
+            Pump([&] { return Access::Items(window).Size() == 1; });
+            expect(tabs.SelectedItem() == selected);
+            expect(Access::Items(window).GetAt(0) == selected);
         };
         "caption gestures after tab selection cannot enter the native tab tear out loop"_test = [] {
             OwnedWindow source(App()->CreateMainWindow());

@@ -2,6 +2,7 @@
 import std;
 #include "App.xaml.h"
 #include "MainWindow.xaml.h"
+#include <winrt/Microsoft.UI.Interop.h>
 
 namespace winrt::Folia::implementation {
     App* App::Current() {
@@ -10,6 +11,10 @@ namespace winrt::Folia::implementation {
     }
     Microsoft::UI::Xaml::Window App::CreateMainWindow(winrt::hstring const& path) {
         auto window = winrt::make<MainWindow>(path);
+        if (!tabMouseHook) {
+            tabMouseHook.reset(::SetWindowsHookExW(WH_MOUSE, TabMouseHook, nullptr, ::GetCurrentThreadId()));
+            winrt::check_bool(static_cast<bool>(tabMouseHook));
+        }
         auto id = window.AppWindow().Id();
         windows.push_back({id, window});
         window.Closed([weak = get_weak(), id](auto const&, auto const&) {
@@ -17,6 +22,34 @@ namespace winrt::Folia::implementation {
         });
         return window;
     }
+
+    LRESULT CALLBACK App::TabMouseHook(int code, WPARAM message, LPARAM data) noexcept {
+        if (code == HC_ACTION) {
+            try {
+                if (RouteTabMiddleButton(message, *reinterpret_cast<MOUSEHOOKSTRUCT const*>(data))) return 1;
+            } catch (...) {
+                // Preserve normal message delivery if dispatch fails.
+            }
+        }
+        return ::CallNextHookEx(nullptr, code, message, data);
+    }
+
+    bool App::RouteTabMiddleButton(WPARAM message, MOUSEHOOKSTRUCT const& mouse) {
+        const bool release = message == WM_MBUTTONUP || message == WM_NCMBUTTONUP;
+        const bool captionPress = mouse.wHitTestCode == HTCAPTION
+            && (message == WM_NCMBUTTONDOWN || message == WM_NCMBUTTONDBLCLK);
+        if (!release && !captionPress) return false;
+
+        // WinUI dispatches caption input to a child HWND of the main window.
+        auto window = ::GetAncestor(mouse.hwnd, GA_ROOT);
+        if (!window) return false;
+        auto owner = Current()->FindMainWindow(Microsoft::UI::GetWindowIdFromWindow(window));
+        if (!owner) return false;
+        auto target = owner->get_strong();
+        const Windows::Graphics::PointInt32 point{mouse.pt.x, mouse.pt.y};
+        return release ? target->ReleaseTabMiddlePress(point) : target->BeginTabMiddlePress(point);
+    }
+
     void App::OnWindowClosed(Microsoft::UI::WindowId id) {
         std::erase_if(windows, [id](auto const& item) { return item.id == id; });
         if (closingPreparedWindows) return;
@@ -37,6 +70,7 @@ namespace winrt::Folia::implementation {
         }
         closingPreparedWindows = false;
         if (windows.empty()) {
+            tabMouseHook.reset();
             activationSubscription.revoke();
             if (activationInstance && activationInstance.IsCurrent()) activationInstance.UnregisterKey();
             Exit();

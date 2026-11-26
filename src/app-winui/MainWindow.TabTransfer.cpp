@@ -192,7 +192,7 @@ namespace winrt::Folia::implementation {
                     if (auto tab = tabs.ContainerFromIndex(i).try_as<TabViewItem>()) {
                         auto rect = bounds(tab);
                         if (contains(rect)) return TabHit{
-                            winrt::unbox_value<std::uint64_t>(tabSource.GetAt(i)), local.X - rect.X};
+                            winrt::unbox_value<std::uint64_t>(tabSource.GetAt(i)), local.X - rect.X, tab.IsClosable()};
                     }
                 }
             }
@@ -306,8 +306,10 @@ namespace winrt::Folia::implementation {
     LRESULT CALLBACK MainWindow::TabPressSubclass(HWND window, UINT message, WPARAM wparam, LPARAM lparam,
         UINT_PTR id, DWORD_PTR context) {
         if (message == WM_NCDESTROY) ::RemoveWindowSubclass(window, TabPressSubclass, id);
+        auto owner = reinterpret_cast<MainWindow*>(context);
+        if (message == WM_CAPTURECHANGED || message == WM_CANCELMODE) owner->CancelTabMiddlePress();
         if (message == WM_NCLBUTTONDOWN && wparam == HTCAPTION) {
-            auto self = reinterpret_cast<MainWindow*>(context)->get_strong();
+            auto self = owner->get_strong();
             const Windows::Graphics::PointInt32 point{GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)};
             if (!self->tabMoveInProgress && self->DocumentTabs().CanTearOutTabs()) {
                 if (auto tab = self->HitTestVisibleTab(point)) {
@@ -342,7 +344,9 @@ namespace winrt::Folia::implementation {
                 if (args.MoveSizeOperation() == Microsoft::UI::Input::MoveSizeOperation::Move && !tabGrabOffset)
                     animationController.SetPaused(true);
             }),
-            WindowEvent([this](auto const&, auto const&) {
+            WindowEvent([this](auto const&, Microsoft::UI::Input::NonClientPointerEventArgs const& args) {
+                if (args.PointerDeviceType() == Microsoft::UI::Input::PointerDeviceType::Mouse
+                    && !(::GetAsyncKeyState(VK_LBUTTON) & 0x8000)) return;
                 POINT point{};
                 if (::GetCursorPos(&point)) BeginTabPointerGesture({point.x, point.y});
             }),

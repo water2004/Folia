@@ -141,6 +141,36 @@ namespace winrt::Folia::implementation {
         if (!windowClosed) UpdateLoadingState();
     }
 
+    bool MainWindow::BeginTabMiddlePress(Windows::Graphics::PointInt32 point) {
+        if (windowClosed || tabMoveInProgress || ::GetCapture()) return false;
+        auto hit = HitTestVisibleTab(point);
+        if (!hit || !hit->closable) return false;
+
+        auto window = WindowHandle();
+        ::SetCapture(window);
+        if (::GetCapture() != window) return false;
+        middlePressedTab = hit->id;
+        return true;
+    }
+
+    bool MainWindow::ReleaseTabMiddlePress(Windows::Graphics::PointInt32 point) {
+        auto pressed = middlePressedTab;
+        if (!pressed) return false;
+        CancelTabMiddlePress();
+        if (windowClosed) return true;
+
+        if (auto hit = HitTestVisibleTab(point); hit && hit->closable && hit->id == *pressed) {
+            DispatcherQueue().TryEnqueue([weak = get_weak(), tab = *pressed] {
+                if (auto target = weak.get()) target->CloseDocumentAsync(tab);
+            });
+        }
+        return true;
+    }
+
+    void MainWindow::CancelTabMiddlePress() {
+        if (std::exchange(middlePressedTab, std::nullopt) && ::GetCapture() == WindowHandle()) ::ReleaseCapture();
+    }
+
     ScrollViewer MainWindow::TabStripScroller() {
         auto list = DocumentTabs().as<IControlProtected>().GetTemplateChild(L"TabListView").try_as<Control>();
         return list ? list.as<IControlProtected>().GetTemplateChild(L"ScrollViewer").try_as<ScrollViewer>() : nullptr;

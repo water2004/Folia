@@ -72,7 +72,7 @@ namespace winrt::Folia::implementation
         bool CompleteTabTearOut(std::shared_ptr<DocumentTab> const& tab);
         bool PrepareExternalTab(Windows::Foundation::IInspectable const& item);
         bool ContainsTabDragPoint(Windows::Graphics::PointInt32 point);
-        struct TabHit { std::uint64_t id; float grabOffset; };
+        struct TabHit { std::uint64_t id; float grabOffset; bool closable; };
         std::optional<TabHit> HitTestVisibleTab(Windows::Graphics::PointInt32 point);
         void BeginTabPointerGesture(Windows::Graphics::PointInt32 point);
         static LRESULT CALLBACK TabPressSubclass(HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR);
@@ -103,6 +103,9 @@ namespace winrt::Folia::implementation
         void RefreshRecentMenu();
         Windows::Foundation::IAsyncOperation<winrt::hstring> ApplyExplorerActionAsync(folia::platform::WorkspaceFileAction action);
         void RegisterWorkspaceHandlers();
+        bool BeginTabMiddlePress(Windows::Graphics::PointInt32 point);
+        bool ReleaseTabMiddlePress(Windows::Graphics::PointInt32 point);
+        void CancelTabMiddlePress();
         Microsoft::UI::Xaml::Controls::ScrollViewer TabStripScroller();
         bool ScrollTabsWithWheel(int delta);
         void RefreshDocumentTabs();
@@ -205,6 +208,7 @@ namespace winrt::Folia::implementation
         bool relocatingFiles = false;
         bool selectedTabVisibilityPending = false;
         bool tabPointerDown = false, tabMoveInProgress = false;
+        std::optional<std::uint64_t> middlePressedTab;
         bool tabRegionsPending = false;
         bool updatingTabs = false;
         DocumentTools documentTools;
