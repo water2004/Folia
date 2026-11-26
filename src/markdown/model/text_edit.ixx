@@ -42,10 +42,17 @@ struct TextSpan {
 struct TextSelection {
     TextPosition anchor;
     TextPosition active;
+    enum class Kind : std::uint8_t { Text, TableCells };
+    Kind kind = Kind::Text;
 
     static TextSelection caret(TextPosition position) { return {position, position}; }
+    static TextSelection cells(TextPosition anchor, TextPosition active) {
+        anchor.source_offset = active.source_offset = 0;
+        return {anchor, active, Kind::TableCells};
+    }
+    bool selects_cells() const { return kind == Kind::TableCells; }
     bool is_caret() const {
-        return anchor.container_id == active.container_id
+        return !selects_cells() && anchor.container_id == active.container_id
             && anchor.source_offset == active.source_offset;
     }
     const TextPosition& head() const { return active; }

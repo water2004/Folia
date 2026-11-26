@@ -3,6 +3,7 @@
 // navigation, selection and document mutation semantics live in the core.
 export module folia.core.command;
 import std;
+import folia.markdown.table_metadata;
 import folia.markdown.dialect;
 import folia.markdown.text_edit;
 
@@ -24,7 +25,10 @@ enum class CommandKind {
     MoveTableCellNext, MoveTableCellPrevious,
     InsertTableRowAbove, InsertTableRowBelow, DeleteTableRow, MoveTableRowUp, MoveTableRowDown,
     InsertTableColumnLeft, InsertTableColumnRight, DeleteTableColumn, MoveTableColumnLeft, MoveTableColumnRight,
-    SetTableColumnAlignment, NormalizeTable,
+    SetTableColumnAlignment, SetTableColumnWidth, SetTableAppearance, CopyTable, NormalizeTable,
+    SortTableRows, FillTableSelection, CopyPlainTable,
+    CommitTableCell, SetTableCellValue, ToggleTableCheckbox, MakeTableCheckbox,
+    DuplicateTableRows, DuplicateTableColumns, DeleteTable,
     InsertTableRowAt, InsertTableColumnAt, MoveTableRowTo, MoveTableColumnTo,
     ToggleCallout, ExtensionCmd,
     Undo, Redo, Cut, Copy, Paste, ReplaceSourceText, MoveSelection,
@@ -48,6 +52,9 @@ struct Command {
     std::size_t rows = 0, cols = 0;       // InsertTable
     TableAlignment table_alignment = TableAlignment::None;
     std::size_t table_index = 0;
+    std::optional<TableFormatEdit> table_format;
+    std::optional<TableCoordinate> table_fill_target;
+    bool table_copy_fill = false;
     std::u32string path, alt;              // InsertImage
     std::u32string href;                   // InsertLink
     std::string footnote_label;            // CreateFootnoteDefinition
@@ -56,6 +63,7 @@ struct Command {
     std::u32string ext_name;               // Extension
     std::optional<ReplaceTextTarget> replacement; // Explicit block-local replacement
     std::optional<TextSpan> paste_range;  // Semantic Markdown paste without changing selection first
+    bool paste_as_table_grid = false;      // Clipboard identified this payload as TSV
     std::optional<TextPosition> move_destination;
 
     static Command InsertText(std::u32string t) { Command c; c.kind = CommandKind::InsertText; c.text = std::move(t); return c; }

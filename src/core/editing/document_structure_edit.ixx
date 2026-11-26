@@ -17,6 +17,7 @@ import folia.markdown.inline_document;
 import folia.markdown.inline_parser;
 import folia.core.inline_source_edit;
 import folia.markdown.text_edit;
+import folia.markdown.table_metadata;
 import folia.core.table_selection;
 import folia.markdown.utf;
 import folia.core.document_edit_support;
@@ -24,6 +25,7 @@ import folia.core.document_input_rules;
 import folia.core.document_list_input;
 import folia.core.document_source_edit;
 import folia.core.document_copy;
+import folia.core.table_calculation;
 
 export namespace folia {
 
@@ -1005,7 +1007,8 @@ inline std::optional<DocumentTransaction> document_edit_table(
     const TextSelection& selection,
     DocumentTableEdit edit,
     TableAlignment alignment = TableAlignment::None,
-    std::size_t argument = 0) {
+    std::size_t argument = 0,
+    const TableFormatEdit* appearance = nullptr) {
     const auto revision_before = document.revision;
     auto& after = document;
     // Navigation starts at the active cell, including when a text range spans
@@ -1013,8 +1016,9 @@ inline std::optional<DocumentTransaction> document_edit_table(
     // an explicit handle that collapsed the selection to its source cell).
     const auto navigation = edit == DocumentTableEdit::MoveCellNext
         || edit == DocumentTableEdit::MoveCellPrevious;
+    const auto metadata_only = edit == DocumentTableEdit::SetColumnWidth || edit == DocumentTableEdit::SetAppearance;
     auto const target_cell = document_table_edit_target(after,
-        navigation ? TextSelection::caret(selection.active) : selection);
+        navigation || metadata_only || selection.selects_cells() ? TextSelection::caret(selection.active) : selection);
     if (!target_cell) return std::nullopt;
     const auto cell_id = target_cell->cell_id;
     const auto column = target_cell->column;
@@ -1027,30 +1031,51 @@ inline std::optional<DocumentTransaction> document_edit_table(
     const auto header_rows = table->children.front().table_special().table_header_row
         ? std::size_t{1}
         : std::size_t{0};
+    const auto table_metadata = table->table_special().metadata;
+    const auto visual_headers = table_metadata ? table_metadata->header_rows : header_rows;
+    const auto has_total = table_has_totals(table_metadata.get());
+    const auto cell_range = document_table_cell_selection(after, selection);
+    auto adjacent_cell = [&](bool forward) -> std::optional<NodeId> {
+        auto offset = row_index * column_count + column;
+        const auto cell_count = (table->children.size() - has_total) * column_count;
+        while (forward ? offset + 1 < cell_count : offset > 0) {
+            offset = forward ? offset + 1 : offset - 1;
+            const TableCoordinate candidate{offset / column_count, offset % column_count};
+            const auto& cells = table->children[candidate.row].children;
+            if (candidate.column < cells.size()
+                && !table_cell_is_covered(table_metadata.get(), candidate, table->children.size(), column_count))
+                return cells[candidate.column].id;
+        }
+        return std::nullopt;
+    };
     const auto cell_syntax_mode = table->has_html_source()
         ? InlineSyntaxMode::HtmlText
         : InlineSyntaxMode::TableCell;
-    auto make_cell = [&] {
+    auto make_cell = [&](std::u32string_view source = {}) {
         BlockNode cell;
         cell.id = allocator.allocate();
         cell.kind = BlockKind::TableCell;
         cell.edit_inline_content() = document_edit_detail::make_inline(
-            {},
+            std::u32string(source),
             after,
             allocator,
             cell_syntax_mode);
         return cell;
     };
-    auto make_row = [&] {
+    auto make_row = [&](const BlockNode* original = nullptr) {
         BlockNode row;
         row.id = allocator.allocate();
         row.kind = BlockKind::TableRow;
-        for (std::size_t index = 0; index < column_count; ++index) row.children.push_back(make_cell());
+        for (std::size_t index = 0; index < column_count; ++index)
+            row.children.push_back(make_cell(original ? std::u32string_view{original->children[index].inline_content().source} : std::u32string_view{}));
         return row;
     };
     auto target_id = cell_id;
     const auto table_id = table->id;
     const auto table_payload_before = document_transaction_detail::payload_shell(*table);
+    using Axis = TableAxisEdit::Axis;
+    using AxisEdit = TableAxisEdit::Kind;
+    std::optional<TableAxisEdit> axis_edit;
     std::vector<DocumentOperation> operations;
     document_edit_detail::MutationRollback rollback(after, operations, revision_before);
     bool payload_changed = false;
@@ -1065,8 +1090,12 @@ inline std::optional<DocumentTransaction> document_edit_table(
         operations.emplace_back(std::move(insert));
         return insert_block(*owner, index, std::move(node));
     };
-    auto insert_row = [&](std::size_t index) {
-        auto row = make_row();
+    auto insert_row = [&](std::size_t index, std::size_t count = 1, std::optional<std::size_t> duplicate = {}) {
+        if (has_total) index = (std::min)(index, table->children.size() - 1);
+        std::vector<BlockNode> new_rows;
+        new_rows.reserve(count);
+        for (std::size_t i = 0; i < count; ++i)
+            new_rows.push_back(make_row(duplicate ? &table->children[*duplicate + i] : nullptr));
         if (index == 0 && header_rows > 0) {
             auto* current = find_block(after.root, table_id);
             if (!current || current->children.empty()) return false;
@@ -1077,9 +1106,12 @@ inline std::optional<DocumentTransaction> document_edit_table(
             old_header.ensure_table_special().table_header_row = false;
             update.after = document_transaction_detail::payload_shell(old_header);
             operations.emplace_back(std::move(update));
-            row.ensure_table_special().table_header_row = true;
+            new_rows.front().ensure_table_special().table_header_row = true;
         }
-        return insert_node(table_id, index, std::move(row));
+        for (std::size_t i = 0; i < count; ++i)
+            if (!insert_node(table_id, index + i, std::move(new_rows[i]))) return false;
+        axis_edit = TableAxisEdit{Axis::Row, AxisEdit::Insert, index, 0, count, duplicate};
+        return true;
     };
     auto remove_node = [&](NodeId parent_id, std::size_t index) {
         auto* owner = find_block(after.root, parent_id);
@@ -1111,16 +1143,24 @@ inline std::optional<DocumentTransaction> document_edit_table(
     bool changed = true;
     switch (edit) {
         case DocumentTableEdit::MoveCellNext: {
-            if (column + 1 < table->children[row_index].children.size()) target_id = table->children[row_index].children[column + 1].id;
-            else if (row_index + 1 < table->children.size()) target_id = table->children[row_index + 1].children.front().id;
+            if (const auto next = adjacent_cell(true)) target_id = *next;
+            else if (has_total) {
+                auto row = make_row();
+                target_id = row.children.front().id;
+                const auto index = table->children.size() - 1;
+                if (!insert_node(table->id, index, std::move(row))) return std::nullopt;
+                axis_edit = TableAxisEdit{Axis::Row, AxisEdit::Insert, index};
+            }
             else {
                 // Match the established desktop-table convention: Tab from
                 // the final cell appends a row and enters its first cell.
                 auto row = make_row();
                 target_id = row.children.front().id;
-                if (!insert_node(table->id, table->children.size(), std::move(row))) {
+                const auto index = table->children.size();
+                if (!insert_node(table->id, index, std::move(row))) {
                     return std::nullopt;
                 }
+                axis_edit = TableAxisEdit{Axis::Row, AxisEdit::Insert, index};
             }
             // Navigation is selection-only; appending the terminal row is a
             // real tree transaction and therefore participates in history.
@@ -1128,8 +1168,7 @@ inline std::optional<DocumentTransaction> document_edit_table(
             break;
         }
         case DocumentTableEdit::MoveCellPrevious: {
-            if (column > 0) target_id = table->children[row_index].children[column - 1].id;
-            else if (row_index > 0) target_id = table->children[row_index - 1].children.back().id;
+            if (const auto previous_cell = adjacent_cell(false)) target_id = *previous_cell;
             else {
                 const auto first = document_editable_order_position(after, cell_id);
                 if (!first) return std::nullopt;
@@ -1173,11 +1212,22 @@ inline std::optional<DocumentTransaction> document_edit_table(
             break;
         }
         case DocumentTableEdit::InsertRowAbove:
-            if (!insert_row(row_index)) return std::nullopt;
+            if (!insert_row(cell_range ? cell_range->region.first.row : row_index,
+                cell_range ? cell_range->region.last.row - cell_range->region.first.row + 1 : 1)) return std::nullopt;
             break;
         case DocumentTableEdit::InsertRowBelow:
-            if (!insert_row(row_index + 1)) return std::nullopt;
+        case DocumentTableEdit::DuplicateRows: {
+            const auto first = cell_range ? cell_range->region.first.row : row_index;
+            auto last = cell_range ? cell_range->region.last.row : row_index;
+            const auto duplicate = edit == DocumentTableEdit::DuplicateRows;
+            if (duplicate && has_total && last + 1 == table->children.size()) {
+                if (last == first) return std::nullopt;
+                --last;
+            }
+            if (!insert_row(last + 1, last - first + 1, duplicate ? std::optional{first} : std::nullopt))
+                return std::nullopt;
             break;
+        }
         case DocumentTableEdit::InsertRowAt: {
             const auto index = (std::min)(argument, table->children.size());
             if (!insert_row(index)) return std::nullopt;
@@ -1185,7 +1235,9 @@ inline std::optional<DocumentTransaction> document_edit_table(
         }
         case DocumentTableEdit::DeleteRow:
             if (row_index < header_rows || table->children.size() <= 1) return std::nullopt;
+            if (has_total && row_index + 1 == table->children.size()) return std::nullopt;
             if (!remove_node(table_id, row_index)) return std::nullopt;
+            axis_edit = TableAxisEdit{Axis::Row, AxisEdit::Remove, row_index};
             table = find_block(after.root, table_id);
             if (!table) return std::nullopt;
             target_id = table->children[
@@ -1195,34 +1247,53 @@ inline std::optional<DocumentTransaction> document_edit_table(
                 .children[(std::min)(column, column_count - 1)].id;
             break;
         case DocumentTableEdit::MoveRowUp:
-            if (row_index <= header_rows) return std::nullopt;
+            if (row_index <= visual_headers || (has_total && row_index + 1 == table->children.size())) return std::nullopt;
             if (!move_node(table_id, row_index, row_index - 1)) return std::nullopt;
+            axis_edit = TableAxisEdit{Axis::Row, AxisEdit::Move, row_index, row_index - 1};
             break;
         case DocumentTableEdit::MoveRowDown:
-            if (row_index < header_rows || row_index + 1 >= table->children.size()) return std::nullopt;
+            if (row_index < visual_headers || row_index + 1 >= table->children.size() - has_total) return std::nullopt;
             if (!move_node(table_id, row_index, row_index + 1)) return std::nullopt;
+            axis_edit = TableAxisEdit{Axis::Row, AxisEdit::Move, row_index, row_index + 1};
             break;
         case DocumentTableEdit::MoveRowTo: {
-            if (row_index < header_rows || argument < header_rows
-                || argument >= table->children.size()) return std::nullopt;
+            if (argument == row_index || row_index < visual_headers || argument < visual_headers
+                || argument >= table->children.size() - has_total
+                || row_index >= table->children.size() - has_total) return std::nullopt;
             if (!move_node(table_id, row_index, argument)) return std::nullopt;
+            axis_edit = TableAxisEdit{Axis::Row, AxisEdit::Move, row_index, argument};
             break;
         }
         case DocumentTableEdit::InsertColumnLeft:
         case DocumentTableEdit::InsertColumnRight:
+        case DocumentTableEdit::DuplicateColumns:
         case DocumentTableEdit::InsertColumnAt: {
-            const auto index = edit == DocumentTableEdit::InsertColumnLeft ? column
-                : edit == DocumentTableEdit::InsertColumnRight ? column + 1
+            const auto first = cell_range ? cell_range->region.first.column : column;
+            const auto last = cell_range ? cell_range->region.last.column : column;
+            const auto duplicate = edit == DocumentTableEdit::DuplicateColumns;
+            const auto index = edit == DocumentTableEdit::InsertColumnLeft ? first
+                : edit != DocumentTableEdit::InsertColumnAt ? last + 1
                 : (std::min)(argument, column_count);
+            const auto count = edit == DocumentTableEdit::InsertColumnAt ? 1 : last - first + 1;
             std::vector<NodeId> row_ids;
             for (const auto& row : table->children) row_ids.push_back(row.id);
             for (auto row_id : row_ids) {
-                if (!insert_node(row_id, index, make_cell())) return std::nullopt;
+                const auto* row = find_document_block(after, row_id);
+                if (!row) return std::nullopt;
+                for (std::size_t i = 0; i < count; ++i) {
+                    auto source = duplicate ? std::u32string_view{row->children[first + i].inline_content().source} : std::u32string_view{};
+                    if (!insert_node(row_id, index + i, make_cell(source))) return std::nullopt;
+                }
             }
             table = find_block(after.root, table_id);
             if (!table) return std::nullopt;
             auto& aligns = table->ensure_table_special().table_aligns;
-            aligns.insert(aligns.begin() + static_cast<std::ptrdiff_t>((std::min)(index, aligns.size())), TableAlignment::None);
+            std::vector<TableAlignment> extra(count, TableAlignment::None);
+            if (duplicate)
+                for (std::size_t i = 0; i < count && first + i < aligns.size(); ++i) extra[i] = aligns[first + i];
+            aligns.insert(aligns.begin() + static_cast<std::ptrdiff_t>((std::min)(index, aligns.size())), extra.begin(), extra.end());
+            axis_edit = TableAxisEdit{Axis::Column, AxisEdit::Insert, index, 0, count,
+                duplicate ? std::optional{first} : std::nullopt};
             payload_changed = true;
             break;
         }
@@ -1239,6 +1310,7 @@ inline std::optional<DocumentTransaction> document_edit_table(
             if (!table) return std::nullopt;
             auto& aligns = table->ensure_table_special().table_aligns;
             if (column < aligns.size()) aligns.erase(aligns.begin() + static_cast<std::ptrdiff_t>(column));
+            axis_edit = TableAxisEdit{Axis::Column, AxisEdit::Remove, column};
             payload_changed = true;
             target_id = table->children[row_index].children[(std::min)(column, column_count - 2)].id;
             break;
@@ -1256,6 +1328,7 @@ inline std::optional<DocumentTransaction> document_edit_table(
             if (!table) return std::nullopt;
             auto& aligns = table->ensure_table_special().table_aligns;
             if (column < aligns.size()) std::swap(aligns[column], aligns[column - 1]);
+            axis_edit = TableAxisEdit{Axis::Column, AxisEdit::Move, column, column - 1};
             payload_changed = true;
             break;
         }
@@ -1272,6 +1345,7 @@ inline std::optional<DocumentTransaction> document_edit_table(
             if (!table) return std::nullopt;
             auto& aligns = table->ensure_table_special().table_aligns;
             if (column + 1 < aligns.size()) std::swap(aligns[column], aligns[column + 1]);
+            axis_edit = TableAxisEdit{Axis::Column, AxisEdit::Move, column, column + 1};
             payload_changed = true;
             break;
         }
@@ -1288,16 +1362,63 @@ inline std::optional<DocumentTransaction> document_edit_table(
             auto value = aligns[column];
             aligns.erase(aligns.begin() + static_cast<std::ptrdiff_t>(column));
             aligns.insert(aligns.begin() + static_cast<std::ptrdiff_t>(argument), value);
+            axis_edit = TableAxisEdit{Axis::Column, AxisEdit::Move, column, argument};
             payload_changed = true;
             break;
         }
-        case DocumentTableEdit::SetColumnAlignment:
-            if (column >= table->table_special().table_aligns.size()) {
-                table->ensure_table_special().table_aligns.resize(column_count, TableAlignment::None);
-            }
-            table->ensure_table_special().table_aligns[column] = alignment;
+        case DocumentTableEdit::SetColumnAlignment: {
+            const auto first = cell_range ? cell_range->region.first.column : column;
+            const auto end = cell_range ? cell_range->region.last.column + 1 : column + 1;
+            auto& alignments = table->ensure_table_special().table_aligns;
+            if (alignments.size() == column_count && std::ranges::all_of(std::span{alignments}.subspan(first, end - first),
+                    [&](auto value) { return value == alignment; })) return std::nullopt;
+            alignments.resize(column_count, TableAlignment::None);
+            std::ranges::fill(std::span{alignments}.subspan(first, end - first), alignment);
             payload_changed = true;
             break;
+        }
+        case DocumentTableEdit::SetColumnWidth:
+        case DocumentTableEdit::SetAppearance: {
+            if (table->has_html_source()) return std::nullopt;
+            auto& special = table->ensure_table_special();
+            const auto separator = special.table_internal_line_endings.empty()
+                ? std::u32string_view{U"\n"} : std::u32string_view{special.table_internal_line_endings.back()};
+            std::shared_ptr<const TableMetadata> metadata;
+            if (edit == DocumentTableEdit::SetColumnWidth) {
+                metadata = set_table_column_width(special.metadata, column, argument, separator);
+            } else {
+                const auto anchor = document_table_cell_address(after, selection.anchor.container_id);
+                if (!appearance || !anchor || anchor->table_id != table_id) return std::nullopt;
+                TableRegion region{
+                    {(std::min)(anchor->row, row_index), (std::min)(anchor->column, column)},
+                    {(std::max)(anchor->row, row_index), (std::max)(anchor->column, column)}};
+                if (auto selected = document_table_cell_selection(after, selection)) region = selected->region;
+                if (appearance->kind == TableFormatKind::EqualWidths)
+                    region = {{0, 0}, {table->children.size() - 1, column_count - 1}};
+                if (appearance->kind == TableFormatKind::Formula && !table_formula_is_valid(*table, appearance->text, region))
+                    return std::nullopt;
+                metadata = format_table_metadata(special.metadata, *appearance, region, separator);
+                if (appearance->kind == TableFormatKind::Merge)
+                    target_id = table->children[region.first.row].children[region.first.column].id;
+            }
+            if (metadata == special.metadata
+                || (metadata && special.metadata && metadata->source == special.metadata->source)) return std::nullopt;
+            if (appearance && appearance->kind == TableFormatKind::Total
+                && has_total != table_has_totals(metadata.get())) {
+                if (has_total) {
+                    if (row_index + 1 == table->children.size())
+                        target_id = table->children[row_index - 1].children[column].id;
+                    if (!remove_node(table_id, table->children.size() - 1)) return std::nullopt;
+                } else if (!insert_node(table_id, table->children.size(), make_row())) return std::nullopt;
+                if (!special.table_internal_line_endings.empty()) {
+                    const auto ending = special.table_internal_line_endings.back();
+                    special.table_internal_line_endings.resize(table->children.size(), ending);
+                }
+            }
+            special.metadata = std::move(metadata);
+            payload_changed = true;
+            break;
+        }
         case DocumentTableEdit::Normalize: {
             auto columns = (std::max)(std::size_t{1}, column_count);
             std::vector<NodeId> row_ids;
@@ -1323,10 +1444,14 @@ inline std::optional<DocumentTransaction> document_edit_table(
             break;
         }
     }
-    if (changed) {
+    if (changed && !metadata_only) {
         table = find_block(after.root, table_id);
         if (!table) return std::nullopt;
         auto& table_special = table->ensure_table_special();
+        if (axis_edit && table_special.metadata) {
+            table_special.metadata = remap_table_metadata(table_special.metadata, *axis_edit);
+            payload_changed = true;
+        }
         if (!table_special.table_separator_source.empty()
             || !table_special.table_internal_line_endings.empty()) {
             table_special.table_separator_source.clear();
@@ -1344,7 +1469,11 @@ inline std::optional<DocumentTransaction> document_edit_table(
         operations.emplace_back(std::move(update));
     }
     if (changed) ++after.revision;
-    const auto target = TextSelection::caret(TextPosition{target_id, 0, TextAffinity::Downstream});
+    const auto merging = appearance && appearance->kind == TableFormatKind::Merge;
+    auto target_position = TextPosition{target_id, 0, TextAffinity::Downstream};
+    const auto target = metadata_only && !merging && target_id == cell_id ? selection
+        : selection.selects_cells() ? TextSelection::cells(target_position, target_position)
+        : TextSelection::caret(target_position);
     rollback.commit();
     return make_recorded_document_transaction(
         std::move(operations),

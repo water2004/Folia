@@ -15,6 +15,7 @@ import folia.core.document_edit_validation;
 import folia.markdown.inline_cst;
 import folia.markdown.inline_document;
 import folia.core.inline_source_edit;
+import folia.core.table_selection;
 import folia.markdown.text_edit;
 
 export namespace folia {
@@ -308,6 +309,7 @@ inline std::optional<std::vector<SelectedInlineOwner>> selected_inline_owners(
     const EditorDocument& document,
     const TextSelection& selection,
     InlineFormat format) {
+    if (selection.selects_cells()) return std::nullopt;
     const auto anchor_index = document_editable_order_position(document, selection.anchor.container_id);
     const auto active_index = document_editable_order_position(document, selection.active.container_id);
     if (!anchor_index || !active_index) return std::nullopt;
@@ -326,19 +328,17 @@ inline std::optional<std::vector<SelectedInlineOwner>> selected_inline_owners(
     const auto last_index = (std::max)(*anchor_index, *active_index);
     const auto cross_owner = first_index != last_index;
     std::vector<SelectedInlineOwner> result;
-    for (auto index = first_index; index <= last_index; ++index) {
-        const auto id = document.cached_editable_order[index];
+    auto append = [&](NodeId id, std::size_t start, std::optional<std::size_t> selected_end) {
         const auto* block = find_document_block(document, id);
         const auto* owner = block ? editable_inline_document(*block) : nullptr;
         // Fences and atomic objects remain source islands. Empty boundary
         // ranges do not acquire a pair of markers merely because the range
         // ends at the beginning of the following paragraph or table cell.
-        if (!owner) continue;
-        const auto start = index == first_index ? first.source_offset : 0;
-        const auto end = index == last_index ? last.source_offset : owner->source.size();
-        if (start == end && !selection.is_caret()) continue;
+        if (!owner) return true;
+        const auto end = selected_end.value_or(owner->source.size());
+        if (start == end && !selection.is_caret()) return true;
         const auto range = SourceRange{start, end};
-        if (!range.valid_for(owner->source.size())) return std::nullopt;
+        if (!range.valid_for(owner->source.size())) return false;
         auto local = TextSelection{
             {id, reversed ? end : start, selection.anchor.affinity},
             {id, reversed ? start : end, selection.active.affinity},
@@ -347,6 +347,15 @@ inline std::optional<std::vector<SelectedInlineOwner>> selected_inline_owners(
             start, end, selection.is_caret());
         if (!existing && cross_owner) existing = find_boundary_format(owner->tree.nodes, cst_kind(format), range);
         result.push_back({id, owner, range, local, existing});
+        return true;
+    };
+    if (auto slices = document_merged_table_text_slices(document, selection)) {
+        for (const auto& slice : *slices)
+            if (!append(slice.container_id, slice.source_range.start, slice.source_range.end)) return std::nullopt;
+    } else {
+        for (auto index = first_index; index <= last_index; ++index)
+            if (!append(document.cached_editable_order[index], index == first_index ? first.source_offset : 0,
+                    index == last_index ? std::optional{last.source_offset} : std::nullopt)) return std::nullopt;
     }
     return result;
 }

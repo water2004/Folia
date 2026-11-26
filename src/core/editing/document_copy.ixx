@@ -12,7 +12,10 @@ import folia.markdown.document_text;
 import folia.markdown.inline_parser;
 import folia.markdown.serializer;
 import folia.core.table_selection;
+import folia.core.theme;
 import folia.markdown.text_edit;
+import folia.markdown.table_metadata;
+import folia.markdown.utf;
 
 export namespace folia {
 
@@ -239,12 +242,30 @@ inline std::optional<BlockNode> slice_block(
 
 } // namespace document_copy_detail
 
+struct TableClipboard {
+    std::u32string markdown;
+    std::u32string html;
+    std::u32string tab_separated;
+};
+
+std::optional<TableClipboard> document_table_clipboard(
+    const EditorDocument& document, TextPosition position,
+    std::optional<TableRegion> selected = {}, bool markdown_only = false, const ThemeColors* colors = nullptr);
+std::optional<std::u32string> table_clipboard_markdown(std::u32string_view html);
+std::optional<std::u32string> table_clipboard_html_table(std::u32string_view html);
+
 // Return the exact source substring for a one-owner selection. Cross-owner
 // selections are represented by a recursively pruned block tree, preserving
 // list/quote/task/callout/footnote structure at arbitrary nesting depth.
 inline std::optional<std::u32string> document_selected_markdown(
     const EditorDocument& document,
     const TextSelection& selection) {
+    if (auto cells = document_table_cell_selection(document, selection)) {
+        if (auto clipboard = document_table_clipboard(document, selection.active, cells->region))
+            return std::move(clipboard->tab_separated);
+        return std::nullopt;
+    }
+    if (auto merged = document_selected_merged_table_text(document, selection)) return merged;
     auto ordered = document_copy_detail::order_selection(document, selection);
     if (!ordered) return std::nullopt;
     if (ordered->start_index == ordered->end_index) {

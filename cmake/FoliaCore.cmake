@@ -11,6 +11,9 @@ set_target_properties(folia_core PROPERTIES CXX_MODULE_STD ON)
 target_include_directories(folia_core PRIVATE
     ${FOLIA_SOURCE_ROOT}/third_party/srell)
 target_link_libraries(folia_core PUBLIC folia::markdown)
+if(MSVC)
+    target_compile_options(folia_core PRIVATE /bigobj)
+endif()
 
 file(GLOB_RECURSE FOLIA_CORE_MODULE CONFIGURE_DEPENDS
     ${FOLIA_SOURCE_ROOT}/src/core/*.ixx)

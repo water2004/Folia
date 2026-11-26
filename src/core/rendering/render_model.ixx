@@ -7,6 +7,7 @@ import folia.core.types;
 import folia.markdown.ids;
 import folia.markdown.dialect;
 import folia.markdown.image_dimension;
+import folia.markdown.table_metadata;
 import folia.core.theme;
 import folia.markdown.outline;
 import folia.markdown.diagnostics;
@@ -336,7 +337,11 @@ struct RenderBlockSpecial {
     // Table
     std::vector<std::vector<InlineRenderItem>> table_cells;
     std::vector<TextSpan> table_cell_spans;
+    std::vector<std::uint64_t> table_cell_keys;
+    std::map<std::size_t, bool> table_checkboxes;
     std::vector<TableAlignment> table_aligns;
+    std::shared_ptr<const TableMetadata> table_metadata;
+    bool table_grid_editable = false;
     std::size_t column_count = 0, row_count = 0;
     bool table_header_row = true;
     // Container labels / raw and extension payloads

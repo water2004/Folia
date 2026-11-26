@@ -17,7 +17,10 @@ add_library(folia_markdown STATIC)
 add_library(folia::markdown ALIAS folia_markdown)
 target_compile_features(folia_markdown PUBLIC cxx_std_23)
 set_target_properties(folia_markdown PROPERTIES CXX_MODULE_STD ON)
-target_include_directories(folia_markdown PRIVATE ../../third_party/tree-sitter/include)
+target_include_directories(folia_markdown PRIVATE
+    ../../third_party/tree-sitter/include
+    ../../third_party/nlohmann-json/include)
+target_sources(folia_markdown PRIVATE model/table_metadata.cpp)
 target_link_libraries(folia_markdown PRIVATE folia_tree_sitter_html)
 if(MSVC)
     target_compile_options(folia_markdown PRIVATE /utf-8)
@@ -39,6 +42,7 @@ target_sources(folia_markdown PUBLIC FILE_SET CXX_MODULES FILES
     model/selection.ixx
     model/source_offset_map.ixx
     model/symbols.ixx
+    model/table_metadata.ixx
     model/text_edit.ixx
     parsing/block_line_recognizer.ixx
     parsing/block_source.ixx

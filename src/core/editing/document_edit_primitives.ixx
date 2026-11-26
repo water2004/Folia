@@ -27,7 +27,8 @@ enum class DocumentTableEdit {
     MoveCellNext, MoveCellPrevious,
     InsertRowAbove, InsertRowBelow, DeleteRow, MoveRowUp, MoveRowDown,
     InsertColumnLeft, InsertColumnRight, DeleteColumn, MoveColumnLeft, MoveColumnRight,
-    SetColumnAlignment, Normalize, InsertRowAt, InsertColumnAt, MoveRowTo, MoveColumnTo,
+    SetColumnAlignment, SetColumnWidth, SetAppearance, Normalize, InsertRowAt, InsertColumnAt, MoveRowTo, MoveColumnTo,
+    DuplicateRows, DuplicateColumns,
 };
 enum class DocumentMove { Left, Right, Up, Down, LineStart, LineEnd, DocumentStart, DocumentEnd };
 

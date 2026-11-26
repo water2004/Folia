@@ -22,6 +22,8 @@ import folia.markdown.inline_parser;
 import folia.markdown.parser;
 import folia.markdown.text_edit;
 import folia.markdown.utf;
+import folia.core.table_selection;
+import folia.markdown.table_metadata;
 
 export namespace folia {
 
@@ -51,7 +53,7 @@ inline bool record_insert(
     std::size_t index,
     BlockNode node,
     std::vector<DocumentOperation>& operations) {
-    auto* parent = find_block(document.root, parent_id);
+    auto* parent = find_document_block(document, parent_id);
     if (!parent || index > parent->children.size()) return false;
     DocumentTreeEdit insert;
     insert.kind = DocumentTreeEditKind::Insert;
@@ -613,14 +615,166 @@ inline std::optional<TextPosition> paste_parsed_blocks(
     return target;
 }
 
+using ClipboardGrid = std::vector<std::vector<std::u32string>>;
+
+inline ClipboardGrid table_clipboard_grid(std::u32string_view text, const MarkdownDialect& dialect, bool structured,
+    std::shared_ptr<const TableMetadata>& metadata) {
+    if ((text.contains(U'|') && text.contains(U'\n')) || text.starts_with(U"<table") || text.starts_with(U"<TABLE")) {
+        auto fragment = parse_block_fragment(text, dialect);
+        if (fragment.blocks.size() == 1 && fragment.blocks.front().kind == BlockKind::Table) {
+            ClipboardGrid grid;
+            metadata = fragment.blocks.front().table_special().metadata;
+            for (const auto& row : fragment.blocks.front().children) {
+                auto& cells = grid.emplace_back();
+                for (const auto& cell : row.children) cells.push_back(cell.inline_content().source);
+            }
+            return grid;
+        }
+    }
+    // A plain-text clipboard containing only whitespace is literal cell
+    // input. Tabs in that payload alone do not identify a spreadsheet grid.
+    if (!structured && (!text.contains(U'\t') || text.find_first_not_of(U" \t\n") == text.npos)) return {};
+    ClipboardGrid grid(1, std::vector<std::u32string>(1));
+    bool quoted = false;
+    bool at_start = true;
+    bool tabular = false;
+    for (auto index = std::size_t{0}; index < text.size(); ++index) {
+        const auto cp = text[index];
+        auto& cell = grid.back().back();
+        if (quoted) {
+            if (cp != U'"') cell += cp;
+            else if (index + 1 < text.size() && text[index + 1] == U'"') {
+                cell += cp;
+                ++index;
+            } else quoted = false;
+            continue;
+        }
+        if (cp == U'"' && at_start) quoted = true;
+        else if (cp == U'\t') {
+            grid.back().emplace_back();
+            tabular = true;
+        } else if (cp == U'\n') grid.emplace_back(1);
+        else cell += cp;
+        at_start = !quoted && (cp == U'\t' || cp == U'\n');
+    }
+    if ((!tabular && !structured) || quoted) return {};
+    if (grid.size() > 1 && grid.back().size() == 1 && grid.back().front().empty()) grid.pop_back();
+    return grid;
+}
+
+inline std::optional<DocumentTransaction> paste_table_grid(
+    EditorDocument& document, const TextSelection& selection,
+    TableCellAddress first, const ClipboardGrid& grid, const TableMetadata* clipboard = nullptr) {
+    auto* table = find_document_block(document, first.table_id);
+    if (!table || table->has_html_source() || table->children.empty()) return std::nullopt;
+    const auto revision = document.revision;
+    const auto old_columns = table->children.front().children.size();
+    const auto old_rows = table->children.size();
+    const auto has_total = table_has_totals(table->table_special().metadata.get());
+    const auto longest_row = std::ranges::max(grid | std::views::transform([](const auto& row) { return row.size(); }));
+    const auto columns = (std::max)(old_columns, first.column + longest_row);
+    const auto rows = (std::max)(old_rows, first.row + grid.size() + has_total);
+    std::vector<DocumentOperation> operations;
+    document_edit_detail::MutationRollback rollback(document, operations, revision);
+    document_edit_detail::NodeAllocator allocator(document);
+    auto make_cell = [&] {
+        BlockNode cell;
+        cell.kind = BlockKind::TableCell;
+        cell.id = allocator.allocate();
+        cell.edit_inline_content().syntax_mode = InlineSyntaxMode::TableCell;
+        return cell;
+    };
+    if (columns > old_columns) {
+        for (auto& row : table->children)
+            while (row.children.size() < columns)
+                if (!record_insert(document, row.id, row.children.size(), make_cell(), operations)) return std::nullopt;
+    }
+    while (table->children.size() < rows) {
+        BlockNode row;
+        row.kind = BlockKind::TableRow;
+        row.id = allocator.allocate();
+        for (std::size_t column = 0; column < columns; ++column) row.children.push_back(make_cell());
+        if (!record_insert(document, table->id, table->children.size() - has_total, std::move(row), operations)) return std::nullopt;
+    }
+    const auto& original = table->table_special();
+    const auto separator = original.table_internal_line_endings.empty()
+        ? std::u32string_view{U"\n"} : std::u32string_view{original.table_internal_line_endings.back()};
+    const TableRegion pasted{{first.row, first.column},
+        {first.row + grid.size() - 1, first.column + longest_row - 1}};
+    auto metadata = clipboard ? paste_table_metadata(original.metadata, *clipboard, pasted, separator) : original.metadata;
+    if (columns != old_columns || rows != old_rows || metadata != original.metadata) {
+        DocumentTreeEdit payload;
+        payload.kind = DocumentTreeEditKind::UpdatePayload;
+        payload.before = document_transaction_detail::payload_shell(*table);
+        auto& special = table->ensure_table_special();
+        special.metadata = std::move(metadata);
+        if (columns != old_columns) {
+            special.table_separator_source.clear();
+            special.table_aligns.resize(columns, TableAlignment::None);
+        }
+        if (!special.table_internal_line_endings.empty()) {
+            const auto ending = special.table_internal_line_endings.back();
+            special.table_internal_line_endings.resize(rows, ending);
+        }
+        payload.after = document_transaction_detail::payload_shell(*table);
+        operations.emplace_back(std::move(payload));
+    }
+    for (std::size_t row = 0; row < grid.size(); ++row) {
+        for (std::size_t column = 0; column < grid[row].size(); ++column) {
+            if (table_cell_is_computed(*table, {first.row + row, first.column + column})) continue;
+            auto& cell = table->children[first.row + row].children[first.column + column];
+            const auto& source = cell.inline_content().source;
+            auto replacement = document_edit_detail::table_cell_input_source({}, 0, grid[row][column]);
+            if (source == replacement) continue;
+            auto edit = document_edit_detail::edit_inline(document, cell.id,
+                {0, source.size()}, std::move(replacement), allocator);
+            if (!edit) return std::nullopt;
+            document_edit_detail::append_source_operation(operations, std::move(*edit));
+        }
+    }
+    if (operations.empty()) return std::nullopt;
+    auto first_position = TextPosition{table->children[first.row].children[first.column].id, 0, TextAffinity::Downstream};
+    const auto last_cell = table->children[first.row + grid.size() - 1].children[first.column + longest_row - 1].id;
+    auto pasted_selection = selection.selects_cells()
+        ? TextSelection::cells(first_position, {last_cell, 0})
+        : TextSelection::caret(first_position);
+    ++document.revision;
+    rollback.commit();
+    return make_recorded_document_transaction(std::move(operations), selection,
+        pasted_selection, revision,
+        document.revision, DocumentTransactionReason::Paste);
+}
+
 } // namespace document_paste_detail
 
 inline std::optional<DocumentTransaction> document_paste_text(
     EditorDocument& document,
     const TextSelection& selection,
-    std::u32string_view text) {
+    std::u32string_view text, bool structured_table_clipboard = false) {
     if (text.empty()) return std::nullopt;
     auto normalized = document_paste_detail::normalize_newlines(text);
+    if (const auto target = document_table_cell_address(document, selection.active.container_id)) {
+        const auto anchor = document_table_cell_address(document, selection.anchor.container_id);
+        const auto* table = find_document_block(document, target->table_id);
+        if (anchor && anchor->table_id == target->table_id && table && !table->has_html_source()) {
+            std::shared_ptr<const TableMetadata> metadata;
+            auto grid = document_paste_detail::table_clipboard_grid(normalized, document.dialect, structured_table_clipboard, metadata);
+            auto selected = document_table_cell_selection(document, selection);
+            if ((grid.empty() || (grid.size() == 1 && grid.front().size() == 1)) && selected) {
+                const auto height = selected->region.last.row - selected->region.first.row + 1;
+                const auto width = selected->region.last.column - selected->region.first.column + 1;
+                auto value = grid.empty() ? normalized : std::move(grid.front().front());
+                grid.assign(height, std::vector<std::u32string>(width, value));
+            }
+            if (!grid.empty()) {
+                const auto row = selected ? selected->region.first.row : (std::min)(anchor->row, target->row);
+                const auto column = selected ? selected->region.first.column : (std::min)(anchor->column, target->column);
+                const auto& row_node = table->children[row];
+                return document_paste_detail::paste_table_grid(document, selection,
+                    {table->id, row_node.id, row_node.children[column].id, row, column}, grid, metadata.get());
+            }
+        }
+    }
     const auto revision_before = document.revision;
     auto& working = document;
     auto current = selection;

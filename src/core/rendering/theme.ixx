@@ -56,6 +56,11 @@ struct ThemeColors {
     Color shell_bg, shell_layer_bg, shell_border, shell_fg, shell_muted_fg, shell_accent;
     std::array<Color, 11> syntax{};
 
+    std::array<Color, 7> table_palette() const {
+        return {muted_fg, callout_caution_border, callout_warning_border, highlight_underline,
+            callout_tip_border, callout_note_border, callout_important_border};
+    }
+
     std::pair<Color, Color> callout_for(std::string_view kind) const {
         if (kind == "note") return {callout_note_bg, callout_note_border};
         if (kind == "warning") return {callout_warning_bg, callout_warning_border};

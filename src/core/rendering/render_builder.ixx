@@ -8,6 +8,7 @@ import folia.core.types;
 import folia.markdown.ids;
 import folia.markdown.dialect;
 import folia.markdown.ast;
+import folia.markdown.table_metadata;
 import folia.markdown.block_source;
 import folia.markdown.block_tree;
 import folia.markdown.callout;
@@ -26,6 +27,7 @@ import folia.core.render_model;
 import folia.core.render_fragments;
 import folia.core.html_inline_presentation;
 import folia.core.html_inline_flow;
+import folia.core.table_values;
 
 export namespace folia {
 
@@ -132,6 +134,7 @@ inline void append_metadata(Hasher& hash, BlockNode const& block) {
         hash.scalar(table.table_aligns.size());
         for (auto alignment : table.table_aligns) hash.scalar(alignment);
         hash.scalar(table.table_header_row);
+        hash.scalar(table.metadata ? table.metadata->source_hash : 0);
     });
     field(supplemental ? supplemental->image.get() : nullptr, [&](auto const& image) {
         hash.text(image.src); hash.text(image.image_alt);
@@ -1371,12 +1374,22 @@ struct Builder {
                 auto rb = base(BlockStyle::table(theme.layout));
                 auto& special = rb.ensure_special();
                 special.table_aligns = b.table_special().table_aligns;
+                special.table_metadata = b.table_special().metadata;
+                special.table_grid_editable = !b.has_html_source();
                 special.table_header_row = !b.children.empty() && b.children.front().table_special().table_header_row;
                 special.column_count = b.children.empty() ? 0 : b.children.front().children.size();
                 special.row_count = b.children.size();
                 auto build_cell = [&](const BlockNode& cell) {
-                    special.table_cell_spans.push_back({cell.id, {0, cell.inline_content().source.size()}});
-                    return build_inline_document(cell.inline_content(), cell.id, InlineStyle::plain());
+                    const auto& content = cell.inline_content();
+                    if (special.table_grid_editable)
+                        if (auto checkbox = table_checkbox(content.source))
+                            special.table_checkboxes.emplace(special.table_cell_spans.size(), *checkbox);
+                    special.table_cell_spans.push_back({cell.id, {0, content.source.size()}});
+                    render_key_detail::Hasher key;
+                    key.scalar(cell.id);
+                    render_key_detail::append(key, content);
+                    special.table_cell_keys.push_back(key.value);
+                    return build_inline_document(content, cell.id, InlineStyle::plain());
                 };
                 for (const auto& row : b.children) for (const auto& cell : row.children) special.table_cells.push_back(build_cell(cell));
                 return rb;
@@ -1780,7 +1793,8 @@ inline std::optional<Repair> repair_plan(
         }
         // Renumbering and moving between ancestry contexts have a wider real
         // presentation dependency. They use the general structural planner.
-        if (delta.kind == DocumentTreeEditKind::Move) return std::nullopt;
+        if (delta.kind == DocumentTreeEditKind::Move || delta.kind == DocumentTreeEditKind::ReorderChildren)
+            return std::nullopt;
         auto parent_path = cached_document_block_path(document, delta.parent_id);
         if (!parent_path || parent_path->empty()) return std::nullopt;
         auto const* parent = block_at_path(document.root, *parent_path);

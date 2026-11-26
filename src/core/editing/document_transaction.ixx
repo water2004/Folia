@@ -24,7 +24,7 @@ struct DocumentTextOperation {
     std::optional<InlineIdentityPatch> inline_identities;
 };
 
-enum class DocumentTreeEditKind { Insert, Remove, Move, UpdatePayload };
+enum class DocumentTreeEditKind { Insert, Remove, Move, UpdatePayload, ReorderChildren };
 
 struct DocumentTreeEdit {
     DocumentTreeEditKind kind = DocumentTreeEditKind::Insert;
@@ -35,6 +35,9 @@ struct DocumentTreeEdit {
     std::size_t other_index = 0;
     BlockNode before;
     BlockNode after;
+    // For a reorder, map each old child index to its new index within the
+    // contiguous interval starting at index. Undo uses the inverse mapping.
+    std::vector<std::size_t> order;
 };
 
 // A derived invalidation delta, not a replay operation. Its direction is
@@ -129,6 +132,7 @@ inline BlockNode semantic_payload_shell(const BlockNode& source) {
         auto& table = shell.ensure_table_special();
         table.table_aligns = payload.table->table_aligns;
         table.table_header_row = payload.table->table_header_row;
+        table.metadata = payload.table->metadata;
     }
     if (payload.supplemental) {
         auto const& supplemental = *payload.supplemental;
@@ -168,6 +172,8 @@ inline DocumentTreeDelta summarize_tree_delta(DocumentTreeEdit const& edit, bool
             forward ? edit.before : edit.after);
         delta.after_payload = document_transaction_detail::semantic_payload_shell(
             forward ? edit.after : edit.before);
+    } else if (edit.kind == DocumentTreeEditKind::ReorderChildren) {
+        delta.root_id = edit.parent_id;
     } else {
         auto const& subtree = edit.kind == DocumentTreeEditKind::Insert ? edit.after : edit.before;
         delta.root_id = subtree.id;

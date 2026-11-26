@@ -114,6 +114,7 @@ inline bool update_document_block_index(
     std::unordered_set<std::uint64_t> relocated_roots;
     std::vector<NodeId> added_roots;
     std::vector<NodeId> updated_payloads;
+    std::vector<NodeId> reordered_parents;
 
     auto note_parent = [&](NodeId id, std::size_t index) {
         auto [found, inserted] = affected_parents.emplace(id.v, index);
@@ -129,6 +130,11 @@ inline bool update_document_block_index(
             note_parent(tree->parent_id, tree->index);
             note_parent(tree->other_parent_id, tree->other_index);
             relocated_roots.insert(tree->moved_id.v);
+            continue;
+        }
+        if (tree->kind == DocumentTreeEditKind::ReorderChildren) {
+            note_parent(tree->parent_id, tree->index);
+            reordered_parents.push_back(tree->parent_id);
             continue;
         }
         if (tree->kind == DocumentTreeEditKind::UpdatePayload) {
@@ -289,6 +295,25 @@ inline bool update_document_block_index(
         rebuild_editable_positions(document, insertion);
     }
 
+    for (const auto id : reordered_parents) {
+        const auto* parent = find_document_block(document, id);
+        if (!parent) return false;
+        std::vector<NodeId> order;
+        collect_editable_order(*parent, order);
+        if (order.empty()) continue;
+        auto first = document.cached_editable_order.size();
+        for (const auto owner : order) {
+            auto rank = document.cached_editable_index.find(owner.v);
+            if (rank == document.cached_editable_index.end()) return false;
+            first = (std::min)(first, rank->second);
+        }
+        if (document.cached_editable_order.size() - first < order.size()) return false;
+        for (std::size_t offset = 0; offset < order.size(); ++offset) {
+            record_editable_order_entry_update();
+            document.cached_editable_order.set(first + offset, order[offset]);
+            document.cached_editable_index.set(order[offset].v, first + offset);
+        }
+    }
     record_incremental_document_block_index_repair();
     return true;
 }

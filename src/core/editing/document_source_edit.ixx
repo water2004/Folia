@@ -1022,6 +1022,32 @@ inline std::optional<DocumentTransaction> document_delete_forward(EditorDocument
 inline std::optional<DocumentTransaction> document_delete_selection(
     EditorDocument& document, const TextSelection& selection, TextPosition* tracked) {
     if (selection.is_caret()) return std::nullopt;
+    if (selection.selects_cells()) {
+        const auto grid = document_table_cell_selection(document, selection);
+        if (!grid) return std::nullopt;
+        const auto* table = find_document_block(document, grid->table);
+        if (!table) return std::nullopt;
+        const auto revision = document.revision;
+        std::vector<DocumentOperation> operations;
+        document_edit_detail::MutationRollback rollback(document, operations, revision);
+        document_edit_detail::NodeAllocator allocator(document);
+        for (auto row = grid->region.first.row; row <= grid->region.last.row; ++row) {
+            for (auto column = grid->region.first.column; column <= grid->region.last.column; ++column) {
+                if (table_cell_is_computed(*table, {row, column})) continue;
+                const auto& cell = table->children[row].children[column];
+                const auto size = cell.inline_content().source.size();
+                if (size == 0) continue;
+                auto edit = document_edit_detail::edit_inline(document, cell.id, {0, size}, {}, allocator);
+                if (!edit) return std::nullopt;
+                document_edit_detail::append_source_operation(operations, std::move(*edit));
+            }
+        }
+        document_edit_detail::track_source_operations(tracked, operations);
+        if (!operations.empty()) ++document.revision;
+        rollback.commit();
+        return make_recorded_document_transaction(std::move(operations), selection, selection,
+            revision, document.revision, DocumentTransactionReason::Delete);
+    }
     if (auto marker = document_delete_marker(document, selection, false, tracked)) return marker;
     const auto revision_before = document.revision;
     auto& after = document; document_edit_detail::NodeAllocator allocator(after);

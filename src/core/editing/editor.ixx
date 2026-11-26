@@ -2,6 +2,7 @@
 // reversible operation history, and the command pipeline.
 export module folia.core.editor;
 import std;
+import folia.markdown.table_metadata;
 import folia.core.types;
 import folia.markdown.ids;
 import folia.markdown.selection;
@@ -23,6 +24,9 @@ import folia.core.document_operation_apply;
 import folia.core.document_search_replace;
 import folia.core.document_index_update;
 import folia.core.document_transaction;
+import folia.core.table_selection;
+import folia.core.table_commands;
+import folia.core.table_calculation;
 import folia.markdown.document_symbols;
 import folia.markdown.text_edit;
 import folia.markdown.symbols;
@@ -133,6 +137,7 @@ public:
     }
     std::u32string selected_text_cps() const {
         if (source_view_) return source_view_->editor.selected_text();
+        if (auto merged = document_selected_merged_table_text(document_, *rendered_selection_)) return std::move(*merged);
         return document_selected_text(document_, rendered_selection_.value()).value_or(std::u32string{});
     }
     std::u32string selected_markdown_cps() const {
@@ -162,7 +167,8 @@ public:
     }
 
     std::optional<DocumentTransaction> execute_document_enter(TextSelection selection) {
-        auto transaction = document_enter(document_, selection);
+        auto transaction = document_edit_table_cell_text(document_, selection,
+            [&](auto selected) { return document_enter(document_, selected); });
         if (!transaction) return std::nullopt;
         if (transaction->revision_before == transaction->revision_after) {
             rendered_selection_.value() = transaction->selection_after;
@@ -173,8 +179,12 @@ public:
     }
 
     std::optional<DocumentTransaction> execute_document_insert_text(TextSelection selection, std::u32string_view text) {
-        auto transaction = document_insert_text(document_, selection, text);
+        if (document_table_cell_is_computed(document_, selection.active.container_id)) return std::nullopt;
+        auto inline_selection = document_table_text_selection(document_, selection).value_or(selection);
+        auto transaction = document_edit_table_cell_text(document_, inline_selection,
+            [&](auto selected) { return document_insert_text(document_, selected, text); });
         if (!transaction) return std::nullopt;
+        transaction->selection_before = selection;
         if (transaction->revision_before == transaction->revision_after) {
             rendered_selection_.value() = transaction->selection_after;
         } else {
@@ -184,8 +194,20 @@ public:
     }
 
     bool execute_document_replace_text(TextSpan range, std::u32string_view text, TextSelection after) {
+        if (document_table_cell_is_computed(document_, range.container_id)) return false;
         auto before = rendered_selection_.value();
-        auto transaction = document_replace_text(document_, before, range, text, after);
+        const TextSelection target{{range.container_id, range.source_range.start},
+            {range.container_id, range.source_range.end}};
+        auto transaction = document_edit_table_cell_text(document_, target, [&](auto selected) {
+            const auto delta = selected.anchor.source_offset - range.source_range.start;
+            for (auto* position : {&after.anchor, &after.active}) {
+                if (position->container_id != range.container_id) continue;
+                position->container_id = selected.active.container_id;
+                position->source_offset += delta;
+            }
+            return document_replace_text(document_, selected,
+                {selected.active.container_id, {selected.anchor.source_offset, selected.active.source_offset}}, text, after);
+        });
         if (!transaction) return false;
         transaction->selection_before = before;
         transaction->selection_after = after;
@@ -203,7 +225,7 @@ public:
     }
 
     std::optional<DocumentTransaction> execute_document_paste_text(TextSelection selection, std::u32string_view text,
-        std::optional<TextSpan> range = {}) {
+        std::optional<TextSpan> range = {}, bool structured_table_clipboard = false) {
         if (text.empty() && !range) return std::nullopt;
         const auto before = selection;
         if (range) {
@@ -212,8 +234,10 @@ public:
             selection = {{range->container_id, range->source_range.start, TextAffinity::Downstream},
                          {range->container_id, range->source_range.end, TextAffinity::Upstream}};
         }
-        auto transaction = text.empty() ? document_delete_selection(document_, selection)
-            : document_paste_text(document_, selection, text);
+        auto transaction = document_edit_table_cell_text(document_, selection, [&](auto selected) {
+            return text.empty() ? document_delete_selection(document_, selected)
+                : document_paste_text(document_, selected, text, structured_table_clipboard);
+        });
         if (!transaction) return std::nullopt;
         transaction->selection_before = before;
         apply_document_transaction_(*transaction);
@@ -221,13 +245,34 @@ public:
     }
 
     std::optional<DocumentTransaction> execute_document_insert_soft_break(TextSelection selection) {
-        auto transaction = document_insert_soft_break(document_, selection);
+        if (document_table_cell_is_computed(document_, selection.active.container_id)) return std::nullopt;
+        auto inline_selection = document_table_text_selection(document_, selection);
+        auto transaction = document_edit_table_cell_text(document_,
+            inline_selection ? TextSelection::caret(inline_selection->active) : selection,
+            [&](auto selected) { return document_insert_soft_break(document_, selected); });
         if (!transaction) return std::nullopt;
+        transaction->selection_before = selection;
         apply_document_transaction_(*transaction);
         return transaction;
     }
 
     bool execute_document_move(DocumentMove movement, bool extend_selection) {
+        if (rendered_selection_->selects_cells()) {
+            auto row = static_cast<int>(movement == DocumentMove::Down) - static_cast<int>(movement == DocumentMove::Up);
+            auto column = static_cast<int>(movement == DocumentMove::Right) - static_cast<int>(movement == DocumentMove::Left);
+            if (row != 0 || column != 0) {
+                auto moved = document_table_step(document_, *rendered_selection_, row, column, extend_selection);
+                if (!moved) return false;
+                rendered_selection_ = *moved;
+                return true;
+            }
+        } else if (movement == DocumentMove::Left || movement == DocumentMove::Right) {
+            if (auto moved = document_move_merged_table_text(document_, *rendered_selection_,
+                    movement == DocumentMove::Right, extend_selection)) {
+                rendered_selection_ = *moved;
+                return true;
+            }
+        }
         auto selection = document_move_selection(document_, rendered_selection_.value(), movement, extend_selection);
         if (!selection) return false;
         rendered_selection_.value() = *selection;
@@ -235,21 +280,24 @@ public:
     }
 
     std::optional<DocumentTransaction> execute_document_delete_backward(TextSelection selection) {
-        auto transaction = document_delete_backward(document_, selection);
+        auto transaction = document_edit_table_cell_text(document_, selection,
+            [&](auto selected) { return document_delete_backward(document_, selected); });
         if (!transaction) return std::nullopt;
         apply_document_transaction_(*transaction);
         return transaction;
     }
 
     std::optional<DocumentTransaction> execute_document_delete_forward(TextSelection selection) {
-        auto transaction = document_delete_forward(document_, selection);
+        auto transaction = document_edit_table_cell_text(document_, selection,
+            [&](auto selected) { return document_delete_forward(document_, selected); });
         if (!transaction) return std::nullopt;
         apply_document_transaction_(*transaction);
         return transaction;
     }
 
     std::optional<DocumentTransaction> execute_document_delete_selection(TextSelection selection) {
-        auto transaction = document_delete_selection(document_, selection);
+        auto transaction = document_edit_table_cell_text(document_, selection,
+            [&](auto selected) { return document_delete_selection(document_, selected); });
         if (!transaction) return std::nullopt;
         apply_document_transaction_(*transaction);
         return transaction;
@@ -270,7 +318,8 @@ public:
     }
 
     std::optional<DocumentTransaction> execute_document_toggle_inline_format(TextSelection selection, InlineFormat kind) {
-        auto transaction = document_toggle_inline_format(document_, selection, kind);
+        auto transaction = document_edit_table_cell_text(document_, selection,
+            [&](auto selected) { return document_toggle_inline_format(document_, selected, kind); });
         if (!transaction) return std::nullopt;
         apply_document_transaction_(*transaction);
         return transaction;
@@ -307,14 +356,18 @@ public:
 
     std::optional<DocumentTransaction> execute_document_insert_link(TextSelection selection, const Command& command) {
         auto title = command.title ? std::optional<std::string>{cps_to_utf8(*command.title)} : std::nullopt;
-        auto transaction = document_insert_link(document_, selection, cps_to_utf8(command.href), std::move(title));
+        auto transaction = document_edit_table_cell_text(document_, selection, [&](auto selected) {
+            return document_insert_link(document_, selected, cps_to_utf8(command.href), std::move(title));
+        });
         if (!transaction) return std::nullopt;
         apply_document_transaction_(*transaction);
         return transaction;
     }
 
     std::optional<DocumentTransaction> execute_document_insert_image(TextSelection selection, const Command& command) {
-        auto transaction = document_insert_image(document_, selection, cps_to_utf8(command.path), cps_to_utf8(command.alt));
+        auto transaction = document_edit_table_cell_text(document_, selection, [&](auto selected) {
+            return document_insert_image(document_, selected, cps_to_utf8(command.path), cps_to_utf8(command.alt));
+        });
         if (!transaction) return std::nullopt;
         apply_document_transaction_(*transaction);
         return transaction;
@@ -356,8 +409,9 @@ public:
         TextSelection selection,
         DocumentTableEdit edit,
         TableAlignment alignment = TableAlignment::None,
-        std::size_t requested_index = 0) {
-        auto transaction = document_edit_table(document_, selection, edit, alignment, requested_index);
+        std::size_t requested_index = 0,
+        const TableFormatEdit* appearance = nullptr) {
+        auto transaction = document_edit_table(document_, selection, edit, alignment, requested_index, appearance);
         if (!transaction) return std::nullopt;
         if (transaction->revision_before == transaction->revision_after) {
             rendered_selection_.value() = transaction->selection_after;
@@ -481,9 +535,38 @@ public:
             return moved;
         }
         if (source_view_) return execute_source_command_(cmd);
+        if (cmd.kind == CommandKind::SortTableRows || cmd.kind == CommandKind::FillTableSelection) {
+            const auto selection = *rendered_selection_;
+            auto edit = cmd.kind == CommandKind::SortTableRows
+                ? document_sort_table(document_, selection, cmd.table_index != 0)
+                : cmd.table_fill_target ? document_fill_table(document_, selection, *cmd.table_fill_target, cmd.table_copy_fill)
+                    : std::nullopt;
+            if (!edit) return false;
+            apply_document_transaction_(*edit);
+            return true;
+        }
+        if (cmd.kind == CommandKind::DeleteTable) {
+            auto edit = document_delete_table(document_, *rendered_selection_);
+            if (!edit) return false;
+            apply_document_transaction_(*edit);
+            return true;
+        }
+        if (cmd.kind == CommandKind::CommitTableCell || cmd.kind == CommandKind::SetTableCellValue
+            || cmd.kind == CommandKind::ToggleTableCheckbox || cmd.kind == CommandKind::MakeTableCheckbox) {
+            const auto selection = *rendered_selection_;
+            auto edit = cmd.kind == CommandKind::ToggleTableCheckbox || cmd.kind == CommandKind::MakeTableCheckbox
+                ? document_toggle_table_checkbox(document_, selection, cmd.kind == CommandKind::MakeTableCheckbox)
+                : document_commit_table_cell(document_, selection, cmd.kind == CommandKind::SetTableCellValue
+                    ? std::optional<std::u32string_view>{cmd.text} : std::nullopt);
+            if (!edit) return false;
+            apply_document_transaction_(*edit);
+            return true;
+        }
         if (cmd.kind == CommandKind::MoveSelection) {
             if (!cmd.move_destination) return false;
-            auto transaction = document_move_selection(document_, rendered_selection_.value(), *cmd.move_destination);
+            auto destination = *cmd.move_destination;
+            auto transaction = document_edit_table_cell_text(document_, *rendered_selection_,
+                [&](auto selected) { return document_move_selection(document_, selected, destination); }, &destination);
             if (!transaction) return false;
             apply_document_transaction_(*transaction);
             return true;
@@ -508,8 +591,9 @@ public:
             return true;
         }
         if (cmd.kind == CommandKind::DeleteWordBackward || cmd.kind == CommandKind::DeleteWordForward) {
-            auto transaction = document_delete_word(document_, rendered_selection_.value(),
-                cmd.kind == CommandKind::DeleteWordBackward);
+            auto transaction = document_edit_table_cell_text(document_, *rendered_selection_, [&](auto selected) {
+                return document_delete_word(document_, selected, cmd.kind == CommandKind::DeleteWordBackward);
+            });
             if (!transaction) return false;
             apply_document_transaction_(*transaction);
             return true;
@@ -536,7 +620,10 @@ public:
             return execute_document_move(movement, cmd.extend_selection);
         }
         if (cmd.kind == CommandKind::SelectAll) {
-            auto selection = document_select_all(document_);
+            const auto& current = *rendered_selection_;
+            auto selection = current.selects_cells() ? std::nullopt : document_table_cell_contents(document_, current.active);
+            if (!selection || document_table_text_owner(document_, current.anchor) != document_table_text_owner(document_, current.active))
+                selection = document_select_all(document_);
             if (!selection) return false;
             rendered_selection_.value() = *selection;
             return true;
@@ -563,7 +650,10 @@ public:
             || cmd.kind == CommandKind::MoveTableRowDown || cmd.kind == CommandKind::InsertTableColumnLeft
             || cmd.kind == CommandKind::InsertTableColumnRight || cmd.kind == CommandKind::DeleteTableColumn
             || cmd.kind == CommandKind::MoveTableColumnLeft || cmd.kind == CommandKind::MoveTableColumnRight
-            || cmd.kind == CommandKind::SetTableColumnAlignment || cmd.kind == CommandKind::NormalizeTable
+            || cmd.kind == CommandKind::SetTableColumnAlignment || cmd.kind == CommandKind::SetTableColumnWidth
+            || cmd.kind == CommandKind::SetTableAppearance
+            || cmd.kind == CommandKind::DuplicateTableRows || cmd.kind == CommandKind::DuplicateTableColumns
+            || cmd.kind == CommandKind::NormalizeTable
             || cmd.kind == CommandKind::InsertTableRowAt || cmd.kind == CommandKind::InsertTableColumnAt
             || cmd.kind == CommandKind::MoveTableRowTo || cmd.kind == CommandKind::MoveTableColumnTo) {
             auto edit = DocumentTableEdit::Normalize;
@@ -581,13 +671,18 @@ public:
                 case CommandKind::MoveTableColumnLeft: edit = DocumentTableEdit::MoveColumnLeft; break;
                 case CommandKind::MoveTableColumnRight: edit = DocumentTableEdit::MoveColumnRight; break;
                 case CommandKind::SetTableColumnAlignment: edit = DocumentTableEdit::SetColumnAlignment; break;
+                case CommandKind::SetTableColumnWidth: edit = DocumentTableEdit::SetColumnWidth; break;
+                case CommandKind::SetTableAppearance: edit = DocumentTableEdit::SetAppearance; break;
+                case CommandKind::DuplicateTableRows: edit = DocumentTableEdit::DuplicateRows; break;
+                case CommandKind::DuplicateTableColumns: edit = DocumentTableEdit::DuplicateColumns; break;
                 case CommandKind::InsertTableRowAt: edit = DocumentTableEdit::InsertRowAt; break;
                 case CommandKind::InsertTableColumnAt: edit = DocumentTableEdit::InsertColumnAt; break;
                 case CommandKind::MoveTableRowTo: edit = DocumentTableEdit::MoveRowTo; break;
                 case CommandKind::MoveTableColumnTo: edit = DocumentTableEdit::MoveColumnTo; break;
                 default: break;
             }
-            return execute_document_table_edit(rendered_selection_.value(), edit, cmd.table_alignment, cmd.table_index).has_value();
+            return execute_document_table_edit(rendered_selection_.value(), edit, cmd.table_alignment,
+                cmd.table_index, cmd.table_format ? &*cmd.table_format : nullptr).has_value();
         }
         if (cmd.kind == CommandKind::InsertCodeBlock || cmd.kind == CommandKind::InsertMathBlock
             || cmd.kind == CommandKind::InsertToc || cmd.kind == CommandKind::InsertTable) {
@@ -633,7 +728,7 @@ public:
         }
         if (cmd.kind == CommandKind::InsertText || cmd.kind == CommandKind::Paste) {
             const auto changed = cmd.kind == CommandKind::Paste
-                ? execute_document_paste_text(rendered_selection_.value(), cmd.text, cmd.paste_range).has_value()
+                ? execute_document_paste_text(rendered_selection_.value(), cmd.text, cmd.paste_range, cmd.paste_as_table_grid).has_value()
                 : execute_document_insert_text(rendered_selection_.value(), cmd.text).has_value();
             return changed;
         }
@@ -692,6 +787,7 @@ private:
     DocumentSymbolContributions symbol_contributions_;
     Outline outline_;
     DocumentHistory document_history_{1000};
+    TableCalculationCache table_calculations_;
     std::optional<EditorDocumentChange> last_document_change_;
     std::optional<TextSelection> rendered_selection_{TextSelection{}};
     std::optional<DocumentEditableFallback> editable_fallback_;
@@ -1022,6 +1118,7 @@ private:
                 transaction.selection_after = TextSelection::caret(*fallback);
             }
         }
+        refresh_table_calculations(document_, transaction, table_calculations_);
         document_history_.push(transaction);
         rendered_selection_.value() = transaction.selection_after;
         last_document_change_ = summarize_document_change(

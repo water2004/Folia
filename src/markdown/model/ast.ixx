@@ -12,6 +12,7 @@ import folia.markdown.text_edit;
 import folia.markdown.inline_document;
 import folia.markdown.html_cst;
 import folia.markdown.container_source;
+import folia.markdown.table_metadata;
 
 export namespace folia {
 
@@ -93,6 +94,7 @@ struct BlockTableSpecial {
     // the final row's ending remains ordinary sibling separator metadata.
     std::u32string table_separator_source;
     std::vector<std::u32string> table_internal_line_endings;
+    std::shared_ptr<const TableMetadata> metadata;
     // Parsed table rows retain only syntax around cell bodies. Cell bodies
     // continue to live exclusively in the referenced TableCell sources.
     struct RowSyntax {

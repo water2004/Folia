@@ -2,6 +2,7 @@
 // serializer facade imports this module and exposes only the established API.
 export module folia.markdown.serializer_visitor;
 import std;
+import folia.markdown.table_metadata;
 import folia.markdown.dialect;
 import folia.markdown.ast;
 import folia.markdown.block_tree;
@@ -260,7 +261,13 @@ private:
                 writer_.generated_owned(std::move(separator));
             }
         }
-        if (index >= table.children.size()) return;
+        if (index >= table.children.size()) {
+            if (special.metadata) {
+                writer_.generated_span(special.metadata->separator);
+                writer_.generated_span(special.metadata->source);
+            }
+            return;
+        }
         if (special.table_internal_line_endings.size() == table.children.size()) {
             writer_.generated_span(special.table_internal_line_endings[index]);
         } else writer_.generated_span(U"\n");

@@ -119,6 +119,24 @@ inline bool apply_tree_edit(EditorDocument& document, const DocumentTreeEdit& ed
             apply_payload(*target, forward ? edit.after : edit.before);
             return true;
         }
+        case DocumentTreeEditKind::ReorderChildren: {
+            auto* parent = find_document_block(document, edit.parent_id);
+            if (!parent || edit.index > parent->children.size()
+                || parent->children.size() - edit.index < edit.order.size()) return false;
+            std::vector<bool> seen(edit.order.size());
+            for (auto destination : edit.order) {
+                if (destination >= edit.order.size() || seen[destination]) return false;
+                seen[destination] = true;
+            }
+            std::vector<BlockNode> reordered(edit.order.size());
+            for (std::size_t offset = 0; offset < edit.order.size(); ++offset) {
+                const auto from = forward ? offset : edit.order[offset];
+                const auto to = forward ? edit.order[offset] : offset;
+                reordered[to] = std::move(parent->children[edit.index + from]);
+            }
+            std::ranges::move(reordered, parent->children.begin() + static_cast<std::ptrdiff_t>(edit.index));
+            return true;
+        }
     }
     return false;
 }

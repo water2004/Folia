@@ -22,6 +22,7 @@ import folia.markdown.dialect;
 import folia.markdown.image_dimension;
 import folia.markdown.diagnostics;
 import folia.markdown.metadata;
+import folia.markdown.table_metadata;
 import folia.markdown.symbols;
 import folia.markdown.ast;
 import folia.markdown.container_source;
@@ -1511,15 +1512,25 @@ std::optional<BlockNode> try_parse_raw_html_block(const LeafLine& first) {
         accept_leaf_line(*current_separator);
 
         BlockVec rows;
+        std::shared_ptr<const TableMetadata> metadata;
         while (const auto* offered = peek_leaf_line()) {
             const LeafLine& row_line = *offered;
             const LeafLineText row_text(physical_source(), row_line);
-            bool blank = true;
-            for (std::size_t index = 0; index < row_text.size(); ++index)
-                if (row_text.at(index) != U' ' && row_text.at(index) != U'\t') { blank = false; break; }
+            const auto text_size = row_text.size();
+            std::size_t first = 0;
+            while (first < text_size && (row_text.at(first) == U' ' || row_text.at(first) == U'\t')) ++first;
+            if (first == text_size || !leaf_line_fully_matched(row_line)) break;
+            if (row_text.at(first) == U'<' && row_text.at(first + 1) == U'!') {
+                metadata = parse_table_metadata(
+                    table_text(row_text, 0, text_size), physical_line_endings.back());
+                if (metadata) {
+                    table_source.append_line(row_line, true);
+                    accept_leaf_line(row_line);
+                    break;
+                }
+            }
             const auto physical_start = row_line.content_cursor.offset;
-            if (blank || !leaf_line_fully_matched(row_line)
-                || line_starts_interrupting_block(physical_start, false)) break;
+            if (line_starts_interrupting_block(physical_start, false)) break;
             auto row = parse_table_row_leaf(row_line, header_row->children.size());
             if (!row) break;
             table_source.append_line(row_line, true);
@@ -1537,6 +1548,7 @@ std::optional<BlockNode> try_parse_raw_html_block(const LeafLine& first) {
         auto& table = b.ensure_table_special();
         table.table_aligns = *alignments;
         table.table_separator_source = std::move(separator_source);
+        table.metadata = std::move(metadata);
         physical_line_endings.resize(b.children.size());
         table.table_internal_line_endings = std::move(physical_line_endings);
         for (const auto& row : b.children) {
