@@ -407,4 +407,95 @@
   <data name="ReadingMaterial" xml:space="preserve"><value>Reading area material</value></data>
   <data name="MaterialFollowWindow" xml:space="preserve"><value>Follow window</value></data>
   <data name="AutoHideDocumentTools" xml:space="preserve"><value>Auto-hide document tools</value></data>
+  <data name="TableCopy" xml:space="preserve"><value>Copy table with formatting</value></data>
+  <data name="TableStyle" xml:space="preserve"><value>Table style</value></data>
+  <data name="TableStyleDefault" xml:space="preserve"><value>Default</value></data>
+  <data name="TableStyleZebra" xml:space="preserve"><value>Striped</value></data>
+  <data name="TableStyleMinimal" xml:space="preserve"><value>Minimal</value></data>
+  <data name="TableStyleAcademic" xml:space="preserve"><value>Three-line</value></data>
+  <data name="TableDensity" xml:space="preserve"><value>Row spacing</value></data>
+  <data name="TableDensityComfortable" xml:space="preserve"><value>Comfortable</value></data>
+  <data name="TableDensityCompact" xml:space="preserve"><value>Compact</value></data>
+  <data name="TableHeaders" xml:space="preserve"><value>Headers</value></data>
+  <data name="TableHeaderOne" xml:space="preserve"><value>One header row</value></data>
+  <data name="TableHeaderTwo" xml:space="preserve"><value>Two header rows</value></data>
+  <data name="TableHeaderThree" xml:space="preserve"><value>Three header rows</value></data>
+  <data name="TableHeaderColumn" xml:space="preserve"><value>Use first column as header</value></data>
+  <data name="TableNoHeaderColumn" xml:space="preserve"><value>Clear header column</value></data>
+  <data name="TableVerticalAlignment" xml:space="preserve"><value>Column vertical alignment</value></data>
+  <data name="TableAlignTop" xml:space="preserve"><value>Top</value></data>
+  <data name="TableAlignMiddle" xml:space="preserve"><value>Center</value></data>
+  <data name="TableAlignBottom" xml:space="preserve"><value>Bottom</value></data>
+  <data name="TableGray" xml:space="preserve"><value>Gray</value></data>
+  <data name="TableRed" xml:space="preserve"><value>Red</value></data>
+  <data name="TableOrange" xml:space="preserve"><value>Orange</value></data>
+  <data name="TableYellow" xml:space="preserve"><value>Yellow</value></data>
+  <data name="TableGreen" xml:space="preserve"><value>Green</value></data>
+  <data name="TableBlue" xml:space="preserve"><value>Blue</value></data>
+  <data name="TablePurple" xml:space="preserve"><value>Purple</value></data>
+  <data name="TableBackground" xml:space="preserve"><value>Cell background</value></data>
+  <data name="TableForeground" xml:space="preserve"><value>Cell text color</value></data>
+  <data name="TableFontSize" xml:space="preserve"><value>Cell text size</value></data>
+  <data name="TableFontSmall" xml:space="preserve"><value>Small</value></data>
+  <data name="TableFontLarge" xml:space="preserve"><value>Large</value></data>
+  <data name="TableMerge" xml:space="preserve"><value>Merge selected cells</value></data>
+  <data name="TableUnmerge" xml:space="preserve"><value>Unmerge cells</value></data>
+  <data name="TableCopyMarkdown" xml:space="preserve"><value>Copy as Markdown</value></data>
+  <data name="TableRows" xml:space="preserve"><value>Rows</value></data>
+  <data name="TableColumns" xml:space="preserve"><value>Columns</value></data>
+  <data name="TableInsertAbove" xml:space="preserve"><value>Insert above</value></data>
+  <data name="TableInsertBelow" xml:space="preserve"><value>Insert below</value></data>
+  <data name="TableDeleteRow" xml:space="preserve"><value>Delete row</value></data>
+  <data name="TableInsertLeft" xml:space="preserve"><value>Insert to the left</value></data>
+  <data name="TableInsertRight" xml:space="preserve"><value>Insert to the right</value></data>
+  <data name="TableDeleteColumn" xml:space="preserve"><value>Delete column</value></data>
+  <data name="TableAutoColumnWidth" xml:space="preserve"><value>Reset column width</value></data>
+  <data name="TableSortAscending" xml:space="preserve"><value>Sort ascending</value></data>
+  <data name="TableSortDescending" xml:space="preserve"><value>Sort descending</value></data>
+  <data name="TableHorizontalAlignment" xml:space="preserve"><value>Horizontal alignment</value></data>
+  <data name="TableAlignLeft" xml:space="preserve"><value>Left</value></data>
+  <data name="TableAlignRight" xml:space="preserve"><value>Right</value></data>
+  <data name="TableFold" xml:space="preserve"><value>Fold table</value></data>
+  <data name="TableUnfold" xml:space="preserve"><value>Unfold table</value></data>
+  <data name="TableShowRows" xml:space="preserve"><value>▸ Show {0} rows</value></data>
+  <data name="TableFreezeHeader" xml:space="preserve"><value>Freeze first column</value></data>
+  <data name="TableUnfreezeHeader" xml:space="preserve"><value>Unfreeze first column</value></data>
+  <data name="TableWide" xml:space="preserve"><value>Allow horizontal scrolling</value></data>
+  <data name="TableFit" xml:space="preserve"><value>Fit to page width</value></data>
+  <data name="TableAutoWidths" xml:space="preserve"><value>Reset all column widths</value></data>
+  <data name="TableClearColors" xml:space="preserve"><value>Clear all colors</value></data>
+  <data name="TableFontWhole" xml:space="preserve"><value>Table text size</value></data>
+  <data name="TableTotal" xml:space="preserve"><value>Total row</value></data>
+  <data name="TableTotalNone" xml:space="preserve"><value>None</value></data>
+  <data name="TableTotalSum" xml:space="preserve"><value>Sum</value></data>
+  <data name="TableTotalAverage" xml:space="preserve"><value>Average</value></data>
+  <data name="TableTotalCount" xml:space="preserve"><value>Count</value></data>
+  <data name="TableTotalMax" xml:space="preserve"><value>Maximum</value></data>
+  <data name="TableTotalMin" xml:space="preserve"><value>Minimum</value></data>
+  <data name="TableLayout" xml:space="preserve"><value>Table layout</value></data>
+  <data name="TableFormula" xml:space="preserve"><value>Calculated column…</value></data>
+  <data name="TableFormulaDecimals" xml:space="preserve"><value>Calculation decimals</value></data>
+  <data name="TableFormulaError" xml:space="preserve"><value>Check the formula and its column names.</value></data>
+  <data name="TableStopFormula" xml:space="preserve"><value>Stop calculating this column</value></data>
+  <data name="TableMakeCheckbox" xml:space="preserve"><value>Add checkbox</value></data>
+  <data name="TableRemoveCheckbox" xml:space="preserve"><value>Remove checkbox</value></data>
+  <data name="TableColumnType" xml:space="preserve"><value>Column type</value></data>
+  <data name="TableTypeText" xml:space="preserve"><value>Text</value></data>
+  <data name="TableTypeStatus" xml:space="preserve"><value>Status</value></data>
+  <data name="TableTypeMulti" xml:space="preserve"><value>Multi-select tags</value></data>
+  <data name="TableTypeDate" xml:space="preserve"><value>Date</value></data>
+  <data name="TableTypeDateSlash" xml:space="preserve"><value>Date with slashes</value></data>
+  <data name="TableTypeDateLink" xml:space="preserve"><value>Date as a note link</value></data>
+  <data name="TableTypeNumber" xml:space="preserve"><value>Number</value></data>
+  <data name="TableTypeThousands" xml:space="preserve"><value>Number with grouping</value></data>
+  <data name="TableTypePercent" xml:space="preserve"><value>Percent</value></data>
+  <data name="TableTypeYuan" xml:space="preserve"><value>Currency (¥)</value></data>
+  <data name="TableTypeDollar" xml:space="preserve"><value>Currency ($)</value></data>
+  <data name="TableTypeProgress" xml:space="preserve"><value>Progress bar</value></data>
+  <data name="TableStatusColor" xml:space="preserve"><value>Status label color</value></data>
+  <data name="TableNewTag" xml:space="preserve"><value>Add a tag</value></data>
+  <data name="TableEditValue" xml:space="preserve"><value>Edit value…</value></data>
+  <data name="TableDuplicateRows" xml:space="preserve"><value>Duplicate rows</value></data>
+  <data name="TableDuplicateColumns" xml:space="preserve"><value>Duplicate columns</value></data>
+  <data name="TableDelete" xml:space="preserve"><value>Delete table</value></data>
 </root>

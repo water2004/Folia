@@ -210,4 +210,46 @@ namespace winrt::Folia {
                     && y >= rect.bounds.top && y < rect.bounds.bottom) return true;
         return false;
     }
+
+    void EditorTableSelectionAnimation::Configure(double value) {
+        if (duration == value) return;
+        duration = value;
+        Reset();
+    }
+
+    void EditorTableSelectionAnimation::Reset() {
+        table = {};
+        animateChange = animating = seen = false;
+    }
+
+    void EditorTableSelectionAnimation::BeginFrame(folia::TextSelection value,
+        std::uint64_t contentRevision, double time) {
+        if (revision != contentRevision || !value.selects_cells()) Reset();
+        animateChange = duration > 0 && selection != value;
+        selection = value;
+        revision = contentRevision;
+        now = time;
+        seen = false;
+    }
+
+    D2D1_RECT_F EditorTableSelectionAnimation::Sample(folia::NodeId owner, D2D1_RECT_F target) {
+        const auto sample = [&] {
+            return EditorMotion::Interpolate(from, to, EditorMotion::Progress(now - began, duration));
+        };
+        if (table != owner || target.left != to.left || target.right != to.right
+            || target.top != to.top || target.bottom != to.bottom) {
+            animating = table == owner && animateChange;
+            from = animating ? sample() : target;
+            to = target;
+            began = now;
+        }
+        table = owner;
+        seen = true;
+        animating = animating && now < began + duration;
+        return animating ? sample() : to;
+    }
+
+    void EditorTableSelectionAnimation::EndFrame() {
+        if (!seen) Reset();
+    }
 }

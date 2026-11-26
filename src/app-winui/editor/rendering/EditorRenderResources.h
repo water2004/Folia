@@ -52,10 +52,12 @@ namespace winrt::Folia
         EditorPopupShadow popupShadow;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> mathBracketBrush;
         EditorSyntaxIcons syntaxIcons;
+        EditorChromeIcons chromeIcons;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> codeBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> mathDecorationBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> inlineCodeBrush, inlineCodeBackgroundBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> panelBrush;
+        ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> tableBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> canvasBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> nestedQuoteBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> calloutNoteBackgroundBrush;
@@ -70,6 +72,7 @@ namespace winrt::Folia
         uint32_t surfaceWidth = 0;
         uint32_t surfaceHeight = 0;
         float surfaceWidthDip = 1.0f;
+        std::size_t tableTextLayoutsBuilt = 0;
         float surfaceHeightDip = 1.0f;
         float surfaceScaleX = 1.0f;
         float surfaceScaleY = 1.0f;

@@ -434,14 +434,15 @@ namespace winrt::Folia
         folia::RenderBlock const& block,
         bool requestEmbedded,
         bool highPriority,
-        std::optional<EditorFlowLayoutContext> flowContext)
+        std::optional<EditorFlowLayoutContext> flowContext,
+        EditorTableBlockRenderer::PreparedTable* previousTable)
     {
         mathJax.BeginBlock(block.id.v);
         EditorPreparedDocument::Block prepared;
         InitializeMetadata(prepared, block);
         InitializeContentMetadata(prepared, block);
         auto& visual = prepared.EnsureVisuals();
-        visual.caretPresentation = CaretPresentationState(block, caret);
+        visual.caretPresentation = CaretPresentationState(block, caret, frame.renderModel.editable_index);
         prepared.embeddedRequested = requestEmbedded;
         prepared.embeddedGeneration = embeddedGeneration;
         prepared.remoteImageGeneration = remoteImageGeneration;
@@ -470,7 +471,8 @@ namespace winrt::Folia
                 mathJax,
                 svgNormalizer,
                 treeSitter,
-                frame.completion);
+                frame.completion, previousTable, frame.renderModel.document_dependency_key,
+                visual.caretPresentation.empty() ? folia::NodeId{} : caret.container_id);
             if (visual.table)
             {
                 for (auto const& span : block.special().table_cell_spans)

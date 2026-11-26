@@ -72,6 +72,7 @@ namespace winrt::Folia
         void InsertImage();
         void OpenLink(std::string href);
         void CopySelection();
+        bool CopyTable(bool selected = false, bool plain = false);
         void CutSelection();
         void PasteClipboard();
 

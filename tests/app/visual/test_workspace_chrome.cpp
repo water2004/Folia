@@ -191,9 +191,8 @@ namespace {
             auto main = f.Find<Button>(L"DocumentActionsButton").Flyout().as<MenuFlyout>();
             expect(main.Placement() == Primitives::FlyoutPlacementMode::BottomEdgeAlignedLeft);
             for (auto item : main.Items()) if (auto sub = item.try_as<MenuFlyoutSubItem>()) expect(sub.Name() != L"InsertButton");
-            auto context = f.Find<Grid>(L"EditorSurface").ContextFlyout().as<MenuFlyout>();
-            MenuFlyoutSubItem insertion{nullptr};
-            for (auto item : context.Items()) if (auto sub = item.try_as<MenuFlyoutSubItem>(); sub && sub.Name() == L"InsertButton") insertion = sub;
+            expect(!f.Find<Grid>(L"EditorSurface").ContextFlyout());
+            auto insertion = f.Find<MenuFlyoutSubItem>(L"InsertButton");
             expect(insertion != nullptr);
             expect(insertion.Items().Size() >= 7_u);
             expect(!f.root.FindName(L"ShellDivider"));
@@ -354,7 +353,7 @@ namespace {
                 auto transform = path.TransformToVisual(f.root);
                 for (double scale : {1., 1.25, 1.5, 2.}) {
                     Capture capture(f.root, scale);
-                    auto right = transform.TransformPoint({17.5f, 10.f}), bottom = transform.TransformPoint({10.f, 15.5f});
+                    auto right = transform.TransformPoint({20.5f, 10.f}), bottom = transform.TransformPoint({13.f, 19.5f});
                     auto empty = transform.TransformPoint({-2.f, 10.f});
                     expect(capture.Ink(right, empty)) << "right stroke at raster scale" << scale;
                     expect(capture.Ink(bottom, empty)) << "bottom stroke at raster scale" << scale;

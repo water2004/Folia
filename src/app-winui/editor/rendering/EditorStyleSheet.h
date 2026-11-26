@@ -44,6 +44,8 @@ namespace winrt::Folia
         D2D1_COLOR_F highlightBackgroundColor{}, highlightUnderlineColor{};
         float highlightUnderlineWidth = 0.0f;
         D2D1_COLOR_F panelColor{};
+        D2D1_COLOR_F tableBorderColor{}, tableHeaderColor{};
+        std::array<D2D1_COLOR_F, 7> tablePalette{};
         D2D1_COLOR_F previewBackgroundColor{}, previewBorderColor{};
         folia::ThemeMathPreview mathPreview;
         folia::ThemeEditor editor;

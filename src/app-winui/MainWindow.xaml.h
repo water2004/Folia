@@ -187,6 +187,8 @@ namespace winrt::Folia::implementation
         winrt::Folia::EditorAnimationController animationController;
         winrt::Folia::EditorTextInputController textInputController;
         winrt::Folia::EditorPointerController pointerController;
+        Microsoft::UI::Xaml::Controls::MenuFlyout documentContextMenu{nullptr};
+        Microsoft::UI::Xaml::Controls::MenuFlyout activeEditorContextMenu{nullptr};
         winrt::Folia::EditorKeyboardController keyboardController;
         winrt::Folia::EditorLatexCompletionController latexCompletionController;
         winrt::Folia::EditorCodeLanguageController codeLanguageController;

@@ -1,6 +1,7 @@
 #pragma once
 
 import folia.core.render_model;
+import folia.core.table_selection;
 import folia.markdown.selection;
 import folia.markdown.text_edit;
 import folia.platform.editor_snippet_session;
@@ -29,5 +30,8 @@ namespace winrt::Folia::detail
         std::function<void(std::size_t, std::size_t)> releaseBlocksOutside;
         std::span<const folia::platform::editor::EditorSnippetPlaceholder> snippetPlaceholders;
         std::optional<EditorCompletionPreview> completion;
+        std::optional<folia::TableCellSelection> tableSelection;
+        const std::unordered_map<std::uint64_t, float>* tableScrollOffsets = nullptr;
+        folia::NodeId tableTextOwner{};
     };
 }

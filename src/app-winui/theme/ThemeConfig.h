@@ -23,4 +23,13 @@ namespace winrt::Folia
     ThemeFileLoadResult LoadThemeFile(std::filesystem::path const& path);
     ThemeLoadResult LoadThemeProfile(folia::Theme variant);
     std::shared_ptr<const folia::SyntaxMarkerTheme> DefaultSyntaxMarkerTheme();
+
+    struct ThemeGlyph
+    {
+        std::wstring path;
+        std::wstring strokeWidth;
+        std::string svg;
+    };
+
+    const ThemeGlyph* FindThemeGlyph(std::wstring_view key);
 }

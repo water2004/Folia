@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "MainWindow.xaml.h"
+#include "editor/interaction/EditorTableInteraction.h"
 
 import folia.core.command;
 
@@ -137,11 +138,11 @@ namespace winrt::Folia::implementation
 
         TableButton().Click(WindowEvent([this](auto const&, auto const&)
         {
-            folia::Command command;
-            command.kind = folia::CommandKind::InsertTable;
-            command.rows = 2;
-            command.cols = 3;
-            ExecuteEditorCommand(command);
+            EditorTableInteraction::InsertPicker(EditorSurface().XamlRoot(),
+                [weak = get_weak()](const folia::Command& command) {
+                    if (auto window = weak.get()) return window->ExecuteEditorCommand(command);
+                    return false;
+                });
         }));
 
         InlineMathButton().Click(WindowEvent([this](auto const&, auto const&)

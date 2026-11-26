@@ -15,7 +15,8 @@ namespace winrt::Folia
 
         std::optional<float> SourceScrollAnchorTop(
             EditorPreparedDocument::Block const& block,
-            folia::TextPosition position)
+            folia::TextPosition position,
+            const folia::OwnerIndex& index)
         {
             auto const& content = block.Visuals();
             auto locate = [&](IDWriteTextLayout* layout, EditorDisplayMapping const& mapping,
@@ -38,9 +39,12 @@ namespace winrt::Folia
             };
             if (content.table)
             {
-                for (auto const& cell : content.table->visual.cells)
-                    if (auto top = locate(cell.layout.Get(), cell.displayToSource, cell.textOrigin.y))
-                        return top;
+                const auto& table = content.table->visual;
+                if (auto at = EditorTableCellIndex(table.SourceSpans(), position.container_id, index);
+                    at && *at < table.cells.size()) {
+                    const auto& cell = table.cells[*at];
+                    return locate(cell.layout.Get(), cell.displayToSource, cell.textOrigin.y);
+                }
                 return {};
             }
             return locate(content.layout.Get(), content.display.displayToSource, content.textTop);
@@ -77,16 +81,23 @@ namespace winrt::Folia
                     }
                 }
             };
-            if (content.table)
-                for (auto const& cell : content.table->visual.cells)
-                    visit(cell.layoutLines, cell.textOrigin.y);
+            if (content.table) {
+                const auto& table = content.table->visual;
+                const auto row = table.rowBoundaries.Interval(scrollOffset - documentTop);
+                const auto end = (std::min)(table.rowCount, row + 2) * table.columnCount;
+                for (auto cell = row * table.columnCount; cell < end; ++cell) {
+                    const auto& visible = table.cells[cell];
+                    visit(visible.layoutLines, visible.textOrigin.y);
+                    if (closest == 0.0f) break;
+                }
+            }
             else
                 visit(content.layoutLines, content.textTop);
             // The line box selects the first visible source position. Its top
             // can differ from DirectWrite's hit-test origin for that position.
             // Measure both sides of reflow using the same coordinate.
             if (position)
-                if (auto localTop = SourceScrollAnchorTop(block, *position))
+                if (auto localTop = SourceScrollAnchorTop(block, *position, model.editable_index))
                     return SourceScrollAnchor{*position, documentTop + *localTop - scrollOffset};
             return {};
         }
@@ -179,7 +190,7 @@ namespace winrt::Folia
                     auto index = *found;
                     viewportMaterializer.EnsurePrepared(index, true, true);
                     if (auto localTop = SourceScrollAnchorTop(
-                            preparedDocument->blocks[index], sourceAnchor->position))
+                            preparedDocument->blocks[index], sourceAnchor->position, frame.renderModel.editable_index))
                         anchoredOffset = preparedDocument->geometry.At(index).top
                             + *localTop - sourceAnchor->screenY;
                 }

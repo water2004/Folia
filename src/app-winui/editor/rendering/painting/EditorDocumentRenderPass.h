@@ -27,6 +27,7 @@ namespace winrt::Folia
             EditorStyleSheet const& styleSheet,
             EditorInteractionMap& interactionMap,
             EditorCaretAnimation& caretAnimation,
+            EditorTableSelectionAnimation& tableSelectionAnimation,
             std::vector<D2D1_RECT_F>& nonInteractiveRegions,
             EditorInlineImageRenderer& inlineImages,
             EditorDocumentPainter& documentPainter,
@@ -61,6 +62,7 @@ namespace winrt::Folia
         EditorStyleSheet const& styleSheet;
         EditorInteractionMap& interactionMap;
         EditorCaretAnimation& caretAnimation;
+        EditorTableSelectionAnimation& tableSelectionAnimation;
         std::vector<D2D1_RECT_F>& nonInteractiveRegions;
         EditorInlineImageRenderer& inlineImages;
         EditorDocumentPainter& documentPainter;

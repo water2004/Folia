@@ -82,6 +82,7 @@ namespace winrt::Folia
 
         std::optional<D2D1_RECT_F> InlineMathPreviewBounds() const noexcept { return inlineMathPreviewBounds; }
         std::optional<folia::TextPosition> HitTest(float x, float y) const;
+        std::optional<folia::TextPosition> HitTestTableText(float x, float y, folia::NodeId owner) const;
         std::optional<folia::TextPosition> HitTestTextUnit(float x, float y) const;
         std::optional<folia::TextPosition> ViewportPosition() const;
         std::optional<folia::TextPosition> TaskCheckboxAt(float x, float y) const;
@@ -95,7 +96,13 @@ namespace winrt::Folia
         std::optional<folia::TextPosition> VisualLineEnd(folia::TextPosition position) const;
         void UpdatePointer(float x, float y);
         void ClearPointer();
-        std::optional<EditorTableAction> TableActionAt(float x, float y) const;
+        folia::platform::editor::EditorTableControls TableControlsAt(float x, float y) const;
+        std::optional<folia::TextSelection> TableAxisSelection(EditorTableAction const&) const;
+        std::optional<folia::TableFormatEdit> TableResizeFormat(EditorTableAction const&, float width) const;
+        std::optional<folia::TextSpan> TableCellAt(float x, float y) const;
+        std::optional<folia::TableCoordinate> TableFillTargetAt(folia::NodeId table, float x, float y) const;
+        std::optional<std::pair<folia::NodeId, float>> ScrollTableAt(float x, float y, float delta) const;
+        std::optional<float> RevealTableColumn(const folia::TableCellAddress& address) const;
         std::optional<std::size_t> TableDropIndexAt(float x, float y, bool rows) const;
         void SetTableDrag(std::optional<EditorTableAction> action, std::optional<std::size_t> dropIndex);
         void ScrollBy(float delta);
@@ -109,14 +116,18 @@ namespace winrt::Folia
         void FocusCaret(bool focused) {
             caretAnimation.Focus(focused);
             selectionAnimation.Focus(focused);
+            if (!focused) tableSelectionAnimation.Reset();
         }
         void ConfigureCaret(bool animations, double blinkHalfPeriod) {
             caretAnimation.Configure(styleSheet.editor, animations, blinkHalfPeriod);
             selectionAnimation.Configure(animations ? styleSheet.editor.caret_move_ms / 1000.0 : 0.0);
+            tableSelectionAnimation.Configure(animations
+                ? (std::clamp)(static_cast<double>(styleSheet.editor.caret_move_ms) / 1000.0, 0.0, 0.080) : 0.0);
         }
         EditorCaretFrame const& CaretAnimationFrame() const { return caretAnimation.Frame(); }
-        bool SelectionAnimating() const { return selectionAnimation.Animating(); }
+        bool SelectionAnimating() const { return selectionAnimation.Animating() || tableSelectionAnimation.Animating(); }
         bool ScrollToPosition(folia::TextPosition position, EditorScrollAlignment alignment = EditorScrollAlignment::Nearest);
+        std::size_t TableTextLayoutsBuilt() const { return resources.tableTextLayoutsBuilt; }
         bool SelectionBackgroundAt(float x, float y) const { return selectionAnimation.HitTest(x, y); }
         bool SetSelectionDrop(std::optional<folia::TextPosition> position) {
             if (selectionDrop == position) return false;
@@ -168,9 +179,11 @@ namespace winrt::Folia
         EditorInteractionMap interactionMap;
         EditorCaretAnimation caretAnimation;
         EditorSelectionAnimation selectionAnimation;
+        EditorTableSelectionAnimation tableSelectionAnimation;
         void ResetTextMotion() {
             caretAnimation.Reset();
             selectionAnimation.Reset();
+            tableSelectionAnimation.Reset();
         }
         std::vector<D2D1_RECT_F> nonInteractiveRegions;
         std::optional<D2D1_RECT_F> inlineMathPreviewBounds;

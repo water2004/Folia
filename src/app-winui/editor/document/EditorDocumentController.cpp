@@ -147,6 +147,7 @@ namespace winrt::Folia
     void EditorDocumentController::CopySelection()
     {
         if (!state_->session || !state_->session->HasSelection()) return;
+        if (state_->session->Selection().selects_cells() && CopyTable(true)) return;
         auto package = winrt::Windows::ApplicationModel::DataTransfer::DataPackage();
         package.SetText(winrt::to_hstring(state_->session->SelectedTextUtf8()));
         winrt::Windows::ApplicationModel::DataTransfer::Clipboard::SetContent(package);
@@ -160,6 +161,20 @@ namespace winrt::Folia
         folia::Command command;
         command.kind = folia::CommandKind::DeleteSelection;
         if (state_->executeCommand) state_->executeCommand(command);
+    }
+
+    bool EditorDocumentController::CopyTable(bool selected, bool plain)
+    {
+        if (!state_->session) return false;
+        auto table = state_->session->TableClipboard(selected, plain);
+        if (!table) return false;
+        using namespace winrt::Windows::ApplicationModel::DataTransfer;
+        DataPackage package;
+        package.SetText(winrt::to_hstring(folia::cps_to_utf8(table->first)));
+        package.SetHtmlFormat(HtmlFormatHelper::CreateHtmlFormat(winrt::to_hstring(folia::cps_to_utf8(table->second))));
+        Clipboard::SetContent(package);
+        if (state_->setStatus) state_->setStatus(Localize(L"StatusCopiedSelection"));
+        return true;
     }
 
     void EditorDocumentController::PasteClipboard()

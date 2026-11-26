@@ -44,6 +44,7 @@ namespace winrt::Folia
         Cancel();
         active = true;
         anchor = initial.anchor;
+        tableTextOwner = session->TableTextOwner(initial);
         pointerX = x;
         pointerY = y;
         gesture.Begin(x, y);
@@ -111,6 +112,7 @@ namespace winrt::Folia
         active = false;
         move.reset();
         drop.reset();
+        tableTextOwner.reset();
         if (renderer) renderer->SetSelectionDrop({});
     }
 
@@ -142,7 +144,8 @@ namespace winrt::Folia
         }
 
         const auto insideViewport = x >= 0.0f && x <= width && y >= 0.0f && y <= viewportHeight;
-        auto hit = !move || insideViewport ? renderer->HitTest(projection.hitX, projection.hitY) : std::nullopt;
+        auto hit = tableTextOwner ? renderer->HitTestTableText(projection.hitX, projection.hitY, *tableTextOwner)
+            : !move || insideViewport ? renderer->HitTest(projection.hitX, projection.hitY) : std::nullopt;
         if (move)
         {
             drop = hit && MoveStillValid() && !session->SelectionCovers(*hit) ? hit : std::nullopt;
@@ -150,8 +153,9 @@ namespace winrt::Folia
         }
         if (!hit) return false;
         auto selection = session->Selection();
-        if (selection.anchor == anchor && selection.active == *hit) return false;
-        session->SetSelection(anchor, *hit);
+        folia::TextSelection next{anchor, *hit};
+        if (selection == next) return false;
+        session->SetSelection(next);
         if (textInput) textInput->NotifySelectionChanged();
         return true;
     }

@@ -3,6 +3,7 @@
 #include "localization/Localization.h"
 #include "storage/AssetPaths.h"
 #include <winrt/Windows.Data.Xml.Dom.h>
+#include <map>
 
 namespace
 {
@@ -308,6 +309,32 @@ namespace winrt::Folia
     std::filesystem::path BuiltinThemeDirectory()
     {
         return AssetPath(L"themes");
+    }
+
+    const ThemeGlyph* FindThemeGlyph(std::wstring_view key)
+    {
+        static const auto glyphs = [] {
+            std::map<std::wstring, ThemeGlyph, std::less<>> result;
+            winrt::Windows::Data::Xml::Dom::XmlDocument svg;
+            svg.LoadXml(winrt::to_hstring(ReadUtf8(BuiltinThemeDirectory() / L"resources" / L"icons.svg")));
+            auto width = svg.DocumentElement().GetAttribute(L"stroke-width");
+            if (width.empty() || std::wstring_view(width).find_first_not_of(L"0123456789.") != std::wstring_view::npos)
+                throw std::runtime_error("invalid theme glyph stroke width");
+            using winrt::Windows::Data::Xml::Dom::XmlElement;
+            for (auto const& node : svg.GetElementsByTagName(L"path")) {
+                auto element = node.as<XmlElement>();
+                auto path = element.GetAttribute(L"d");
+                if (path.empty() || std::wstring_view(path).find_first_not_of(L"0123456789.+-, MmLlHhVvCcQqSsTtAaZz") != std::wstring_view::npos)
+                    throw std::runtime_error("invalid theme glyph path");
+                auto source = L"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='"
+                    + std::wstring(width) + L"' stroke-linecap='round' stroke-linejoin='round'><path d='" + std::wstring(path) + L"'/></svg>";
+                result.emplace(std::wstring(element.GetAttribute(L"id")),
+                    ThemeGlyph{std::wstring(path), std::wstring(width), winrt::to_string(source)});
+            }
+            return result;
+        }();
+        auto found = glyphs.find(key);
+        return found == glyphs.end() ? nullptr : &found->second;
     }
 
     std::filesystem::path BuiltinThemeProfilePath(folia::Theme variant)

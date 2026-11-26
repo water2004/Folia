@@ -34,6 +34,7 @@ namespace winrt::Folia
             bool printMode,
             float documentRight,
             folia::TextSelection selection,
+            folia::NodeId tableTextOwner,
             std::span<const detail::EditorSearchHighlight> searchHighlights,
             folia::OwnerIndex const& editableIndex);
 
@@ -91,6 +92,7 @@ namespace winrt::Folia
         bool printMode = false;
         float documentRight = 0.0f;
         folia::TextSelection selection;
+        folia::NodeId tableTextOwner;
         std::span<const detail::EditorSearchHighlight> searchHighlights;
         folia::OwnerIndex const& editableIndex;
         folia::TextPosition selectionStart;

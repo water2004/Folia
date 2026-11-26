@@ -99,6 +99,7 @@ namespace winrt::Folia
         bool printMode,
         float documentRight,
         folia::TextSelection selection,
+        folia::NodeId tableTextOwner,
         std::span<const detail::EditorSearchHighlight> searchHighlights,
         folia::OwnerIndex const& editableIndex)
         : resources(resources),
@@ -109,6 +110,7 @@ namespace winrt::Folia
           printMode(printMode),
           documentRight(documentRight),
           selection(selection),
+          tableTextOwner(tableTextOwner),
           searchHighlights(searchHighlights),
           editableIndex(editableIndex),
           selectionStart(PositionLess(selection.active, selection.anchor) ? selection.active : selection.anchor),
@@ -308,7 +310,8 @@ namespace winrt::Folia
         EditorDisplayMapping const& mapping, std::pair<std::size_t, std::size_t> visible)
     {
         std::vector<EditorSelectionRect> target;
-        auto ranges = selection.is_caret() || mapping.empty()
+        auto ranges = selection.is_caret() || selection.selects_cells() || mapping.empty()
+            || (tableTextOwner.v != 0 && owner != tableTextOwner)
             ? std::vector<std::pair<std::size_t, std::size_t>>{}
             : folia::platform::editor::DisplayRangesForSourceSelection(mapping, selectionStart, selectionEnd,
                 [&](auto a, auto b) { return PositionLess(a, b); });

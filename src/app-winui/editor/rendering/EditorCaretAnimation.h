@@ -78,4 +78,24 @@ namespace winrt::Folia {
         bool focused = true, initialized = false, animateChange = false, animating = false;
         bool previousForward = true, forward = true;
     };
+
+    // Interpolate a single rectangle in table-local coordinates. Scroll and
+    // the frozen/sticky portions of the grid are projected during painting.
+    class EditorTableSelectionAnimation {
+    public:
+        void Configure(double duration);
+        void Reset();
+        void BeginFrame(folia::TextSelection selection, std::uint64_t revision, double now);
+        D2D1_RECT_F Sample(folia::NodeId table, D2D1_RECT_F target);
+        void EndFrame();
+        bool Animating() const { return animating; }
+
+    private:
+        folia::TextSelection selection{};
+        folia::NodeId table{};
+        std::uint64_t revision = 0;
+        D2D1_RECT_F from{}, to{};
+        double now = 0, began = 0, duration = 0;
+        bool animateChange = false, animating = false, seen = false;
+    };
 }

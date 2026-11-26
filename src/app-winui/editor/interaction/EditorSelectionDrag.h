@@ -46,6 +46,7 @@ namespace winrt::Folia
         };
         std::optional<Move> move;
         std::optional<folia::TextPosition> drop;
+        std::optional<folia::NodeId> tableTextOwner;
         folia::platform::editor::EditorSelectionDragGesture gesture;
         float pointerX = 0.0f;
         float pointerY = 0.0f;

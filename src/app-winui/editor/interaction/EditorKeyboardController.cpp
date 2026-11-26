@@ -4,6 +4,7 @@
 import folia.platform.editor_input_command;
 import folia.platform.editor_shortcuts;
 import folia.platform.editor_snippet_session;
+import folia.core.table_values;
 
 namespace winrt::Folia
 {
@@ -135,6 +136,7 @@ namespace winrt::Folia
         if (auto shortcut = folia::platform::editor::resolve_editor_shortcut(
             shortcuts_, gesture, session_->ShortcutScope()))
             return DispatchShortcut(shortcuts_[*shortcut]);
+        if (TableKey(gesture)) return true;
         return DispatchInputAction(
             folia::platform::editor::TranslateEditorKeyGesture(gesture));
     }
@@ -145,11 +147,11 @@ namespace winrt::Folia
         auto shift = KeyDown(winrt::Windows::System::VirtualKey::Shift)
             || KeyDown(winrt::Windows::System::VirtualKey::LeftShift)
             || KeyDown(winrt::Windows::System::VirtualKey::RightShift);
-        return DispatchInputAction(
-            folia::platform::editor::TranslateEditorKeyGesture({
+        const folia::platform::editor::EditorKeyGesture gesture{
                 .key = folia::platform::editor::EditorKey::Enter,
                 .shift = shift,
-            }));
+        };
+        return TableKey(gesture) || DispatchInputAction(folia::platform::editor::TranslateEditorKeyGesture(gesture));
     }
 
     bool EditorKeyboardController::DispatchInputAction(
@@ -268,6 +270,9 @@ namespace winrt::Folia
         auto move = page
             ? renderer_->MoveCaretByPage(selection.active, down, caretGoalX_)
             : renderer_->MoveCaretVertically(selection.active, down, caretGoalX_);
+        if (extend)
+            if (auto owner = session_->TableTextOwner(selection);
+                owner && (!move || owner != session_->TableTextOwner(*move))) return true;
         if (!move || *move == selection.active)
         {
             ResetCaretGoal();
@@ -281,6 +286,89 @@ namespace winrt::Folia
         if (textInput_) textInput_->NotifySelectionChanged();
         if (render_) render_();
         if (renderer_->ScrollToPosition(*move) && render_) render_();
+        return true;
+    }
+
+    bool EditorKeyboardController::TableKey(folia::platform::editor::EditorKeyGesture gesture)
+    {
+        using Key = folia::platform::editor::EditorKey;
+        using Command = folia::CommandKind;
+        if (!session_ || !executeCommand_ || gesture.control || gesture.alt) return false;
+        const auto selection = session_->Selection();
+        const auto grid = selection.selects_cells();
+        auto finishEditing = [&] {
+            executeCommand_({Command::CommitTableCell});
+            const auto active = session_->Selection().active;
+            const folia::TextPosition cell{session_->TableTextOwner(active).value_or(active.container_id), 0};
+            return folia::TextSelection::cells(cell, cell);
+        };
+        if (gesture.key == Key::Escape && !gesture.shift) {
+            if (grid) {
+                if (auto target = session_->TableEscapeSelection()) return SelectTablePosition(*target);
+                return true;
+            }
+            if (session_->TableCellDetails(selection.active)) return SelectTablePosition(finishEditing());
+            return false;
+        }
+        if (gesture.key == Key::Enter || gesture.key == Key::Space || gesture.key == Key::F2) {
+            if (gesture.shift || (!grid && gesture.key != Key::Enter)) return false;
+            auto cell = session_->TableCellDetails(selection.active);
+            if (!cell) return false;
+            if (!grid) {
+                const auto next = finishEditing();
+                session_->SetSelection(next);
+                if (!executeCommand_({Command::MoveDown})) SelectTablePosition(next);
+            } else if (gesture.key == Key::Space && cell->checkbox) {
+                executeCommand_({Command::ToggleTableCheckbox});
+            } else if (auto target = session_->TableEnterTarget()) {
+                SelectTablePosition(folia::TextSelection::caret(*target));
+            }
+            return true;
+        }
+        if (gesture.key == Key::Tab) {
+            if (!grid && !session_->TableCellDetails(selection.active)) return false;
+            if (MoveSnippetTabStop(gesture.shift)) return true;
+            if (!grid) session_->SetSelection(finishEditing());
+            executeCommand_({gesture.shift ? Command::TabBackward : Command::TabForward});
+            return true;
+        }
+        const auto move = [&]() -> std::optional<Command> {
+            switch (gesture.key) {
+                case Key::Left: return Command::MoveLeft;
+                case Key::Right: return Command::MoveRight;
+                case Key::Up: return Command::MoveUp;
+                case Key::Down: return Command::MoveDown;
+                default: return std::nullopt;
+            }
+        }();
+        if (!move) return false;
+        if (!grid) {
+            if (gesture.shift || !selection.is_caret()) return false;
+            const auto contents = session_->TableTextContents(selection.active);
+            if (!contents) return false;
+            const auto caret = selection.active;
+            const auto boundary = gesture.key == Key::Left ? contents->anchor : contents->active;
+            bool atEdge = caret.container_id == boundary.container_id && caret.source_offset == boundary.source_offset;
+            if (gesture.key == Key::Up || gesture.key == Key::Down) {
+                float goal = -1.0f;
+                const auto visual = renderer_->MoveCaretVertically(caret, gesture.key == Key::Down, goal);
+                atEdge = !visual || *visual == caret || session_->TableTextOwner(*visual) != session_->TableTextOwner(caret);
+            }
+            if (!atEdge) return false;
+            session_->SetSelection(finishEditing());
+        }
+        executeCommand_({.kind = *move, .extend_selection = gesture.shift});
+        return true;
+    }
+
+    bool EditorKeyboardController::SelectTablePosition(folia::TextSelection selection)
+    {
+        session_->SetSelection(selection);
+        if (textInput_) textInput_->NotifySelectionChanged();
+        if (auto cell = session_->TableAddress(selection.active))
+            if (auto offset = renderer_->RevealTableColumn(*cell)) session_->SetTableScrollOffset(cell->table_id, *offset);
+        if (render_) render_();
+        if (renderer_->ScrollToPosition(selection.active) && render_) render_();
         return true;
     }
 

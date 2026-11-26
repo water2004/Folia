@@ -209,6 +209,7 @@
     <ClInclude Include="editor\interaction\EditorScrollController.h" />
     <ClInclude Include="editor\interaction\EditorTextInputController.h" />
     <ClInclude Include="editor\interaction\EditorPointerController.h" />
+    <ClInclude Include="editor\interaction\EditorTablePointerController.h" />
     <ClInclude Include="editor\interaction\EditorKeyboardController.h" />
     <ClInclude Include="editor\document\EditorDocumentController.h" />
     <ClInclude Include="workspace\WorkspaceDocuments.h" />
@@ -745,6 +746,7 @@
     <ClCompile Include="editor\interaction\EditorScrollController.cpp" />
     <ClCompile Include="editor\interaction\EditorTextInputController.cpp" />
     <ClCompile Include="editor\interaction\EditorPointerController.cpp" />
+    <ClCompile Include="editor\interaction\EditorTablePointerController.cpp" />
     <ClCompile Include="editor\interaction\EditorKeyboardController.cpp" />
     <ClCompile Include="editor\interaction\EditorKeyboardController.Snippets.cpp" />
     <ClCompile Include="editor\interaction\EditorLatexCompletionController.cpp" />
@@ -910,7 +912,7 @@
     <None Include="Assets\themes\*.json;Assets\themes\*.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Assets\themes\resources\workspace-icons.json">
+    <None Include="Assets\themes\resources\icons.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Assets\latex\commands.json">

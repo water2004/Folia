@@ -1,6 +1,7 @@
 #pragma once
 
 import folia.core.render_model;
+import folia.markdown.table_metadata;
 
 namespace winrt::Folia
 {
@@ -50,9 +51,92 @@ namespace winrt::Folia
             - (flow ? 0.0f : block.block_style.padding_right));
     }
 
-    inline float EditorTableCellContentWidth(float tableWidth, std::size_t columns)
+    inline float EditorTableCellPadding(folia::TableMetadata const* metadata)
     {
-        return (std::max)(1.0f, (std::max)(1.0f, tableWidth)
-            / static_cast<float>((std::max)(std::size_t{1}, columns)) - 20.0f);
+        return metadata && metadata->compact ? 8.0f : 10.0f;
+    }
+
+    struct EditorTableMerge
+    {
+        std::size_t rows = 1;
+        std::size_t columns = 1;
+    };
+
+    inline std::vector<EditorTableMerge> ResolveEditorTableMerges(
+        folia::TableMetadata const* metadata, std::size_t rows, std::size_t columns)
+    {
+        if (!metadata || metadata->merges.empty()) return {};
+        std::vector<EditorTableMerge> spans(rows * columns);
+        std::vector<bool> occupied(spans.size());
+        for (auto const& merge : metadata->merges)
+        {
+            if (merge.last.row >= rows || merge.last.column >= columns) continue;
+            auto eachCell = [&](auto visit) {
+                for (auto row = merge.first.row; row <= merge.last.row; ++row)
+                    for (auto column = merge.first.column; column <= merge.last.column; ++column)
+                        if (!visit(row * columns + column)) return false;
+                return true;
+            };
+            if (!eachCell([&](auto index) { return !occupied[index]; })) continue;
+            eachCell([&](auto index) { occupied[index] = true; spans[index] = {0, 0}; return true; });
+            spans[merge.first.row * columns + merge.first.column] = {
+                merge.last.row - merge.first.row + 1, merge.last.column - merge.first.column + 1};
+        }
+        return spans;
+    }
+
+    inline folia::TableCellAppearance EditorTableCellAppearance(
+        folia::TableMetadata const* metadata, std::size_t row, std::size_t column)
+    {
+        if (metadata)
+            if (const auto found = metadata->cells.find({row, column}); found != metadata->cells.end())
+                return found->second;
+        return {};
+    }
+
+    inline float EditorTableCellFontSize(
+        float bodySize, folia::TableMetadata const* metadata, const folia::TableCellAppearance& appearance)
+    {
+        return bodySize * 0.93f * (metadata ? metadata->font_scale : 1.0f) * appearance.font_scale;
+    }
+
+    inline std::vector<float> EditorTableColumnBoundaries(
+        folia::RenderBlockSpecial const& table, float available)
+    {
+        const auto count = table.column_count;
+        std::vector<float> boundaries(count + 1);
+        if (count == 0) return boundaries;
+        const auto& metadata = table.table_metadata;
+        auto explicitWidth = [&](std::size_t column) {
+            const auto savedWidth = metadata && column < metadata->widths.size()
+                ? metadata->widths[column] : 0.0f;
+            return (std::max)(0.0f, savedWidth);
+        };
+        float fixed = 0.0f;
+        std::size_t automatic = 0;
+        for (std::size_t column = 0; column < count; ++column)
+        {
+            auto width = explicitWidth(column);
+            fixed += width;
+            automatic += width == 0.0f;
+        }
+        const auto autoWidth = automatic == 0 ? 0.0f
+            : (std::max)(40.0f, (available - fixed) / static_cast<float>(automatic));
+        for (std::size_t column = 0; column < count; ++column)
+        {
+            const auto width = explicitWidth(column);
+            boundaries[column + 1] = boundaries[column] + (width > 0.0f ? width : autoWidth);
+        }
+        if (boundaries.back() > available && !(metadata && metadata->wide))
+        {
+            auto scale = available / boundaries.back();
+            for (auto& boundary : boundaries) boundary *= scale;
+        }
+        return boundaries;
+    }
+
+    inline float EditorTableCellContentWidth(float width, folia::TableMetadata const* metadata)
+    {
+        return (std::max)(1.0f, width - 2.0f * EditorTableCellPadding(metadata));
     }
 }

@@ -286,7 +286,7 @@ namespace winrt::Folia
     winrt::Windows::UI::Text::Core::CoreTextRange EditorTextInputController::CurrentSelection() const
     {
         if (!session_) return {};
-        auto selection = session_->Selection();
+        auto selection = session_->TextInputSelection();
         if (selection.active.container_id != activeContainer_) return {};
         const auto length = knownText_.size();
         const auto active = (std::min)(session_->TextInputAcpOffset(selection.active), length);
@@ -460,7 +460,7 @@ namespace winrt::Folia
                 && selection.active.container_id == activeContainer_
                 && start == end
                 && start == activeAcp;
-            if (!preserveCrossBlockSelection)
+            if (!preserveCrossBlockSelection && !selection.selects_cells())
             {
                 session_->SetSelection(
                     session_->TextInputPositionFromAcp(activeContainer_, (std::min)(start, length)),

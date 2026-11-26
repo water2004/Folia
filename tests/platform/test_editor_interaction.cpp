@@ -64,7 +64,8 @@ namespace
     {
         EditorVisualTable table;
         table.rect = D2D1_RECT_F{0.0f, 0.0f, 200.0f, 100.0f};
-        table.sourceSpans = {{owner, {0, 40}}};
+        table.sourceSpans = std::make_shared<const std::vector<folia::TextSpan>>(
+            std::initializer_list<folia::TextSpan>{{owner, {0, 40}}});
         table.rowCount = 2;
         table.columnCount = 2;
         table.rowBoundaries = {0.0f, 50.0f, 100.0f};
@@ -306,7 +307,8 @@ suite editor_interaction_tests = [] {
 
     EditorVisualTable table;
     table.rect = D2D1_RECT_F{20.0f, 30.0f, 420.0f, 90.0f};
-    table.sourceSpans = {{owner, {0, length}}};
+    table.sourceSpans = std::make_shared<const std::vector<folia::TextSpan>>(
+        std::initializer_list<folia::TextSpan>{{owner, {0, length}}});
     table.rowCount = 1;
     table.columnCount = 1;
     table.rowBoundaries = {30.0f, 90.0f};
@@ -333,46 +335,43 @@ suite editor_interaction_tests = [] {
     expect(partial.front().bottom == whole.front().bottom);
 };
 
-"table hit policy returns semantic actions without renderer ownership"_test = [] {
+"table chrome keeps the four insertion edges and distinct row and column handles"_test = [] {
     const auto owner = NodeId{503};
     EditorInteractionMap interaction;
     interaction.tables.push_back(MakeEditableTable(owner));
+    interaction.tables.front().headerRows = 1;
+    auto action = [&](float x, float y) -> std::optional<EditorTableAction> {
+        const auto controls = interaction.TableControlsAt(x, y);
+        const auto* hit = controls.Hit();
+        return hit ? std::optional{hit->action} : std::nullopt;
+    };
+    using Kind = EditorTableActionKind;
+    expect(action(100, -23)->kind == Kind::InsertRow);
+    expect(action(100, -23)->index == 1_u);
+    expect(action(100, 109)->index == 2_u);
+    expect(action(-19, 50)->kind == Kind::InsertColumn);
+    expect(action(210, 50)->index == 2_u);
+    expect(action(0, 75)->kind == Kind::DragRow);
+    expect(action(0, 75)->index == 1_u);
+    expect(!action(0, 25)->draggable);
+    expect(action(50, 9)->kind == Kind::DragColumn);
+    expect(action(64, 11)->kind == Kind::DragColumn);
+    expect(action(100, 0)->kind == Kind::ResizeColumn);
+    expect(action(108, 0)->kind == Kind::ResizeColumn);
+    expect(action(-14, -13)->kind == Kind::Menu);
+    expect(action(-25, -14)->kind == Kind::Menu);
+    expect(!action(50, 30).has_value());
+    expect(!action(150, 75).has_value());
+};
 
-    auto insertRow = interaction.TableActionAt(50.0f, 0.0f);
-    expect(insertRow.has_value());
-    expect(insertRow->kind == EditorTableActionKind::InsertRow);
-    expect(insertRow->index == 0_u);
-    expect(insertRow->sourcePosition == TextPosition{owner, 0, TextAffinity::Downstream});
-
-    auto insertColumn = interaction.TableActionAt(0.0f, 25.0f);
-    expect(insertColumn.has_value());
-    expect(insertColumn->kind == EditorTableActionKind::InsertColumn);
-    expect(insertColumn->index == 0_u);
-
-    auto dragRow = interaction.TableActionAt(-40.0f, 25.0f);
-    expect(dragRow.has_value());
-    expect(dragRow->kind == EditorTableActionKind::DragRow);
-    expect(dragRow->index == 0_u);
-
-    auto deleteRow = interaction.TableActionAt(-15.0f, 75.0f);
-    expect(deleteRow.has_value());
-    expect(deleteRow->kind == EditorTableActionKind::DeleteRow);
-    expect(deleteRow->index == 1_u);
-
-    auto dragColumn = interaction.TableActionAt(40.0f, -18.0f);
-    expect(dragColumn.has_value());
-    expect(dragColumn->kind == EditorTableActionKind::DragColumn);
-    expect(dragColumn->index == 0_u);
-
-    auto deleteColumn = interaction.TableActionAt(60.0f, -18.0f);
-    expect(deleteColumn.has_value());
-    expect(deleteColumn->kind == EditorTableActionKind::DeleteColumn);
-    expect(deleteColumn->index == 0_u);
-
-    // Cell interiors always belong to text hit-testing. Structural actions
-    // are available only in the explicit margins and boundary handles.
-    expect(!interaction.TableActionAt(50.0f, 25.0f).has_value());
-    expect(!interaction.TableActionAt(150.0f, 75.0f).has_value());
+"table gesture distinguishes a grip click from a drag and retains pointer ownership"_test = [] {
+    EditorTableGesture gesture{75, 20, 40};
+    expect(gesture.Owns(75));
+    expect(!gesture.Owns(76));
+    expect(gesture.Update(23, 43) == EditorTableGesture::Phase::Pressed);
+    expect(gesture.Update(23, 44) == EditorTableGesture::Phase::Dragging);
+    expect(gesture.Update(20, 40) == EditorTableGesture::Phase::Dragging);
+    expect(gesture.DeltaX(30) == 10.0_f);
 };
 
 "table drop policy stays within the source table and tolerates incomplete geometry"_test = [] {
@@ -397,7 +396,7 @@ suite editor_interaction_tests = [] {
     incomplete.rowCount = 1;
     incomplete.columnCount = 1;
     interaction.tables = {std::move(incomplete)};
-    expect(!interaction.TableActionAt(0.0f, 0.0f).has_value());
+    expect(interaction.TableControlsAt(0.0f, 0.0f).Visible().empty());
     expect(!interaction.TableDropIndexAt(std::nullopt, 0.0f, 0.0f, true).has_value());
 };
 

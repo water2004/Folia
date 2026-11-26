@@ -9,6 +9,7 @@ namespace winrt::Folia
         EditorStyleSheet const& valueStyleSheet,
         EditorInteractionMap& valueInteractionMap,
         EditorCaretAnimation& valueCaretAnimation,
+        EditorTableSelectionAnimation& valueTableSelectionAnimation,
         std::vector<D2D1_RECT_F>& valueNonInteractiveRegions,
         EditorInlineImageRenderer& valueInlineImages,
         EditorDocumentPainter& valueDocumentPainter,
@@ -19,6 +20,7 @@ namespace winrt::Folia
           styleSheet(valueStyleSheet),
           interactionMap(valueInteractionMap),
           caretAnimation(valueCaretAnimation),
+          tableSelectionAnimation(valueTableSelectionAnimation),
           nonInteractiveRegions(valueNonInteractiveRegions),
           inlineImages(valueInlineImages),
           documentPainter(valueDocumentPainter),
@@ -90,12 +92,24 @@ namespace winrt::Folia
             auto const& content = prepared.Visuals();
             if (content.table)
             {
+                float horizontalOffset = 0.0f;
+                if (!printMode && frame.tableScrollOffsets)
+                    if (auto found = frame.tableScrollOffsets->find(block.id.v); found != frame.tableScrollOffsets->end())
+                        horizontalOffset = found->second;
                 EditorTableBlockRenderer::Paint(
                     block,
                     *content.table,
                     documentLeft,
                     top,
                     scrollOffset,
+                    horizontalOffset,
+                    printMode,
+                    printMode ? folia::NodeId{} : frame.tableTextOwner,
+                    !printMode && frame.tableSelection && frame.tableSelection->table == block.id
+                        ? &frame.tableSelection->region : nullptr,
+                    tableSelectionAnimation,
+                    !printMode && draggedTableAction && draggedTableAction->tableId == block.id
+                        ? &*draggedTableAction : nullptr,
                     resources,
                     styleSheet,
                     interactionMap,

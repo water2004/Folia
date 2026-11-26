@@ -5,6 +5,7 @@
 
 import folia.markdown.serializer;
 import folia.markdown.utf;
+import folia.core.document_copy;
 
 namespace winrt::Folia {
     winrt::Windows::Foundation::IAsyncOperation<bool> EditorDocumentController::PasteAsync(
@@ -35,9 +36,20 @@ namespace winrt::Folia {
             if (!content) content = Clipboard::GetContent();
             folia::Command command;
             command.kind = folia::CommandKind::Paste;
-            auto bitmap = content.Contains(StandardDataFormats::Bitmap());
+            if (!state->session->IsSourceMode() && content.Contains(StandardDataFormats::Html())) {
+                auto html = co_await content.GetHtmlFormatAsync();
+                co_await ui;
+                if (!current()) co_return false;
+                auto fragment = HtmlFormatHelper::GetStaticFragment(html);
+                auto source = folia::utf8_to_cps(winrt::to_string(fragment));
+                if (auto rich = folia::table_clipboard_markdown(source)) command.text = std::move(*rich);
+                else if (source.contains(U"data-ggt=\"1\"")) command.paste_as_table_grid = state->session->CanCopyTable();
+                else if (auto table = folia::table_clipboard_html_table(source)) command.text = std::move(*table);
+            }
+            const auto useImage = command.text.empty() && !command.paste_as_table_grid;
+            auto bitmap = useImage && content.Contains(StandardDataFormats::Bitmap());
             std::vector<winrt::Windows::Storage::StorageFile> files;
-            if (!bitmap && content.Contains(StandardDataFormats::StorageItems())) {
+            if (useImage && !bitmap && content.Contains(StandardDataFormats::StorageItems())) {
                 auto items = co_await content.GetStorageItemsAsync();
                 co_await ui;
                 if (!current()) co_return false;
@@ -69,7 +81,7 @@ namespace winrt::Folia {
                         if (!command.text.empty()) command.text += U'\n';
                         command.text += folia::serialize_image_source(folia::utf8_to_cps(winrt::to_string(image.Name())));
                     }
-            } else if (content.Contains(StandardDataFormats::Text())) {
+            } else if (command.text.empty() && content.Contains(StandardDataFormats::Text())) {
                 auto text = co_await content.GetTextAsync();
                 co_await ui;
                 if (current()) command.text = folia::utf8_to_cps(winrt::to_string(text));

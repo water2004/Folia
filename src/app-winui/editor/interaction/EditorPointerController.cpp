@@ -28,8 +28,11 @@ namespace winrt::Folia
         EditorScrollController& scroll,
         EditorTextInputController& textInput,
         winrt::Microsoft::UI::Xaml::FrameworkElement const& surface,
+        winrt::Microsoft::UI::Xaml::Style const& menuStyle,
+        EditorTableInteraction::ClipboardActions clipboard,
         ExecuteCommand executeCommand,
         Render render,
+        Render requestFrame,
         OpenLink openLink,
         OpenFootnote openFootnote,
         ResetCaretGoal resetCaretGoal)
@@ -44,35 +47,39 @@ namespace winrt::Folia
         using winrt::Microsoft::UI::Input::InputSystemCursor;
         using Shape = winrt::Microsoft::UI::Input::InputSystemCursorShape;
         cursors_ = {InputSystemCursor::Create(Shape::IBeam), InputSystemCursor::Create(Shape::Hand),
-            SystemSelectionMoveCursor(), InputSystemCursor::Create(Shape::UniversalNo)};
+            SystemSelectionMoveCursor(), InputSystemCursor::Create(Shape::UniversalNo),
+            InputSystemCursor::Create(Shape::SizeWestEast)};
         SetCursor(Cursor::Text);
         executeCommand_ = std::move(executeCommand);
         render_ = std::move(render);
+        requestFrame_ = requestFrame;
         openLink_ = std::move(openLink);
         openFootnote_ = std::move(openFootnote);
         resetCaretGoal_ = std::move(resetCaretGoal);
+        tablePointer_.Attach(session, renderer, scroll, textInput, surface,
+            menuStyle, std::move(clipboard), executeCommand_, openLink_, render_, std::move(requestFrame));
+    }
+
+    Microsoft::UI::Xaml::Controls::MenuFlyout EditorPointerController::ContextMenuAt(
+        std::optional<Windows::Foundation::Point> point)
+    {
+        return tablePointer_.ContextMenuAt(point);
     }
 
     void EditorPointerController::Detach()
     {
+        tablePointer_.Detach();
         selectionDrag_.Detach();
         if (surface_)
-        {
             if (auto protectedElement = surface_.try_as<winrt::Microsoft::UI::Xaml::IUIElementProtected>())
                 protectedElement.ProtectedCursor(nullptr);
-        }
-        if (renderer_)
-        {
-            renderer_->SetTableDrag(std::nullopt, std::nullopt);
-            renderer_->ClearPointer();
-        }
+        if (renderer_) renderer_->ClearPointer();
         hoverTooltip_.reset();
         hoverTaskCheckbox_.reset();
-        hoverTableAction_.reset();
-        tableDrag_.reset();
-        tableDropIndex_.reset();
+        hoverTableControls_ = {};
         executeCommand_ = {};
         render_ = {};
+        requestFrame_ = {};
         openLink_ = {};
         openFootnote_ = {};
         resetCaretGoal_ = {};
@@ -98,10 +105,15 @@ namespace winrt::Folia
         auto point = pointerPoint.Position();
         if (scroll_) scroll_->Stop();
         renderer_->UpdatePointer(static_cast<float>(point.X), static_cast<float>(point.Y));
+        if (tablePointer_.Press(args, point))
+        {
+            args.Handled(true);
+            return;
+        }
         using Modifiers = winrt::Windows::System::VirtualKeyModifiers;
         if (args.Pointer().PointerDeviceType() == winrt::Microsoft::UI::Input::PointerDeviceType::Mouse
             && args.KeyModifiers() == Modifiers::None
-            && session_->HasSelection()
+            && session_->HasSelection() && !session_->Selection().selects_cells()
             && renderer_->SelectionBackgroundAt(static_cast<float>(point.X), static_cast<float>(point.Y)))
         {
             if (auto hit = renderer_->HitTest(static_cast<float>(point.X), static_cast<float>(point.Y));
@@ -112,46 +124,6 @@ namespace winrt::Folia
                 return;
             }
         }
-        if (auto action = renderer_->TableActionAt(static_cast<float>(point.X), static_cast<float>(point.Y)))
-        {
-            if (action->kind == EditorTableActionKind::DragRow || action->kind == EditorTableActionKind::DragColumn)
-            {
-                tableDrag_ = action;
-                auto rows = action->kind == EditorTableActionKind::DragRow;
-                tableDropIndex_ = renderer_->TableDropIndexAt(static_cast<float>(point.X), static_cast<float>(point.Y), rows);
-                renderer_->SetTableDrag(tableDrag_, tableDropIndex_);
-                surface_.CapturePointer(args.Pointer());
-                if (render_) render_();
-                args.Handled(true);
-                return;
-            }
-
-            session_->SetSelection(action->sourcePosition, action->sourcePosition);
-            if (textInput_) textInput_->NotifySelectionChanged();
-            folia::Command command;
-            command.table_index = action->index;
-            switch (action->kind)
-            {
-                case EditorTableActionKind::InsertRow:
-                    command.kind = folia::CommandKind::InsertTableRowAt;
-                    break;
-                case EditorTableActionKind::InsertColumn:
-                    command.kind = folia::CommandKind::InsertTableColumnAt;
-                    break;
-                case EditorTableActionKind::DeleteRow:
-                    command.kind = folia::CommandKind::DeleteTableRow;
-                    break;
-                case EditorTableActionKind::DeleteColumn:
-                    command.kind = folia::CommandKind::DeleteTableColumn;
-                    break;
-                default:
-                    return;
-            }
-            if (executeCommand_) executeCommand_(command);
-            args.Handled(true);
-            return;
-        }
-
         if (auto checkbox = renderer_->TaskCheckboxAt(static_cast<float>(point.X), static_cast<float>(point.Y)))
         {
             session_->SetSelection(*checkbox, *checkbox);
@@ -192,81 +164,56 @@ namespace winrt::Folia
     {
         if (!session_ || !renderer_ || !surface_) return;
         auto point = args.GetCurrentPoint(surface_).Position();
-        auto taskCheckbox = renderer_->TaskCheckboxAt(static_cast<float>(point.X), static_cast<float>(point.Y));
-        auto tableAction = renderer_->TableActionAt(static_cast<float>(point.X), static_cast<float>(point.Y));
-        auto hoverVisualChanged = taskCheckbox != hoverTaskCheckbox_ || tableAction != hoverTableAction_;
-        hoverTaskCheckbox_ = std::move(taskCheckbox);
-        hoverTableAction_ = std::move(tableAction);
-        renderer_->UpdatePointer(static_cast<float>(point.X), static_cast<float>(point.Y));
-        if (!selectionDrag_.Active() && !tableDrag_)
+        renderer_->UpdatePointer(point.X, point.Y);
+        if (tablePointer_.Move(args, point))
         {
-            auto hit = renderer_->HitTest(static_cast<float>(point.X), static_cast<float>(point.Y));
-            auto interaction = hit && session_ ? session_->InteractionAt(*hit) : std::nullopt;
-            auto tooltip = interaction ? std::move(interaction->tooltip) : std::nullopt;
-            auto interactive = (interaction && interaction->link.has_value())
-                || renderer_->CodeLanguageAt(static_cast<float>(point.X), static_cast<float>(point.Y)).has_value();
-            SetCursor(interactive ? Cursor::Link : Cursor::Text);
-            if (tooltip != hoverTooltip_)
-            {
-                hoverTooltip_ = tooltip;
-                winrt::Microsoft::UI::Xaml::Controls::ToolTipService::SetToolTip(
-                    surface_,
-                    tooltip ? winrt::box_value(winrt::to_hstring(*tooltip)) : nullptr);
-            }
-        }
-        if (tableDrag_)
-        {
-            SetCursor(Cursor::Text);
-            auto rows = tableDrag_->kind == EditorTableActionKind::DragRow;
-            tableDropIndex_ = renderer_->TableDropIndexAt(static_cast<float>(point.X), static_cast<float>(point.Y), rows);
-            renderer_->SetTableDrag(tableDrag_, tableDropIndex_);
-            if (render_) render_();
             args.Handled(true);
             return;
         }
-        if (!selectionDrag_.Active())
+        if (selectionDrag_.Active())
         {
-            if (hoverVisualChanged && render_) render_();
+            const bool changed = selectionDrag_.Update(point.X, point.Y);
+            using Feedback = EditorSelectionDrag::MoveFeedback;
+            switch (selectionDrag_.Feedback())
+            {
+                case Feedback::Allowed: SetCursor(Cursor::Move); break;
+                case Feedback::Blocked: SetCursor(Cursor::Blocked); break;
+                case Feedback::None: SetCursor(Cursor::Text); break;
+            }
+            if (changed && requestFrame_) requestFrame_();
+            args.Handled(true);
             return;
         }
-        auto changed = selectionDrag_.Update(static_cast<float>(point.X), static_cast<float>(point.Y));
-        using Feedback = EditorSelectionDrag::MoveFeedback;
-        switch (selectionDrag_.Feedback())
+        auto checkbox = renderer_->TaskCheckboxAt(point.X, point.Y);
+        const auto controls = tablePointer_.Controls(point);
+        const auto* control = controls.Hit();
+        if (checkbox != hoverTaskCheckbox_ || !std::ranges::equal(controls.Visible(), hoverTableControls_.Visible()))
         {
-            case Feedback::Allowed: SetCursor(Cursor::Move); break;
-            case Feedback::Blocked: SetCursor(Cursor::Blocked); break;
-            case Feedback::None: SetCursor(Cursor::Text); break;
+            hoverTaskCheckbox_ = checkbox;
+            hoverTableControls_ = controls;
+            if (requestFrame_) requestFrame_();
         }
-        if ((changed || hoverVisualChanged) && render_) render_();
-        args.Handled(true);
+        auto hit = control ? std::nullopt : renderer_->HitTest(point.X, point.Y);
+        auto interaction = hit ? session_->InteractionAt(*hit) : std::nullopt;
+        auto tooltip = interaction ? std::move(interaction->tooltip) : std::nullopt;
+        const auto interactive = checkbox || control || (interaction && interaction->link)
+            || renderer_->CodeLanguageAt(point.X, point.Y).has_value();
+        SetCursor(control && control->action.kind == folia::platform::editor::EditorTableActionKind::ResizeColumn
+            ? Cursor::ResizeColumn : interactive ? Cursor::Link : Cursor::Text);
+        if (tooltip != hoverTooltip_)
+        {
+            hoverTooltip_ = tooltip;
+            Microsoft::UI::Xaml::Controls::ToolTipService::SetToolTip(
+                surface_, tooltip ? box_value(to_hstring(*tooltip)) : nullptr);
+        }
     }
 
     void EditorPointerController::PointerReleased(winrt::Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args)
     {
         if (!session_ || !renderer_ || !surface_) return;
-        if (tableDrag_)
+        if (tablePointer_.Release(args, args.GetCurrentPoint(surface_).Position()))
         {
-            auto action = *tableDrag_;
-            auto dropIndex = tableDropIndex_;
-            tableDrag_.reset();
-            tableDropIndex_.reset();
-            renderer_->SetTableDrag(std::nullopt, std::nullopt);
-            surface_.ReleasePointerCapture(args.Pointer());
-            if (dropIndex)
-            {
-                session_->SetSelection(action.sourcePosition, action.sourcePosition);
-                if (textInput_) textInput_->NotifySelectionChanged();
-                folia::Command command;
-                command.kind = action.kind == EditorTableActionKind::DragRow
-                    ? folia::CommandKind::MoveTableRowTo
-                    : folia::CommandKind::MoveTableColumnTo;
-                command.table_index = *dropIndex;
-                if (executeCommand_) executeCommand_(command);
-            }
-            else if (render_)
-            {
-                render_();
-            }
+            SetCursor(Cursor::Text);
             args.Handled(true);
             return;
         }
@@ -286,9 +233,9 @@ namespace winrt::Folia
         SetCursor(selectionDrag_.Feedback() == EditorSelectionDrag::MoveFeedback::None ? Cursor::Text : Cursor::Blocked);
         hoverTooltip_.reset();
         hoverTaskCheckbox_.reset();
-        hoverTableAction_.reset();
+        hoverTableControls_ = {};
         if (surface_) winrt::Microsoft::UI::Xaml::Controls::ToolTipService::SetToolTip(surface_, nullptr);
-        if (!tableDrag_ && renderer_)
+        if (!tablePointer_.Active() && renderer_)
         {
             renderer_->ClearPointer();
             if (render_) render_();
@@ -300,19 +247,13 @@ namespace winrt::Folia
         auto repaint = selectionDrag_.Moving();
         selectionDrag_.Cancel();
         SetCursor(Cursor::Text);
-        if (tableDrag_ && renderer_)
-        {
-            tableDrag_.reset();
-            tableDropIndex_.reset();
-            renderer_->SetTableDrag(std::nullopt, std::nullopt);
-            repaint = true;
-        }
+        tablePointer_.Cancel();
         if (repaint && render_) render_();
     }
 
     bool EditorPointerController::CancelSelectionMove()
     {
-        if (!selectionDrag_.Moving()) return false;
+        if (!selectionDrag_.Moving() && !tablePointer_.Active()) return false;
         CancelPointerInteraction();
         if (surface_) surface_.ReleasePointerCaptures();
         return true;
@@ -326,10 +267,14 @@ namespace winrt::Folia
         // some mouse stacks can deliver the gesture before the final release;
         // if that release completes the old drag, it collapses the
         // authoritative source selection after the word was already painted.
-        selectionDrag_.Cancel();
-        SetCursor(Cursor::Text);
+        CancelPointerInteraction();
         surface_.ReleasePointerCaptures();
         auto point = args.GetPosition(surface_);
+        if (tablePointer_.DoubleTap(point))
+        {
+            args.Handled(true);
+            return;
+        }
         auto hit = renderer_->HitTestTextUnit(static_cast<float>(point.X), static_cast<float>(point.Y));
         if (hit && SelectWordAt(*hit))
         {

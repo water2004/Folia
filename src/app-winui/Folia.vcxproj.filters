@@ -750,6 +750,9 @@
     <ClCompile Include="editor\interaction\EditorPointerController.cpp">
       <Filter>Editor\Interaction</Filter>
     </ClCompile>
+    <ClCompile Include="editor\interaction\EditorTablePointerController.cpp">
+      <Filter>Editor\Interaction</Filter>
+    </ClCompile>
     <ClCompile Include="editor\interaction\EditorKeyboardController.cpp">
       <Filter>Editor\Interaction</Filter>
     </ClCompile>
@@ -969,6 +972,9 @@
       <Filter>Editor\Interaction</Filter>
     </ClInclude>
     <ClInclude Include="editor\interaction\EditorPointerController.h">
+      <Filter>Editor\Interaction</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\interaction\EditorTablePointerController.h">
       <Filter>Editor\Interaction</Filter>
     </ClInclude>
     <ClInclude Include="editor\interaction\EditorKeyboardController.h">

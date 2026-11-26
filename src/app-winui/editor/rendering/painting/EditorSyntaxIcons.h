@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+
 import folia.core.syntax_marker;
 
 namespace winrt::Folia
@@ -19,5 +21,14 @@ namespace winrt::Folia
         ::Microsoft::WRL::ComPtr<ID2D1DeviceContext5> context;
         std::shared_ptr<const folia::SyntaxMarkerTheme> theme;
         std::array<::Microsoft::WRL::ComPtr<ID2D1SvgDocument>, static_cast<std::size_t>(SyntaxIcon::Count)> documents;
+    };
+
+    struct EditorChromeIcons
+    {
+        void Reset();
+        void Draw(ID2D1DeviceContext* target, std::wstring_view key, D2D1_RECT_F bounds, D2D1_COLOR_F color);
+    private:
+        ::Microsoft::WRL::ComPtr<ID2D1DeviceContext5> context;
+        std::map<std::wstring, ::Microsoft::WRL::ComPtr<ID2D1SvgDocument>, std::less<>> documents;
     };
 }

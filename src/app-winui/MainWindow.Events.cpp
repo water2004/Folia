@@ -62,8 +62,15 @@ namespace winrt::Folia::implementation
             scrollController,
             textInputController,
             EditorSurface(),
+            documentContextMenu.MenuFlyoutPresenterStyle(),
+            {
+                [this] { documentController().CutSelection(); },
+                [this] { documentController().CopySelection(); },
+                [this] { documentController().PasteClipboard(); },
+            },
             [this](folia::Command const& command) { return ExecuteEditorCommand(command); },
             [this] { RenderEditorSurface(); },
+            [this] { animationController.RequestFrame(); },
             [this](std::string href) { documentController().OpenLink(std::move(href)); },
             [this](auto hit, auto position) { ShowFootnoteFlyout(hit, position); },
             [this]
@@ -259,6 +266,30 @@ namespace winrt::Folia::implementation
             if (args.Key() != winrt::Windows::System::VirtualKey::Enter) return;
             ReplaceCurrentSearchMatch();
             args.Handled(true);
+        }));
+
+        EditorSurface().ContextRequested(WindowEvent([this](auto const&, auto const& args)
+        {
+            if (!HasActiveEditor() || documentController().IsLoading()) return;
+            auto surface = EditorSurface();
+            Windows::Foundation::Point point{};
+            auto location = args.TryGetPosition(surface, point) ? std::optional{point} : std::nullopt;
+            auto menu = pointerController.ContextMenuAt(location);
+            if (!menu) menu = documentContextMenu;
+            if (!location)
+                if (auto bounds = editorRenderer.CaretBounds(editorSession().Selection().active))
+                    location = Windows::Foundation::Point{bounds->left, bounds->bottom};
+            Microsoft::UI::Xaml::Controls::Primitives::FlyoutShowOptions options;
+            if (location) options.Position(*location);
+            if (activeEditorContextMenu && activeEditorContextMenu != menu) activeEditorContextMenu.Hide();
+            activeEditorContextMenu = menu;
+            args.Handled(true);
+            menu.ShowAt(surface, options);
+        }));
+
+        EditorSurface().ContextCanceled(WindowEvent([this](auto const&, auto const&)
+        {
+            if (auto menu = std::exchange(activeEditorContextMenu, nullptr)) menu.Hide();
         }));
 
         EditorSurface().PointerPressed(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args)

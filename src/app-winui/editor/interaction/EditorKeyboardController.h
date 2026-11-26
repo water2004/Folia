@@ -53,6 +53,8 @@ namespace winrt::Folia
             std::optional<std::u32string> selectedText = std::nullopt);
         bool MoveSnippetTabStop(bool backward);
         bool MoveCaretVerticalStep(bool down, bool extend, bool page = false);
+        bool SelectTablePosition(folia::TextSelection selection);
+        bool TableKey(folia::platform::editor::EditorKeyGesture);
         static bool KeyDown(winrt::Windows::System::VirtualKey key);
 
         EditorSession* session_ = nullptr;

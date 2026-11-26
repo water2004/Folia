@@ -33,11 +33,13 @@ namespace winrt::Folia
         popupShadow.Reset();
         mathBracketBrush.Reset();
         syntaxIcons.Reset();
+        chromeIcons.Reset();
         codeBrush = nullptr;
         mathDecorationBrush = nullptr;
         inlineCodeBrush = nullptr;
         inlineCodeBackgroundBrush = nullptr;
         panelBrush = nullptr;
+        tableBrush = nullptr;
         canvasBrush = nullptr;
         nestedQuoteBrush = nullptr;
         calloutNoteBackgroundBrush = nullptr;
@@ -239,6 +241,7 @@ namespace winrt::Folia
             winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.inlineCodeTextColor, inlineCodeBrush.GetAddressOf()));
             winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.inlineCodeBackgroundColor, inlineCodeBackgroundBrush.GetAddressOf()));
             winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.panelColor, panelBrush.GetAddressOf()));
+            winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.tableBorderColor, tableBrush.GetAddressOf()));
             winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.canvasColor, canvasBrush.GetAddressOf()));
             winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.nestedQuoteColor, nestedQuoteBrush.GetAddressOf()));
             winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.calloutNoteBackgroundColor, calloutNoteBackgroundBrush.GetAddressOf()));

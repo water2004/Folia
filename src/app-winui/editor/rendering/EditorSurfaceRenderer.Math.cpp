@@ -35,10 +35,10 @@ namespace winrt::Folia
             sheet.horizontalPadding, sheet.code.size);
         auto width = metrics.width;
         auto batch = result->math.BeginBatch();
-        auto formula = [&](std::u32string_view tex, bool display, float available, D2D1_COLOR_F foreground)
+        auto formula = [&](std::u32string_view tex, bool display, float available, D2D1_COLOR_F foreground, float fontSize)
         {
             if (stop.stop_requested()) throw winrt::hresult_canceled();
-            batch.Render(folia::cps_to_utf8(tex), display, sheet.body.size,
+            batch.Render(folia::cps_to_utf8(tex), display, fontSize,
                 available, SvgColor(foreground), stop);
             ++result->formulaCount;
             // Count newly staged renders, rather than repeated occurrences.
@@ -49,15 +49,16 @@ namespace winrt::Folia
                 result->math.WaitForIdle(stop);
             }
         };
-        auto inlines = [&](auto const& self, std::vector<folia::InlineRenderItem> const& items, float available) -> void
+        auto inlines = [&](auto const& self, std::vector<folia::InlineRenderItem> const& items,
+            float available, D2D1_COLOR_F foreground, float fontSize) -> void
         {
             for (auto const& item : items)
             {
                 if (item.kind == folia::InlineRenderItem::Kind::Math)
                     formula(item.text, item.special().display == folia::MathDisplayMode::Block, available,
-                        InlineForeground(item.style, sheet.textColor));
+                        InlineForeground(item.style, foreground), fontSize);
                 else if (item.kind == folia::InlineRenderItem::Kind::Link)
-                    self(self, item.special().semantic().children, available);
+                    self(self, item.special().semantic().children, available, foreground, fontSize);
             }
         };
         auto block = [&](auto const& self, folia::RenderBlock const& source, float available) -> void
@@ -65,15 +66,30 @@ namespace winrt::Folia
             if (source.source_mode || source.source_code) return;
             auto contentWidth = EditorBlockContentWidth(source, available);
             if (source.kind == folia::RenderBlockKind::Math)
-                formula(source.special().tex, true, contentWidth, sheet.textColor);
+                formula(source.special().tex, true, contentWidth, sheet.textColor, sheet.body.size);
             else if (source.kind == folia::RenderBlockKind::Table)
             {
                 auto const& special = source.special();
-                auto cellWidth = EditorTableCellContentWidth(available, special.column_count);
-                for (auto const& cell : special.table_cells) inlines(inlines, cell, cellWidth);
+                if (special.column_count == 0) return;
+                auto const* metadata = special.table_metadata.get();
+                auto columns = EditorTableColumnBoundaries(special, contentWidth);
+                auto merges = ResolveEditorTableMerges(metadata, special.row_count, special.column_count);
+                for (auto index = std::size_t{0}; index < special.table_cells.size(); ++index)
+                {
+                    auto column = index % special.column_count;
+                    auto span = merges.empty() ? EditorTableMerge{} : merges[index];
+                    if (span.columns == 0) continue;
+                    auto cellWidth = EditorTableCellContentWidth(
+                        columns[column + span.columns] - columns[column], metadata);
+                    auto appearance = EditorTableCellAppearance(metadata, index / special.column_count, column);
+                    auto foreground = appearance.foreground
+                        ? sheet.tablePalette[static_cast<std::size_t>(*appearance.foreground)] : sheet.textColor;
+                    inlines(inlines, special.table_cells[index], cellWidth, foreground,
+                        EditorTableCellFontSize(sheet.body.size, metadata, appearance));
+                }
             }
             else if (!source.inline_items.empty())
-                inlines(inlines, source.inline_items, contentWidth);
+                inlines(inlines, source.inline_items, contentWidth, sheet.textColor, sheet.body.size);
             else
                 for (auto const& child : source.child_blocks) self(self, child, contentWidth);
         };
@@ -126,10 +142,10 @@ namespace winrt::Folia
             normalizer, svg, frame.baseDirectory, false,
             context.media.imageMaxWidthPercent, context.imageMaxHeight);
         EditorDocumentPainter painter(measurementResources, sheet, interaction, syntax, {},
-            false, metrics.right, frame.selection, {}, frame.renderModel.editable_index);
+            false, metrics.right, frame.selection, frame.tableTextOwner, {}, frame.renderModel.editable_index);
         EditorDocumentBlockPreparer preparer(frame, measurementResources, measurementCache,
             sheet, engine, images, painter, result->math, diagrams, normalizer, syntax,
-            frame.selection.active, width, context.svgSupported, context.svgSupported,
+            EditorPresentationCaret(frame.selection), width, context.svgSupported, context.svgSupported,
             context.theme.variant != folia::Theme::Light, 0, 0);
         EditorPreparedDocumentCache cache(frame, sheet, images, preparer, result->document);
         cache.Reconcile(frame.selection, width, context.themeRevision);

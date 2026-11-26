@@ -99,6 +99,7 @@ namespace winrt::Folia
         EditorPreparationCacheView cache;
         std::optional<std::size_t> previousActiveBlock;
         std::optional<std::size_t> activeBlock;
+        const auto caret = EditorPresentationCaret(selection);
         if (preparedDocument)
         {
             cache = {
@@ -107,23 +108,24 @@ namespace winrt::Folia
                 .modelRevision = preparedDocument->modelRevision,
                 .documentWidth = preparedDocument->documentWidth,
                 .themeRevision = preparedDocument->themeRevision,
-                .active = preparedDocument->selection.active,
+                .active = EditorPresentationCaret(preparedDocument->selection),
             };
             previousActiveBlock = preparedDocument->FindOwnerBlock(
-                preparedDocument->selection.active.container_id);
-            activeBlock = preparedDocument->FindOwnerBlock(selection.active.container_id);
+                cache.active.container_id);
+            activeBlock = preparedDocument->FindOwnerBlock(caret.container_id);
         }
         auto sourceMode = !frame.renderModel.blocks.empty()
             && frame.renderModel.blocks.front().source_mode;
         auto layoutAffectedByCaret = [&](std::optional<std::size_t> index) -> std::optional<std::size_t> {
-            if (!index || !preparedDocument || cache.active == selection.active) return {};
+            if (!index || !preparedDocument || cache.active == caret) return {};
             if (*index >= frame.renderModel.blocks.size() || *index >= preparedDocument->blocks.size()) return index;
             auto const& prepared = preparedDocument->blocks[*index];
             if (!prepared.valid) return index;
             if (!frame.renderModel.blocks[*index].materialized && frame.materializeBlocks)
                 frame.materializeBlocks(*index, *index + 1);
             auto const& source = frame.renderModel.blocks[*index];
-            if (!source.materialized || prepared.Visuals().caretPresentation != CaretPresentationState(source, selection.active)) return index;
+            if (!source.materialized || prepared.Visuals().caretPresentation != CaretPresentationState(
+                    source, caret, frame.renderModel.editable_index)) return index;
             return {};
         };
         auto invalidationPlan = BuildEditorPreparationInvalidationPlan(
@@ -132,7 +134,7 @@ namespace winrt::Folia
             frame.renderModel.revision,
             documentWidth,
             themeRevision,
-            selection.active,
+            caret,
             frame.renderModel.incremental_update,
             sourceMode,
             frame.renderModel.changed_block_indices,
@@ -191,7 +193,8 @@ namespace winrt::Folia
                     auto activeOwner = previousActiveBlock == found->second || activeBlock == found->second;
                     if (!source.source_mode && activeOwner && (completionChanged
                         || (invalidationPlan.activePositionChanged
-                            && (!source.materialized || candidate.Visuals().caretPresentation != CaretPresentationState(source, selection.active))))) continue;
+                            && (!source.materialized || candidate.Visuals().caretPresentation != CaretPresentationState(
+                                source, caret, frame.renderModel.editable_index))))) continue;
                     preparedDocument->blocks[index] = std::move(candidate);
                     retained[found->second] = true;
                     previousIndices[index] = found->second;
@@ -222,8 +225,24 @@ namespace winrt::Folia
                 if (group && prepared.hasFlowContext)
                     group->summary.Remove(prepared.intrinsicFlow);
                 RemoveOwners(prepared, index);
-                prepared = {};
-                MeasureGeometry(index, flowContext);
+                const bool residentTable = source.kind == folia::RenderBlockKind::Table && prepared.Visuals().table.has_value();
+                if (residentTable)
+                {
+                    if (!source.materialized && frame.materializeBlocks)
+                        frame.materializeBlocks(index, index + 1);
+                    const auto requested = prepared.embeddedRequested;
+                    auto& retained = *prepared.EnsureVisuals().table;
+                    prepared = blockPreparer.Prepare(frame.renderModel.blocks[index], requested, true, flowContext, &retained);
+                    preparedDocument->layoutBlocks.insert(index);
+                    if (prepared.embeddedRequested && (prepared.containsMath || prepared.containsImage))
+                        preparedDocument->embeddedBlocks.insert(index);
+                    else preparedDocument->embeddedBlocks.erase(index);
+                }
+                else
+                {
+                    prepared = {};
+                    MeasureGeometry(index, flowContext);
+                }
                 if (group)
                 {
                     if (prepared.hasFlowContext) group->summary.Add(prepared.intrinsicFlow);
@@ -241,8 +260,6 @@ namespace winrt::Folia
                     });
                 }
                 preparedDocument->RegisterStructuralOwners(index);
-                preparedDocument->layoutBlocks.erase(index);
-                preparedDocument->embeddedBlocks.erase(index);
                 for (auto const& imageSource : imageSources)
                     inlineImages.ReleaseGif(imageSource);
             }

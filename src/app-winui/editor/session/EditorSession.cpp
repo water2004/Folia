@@ -8,6 +8,8 @@ import folia.markdown.ast;
 import folia.core.document_interaction;
 import folia.core.document_inline_format;
 import folia.core.document_content_context;
+import folia.core.document_copy;
+import folia.core.table_selection;
 import folia.core.document_footnotes;
 import folia.core.render_builder;
 import folia.core.render_model;
@@ -164,6 +166,13 @@ namespace winrt::Folia
 
     void EditorSession::SetSelection(folia::TextPosition anchor, folia::TextPosition active)
     {
+        SetSelection(folia::TextSelection{anchor, active});
+    }
+
+    void EditorSession::SetSelection(folia::TextSelection selection)
+    {
+        auto& anchor = selection.anchor;
+        auto& active = selection.active;
         if (core_->editor.source_editor())
         {
             auto anchorOffset = core_->editor.source_editor()->source_offset_from_position(anchor);
@@ -177,12 +186,7 @@ namespace winrt::Folia
         if (!anchorSource || !activeSource) return;
         anchor.source_offset = (std::min)(anchor.source_offset, anchorSource->size());
         active.source_offset = (std::min)(active.source_offset, activeSource->size());
-        core_->editor.set_selection({anchor, active});
-    }
-
-    void EditorSession::SetSelection(folia::TextSelection selection)
-    {
-        SetSelection(selection.anchor, selection.active);
+        core_->editor.set_selection(selection);
     }
 
     bool EditorSession::HasSelection() const
@@ -196,6 +200,8 @@ namespace winrt::Folia
     {
         const auto selection = Selection();
         if (selection.is_caret()) return false;
+        if (selection.anchor.container_id != selection.active.container_id)
+            if (const auto owner = TableTextOwner(selection); owner && owner != TableTextOwner(position)) return false;
         const auto& ranks = RenderModel().editable_index;
         auto anchor = ranks.find(selection.anchor.container_id.v);
         auto active = ranks.find(selection.active.container_id.v);
@@ -217,6 +223,110 @@ namespace winrt::Folia
     std::string EditorSession::SelectedTextUtf8() const
     {
         return folia::cps_to_utf8(SelectedSource());
+    }
+
+    bool EditorSession::CanCopyTable() const
+    {
+        return !core_->editor.source_editor()
+            && folia::document_table_cell_address(core_->editor.document(), Selection().active.container_id).has_value();
+    }
+
+    bool EditorSession::SelectionInSameTable(folia::TextPosition position) const
+    {
+        if (core_->editor.source_editor()) return false;
+        auto const& document = core_->editor.document();
+        auto selection = Selection();
+        auto target = folia::document_table_cell_address(document, position.container_id);
+        auto anchor = folia::document_table_cell_address(document, selection.anchor.container_id);
+        auto active = folia::document_table_cell_address(document, selection.active.container_id);
+        return target && anchor && active && target->table_id == anchor->table_id && target->table_id == active->table_id;
+    }
+
+    std::optional<folia::TextPosition> EditorSession::TableEnterTarget() const
+    {
+        if (core_->editor.source_editor()) return std::nullopt;
+        return folia::document_table_enter_target(core_->editor.document(), Selection());
+    }
+
+    std::optional<folia::NodeId> EditorSession::TableTextOwner(folia::TextPosition position) const
+    {
+        return core_->editor.source_editor() ? std::nullopt
+            : folia::document_table_text_owner(core_->editor.document(), position);
+    }
+
+    std::optional<folia::NodeId> EditorSession::TableTextOwner(folia::TextSelection selection) const
+    {
+        if (selection.selects_cells()) return std::nullopt;
+        const auto owner = TableTextOwner(selection.active);
+        if (owner && selection.anchor.container_id != selection.active.container_id
+            && owner != TableTextOwner(selection.anchor)) return std::nullopt;
+        return owner;
+    }
+
+    std::optional<folia::TextSelection> EditorSession::TableTextContents(folia::TextPosition position) const
+    {
+        return core_->editor.source_editor() ? std::nullopt
+            : folia::document_table_cell_contents(core_->editor.document(), position);
+    }
+
+    std::optional<folia::TextSelection> EditorSession::TableEscapeSelection() const
+    {
+        if (core_->editor.source_editor()) return std::nullopt;
+        return folia::document_table_escape_selection(core_->editor.document(), Selection());
+    }
+
+    folia::TextSelection EditorSession::TextInputSelection() const
+    {
+        const auto selection = Selection();
+        if (selection.selects_cells())
+            if (const auto source = TextInputSourceView(selection.active.container_id))
+                return {{selection.active.container_id, 0},
+                    {selection.active.container_id, source->size(), folia::TextAffinity::Upstream}};
+        return selection;
+    }
+
+    std::optional<folia::TableCellDetails> EditorSession::TableCellDetails(folia::TextPosition position) const
+    {
+        if (core_->editor.source_editor()) return std::nullopt;
+        return folia::document_table_cell_details(core_->editor.document(), position);
+    }
+
+    std::optional<folia::TableCellAddress> EditorSession::TableAddress(folia::TextPosition position) const
+    {
+        return core_->editor.source_editor() ? std::nullopt
+            : folia::document_visual_table_cell_address(core_->editor.document(), position);
+    }
+
+    bool EditorSession::TableSelectionIncludes(folia::TextPosition position) const
+    {
+        const auto selected = TableSelection();
+        const auto cell = TableAddress(position);
+        return selected && cell && selected->table == cell->table_id
+            && selected->region.contains({cell->row, cell->column});
+    }
+
+    std::optional<folia::TableCellSelection> EditorSession::TableSelection() const
+    {
+        return folia::document_table_cell_selection(core_->editor.document(), Selection());
+    }
+
+    void EditorSession::SetTableScrollOffset(folia::NodeId table, float offset)
+    {
+        if (offset > 0.0f) core_->tableScrollOffsets[table.v] = offset;
+        else core_->tableScrollOffsets.erase(table.v);
+    }
+
+    std::optional<std::pair<std::u32string, std::u32string>> EditorSession::TableClipboard(bool selected, bool plain) const
+    {
+        if (core_->editor.source_editor()) return std::nullopt;
+        auto selection = Selection();
+        auto cells = selected ? folia::document_table_cell_selection(core_->editor.document(), selection) : std::nullopt;
+        if (selected && !cells) return std::nullopt;
+        auto contents = folia::document_table_clipboard(core_->editor.document(), selection.active,
+            cells ? std::optional{cells->region} : std::nullopt, plain, &core_->theme.colors);
+        if (!contents) return std::nullopt;
+        return std::pair{selected ? std::move(contents->tab_separated) : std::move(contents->markdown),
+            std::move(contents->html)};
     }
 
     bool EditorSession::HasFile() const
@@ -410,9 +520,10 @@ namespace winrt::Folia
 
     detail::EditorRenderFrame EditorSession::RenderFrame()
     {
+        const auto selection = Selection();
         return detail::EditorRenderFrame{
             core_->renderModel,
-            Selection(),
+            selection,
             core_->searchHighlights,
             core_->baseDirectory,
             core_->renderModel.virtualized
@@ -423,6 +534,8 @@ namespace winrt::Folia
                 ? std::function<void(std::size_t, std::size_t)>{
                     [this](auto begin, auto end) { ReleaseRenderBlocksOutside(begin, end); }}
                 : std::function<void(std::size_t, std::size_t)>{},
+            {}, {}, folia::document_table_cell_selection(core_->editor.document(), selection), &core_->tableScrollOffsets,
+            TableTextOwner(selection).value_or(folia::NodeId{}),
         };
     }
 }

@@ -59,6 +59,7 @@ namespace winrt::Folia
             folia::RenderModel renderModel;
             folia::ThemeProfile theme = folia::default_theme_profile();
             std::wstring baseDirectory;
+            std::unordered_map<std::uint64_t, float> tableScrollOffsets;
             std::size_t characterCount = 0;
             std::vector<SearchTarget> searchTargets;
             std::vector<EditorSearchHighlight> searchHighlights;
@@ -100,6 +101,20 @@ namespace winrt::Folia
         bool SelectionCovers(folia::TextPosition position) const;
         std::u32string SelectedSource() const;
         std::string SelectedTextUtf8() const;
+        bool CanCopyTable() const;
+        bool SelectionInSameTable(folia::TextPosition position) const;
+        std::optional<folia::TextPosition> TableEnterTarget() const;
+        std::optional<folia::NodeId> TableTextOwner(folia::TextPosition position) const;
+        std::optional<folia::NodeId> TableTextOwner(folia::TextSelection selection) const;
+        std::optional<folia::TextSelection> TableTextContents(folia::TextPosition position) const;
+        std::optional<folia::TextSelection> TableEscapeSelection() const;
+        folia::TextSelection TextInputSelection() const;
+        std::optional<folia::TableCellDetails> TableCellDetails(folia::TextPosition position) const;
+        std::optional<folia::TableCellAddress> TableAddress(folia::TextPosition position) const;
+        bool TableSelectionIncludes(folia::TextPosition position) const;
+        std::optional<folia::TableCellSelection> TableSelection() const;
+        void SetTableScrollOffset(folia::NodeId table, float offset);
+        std::optional<std::pair<std::u32string, std::u32string>> TableClipboard(bool selected = false, bool plain = false) const;
         bool HasFile() const;
         winrt::Windows::Storage::StorageFile File() const;
         winrt::hstring Text() const;

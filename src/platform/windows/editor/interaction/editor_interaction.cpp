@@ -404,9 +404,10 @@ namespace folia::platform::editor
         return folia::TextPosition{span->container_id, span->source_range.end, folia::TextAffinity::Upstream};
     }
 
-    std::optional<folia::TextPosition> EditorInteractionMap::HitTest(float x, float y, bool characterStart) const
+    std::optional<folia::TextPosition> EditorInteractionMap::HitTest(float x, float y, bool characterStart,
+        folia::NodeId tableTextOwner) const
     {
-        for (auto hit = mathHits.rbegin(); hit != mathHits.rend(); ++hit)
+        for (auto hit = mathHits.rbegin(); tableTextOwner.v == 0 && hit != mathHits.rend(); ++hit)
         {
             if (x < hit->rect.left || x > hit->rect.right || y < hit->rect.top || y > hit->rect.bottom) continue;
             auto width = (std::max)(1.0f, hit->rect.right - hit->rect.left);
@@ -417,10 +418,29 @@ namespace folia::platform::editor
             return folia::TextPosition{hit->sourceSpan.container_id, (std::min)(offset, hit->sourceSpan.source_range.end), folia::TextAffinity::Downstream};
         }
         if (lines.empty()) return std::nullopt;
+        std::optional<std::pair<std::size_t, std::size_t>> tableCell;
+        if (tableTextOwner.v != 0)
+        {
+            for (std::size_t index = 0; index < tables.size() && !tableCell; ++index)
+            {
+                const auto& cells = tables[index].cells;
+                auto cell = std::ranges::find_if(cells, [&](const auto& item) {
+                    return item.sourceSpan.container_id == tableTextOwner;
+                });
+                if (cell == cells.end()) continue;
+                tableCell = std::pair{index, static_cast<std::size_t>(cell - cells.begin())};
+                x = (std::clamp)(x, cell->rect.left, cell->rect.right);
+                y = (std::clamp)(y, cell->rect.top, cell->rect.bottom);
+            }
+            if (!tableCell) return std::nullopt;
+        }
+        else tableCell = TableCellAt(x, y);
         std::size_t best = 0;
         float bestDistance = (std::numeric_limits<float>::max)();
         for (std::size_t index = 0; index < lines.size(); ++index)
         {
+            if (tableCell && (lines[index].tableIndex != tableCell->first
+                || lines[index].cellIndex != tableCell->second)) continue;
             auto const& rect = lines[index].rect;
             auto distance = y < rect.top ? rect.top - y : y > rect.bottom ? y - rect.bottom : 0.0f;
             if (lines[index].tableIndex < tables.size())
@@ -431,6 +451,7 @@ namespace folia::platform::editor
             if (distance < bestDistance) { bestDistance = distance; best = index; }
             if (distance == 0.0f) break;
         }
+        if (bestDistance == (std::numeric_limits<float>::max)()) return std::nullopt;
         auto const& line = lines[best];
         if (line.blockIndex >= blocks.size() || line.SourceSpans().empty()) return std::nullopt;
         auto const& block = blocks[line.blockIndex];
@@ -459,6 +480,7 @@ namespace folia::platform::editor
         auto resolved = ResolveMappedPosition(line, *mapping, displayPos);
         auto position = resolved.value_or(end);
         auto nextWrap = best + 1 < lines.size() && lines[best + 1].blockIndex == line.blockIndex
+            && lines[best + 1].cellIndex == line.cellIndex
             && lines[best + 1].wrapContinuation && lines[best + 1].displayStart == line.displayEnd;
         auto sourceSpan = SourceSpanFor(line, position.container_id);
         if (sourceSpan && position.source_offset == sourceSpan->source_range.end && nextWrap)
@@ -486,141 +508,202 @@ namespace folia::platform::editor
         return std::nullopt;
     }
 
-    std::optional<EditorTableAction> EditorInteractionMap::TableActionAt(float x, float y) const
+    std::size_t EditorTableAxis::Nearest(float point) const
+    {
+        const auto edges = Local();
+        const auto position = ToLocal(point);
+        auto next = std::ranges::lower_bound(edges, position);
+        if (next == edges.end()) return edges.size() - 1;
+        if (next != edges.begin() && position - *(next - 1) < *next - position) --next;
+        return static_cast<std::size_t>(next - edges.begin());
+    }
+
+    std::size_t EditorTableAxis::Interval(float point) const
+    {
+        const auto edges = Local();
+        auto next = std::ranges::upper_bound(edges, ToLocal(point));
+        if (next == edges.begin()) return 0;
+        return (std::min)(edges.size() - 2, static_cast<std::size_t>(next - edges.begin() - 1));
+    }
+
+    namespace
+    {
+        bool HasTableGrid(EditorVisualTable const& table)
+        {
+            return table.editable && table.rowCount != 0 && table.columnCount != 0
+                && table.rowBoundaries.size() > table.rowCount
+                && table.columnBoundaries.size() > table.columnCount
+                && !table.SourceSpans().empty();
+        }
+
+        bool Contains(D2D1_RECT_F bounds, float x, float y)
+        {
+            return x >= bounds.left && x < bounds.right && y >= bounds.top && y < bounds.bottom;
+        }
+    }
+
+    const EditorTableControl* EditorTableControls::Hit() const
+    {
+        const auto visible = Visible();
+        const auto result = std::ranges::find_if(visible, &EditorTableControl::hot);
+        return result == visible.end() ? nullptr : &*result;
+    }
+
+    EditorTableControls TableControlsAt(EditorVisualTable const& table, float x, float y)
+    {
+        EditorTableControls controls;
+        if (!HasTableGrid(table)) return controls;
+        using Kind = EditorTableActionKind;
+        const auto& rect = table.rect;
+        const auto& rows = table.rowBoundaries;
+        const auto& columns = table.columnBoundaries;
+        const auto spans = table.SourceSpans();
+        auto bestDistance = (std::numeric_limits<float>::max)();
+        EditorTableControl* closest = nullptr;
+        auto add = [&](Kind kind, std::size_t index, std::size_t cell, D2D1_RECT_F bounds,
+            float width = 0.0f, bool draggable = true) {
+            const auto owner = cell < spans.size() ? spans[cell] : spans.front();
+            auto& control = controls.items[controls.count++];
+            control = {{kind, {owner.container_id, 0}, index, width, table.id, draggable}, bounds};
+            constexpr float padding = 3.0f;
+            if (!Contains({bounds.left - padding, bounds.top - padding,
+                    bounds.right + padding, bounds.bottom + padding}, x, y)) return;
+            const auto dx = x - std::midpoint(bounds.left, bounds.right);
+            const auto dy = y - std::midpoint(bounds.top, bounds.bottom);
+            const auto distance = kind == Kind::ResizeColumn ? dx * dx : dx * dx + dy * dy;
+            if (distance >= bestDistance) return;
+            if (closest) closest->hot = false;
+            closest = &control;
+            closest->hot = true;
+            bestDistance = distance;
+        };
+        if (table.hiddenRows && Contains(table.foldBar, x, y))
+        {
+            add(Kind::Unfold, 0, 0, table.foldBar);
+            return controls;
+        }
+
+        const float header = rect.top + table.stickyOffset;
+        if (!Contains({rect.left - 48, header - 46, rect.right + 30, rect.bottom + 30}, x, y))
+            return controls;
+        const auto visualRow = y < header ? 0 : table.headerRows && y < rows[table.headerRows] + table.stickyOffset
+            ? rows.Interval(y - table.stickyOffset) : rows.Interval(y);
+        const auto visualColumn = table.frozenWidth > 0 && x < rect.left + table.frozenWidth ? 0 : columns.Interval(x);
+        auto button = [&](Kind kind, std::size_t index, std::size_t cell, float cx, float cy) {
+            add(kind, index, cell, {cx - 12, cy - 12, cx + 12, cy + 12});
+        };
+        if (table.selection && table.selectionHandle)
+        {
+            const auto& last = table.selection->last;
+            const auto [cx, cy] = *table.selectionHandle;
+            add(Kind::Fill, 0, last.row * table.columnCount + last.column, {cx - 7, cy - 7, cx + 7, cy + 7});
+        }
+        const auto reversed = table.cells | std::views::reverse;
+        const auto cell = std::ranges::find_if(reversed, [&](auto const& candidate) {
+            const auto& box = candidate.checkboxRect;
+            return candidate.checkbox && Contains({box.left - 3, box.top - 3, box.right + 3, box.bottom + 3}, x, y);
+        });
+        if (cell != reversed.end())
+            add(Kind::Checkbox, 0, cell->row * table.columnCount + cell->column, cell->checkboxRect);
+
+        const auto edge = columns.Nearest(x);
+        if (edge > 0 && std::fabs(x - columns[edge]) <= 9 && columns[edge] >= rect.left + table.frozenWidth
+            && y >= header - 22 && y <= header + 13)
+            add(Kind::ResizeColumn, edge - 1, edge - 1,
+                {columns[edge] - 6, header - 19, columns[edge] + 6, header + 10}, columns[edge] - columns[edge - 1]);
+
+        button(Kind::Menu, 0, 0, rect.left - 13, header - 14);
+        const auto middleX = std::midpoint(rect.left, rect.right);
+        const auto middleY = std::midpoint(header, rect.bottom);
+        if (!table.hiddenRows)
+        {
+            button(Kind::InsertRow, (std::min)(table.headerRows, table.rowCount), 0, middleX, header - 23);
+            button(Kind::InsertRow, table.rowCount, (table.rowCount - 1) * table.columnCount, middleX, rect.bottom + 9);
+        }
+        button(Kind::InsertColumn, 0, 0, rect.left - 28, middleY);
+        button(Kind::InsertColumn, table.columnCount, table.columnCount - 1, rect.right + 10, middleY);
+        if (!table.hiddenRows && x >= rect.left - 22
+            && x <= (std::min)(rect.left + 44, rect.right) && y >= header && y < rect.bottom)
+        {
+            const auto rowMidpoint = std::midpoint(rows[visualRow], rows[visualRow + 1])
+                + (visualRow < table.headerRows ? table.stickyOffset : 0);
+            add(Kind::DragRow, visualRow, visualRow * table.columnCount,
+                {rect.left - 15, rowMidpoint - 12, rect.left + 9, rowMidpoint + 12},
+                0.0f, visualRow >= table.headerRows && (!table.dataEnd || visualRow < table.dataEnd));
+        }
+        if (y >= header - 18 && y <= rows[table.headerRows] + table.stickyOffset
+            && x >= rect.left && x < rect.right)
+        {
+            const auto columnMidpoint = visualColumn == 0 && table.frozenWidth > 0
+                ? rect.left + table.frozenWidth / 2 : std::midpoint(columns[visualColumn], columns[visualColumn + 1]);
+            if (columnMidpoint >= rect.left + 12 && columnMidpoint <= rect.right - 12)
+                button(Kind::DragColumn, visualColumn, visualColumn, columnMidpoint, (std::max)(header, 12.0f));
+        }
+        return controls;
+    }
+
+    EditorTableControls EditorInteractionMap::TableControlsAt(float x, float y) const
     {
         for (auto const& table : tables)
+            if (auto controls = editor::TableControlsAt(table, x, y); controls.count) return controls;
+        return {};
+    }
+
+    std::optional<std::pair<std::size_t, std::size_t>> EditorInteractionMap::TableCellAt(float x, float y) const
+    {
+        auto containsPoint = [&](D2D1_RECT_F const& rect) {
+            return x >= rect.left && x < rect.right && y >= rect.top && y < rect.bottom;
+        };
+        for (std::size_t tableIndex = 0; tableIndex < tables.size(); ++tableIndex)
         {
-            if (!table.editable
-                || table.rowCount == 0
-                || table.columnCount == 0
-                || table.rowBoundaries.size() <= table.rowCount
-                || table.columnBoundaries.size() <= table.columnCount
-                || table.sourceSpans.empty())
-                continue;
-
-            auto sourceForRow = [&](std::size_t row)
-            {
-                auto index = (std::min)(row, table.rowCount - 1) * table.columnCount;
-                auto span = index < table.cells.size() ? table.cells[index].sourceSpan : table.sourceSpans.front();
-                return folia::TextPosition{span.container_id, span.source_range.start, folia::TextAffinity::Downstream};
-            };
-            auto sourceForColumn = [&](std::size_t column)
-            {
-                auto index = (std::min)(column, table.columnCount - 1);
-                auto span = index < table.cells.size() ? table.cells[index].sourceSpan : table.sourceSpans.front();
-                return folia::TextPosition{span.container_id, span.source_range.start, folia::TextAffinity::Downstream};
-            };
-
-            for (std::size_t boundary = 0; boundary < table.rowBoundaries.size(); ++boundary)
-            {
-                for (std::size_t column = 0; column < table.columnCount; ++column)
-                {
-                    auto centerX = (table.columnBoundaries[column] + table.columnBoundaries[column + 1]) * 0.5f;
-                    auto centerY = table.rowBoundaries[boundary];
-                    auto dx = x - centerX;
-                    auto dy = y - centerY;
-                    if (dx * dx + dy * dy <= 81.0f)
-                    {
-                        auto source = sourceForRow(boundary == table.rowCount ? table.rowCount - 1 : boundary);
-                        return EditorTableAction{EditorTableActionKind::InsertRow, source, boundary};
-                    }
-                }
-            }
-            for (std::size_t boundary = 0; boundary < table.columnBoundaries.size(); ++boundary)
-            {
-                for (std::size_t row = 0; row < table.rowCount; ++row)
-                {
-                    auto centerX = table.columnBoundaries[boundary];
-                    auto centerY = (table.rowBoundaries[row] + table.rowBoundaries[row + 1]) * 0.5f;
-                    auto dx = x - centerX;
-                    auto dy = y - centerY;
-                    if (dx * dx + dy * dy <= 81.0f)
-                    {
-                        auto source = sourceForColumn(boundary == table.columnCount ? table.columnCount - 1 : boundary);
-                        return EditorTableAction{EditorTableActionKind::InsertColumn, source, boundary};
-                    }
-                }
-            }
-            if (table.rect.left - 52.0f <= x && x <= table.rect.left - 3.0f
-                && table.rect.top <= y && y <= table.rect.bottom)
-            {
-                for (std::size_t row = 0; row < table.rowCount; ++row)
-                {
-                    if (table.rowBoundaries[row] > y || y > table.rowBoundaries[row + 1]) continue;
-                    auto source = sourceForRow(row);
-                    if (x <= table.rect.left - 28.0f)
-                        return EditorTableAction{EditorTableActionKind::DragRow, source, row};
-                    return EditorTableAction{EditorTableActionKind::DeleteRow, source, row};
-                }
-            }
-            if (table.rect.top - 29.0f <= y && y <= table.rect.top - 7.0f
-                && table.rect.left <= x && x <= table.rect.right)
-            {
-                for (std::size_t column = 0; column < table.columnCount; ++column)
-                {
-                    auto center = (table.columnBoundaries[column] + table.columnBoundaries[column + 1]) * 0.5f;
-                    if (center - 23.0f <= x && x <= center - 1.0f)
-                        return EditorTableAction{EditorTableActionKind::DragColumn, sourceForColumn(column), column};
-                    if (center + 2.0f <= x && x <= center + 24.0f)
-                        return EditorTableAction{EditorTableActionKind::DeleteColumn, sourceForColumn(column), column};
-                }
-            }
+            auto const& table = tables[tableIndex];
+            if (!containsPoint(table.rect)) continue;
+            auto backwards = table.cells | std::views::reverse;
+            auto cell = std::ranges::find_if(backwards,
+                [&](auto const& candidate) { return containsPoint(candidate.rect); });
+            if (cell != backwards.end())
+                return std::pair{tableIndex, static_cast<std::size_t>(cell.base() - table.cells.begin() - 1)};
         }
         return std::nullopt;
     }
 
+    std::optional<folia::TableCoordinate> EditorInteractionMap::TableFillTargetAt(
+        folia::NodeId owner, float x, float y) const
+    {
+        const auto table = std::ranges::find(tables, owner, &EditorVisualTable::id);
+        if (table == tables.end() || !HasTableGrid(*table) || !table->selection) return std::nullopt;
+        auto interval = [](EditorTableAxis const& edges, float position) {
+            if (position <= edges.back()) return edges.Interval(position);
+            const auto stride = (std::max)(20.0f, edges.back() - edges[edges.size() - 2]);
+            return edges.size() - 1 + static_cast<std::size_t>((std::min)(4095.0f, (position - edges.back()) / stride));
+        };
+        const auto& area = *table->selection;
+        folia::TableCoordinate target{interval(table->rowBoundaries, y), interval(table->columnBoundaries, x)};
+        if (area.contains(target)) return std::nullopt;
+        return target;
+    }
+
     std::optional<std::size_t> EditorInteractionMap::TableDropIndexAt(
-        std::optional<EditorTableAction> const& draggedAction,
-        float x,
-        float y,
-        bool rows) const
+        std::optional<EditorTableAction> const& draggedAction, float x, float y, bool rows) const
     {
         for (auto const& table : tables)
         {
-            if (!table.editable
-                || table.rowCount == 0
-                || table.columnCount == 0
-                || table.rowBoundaries.size() <= table.rowCount
-                || table.columnBoundaries.size() <= table.columnCount)
-                continue;
-            if (draggedAction && !std::any_of(table.sourceSpans.begin(), table.sourceSpans.end(), [&](auto const& span)
-            {
-                return span.container_id == draggedAction->sourcePosition.container_id;
-            }))
-                continue;
-            if (rows)
-            {
-                if (x < table.rect.left - 60.0f || x > table.rect.right + 20.0f) continue;
-                if (y <= table.rect.top) return 0;
-                if (y >= table.rect.bottom) return table.rowCount;
-                std::size_t nearest = 0;
-                float distance = (std::numeric_limits<float>::max)();
-                for (std::size_t index = 0; index < table.rowBoundaries.size(); ++index)
-                {
-                    auto candidate = std::fabs(y - table.rowBoundaries[index]);
-                    if (candidate < distance)
-                    {
-                        distance = candidate;
-                        nearest = index;
-                    }
-                }
-                return nearest;
+            if (!HasTableGrid(table)) continue;
+            if (rows && (x < table.rect.left - 60.0f || x > table.rect.right + 20.0f)) continue;
+            if (!rows && (y < table.rect.top - 40.0f || y > table.rect.bottom + 20.0f)) continue;
+            if (draggedAction) {
+                const auto matches = draggedAction->tableId.v != 0 ? table.id == draggedAction->tableId
+                    : std::ranges::any_of(table.SourceSpans(), [&](auto const& span) {
+                        return span.container_id == draggedAction->sourcePosition.container_id;
+                    });
+                if (!matches) continue;
             }
-            if (y < table.rect.top - 40.0f || y > table.rect.bottom + 20.0f) continue;
-            if (x <= table.rect.left) return 0;
-            if (x >= table.rect.right) return table.columnCount;
-            std::size_t nearest = 0;
-            float distance = (std::numeric_limits<float>::max)();
-            for (std::size_t index = 0; index < table.columnBoundaries.size(); ++index)
-            {
-                auto candidate = std::fabs(x - table.columnBoundaries[index]);
-                if (candidate < distance)
-                {
-                    distance = candidate;
-                    nearest = index;
-                }
+            if (rows) {
+                const auto edge = table.rowBoundaries.Nearest(y);
+                const auto end = (std::max)(table.headerRows, table.dataEnd ? table.dataEnd : table.rowCount);
+                return (std::clamp)(edge, table.headerRows, end);
             }
-            return nearest;
+            return table.columnBoundaries.Nearest(x);
         }
         return std::nullopt;
     }
@@ -658,15 +741,21 @@ namespace folia::platform::editor
             auto const& table = tables[currentLine.tableIndex];
             auto const& cell = table.cells[currentLine.cellIndex];
             auto sameCell = lines[targetIndex].tableIndex == currentLine.tableIndex && lines[targetIndex].cellIndex == currentLine.cellIndex;
-            if (!sameCell && down && cell.row + 1 < table.rowCount)
+            auto matchRow = [&](EditorVisualLine const& line, std::size_t row) {
+                if (line.tableIndex != currentLine.tableIndex || line.cellIndex >= table.cells.size()) return false;
+                auto const& candidate = table.cells[line.cellIndex];
+                return candidate.row <= row && row < candidate.row + candidate.rowSpan
+                    && candidate.column <= cell.column && cell.column < candidate.column + candidate.columnSpan;
+            };
+            if (!sameCell && down && cell.row + cell.rowSpan < table.rowCount)
             {
-                auto targetCell = (cell.row + 1) * table.columnCount + cell.column;
-                for (std::size_t i = 0; i < lines.size(); ++i) if (lines[i].tableIndex == currentLine.tableIndex && lines[i].cellIndex == targetCell) { targetIndex = i; break; }
+                for (std::size_t i = 0; i < lines.size(); ++i)
+                    if (matchRow(lines[i], cell.row + cell.rowSpan)) { targetIndex = i; break; }
             }
             else if (!sameCell && !down && cell.row > 0)
             {
-                auto targetCell = (cell.row - 1) * table.columnCount + cell.column;
-                for (std::size_t i = lines.size(); i > 0; --i) if (lines[i - 1].tableIndex == currentLine.tableIndex && lines[i - 1].cellIndex == targetCell) { targetIndex = i - 1; break; }
+                for (std::size_t i = lines.size(); i > 0; --i)
+                    if (matchRow(lines[i - 1], cell.row - 1)) { targetIndex = i - 1; break; }
             }
         }
         auto const& target = lines[targetIndex];

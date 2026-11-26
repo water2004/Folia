@@ -19,6 +19,8 @@ namespace winrt::Folia::implementation
     MainWindow::MainWindow(winrt::hstring const& initialDocumentPath)
     {
         InitializeComponent();
+        documentContextMenu = EditorSurface().ContextFlyout().as<Microsoft::UI::Xaml::Controls::MenuFlyout>();
+        EditorSurface().ContextFlyout(nullptr);
         LocalizeShell();
         auto iconPath = winrt::Folia::AssetPath(std::filesystem::path(L"branding") / L"Folia.ico");
         if (std::filesystem::exists(iconPath)) AppWindow().SetIcon(winrt::hstring(iconPath.c_str()));
@@ -187,7 +189,14 @@ namespace winrt::Folia::implementation
             RefreshSearch(true);
         else
             RenderEditorSurface();
-        if (editorRenderer.ScrollToPosition(editorSession().Selection().active)) RenderEditorSurface();
+        const auto activePosition = editorSession().Selection().active;
+        if (auto cell = editorSession().TableAddress(activePosition))
+            if (auto offset = editorRenderer.RevealTableColumn(*cell))
+            {
+                editorSession().SetTableScrollOffset(cell->table_id, *offset);
+                RenderEditorSurface();
+            }
+        if (editorRenderer.ScrollToPosition(activePosition)) RenderEditorSurface();
         if (FindReplaceBar().Visibility() != Microsoft::UI::Xaml::Visibility::Visible)
             EditorSurface().Focus(Microsoft::UI::Xaml::FocusState::Programmatic);
     }
@@ -211,6 +220,8 @@ namespace winrt::Folia::implementation
     {
         if (windowClosed || SettingsActive() || !HasActiveEditor()
             || workspaceDocuments.Active()->editor->opening || documentController().IsLoading()) return false;
+        if (command.kind == folia::CommandKind::CopyTable) return documentController().CopyTable();
+        if (command.kind == folia::CommandKind::CopyPlainTable) return documentController().CopyTable(false, true);
         keyboardController.ResetCaretGoal();
         auto oldRevision = editorSession().Revision();
         auto beforeSelection = editorSession().Selection();
@@ -219,16 +230,25 @@ namespace winrt::Folia::implementation
             return false;
         }
 
+        const bool changed = editorSession().Revision() != oldRevision;
+        const auto selection = editorSession().Selection();
+        if (!changed && selection.selects_cells() && beforeSelection == selection) return true;
         if (inlineCompletion) inlineCompletion->Edited(beforeSelection, command);
-        if (editorSession().Revision() != oldRevision) UpdateDocumentInfo();
-        sidebarController.Refresh();
-        if (editorSession().Revision() != oldRevision
+        if (changed) {
+            UpdateDocumentInfo();
+            sidebarController.Refresh();
+        }
+        const auto active = selection.active;
+        if (auto cell = editorSession().TableAddress(active))
+            if (auto offset = editorRenderer.RevealTableColumn(*cell))
+                editorSession().SetTableScrollOffset(cell->table_id, *offset);
+        if (changed
             && FindReplaceBar().Visibility() == Microsoft::UI::Xaml::Visibility::Visible)
             RefreshSearch(true);
         else
             RenderEditorSurface();
-        if (editorRenderer.ScrollToPosition(editorSession().Selection().active)) RenderEditorSurface();
-        if (editorSession().Revision() != oldRevision) textInputController.NotifyTextChanged();
+        if (editorRenderer.ScrollToPosition(active)) RenderEditorSurface();
+        if (changed) textInputController.NotifyTextChanged();
         else textInputController.NotifySelectionChanged();
         return true;
     }
@@ -320,7 +340,22 @@ namespace winrt::Folia::implementation
         // needlessly invalidates the XAML tree and makes a continuous wheel
         // gesture compete with the editor frame scheduler.
         if (latexCompletionController.Active()) latexCompletionController.Cancel();
-        auto delta = args.GetCurrentPoint(EditorSurface()).Properties().MouseWheelDelta();
+        auto pointer = args.GetCurrentPoint(EditorSurface());
+        auto delta = pointer.Properties().MouseWheelDelta();
+        using Modifiers = winrt::Windows::System::VirtualKeyModifiers;
+        const bool horizontal = pointer.Properties().IsHorizontalMouseWheel();
+        const bool shift = (args.KeyModifiers() & Modifiers::Shift) == Modifiers::Shift;
+        if ((horizontal || shift) && HasActiveEditor() && !SettingsActive())
+        {
+            const auto point = pointer.Position();
+            if (auto target = editorRenderer.ScrollTableAt(point.X, point.Y, static_cast<float>(horizontal ? delta : -delta)))
+            {
+                editorSession().SetTableScrollOffset(target->first, target->second);
+                RenderEditorSurface();
+                args.Handled(true);
+                return;
+            }
+        }
         auto scrollDelta = static_cast<float>(-delta);
         if (args.Pointer().PointerDeviceType() == Microsoft::UI::Input::PointerDeviceType::Touchpad)
             scrollController.ScrollPreciselyBy(scrollDelta);

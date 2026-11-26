@@ -1,6 +1,8 @@
 #pragma once
 
 import folia.platform.editor_interaction;
+import folia.markdown.table_metadata;
+import folia.markdown.dialect;
 
 #include "editor/rendering/media/EditorEmbeddedDraw.h"
 #include "editor/rendering/media/EditorMathPreview.h"
@@ -26,6 +28,7 @@ namespace winrt::Folia
     using folia::platform::editor::EditorVisualTableCell;
 
     class EditorDocumentPainter;
+    class EditorTableSelectionAnimation;
 
     struct EditorTableBlockRenderer
     {
@@ -38,6 +41,13 @@ namespace winrt::Folia
             std::vector<std::vector<EditorInlineImageRenderer::ImageDraw>> imageDraws;
             std::vector<std::vector<MathPreview>> mathPreviews;
             std::vector<float> textHeights;
+            std::vector<std::uint64_t> cellKeys;
+            std::vector<folia::TableAlignment> alignments;
+            std::shared_ptr<const folia::TableMetadata> metadata;
+            std::uint64_t dependencyKey = 0;
+            folia::NodeId editingOwner;
+            folia::NodeId completionOwner;
+            std::size_t headerRows = 0;
             float height = 0.0f;
             bool pendingImage = false;
             bool pendingMath = false;
@@ -57,7 +67,10 @@ namespace winrt::Folia
             folia::platform::MathJaxRenderer& mathJax,
             folia::platform::SvgNormalizer& svgNormalizer,
             TreeSitterHighlighter& treeSitter,
-            std::optional<detail::EditorCompletionPreview> completion = {});
+            std::optional<detail::EditorCompletionPreview> completion = {},
+            PreparedTable* previous = nullptr,
+            std::uint64_t dependencyKey = 0,
+            folia::NodeId editingOwner = {});
 
         static void Paint(
             folia::RenderBlock const& block,
@@ -65,6 +78,12 @@ namespace winrt::Folia
             float documentLeft,
             float top,
             float scrollOffset,
+            float horizontalOffset,
+            bool printMode,
+            folia::NodeId editingCell,
+            const folia::TableRegion* selection,
+            EditorTableSelectionAnimation& selectionAnimation,
+            const folia::platform::editor::EditorTableAction* gesture,
             EditorRenderResources& resources,
             EditorStyleSheet const& styleSheet,
             EditorInteractionMap& interactionMap,

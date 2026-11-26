@@ -117,6 +117,7 @@ namespace winrt::Folia
             printMode,
             documentRight,
             selection,
+            printMode ? folia::NodeId{} : frame.tableTextOwner,
             printMode ? std::span<const detail::EditorSearchHighlight>{} : frame.searchHighlights,
             frame.renderModel.editable_index);
 
@@ -144,7 +145,7 @@ namespace winrt::Folia
             mermaid,
             svgNormalizer,
             treeSitter,
-            caret,
+            EditorPresentationCaret(selection),
             documentWidth,
             mathSvgSupported,
             svgSupported,
@@ -169,14 +170,18 @@ namespace winrt::Folia
         auto preparation = preparationPass.Prepare();
         scrollOffset = preparation.scrollOffset;
         if (preparation.invalidateRequested) Invalidate();
-        if (!printMode)
+        if (!printMode) {
+            const auto now = EditorCaretAnimation::Now();
             documentPainter.BeginSelectionFrame(selectionAnimation, scrollOffset,
-                EditorCaretAnimation::Now(), frame.renderModel.revision);
+                now, frame.renderModel.revision);
+            tableSelectionAnimation.BeginFrame(selection, frame.renderModel.revision, now);
+        }
         EditorDocumentRenderPass renderPass(
             resources,
             styleSheet,
             interactionMap,
             caretAnimation,
+            tableSelectionAnimation,
             nonInteractiveRegions,
             inlineImages,
             documentPainter,
@@ -201,7 +206,10 @@ namespace winrt::Folia
             draggedTableAction,
             tableDropIndex,
             selectionDrop);
-        if (!printMode) selectionAnimation.EndFrame();
+        if (!printMode) {
+            selectionAnimation.EndFrame();
+            tableSelectionAnimation.EndFrame();
+        }
         std::vector<std::uint64_t> visibleMathBlocks;
         visibleMathBlocks.reserve(preparation.visible.end - preparation.visible.begin);
         for (auto index = preparation.visible.begin; index < preparation.visible.end; ++index)

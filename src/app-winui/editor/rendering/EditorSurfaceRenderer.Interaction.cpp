@@ -26,7 +26,73 @@ namespace winrt::Folia
     void EditorSurfaceRenderer::UpdatePointer(float x, float y) { pointerPosition = D2D1::Point2F(x, y); }
     void EditorSurfaceRenderer::ClearPointer() { pointerPosition.reset(); }
     void EditorSurfaceRenderer::SetTableDrag(std::optional<EditorTableAction> action, std::optional<std::size_t> dropIndex) { draggedTableAction = std::move(action); tableDropIndex = dropIndex; }
-    std::optional<EditorTableAction> EditorSurfaceRenderer::TableActionAt(float x, float y) const { return interactionMap.TableActionAt(x, y); }
+    folia::platform::editor::EditorTableControls EditorSurfaceRenderer::TableControlsAt(float x, float y) const
+    {
+        return interactionMap.TableControlsAt(x, y);
+    }
+    std::optional<folia::TextSelection> EditorSurfaceRenderer::TableAxisSelection(EditorTableAction const& action) const
+    {
+        const auto table = std::ranges::find(interactionMap.tables, action.tableId, &EditorVisualTable::id);
+        if (table == interactionMap.tables.end() || table->SourceSpans().empty()) return std::nullopt;
+        const auto spans = table->SourceSpans();
+        const auto row = action.kind == folia::platform::editor::EditorTableActionKind::DragRow;
+        const auto first = row ? action.index * table->columnCount : action.index;
+        const auto last = first + (row ? table->columnCount - 1 : (table->rowCount - 1) * table->columnCount);
+        if (last >= spans.size()) return std::nullopt;
+        return folia::TextSelection::cells({spans[last].container_id, 0}, {spans[first].container_id, 0});
+    }
+    std::optional<folia::TableFormatEdit> EditorSurfaceRenderer::TableResizeFormat(
+        EditorTableAction const& action, float width) const
+    {
+        const auto table = std::ranges::find(interactionMap.tables, action.tableId, &EditorVisualTable::id);
+        if (table == interactionMap.tables.end() || action.index >= table->columnCount) return std::nullopt;
+        const auto positions = table->columnBoundaries.Local();
+        folia::TableFormatEdit edit{.kind = folia::TableFormatKind::ColumnWidths};
+        edit.widths.reserve(table->columnCount);
+        float total = 0.0f;
+        for (std::size_t column = 0; column < table->columnCount; ++column)
+        {
+            const auto measured = column == action.index ? width : positions[column + 1] - positions[column];
+            edit.widths.push_back(measured);
+            total += measured;
+        }
+        edit.enabled = total > table->viewportWidth + 1.0f;
+        return edit;
+    }
+    std::optional<folia::TextSpan> EditorSurfaceRenderer::TableCellAt(float x, float y) const
+    {
+        auto hit = interactionMap.TableCellAt(x, y);
+        if (!hit || !interactionMap.tables[hit->first].editable) return std::nullopt;
+        return interactionMap.tables[hit->first].cells[hit->second].sourceSpan;
+    }
+    std::optional<folia::TableCoordinate> EditorSurfaceRenderer::TableFillTargetAt(folia::NodeId table, float x, float y) const
+    {
+        return interactionMap.TableFillTargetAt(table, x, y);
+    }
+    std::optional<std::pair<folia::NodeId, float>> EditorSurfaceRenderer::ScrollTableAt(float x, float y, float delta) const
+    {
+        for (const auto& table : interactionMap.tables)
+        {
+            if (table.maximumHorizontalOffset <= 0.0f || x < table.rect.left || x > table.rect.right
+                || y < table.rect.top || y > table.rect.bottom) continue;
+            return std::pair{table.id,
+                (std::clamp)(table.horizontalOffset + delta, 0.0f, table.maximumHorizontalOffset)};
+        }
+        return std::nullopt;
+    }
+    std::optional<float> EditorSurfaceRenderer::RevealTableColumn(const folia::TableCellAddress& address) const
+    {
+        const auto table = std::ranges::find(interactionMap.tables, address.table_id, &EditorVisualTable::id);
+        if (table == interactionMap.tables.end() || table->maximumHorizontalOffset <= 0.0f
+            || address.column + 1 >= table->columnBoundaries.size()
+            || (address.column == 0 && table->frozenWidth > 0.0f)) return std::nullopt;
+        const auto left = table->columnBoundaries[address.column];
+        const auto right = table->columnBoundaries[address.column + 1];
+        const auto leftEdge = table->rect.left + table->frozenWidth;
+        const auto amount = left < leftEdge ? left - leftEdge : (std::max)(0.0f, right - table->rect.right);
+        const auto target = (std::clamp)(table->horizontalOffset + amount, 0.0f, table->maximumHorizontalOffset);
+        return target != table->horizontalOffset ? std::optional{target} : std::nullopt;
+    }
     std::optional<std::size_t> EditorSurfaceRenderer::TableDropIndexAt(float x, float y, bool rows) const { return interactionMap.TableDropIndexAt(draggedTableAction, x, y, rows); }
 
     bool EditorSurfaceRenderer::ScrollToPosition(folia::TextPosition position, EditorScrollAlignment alignment)
@@ -48,8 +114,20 @@ namespace winrt::Folia
             if (owner && *owner < preparedDocument->geometry.Size())
             {
                 auto placement = preparedDocument->geometry.At(*owner);
+                auto y = placement.top;
+                auto const& visuals = preparedDocument->blocks[*owner].Visuals();
+                if (visuals.table)
+                {
+                    auto const& table = visuals.table->visual;
+                    auto cell = EditorTableCellIndex(table.SourceSpans(), position.container_id, preparedDocument->editableIndex);
+                    if (table.columnCount > 0 && cell)
+                    {
+                        auto row = *cell / table.columnCount;
+                        if (row < table.rowBoundaries.size()) y += table.rowBoundaries[row];
+                    }
+                }
                 scrollState.Set(
-                    placement.top - styleSheet.verticalPadding,
+                    y - styleSheet.verticalPadding,
                     MaximumScrollOffset());
                 return scrollState.Offset() != previous;
             }
@@ -71,6 +149,11 @@ namespace winrt::Folia
                 return std::nullopt;
         return interactionMap.HitTest(x, y);
     }
+    std::optional<folia::TextPosition> EditorSurfaceRenderer::HitTestTableText(float x, float y, folia::NodeId owner) const
+    {
+        return interactionMap.HitTest(x, y, false, owner);
+    }
+
     std::optional<folia::TextPosition> EditorSurfaceRenderer::HitTestTextUnit(float x, float y) const
     {
         for (auto const& rect : nonInteractiveRegions)

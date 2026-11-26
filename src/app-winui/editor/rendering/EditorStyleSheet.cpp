@@ -57,6 +57,10 @@ namespace winrt::Folia
         sheet.highlightUnderlineColor = ToD2D(colors.highlight_underline);
         sheet.highlightUnderlineWidth = theme.layout.highlight_underline_width;
         sheet.panelColor = ToD2D(colors.code_block_bg);
+        sheet.tableBorderColor = ToD2D(colors.table_border);
+        sheet.tableHeaderColor = ToD2D(colors.table_header_bg);
+        std::ranges::transform(colors.table_palette(), sheet.tablePalette.begin(),
+            [](folia::Color color) { return ToD2D(color); });
         sheet.previewBackgroundColor = ToD2D(colors.shell_layer_bg);
         sheet.previewBorderColor = ToD2D(colors.shell_border);
         sheet.mathPreview = theme.math_preview;

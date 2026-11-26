@@ -52,7 +52,8 @@ namespace winrt::Folia
             folia::RenderBlock const& block,
             bool requestEmbedded,
             bool highPriority,
-            std::optional<EditorFlowLayoutContext> flowContext = {});
+            std::optional<EditorFlowLayoutContext> flowContext = {},
+            EditorTableBlockRenderer::PreparedTable* previousTable = nullptr);
 
         static std::vector<std::string> ImageSources(
             EditorPreparedDocument::Block const& prepared);

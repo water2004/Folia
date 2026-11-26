@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "editor/rendering/EditorCaretPresentation.h"
 
+import folia.markdown.table_metadata;
+
 namespace winrt::Folia {
     namespace {
     bool CaretTouchesSpan(folia::TextPosition caret, folia::TextSpan const& span)
@@ -38,7 +40,35 @@ namespace winrt::Folia {
         return P::Rendered;
     }
 
-    EditorCaretPresentationState CaretPresentationState(folia::RenderBlock const& block, folia::TextPosition caret) {
+    std::optional<std::size_t> EditorTableCellIndex(
+        std::span<const folia::TextSpan> cells, folia::NodeId owner, const folia::OwnerIndex& index)
+    {
+        if (cells.empty() || owner.v == 0) return std::nullopt;
+        const auto first = index.find(cells.front().container_id.v);
+        const auto active = index.find(owner.v);
+        if (!first || !active || active->second < first->second) return std::nullopt;
+        const auto cell = active->second - first->second;
+        return cell < cells.size() && cells[cell].container_id == owner ? std::optional{cell} : std::nullopt;
+    }
+
+    std::optional<std::size_t> EditorTableCheckboxIndex(folia::RenderBlockSpecial const& table, std::size_t cell)
+    {
+        if (table.table_checkboxes.empty()) return std::nullopt;
+        const auto columns = table.column_count;
+        if (const auto* merge = folia::table_merge_at(table.table_metadata.get(),
+                {cell / columns, cell % columns}, table.row_count, columns)) {
+            for (auto row = merge->first.row; row <= merge->last.row; ++row)
+                for (auto column = merge->first.column; column <= merge->last.column; ++column) {
+                    const auto part = row * columns + column;
+                    if (!table.table_cell_spans[part].source_range.empty())
+                        return table.table_checkboxes.contains(part) ? std::optional{part} : std::nullopt;
+                }
+        }
+        return table.table_checkboxes.contains(cell) ? std::optional{cell} : std::nullopt;
+    }
+
+    EditorCaretPresentationState CaretPresentationState(folia::RenderBlock const& block, folia::TextPosition caret,
+        const folia::OwnerIndex& index) {
         EditorCaretPresentationState state;
         using K = folia::InlineRenderItem::Kind;
         using P = EditorInlinePresentation;
@@ -63,7 +93,15 @@ namespace winrt::Folia {
             } else if (source.kind == folia::RenderBlockKind::Code) {
                 return;
             } else if (source.kind == folia::RenderBlockKind::Table) {
-                for (auto const& cell : source.special().table_cells) inlines(inlines, cell);
+                const auto& table = source.special();
+                if (auto cell = EditorTableCellIndex(table.table_cell_spans, caret.container_id, index)) {
+                    if (auto checkbox = EditorTableCheckboxIndex(table, *cell))
+                        state.push_back({table.table_cell_spans[*checkbox], P::Source, {}});
+                    if (table.table_metadata && table.table_metadata->folded
+                        && *cell >= table.table_metadata->header_rows * table.column_count)
+                        state.push_back({source.source_span, P::Source, {}});
+                    inlines(inlines, table.table_cells[*cell]);
+                }
             } else if (!source.inline_items.empty()) inlines(inlines, source.inline_items);
             else for (auto const& child : source.child_blocks) self(self, child);
         };
