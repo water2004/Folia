@@ -236,86 +236,104 @@ namespace {
             expect(toolbar.Opacity() == 1.) << "pinned tools are visible";
             Pump([&] { return std::abs(view.TransformToVisual(card).TransformPoint({0,0}).Y - toolbar.ActualHeight()) <= 1.; });
         };
-        "the outward sidebar opens immediately and preserves the reading width"_test = [] {
+        "sidebar opens inward with one editor resize per transition"_test = [] {
             OwnedWindow current(App()->CreateMainWindow());
             auto window = current.window;
             auto root = window.Content().as<FrameworkElement>();
+            auto pane = root.FindName(L"WorkspaceSidebar").as<FrameworkElement>();
             auto card = root.FindName(L"ReadingCard").as<FrameworkElement>();
             auto rail = root.FindName(L"WorkspaceRail").as<FrameworkElement>();
-            auto sidebar = root.FindName(L"WorkspaceSidebar").as<FrameworkElement>();
+            auto editor = root.FindName(L"EditorSurface").as<FrameworkElement>();
             auto appWindow = window.AppWindow();
-            auto display = winrt::Microsoft::UI::Windowing::DisplayArea::GetFromWindowId(appWindow.Id(),
-                winrt::Microsoft::UI::Windowing::DisplayAreaFallback::Nearest);
-            auto work = display ? display.WorkArea() : winrt::Windows::Graphics::RectInt32{};
-            const double scale = root.XamlRoot().RasterizationScale();
-            const bool room = work.Width > 820. * scale;
-            if (room) {
-                const int width = static_cast<int>(std::lround(560. * scale));
-                appWindow.MoveAndResize({work.X + static_cast<int>(225. * scale), work.Y + 20,
-                    width, (std::min)(appWindow.Size().Height, work.Height - 30)});
-                Pump([&] { return appWindow.Size().Width == width && root.ActualWidth() < 570.; });
+            auto presenter = appWindow.Presenter().as<winrt::Microsoft::UI::Windowing::OverlappedPresenter>();
+
+            for (bool resizable : {true, false}) {
+                presenter.IsResizable(resizable);
+                root.UpdateLayout();
+                const auto position = appWindow.Position();
+                const auto size = appWindow.Size();
+                const auto width = card.ActualWidth();
+                const auto left = card.TransformToVisual(root).TransformPoint({0, 0}).X;
+                auto expanded = [&] {
+                    return pane.IsHitTestVisible() && std::abs(card.ActualWidth() + pane.Width() - width) < 1.
+                        && std::abs(card.TransformToVisual(root).TransformPoint({0, 0}).X
+                            - left - pane.Width()) < 1.;
+                };
+                auto collapsed = [&] {
+                    return pane.Visibility() == Visibility::Collapsed && std::abs(card.ActualWidth() - width) < 1.
+                        && std::abs(card.TransformToVisual(root).TransformPoint({0, 0}).X - left) < 1.;
+                };
+                auto expectStationary = [&] {
+                    expect(appWindow.Position() == position && appWindow.Size() == size);
+                };
+                std::size_t layoutChanges = 0;
+                auto resized = editor.SizeChanged(winrt::auto_revoke, [&](auto const&, auto const& args) {
+                    if (args.NewSize().Width != args.PreviousSize().Width) ++layoutChanges;
+                });
+
+                Access::Sidebar(window, true);
+                Pump(expanded);
+                expectStationary();
+                expect(layoutChanges == 1_u);
+                expect(rail.TransformToVisual(root).TransformPoint({0, 0}).X == 0.f);
+                expect(rail.ActualHeight() == root.ActualHeight());
+
+                Access::Sidebar(window, false);
+                Pump(collapsed);
+                expectStationary();
+                expect(layoutChanges == 2_u);
+
+                Access::Sidebar(window, true);
+                Access::Sidebar(window, false);
+                Access::Sidebar(window, true);
+                Pump(expanded);
+                expect(pane.IsHitTestVisible());
+                expectStationary();
+                Access::Sidebar(window, false);
+                Pump(collapsed);
             }
-            root.UpdateLayout();
-            const auto original = card.ActualWidth();
-            auto bounds = [&] {
-                RECT rect{};
-                winrt::check_bool(::GetWindowRect(Access::Handle(window), &rect));
-                return rect;
-            };
-            const auto closed = bounds();
-            auto readingOrigin = [&] {
-                return root.XamlRoot().CoordinateConverter().ConvertLocalToScreen(
-                    card.TransformToVisual(nullptr).TransformPoint({0, 0}));
-            };
-            const int originalLeft = readingOrigin().X;
-            Access::Sidebar(window, true);
-            auto visual = Hosting::ElementCompositionPreview::GetElementVisual(sidebar);
-            expect(sidebar.Visibility() == Visibility::Visible && !visual.Clip()) << "the pane is shown immediately";
-            auto expanded = bounds();
-            expect(expanded.left < closed.left && expanded.right == closed.right) << "only the left window edge changes";
-            // Native bounds change synchronously; XAML arranges at the next layout pass.
-            Pump([&] { return std::abs(card.ActualWidth() - original) <= 1. && std::abs(readingOrigin().X - originalLeft) <= 1; });
-            expect(rail.ActualHeight() == root.ActualHeight());
-            expect(rail.TransformToVisual(root).TransformPoint({0,0}).X == 0.f);
-            Access::Sidebar(window, false);
-            expect(sidebar.Visibility() == Visibility::Collapsed && !visual.Clip());
-            auto contracted = bounds();
-            expect(contracted.left == closed.left && contracted.right == closed.right) << "the bounds are restored immediately";
-            Pump([&] { return std::abs(card.ActualWidth() - original) <= 1. && std::abs(readingOrigin().X - originalLeft) <= 1; });
         };
-        "the inward sidebar animates independently of window size"_test = [] {
+        "sidebar compositor motion keeps the right edge of the reading surface filled"_test = [] {
+            using winrt::Folia::WindowMaterial;
+            using winrt::Windows::Foundation::Point;
+            using winrt::Windows::UI::ViewManagement::AccessibilitySettings;
+            using winrt::Windows::UI::ViewManagement::UISettings;
+            if (!UISettings().AnimationsEnabled() || AccessibilitySettings().HighContrast()) return;
             OwnedWindow current(App()->CreateMainWindow());
             auto window = current.window;
-            auto appWindow = window.AppWindow();
-            appWindow.Presenter().as<winrt::Microsoft::UI::Windowing::OverlappedPresenter>().IsResizable(false);
+            window.AppWindow().Presenter().as<winrt::Microsoft::UI::Windowing::OverlappedPresenter>().IsAlwaysOnTop(true);
+            Access::Theme(window, "folia.light");
+            Access::Bars(window, {false, WindowMaterial::Solid, WindowMaterial::Solid});
             auto root = window.Content().as<FrameworkElement>();
             auto card = root.FindName(L"ReadingCard").as<FrameworkElement>();
-            auto sidebar = root.FindName(L"WorkspaceSidebar").as<FrameworkElement>();
-            auto slot = root.FindName(L"SidebarSlot").as<FrameworkElement>();
+            auto pane = root.FindName(L"WorkspaceSidebar").as<FrameworkElement>();
             root.UpdateLayout();
-            const auto position = appWindow.Position();
-            const auto size = appWindow.Size();
-            const auto width = card.ActualWidth();
-            auto expectStationary = [&] {
-                expect(appWindow.Position() == position && appWindow.Size() == size);
+            auto origin = card.TransformToVisual(root).TransformPoint({0, 0});
+            auto convert = root.XamlRoot().CoordinateConverter();
+            const float y = origin.Y + static_cast<float>(card.ActualHeight()) * .60f;
+            const std::array points{
+                convert.ConvertLocalToScreen(Point{25.f, y}),
+                convert.ConvertLocalToScreen(Point{origin.X + 24.f, y}),
+                convert.ConvertLocalToScreen(Point{origin.X + static_cast<float>(pane.Width()) - 20.f, y}),
+                convert.ConvertLocalToScreen(Point{origin.X + static_cast<float>(card.ActualWidth()) - 24.f, y}),
             };
-            const bool animated = winrt::Windows::UI::ViewManagement::UISettings().AnimationsEnabled();
+            std::vector<std::array<int, 3>> initial;
+            const auto waitForFrame = std::chrono::steady_clock::now() + std::chrono::milliseconds(400);
+            Pump([&] { return std::chrono::steady_clock::now() >= waitForFrame; });
+            initial = CaptureColors(window, points);
+            expect(fatal(initial[0] != initial[3] && initial[1] == initial[3] && initial[2] == initial[3]))
+                << std::format("base / divider / pane / paper: {}", initial);
             Access::Sidebar(window, true);
-            expect(sidebar.Visibility() == Visibility::Visible);
-            Pump([&] { return std::abs(card.ActualWidth() + slot.ActualWidth() - width) < 1.
-                && std::abs(slot.ActualWidth() - sidebar.Width()) < 1.; });
-            expectStationary();
-            expect(card.ActualWidth() < width);
-            Access::Sidebar(window, false);
-            if (animated) {
-                expect(sidebar.Visibility() == Visibility::Visible) << "the panel stays on screen through the closing animation";
-                Access::Sidebar(window, true);
-                Pump([&] { return std::abs(slot.ActualWidth() - sidebar.Width()) < 1.; });
-                expect(sidebar.Visibility() == Visibility::Visible) << "reopening keeps the panel visible";
-                Access::Sidebar(window, false);
-            }
-            Pump([&] { return sidebar.Visibility() == Visibility::Collapsed && std::abs(card.ActualWidth() - width) < 1.; });
-            expectStationary();
+            bool hasIntermediateFrame = false;
+            bool rightEdgeStayedFilled = true;
+            Pump([&] {
+                auto colors = CaptureColors(window, points);
+                hasIntermediateFrame |= colors[1] == initial[0] && colors[2] == initial[3];
+                rightEdgeStayedFilled &= colors[3] == initial[3];
+                return pane.IsHitTestVisible() && colors[2] == initial[0];
+            });
+            expect(hasIntermediateFrame);
+            expect(rightEdgeStayedFilled);
         };
         "overflowing tabs scroll by wheel and leave the native caption outside the viewport"_test = [] {
             OwnedWindow current(App()->CreateMainWindow());

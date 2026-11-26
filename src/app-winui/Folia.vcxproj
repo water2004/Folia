@@ -219,6 +219,7 @@
     <ClInclude Include="workspace\RecentWorkspace.h" />
     <ClInclude Include="workspace\WorkspaceFileKind.h" />
     <ClInclude Include="workspace\WorkspaceIcons.h" />
+    <ClInclude Include="workspace\WorkspaceSidebarMotion.h" />
     <ClInclude Include="..\platform\windows\storage\WorkspaceFileOperations.h" />
     <ClInclude Include="workspace\FolderEntry.h" />
     <ClInclude Include="workspace\FolderExplorerView.h" />
@@ -755,6 +756,7 @@
     <ClCompile Include="workspace\WorkspaceDocuments.cpp" />
     <ClCompile Include="workspace\TabDragPresentation.cpp" />
     <ClCompile Include="workspace\DocumentTools.cpp" />
+    <ClCompile Include="workspace\WorkspaceSidebarMotion.cpp" />
     <ClCompile Include="workspace\RecentWorkspace.cpp" />
     <ClCompile Include="MainWindow.Images.cpp" />
     <ClCompile Include="workspace\WorkspaceIcons.cpp" />

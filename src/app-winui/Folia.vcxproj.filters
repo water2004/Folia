@@ -156,6 +156,12 @@
     <ClInclude Include="workspace\WorkspaceIcons.h">
       <Filter>Workspace</Filter>
     </ClInclude>
+    <ClInclude Include="workspace\WorkspaceSidebarMotion.h">
+      <Filter>Workspace</Filter>
+    </ClInclude>
+    <ClCompile Include="workspace\WorkspaceSidebarMotion.cpp">
+      <Filter>Workspace</Filter>
+    </ClCompile>
     <ClInclude Include="workspace\FolderEntry.h">
       <Filter>Workspace</Filter>
     </ClInclude>

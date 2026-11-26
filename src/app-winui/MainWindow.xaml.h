@@ -26,6 +26,7 @@
 #include "workspace/RecentWorkspace.h"
 #include "workspace/DocumentTools.h"
 #include "workspace/TabDragPresentation.h"
+#include "workspace/WorkspaceSidebarMotion.h"
 
 namespace winrt::Folia::implementation
 {
@@ -114,11 +115,6 @@ namespace winrt::Folia::implementation
         void RegisterWorkspaceLayout();
         void SelectWorkspacePane(bool outline);
         void SetSidebarOpen(bool open);
-        void ReserveSidebarSpace();
-        void AnimateSidebarWidth(double from);
-        void FinishSidebarMotion();
-        void RevokeSidebarMotion();
-        void LayoutSidebar();
         void UpdateWorkspaceAppearance(WorkspaceAppearance const& settings);
         void EnsureSelectedTabVisible();
         void UpdateLoadingState();
@@ -212,15 +208,12 @@ namespace winrt::Folia::implementation
         bool tabRegionsPending = false;
         bool updatingTabs = false;
         DocumentTools documentTools;
+        WorkspaceSidebarMotion sidebarMotion;
         std::optional<WindowMaterial> appliedMaterial;
         std::optional<WindowMaterial> appliedReadingMaterial;
         bool selectedTabBackdropUpdatePending = false;
-        bool sidebarOpen = false, outlineSelected = false;
+        bool outlineSelected = false;
         bool updatingRailSelection = false;
-        bool sidebarPresented = false;
-        int sidebarWindowExtension = 0;
-        Microsoft::UI::Xaml::Media::Animation::Storyboard sidebarMotion{nullptr};
-        winrt::event_token sidebarMotionCompleted{};
         TabDragPresentation dragPresentation;
         std::optional<float> tabGrabOffset;
         bool operationActive = false;

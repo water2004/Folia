@@ -72,7 +72,6 @@
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="44"/>
-                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid x:Name="WorkspaceRail" Padding="5,0,5,8" RowDefinitions="Auto,Auto,*,Auto" Canvas.ZIndex="2">
@@ -83,9 +82,13 @@
                 </StackPanel>
                 <Button x:Name="SettingsButton" Grid.Row="3" Style="{StaticResource WorkspaceRailActionStyle}"/>
             </Grid>
-            <Grid x:Name="SidebarSlot" Grid.Column="1" Width="0">
-            <Grid.Clip><RectangleGeometry x:Name="SidebarSlotClip"/></Grid.Clip>
-            <Grid x:Name="WorkspaceSidebar" Padding="4,0,6,7" Visibility="Collapsed">
+            <Grid x:Name="WorkspaceLayout" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="SidebarColumn" Width="0"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid x:Name="WorkspaceSidebar" Grid.ColumnSpan="2" Width="216" HorizontalAlignment="Left"
+                  Padding="4,0,6,7" Visibility="Collapsed" IsHitTestVisible="False">
             <Grid x:Name="ExplorerPane" RowDefinitions="Auto,Auto,*">
                 <Grid x:Name="FolderHeader" Height="{StaticResource WorkspaceTabHeight}" Padding="8,0,0,0" ColumnDefinitions="*,Auto,Auto,Auto,Auto"
                       Visibility="Collapsed">
@@ -116,8 +119,9 @@
                            Foreground="{ThemeResource FoliaShellMutedForegroundBrush}" TextWrapping="Wrap" Visibility="Collapsed"/>
             </Grid>
             </Grid>
-            </Grid>
-        <Grid x:Name="DocumentColumn" Grid.Column="2" RowDefinitions="Auto,*" MinWidth="0">
+        <Grid x:Name="DocumentLayoutSlot" Grid.Column="1">
+        <Grid x:Name="DocumentColumn" RowDefinitions="Auto,*" MinWidth="0">
+        <Grid x:Name="TabMotionFrame">
         <Grid x:Name="TabBackdropLayer" IsHitTestVisible="False">
             <Grid x:Name="SelectedTabBackdropFrame" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Collapsed">
                 <SystemBackdropElement x:Name="SelectedTabBackdrop" CornerRadius="6,6,0,0"/>
@@ -161,7 +165,9 @@
         </Grid>
         <Border x:Name="CaptionInset" Grid.Column="2" Width="138"/>
         </Grid>
-        <Grid x:Name="ReadingCard" Grid.Row="1" Margin="4,0,6,6" CornerRadius="9">
+        </Grid>
+        <Grid x:Name="ReadingMotionFrame" Grid.Row="1" Margin="4,0,6,6">
+        <Grid x:Name="ReadingCard" CornerRadius="9">
         <SystemBackdropElement x:Name="ReadingBackdrop" IsHitTestVisible="False" CornerRadius="9" Visibility="Collapsed"/>
         <Border x:Name="ReadingTint" CornerRadius="9" IsHitTestVisible="False"/>
         <Grid x:Name="ReadingLayout" RowDefinitions="Auto,*">
@@ -185,7 +191,7 @@
             </Button>
             <TextBlock x:Name="ToolbarFilename" Grid.Column="1" Margin="6,0" FontSize="12" FontWeight="SemiBold"
                        VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <StackPanel x:Name="ToolbarStatus" Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                 <StackPanel x:Name="CompletionStatusPanel" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" Visibility="Collapsed">
                     <ProgressRing x:Name="CompletionProgressRing" Style="{StaticResource FoliaCompletionProgressStyle}" IsActive="False" Visibility="Collapsed"/>
                     <TextBlock x:Name="CompletionStatusText" FontSize="12" MaxWidth="180" TextTrimming="CharacterEllipsis"
@@ -463,6 +469,9 @@
                 <InfoBar x:Name="ErrorInfoBar" Severity="Error" IsClosable="True"/>
             </StackPanel>
         </ScrollViewer>
+        </Grid>
+        </Grid>
+        </Grid>
         </Grid>
         </Grid>
         </Grid>
