@@ -190,17 +190,16 @@ list 和 compositor 数据分开。fragment 是布局结果，语义节点不必
 fragment/print gate。它们没有把 `.ixx` 展开成头文件，也没有使用假的
 字体测量器来宣称原生精度。
 
-Windows gate 位于
-[`.github/workflows/document-scalability.yml`](../.github/workflows/document-scalability.yml)，
-包括 MSVC 核心构建、完整 WinUI 构建以及 13 项真实 DirectWrite 的高度、视口
-资源驻留、滚动锚点、owner 索引、共享行距和编辑预览测试。原生 10 MiB
-用例会输出 working set/private bytes，并检查测量后没有 layout 常驻。
+构建 WinUI Release 后，可在本地运行 13 项 DirectWrite 布局回归：
+
+```powershell
+./tests/app/run.ps1 -Configuration Release -SourceFilter test_document_layout_retention -TestFilter 'document layout*' -TimeoutSeconds 600
+```
+
+这些测试覆盖高度、视口资源驻留、滚动锚点、owner 索引、共享行距和编辑预览。
+原生 10 MiB 用例会输出 working set/private bytes，并检查测量后没有 layout 常驻。
 
 Windows 本地使用 MSVC 19.50 和自包含 WinUI x64 Release 验证。
 完整核心回归通过 824 项，DirectWrite 布局回归覆盖上述 13 项。
 滚动锚点在换行前后采用相同的 DirectWrite 命中测试坐标，并检查
 连续重绘时的滚动位置。
-
-该 workflow 由版本标签触发。此前的 GitHub Actions 运行
-[`43720698863`](https://github.com/water2004/Folia/actions/runs/43720698863)
-因账户账单锁定未能启动。Windows 验证结果来自本地运行。

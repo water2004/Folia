@@ -16,7 +16,7 @@
    - 行为基准固定为官方 `mermaid-js/mermaid` **12.2.0**（commit `1fb7869866dd619168d840291c9c54b4f129758b`），新增上游依赖文件时需将源码 SHA-256 记入 `docs/mermaid-cpp/source-lock.json` 并核对 `src/mermaid/THIRD_PARTY_NOTICES.md`。
    - 凡涉及文本宽高的布局必须使用平台层传入的 DirectWrite 实测数据（注意调用 `MermaidMeasurer::measure` 前须先通过 `resolve_family` 将 CSS 字体族列表解析为单个已安装字体名）。严禁使用“字符数 × 固定系数”估算字宽、按测试样例硬编码坐标或放宽几何比较容差（SVG 实测几何容差固定为 `1.5`，ELK 算子坐标容差固定为 `1e-4`）。
 4. **并行分工与交接更新**：
-   - 共享接线文件（`api/` 公共入口、`frontend/frontend.cpp`、`mermaid_renderer.ixx`、`tools/mermaid-cpp/CMakeLists.txt`、`.github/workflows/mermaid-cpp.yml`）在多人/多智能体并行时由集成负责人统一合入；独立图族负责人仅修改所属图族的源码、测试与 fixture。
+   - 共享接线文件（`api/` 公共入口、`frontend/frontend.cpp`、`mermaid_renderer.ixx`、`tools/mermaid-cpp/CMakeLists.txt`）在多人/多智能体并行时由集成负责人统一合入；独立图族负责人仅修改所属图族的源码、测试与 fixture。
    - 每完成一个任务包并通过对应 `FoliaMermaidTests` / `FoliaMermaidPlatformTests` 及浏览器 SVG 对照后，立即小批提交，并原位更新 `docs/mermaid-cpp/HANDOFF.md` 顶部的基线状态与任务进度（不追加历史流水账）。
 
 ## Math migration continuity
