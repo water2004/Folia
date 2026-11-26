@@ -4,49 +4,11 @@ import std;
 #include "localization/Localization.h"
 #include "workspace/WorkspaceIcons.h"
 #include <winrt/Microsoft.UI.Xaml.Automation.h>
-#include <winrt/Microsoft.UI.Xaml.Hosting.h>
 #include <winrt/Windows.Graphics.h>
-#include <windows.graphics.interop.h>
 
 namespace winrt::Folia::implementation {
     using namespace Microsoft::UI::Xaml;
     using namespace Microsoft::UI::Xaml::Controls;
-
-    namespace {
-        // A single backdrop sample covers the selected tab and the reading card.
-        struct ReadingMaterialGeometry : winrt::implements<ReadingMaterialGeometry,
-            Windows::Graphics::IGeometrySource2D, ::ABI::Windows::Graphics::IGeometrySource2DInterop> {
-            Windows::Foundation::Rect page, tab;
-            ReadingMaterialGeometry(Windows::Foundation::Rect pageBounds, Windows::Foundation::Rect tabBounds)
-                : page(pageBounds), tab(tabBounds) {}
-
-            HRESULT __stdcall GetGeometry(ID2D1Geometry** result) noexcept final try {
-                static auto factory = [] {
-                    winrt::com_ptr<ID2D1Factory> value;
-                    winrt::check_hresult(D2D1CreateFactory(D2D1_FACTORY_TYPE_MULTI_THREADED, value.put()));
-                    return value;
-                }();
-                return TryGetGeometryUsingFactory(factory.get(), result);
-            } catch (...) { return winrt::to_hresult(); }
-
-            HRESULT __stdcall TryGetGeometryUsingFactory(ID2D1Factory* factory, ID2D1Geometry** result) noexcept final try {
-                auto rounded = [factory](Windows::Foundation::Rect rect, float radius) {
-                    winrt::com_ptr<ID2D1RoundedRectangleGeometry> geometry;
-                    const D2D1_ROUNDED_RECT bounds{{rect.X, rect.Y, rect.X + rect.Width, rect.Y + rect.Height}, radius, radius};
-                    winrt::check_hresult(factory->CreateRoundedRectangleGeometry(bounds, geometry.put()));
-                    return geometry;
-                };
-                auto paper = rounded(page, 9);
-                if (tab.Width <= 0 || tab.Height <= 0) { *result = paper.detach(); return S_OK; }
-                auto selected = rounded(tab, 6);
-                ID2D1Geometry* shapes[]{paper.get(), selected.get()};
-                winrt::com_ptr<ID2D1GeometryGroup> group;
-                winrt::check_hresult(factory->CreateGeometryGroup(D2D1_FILL_MODE_WINDING, shapes, 2, group.put()));
-                *result = group.detach();
-                return S_OK;
-            } catch (...) { return winrt::to_hresult(); }
-        };
-    }
 
     void MainWindow::UpdateDocumentTab(std::uint64_t id) {
         auto document = workspaceDocuments.Find(id);
@@ -119,7 +81,7 @@ namespace winrt::Folia::implementation {
         auto active = tabItems.find(workspaceDocuments.Active()->id);
         if (active != tabItems.end() && DocumentTabs().SelectedItem() != active->second->item)
             DocumentTabs().SelectedItem(active->second->item);
-        UpdateSelectedTabMaterial();
+        UpdateSelectedTabBackdrop();
         EnsureSelectedTabVisible();
     }
 
@@ -134,49 +96,48 @@ namespace winrt::Folia::implementation {
                     WindowEvent([this](auto const&, auto const&) { RefreshTabCaptionRegion(); }));
         UpdateDocumentTab(id);
         RefreshTabCaptionRegion();
-        UpdateSelectedTabMaterial();
+        UpdateSelectedTabBackdrop();
     }
 
-    void MainWindow::UpdateSelectedTabMaterial() {
+    void MainWindow::UpdateSelectedTabBackdrop() {
         if (!ReadingBackdrop().SystemBackdrop()) {
-            ReadingBackdrop().Visibility(Visibility::Collapsed);
-            readingMaterialBounds.reset();
+            SelectedTabBackdropFrame().Visibility(Visibility::Collapsed);
             return;
         }
-        if (readingMaterialLayoutPending || windowClosed) return;
-        readingMaterialLayoutPending = DispatcherQueue().TryEnqueue([weak = get_weak()] {
+        if (selectedTabBackdropUpdatePending || windowClosed) return;
+        selectedTabBackdropUpdatePending = DispatcherQueue().TryEnqueue([weak = get_weak()] {
             auto window = weak.get();
             if (!window) return;
-            window->readingMaterialLayoutPending = false;
-            auto layer = window->ReadingBackdrop();
-            auto card = window->ReadingCard();
-            if (window->windowClosed || !layer.SystemBackdrop() || !card.IsLoaded() || card.ActualWidth() <= 0.) return;
-            auto origin = window->DocumentColumn();
+            window->selectedTabBackdropUpdatePending = false;
+            if (window->windowClosed || !window->ReadingBackdrop().SystemBackdrop()) return;
+            auto frame = window->SelectedTabBackdropFrame();
+            auto tabs = window->DocumentTabs();
+            auto tab = tabs.ContainerFromItem(tabs.SelectedItem()).try_as<FrameworkElement>();
+            auto viewer = window->TabStripScroller();
+            auto viewport = viewer ? viewer.as<IControlProtected>().GetTemplateChild(L"ScrollContentPresenter").try_as<FrameworkElement>() : nullptr;
+            if (!tab || !tab.IsLoaded() || !viewport) {
+                frame.Visibility(Visibility::Collapsed);
+                return;
+            }
+            auto origin = window->TabBackdropLayer();
             auto bounds = [&](FrameworkElement const& element) {
                 return element.TransformToVisual(origin).TransformBounds({0, 0,
                     static_cast<float>(element.ActualWidth()), static_cast<float>(element.ActualHeight())});
             };
-            auto paper = bounds(card);
-            Windows::Foundation::Rect selected{};
-            auto tabs = window->DocumentTabs();
-            auto viewer = window->TabStripScroller();
-            auto viewport = viewer ? viewer.as<IControlProtected>().GetTemplateChild(L"ScrollContentPresenter").try_as<FrameworkElement>() : nullptr;
-            if (auto tab = tabs.ContainerFromItem(tabs.SelectedItem()).try_as<FrameworkElement>(); tab && viewport && tab.IsLoaded()) {
-                auto item = bounds(tab);
-                auto visible = bounds(viewport);
-                float left = (std::max)(item.X, visible.X);
-                float right = (std::min)(item.X + item.Width, visible.X + visible.Width);
-                if (right > left) selected = {left, item.Y, right - left, paper.Y - item.Y + 6};
+            auto item = bounds(tab);
+            auto visible = bounds(viewport);
+            auto left = (std::max)(item.X, visible.X);
+            auto right = (std::min)(item.X + item.Width, visible.X + visible.Width);
+            auto top = (std::max)(0.f, item.Y);
+            auto bottom = (std::min)(item.Y + item.Height, static_cast<float>(origin.ActualHeight()));
+            if (right <= left || bottom <= top) {
+                frame.Visibility(Visibility::Collapsed);
+                return;
             }
-            auto geometry = std::pair{paper, selected};
-            if (geometry == window->readingMaterialBounds) return;
-            auto visual = Hosting::ElementCompositionPreview::GetElementVisual(layer);
-            auto compositor = visual.Compositor();
-            auto path = compositor.CreatePathGeometry(Microsoft::UI::Composition::CompositionPath(
-                winrt::make<ReadingMaterialGeometry>(paper, selected)));
-            visual.Clip(compositor.CreateGeometricClip(path));
-            window->readingMaterialBounds = geometry;
-            layer.Visibility(Visibility::Visible);
+            frame.Margin({left, top, 0, 0});
+            frame.Width(right - left);
+            frame.Height(bottom - top);
+            frame.Visibility(Visibility::Visible);
         });
     }
     void MainWindow::DocumentTabPrepared(FrameworkElement const& sender, DataContextChangedEventArgs const&) {
@@ -259,7 +220,7 @@ namespace winrt::Folia::implementation {
                 list.SizeChanged(WindowEvent([this](auto const&, auto const&) { RefreshTabCaptionRegion(); }));
             if (auto viewer = TabStripScroller()) {
                 viewer.ViewChanged(WindowEvent([this](auto const&, auto const&) {
-                    UpdateSelectedTabMaterial();
+                    UpdateSelectedTabBackdrop();
                     RefreshTabCaptionRegion();
                 }));
                 // TabView handles ViewChanged, but resizing the viewport at offset
@@ -293,9 +254,8 @@ namespace winrt::Folia::implementation {
             UpdateChromeMetrics();
             EnsureSelectedTabVisible();
             RefreshTabCaptionRegion();
-            UpdateSelectedTabMaterial();
+            UpdateSelectedTabBackdrop();
         }));
-        ReadingCard().SizeChanged(WindowEvent([this](auto const&, auto const&) { UpdateSelectedTabMaterial(); }));
         folderExplorer.Attach(FileTree(), [weak = get_weak()](auto path, bool keep) {
             if (auto window = weak.get()) window->OpenWorkspaceFile(std::move(path), keep ? winrt::Folia::WorkspaceOpenMode::Keep : winrt::Folia::WorkspaceOpenMode::Preview);
         }, [weak = get_weak()](auto error) {

@@ -548,9 +548,12 @@ namespace winrt::Folia::implementation
             appliedMaterial = material;
         }
         if (appliedReadingMaterial != reading || changedLayer) {
-            ReadingBackdrop().SystemBackdrop(sharesBase ? nullptr : backdrop(reading));
+            auto paperBackdrop = sharesBase ? nullptr : backdrop(reading);
+            ReadingBackdrop().SystemBackdrop(paperBackdrop);
+            SelectedTabBackdrop().SystemBackdrop(paperBackdrop);
+            ReadingBackdrop().Visibility(paperBackdrop ? Microsoft::UI::Xaml::Visibility::Visible : Microsoft::UI::Xaml::Visibility::Collapsed);
             appliedReadingMaterial = reading;
-            UpdateSelectedTabMaterial();
+            UpdateSelectedTabBackdrop();
         }
 
         auto const& colors = themeProfile.colors;

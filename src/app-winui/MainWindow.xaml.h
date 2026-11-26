@@ -137,7 +137,7 @@ namespace winrt::Folia::implementation
         void UpdateTheme();
         void ApplyShellTheme();
         void ApplyWorkspaceMaterial();
-        void UpdateSelectedTabMaterial();
+        void UpdateSelectedTabBackdrop();
         folia::Theme CurrentThemeVariant();
         bool SettingsActive() const noexcept { return workspaceDocuments.Active()->kind == WorkspaceTabKind::Settings; }
         void OpenSettingsTab();
@@ -212,8 +212,7 @@ namespace winrt::Folia::implementation
         DocumentTools documentTools;
         std::optional<WindowMaterial> appliedMaterial;
         std::optional<WindowMaterial> appliedReadingMaterial;
-        std::optional<std::pair<Windows::Foundation::Rect, Windows::Foundation::Rect>> readingMaterialBounds;
-        bool readingMaterialLayoutPending = false;
+        bool selectedTabBackdropUpdatePending = false;
         bool sidebarOpen = false, outlineSelected = false;
         bool updatingRailSelection = false;
         bool sidebarPresented = false;

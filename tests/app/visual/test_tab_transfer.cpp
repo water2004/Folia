@@ -62,7 +62,6 @@ namespace winrt::Folia::implementation {
         static void Sidebar(Microsoft::UI::Xaml::Window const& window, bool open) { Impl(window)->SetSidebarOpen(open); }
         static bool ScrollTabs(Microsoft::UI::Xaml::Window const& window, int delta) { return Impl(window)->ScrollTabsWithWheel(delta); }
         static auto TabScroller(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->TabStripScroller(); }
-        static auto ReadingMaterialBounds(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->readingMaterialBounds; }
         static void Pane(Microsoft::UI::Xaml::Window const& window, bool outline) { Impl(window)->SelectWorkspacePane(outline); }
         static void PointerEnd(Microsoft::UI::Xaml::Window const& window) { Impl(window)->EndTabPointerGesture(); }
         static void EnterMove(Microsoft::UI::Xaml::Window const& window) {
@@ -473,6 +472,7 @@ namespace {
             using winrt::Folia::WindowMaterial;
             using winrt::Windows::Foundation::Point;
             using winrt::Microsoft::UI::Composition::SystemBackdrops::DesktopAcrylicController;
+            using winrt::Microsoft::UI::Composition::SystemBackdrops::MicaController;
             OwnedWindow owned(App()->CreateMainWindow());
             auto window = owned.window;
             window.AppWindow().Presenter().as<winrt::Microsoft::UI::Windowing::OverlappedPresenter>().IsAlwaysOnTop(true);
@@ -480,6 +480,8 @@ namespace {
             Access::Theme(window, "folia.dark");
             auto editor = root.FindName(L"EditorSurface").as<FrameworkElement>();
             auto card = root.FindName(L"ReadingCard").as<FrameworkElement>();
+            auto tabBackdrop = root.FindName(L"SelectedTabBackdrop").as<Controls::SystemBackdropElement>();
+            auto readingBackdrop = root.FindName(L"ReadingBackdrop").as<Controls::SystemBackdropElement>();
             auto tab = Access::View(window, Access::Documents(window).Active()->id);
             Access::Edit(window, U"MMMM");
             auto document = Access::Documents(window).Active();
@@ -496,13 +498,23 @@ namespace {
             auto delta = [](auto const& a, auto const& b) {
                 return (std::max)({std::abs(a[0] - b[0]), std::abs(a[1] - b[1]), std::abs(a[2] - b[2])});
             };
-            for (auto [base, reading] : {std::pair{WindowMaterial::Solid, WindowMaterial::Solid},
-                    {WindowMaterial::Acrylic, WindowMaterial::Acrylic}, {WindowMaterial::MicaAlt, WindowMaterial::Acrylic}}) {
-                if (reading == WindowMaterial::Acrylic && !DesktopAcrylicController::IsSupported()) continue;
+            auto supported = [](WindowMaterial value) {
+                if (value == WindowMaterial::Solid) return true;
+                return value == WindowMaterial::Acrylic ? DesktopAcrylicController::IsSupported() : MicaController::IsSupported();
+            };
+            auto verifySurface = [&](WindowMaterial base, WindowMaterial reading) {
+                if (!supported(base) || !supported(reading)) return;
                 Access::Bars(window, {false, base, reading});
                 root.UpdateLayout();
                 auto settle = std::chrono::steady_clock::now() + std::chrono::milliseconds(350);
                 Pump([&] { return std::chrono::steady_clock::now() >= settle; });
+                expect(tabBackdrop.SystemBackdrop() == readingBackdrop.SystemBackdrop());
+                if (readingBackdrop.SystemBackdrop()) {
+                    expect(tabBackdrop.ActualWidth() > 0. && tabBackdrop.ActualHeight() > 0.) << "the tab receives layout bounds";
+                    auto placement = Hosting::ElementCompositionPreview::GetElementChildVisual(tabBackdrop);
+                    auto size = placement ? placement.Size() : winrt::Windows::Foundation::Numerics::float2{};
+                    expect(size.x > 0.f && size.y > 0.f) << std::format("tab backdrop visual occupies {} x {} pixels", size.x, size.y);
+                }
                 auto convert = root.XamlRoot().CoordinateConverter();
                 float x = origin(tab).X + static_cast<float>(tab.ActualWidth() * .75);
                 float tabEnd = origin(card).Y;
@@ -510,9 +522,13 @@ namespace {
                 std::vector points{
                     convert.ConvertLocalToScreen(Point{x, tabEnd - 4}),
                     convert.ConvertLocalToScreen(Point{x, tabEnd + 4}),
-                    convert.ConvertLocalToScreen(Point{x, editorTop - 4}),
-                    convert.ConvertLocalToScreen(Point{x, editorTop + 4}),
                 };
+                for (auto fraction : {.15f, .50f, .87f, .95f}) {
+                    auto sampleX = origin(card).X + static_cast<float>(card.ActualWidth()) * fraction;
+                    points.push_back(convert.ConvertLocalToScreen(Point{sampleX, editorTop - 3}));
+                    points.push_back(convert.ConvertLocalToScreen(Point{sampleX, editorTop + 3}));
+                }
+                auto firstTextSample = points.size();
                 auto editorOrigin = origin(editor);
                 for (float y = textStart->top; y < textStart->bottom; y += 2.f)
                     for (float dx = 0; dx < (textEnd->left - textStart->left) / 2; dx += 2.f)
@@ -520,11 +536,58 @@ namespace {
                             editorOrigin.X + textStart->left + dx, editorOrigin.Y + y}));
                 auto colors = CaptureColors(window, points);
                 expect(delta(colors[0], colors[1]) <= 5) << std::format("tab to toolbar: {} vs {}", colors[0], colors[1]);
-                expect(delta(colors[2], colors[3]) <= 5) << std::format("toolbar to editor: {} vs {}", colors[2], colors[3]);
-                auto visible = std::ranges::count_if(std::span{colors}.subspan(4), [&](auto const& pixel) {
+                for (std::size_t i = 2; i < firstTextSample; i += 2)
+                    expect(delta(colors[i], colors[i+1]) <= 5) << std::format("toolbar to editor: {} vs {}", colors[i], colors[i+1]);
+                auto visible = std::ranges::count_if(std::span{colors}.subspan(firstTextSample), [&](auto const& pixel) {
                     return delta(pixel, colors[3]) >= 48;
                 });
                 expect(visible >= 6) << "text is visible within its expected DIP bounds";
+            };
+            for (auto theme : {"folia.dark", "folia.light"}) {
+                Access::Theme(window, theme);
+                verifySurface(WindowMaterial::Solid, WindowMaterial::Solid);
+                verifySurface(WindowMaterial::Acrylic, WindowMaterial::Acrylic);
+                verifySurface(WindowMaterial::Mica, WindowMaterial::Acrylic);
+                verifySurface(WindowMaterial::MicaAlt, WindowMaterial::Acrylic);
+                verifySurface(WindowMaterial::Acrylic, WindowMaterial::Mica);
+                verifySurface(WindowMaterial::Solid, WindowMaterial::MicaAlt);
+            }
+        };
+        "changing the reading backdrop leaves the inactive tabs and title strip on the window material"_test = [] {
+            using namespace winrt::Microsoft::UI::Composition::SystemBackdrops;
+            using winrt::Folia::WindowMaterial;
+            using winrt::Windows::Foundation::Point;
+            if (!MicaController::IsSupported() || !DesktopAcrylicController::IsSupported()
+                || winrt::Windows::UI::ViewManagement::AccessibilitySettings().HighContrast()) return;
+            OwnedWindow owned(App()->CreateMainWindow());
+            auto window = owned.window;
+            window.AppWindow().Presenter().as<winrt::Microsoft::UI::Windowing::OverlappedPresenter>().IsAlwaysOnTop(true);
+            Access::Theme(window, "folia.light");
+            Access::Sidebar(window, false);
+            auto inactiveId = Access::Documents(window).Active()->id;
+            Access::New(window);
+            auto inactive = Access::View(window, inactiveId);
+            auto root = window.Content().as<FrameworkElement>();
+            auto chrome = root.FindName(L"TopChrome").as<FrameworkElement>();
+            auto sample = [&](WindowMaterial reading) {
+                Access::Bars(window, {false, WindowMaterial::Mica, reading});
+                auto settle = std::chrono::steady_clock::now() + std::chrono::milliseconds(350);
+                Pump([&] { return std::chrono::steady_clock::now() >= settle; });
+                auto convert = root.XamlRoot().CoordinateConverter();
+                auto point = [&](FrameworkElement const& element, float x, float y) {
+                    return convert.ConvertLocalToScreen(element.TransformToVisual(root).TransformPoint(Point{x, y}));
+                };
+                std::array points{
+                    point(inactive, static_cast<float>(inactive.ActualWidth() * .75), 15.f),
+                    point(chrome, static_cast<float>(chrome.ActualWidth() * .70), 15.f),
+                };
+                return CaptureColors(window, points);
+            };
+            auto solid = sample(WindowMaterial::Solid);
+            auto acrylic = sample(WindowMaterial::Acrylic);
+            for (std::size_t i = 0; i < solid.size(); ++i) {
+                bool unchanged = solid[i] == acrylic[i];
+                expect(unchanged) << std::format("base pixel with solid paper {} and acrylic paper {}", solid[i], acrylic[i]);
             }
         };
         "workspace material can leave the reading surface opaque independently of the window"_test = [] {
@@ -535,6 +598,8 @@ namespace {
             OwnedWindow owned(window);
             auto root = window.Content().as<FrameworkElement>();
             auto readingBackdrop = root.FindName(L"ReadingBackdrop").as<Controls::SystemBackdropElement>();
+            auto selectedBackdrop = root.FindName(L"SelectedTabBackdrop").as<Controls::SystemBackdropElement>();
+            auto backdropFrame = root.FindName(L"SelectedTabBackdropFrame").as<FrameworkElement>();
             Access::Sidebar(window, false);
             auto tabs = Access::Tabs(window);
             auto first = tabs.SelectedItem();
@@ -575,13 +640,12 @@ namespace {
                 Access::Bars(window, {false, WindowMaterial::Solid, material});
                 expect(window.SystemBackdrop() == nullptr);
                 expect(readingBackdrop.SystemBackdrop() != nullptr);
-                Pump([&] { auto bounds = Access::ReadingMaterialBounds(window); return bounds && bounds->second.Width > 0; });
-                expect(Hosting::ElementCompositionPreview::GetElementVisual(readingBackdrop).Clip()
-                    .try_as<winrt::Microsoft::UI::Composition::CompositionGeometricClip>() != nullptr);
+                Pump([&] { return backdropFrame.Visibility() == Visibility::Visible && selectedBackdrop.ActualWidth() > 0; });
+                expect(selectedBackdrop.SystemBackdrop() == readingBackdrop.SystemBackdrop());
                 expect(paper.Opacity() < 1.);
-                auto old = Access::ReadingMaterialBounds(window);
+                auto old = backdropFrame.Margin().Left;
                 tabs.SelectedItem(tabs.SelectedItem() == first ? second : first);
-                Pump([&] { return Access::ReadingMaterialBounds(window) != old; });
+                Pump([&] { return backdropFrame.Margin().Left != old; });
                 selected();
             }
             Access::Bars(window, {true, WindowMaterial::Mica, WindowMaterial::Acrylic});

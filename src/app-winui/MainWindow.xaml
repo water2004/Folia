@@ -118,8 +118,11 @@
             </Grid>
             </Grid>
         <Grid x:Name="DocumentColumn" Grid.Column="2" RowDefinitions="Auto,*" MinWidth="0">
-        <SystemBackdropElement x:Name="ReadingBackdrop" Grid.RowSpan="2"
-                               IsHitTestVisible="False" Visibility="Collapsed"/>
+        <Grid x:Name="TabBackdropLayer" IsHitTestVisible="False">
+            <Grid x:Name="SelectedTabBackdropFrame" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Collapsed">
+                <SystemBackdropElement x:Name="SelectedTabBackdrop" CornerRadius="6,6,0,0"/>
+            </Grid>
+        </Grid>
         <Grid x:Name="TopChrome" ColumnDefinitions="Auto,*,Auto" Height="{StaticResource WorkspaceTabHeight}" Canvas.ZIndex="2">
         <ToggleButton x:Name="SidebarButton" Margin="4,0" Style="{StaticResource WorkspacePaneToggleStyle}"/>
         <Grid x:Name="TabViewport" Grid.Column="1" MinWidth="0">
@@ -159,6 +162,7 @@
         <Border x:Name="CaptionInset" Grid.Column="2" Width="138"/>
         </Grid>
         <Grid x:Name="ReadingCard" Grid.Row="1" Margin="4,0,6,6" CornerRadius="9">
+        <SystemBackdropElement x:Name="ReadingBackdrop" IsHitTestVisible="False" CornerRadius="9" Visibility="Collapsed"/>
         <Border x:Name="ReadingTint" CornerRadius="9" IsHitTestVisible="False"/>
         <Grid x:Name="ReadingLayout" RowDefinitions="Auto,*">
         <Grid x:Name="DocumentToolbar" MinHeight="30" VerticalAlignment="Top" Canvas.ZIndex="2"
