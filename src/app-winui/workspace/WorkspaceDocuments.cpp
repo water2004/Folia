@@ -3,11 +3,9 @@ import std;
 #include "workspace/WorkspaceDocuments.h"
 
 namespace winrt::Folia {
-    namespace {
-        std::uint64_t NextDocumentId() {
-            static std::atomic_uint64_t next{1};
-            return next.fetch_add(1, std::memory_order_relaxed);
-        }
+    std::uint64_t AllocateWorkspaceItemId() {
+        static std::atomic_uint64_t next{1};
+        return next.fetch_add(1, std::memory_order_relaxed);
     }
     WorkspaceDocuments::WorkspaceDocuments() {
         active_ = New(WorkspaceOpenMode::Preview);
@@ -36,7 +34,7 @@ namespace winrt::Folia {
     }
 
     std::shared_ptr<WorkspaceDocument> WorkspaceDocuments::New(WorkspaceOpenMode mode) {
-        auto document = std::make_shared<WorkspaceDocument>(NextDocumentId());
+        auto document = std::make_shared<WorkspaceDocument>(AllocateWorkspaceItemId());
         document->kept = mode == WorkspaceOpenMode::Keep;
         document->editor->loaded = true;
         documents_.push_back(document);
@@ -50,13 +48,14 @@ namespace winrt::Folia {
 
     std::shared_ptr<WorkspaceDocument> WorkspaceDocuments::OpenSettings() {
         if (auto existing = FindSettings()) return existing;
-        auto settings = std::make_shared<WorkspaceDocument>(NextDocumentId(), WorkspaceTabKind::Settings);
+        auto settings = std::make_shared<WorkspaceDocument>(AllocateWorkspaceItemId(), WorkspaceTabKind::Settings);
         settings->kept = true;
         documents_.push_back(settings);
         return settings;
     }
 
-    WorkspaceOpenResult WorkspaceDocuments::Open(std::filesystem::path path, WorkspaceOpenMode mode) {
+    WorkspaceOpenResult WorkspaceDocuments::Open(std::filesystem::path path, WorkspaceOpenMode mode,
+        std::function<bool(std::uint64_t)> const& canReplacePreview) {
         if (path.empty() || !path.is_absolute()) throw std::invalid_argument("Workspace file paths must be absolute");
         path = path.lexically_normal();
         for (auto const& document : documents_)
@@ -66,11 +65,11 @@ namespace winrt::Folia {
             return {std::move(document), {}, false};
         }
         std::optional<std::uint64_t> replaced;
-        auto preview = std::ranges::find_if(documents_, [](auto const& document) {
-            return !document->kept && !document->IsModified();
+        auto preview = std::ranges::find_if(documents_, [&](auto const& document) {
+            return !document->kept && !document->IsModified() && (!canReplacePreview || canReplacePreview(document->id));
         });
         auto kind = IsWorkspaceImage(ClassifyWorkspaceFile(path)) ? WorkspaceTabKind::Image : WorkspaceTabKind::Editor;
-        auto document = std::make_shared<WorkspaceDocument>(NextDocumentId(), kind);
+        auto document = std::make_shared<WorkspaceDocument>(AllocateWorkspaceItemId(), kind);
         document->path = std::move(path);
         document->kept = mode == WorkspaceOpenMode::Keep;
         if (preview != documents_.end()) {
@@ -137,13 +136,5 @@ namespace winrt::Folia {
         target.documents_.reserve(target.documents_.size() + 1);
         target.documents_.insert(target.documents_.begin() + (std::min)(index, target.documents_.size()), document);
         std::erase(documents_, document);
-    }
-
-    std::shared_ptr<WorkspaceDocument> WorkspaceDocuments::Adjacent(std::uint64_t id, int direction) const noexcept {
-        auto found = std::ranges::find(documents_, id, [](auto const& document) { return document->id; });
-        if (found == documents_.end()) return nullptr;
-        auto index = static_cast<std::size_t>(found - documents_.begin());
-        index = direction < 0 ? (index + documents_.size() - 1) % documents_.size() : (index + 1) % documents_.size();
-        return documents_[index];
     }
 }

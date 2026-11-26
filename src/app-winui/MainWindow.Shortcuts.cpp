@@ -22,8 +22,8 @@ namespace winrt::Folia::implementation {
         else if (action == "file.close") CloseDocumentAsync(workspaceDocuments.Active()->id);
         else if (action == "file.reload") ReloadWorkspaceFile();
         else if (action == "view.next_tab" || action == "view.previous_tab") {
-            auto document = workspaceDocuments.Adjacent(workspaceDocuments.Active()->id, action == "view.next_tab" ? 1 : -1);
-            if (document) ActivateDocument(document->id);
+            auto next = editorGroups.Replacement(SelectedEditorView(), action == "view.next_tab" ? 1 : -1);
+            if (next && editorGroups.GroupOf(next) == editorGroups.ActiveGroup()) ActivateView(next);
         }
         else if (!HasActiveEditor()) return false;
         else if (action == "file.save") documentController().SaveDocument();

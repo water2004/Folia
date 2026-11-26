@@ -19,6 +19,7 @@ namespace winrt::Folia::implementation
     MainWindow::MainWindow(winrt::hstring const& initialDocumentPath)
     {
         InitializeComponent();
+        presentedEditorView = editorGroups.Add(EditorGroup::Left, workspaceDocuments.Active()->id);
         documentContextMenu = EditorSurface().ContextFlyout().as<Microsoft::UI::Xaml::Controls::MenuFlyout>();
         EditorSurface().ContextFlyout(nullptr);
         LocalizeShell();
@@ -147,6 +148,7 @@ namespace winrt::Folia::implementation
         if (active->editor) workspaceDocuments.RefreshPath(active->id);
         if (!SettingsActive()) Title(LocalizeFormat(L"WindowTitleDocument", { displayName }));
         ToolbarFilename().Text(displayName);
+        QueueOtherGroupRender();
         if (!active->editor) { UpdateDocumentTab(active->id); return; }
         CharacterCountText().Text(LocalizeFormat(
             L"CharacterCount", { winrt::to_hstring(editorSession().CharacterCount()) }));
@@ -331,6 +333,44 @@ namespace winrt::Folia::implementation
         options.Position(winrt::box_value(position).as<Windows::Foundation::IReference<Windows::Foundation::Point>>());
         options.ShowMode(FlyoutShowMode::Standard);
         footnoteFlyout.ShowAt(EditorSurface(), options);
+    }
+
+    void MainWindow::ShowEditorContextMenu(Microsoft::UI::Xaml::Input::ContextRequestedEventArgs const& args)
+    {
+        if (!HasActiveEditor() || documentController().IsLoading()) return;
+        auto surface = EditorSurface();
+        Windows::Foundation::Point point{};
+        auto location = args.TryGetPosition(surface, point) ? std::optional{point} : std::nullopt;
+        auto menu = pointerController.ContextMenuAt(location);
+        if (!menu) menu = documentContextMenu;
+        if (!location)
+            if (auto bounds = editorRenderer.CaretBounds(editorSession().Selection().active))
+                location = Windows::Foundation::Point{bounds->left, bounds->bottom};
+        Microsoft::UI::Xaml::Controls::Primitives::FlyoutShowOptions options;
+        if (location) options.Position(*location);
+        if (activeEditorContextMenu && activeEditorContextMenu != menu) activeEditorContextMenu.Hide();
+        activeEditorContextMenu = menu;
+        args.Handled(true);
+        menu.ShowAt(surface, options);
+    }
+
+    void MainWindow::HandleEditorPointerPressed(Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args)
+    {
+        if (!HasActiveEditor() || workspaceDocuments.Active()->editor->opening || documentController().IsLoading()) return;
+        auto point = args.GetCurrentPoint(EditorSurface());
+        if (point.Properties().IsLeftButtonPressed()) {
+            auto at = point.Position();
+            if (auto code = editorRenderer.CodeLanguageAt(static_cast<float>(at.X), static_cast<float>(at.Y))) {
+                scrollController.Stop();
+                editorSession().SetSelection(folia::TextSelection::caret(code->contentStart));
+                textInputController.NotifySelectionChanged();
+                RenderEditorSurface();
+                codeLanguageController.Open(code->contentStart.container_id);
+                args.Handled(true);
+                return;
+            }
+        }
+        pointerController.PointerPressed(args);
     }
 
     void MainWindow::HandlePointerWheel(Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args)

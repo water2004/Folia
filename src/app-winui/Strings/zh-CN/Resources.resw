@@ -319,6 +319,12 @@
   <data name="FormatMenu" xml:space="preserve"><value>格式</value></data>
   <data name="MainMenu" xml:space="preserve"><value>主菜单</value></data>
   <data name="NewDocument" xml:space="preserve"><value>新建文档</value></data>
+  <data name="ScrollTabsLeft" xml:space="preserve"><value>向左滚动页签</value></data>
+  <data name="ScrollTabsRight" xml:space="preserve"><value>向右滚动页签</value></data>
+  <data name="SplitEditor" xml:space="preserve"><value>向右分屏</value></data>
+  <data name="ResizeEditorGroups" xml:space="preserve"><value>调整左右分屏宽度</value></data>
+  <data name="LeftEditorGroup" xml:space="preserve"><value>左侧编辑组</value></data>
+  <data name="RightEditorGroup" xml:space="preserve"><value>右侧编辑组</value></data>
   <data name="NextTab" xml:space="preserve"><value>下一个标签页</value></data>
   <data name="OpenFolder" xml:space="preserve"><value>打开文件夹…</value></data>
   <data name="OpenRecentFile" xml:space="preserve"><value>打开最近文件</value></data>

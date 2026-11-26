@@ -34,6 +34,15 @@ namespace winrt::Folia::implementation {
             return winrt::get_self<MainWindow>(window.as<winrt::Folia::MainWindow>());
         }
         static auto& Documents(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->workspaceDocuments; }
+        static auto& Groups(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->editorGroups; }
+        static auto GroupTabs(Microsoft::UI::Xaml::Window const& window, EditorGroup group) { return Impl(window)->GroupTabs(group); }
+        static auto OtherRenderer(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->otherEditorRenderer.get(); }
+        static void ResizeGroups(Microsoft::UI::Xaml::Window const& window, double delta) { Impl(window)->ResizeEditorGroups(delta); }
+        static void SelectView(Microsoft::UI::Xaml::Window const& window, std::uint64_t view) { Impl(window)->ActivateView(view); }
+        static void CloseView(Microsoft::UI::Xaml::Window const& window, std::uint64_t view) { Impl(window)->CloseEditorViewAsync(view); }
+        static bool MoveView(Microsoft::UI::Xaml::Window const& window, std::uint64_t view, EditorGroup group, std::size_t index) {
+            return Impl(window)->MoveEditorView(view, group, index);
+        }
         static auto Tabs(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->DocumentTabs(); }
         static auto NewTabButton(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->NewTabButton(); }
         static auto Handle(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->WindowHandle(); }
@@ -44,6 +53,7 @@ namespace winrt::Folia::implementation {
             window.Content().as<Microsoft::UI::Xaml::FrameworkElement>().UpdateLayout();
             return impl->SettingsViewHost();
         }
+        static void ReturnToDocumentTab(Microsoft::UI::Xaml::Window const& window) { Impl(window)->ReturnToDocumentTab(); }
         static auto ThemeSettings(Microsoft::UI::Xaml::Window const& window) {
             auto impl = Impl(window);
             impl->OpenSettingsTab();
@@ -63,8 +73,12 @@ namespace winrt::Folia::implementation {
             return App::RouteTabMiddleButton(message, mouse);
         }
         static void Sidebar(Microsoft::UI::Xaml::Window const& window, bool open) { Impl(window)->SetSidebarOpen(open); }
-        static bool ScrollTabs(Microsoft::UI::Xaml::Window const& window, int delta) { return Impl(window)->ScrollTabsWithWheel(delta); }
-        static auto TabScroller(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->TabStripScroller(); }
+        static bool ScrollTabs(Microsoft::UI::Xaml::Window const& window, int delta, EditorGroup group = EditorGroup::Left) {
+            return Impl(window)->ScrollTabsWithWheel(delta, group);
+        }
+        static auto TabScroller(Microsoft::UI::Xaml::Window const& window, EditorGroup group = EditorGroup::Left) {
+            return Impl(window)->TabStripScroller(group);
+        }
         static void Pane(Microsoft::UI::Xaml::Window const& window, bool outline) { Impl(window)->SelectWorkspacePane(outline); }
         static void PointerEnd(Microsoft::UI::Xaml::Window const& window) { Impl(window)->EndTabPointerGesture(); }
         static void EnterMove(Microsoft::UI::Xaml::Window const& window) {
@@ -211,6 +225,272 @@ namespace {
         return colors;
     }
     suite tab_transfer_tests = [] {
+        "split groups move the reading material when switching right tabs"_test = [] {
+            using winrt::Folia::EditorGroup;
+            using winrt::Folia::WindowMaterial;
+            using winrt::Microsoft::UI::Composition::RectangleClip;
+            using winrt::Microsoft::UI::Composition::SystemBackdrops::DesktopAcrylicController;
+            using winrt::Microsoft::UI::Composition::SystemBackdrops::MicaController;
+            using namespace Controls;
+            if (!MicaController::IsSupported() || !DesktopAcrylicController::IsSupported()
+                || winrt::Windows::UI::ViewManagement::AccessibilitySettings().HighContrast()) return;
+            OwnedWindow workspace(App()->CreateMainWindow());
+            auto window = workspace.window;
+            auto root = window.Content().as<FrameworkElement>();
+            Access::Bars(window, {false, WindowMaterial::Acrylic, WindowMaterial::Mica});
+            auto invoke = [](Button const& button) {
+                Automation::Peers::ButtonAutomationPeer(button).as<Automation::Provider::IInvokeProvider>().Invoke();
+            };
+            invoke(root.FindName(L"SplitEditorButton").as<Button>());
+            auto right = Access::GroupTabs(window, EditorGroup::Right);
+            auto rightAdd = [&] { return right.as<IControlProtected>().GetTemplateChild(L"AddButton").try_as<Button>(); };
+            Pump([&] { return rightAdd() && rightAdd().IsLoaded(); });
+            invoke(rightAdd());
+            invoke(rightAdd());
+
+            auto layer = root.FindName(L"TabBackdropLayer").as<FrameworkElement>();
+            auto rightFrame = root.FindName(L"RightTabBackdropFrame").as<FrameworkElement>();
+            auto leftFrame = root.FindName(L"SelectedTabBackdropFrame").as<FrameworkElement>();
+            auto left = Hosting::ElementCompositionPreview::GetElementVisual(leftFrame);
+            auto visual = Hosting::ElementCompositionPreview::GetElementVisual(rightFrame);
+            Pump([&] { return left.Clip() && visual.Clip(); });
+            const auto leftEdge = left.Clip().as<RectangleClip>().Left();
+            for (int index : {1, 2, 0, 2, 1}) {
+                right.SelectedIndex(index);
+                auto tab = right.ContainerFromIndex(index).as<TabViewItem>();
+                const auto x = tab.TransformToVisual(layer).TransformPoint({0, 0}).X;
+                Pump([&] {
+                    auto clip = visual.Clip().as<RectangleClip>();
+                    return std::abs(clip.Left() - x) < 1.f && std::abs(clip.Right() - x - tab.ActualWidth()) < 1.f;
+                });
+                expect(left.Clip().as<RectangleClip>().Left() == leftEdge);
+                expect(rightFrame.TransformToVisual(layer).TransformPoint({0, 0}).X == 0.f);
+                expect(rightFrame.ActualWidth() == layer.ActualWidth());
+                // WinUI can leave this state on a tab after an ordinary click.
+                // Exercise the template state directly as well as selection changes.
+                expect(VisualStateManager::GoToState(tab, L"DragDropVisualVisible", false));
+                auto drag = TabPart(tab, L"TabDragVisualContainer").as<Grid>();
+                expect(drag.Visibility() == Visibility::Visible);
+                expect(drag.Background().as<Media::SolidColorBrush>().Color().A == 0);
+            }
+        };
+        "split groups share a document, align their tab strips, and close the duplicate without a save prompt"_test = [] {
+            using winrt::Folia::EditorGroup;
+            OwnedWindow workspace(App()->CreateMainWindow());
+            auto window = workspace.window;
+            auto root = window.Content().as<FrameworkElement>();
+            auto document = Access::Documents(window).Active();
+            auto& groups = Access::Groups(window);
+            Access::Edit(window, U"This document has unsaved changes.");
+            auto splitter = root.FindName(L"EditorGroupSplitter").as<FrameworkElement>();
+            auto splitButton = root.FindName(L"SplitEditorButton").as<Controls::Button>();
+            Automation::Peers::ButtonAutomationPeer(splitButton).as<Automation::Provider::IInvokeProvider>().Invoke();
+            Pump([&] {
+                auto renderer = Access::OtherRenderer(window);
+                return groups.IsSplit() && renderer && winrt::Folia::EditorRendererTestAccess::Ready(*renderer);
+            });
+            auto left = groups.Selected(EditorGroup::Left);
+            auto right = groups.Selected(EditorGroup::Right);
+            expect(left != right);
+            expect(groups.ActiveGroup() == EditorGroup::Right);
+            expect(groups.Find(left)->document == document->id && groups.Find(right)->document == document->id);
+            expect(Access::Documents(window).Items().size() == 1_u);
+
+            auto card = root.FindName(L"ReadingCard").as<FrameworkElement>();
+            auto other = root.FindName(L"OtherReadingCard").as<FrameworkElement>();
+            auto leftStrip = root.FindName(L"TabViewport").as<FrameworkElement>();
+            auto rightStrip = root.FindName(L"RightTabViewport").as<FrameworkElement>();
+            root.UpdateLayout();
+            const auto leftWidth = other.ActualWidth();
+            const auto rightWidth = card.ActualWidth();
+            Access::ResizeGroups(window, 60.);
+            root.UpdateLayout();
+            expect(other.ActualWidth() > leftWidth && card.ActualWidth() < rightWidth);
+            auto splitX = splitter.TransformToVisual(root).TransformPoint({0, 0}).X;
+            auto tabSplitX = leftStrip.TransformToVisual(root).TransformPoint({static_cast<float>(leftStrip.ActualWidth()), 0}).X;
+            expect(std::abs(splitX - tabSplitX) <= 1.);
+            expect(rightStrip.IsLoaded() && rightStrip.ActualWidth() > 0);
+            auto caption = root.FindName(L"CaptionInset").as<FrameworkElement>();
+            auto rightStripEnd = rightStrip.TransformToVisual(root).TransformPoint({static_cast<float>(rightStrip.ActualWidth()), 0}).X;
+            expect(rightStripEnd <= caption.TransformToVisual(root).TransformPoint({0, 0}).X + 1.);
+            auto rightTabs = Access::GroupTabs(window, EditorGroup::Right);
+            auto rightAdd = rightTabs.as<Controls::IControlProtected>().GetTemplateChild(L"AddButton").try_as<Controls::Button>();
+            expect(rightAdd && rightAdd.Content().try_as<Controls::Viewbox>());
+            auto rightTab = rightTabs.ContainerFromIndex(0).as<Controls::TabViewItem>();
+            auto header = rightTab.as<Controls::IControlProtected>().GetTemplateChild(L"TabContainer").as<FrameworkElement>();
+            auto leftEdge = [&](FrameworkElement const& element) { return element.TransformToVisual(root).TransformPoint({0, 0}).X; };
+            auto visibleHeaderEdge = [&] { return (std::max)(leftEdge(header), leftEdge(rightStrip)); };
+            auto tolerance = .5 / root.XamlRoot().RasterizationScale();
+            expect(std::abs(visibleHeaderEdge() - leftEdge(card)) <= tolerance)
+                << std::format("visible right header at {:.2f}, reading card at {:.2f}", visibleHeaderEdge(), leftEdge(card));
+            expect(card.as<Controls::Grid>().CornerRadius().TopLeft == 0.);
+            expect(other.as<Controls::Grid>().CornerRadius().TopLeft > 0.);
+
+            auto originalCaret = document->editor->session.Selection().active;
+            auto start = originalCaret;
+            start.source_offset = 0;
+            document->editor->session.SetSelection(folia::TextSelection::caret(start));
+            Access::SelectView(window, left);
+            expect(Access::Documents(window).Active() == document);
+            expect(document->editor->session.Selection().active == originalCaret);
+            expect(other.as<Controls::Grid>().CornerRadius().TopLeft == 0.);
+            root.UpdateLayout();
+            expect(std::abs(visibleHeaderEdge() - leftEdge(other)) <= tolerance);
+            Access::SelectView(window, right);
+            expect(document->editor->session.Selection().active == start);
+            Access::CloseView(window, right);
+            Pump([&] { return !groups.IsSplit() && splitter.Visibility() == Visibility::Collapsed; });
+            expect(Access::Documents(window).Active() == document && document->IsModified());
+            expect(Access::Documents(window).Items().size() == 1_u);
+        };
+        "split groups leave both blank title areas draggable"_test = [] {
+            using winrt::Folia::EditorGroup;
+            using winrt::Microsoft::UI::Input::NonClientRegionKind;
+            OwnedWindow workspace(App()->CreateMainWindow());
+            auto window = workspace.window;
+            auto root = window.Content().as<FrameworkElement>();
+            auto button = root.FindName(L"SplitEditorButton").as<Controls::Button>();
+            Automation::Peers::ButtonAutomationPeer(button).as<Automation::Provider::IInvokeProvider>().Invoke();
+            Pump([&] { return Access::Groups(window).IsSplit(); });
+            root.UpdateLayout();
+
+            auto id = window.AppWindow().Id();
+            auto island = root.XamlRoot().CoordinateConverter();
+            auto native = winrt::Microsoft::UI::Content::ContentCoordinateConverter::CreateForWindowId(id);
+            auto input = winrt::Microsoft::UI::Input::InputNonClientPointerSource::GetForWindowId(id);
+            auto captionAt = [&](FrameworkElement const& element) {
+                auto center = element.TransformToVisual(nullptr).TransformPoint({static_cast<float>(element.ActualWidth() * .5),
+                    static_cast<float>(element.ActualHeight() * .5)});
+                auto point = native.ConvertScreenToLocal(island.ConvertLocalToScreen(center));
+                return std::ranges::any_of(input.GetRegionRects(NonClientRegionKind::Caption), [&](auto rect) {
+                    return point.X >= rect.X && point.X < rect.X + rect.Width && point.Y >= rect.Y && point.Y < rect.Y + rect.Height;
+                });
+            };
+            for (auto group : {EditorGroup::Left, EditorGroup::Right}) {
+                auto tabs = Access::GroupTabs(window, group);
+                auto blank = tabs.TabStripFooter().as<FrameworkElement>();
+                auto add = tabs.as<Controls::IControlProtected>().GetTemplateChild(L"AddButton").as<FrameworkElement>();
+                auto tab = tabs.ContainerFromIndex(0).as<FrameworkElement>();
+                Pump([&] { return captionAt(blank) && !captionAt(add) && !captionAt(tab); });
+            }
+        };
+        "split groups use the reading surface only on each selected tab"_test = [] {
+            using winrt::Folia::EditorGroup;
+            using winrt::Folia::WindowMaterial;
+            using namespace Controls;
+            OwnedWindow workspace(App()->CreateMainWindow());
+            auto window = workspace.window;
+            auto root = window.Content().as<FrameworkElement>();
+            Access::Theme(window, "folia.light");
+            Access::Bars(window, {false, WindowMaterial::MicaAlt, WindowMaterial::Solid});
+            auto paper = root.FindName(L"ReadingTint").as<Border>().Background();
+            expect(root.FindName(L"SelectedTabTint").as<Border>().Background() == paper);
+            expect(root.FindName(L"RightTabTint").as<Border>().Background() == paper);
+            auto invoke = [](Button const& button) {
+                Automation::Peers::ButtonAutomationPeer(button).as<Automation::Provider::IInvokeProvider>().Invoke();
+            };
+            Access::New(window);
+            invoke(root.FindName(L"SplitEditorButton").as<Button>());
+            auto left = Access::GroupTabs(window, EditorGroup::Left);
+            auto right = Access::GroupTabs(window, EditorGroup::Right);
+            auto rightAdd = [&] { return right.as<IControlProtected>().GetTemplateChild(L"AddButton").try_as<Button>(); };
+            Pump([&] { return rightAdd() && rightAdd().IsLoaded(); });
+            auto& groups = Access::Groups(window);
+            for (int i = 0; i < 2; ++i) invoke(rightAdd());
+            auto check = [&](TabView const& strip, std::wstring_view group) {
+                root.UpdateLayout();
+                if (groups.IsSplit()) expect(!strip.CanDragTabs() && !strip.CanReorderTabs() && !strip.AllowDrop());
+                for (std::uint32_t i = 0; i < strip.TabItems().Size(); ++i) {
+                    const auto description = winrt::to_string(std::format(L"{} tab {}", group, i));
+                    auto tab = strip.ContainerFromIndex(i).try_as<TabViewItem>();
+                    expect(fatal(static_cast<bool>(tab))) << description + " loaded container";
+                    auto drag = TabPart(tab, L"TabDragVisualContainer").as<Grid>();
+                    expect(drag.Background().as<Media::SolidColorBrush>().Color().A == 0) << description + " drag background";
+                    auto shape = TabPart(tab, L"SelectedBackgroundPath").try_as<Shapes::Path>();
+                    if (strip.SelectedIndex() == static_cast<int>(i)) {
+                        expect(shape && shape.Visibility() == Visibility::Visible && shape.Fill().as<Media::SolidColorBrush>().Color().A == 0)
+                            << description + " selected background";
+                    } else {
+                        expect(!shape || shape.Visibility() == Visibility::Collapsed) << description + " inactive background";
+                        const auto background = TabPart(tab, L"TabContainer").as<Grid>().Background().try_as<Media::SolidColorBrush>();
+                        if (!winrt::Windows::UI::ViewManagement::AccessibilitySettings().HighContrast())
+                            expect(!background || background.Color().A == 0) << description + " idle fill";
+                    }
+                }
+            };
+            check(left, L"left before transfer");
+            check(right, L"right before transfer");
+            expect(Access::MoveView(window, groups.Selected(EditorGroup::Right), EditorGroup::Left, 0));
+            check(left, L"left after transfer");
+            check(right, L"right after transfer");
+            while (auto view = groups.Selected(EditorGroup::Right))
+                expect(fatal(Access::MoveView(window, view, EditorGroup::Left, 0)));
+            expect(!groups.IsSplit());
+            check(left, L"left after closing split");
+        };
+        "split groups move tab identity and collapse either empty group"_test = [] {
+            using winrt::Folia::EditorGroup;
+            OwnedWindow workspace(App()->CreateMainWindow());
+            auto window = workspace.window;
+            auto root = window.Content().as<FrameworkElement>();
+            auto& groups = Access::Groups(window);
+            auto first = Access::Documents(window).Active();
+            Access::New(window);
+            auto second = Access::Documents(window).Active();
+            auto button = root.FindName(L"SplitEditorButton").as<Controls::Button>();
+            Automation::Peers::ButtonAutomationPeer(button).as<Automation::Provider::IInvokeProvider>().Invoke();
+            Pump([&] { return groups.IsSplit(); });
+            auto right = groups.Selected(EditorGroup::Right);
+            auto item = Access::Binding(window, first->id)->item;
+            expect(Access::MoveView(window, first->id, EditorGroup::Right, 1));
+            expect(Access::GroupTabs(window, EditorGroup::Right).SelectedItem() == item);
+            expect(Access::Documents(window).Active() == first);
+            expect(Access::MoveView(window, first->id, EditorGroup::Right, 0));
+            expect(groups.Views(EditorGroup::Right).front().document == first->id);
+            expect(Access::MoveView(window, first->id, EditorGroup::Right, 2));
+            expect(Access::MoveView(window, second->id, EditorGroup::Right, 0));
+            expect(!groups.IsSplit());
+            expect(groups.Selected(EditorGroup::Left) == right);
+            expect(Access::Items(window).Size() == 2_u);
+            expect(Access::Items(window).GetAt(1) == item);
+            expect(Access::Documents(window).Items().size() == 2_u);
+
+            Automation::Peers::ButtonAutomationPeer(button).as<Automation::Provider::IInvokeProvider>().Invoke();
+            Pump([&] { return groups.IsSplit(); });
+            auto newRight = groups.Selected(EditorGroup::Right);
+            expect(Access::MoveView(window, newRight, EditorGroup::Left, 0));
+            expect(!groups.IsSplit());
+            expect(groups.Selected(EditorGroup::Left) == right);
+            expect(Access::Documents(window).Active() == second);
+        };
+        "split groups retain settings in its visible editor group"_test = [] {
+            using winrt::Folia::EditorGroup;
+            OwnedWindow workspace(App()->CreateMainWindow());
+            auto window = workspace.window;
+            auto root = window.Content().as<FrameworkElement>();
+            auto& groups = Access::Groups(window);
+            auto button = root.FindName(L"SplitEditorButton").as<Controls::Button>();
+            Automation::Peers::ButtonAutomationPeer(button).as<Automation::Provider::IInvokeProvider>().Invoke();
+            Pump([&] { return groups.IsSplit(); });
+            auto fallback = groups.Selected(EditorGroup::Right);
+            Access::New(window);
+            auto previous = groups.Selected(EditorGroup::Right);
+            auto settings = Access::About(window);
+            auto settingsView = groups.Selected(EditorGroup::Right);
+            Access::SelectView(window, groups.Selected(EditorGroup::Left));
+            auto peer = root.FindName(L"OtherDocumentViewport");
+            Pump([&] { return settings.Parent() == peer && settings.Visibility() == Visibility::Visible; });
+            expect(!settings.IsHitTestVisible());
+            Access::SelectView(window, settingsView);
+            expect(settings.Parent() == root.FindName(L"WorkspaceHost") && settings.IsHitTestVisible());
+            Access::SelectView(window, previous);
+            Access::SelectView(window, settingsView);
+            Access::CloseView(window, previous);
+            Pump([&] { return !groups.Find(previous); });
+            Access::ReturnToDocumentTab(window);
+            expect(groups.ActiveGroup() == EditorGroup::Right);
+            expect(groups.Selected(EditorGroup::Right) == fallback);
+        };
         "document tools reveal over a stationary reading surface without moving the tabs"_test = [] {
             OwnedWindow current(App()->CreateMainWindow());
             auto window = current.window;
@@ -380,6 +660,51 @@ namespace {
             Pump([&] { return addX() > overflowAdd + 175.; });
             expect(viewport.ActualWidth() > oldWidth + 180.);
             expect(tabs.ActualWidth() <= viewport.ActualWidth() + 1.);
+        };
+        "overflowing right tabs track arrow clicks and scroll boundaries"_test = [] {
+            using winrt::Folia::EditorGroup;
+            using namespace Controls;
+            OwnedWindow current(App()->CreateMainWindow());
+            auto window = current.window;
+            auto root = window.Content().as<FrameworkElement>();
+            auto invokeButton = [](Button const& button) {
+                Automation::Peers::ButtonAutomationPeer(button).as<Automation::Provider::IInvokeProvider>().Invoke();
+            };
+            invokeButton(root.FindName(L"SplitEditorButton").as<Button>());
+            auto rightTabs = Access::GroupTabs(window, EditorGroup::Right);
+            auto add = [&] { return rightTabs.as<IControlProtected>().GetTemplateChild(L"AddButton").try_as<Button>(); };
+            Pump([&] { return add() && add().IsLoaded(); });
+            for (int i = 0; i < 8; ++i) invokeButton(add());
+
+            auto viewer = Access::TabScroller(window, EditorGroup::Right);
+            auto parts = viewer.as<IControlProtected>();
+            auto previous = parts.GetTemplateChild(L"PreviousTabScrollArrow").as<Primitives::RepeatButton>();
+            auto next = parts.GetTemplateChild(L"NextTabScrollArrow").as<Primitives::RepeatButton>();
+            auto selected = rightTabs.SelectedItem();
+            auto invokeArrow = [](Primitives::RepeatButton const& button) {
+                Automation::Peers::RepeatButtonAutomationPeer(button).as<Automation::Provider::IInvokeProvider>().Invoke();
+            };
+            auto atStart = [&] { return viewer.HorizontalOffset() <= .1; };
+            auto atEnd = [&] { return viewer.ScrollableWidth() - viewer.HorizontalOffset() <= .1; };
+            Pump([&] { return viewer.ScrollableWidth() > 10.; });
+            expect(Access::ScrollTabs(window, -60 * WHEEL_DELTA, EditorGroup::Right));
+            Pump(atEnd);
+            expect(!next.IsEnabled()) << "next is disabled at the end";
+            expect(fatal(previous.IsEnabled())) << "previous is enabled at the end";
+            const auto fromEnd = viewer.HorizontalOffset();
+            invokeArrow(previous);
+            Pump([&] { return viewer.HorizontalOffset() < fromEnd - .1; });
+            expect(fatal(next.IsEnabled())) << "scrolling back re-enables next";
+            const auto beforeNext = viewer.HorizontalOffset();
+            invokeArrow(next);
+            Pump([&] { return viewer.HorizontalOffset() > beforeNext + .1; });
+            expect(Access::ScrollTabs(window, 60 * WHEEL_DELTA, EditorGroup::Right));
+            Pump(atStart);
+            expect(!previous.IsEnabled() && next.IsEnabled());
+            expect(Access::ScrollTabs(window, -60 * WHEEL_DELTA, EditorGroup::Right));
+            Pump(atEnd);
+            expect(previous.IsEnabled() && !next.IsEnabled());
+            expect(rightTabs.SelectedItem() == selected);
         };
         "clicking a disk document tab leaves the tab strip responsive to resizing"_test = [] {
             TestDirectory directory;
@@ -628,11 +953,9 @@ namespace {
             auto second = tabs.SelectedItem();
             Pump([&] { return Access::View(window, Access::Documents(window).Active()->id).IsLoaded(); });
             auto selected = [&] {
-                auto tab = Access::View(window, Access::Documents(window).Active()->id);
-                auto shape = TabPart(tab, L"SelectedBackgroundPath").as<Shapes::Path>();
-                expect(shape.Fill() == root.Resources().Lookup(winrt::box_value(L"FoliaReadingSurfaceBrush")).as<Media::Brush>())
-                    << "the native tab silhouette uses the reading surface tint";
-                expect(!TabPart(tab, L"SelectedTabBackdrop")) << "the selected tab uses the shared backdrop visual";
+                auto tint = root.FindName(L"SelectedTabTint").as<Controls::Border>();
+                expect(tint.Background() == root.FindName(L"ReadingTint").as<Controls::Border>().Background())
+                    << "the selected tab uses the reading surface tint";
             };
             bool highContrast = winrt::Windows::UI::ViewManagement::AccessibilitySettings().HighContrast();
             for (auto material : {WindowMaterial::Solid, WindowMaterial::Mica, WindowMaterial::MicaAlt, WindowMaterial::Acrylic}) {
@@ -664,9 +987,11 @@ namespace {
                 Pump([&] { return backdropFrame.Visibility() == Visibility::Visible && selectedBackdrop.ActualWidth() > 0; });
                 expect(selectedBackdrop.SystemBackdrop() == readingBackdrop.SystemBackdrop());
                 expect(paper.Opacity() < 1.);
-                auto old = backdropFrame.Margin().Left;
+                auto visual = Hosting::ElementCompositionPreview::GetElementVisual(backdropFrame);
+                auto clip = visual.Clip().as<winrt::Microsoft::UI::Composition::RectangleClip>();
+                auto old = clip.Left();
                 tabs.SelectedItem(tabs.SelectedItem() == first ? second : first);
-                Pump([&] { return backdropFrame.Margin().Left != old; });
+                Pump([&] { return clip.Left() != old; });
                 selected();
             }
             Access::Bars(window, {true, WindowMaterial::Mica, WindowMaterial::Acrylic});

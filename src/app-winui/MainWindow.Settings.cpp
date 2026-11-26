@@ -47,6 +47,8 @@ namespace winrt::Folia::implementation
         if (themeChanged) UpdateTheme();
         if (mediaChanged) {
             editorRenderer.SetMediaDisplaySettings(appSettings.media);
+            if (otherEditorRenderer) otherEditorRenderer->SetMediaDisplaySettings(appSettings.media);
+            QueueOtherGroupRender();
         }
         if (appearanceChanged) {
             ApplyBarLayout();
@@ -62,6 +64,8 @@ namespace winrt::Folia::implementation
         if (appSettings.media == settings) return;
         appSettings.media = settings;
         editorRenderer.SetMediaDisplaySettings(settings);
+        if (otherEditorRenderer) otherEditorRenderer->SetMediaDisplaySettings(settings);
+        QueueOtherGroupRender();
         if (settingsView) settingsView->UpdateMediaSettings(settings);
         if (!SettingsActive()) RenderEditorSurface();
     }
@@ -77,10 +81,10 @@ namespace winrt::Folia::implementation
     void MainWindow::ReturnToDocumentTab()
     {
         if (!SettingsActive()) return;
-        auto tab = previousDocumentTab ? workspaceDocuments.Find(*previousDocumentTab) : nullptr;
-        if (!tab) tab = workspaceDocuments.Adjacent(workspaceDocuments.Active()->id, -1);
-        if (tab == workspaceDocuments.Active()) NewDocument();
-        else ActivateDocument(tab->id);
+        auto view = previousDocumentTab ? FindDocumentView(*previousDocumentTab) : 0;
+        if (!view) view = editorGroups.Replacement(SelectedEditorView(), -1);
+        if (view) ActivateView(view);
+        else NewDocument();
     }
 
     void MainWindow::ShowSettingsPage(bool enabled)
@@ -88,6 +92,7 @@ namespace winrt::Folia::implementation
         if (enabled)
         {
             animationController.Focus(false);
+            PlaceSettingsView(true);
             if (!settingsView)
             {
                 settingsView = std::make_shared<winrt::Folia::SettingsView>(
@@ -111,5 +116,18 @@ namespace winrt::Folia::implementation
         SettingsViewHost().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
         DocumentPages().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
         ApplyBarLayout();
+    }
+
+    void MainWindow::PlaceSettingsView(bool active) {
+        using namespace Microsoft::UI::Xaml::Controls;
+        auto view = SettingsViewHost();
+        auto target = active ? WorkspaceHost() : OtherDocumentViewport();
+        auto parent = view.Parent().try_as<Panel>();
+        if (parent && parent != target) {
+            std::uint32_t index = 0;
+            if (parent.Children().IndexOf(view, index)) parent.Children().RemoveAt(index);
+            target.Children().Append(view);
+        }
+        view.IsHitTestVisible(active);
     }
 }

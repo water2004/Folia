@@ -153,6 +153,9 @@
     <ClInclude Include="workspace\WorkspaceDocuments.h">
       <Filter>Workspace</Filter>
     </ClInclude>
+    <ClInclude Include="workspace\WorkspaceEditorGroups.h">
+      <Filter>Workspace</Filter>
+    </ClInclude>
     <ClInclude Include="workspace\WorkspaceIcons.h">
       <Filter>Workspace</Filter>
     </ClInclude>
@@ -217,6 +220,9 @@
       <Filter>Editor\Rendering\Painting</Filter>
     </ClCompile>
     <ClCompile Include="workspace\WorkspaceDocuments.cpp">
+      <Filter>Workspace</Filter>
+    </ClCompile>
+    <ClCompile Include="workspace\WorkspaceEditorGroups.cpp">
       <Filter>Workspace</Filter>
     </ClCompile>
     <ClCompile Include="workspace\WorkspaceIcons.cpp">
@@ -823,6 +829,12 @@
       <Filter>Application Shell</Filter>
     </ClCompile>
     <ClCompile Include="MainWindow.Appearance.cpp">
+      <Filter>Application Shell</Filter>
+    </ClCompile>
+    <ClCompile Include="MainWindow.Groups.cpp">
+      <Filter>Application Shell</Filter>
+    </ClCompile>
+    <ClCompile Include="MainWindow.GroupDrag.cpp">
       <Filter>Application Shell</Filter>
     </ClCompile>
     <ClCompile Include="localization\Localization.cpp">

@@ -103,5 +103,14 @@ namespace winrt::Folia::implementation {
         Grid::SetRow(DocumentViewport(), overlay ? 0 : 1);
         Grid::SetRowSpan(DocumentViewport(), overlay ? 2 : 1);
         documentTools.Configure(overlay, showTools);
+        if (editorGroups.IsSplit()) {
+            auto view = editorGroups.Find(editorGroups.Selected(OtherEditorGroup(editorGroups.ActiveGroup())));
+            auto document = view ? workspaceDocuments.Find(view->document) : nullptr;
+            const bool available = document && document->kind != WorkspaceTabKind::Settings;
+            const bool otherOverlay = available && appSettings.appearance.autoHideTools;
+            Grid::SetRow(OtherDocumentViewport(), otherOverlay ? 0 : 1);
+            Grid::SetRowSpan(OtherDocumentViewport(), otherOverlay ? 2 : 1);
+            otherDocumentTools.Configure(otherOverlay, available);
+        }
     }
 }

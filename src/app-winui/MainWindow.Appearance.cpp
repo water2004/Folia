@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "MainWindow.xaml.h"
 #include <winrt/Microsoft.UI.Composition.SystemBackdrops.h>
+#include <winrt/Microsoft.UI.Xaml.Hosting.h>
 
 import std;
 
@@ -89,7 +90,9 @@ namespace winrt::Folia::implementation
         EditorScrollBar().Width(themeProfile.layout.scrollbar_width);
         EditorScrollBarColumn().Width(Microsoft::UI::Xaml::GridLengthHelper::FromPixels(themeProfile.layout.scrollbar_width));
         scrollController.SetWidth(themeProfile.layout.scrollbar_width);
+        otherScrollController.SetWidth(themeProfile.layout.scrollbar_width);
         DocumentToolbar().MinHeight((std::max)(30.f, themeProfile.layout.status_bar_min_height));
+        OtherDocumentToolbar().MinHeight(DocumentToolbar().MinHeight());
     }
 
     void MainWindow::ApplyWorkspaceMaterial()
@@ -122,7 +125,10 @@ namespace winrt::Folia::implementation
             auto paperBackdrop = sharesBase ? nullptr : backdrop(reading);
             ReadingBackdrop().SystemBackdrop(paperBackdrop);
             SelectedTabBackdrop().SystemBackdrop(paperBackdrop);
+            OtherReadingBackdrop().SystemBackdrop(paperBackdrop);
+            RightTabBackdrop().SystemBackdrop(paperBackdrop);
             ReadingBackdrop().Visibility(paperBackdrop ? Microsoft::UI::Xaml::Visibility::Visible : Microsoft::UI::Xaml::Visibility::Collapsed);
+            OtherReadingBackdrop().Visibility(ReadingBackdrop().Visibility());
             appliedReadingMaterial = reading;
             UpdateSelectedTabBackdrop();
         }
@@ -180,12 +186,14 @@ namespace winrt::Folia::implementation
             editor->themeRevision = workspaceThemeRevision;
         }
         editorRenderer.SetTheme(themeProfile);
+        if (otherEditorRenderer) otherEditorRenderer->SetTheme(themeProfile);
         if (settingsView)
         {
             settingsView->SetSystemVariant(systemVariant);
         }
         if (!loaded.diagnostic.empty()) ShowError(loaded.diagnostic);
         RenderEditorSurface();
+        QueueOtherGroupRender();
     }
 
     void MainWindow::UpdateWorkspaceAppearance(WorkspaceAppearance const& settings)
@@ -199,47 +207,63 @@ namespace winrt::Folia::implementation
 
     void MainWindow::UpdateSelectedTabBackdrop()
     {
+        using Microsoft::UI::Composition::RectangleClip;
         using namespace Microsoft::UI::Xaml;
         using Microsoft::UI::Xaml::Controls::IControlProtected;
-        if (!ReadingBackdrop().SystemBackdrop()) {
-            SelectedTabBackdropFrame().Visibility(Visibility::Collapsed);
-            return;
-        }
+        using Microsoft::UI::Xaml::Controls::TabViewItem;
+        using Microsoft::UI::Xaml::Hosting::ElementCompositionPreview;
+        using Windows::Foundation::Numerics::float2;
         if (selectedTabBackdropUpdatePending || windowClosed) return;
         selectedTabBackdropUpdatePending = DispatcherQueue().TryEnqueue([weak = get_weak()] {
             auto window = weak.get();
             if (!window) return;
             window->selectedTabBackdropUpdatePending = false;
-            if (window->windowClosed || !window->ReadingBackdrop().SystemBackdrop()) return;
-            auto frame = window->SelectedTabBackdropFrame();
-            auto tabs = window->DocumentTabs();
-            auto tab = tabs.ContainerFromItem(tabs.SelectedItem()).try_as<FrameworkElement>();
-            auto viewer = window->TabStripScroller();
-            auto viewport = viewer ? viewer.as<IControlProtected>().GetTemplateChild(L"ScrollContentPresenter").try_as<FrameworkElement>() : nullptr;
-            if (!tab || !tab.IsLoaded() || !viewport) {
-                frame.Visibility(Visibility::Collapsed);
-                return;
-            }
+            if (window->windowClosed) return;
             auto origin = window->TabBackdropLayer();
             auto bounds = [&](FrameworkElement const& element) {
                 return element.TransformToVisual(origin).TransformBounds({0, 0,
                     static_cast<float>(element.ActualWidth()), static_cast<float>(element.ActualHeight())});
             };
-            auto item = bounds(tab);
-            auto visible = bounds(viewport);
-            // Keep the native backdrop inside the portion the tab scroller displays.
-            auto left = (std::max)(item.X, visible.X);
-            auto right = (std::min)(item.X + item.Width, visible.X + visible.Width);
-            auto top = (std::max)(0.f, item.Y);
-            auto bottom = (std::min)(item.Y + item.Height, static_cast<float>(origin.ActualHeight()));
-            if (right <= left || bottom <= top) {
-                frame.Visibility(Visibility::Collapsed);
-                return;
+            for (auto group : {EditorGroup::Left, EditorGroup::Right}) {
+                auto frame = group == EditorGroup::Left ? window->SelectedTabBackdropFrame() : window->RightTabBackdropFrame();
+                auto tabs = window->GroupTabs(group);
+                auto tab = tabs.ContainerFromItem(tabs.SelectedItem()).try_as<TabViewItem>();
+                auto viewer = window->TabStripScroller(group);
+                auto viewport = viewer ? viewer.as<IControlProtected>().GetTemplateChild(L"ScrollContentPresenter").try_as<FrameworkElement>() : nullptr;
+                if (!tab || !tab.IsLoaded() || !viewport) {
+                    frame.Visibility(Visibility::Collapsed);
+                    continue;
+                }
+                auto item = bounds(tab);
+                auto visible = bounds(viewport);
+                // Keep the backdrop inside the portion the tab scroller displays.
+                auto left = (std::max)(item.X, visible.X);
+                auto right = (std::min)(item.X + item.Width, visible.X + visible.Width);
+                auto top = (std::max)(0.f, item.Y);
+                auto bottom = (std::min)(item.Y + item.Height, static_cast<float>(origin.ActualHeight()));
+                if (right <= left || bottom <= top) {
+                    frame.Visibility(Visibility::Collapsed);
+                    continue;
+                }
+                // Both the reading tint and the optional system material follow
+                // this selection, independently of the TabViewItem drag states.
+                auto visual = ElementCompositionPreview::GetElementVisual(frame);
+                auto clip = visual.Clip().try_as<RectangleClip>();
+                if (!clip) {
+                    clip = visual.Compositor().CreateRectangleClip();
+                    visual.Clip(clip);
+                }
+                clip.Left(left);
+                clip.Top(top);
+                clip.Right(right);
+                clip.Bottom(bottom);
+                auto corners = tab.CornerRadius();
+                const auto topLeft = left == item.X ? static_cast<float>(corners.TopLeft) : 0.f;
+                const auto topRight = right == item.X + item.Width ? static_cast<float>(corners.TopRight) : 0.f;
+                clip.TopLeftRadius(float2{topLeft, topLeft});
+                clip.TopRightRadius(float2{topRight, topRight});
+                frame.Visibility(Visibility::Visible);
             }
-            frame.Margin({left, top, 0, 0});
-            frame.Width(right - left);
-            frame.Height(bottom - top);
-            frame.Visibility(Visibility::Visible);
         });
     }
 }

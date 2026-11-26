@@ -14,6 +14,7 @@
     <path id="settings" d="m10 3 4 0 .7 2.7 2 .9 2.6-.8 2 3.4-1.9 1.9v2l1.9 1.9-2 3.4-2.6-.8-2 .9L14 21h-4l-.7-2.5-2-.9-2.6.8-2-3.4 1.9-1.9v-2L2.7 9.2l2-3.4 2.6.8 2-.9ZM15 12a3 3 0 1 1-6 0 3 3 0 1 1 6 0Z"/>
     <path id="add" d="M12 5v14M5 12h14"/>
     <path id="more" d="M5.5 12h.5m5.75 0h.5m5.75 0h.5"/>
+    <path id="split-editor" d="M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2ZM12 5v14m4-9v4m-2-2h4"/>
     <path id="table-row-grip" d="M9 7h.2m5.6 0h.2M9 12h.2m5.6 0h.2M9 17h.2m5.6 0h.2"/>
     <path id="table-column-grip" d="M7 9h.2m4.8 0h.2m4.8 0h.2M7 15h.2m4.8 0h.2m4.8 0h.2"/>
     <path id="table-resize" d="M12 4v16M3 12h6m-3-3-3 3 3 3m9-3h6m-3-3 3 3-3 3"/>

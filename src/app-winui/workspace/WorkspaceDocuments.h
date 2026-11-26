@@ -9,13 +9,12 @@ namespace winrt::Folia {
     enum class WorkspaceOpenMode { Preview, Keep };
     enum class WorkspaceTabKind { Editor, Image, Settings };
 
+    std::uint64_t AllocateWorkspaceItemId();
+
     struct WorkspaceEditorDocument {
         EditorSession session;
         EditorDocumentController controller;
         std::optional<folia::platform::MathJaxRenderer> math;
-        std::optional<folia::TextPosition> viewportPosition;
-        float scrollOffset = 0;
-        float viewportInset = 0;
         bool loaded = false;
         bool opening = false;
         bool controllerAttached = false;
@@ -54,7 +53,8 @@ namespace winrt::Folia {
         std::shared_ptr<WorkspaceDocument> New(WorkspaceOpenMode mode = WorkspaceOpenMode::Keep);
         std::shared_ptr<WorkspaceDocument> FindSettings() const noexcept;
         std::shared_ptr<WorkspaceDocument> OpenSettings();
-        WorkspaceOpenResult Open(std::filesystem::path path, WorkspaceOpenMode mode);
+        WorkspaceOpenResult Open(std::filesystem::path path, WorkspaceOpenMode mode,
+            std::function<bool(std::uint64_t)> const& canReplacePreview = {});
         void Activate(std::uint64_t id);
         bool Keep(std::uint64_t id);
         bool ObserveEdit(std::uint64_t id);
@@ -63,7 +63,6 @@ namespace winrt::Folia {
         // Move the same session/controller; the source must activate its successor first.
         void TransferTo(std::uint64_t id, WorkspaceDocuments& target, std::size_t index);
         void Reorder(std::span<std::uint64_t const> ids);
-        std::shared_ptr<WorkspaceDocument> Adjacent(std::uint64_t id, int direction) const noexcept;
 
     private:
         static bool SamePath(std::filesystem::path const& left, std::filesystem::path const& right);

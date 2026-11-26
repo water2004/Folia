@@ -72,10 +72,20 @@ namespace winrt::Folia::implementation {
     }
 
     void MainWindow::ActivateDocument(std::uint64_t id) {
-        auto document = workspaceDocuments.Find(id);
+        if (!workspaceDocuments.Find(id) || windowClosed) return;
+        auto view = FindDocumentView(id);
+        if (!view) view = editorGroups.Add(editorGroups.ActiveGroup(), id);
+        ActivateView(view);
+    }
+
+    void MainWindow::ActivateView(std::uint64_t view) {
+        auto entry = editorGroups.Find(view);
+        auto document = entry ? workspaceDocuments.Find(entry->document) : nullptr;
         if (!document || windowClosed) return;
         auto previous = workspaceDocuments.Active();
-        if (previous == document) {
+        if (presentedEditorView == view) {
+            editorGroups.Select(view);
+            UpdateEditorGroupLayout();
             SelectDocumentTab();
             if (document->editor && !document->editor->loaded) LoadWorkspaceDocument(document);
             return;
@@ -94,19 +104,25 @@ namespace winrt::Folia::implementation {
             sidebarController.Detach();
             scrollController.Stop();
             if (footnoteFlyout) footnoteFlyout.Hide();
-            editor->viewportPosition = editorRenderer.ViewportPosition();
-            editor->scrollOffset = editorRenderer.ScrollOffset();
-            if (editor->viewportPosition)
-                if (auto bounds = editorRenderer.CaretBounds(*editor->viewportPosition)) editor->viewportInset = bounds->top;
+            SaveEditorView(presentedEditorView);
             editor->controller.SuspendPresentation();
             ++editor->openSerial;
             editor->opening = false;
             editor->math = editorRenderer.TakeMathCache();
-        } else if (previous->kind == WorkspaceTabKind::Image) ClearImagePreview();
+        } else if (previous->kind == WorkspaceTabKind::Image) {
+            if (editorGroups.IsSplit() && WorkspaceImage().Source()) {
+                otherImageDocument = previous->id;
+                OtherWorkspaceImage().Source(WorkspaceImage().Source());
+            }
+            ClearImagePreview();
+        }
         const bool enteringSettings = document->kind == WorkspaceTabKind::Settings;
         const bool leavingSettings = previous->kind == WorkspaceTabKind::Settings;
         if (enteringSettings) previousDocumentTab = previous->id;
-        workspaceDocuments.Activate(id);
+        workspaceDocuments.Activate(document->id);
+        editorGroups.Select(view);
+        presentedEditorView = view;
+        UpdateEditorGroupLayout();
         if (enteringSettings || leavingSettings) ShowSettingsPage(enteringSettings);
         UpdateWorkspaceContent();
         ExternalChangeInfoBar().IsOpen(false);
@@ -129,29 +145,29 @@ namespace winrt::Folia::implementation {
             editorRenderer.RestoreMathCache(std::move(*editor->math));
             editor->math.reset();
         }
+        if (entry->selection) editor->session.SetSelection(*entry->selection);
         editorRenderer.SetScrollOffset(0);
         InitializeTextInput();
         AttachControllers();
         UpdateSourceModeUi();
+        if (editorGroups.IsSplit()) ReadingMotionFrame().UpdateLayout();
         RenderEditorSurface();
-        if (editor->viewportPosition) {
-            editorRenderer.ScrollToPosition(*editor->viewportPosition, winrt::Folia::EditorScrollAlignment::Start);
-            RenderEditorSurface();
-            if (auto bounds = editorRenderer.CaretBounds(*editor->viewportPosition))
-                editorRenderer.ScrollBy(bounds->top - editor->viewportInset);
-        } else editorRenderer.SetScrollOffset(editor->scrollOffset);
+        RestoreEditorView(*entry);
         if (FindReplaceBar().Visibility() == Visibility::Visible) RefreshSearch(false);
-        else RenderEditorSurface();
         UpdateLoadingState();
         if (!editor->loaded) LoadWorkspaceDocument(document);
         if (leavingSettings) EditorSurface().Focus(FocusState::Programmatic);
     }
 
     void MainWindow::NewDocument() {
+        NewDocumentInGroup(editorGroups.ActiveGroup());
+    }
+
+    void MainWindow::NewDocumentInGroup(EditorGroup group) {
         if (closePending || closingDocument) return;
         textInputController.FocusLeave();
         auto document = workspaceDocuments.New();
-        ActivateDocument(document->id);
+        ActivateView(editorGroups.Add(group, document->id));
         RefreshDocumentTabs();
         EditorSurface().Focus(FocusState::Programmatic);
     }
@@ -180,8 +196,14 @@ namespace winrt::Folia::implementation {
             }
             textInputController.FocusLeave();
             auto previous = workspaceDocuments.Active();
-            auto result = workspaceDocuments.Open(path, mode);
-            ActivateDocument(result.document->id);
+            auto group = editorGroups.ActiveGroup();
+            auto result = workspaceDocuments.Open(path, mode, [this, group](auto candidate) {
+                return editorGroups.ViewFor(group, candidate) && editorGroups.ViewCount(candidate) == 1;
+            });
+            auto id = result.document->id;
+            auto view = editorGroups.Add(group, id);
+            if (editorGroups.ViewCount(id) > 1) workspaceDocuments.Keep(id);
+            ActivateView(view);
             RefreshDocumentTabs();
             if (result.document->editor && result.document->editor->loaded)
                 recentWorkspace.Remember(RecentWorkspaceKind::File, result.document->path);
@@ -229,7 +251,6 @@ namespace winrt::Folia::implementation {
     void MainWindow::UpdateLoadingState() {
         auto movable = !closePending && !closingDocument && !relocatingFiles;
         UpdateTabTransferAvailability();
-        DocumentTabs().CanDragTabs(movable);
         auto const& editor = workspaceDocuments.Active()->editor;
         bool loading = editor && (editor->opening || editor->controller.IsLoading());
         auto showProgress = loading || operationActive;
@@ -241,5 +262,7 @@ namespace winrt::Folia::implementation {
         SaveAsButton().IsEnabled(editor && !loading);
         SourceModeButton().IsEnabled(editor && !loading);
         EncodingButton().IsEnabled(editor && !loading && editor->session.HasFile());
+        SplitEditorButton().IsEnabled(movable && !editorGroups.IsSplit() && !loading && !SettingsActive());
+        QueueOtherGroupRender();
     }
 }

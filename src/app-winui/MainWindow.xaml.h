@@ -22,6 +22,7 @@
 #include "MainWindow.g.h"
 #include "MainWindow.Lifecycle.h"
 #include "workspace/WorkspaceDocuments.h"
+#include "workspace/WorkspaceEditorGroups.h"
 #include "workspace/FolderExplorerController.h"
 #include "workspace/RecentWorkspace.h"
 #include "workspace/DocumentTools.h"
@@ -55,18 +56,26 @@ namespace winrt::Folia::implementation
         friend struct App;
         struct DocumentTab {
             Windows::Foundation::IInspectable item{nullptr};
+            std::uint64_t document = 0;
             Microsoft::UI::Xaml::FrameworkElement::SizeChanged_revoker closeButtonSizeChanged;
             winrt::weak_ref<MainWindow> owner;
             winrt::weak_ref<MainWindow> tearOutWindow;
         };
         void RegisterTabTransferHandlers();
+        void RegisterGroupDragHandlers(EditorGroup group);
+        void RegisterGroupDragSurface();
+        struct GroupDropTarget { EditorGroup group; std::size_t index; float indicatorX; };
+        std::optional<GroupDropTarget> GroupDropAt(Windows::Foundation::Point point, std::uint64_t view);
+        void UpdateGroupDrag(Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args, bool releasing);
+        void CancelGroupDrag();
+        void DropGroupTabOutside(std::uint64_t view);
         void UpdateTabTransferAvailability();
         void RefreshTabCaptionRegion();
         MainWindow* CreateTabWindow();
         void SynchronizeTabOrder();
         void QueueTabOrderSync();
         bool CanAcceptTab(std::shared_ptr<DocumentTab> const& tab) const;
-        bool TransferTab(std::shared_ptr<DocumentTab> tab, std::size_t index);
+        bool TransferTab(std::shared_ptr<DocumentTab> tab, std::size_t index, EditorGroup group = EditorGroup::Left);
         std::shared_ptr<DocumentTab> FindTransferTab(Windows::Foundation::IInspectable const& item);
         MainWindow* BeginTabTearOut(std::shared_ptr<DocumentTab> const& tab);
         bool CompleteTabTearOut(std::shared_ptr<DocumentTab> const& tab);
@@ -89,6 +98,8 @@ namespace winrt::Folia::implementation
         bool HasActiveEditor() const noexcept { return bool(workspaceDocuments.Active()->editor); }
         bool IsActiveDocument(std::uint64_t id) const noexcept;
         void ActivateDocument(std::uint64_t id);
+        void ActivateView(std::uint64_t view);
+        void NewDocumentInGroup(EditorGroup group);
         void NewDocument();
         winrt::fire_and_forget OpenWorkspaceFile(std::filesystem::path path, winrt::Folia::WorkspaceOpenMode mode);
         winrt::fire_and_forget LoadWorkspaceDocument(std::shared_ptr<winrt::Folia::WorkspaceDocument> document);
@@ -106,14 +117,32 @@ namespace winrt::Folia::implementation
         bool BeginTabMiddlePress(Windows::Graphics::PointInt32 point);
         bool ReleaseTabMiddlePress(Windows::Graphics::PointInt32 point);
         void CancelTabMiddlePress();
-        Microsoft::UI::Xaml::Controls::ScrollViewer TabStripScroller();
-        bool ScrollTabsWithWheel(int delta);
+        Microsoft::UI::Xaml::Controls::TabView GroupTabs(EditorGroup group);
+        Microsoft::UI::Xaml::Controls::ScrollViewer TabStripScroller(EditorGroup group = EditorGroup::Left);
+        bool ScrollTabsWithWheel(int delta, EditorGroup group = EditorGroup::Left);
+        void RegisterGroupTabs(EditorGroup group);
+        void PrepareGroupTabStrip(EditorGroup group);
         void RefreshDocumentTabs();
         void SelectDocumentTab();
         void UpdateDocumentTab(std::uint64_t id);
+        void UpdateTabHeader(Microsoft::UI::Xaml::Controls::TabViewItem const&, WorkspaceDocument const&);
+        std::uint64_t SelectedEditorView() const;
+        std::uint64_t FindDocumentView(std::uint64_t document) const;
+        void RegisterEditorGroups();
+        void SplitEditor();
+        bool MoveEditorView(std::uint64_t view, EditorGroup group, std::size_t index);
+        void UpdateEditorGroupLayout();
+        void UpdateReadingGroupCorners();
+        void ResizeEditorGroups(double delta);
+        void SaveEditorView(std::uint64_t view);
+        void RestoreEditorView(WorkspaceEditorView const& view);
+        void QueueOtherGroupRender();
+        void RenderOtherGroup();
+        void ReleaseOtherGroupRenderer();
+        bool FocusOtherGroup();
         void UpdateWorkspaceLayout();
         void UpdateChromeMetrics();
-        Microsoft::UI::Xaml::Controls::Button NewTabButton();
+        Microsoft::UI::Xaml::Controls::Button NewTabButton(EditorGroup group = EditorGroup::Left);
         void ApplyBarLayout();
         void RegisterWorkspaceLayout();
         void SelectWorkspacePane(bool outline);
@@ -124,6 +153,7 @@ namespace winrt::Folia::implementation
         bool DispatchApplicationAction(std::string_view action);
         void RegisterApplicationShortcuts();
         winrt::fire_and_forget CloseDocumentAsync(std::uint64_t id);
+        winrt::fire_and_forget CloseEditorViewAsync(std::uint64_t view);
         void RegisterWindowHandlers();
         winrt::fire_and_forget ConfirmWindowCloseAsync();
         winrt::Windows::Foundation::IAsyncOperation<winrt::Microsoft::UI::Xaml::Controls::ContentDialogResult> ConfirmUnsavedChangesAsync(std::uint64_t id);
@@ -142,6 +172,7 @@ namespace winrt::Folia::implementation
         void OpenSettingsTab();
         void ReturnToDocumentTab();
         void ShowSettingsPage(bool enabled);
+        void PlaceSettingsView(bool active);
         void SetDocumentCommandsVisible(bool visible);
         std::optional<winrt::hstring> ApplySettings(winrt::Folia::AppSettings const& settings);
         void UpdateMediaSettings(winrt::Folia::MediaDisplaySettings const& settings);
@@ -165,6 +196,8 @@ namespace winrt::Folia::implementation
             folia::platform::editor::EditorVisualFootnoteHit const& hit,
             winrt::Windows::Foundation::Point position);
         void NavigateToFootnote(folia::TextPosition position);
+        void HandleEditorPointerPressed(Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args);
+        void ShowEditorContextMenu(Microsoft::UI::Xaml::Input::ContextRequestedEventArgs const& args);
         void HandlePointerWheel(winrt::Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args);
         void ShowError(winrt::hstring const& text);
         winrt::hstring WorkspaceOpenError(RecentWorkspaceKind kind, std::filesystem::path const& path,
@@ -177,6 +210,28 @@ namespace winrt::Folia::implementation
         HWND WindowHandle();
 
         winrt::Folia::WorkspaceDocuments workspaceDocuments;
+        WorkspaceEditorGroups editorGroups;
+        std::uint64_t presentedEditorView = 0;
+        double splitFraction = .5;
+        std::unique_ptr<EditorSurfaceRenderer> otherEditorRenderer;
+        EditorScrollController otherScrollController;
+        EditorAnimationController otherAnimationController;
+        std::uint64_t otherRenderedView = 0;
+        std::uint64_t otherImageDocument = 0;
+        bool otherGroupRenderPending = false;
+        struct GroupTabDrag {
+            std::uint64_t view;
+            Windows::Foundation::Point origin;
+            Microsoft::UI::Xaml::Input::Pointer pointer;
+            bool started = false;
+        };
+        std::optional<GroupTabDrag> groupTabDrag;
+        struct TabStripParts {
+            winrt::weak_ref<Microsoft::UI::Xaml::FrameworkElement> list;
+            winrt::weak_ref<Microsoft::UI::Xaml::Controls::ScrollViewer> scroller;
+            std::array<winrt::weak_ref<Microsoft::UI::Xaml::Controls::Primitives::RepeatButton>, 2> arrows;
+        };
+        std::array<TabStripParts, 2> tabStripParts;
         winrt::Folia::FolderExplorerController folderExplorer;
         winrt::Folia::RecentWorkspace recentWorkspace;
         winrt::Folia::EditorSurfaceRenderer editorRenderer;
@@ -212,6 +267,7 @@ namespace winrt::Folia::implementation
         bool tabRegionsPending = false;
         bool updatingTabs = false;
         DocumentTools documentTools;
+        DocumentTools otherDocumentTools;
         WorkspaceSidebarMotion sidebarMotion;
         std::optional<WindowMaterial> appliedMaterial;
         std::optional<WindowMaterial> appliedReadingMaterial;
@@ -228,6 +284,8 @@ namespace winrt::Folia::implementation
         std::uint64_t workspaceThemeRevision = 1;
         std::unordered_map<std::uint64_t, std::shared_ptr<DocumentTab>> tabItems;
         Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> tabSource =
+            winrt::single_threaded_observable_vector<Windows::Foundation::IInspectable>();
+        Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> rightTabSource =
             winrt::single_threaded_observable_vector<Windows::Foundation::IInspectable>();
         std::shared_ptr<DocumentTab> draggingTab;
         winrt::Folia::detail::TabDragCompletionSubscription tabDragEnded;

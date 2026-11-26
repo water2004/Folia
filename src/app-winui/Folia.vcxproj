@@ -213,6 +213,7 @@
     <ClInclude Include="editor\interaction\EditorKeyboardController.h" />
     <ClInclude Include="editor\document\EditorDocumentController.h" />
     <ClInclude Include="workspace\WorkspaceDocuments.h" />
+    <ClInclude Include="workspace\WorkspaceEditorGroups.h" />
     <ClInclude Include="workspace\TabDragPresentation.h" />
     <ClInclude Include="workspace\DocumentTools.h" />
     <ClInclude Include="workspace\WorkspaceAppearance.h" />
@@ -754,6 +755,7 @@
     <ClCompile Include="editor\interaction\EditorCodeLanguageController.cpp" />
     <ClCompile Include="editor\document\EditorDocumentController.cpp" />
     <ClCompile Include="workspace\WorkspaceDocuments.cpp" />
+    <ClCompile Include="workspace\WorkspaceEditorGroups.cpp" />
     <ClCompile Include="workspace\TabDragPresentation.cpp" />
     <ClCompile Include="workspace\DocumentTools.cpp" />
     <ClCompile Include="workspace\WorkspaceSidebarMotion.cpp" />
@@ -866,6 +868,8 @@
     <ClCompile Include="MainWindow.Commands.cpp" />
     <ClCompile Include="MainWindow.Documents.cpp" />
     <ClCompile Include="MainWindow.Tabs.cpp" />
+    <ClCompile Include="MainWindow.Groups.cpp" />
+    <ClCompile Include="MainWindow.GroupDrag.cpp" />
     <ClCompile Include="MainWindow.Workspace.cpp" />
     <ClCompile Include="MainWindow.TabTransfer.cpp" />
     <ClCompile Include="App.Windows.cpp" />

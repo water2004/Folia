@@ -82,6 +82,7 @@ namespace winrt::Folia::implementation {
         }
         ImagePreviewProgress().IsActive(false);
         ImagePreviewProgress().Visibility(Visibility::Collapsed);
+        QueueOtherGroupRender();
     }
 
     void MainWindow::ReloadWorkspaceFile() {

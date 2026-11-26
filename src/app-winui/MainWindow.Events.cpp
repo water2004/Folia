@@ -119,7 +119,10 @@ namespace winrt::Folia::implementation
         Closed(WindowEvent([this](auto const&, auto const&)
         {
             windowClosed = true;
+            CancelGroupDrag();
             documentTools.Stop();
+            otherDocumentTools.Stop();
+            ReleaseOtherGroupRenderer();
             sidebarMotion.Stop();
             inlineCompletion.reset();
             tabDragEnded.Reset();
@@ -170,6 +173,7 @@ namespace winrt::Folia::implementation
                 if (std::exchange(editorRasterizationScale, scale) == scale) return;
                 UpdateChromeMetrics();
                 ResizeEditorSurface(EditorSurface().ActualWidth(), EditorSurface().ActualHeight());
+                QueueOtherGroupRender();
             }));
         }));
 
@@ -270,21 +274,7 @@ namespace winrt::Folia::implementation
 
         EditorSurface().ContextRequested(WindowEvent([this](auto const&, auto const& args)
         {
-            if (!HasActiveEditor() || documentController().IsLoading()) return;
-            auto surface = EditorSurface();
-            Windows::Foundation::Point point{};
-            auto location = args.TryGetPosition(surface, point) ? std::optional{point} : std::nullopt;
-            auto menu = pointerController.ContextMenuAt(location);
-            if (!menu) menu = documentContextMenu;
-            if (!location)
-                if (auto bounds = editorRenderer.CaretBounds(editorSession().Selection().active))
-                    location = Windows::Foundation::Point{bounds->left, bounds->bottom};
-            Microsoft::UI::Xaml::Controls::Primitives::FlyoutShowOptions options;
-            if (location) options.Position(*location);
-            if (activeEditorContextMenu && activeEditorContextMenu != menu) activeEditorContextMenu.Hide();
-            activeEditorContextMenu = menu;
-            args.Handled(true);
-            menu.ShowAt(surface, options);
+            ShowEditorContextMenu(args);
         }));
 
         EditorSurface().ContextCanceled(WindowEvent([this](auto const&, auto const&)
@@ -294,20 +284,7 @@ namespace winrt::Folia::implementation
 
         EditorSurface().PointerPressed(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args)
         {
-            auto point = args.GetCurrentPoint(EditorSurface());
-            if (point.Properties().IsLeftButtonPressed()) {
-                auto at = point.Position();
-                if (auto code = editorRenderer.CodeLanguageAt(static_cast<float>(at.X), static_cast<float>(at.Y))) {
-                    scrollController.Stop();
-                    editorSession().SetSelection(folia::TextSelection::caret(code->contentStart));
-                    textInputController.NotifySelectionChanged();
-                    RenderEditorSurface();
-                    codeLanguageController.Open(code->contentStart.container_id);
-                    args.Handled(true);
-                    return;
-                }
-            }
-            pointerController.PointerPressed(args);
+            HandleEditorPointerPressed(args);
         }));
 
         EditorSurface().PointerMoved(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args)

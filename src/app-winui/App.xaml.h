@@ -17,7 +17,7 @@ namespace winrt::Folia::implementation
         void OnLaunched(Microsoft::UI::Xaml::LaunchActivatedEventArgs const&);
         Microsoft::UI::Xaml::Window CreateMainWindow(winrt::hstring const& path = {});
         MainWindow* FindMainWindow(Microsoft::UI::WindowId id) const;
-        MainWindow* FindDocumentWindow(std::uint64_t id) const;
+        MainWindow* FindTabWindow(std::uint64_t view) const;
         void UpdateWindowViewSettings(MainWindow const* source, MediaDisplaySettings const& media, WorkspaceAppearance const& appearance);
 
     private:

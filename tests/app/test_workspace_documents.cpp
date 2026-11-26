@@ -60,7 +60,7 @@ namespace {
             documents.TransferTo(photo.document->id, receiving, 0);
             expect(receiving.Find(photo.document->id) == photo.document && !documents.Find(photo.document->id));
         };
-        "workspace transfer moves the original session and preserves source history and viewport"_test = [] {
+        "workspace transfer moves the original session and preserves source history"_test = [] {
             Fixture fixture(false, L"");
             WorkspaceDocuments source, target;
             auto document = source.Active();
@@ -75,9 +75,6 @@ namespace {
             auto text = document->editor->session.TextUtf8();
             auto selection = document->editor->session.Selection();
             auto state = document->editor->session.ContentState();
-            document->editor->viewportPosition = selection.active;
-            document->editor->scrollOffset = 1234;
-            document->editor->viewportInset = -3;
             document->editor->math.emplace();
             auto cache = &*document->editor->math;
             document->editor->controller.SuspendPresentation();
@@ -88,7 +85,6 @@ namespace {
             expect(target.Find(document->id).get() == document.get());
             expect(target.Items().front() == document && target.Active() == targetActive);
             expect(document->editor->controller.IsModified() && document->kept && document->editor->session.IsSourceMode());
-            expect(document->editor->viewportPosition == selection.active && document->editor->scrollOffset == 1234.f && document->editor->viewportInset == -3.f);
             expect(&*document->editor->math == cache);
             expect(document->editor->session.Selection() == selection && document->editor->session.ContentState() == state);
             expect(document->editor->session.TextUtf8() == text);
@@ -170,8 +166,9 @@ namespace {
             expect(documents.Active() == a);
             std::array order{c->id, a->id, b->id};
             documents.Reorder(order);
-            expect(documents.Adjacent(a->id, 1) == b);
-            expect(documents.Adjacent(c->id, -1) == b);
+            expect(documents.Items()[0] == c);
+            expect(documents.Items()[1] == a);
+            expect(documents.Items()[2] == b);
             expect(throws([&] { documents.Remove(a->id); }));
             documents.Activate(c->id);
             expect(documents.Remove(a->id));

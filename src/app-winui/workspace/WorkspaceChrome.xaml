@@ -52,8 +52,7 @@
         <Setter Property="CornerRadius" Value="5"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
     </Style>
-    <!-- Keep the native ScrollViewer and repeat-button contracts. Only the
-         overflow presentation changes; selection/reordering remain TabView's. -->
+    <!-- Folia owns the overflow arrows. Selection and reordering remain TabView's. -->
     <Style x:Key="TabViewScrollButtonStyle" TargetType="RepeatButton">
         <Setter Property="Width" Value="28"/><Setter Property="Height" Value="28"/>
         <Setter Property="Padding" Value="0"/><Setter Property="IsTabStop" Value="False"/>
@@ -84,7 +83,7 @@
                     <Border x:Name="RightBottomBorderLine" Grid.Column="2" Height="1" VerticalAlignment="Bottom" Background="Transparent"/>
                     <Border x:Name="ScrollDecreaseButtonContainer" Margin="4,0" VerticalAlignment="Center"
                             Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}">
-                        <RepeatButton x:Name="ScrollDecreaseButton" Delay="50" Interval="100" Style="{StaticResource TabViewScrollButtonStyle}">
+                        <RepeatButton x:Name="PreviousTabScrollArrow" Delay="50" Interval="100" Style="{StaticResource TabViewScrollButtonStyle}">
                             <Viewbox Width="16" Height="16"><Canvas Width="16" Height="16">
                                 <Path Width="16" Height="16" Data="M10 4L6 8L10 12" Stroke="{ThemeResource TextFillColorPrimaryBrush}"
                                       StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
@@ -94,7 +93,7 @@
                     <ScrollContentPresenter x:Name="ScrollContentPresenter" Grid.Column="1" TabFocusNavigation="Once"/>
                     <Border x:Name="ScrollIncreaseButtonContainer" Grid.Column="2" Margin="4,0" VerticalAlignment="Center"
                             Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}">
-                        <RepeatButton x:Name="ScrollIncreaseButton" Delay="50" Interval="100" Style="{StaticResource TabViewScrollButtonStyle}">
+                        <RepeatButton x:Name="NextTabScrollArrow" Delay="50" Interval="100" Style="{StaticResource TabViewScrollButtonStyle}">
                             <Viewbox Width="16" Height="16"><Canvas Width="16" Height="16">
                                 <Path Width="16" Height="16" Data="M10 4L6 8L10 12" Stroke="{ThemeResource TextFillColorPrimaryBrush}"
                                       StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round">
