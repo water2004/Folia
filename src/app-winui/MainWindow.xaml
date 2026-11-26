@@ -154,6 +154,10 @@
                 <SolidColorBrush x:Key="TabViewBorderBrush" Color="Transparent"/>
                 <SolidColorBrush x:Key="TabViewSelectedItemBorderBrush" Color="Transparent"/>
                 <Thickness x:Key="TabViewSelectedItemBorderThickness">0</Thickness>
+                <!-- Preserve the width of the close slot and center its square hover surface. -->
+                <x:Double x:Key="TabViewItemHeaderCloseButtonWidth">24</x:Double>
+                <x:Double x:Key="TabViewItemHeaderCloseButtonHeight">24</x:Double>
+                <Thickness x:Key="TabViewItemHeaderCloseMargin">8,0,4,0</Thickness>
                 <Style x:Key="TabViewButtonStyle" TargetType="Button" BasedOn="{StaticResource WorkspaceToolActionStyle}"/>
                 <Thickness x:Key="TabViewItemAddButtonContainerPadding">4,5,4,5</Thickness>
             </TabView.Resources>

@@ -115,7 +115,16 @@ namespace {
             }
             // Leave the fixture's original tab as the only document.
             tabs.SelectedItem(secondItem);
-            Invoke(Descendant(second, L"CloseButton").as<Button>());
+            auto close = Descendant(second, L"CloseButton").as<Button>();
+            expect(VisualStateManager::GoToState(second, L"CloseButtonVisible", false));
+            f.root.UpdateLayout();
+            auto fill = Descendant(close, L"ContentPresenter").as<ContentPresenter>();
+            auto normal = fill.Background();
+            expect(VisualStateManager::GoToState(close, L"PointerOver", false));
+            expect(fill.Background() && fill.Background() != normal);
+            expect(std::abs(fill.ActualWidth() - 24.) < 1. && std::abs(fill.ActualHeight() - 24.) < 1.)
+                << std::format("close hover measures {:.2f} × {:.2f} DIP", fill.ActualWidth(), fill.ActualHeight());
+            Invoke(close);
             Pump([&] { return tabs.ContainerFromItem(secondItem) == nullptr; });
             expect(tabs.SelectedItem() == firstItem);
         };
