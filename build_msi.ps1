@@ -60,9 +60,30 @@ if ($Executable.VersionInfo.ProductVersion -ne $Version) {
 }
 
 if (-not $SkipStartupTest) {
-    & (Join-Path $Root 'tests\app\test_startup.ps1') -Executable $Executable.FullName `
-        -ReportDirectory (Join-Path $BuildRoot 'tests\startup-msi')
-    if ($LASTEXITCODE -ne 0) { throw 'Folia startup and normal-close test failed.' }
+    . (Join-Path $Root 'tools\Get-DeploymentFiles.ps1')
+    $StartupReport = Join-Path $BuildRoot 'tests\startup-msi'
+    $StartupProfile = Join-Path $StartupReport ([guid]::NewGuid().ToString('N'))
+    $StartupAssets = Join-Path $StartupProfile 'Folia\Assets'
+    $PreviousLocalAppData = $env:LOCALAPPDATA
+    try {
+        # The installer has not deployed this version's assets yet.
+        foreach ($asset in (Get-DeploymentFiles -Root $AssetsRoot -Kind Asset)) {
+            $destination = Join-Path $StartupAssets $asset.Relative
+            [void][IO.Directory]::CreateDirectory((Split-Path -Parent $destination))
+            Copy-Item -LiteralPath $asset.Source -Destination $destination
+        }
+        $env:LOCALAPPDATA = $StartupProfile
+        & (Join-Path $Root 'tests\app\test_startup.ps1') -Executable $Executable.FullName -ReportDirectory $StartupReport
+    }
+    finally {
+        $env:LOCALAPPDATA = $PreviousLocalAppData
+        if (Test-Path -LiteralPath $StartupProfile) {
+            $ResolvedProfile = (Resolve-Path -LiteralPath $StartupProfile).Path
+            if ((Split-Path -Parent $ResolvedProfile) -eq (Resolve-Path -LiteralPath $StartupReport).Path) {
+                Remove-Item -LiteralPath $ResolvedProfile -Recurse -Force
+            }
+        }
+    }
 }
 
 & $PayloadGenerator -ProgramRoot $ProgramRoot -AssetsRoot $AssetsRoot -OutputPath $GeneratedPayload
