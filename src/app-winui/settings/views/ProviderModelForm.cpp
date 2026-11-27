@@ -34,12 +34,13 @@ namespace winrt::Folia::settings_ui {
         }
     }
 
-    ProviderModelForm::ProviderModelForm(models::ConfiguredModel draft, models::ProviderRoute const& route)
-        : draft_(std::move(draft)), route_(route) {}
+    ProviderModelForm::ProviderModelForm(models::ConfiguredModel draft, models::ModelProfile const& connection)
+        : connectionFormat_(connection.webFormat), draft_(std::move(draft)),
+          route_(*models::Preset(connection.providerType).Find(connection.protocol)) {}
 
-    std::shared_ptr<ProviderModelForm> ProviderModelForm::Create(models::ConfiguredModel model, models::ProviderRoute const& route,
+    std::shared_ptr<ProviderModelForm> ProviderModelForm::Create(models::ConfiguredModel model, models::ModelProfile const& connection,
         Save save, Command cancel, Command remove, Command fetch) {
-        auto form = std::shared_ptr<ProviderModelForm>(new ProviderModelForm(std::move(model), route));
+        auto form = std::shared_ptr<ProviderModelForm>(new ProviderModelForm(std::move(model), connection));
         form->Build(std::move(save), std::move(cancel), std::move(remove), std::move(fetch));
         return form;
     }
@@ -76,6 +77,7 @@ namespace winrt::Folia::settings_ui {
             model.maxOutputTokens = metadata.maxOutputTokens;
             model.vision = metadata.vision;
             model.webSearch = metadata.webSearch;
+            model.webFetch = metadata.webFetch;
             model.searchFormat = metadata.searchFormat;
             self->Fill(model);
         });
@@ -106,23 +108,13 @@ namespace winrt::Folia::settings_ui {
         if (!route_.search.empty()) {
             search_ = cards::Switch();
             capabilities.Children().Append(cards::Setting(
-                {Localize(L"ChatModelWebSearch"), Localize(L"ChatModelWebSearchHint"), cards::Icon(WorkspaceIcon::Network)},
+                {Localize(route_.Pages(connectionFormat_ ? connectionFormat_ : draft_.searchFormat) == folia::ai::PageAccess::WithSearch ? L"ChatSearchAndBrowse" : L"ChatModelWebSearch"), Localize(L"ChatModelWebSearchHint"), cards::Icon(WorkspaceIcon::Network)},
                 search_, cards::Placement::Wrap));
         }
-        if (route_.search.size() > 1) {
-            searchFormat_ = Choice();
-            cards::ChoiceStyle(searchFormat_);
-            searchFormat_.Items().Append(box_value(Localize(route_.requiresSearchFormat ? L"AISearchFormatChoose" : L"AISearchFormatDefault")));
-            for (auto format : route_.search) {
-                using enum folia::ai::WebSearchDialect;
-                auto label = format == Standard ? L"AISearchFormatStandard" : format == DeepSeek ? L"AISearchFormatDeepSeek" : L"AISearchFormatOpenRouter";
-                searchFormat_.Items().Append(box_value(Localize(label)));
-            }
-            capabilities.Children().Append(cards::Setting({Localize(L"AISearchFormat"), {}, cards::Icon(WorkspaceIcon::Source)},
-                searchFormat_, cards::Placement::Wrap));
-            search_.Toggled([weak](auto const&, auto const&) {
-                if (auto self = weak.lock()) self->searchFormat_.IsEnabled(self->search_.IsOn());
-            });
+        if (route_.HasPageTool()) {
+            readPages_ = cards::Switch();
+            readPagesRow_ = cards::Setting({Localize(L"ChatModelPageRead"), {}, cards::Icon(WorkspaceIcon::Document)}, readPages_);
+            capabilities.Children().Append(readPagesRow_);
         }
         panel_.Children().Append(cards::Section(Localize(L"ChatModelCapabilities"), capabilities));
 
@@ -145,6 +137,13 @@ namespace winrt::Folia::settings_ui {
         Fill(draft_);
     }
 
+    void ProviderModelForm::RefreshPageCapability() {
+        if (!readPagesRow_) return;
+        auto format = connectionFormat_ ? connectionFormat_ : draft_.searchFormat;
+        bool show = folia::ai::SeparatePageTool(route_.Pages(format)) || (!format && route_.requiresSearchFormat);
+        readPagesRow_.Visibility(show ? Visibility::Visible : Visibility::Collapsed);
+    }
+
     void ProviderModelForm::Fill(models::ConfiguredModel const& model) {
         name_.Text(to_hstring(model.name));
         upstream_.Text(to_hstring(model.upstream));
@@ -152,11 +151,9 @@ namespace winrt::Folia::settings_ui {
         output_.Text(FormatLimit(model.maxOutputTokens));
         vision_.IsOn(model.vision);
         search_.IsOn(model.webSearch);
-        if (searchFormat_) {
-            auto item = model.searchFormat ? std::ranges::find(route_.search, *model.searchFormat) : route_.search.end();
-            searchFormat_.SelectedIndex(item == route_.search.end() ? 0 : static_cast<int>(item - route_.search.begin() + 1));
-            searchFormat_.IsEnabled(model.webSearch);
-        }
+        draft_.searchFormat = model.searchFormat;
+        readPages_.IsOn(model.webFetch);
+        RefreshPageCapability();
         levels_.clear();
         efforts_.Children().Clear();
         auto presets = EffortPresets(route_);
@@ -208,13 +205,7 @@ namespace winrt::Folia::settings_ui {
         model.effort = SelectedEffort(defaultEffort_);
         model.vision = vision_.IsOn();
         model.webSearch = !route_.search.empty() && search_.IsOn();
-        model.searchFormat.reset();
-        if (searchFormat_ && searchFormat_.SelectedIndex() > 0)
-            model.searchFormat = route_.search.at(searchFormat_.SelectedIndex() - 1);
-        if (model.webSearch && route_.requiresSearchFormat && !model.searchFormat) {
-            cards::Status(validation_, Localize(L"AISearchFormatChoose"), true);
-            return;
-        }
+        model.webFetch = readPagesRow_ && readPagesRow_.Visibility() == Visibility::Visible && readPages_.IsOn();
         save(std::move(model));
     }
 

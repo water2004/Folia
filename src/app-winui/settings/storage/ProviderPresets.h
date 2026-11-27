@@ -11,6 +11,9 @@ namespace winrt::Folia::models {
         std::vector<folia::ai::WebSearchDialect> search;
         bool requiresSearchFormat = false;
         std::vector<std::string> effortChoices;
+        std::map<folia::ai::WebSearchDialect, folia::ai::PageAccess> pages;
+        folia::ai::PageAccess Pages(std::optional<folia::ai::WebSearchDialect> format) const;
+        bool HasPageTool() const;
     };
     struct ProviderPreset {
         std::string id, name;

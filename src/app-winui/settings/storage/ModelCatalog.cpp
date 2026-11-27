@@ -29,6 +29,7 @@ namespace winrt::Folia::models {
             if (auto size = data.value("maxOutputTokens", 0u)) model.maxOutputTokens = size;
             if (auto mode = data.find("searchFormat"); mode != data.end())
                 model.searchFormat = folia::ai::ParseSearchDialect(mode->get_ref<std::string const&>());
+            model.webFetch = data.value("webFetch", false);
             model.vision = data.value("vision", false);
             model.enabled = data.value("enabled", true);
             return model;
@@ -46,6 +47,8 @@ namespace winrt::Folia::models {
             profile.iconPng = data.value("iconPng", "");
             profile.fullUrl = data.value("fullUrl", false);
             profile.catalogUrl = data.value("catalogUrl", "");
+            profile.allowWebFetch = data.value("allowWebFetch", false);
+            if (data.contains("webFormat")) profile.webFormat = folia::ai::ParseSearchDialect(data.at("webFormat").get<std::string>());
             profile.allowWebSearch = data.value("allowWebSearch", true);
             auto models = data.find("configuredModels");
             if (models != data.end())
@@ -92,7 +95,7 @@ namespace winrt::Folia::models {
                     throw std::invalid_argument("Invalid model configuration");
                 Json entry{{"id", model.id}, {"name", model.name}, {"upstream", model.upstream},
                     {"effort", model.effort}, {"efforts", model.efforts}, {"webSearch", model.webSearch},
-                    {"vision", model.vision}, {"enabled", model.enabled}};
+                    {"webFetch", model.webFetch}, {"vision", model.vision}, {"enabled", model.enabled}};
                 if (model.searchFormat) entry["searchFormat"] = folia::ai::SearchDialectId(*model.searchFormat);
                 if (model.maxInputTokens) entry["maxInputTokens"] = *model.maxInputTokens;
                 if (model.maxOutputTokens) entry["maxOutputTokens"] = *model.maxOutputTokens;
@@ -108,12 +111,21 @@ namespace winrt::Folia::models {
         return !effort.empty() && allowed(effort) ? effort : std::string{};
     }
 
+    folia::ai::PageAccess HostedPageAccess(ConfiguredModel const& model, ModelProfile const& profile) {
+        using folia::ai::PageAccess;
+        auto route = Preset(profile.providerType).Find(profile.protocol);
+        auto mode = route ? route->Pages(profile.webFormat ? profile.webFormat : model.searchFormat) : PageAccess::None;
+        if (mode == PageAccess::WithSearch) return HostedSearchFormat(model, profile) ? mode : PageAccess::None;
+        return model.webFetch && profile.allowWebFetch ? mode : PageAccess::None;
+    }
+
     std::optional<folia::ai::WebSearchDialect> HostedSearchFormat(ConfiguredModel const& model, ModelProfile const& profile) {
         if (!model.webSearch || !profile.allowWebSearch) return {};
         auto route = Preset(profile.providerType).Find(profile.protocol);
         if (!route || route->search.empty()) return {};
-        if (!model.searchFormat) return route->requiresSearchFormat ? std::nullopt : std::optional(route->search.front());
-        return std::ranges::contains(route->search, *model.searchFormat) ? model.searchFormat : std::nullopt;
+        auto format = profile.webFormat ? profile.webFormat : model.searchFormat;
+        if (!format) return route->requiresSearchFormat ? std::nullopt : std::optional(route->search.front());
+        return std::ranges::contains(route->search, *format) ? format : std::nullopt;
     }
 
     std::vector<ModelProfile> Profiles() {
@@ -125,6 +137,8 @@ namespace winrt::Folia::models {
         if (profile.id.empty()) profile.id = NewId();
         auto route = Preset(profile.providerType).Find(profile.protocol);
         if (!route) throw std::invalid_argument("The selected provider does not offer this protocol.");
+        if (profile.webFormat && !std::ranges::contains(route->search, *profile.webFormat))
+            throw std::invalid_argument("Unsupported web tool format on this connection");
         for (auto& model : profile.models) {
             if (model.searchFormat && !std::ranges::contains(route->search, *model.searchFormat))
                 model.searchFormat.reset();
@@ -146,7 +160,8 @@ namespace winrt::Folia::models {
         try {
             Json data{{"name", profile.name}, {"baseUrl", profile.baseUrl},
                 {"protocol", folia::ai::ProtocolName(profile.protocol)}, {"configuredModels", std::move(models)},
-                {"fullUrl", profile.fullUrl}, {"allowWebSearch", profile.allowWebSearch}, {"providerType", profile.providerType}};
+                {"fullUrl", profile.fullUrl}, {"allowWebSearch", profile.allowWebSearch}, {"allowWebFetch", profile.allowWebFetch}, {"providerType", profile.providerType}};
+            if (profile.webFormat) data["webFormat"] = folia::ai::SearchDialectId(*profile.webFormat);
             if (!profile.catalogUrl.empty()) data["catalogUrl"] = profile.catalogUrl;
             if (!profile.iconPng.empty()) data["iconPng"] = profile.iconPng;
             Write(path, data);
@@ -236,7 +251,7 @@ namespace winrt::Folia::models {
             auto model = std::ranges::find(profile.models, id, &ConfiguredModel::id);
             if (model != profile.models.end() && model->enabled)
                 return {*model, {profile.id, profile.name, profile.baseUrl, profile.protocol, {}, {},
-                    profile.fullUrl, profile.catalogUrl, profile.allowWebSearch, profile.providerType}};
+                    profile.fullUrl, profile.catalogUrl, profile.allowWebSearch, profile.providerType, profile.allowWebFetch, profile.webFormat}};
         }
         throw std::runtime_error("The selected AI model is unavailable.");
     }

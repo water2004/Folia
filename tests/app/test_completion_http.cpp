@@ -60,6 +60,33 @@ suite completion_http_tests = [] {
         expect(tools().size() == 1_u);
     };
 
+    "hosted page access follows the connection format, model capability and permission"_test = [] {
+        using namespace folia::ai;
+        using namespace winrt::Folia::models;
+        ModelProfile profile;
+        profile.providerType = "deepseek";
+        ConfiguredModel model;
+        model.webFetch = true;
+        expect(HostedPageAccess(model, profile) == PageAccess::None);
+        profile.allowWebFetch = true;
+        expect(HostedPageAccess(model, profile) == PageAccess::DeepSeek && !HostedSearchFormat(model, profile));
+        model.webFetch = false;
+        expect(HostedPageAccess(model, profile) == PageAccess::None);
+
+        // Standard Responses opens pages as part of search. The connection selection also
+        // resolves ambiguous gateway metadata for all of its models.
+        model.searchFormat = WebSearchDialect::DeepSeek;
+        profile.webFormat = WebSearchDialect::Standard;
+        profile.allowWebSearch = model.webSearch = true;
+        expect(HostedSearchFormat(model, profile) == WebSearchDialect::Standard);
+        expect(HostedPageAccess(model, profile) == PageAccess::WithSearch);
+        model.webSearch = false;
+        expect(HostedPageAccess(model, profile) == PageAccess::None);
+        profile.providerType = "google-gemini";
+        profile.protocol = ApiProtocol::ChatCompletions;
+        model.webFetch = model.webSearch = true;
+        expect(!HostedSearchFormat(model, profile) && HostedPageAccess(model, profile) == PageAccess::None);
+    };
     "model discovery uses the selected catalog schema for an aliased OpenRouter model"_test = [] {
         auto payload = R"({"data":[{"id":"alias","name":"Alias via gateway","context_length":64000,
             "top_provider":{"max_completion_tokens":4096},"architecture":{"input_modalities":["text","image"]}},
@@ -254,16 +281,16 @@ suite completion_http_tests = [] {
     };
     "Anthropic model discovery reads only explicitly supported capabilities"_test = [] {
         auto page = ParseCompletionModels(R"({"data":[{"id":"fixture","display_name":"Fixture Claude",
-            "max_input_tokens":128000,"max_tokens":8192,"capabilities":{"image_input":{"supported":false},
+            "max_input_tokens":128000,"max_tokens":8192,"capabilities":{"image_input":{"supported":false},"server_tools":{"web_fetch":{"supported":true},"web_search":{"supported":false}},
             "effort":{"supported":true,"low":{"supported":true},"medium":{"supported":false},"max":{"supported":true}}}}],
             "has_more":true,"last_id":"model/a+b"})", 2);
         expect(page.next == "model/a+b"); expect(page.models[0].name == "Fixture Claude");
         expect(page.models[0].reasoningEfforts == std::vector<std::string>{"low", "max"});
         expect(page.models[0].maxInputTokens.value_or(0) == 128000_u);
         expect(page.models[0].maxOutputTokens.value_or(0) == 8192_u);
-        expect(page.models[0].vision == false);
+        expect(!page.models[0].vision && page.models[0].webFetch && !page.models[0].webSearch);
         auto unspecified = ParseCompletionModels(R"({"data":[{"id":"fixture","max_tokens":null}]})", 2).models.front();
-        expect(unspecified.name.empty() && !unspecified.vision && !unspecified.maxInputTokens && !unspecified.maxOutputTokens);
+        expect(!unspecified.webFetch && unspecified.name.empty() && !unspecified.vision && !unspecified.maxInputTokens && !unspecified.maxOutputTokens);
         expect(ParseCompletionModels(R"({"data":[{"id":"a"},{"id":"a"}]})", 0).models.size() == 1_u);
         for (auto json : {R"({"data":[{}]})", R"({"data":[{"id":42}]})", R"({"data":{}})",
              R"({"data":[],"has_more":true})", R"({"data":[{"id":"a"}],"has_more":true})"})

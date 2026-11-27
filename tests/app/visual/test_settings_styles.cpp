@@ -379,7 +379,7 @@ suite settings_style_tests = [] {
         expect(saved->fullUrl && saved->allowWebSearch);
     };
 
-    "provider presets supply editable endpoints and scope model search formats"_test = [] {
+    "provider connection selects its web format and models declare tool capabilities"_test = [] {
         using namespace winrt::Folia;
         ModelSettingsPage fixture(SettingsView::Page::Providers);
         InvokeAction(Action(fixture.page, Localize(L"ChatAddProvider")));
@@ -388,8 +388,7 @@ suite settings_style_tests = [] {
         auto protocol = Field<ComboBox>(fixture.page, Localize(L"AIProtocol"));
         auto name = Field<TextBox>(fixture.page, Localize(L"ChatProviderName"));
         auto address = Field<TextBox>(fixture.page, Localize(L"AIBaseUrl"));
-        auto allow = Field<ToggleSwitch>(fixture.page, Localize(L"ChatProviderWebSearch"));
-        if (!expect(type && protocol && name && address && allow)) return;
+        if (!expect(type && protocol && name && address)) return;
         auto select = [](ComboBox const& box, winrt::hstring const& label) {
             for (unsigned i = 0; i < box.Items().Size(); ++i)
                 if (winrt::unbox_value<winrt::hstring>(box.Items().GetAt(i)) == label) {
@@ -402,27 +401,31 @@ suite settings_style_tests = [] {
         expect(!protocol.IsEnabled() && protocol.Items().Size() == 1_u && name.Text() == L"Anthropic");
         expect(address.Text() == L"https://api.anthropic.com/v1");
         expect(select(type, L"Google Gemini"));
-        expect(!allow.IsEnabled() && !protocol.IsEnabled());
+        expect(!Field<ToggleSwitch>(fixture.page, Localize(L"ChatAllowPageRead")) && !protocol.IsEnabled());
         expect(select(type, L"DeepSeek"));
-        expect(allow.IsEnabled() && protocol.IsEnabled() && protocol.Items().Size() == 3_u);
+        expect(Field<ToggleSwitch>(fixture.page, Localize(L"ChatAllowPageRead")) && protocol.IsEnabled() && protocol.Items().Size() == 3_u);
         expect(name.Text() == L"DeepSeek");
         name.Text(L"Proxy settings fixture");
         address.Text(L"https://gateway.example.test/v1");
         expect(select(type, L"OpenAI"));
         expect(select(type, L"DeepSeek"));
         expect(name.Text() == L"Proxy settings fixture" && address.Text() == L"https://gateway.example.test/v1");
-        allow.IsOn(true);
+        auto format = Field<ComboBox>(fixture.page, Localize(L"AISearchFormat"));
+        if (!expect(format != nullptr)) return;
+        expect(format.Items().Size() == 3_u);
+        expect(select(format, Localize(L"AISearchFormatDeepSeek")));
+        Field<ToggleSwitch>(fixture.page, Localize(L"ChatProviderWebSearch")).IsOn(true);
+        Field<ToggleSwitch>(fixture.page, Localize(L"ChatAllowPageRead")).IsOn(true);
         fixture.root.UpdateLayout();
         SaveSettingsImage(fixture.root, "preset-connection.png");
         InvokeAction(Action(fixture.page, Localize(L"ChatAddModel")));
         Pump([&] { return Field<ToggleSwitch>(fixture.page, Localize(L"ChatModelWebSearch")) != nullptr; });
         auto search = Field<ToggleSwitch>(fixture.page, Localize(L"ChatModelWebSearch"));
-        auto format = Field<ComboBox>(fixture.page, Localize(L"AISearchFormat"));
-        if (!expect(search && format)) return;
-        expect(!format.IsEnabled());
+        auto pages = Field<ToggleSwitch>(fixture.page, Localize(L"ChatModelPageRead"));
+        if (!expect(search && pages)) return;
+        expect(!Field<ComboBox>(fixture.page, Localize(L"AISearchFormat")));
         search.IsOn(true);
-        expect(format.IsEnabled() && format.Items().Size() == 3_u);
-        expect(select(format, Localize(L"AISearchFormatStandard")));
+        pages.IsOn(true);
         Field<TextBox>(fixture.page, Localize(L"ChatUpstreamModel")).Text(L"aliased-model");
         InvokeAction(Action(fixture.page, Localize(L"ChatApplyModel")));
         Pump([&] { return Action(fixture.page, L"aliased-model") != nullptr; });
@@ -433,7 +436,8 @@ suite settings_style_tests = [] {
         if (!expect(saved != configured.end())) return;
         auto cleanup = wil::scope_exit([&] { models::DeleteProfile(saved->id); });
         expect(saved->providerType == "deepseek" && saved->protocol == models::ApiProtocol::Responses);
-        expect(saved->models.size() == 1_u && models::HostedSearchFormat(saved->models.front(), *saved) == folia::ai::WebSearchDialect::Standard);
+        expect(saved->models.size() == 1_u && models::HostedSearchFormat(saved->models.front(), *saved) == folia::ai::WebSearchDialect::DeepSeek);
+        expect(models::HostedPageAccess(saved->models.front(), *saved) == folia::ai::PageAccess::DeepSeek);
     };
 
     "provider connection check cancels when the configured credentials change"_test = [] {

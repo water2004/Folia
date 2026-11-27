@@ -9,16 +9,18 @@ namespace winrt::Folia::settings_ui {
     public:
         using Save = std::function<void(models::ConfiguredModel)>;
         using Command = std::function<void()>;
-        static std::shared_ptr<ProviderModelForm> Create(models::ConfiguredModel, models::ProviderRoute const&,
+        static std::shared_ptr<ProviderModelForm> Create(models::ConfiguredModel, models::ModelProfile const&,
             Save save, Command cancel, Command remove, Command fetch);
         Microsoft::UI::Xaml::UIElement Element() const { return panel_; }
         void QueryStatus(winrt::hstring const& text, bool busy = false, bool error = false);
         void SetCatalog(std::vector<folia::platform::completion::CompletionModel>);
 
     private:
-        ProviderModelForm(models::ConfiguredModel, models::ProviderRoute const&);
+        ProviderModelForm(models::ConfiguredModel, models::ModelProfile const&);
         void Build(Save, Command cancel, Command remove, Command fetch);
         void Fill(models::ConfiguredModel const&);
+        void RefreshPageCapability();
+        std::optional<folia::ai::WebSearchDialect> connectionFormat_;
         void AddEffort(std::string_view level, bool checked);
         std::vector<std::string> CheckedEfforts() const;
         void RefreshDefault(std::string_view selection);
@@ -31,8 +33,9 @@ namespace winrt::Folia::settings_ui {
         Microsoft::UI::Xaml::Controls::StackPanel panel_{nullptr};
         Microsoft::UI::Xaml::Controls::VariableSizedWrapGrid efforts_;
         Microsoft::UI::Xaml::Controls::TextBox name_, upstream_, context_, output_;
-        Microsoft::UI::Xaml::Controls::ComboBox choices_{nullptr}, defaultEffort_{nullptr}, searchFormat_{nullptr};
-        Microsoft::UI::Xaml::Controls::ToggleSwitch vision_, search_;
+        Microsoft::UI::Xaml::Controls::ComboBox choices_{nullptr}, defaultEffort_{nullptr};
+        Microsoft::UI::Xaml::Controls::ToggleSwitch vision_, search_, readPages_;
+        Microsoft::UI::Xaml::UIElement readPagesRow_{nullptr};
         Microsoft::UI::Xaml::Controls::Button fetch_;
         Microsoft::UI::Xaml::Controls::TextBlock queryStatus_, validation_;
     };

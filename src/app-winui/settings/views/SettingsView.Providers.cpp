@@ -137,7 +137,10 @@ namespace winrt::Folia {
             TextBox name, base, catalogAddress;
             std::shared_ptr<ProviderConnectionPicker> providerPicker;
             PasswordBox key;
-            ToggleSwitch fullUrl, search;
+            ToggleSwitch fullUrl, search, readPages;
+            StackPanel webOptions{nullptr}, webPermissions{nullptr};
+            ComboBox webFormat{nullptr};
+            std::optional<folia::ai::WebSearchDialect> selectedFormat;
             TextBlock status, connectionStatus;
             StackPanel modelRows = cards::List();
             Button test;
@@ -178,7 +181,9 @@ namespace winrt::Folia {
                 connection.providerType = providerPicker->Type().id;
                 connection.fullUrl = fullUrl.IsOn();
                 if (connection.fullUrl) connection.catalogUrl = FieldText(catalogAddress);
+                connection.webFormat = selectedFormat;
                 connection.allowWebSearch = !route.search.empty() && search.IsOn();
+                connection.allowWebFetch = readPages.IsOn() && (selectedFormat ? folia::ai::SeparatePageTool(route.Pages(selectedFormat)) : route.HasPageTool());
                 return connection;
             }
 
@@ -311,6 +316,56 @@ namespace winrt::Folia {
                 return row;
             }
 
+            void RefreshWebOptions() {
+                if (!webOptions) return;
+                auto const& route = providerPicker->Route();
+                webOptions.Children().Clear();
+                if (route.search.size() > 1) {
+                    webFormat = Choice();
+                    cards::ChoiceStyle(webFormat);
+                    webFormat.Items().Append(box_value(Localize(L"ChatWebFormatAuto")));
+                    for (auto format : route.search) {
+                        using enum folia::ai::WebSearchDialect;
+                        webFormat.Items().Append(box_value(Localize(format == Standard ? L"AISearchFormatStandard" :
+                            format == DeepSeek ? L"AISearchFormatDeepSeek" : L"AISearchFormatOpenRouter")));
+                    }
+                    auto item = selectedFormat ? std::ranges::find(route.search, *selectedFormat) : route.search.end();
+                    webFormat.SelectedIndex(item == route.search.end() ? 0 : static_cast<int>(item - route.search.begin()) + 1);
+                    webOptions.Children().Append(cards::Setting({Localize(L"AISearchFormat"), {}, cards::Icon(WorkspaceIcon::Source)}, webFormat));
+                    webFormat.SelectionChanged([weak = weak_from_this()](auto const& sender, auto const&) {
+                        if (auto self = weak.lock()) {
+                            auto const index = sender.template as<ComboBox>().SelectedIndex();
+                            if (index < 0) return;
+                            self->selectedFormat = index ? std::optional(self->providerPicker->Route().search.at(index - 1)) : std::nullopt;
+                            self->RefreshWebPermissions();
+                        }
+                    });
+                } else webFormat = nullptr;
+                webPermissions = cards::List();
+                webOptions.Children().Append(webPermissions);
+                RefreshWebPermissions();
+            }
+
+            void RefreshWebPermissions() {
+                auto const& route = providerPicker->Route();
+                const bool allowSearch = search.IsOn(), allowFetch = readPages.IsOn();
+                webPermissions.Children().Clear();
+                search = cards::Switch(allowSearch);
+                readPages = cards::Switch(allowFetch);
+                const bool independent = selectedFormat ? folia::ai::SeparatePageTool(route.Pages(selectedFormat)) : route.HasPageTool();
+                if (!route.search.empty()) {
+                    const auto label = !independent && route.Pages(selectedFormat) == folia::ai::PageAccess::WithSearch
+                        ? L"ChatSearchAndBrowse" : L"ChatProviderWebSearch";
+                    webPermissions.Children().Append(cards::Setting(
+                        {Localize(label), Localize(L"ChatProviderWebSearchHint"), cards::Icon(WorkspaceIcon::Network)},
+                        search, cards::Placement::Wrap));
+                }
+                if (independent)
+                    webPermissions.Children().Append(cards::Setting(
+                        {Localize(L"ChatAllowPageRead"), Localize(L"ChatProviderPageReadHint"), cards::Icon(WorkspaceIcon::Document)},
+                        readPages, cards::Placement::Wrap));
+            }
+
             StackPanel BuildConnection() {
                 auto connection = SectionPanel();
                 TextField(name, Localize(L"ChatProviderName"));
@@ -332,7 +387,8 @@ namespace winrt::Folia {
                             auto address = FieldText(self->base);
                             if (!self->fullUrl.IsOn() && (address.empty() || address == oldRoute.address))
                                 self->base.Text(to_hstring(route.address));
-                            self->search.IsEnabled(!route.search.empty());
+                            self->selectedFormat.reset();
+                            self->RefreshWebOptions();
                             self->ConnectionChanged();
                         }
                     });
@@ -366,9 +422,9 @@ namespace winrt::Folia {
                 auto options = SectionPanel();
                 options.Children().Append(cards::Setting(
                     {Localize(L"ChatUseFullUrl"), {}, cards::Icon(WorkspaceIcon::Source)}, fullUrl));
-                options.Children().Append(cards::Setting(
-                    {Localize(L"ChatProviderWebSearch"), Localize(L"ChatProviderWebSearchHint"), cards::Icon(WorkspaceIcon::Network)},
-                    search, cards::Placement::Wrap));
+                webOptions = cards::List();
+                RefreshWebOptions();
+                options.Children().Append(webOptions);
                 auto update = [weak = weak_from_this(), addressLabel] {
                     if (auto self = weak.lock()) {
                         const auto full = self->fullUrl.IsOn();
@@ -378,7 +434,6 @@ namespace winrt::Folia {
                         ToolTipService::SetToolTip(self->base, box_value(Localize(full ? L"ChatFullUrlHint" : L"AIBaseUrlDescription")));
                         self->base.PlaceholderText(full ? L"https://api.example.com/custom/generate" : L"https://api.example.com/v1");
                         self->catalogAddress.IsEnabled(full);
-                        self->search.IsEnabled(!self->providerPicker->Route().search.empty());
                         self->ConnectionChanged();
                     }
                 };
@@ -400,6 +455,9 @@ namespace winrt::Folia {
                 clearKeyOnSave = false;
                 fullUrl = cards::Switch(draft.fullUrl);
                 search = cards::Switch(draft.allowWebSearch);
+                readPages = cards::Switch(draft.allowWebFetch);
+                webOptions = nullptr;
+                selectedFormat = draft.webFormat;
                 catalogAddress = TextBox{};
                 status = TextBlock{};
                 connectionStatus = TextBlock{};
@@ -570,7 +628,7 @@ namespace winrt::Folia {
                     }
                 }) : ProviderModelForm::Command{};
                 auto fetch = [weak] { if (auto self = weak.lock()) self->StartQuery(ModelQuery::Fetch); };
-                modelForm = ProviderModelForm::Create(std::move(model), providerPicker->Route(),
+                modelForm = ProviderModelForm::Create(std::move(model), Connection(),
                     std::move(save), back, std::move(remove), std::move(fetch));
                 breadcrumb(ProviderTitle(), [weak] { if (auto self = weak.lock()) self->ShowList(); }, title, back);
                 SetPage(modelForm->Element());

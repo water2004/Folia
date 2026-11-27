@@ -604,7 +604,7 @@
   <data name="ChatInterrupted" xml:space="preserve"><value>Reply interrupted</value></data>
   <data name="ChatPreparingImage" xml:space="preserve"><value>Preparing the image. Try again in a moment.</value></data>
   <data name="ChatSendKeys" xml:space="preserve"><value>Send (Enter), new line (Shift+Enter)</value></data>
-  <data name="ChatMention" xml:space="preserve"><value>Mention a document (@)</value></data>
+  <data name="ChatMention" xml:space="preserve"><value>Mention a document</value></data>
   <data name="ChatUsageHint" xml:space="preserve"><value>Last request input: {0} tokens. Model context limit: {1} tokens.</value></data>
   <data name="ChatNotReported" xml:space="preserve"><value>unreported</value></data>
   <data name="ChatNotConfigured" xml:space="preserve"><value>unspecified</value></data>
@@ -638,10 +638,17 @@
   <data name="ChatActionToolDone" xml:space="preserve"><value>Ran tool</value></data>
   <data name="AIProviderType" xml:space="preserve"><value>Provider type</value></data>
   <data name="AIProviderCustom" xml:space="preserve"><value>Custom</value></data>
-  <data name="AISearchFormat" xml:space="preserve"><value>Search tool format</value></data>
-  <data name="AISearchFormatChoose" xml:space="preserve"><value>Choose a search tool format</value></data>
-  <data name="AISearchFormatDefault" xml:space="preserve"><value>Provider default</value></data>
+  <data name="AISearchFormat" xml:space="preserve"><value>Web tool format</value></data>
   <data name="AISearchFormatStandard" xml:space="preserve"><value>Protocol standard</value></data>
-  <data name="AISearchFormatDeepSeek" xml:space="preserve"><value>DeepSeek search</value></data>
-  <data name="AISearchFormatOpenRouter" xml:space="preserve"><value>OpenRouter search</value></data>
+  <data name="AISearchFormatDeepSeek" xml:space="preserve"><value>DeepSeek</value></data>
+  <data name="AISearchFormatOpenRouter" xml:space="preserve"><value>OpenRouter</value></data>
+  <data name="ChatCompactCommand" xml:space="preserve"><value>Compact conversation context</value></data>
+  <data name="ChatNothingToCompact" xml:space="preserve"><value>There are no new completed turns to compact.</value></data>
+  <data name="ChatSearchAndBrowse" xml:space="preserve"><value>Search and browse the web</value></data>
+  <data name="ChatAllowPageRead" xml:space="preserve"><value>Read linked webpages</value></data>
+  <data name="ChatProviderPageReadHint" xml:space="preserve"><value>Let enabled models retrieve a URL when the conversation allows it.</value></data>
+  <data name="ChatModelPageRead" xml:space="preserve"><value>Read a webpage by URL</value></data>
+  <data name="ChatActionPageNow" xml:space="preserve"><value>Reading webpage</value></data>
+  <data name="ChatActionPageDone" xml:space="preserve"><value>Read webpage</value></data>
+  <data name="ChatWebFormatAuto" xml:space="preserve"><value>Automatic</value></data>
 </root>

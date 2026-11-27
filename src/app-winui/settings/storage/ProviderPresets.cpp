@@ -4,6 +4,15 @@
 #include "storage/JsonRecords.h"
 
 namespace winrt::Folia::models {
+    folia::ai::PageAccess ProviderRoute::Pages(std::optional<folia::ai::WebSearchDialect> format) const {
+        if (!format && (requiresSearchFormat || search.empty())) return folia::ai::PageAccess::None;
+        auto it = pages.find(format ? *format : search.front());
+        return it == pages.end() ? folia::ai::PageAccess::None : it->second;
+    }
+    bool ProviderRoute::HasPageTool() const {
+        return std::ranges::any_of(pages, [](auto const& item) { return folia::ai::SeparatePageTool(item.second); });
+    }
+
     ProviderRoute const* ProviderPreset::Find(folia::ai::ApiProtocol protocol) const {
         auto found = std::ranges::find(routes, protocol, &ProviderRoute::protocol);
         return found == routes.end() ? nullptr : &*found;
@@ -28,6 +37,9 @@ namespace winrt::Folia::models {
                         if (!folia::ai::SupportsSearchDialect(route.protocol, dialect)) throw std::runtime_error("Invalid provider search format");
                         route.search.push_back(dialect);
                     }
+                    if (auto pages = spec.find("pages"); pages != spec.end())
+                        for (auto const& [format, mode] : pages->items())
+                            route.pages.emplace(folia::ai::ParseSearchDialect(format), folia::ai::ParsePageAccess(mode.get<std::string>()));
                     if (preset.Find(route.protocol)) throw std::runtime_error("Duplicate provider protocol");
                     preset.routes.push_back(std::move(route));
                 }

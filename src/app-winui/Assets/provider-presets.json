@@ -2,38 +2,38 @@
   {
     "id": "custom", "name": "",
     "routes": [
-      {"protocol": "responses", "address": "", "search": ["standard", "deepseek", "openrouter"]},
-      {"protocol": "chat-completions", "address": "", "search": ["deepseek", "openrouter"], "selectSearchFormat": true},
-      {"protocol": "anthropic-messages", "address": "", "search": ["standard", "deepseek"]}
+      {"protocol": "responses", "address": "", "search": ["standard", "deepseek", "openrouter"], "pages": {"standard": "with-search", "deepseek": "deepseek", "openrouter": "openrouter"}},
+      {"protocol": "chat-completions", "address": "", "search": ["deepseek", "openrouter"], "selectSearchFormat": true, "pages": {"deepseek": "deepseek", "openrouter": "openrouter"}},
+      {"protocol": "anthropic-messages", "address": "", "search": ["standard", "deepseek"], "pages": {"standard": "anthropic", "deepseek": "deepseek"}}
     ]
   },
   {
     "id": "openai", "name": "OpenAI",
     "routes": [
-      {"protocol": "responses", "address": "https://api.openai.com/v1", "search": ["standard"]},
+      {"protocol": "responses", "address": "https://api.openai.com/v1", "search": ["standard"], "pages": {"standard": "with-search"}},
       {"protocol": "chat-completions", "address": "https://api.openai.com/v1", "search": []}
     ]
   },
   {
     "id": "anthropic", "name": "Anthropic",
     "routes": [
-      {"protocol": "anthropic-messages", "address": "https://api.anthropic.com/v1", "search": ["standard"]}
+      {"protocol": "anthropic-messages", "address": "https://api.anthropic.com/v1", "search": ["standard"], "pages": {"standard": "anthropic"}}
     ]
   },
   {
     "id": "deepseek", "name": "DeepSeek",
     "explicitThinkingToggle": true, "effortChoices": ["none", "low", "high", "max"],
     "routes": [
-      {"protocol": "responses", "address": "https://api.deepseek.com/v1", "search": ["deepseek", "standard"]},
-      {"protocol": "chat-completions", "address": "https://api.deepseek.com/v1", "search": ["deepseek"]},
-      {"protocol": "anthropic-messages", "address": "https://api.deepseek.com/anthropic/v1", "search": ["deepseek", "standard"]}
+      {"protocol": "responses", "address": "https://api.deepseek.com/v1", "search": ["deepseek", "standard"], "pages": {"deepseek": "deepseek", "standard": "with-search"}},
+      {"protocol": "chat-completions", "address": "https://api.deepseek.com/v1", "search": ["deepseek"], "pages": {"deepseek": "deepseek"}},
+      {"protocol": "anthropic-messages", "address": "https://api.deepseek.com/anthropic/v1", "search": ["deepseek", "standard"], "pages": {"deepseek": "deepseek", "standard": "anthropic"}}
     ]
   },
   {
     "id": "openrouter", "name": "OpenRouter", "catalog": "openrouter",
     "routes": [
-      {"protocol": "chat-completions", "address": "https://openrouter.ai/api/v1", "search": ["openrouter"]},
-      {"protocol": "responses", "address": "https://openrouter.ai/api/v1", "search": ["openrouter"]}
+      {"protocol": "chat-completions", "address": "https://openrouter.ai/api/v1", "search": ["openrouter"], "pages": {"openrouter": "openrouter"}},
+      {"protocol": "responses", "address": "https://openrouter.ai/api/v1", "search": ["openrouter"], "pages": {"openrouter": "openrouter"}}
     ]
   },
   {
@@ -45,7 +45,7 @@
   {
     "id": "xai", "name": "xAI",
     "routes": [
-      {"protocol": "responses", "address": "https://api.x.ai/v1", "search": ["standard"]},
+      {"protocol": "responses", "address": "https://api.x.ai/v1", "search": ["standard"], "pages": {"standard": "with-search"}},
       {"protocol": "chat-completions", "address": "https://api.x.ai/v1", "search": []}
     ]
   }
