@@ -2,7 +2,10 @@
 #include "support/folia_test.hpp"
 #include "../support/DocumentControllerFixture.h"
 #include "App.xaml.h"
+#include "../support/TestPaths.h"
+#include <wil/resource.h>
 #include "visual_window.h"
+#include "EditorPixelCapture.h"
 #include "MainWindow.xaml.h"
 #include "windows/media/images/ImageSource.h"
 #include "workspace/WorkspaceIcons.h"
@@ -22,6 +25,7 @@ import folia.markdown.instrumentation;
 namespace winrt::Folia {
     struct EditorRendererTestAccess {
         static bool Ready(EditorSurfaceRenderer const& renderer) { return renderer.resources.drawingSurface != nullptr; }
+        static auto& Resources(EditorSurfaceRenderer& renderer) { return renderer.resources; }
         static bool PresentPending(EditorSurfaceRenderer const& renderer) { return renderer.presentPending; }
     };
 }
@@ -1035,6 +1039,78 @@ namespace {
             });
             expect(presenter.Background() == surface) << "document-menu background";
             menu.Hide();
+        };
+        "the document renderer presents individual device pixels at native resolution"_test = [] {
+            OwnedWindow owned(App()->CreateMainWindow());
+            auto window = owned.window;
+            window.AppWindow().Presenter().as<winrt::Microsoft::UI::Windowing::OverlappedPresenter>().IsAlwaysOnTop(true);
+            auto root = window.Content().as<FrameworkElement>();
+            auto editor = root.FindName(L"EditorSurface").as<FrameworkElement>();
+            auto& r = winrt::Folia::EditorRendererTestAccess::Resources(Access::Renderer(window));
+            Access::Edit(window, U"Native resolution");
+            auto settle = std::chrono::steady_clock::now() + std::chrono::milliseconds(400);
+            Pump([&] { return std::chrono::steady_clock::now() >= settle && r.renderTexture; });
+            std::ofstream report(app_tests::RepositoryRoot() / "build/tests/document-device-pixels.txt");
+            auto verify = [&] {
+                auto converter = root.XamlRoot().CoordinateConverter();
+                auto screen = [&](float x, float y) {
+                    return converter.ConvertLocalToScreen(editor.TransformToVisual(root).TransformPoint({x, y}));
+                };
+                auto origin = screen(0, 0);
+                auto end = screen(static_cast<float>(editor.ActualWidth()), static_cast<float>(editor.ActualHeight()));
+                auto pixels = r.d2dTarget->GetPixelSize();
+                auto surface = r.drawingSurface.Size();
+                auto dpi = ::GetDpiForWindow(Access::Handle(window));
+                auto scale = root.XamlRoot().RasterizationScale();
+                report << std::format("DPI={} XamlRoot={} editor={}x{} DIP screen={}x{} px D2D={}x{} composition={}x{}\n",
+                    dpi, scale, editor.ActualWidth(), editor.ActualHeight(), end.X - origin.X, end.Y - origin.Y,
+                    pixels.width, pixels.height, surface.Width, surface.Height);
+                expect(std::abs(scale - dpi / 96.) < .001);
+                expect(std::abs(static_cast<int>(pixels.width) - (end.X - origin.X)) <= 1);
+                expect(std::abs(static_cast<int>(pixels.height) - (end.Y - origin.Y)) <= 1);
+                expect(surface.Width == pixels.width && surface.Height == pixels.height);
+
+                // Compare a line of actual DirectWrite glyphs before and after composition.
+                // The editor draws premultiplied pixels over the window material.
+                auto active = Access::Documents(window).Active()->editor->session.Selection().active;
+                active.source_offset = static_cast<std::uint32_t>(std::u32string_view(U"Native resolution").size());
+                auto finish = Access::Renderer(window).CaretBounds(active).value();
+                active.source_offset = 0;
+                auto start = Access::Renderer(window).CaretBounds(active).value();
+                const auto left = static_cast<unsigned>(std::floor(start.left * scale));
+                const auto top = static_cast<unsigned>(std::floor(start.top * scale));
+                const auto width = static_cast<unsigned>(std::floor(finish.left * scale)) - left;
+                const auto height = static_cast<unsigned>(std::ceil(finish.bottom * scale)) - top;
+                expect(fatal(width > 8 && height > 8));
+                auto sample = app_tests::MeasurePresentedGlyphs(r, Access::Handle(window), origin, left, top, width, height);
+                report << std::format("Glyph samples={} mean error={:.2f} outside tolerance={}\n",
+                    sample.samples, sample.mean, sample.outsideTolerance);
+                expect(fatal(sample.samples > 100));
+                expect(sample.mean < 5.) << "native glyph edges survive desktop composition";
+            };
+            verify();
+            // A composited layer can move between device pixels while a pane is animating.
+            // Exercise that position deterministically without racing the desktop frame clock.
+            Media::TranslateTransform translation;
+            translation.X(.4 / root.XamlRoot().RasterizationScale());
+            editor.RenderTransform(translation);
+            auto settleLayout = [&] {
+                root.UpdateLayout();
+                auto until = std::chrono::steady_clock::now() + std::chrono::milliseconds(220);
+                Pump([&] { return std::chrono::steady_clock::now() >= until; });
+            };
+            settleLayout();
+            verify();
+            editor.RenderTransform(nullptr);
+            auto size = window.AppWindow().Size();
+            window.AppWindow().Resize({size.Width - 53, size.Height - 21});
+            settleLayout();
+            verify();
+            auto split = root.FindName(L"SplitEditorButton").as<Controls::Button>();
+            Automation::Peers::ButtonAutomationPeer(split).as<Automation::Provider::IInvokeProvider>().Invoke();
+            settleLayout();
+            expect(fatal(Access::Groups(window).IsSplit()));
+            verify();
         };
         "the selected tab toolbar and editor present one reading surface"_test = [] {
             using winrt::Folia::WindowMaterial;

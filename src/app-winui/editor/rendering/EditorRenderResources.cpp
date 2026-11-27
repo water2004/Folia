@@ -141,11 +141,18 @@ namespace winrt::Folia
         drawingSurface = graphicsDevice.CreateDrawingSurface(
             {static_cast<float>(surfaceWidth), static_cast<float>(surfaceHeight)},
             DirectXPixelFormat::B8G8R8A8UIntNormalized, DirectXAlphaMode::Premultiplied);
-        auto brush = compositor.CreateSurfaceBrush(drawingSurface);
-        brush.Stretch(CompositionStretch::Fill);
+        // The texture already contains physical display pixels. Map them to the
+        // top-left of the host at its DPI, including while XAML is rearranging.
+        surfaceBrush = compositor.CreateSurfaceBrush(drawingSurface);
+        surfaceBrush.Stretch(CompositionStretch::None);
+        surfaceBrush.HorizontalAlignmentRatio(0);
+        surfaceBrush.VerticalAlignmentRatio(0);
+        surfaceBrush.Scale({1.f / surfaceScaleX, 1.f / surfaceScaleY});
+        surfaceBrush.BitmapInterpolationMode(CompositionBitmapInterpolationMode::NearestNeighbor);
         auto visual = compositor.CreateSpriteVisual();
         visual.RelativeSizeAdjustment({1.f, 1.f});
-        visual.Brush(brush);
+        visual.IsPixelSnappingEnabled(true);
+        visual.Brush(surfaceBrush);
         ElementCompositionPreview::SetElementChildVisual(host, visual);
     }
 
@@ -196,6 +203,7 @@ namespace winrt::Folia
         surfaceHeight = newHeight;
         surfaceWidthDip = newWidthDip;
         surfaceHeightDip = newHeightDip;
+        if (surfaceScaleX != scale) surfaceBrush.Scale({1.f / scale, 1.f / scale});
         surfaceScaleX = surfaceScaleY = scale;
         return true;
     }

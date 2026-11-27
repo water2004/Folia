@@ -72,6 +72,7 @@ namespace winrt::Folia
         float surfaceScaleY = 1.0f;
 
     private:
+        winrt::Microsoft::UI::Composition::CompositionSurfaceBrush surfaceBrush{nullptr};
         void InitializeDeviceResources(EditorStyleSheet const& styleSheet);
     };
 }
