@@ -21,10 +21,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\generate-third-party-notices.ps
 
 Folia itself is licensed under the MIT License in `LICENSE`.
 
-## Inline completion
+## AI protocols
 
-- Model protocol adapters: MIT, Fairy contributors, vendored at
-  `ef60077797ddadc82ee934d2e9d80ce05cf67830`. Source and license are in
-  `src/ai`; Folia has no Fairy installation or runtime dependency.
 - nlohmann/json 3.12.0: MIT. Source, license and hash are in
   `third_party/nlohmann-json`.
