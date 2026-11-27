@@ -190,23 +190,29 @@
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="Foreground" Value="{ThemeResource FoliaShellMutedForegroundBrush}"/>
     </Style>
-    <Style x:Key="SettingsHomeButtonStyle" TargetType="Button" BasedOn="{StaticResource SubtleButtonStyle}">
-        <Setter Property="HorizontalAlignment" Value="Left"/>
-        <Setter Property="Padding" Value="10,6"/>
-    </Style>
-    <Style x:Key="SettingsBreadcrumbStyle" TargetType="StackPanel">
-        <Setter Property="Margin" Value="14,12,24,0"/>
-        <Setter Property="Spacing" Value="8"/>
-    </Style>
-    <Style x:Key="SettingsSubpageBreadcrumbStyle" TargetType="StackPanel">
-        <Setter Property="Spacing" Value="8"/>
-    </Style>
-    <Style x:Key="SettingsSubpageTitleStyle" TargetType="TextBlock" BasedOn="{StaticResource SettingsCardTitleStyle}">
-        <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-        <Setter Property="TextWrapping" Value="NoWrap"/>
-        <Setter Property="MaxWidth" Value="240"/>
-    </Style>
+    <DataTemplate x:Key="SettingsBreadcrumbTemplate">
+        <Grid MaxWidth="{StaticResource SettingsPageWidth}" Visibility="Collapsed">
+            <Grid Margin="14,12,24,0" MinHeight="32" ColumnSpacing="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="SettingsBackButton" Style="{StaticResource SubtleButtonStyle}"
+                        Width="32" Height="32" Padding="0">
+                    <FontIcon Glyph="&#xE72B;" Style="{StaticResource SettingsNavigationArrowStyle}"/>
+                </Button>
+                <BreadcrumbBar x:Name="SettingsBreadcrumbBar" Grid.Column="1" VerticalAlignment="Center">
+                    <BreadcrumbBar.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" ToolTipService.ToolTip="{Binding}"
+                                       FontFamily="{ThemeResource FoliaUiFontFamily}" FontSize="{ThemeResource FoliaUiFontSize}"
+                                       TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="240"/>
+                        </DataTemplate>
+                    </BreadcrumbBar.ItemTemplate>
+                </BreadcrumbBar>
+            </Grid>
+        </Grid>
+    </DataTemplate>
     <Style x:Key="SettingsProviderIconButtonStyle" TargetType="Button" BasedOn="{StaticResource SubtleButtonStyle}">
         <Setter Property="Padding" Value="0"/>
         <Setter Property="Width" Value="36"/>

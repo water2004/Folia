@@ -48,68 +48,7 @@ namespace winrt::Folia
         auto root = Application::Current().Resources().Lookup(box_value(L"SettingsRootTemplate"))
             .as<DataTemplate>().LoadContent().as<Grid>();
 
-        StackPanel backLabel;
-        backLabel.Orientation(Orientation::Horizontal);
-        backLabel.Spacing(8);
-        FontIcon backIcon;
-        backIcon.Glyph(L"\xE72B");
-        backIcon.Style(settings_ui::ResourceStyle(L"SettingsNavigationArrowStyle"));
-        backLabel.Children().Append(backIcon);
-        backLabel.Children().Append(settings_ui::Text(Localize(L"Settings")));
-        homeButton_.Name(L"SettingsHomeButton");
-        homeButton_.Content(backLabel);
-        homeButton_.Style(settings_ui::ResourceStyle(L"SettingsHomeButtonStyle"));
-        Automation::AutomationProperties::SetName(homeButton_, Localize(L"Settings"));
-        navigationClicks_.push_back(homeButton_.Click(winrt::auto_revoke, [this](auto const&, auto const&) {
-            const auto previous = currentPage_;
-            Navigate(Page::Home);
-            auto category = std::ranges::find(categoryButtons_, previous, &std::pair<Page, Button>::first);
-            if (category != categoryButtons_.end()) category->second.Focus(FocusState::Programmatic);
-        }));
-        StackPanel crumbs;
-        crumbs.Orientation(Orientation::Horizontal);
-        crumbs.Style(settings_ui::ResourceStyle(L"SettingsBreadcrumbStyle"));
-        crumbs.Children().Append(homeButton_);
-        FontIcon separator;
-        separator.Glyph(L"\xE76C");
-        separator.Style(settings_ui::ResourceStyle(L"SettingsNavigationArrowStyle"));
-        crumbs.Children().Append(separator);
-        pageCrumb_.Style(settings_ui::ResourceStyle(L"SettingsCardTitleStyle"));
-        pageCrumb_.VerticalAlignment(VerticalAlignment::Center);
-        crumbs.Children().Append(pageCrumb_);
-        subpageCrumbs_.Orientation(Orientation::Horizontal);
-        subpageCrumbs_.Style(settings_ui::ResourceStyle(L"SettingsSubpageBreadcrumbStyle"));
-        categoryCrumb_.Style(settings_ui::ResourceStyle(L"SettingsHomeButtonStyle"));
-        navigationClicks_.push_back(categoryCrumb_.Click(winrt::auto_revoke, [this](auto const&, auto const&) {
-            auto back = subpageBack_;
-            if (back) back();
-        }));
-        subpageCrumbs_.Children().Append(categoryCrumb_);
-        FontIcon next;
-        next.Glyph(L"\xE76C");
-        next.Style(settings_ui::ResourceStyle(L"SettingsNavigationArrowStyle"));
-        subpageCrumbs_.Children().Append(next);
-        subpageTitle_.Style(settings_ui::ResourceStyle(L"SettingsSubpageTitleStyle"));
-        subpageCrumbs_.Children().Append(subpageTitle_);
-        childCrumbs_.Orientation(Orientation::Horizontal);
-        childCrumbs_.Style(settings_ui::ResourceStyle(L"SettingsSubpageBreadcrumbStyle"));
-        parentCrumb_.Style(settings_ui::ResourceStyle(L"SettingsHomeButtonStyle"));
-        navigationClicks_.push_back(parentCrumb_.Click(winrt::auto_revoke, [this](auto const&, auto const&) {
-            auto back = parentBack_;
-            if (back) back();
-        }));
-        childCrumbs_.Children().Append(parentCrumb_);
-        FontIcon childSeparator;
-        childSeparator.Glyph(L"\xE76C");
-        childSeparator.Style(settings_ui::ResourceStyle(L"SettingsNavigationArrowStyle"));
-        childCrumbs_.Children().Append(childSeparator);
-        childTitle_.Style(settings_ui::ResourceStyle(L"SettingsSubpageTitleStyle"));
-        childCrumbs_.Children().Append(childTitle_);
-        subpageCrumbs_.Children().Append(childCrumbs_);
-        crumbs.Children().Append(subpageCrumbs_);
-        SetSubpage();
-        pageNavigation_ = settings_ui::PageViewport(crumbs);
-        root.Children().InsertAt(0, pageNavigation_);
+        root.Children().InsertAt(0, breadcrumb_.Element());
 
         pageHost_ = root.FindName(L"SettingsPageContent").as<ContentControl>();
         host.HorizontalContentAlignment(HorizontalAlignment::Stretch);
@@ -145,7 +84,8 @@ namespace winrt::Folia
     void SettingsView::Navigate(Page page)
     {
         if (pageHost_.Content() && page == currentPage_) return;
-        SetSubpage();
+        currentPage_ = page;
+        SetNavigationPath();
         if (page != Page::Shortcuts) CancelShortcutCapture();
         switch (page) {
         case Page::Home: pageHost_.Content(homePage_); break;
@@ -178,38 +118,32 @@ namespace winrt::Folia
             pageHost_.Content(aboutPage_);
             break;
         }
-        currentPage_ = page;
-        pageNavigation_.Visibility(page == Page::Home ? Visibility::Collapsed : Visibility::Visible);
-        if (auto category = std::ranges::find(categories, page, &Category::page); category != std::end(categories))
-            pageCrumb_.Text(Localize(category->title));
     }
 
-    void SettingsView::SetSubpage(hstring const& title, std::function<void()> back,
-        hstring const& child, std::function<void()> parent)
+    void SettingsView::SetNavigationPath(settings_ui::SettingsBreadcrumb::Path children, std::function<void()> openCategory)
     {
-        subpageBack_ = std::move(back);
-        auto expanded = static_cast<bool>(subpageBack_);
-        pageCrumb_.Visibility(expanded ? Visibility::Collapsed : Visibility::Visible);
-        subpageCrumbs_.Visibility(expanded ? Visibility::Visible : Visibility::Collapsed);
-        parentBack_ = std::move(parent);
-        auto nested = static_cast<bool>(parentBack_);
-        subpageTitle_.Visibility(nested ? Visibility::Collapsed : Visibility::Visible);
-        subpageTitle_.Text(title);
-        childCrumbs_.Visibility(nested ? Visibility::Visible : Visibility::Collapsed);
-        childTitle_.Text(child);
-        if (nested) {
-            auto label = settings_ui::Text(title);
-            label.Style(settings_ui::ResourceStyle(L"SettingsSubpageTitleStyle"));
-            parentCrumb_.Content(label);
-            Automation::AutomationProperties::SetName(parentCrumb_, title);
+        auto category = std::ranges::find(categories, currentPage_, &Category::page);
+        if (category == std::end(categories)) {
+            breadcrumb_.SetPath({});
+            return;
         }
-        if (expanded) categoryCrumb_.Content(box_value(pageCrumb_.Text()));
+        auto home = [this] {
+            auto previous = currentPage_;
+            Navigate(Page::Home);
+            auto category = std::ranges::find(categoryButtons_, previous, &std::pair<Page, Button>::first);
+            if (category != categoryButtons_.end()) category->second.Focus(FocusState::Programmatic);
+        };
+        settings_ui::SettingsBreadcrumb::Path path{
+            {Localize(L"Settings"), std::move(home)}, {Localize(category->title), std::move(openCategory)}
+        };
+        path.append_range(std::move(children) | std::views::as_rvalue);
+        breadcrumb_.SetPath(std::move(path));
     }
 
     void SettingsView::Focus()
     {
-        auto button = currentPage_ == Page::Home ? categoryButtons_.front().second : homeButton_;
-        button.Focus(FocusState::Programmatic);
+        if (currentPage_ == Page::Home) categoryButtons_.front().second.Focus(FocusState::Programmatic);
+        else breadcrumb_.Focus();
     }
 
     void SettingsView::Reset(AppSettings settings, folia::Theme systemVariant)
@@ -243,6 +177,7 @@ namespace winrt::Folia
 
     void SettingsView::Detach()
     {
+        breadcrumb_.Detach();
         navigationClicks_.clear();
         detached_ = true;
         shortcutRows_.revoke();

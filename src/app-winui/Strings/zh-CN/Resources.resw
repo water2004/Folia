@@ -68,6 +68,7 @@
   <data name="DefinitionHasNoReference" xml:space="preserve"><value>此脚注定义没有对应的引用。</value></data>
   <data name="GoToDefinition" xml:space="preserve"><value>转到脚注定义</value></data>
   <data name="BackToReference" xml:space="preserve"><value>返回引用</value></data>
+  <data name="SettingsBack" xml:space="preserve"><value>返回上一级</value></data>
   <data name="CreateDefinition" xml:space="preserve"><value>创建脚注定义</value></data>
   <data name="ResizeFailed" xml:space="preserve"><value>调整大小失败：{0}</value></data>
   <data name="RenderFailed" xml:space="preserve"><value>渲染失败：{0}</value></data>

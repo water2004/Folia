@@ -129,7 +129,7 @@ namespace winrt::Folia {
             HWND owner{};
             ContentControl host;
             weak_ref<ScrollViewer> viewport;
-            std::function<void(hstring const&, std::function<void()>, hstring const&, std::function<void()>)> breadcrumb;
+            std::function<void(SettingsBreadcrumb::Path)> setNavigationPath;
             ModelProfile draft;
             ModelProfile pendingConnection;
             StackPanel providerForm{nullptr};
@@ -221,7 +221,8 @@ namespace winrt::Folia {
                 return title.empty() ? Localize(L"ChatAddProvider") : to_hstring(title);
             }
 
-            void SetPage(UIElement const& element) {
+            void SetPage(UIElement const& element, SettingsBreadcrumb::Path path = {}) {
+                setNavigationPath(std::move(path));
                 host.Content(element);
                 if (auto scroll = viewport.get()) scroll.ChangeView(nullptr, 0.0, nullptr, true);
             }
@@ -229,10 +230,8 @@ namespace winrt::Folia {
             void ShowProvider() {
                 CancelQuery();
                 modelForm.reset();
-                auto weak = weak_from_this();
-                breadcrumb(ProviderTitle(), [weak] { if (auto self = weak.lock()) self->ShowList(); }, {}, {});
                 DrawModels();
-                SetPage(providerForm);
+                SetPage(providerForm, {{ProviderTitle(), {}}});
             }
 
             void ShowList() {
@@ -242,7 +241,6 @@ namespace winrt::Folia {
                 draft = {};
                 providerForm = nullptr;
                 modelForm.reset();
-                breadcrumb({}, {}, {}, {});
                 auto list = PagePanel();
                 auto add = Command(L"ChatAddProvider", &ProviderSettings::AddProvider, true);
                 add.HorizontalAlignment(HorizontalAlignment::Right);
@@ -630,8 +628,7 @@ namespace winrt::Folia {
                 auto fetch = [weak] { if (auto self = weak.lock()) self->StartQuery(ModelQuery::Fetch); };
                 modelForm = ProviderModelForm::Create(std::move(model), Connection(),
                     std::move(save), back, std::move(remove), std::move(fetch));
-                breadcrumb(ProviderTitle(), [weak] { if (auto self = weak.lock()) self->ShowList(); }, title, back);
-                SetPage(modelForm->Element());
+                SetPage(modelForm->Element(), {{ProviderTitle(), std::move(back)}, {title, {}}});
             }
 
             void StartQuery(ModelQuery action) {
@@ -687,9 +684,9 @@ namespace winrt::Folia {
         auto state = std::make_shared<ProviderSettings>();
         state->owner = owner_;
         state->host.HorizontalContentAlignment(HorizontalAlignment::Stretch);
-        state->breadcrumb = [weak = weak_from_this()](hstring const& title, std::function<void()> back,
-            hstring const& child, std::function<void()> parent) {
-            if (auto self = weak.lock()) self->SetSubpage(title, std::move(back), child, std::move(parent));
+        state->setNavigationPath = [weak = weak_from_this(), providers = state->weak_from_this()](SettingsBreadcrumb::Path children) {
+            if (auto self = weak.lock(); self && self->currentPage_ == Page::Providers)
+                self->SetNavigationPath(std::move(children), [providers] { if (auto page = providers.lock()) page->ShowList(); });
         };
         auto page = PageScroll(state->host);
         state->viewport = make_weak(page);

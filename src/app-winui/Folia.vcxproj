@@ -165,6 +165,7 @@
     <ClInclude Include="settings\storage\AppSettings.h" />
     <ClInclude Include="settings\storage\CompletionPromptSettings.h" />
     <ClInclude Include="settings\storage\ShortcutSettingsSerialization.h" />
+    <ClInclude Include="settings\views\SettingsBreadcrumb.h" />
     <ClInclude Include="settings\views\SettingsView.h" />
     <ClInclude Include="settings\views\SettingsViewSupport.h" />
     <ClInclude Include="settings\views\SettingsCards.h" />
@@ -703,6 +704,7 @@
     <ClCompile Include="settings\views\ShortcutSettingsComponents.cpp" />
     <ClCompile Include="settings\storage\LatexCommandStore.cpp" />
     <ClCompile Include="localization\Localization.cpp" />
+    <ClCompile Include="settings\views\SettingsBreadcrumb.cpp" />
     <ClCompile Include="settings\views\SettingsView.cpp" />
     <ClCompile Include="settings\views\SettingsView.General.cpp" />
     <ClCompile Include="settings\views\SettingsView.Shortcuts.cpp" />

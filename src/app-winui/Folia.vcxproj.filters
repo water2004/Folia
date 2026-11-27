@@ -714,6 +714,9 @@
     <ClCompile Include="settings\storage\ShortcutSettingsSerialization.cpp">
       <Filter>Settings\Storage</Filter>
     </ClCompile>
+    <ClCompile Include="settings\views\SettingsBreadcrumb.cpp">
+      <Filter>Settings\Views</Filter>
+    </ClCompile>
     <ClCompile Include="settings\views\SettingsView.cpp">
       <Filter>Settings\Views</Filter>
     </ClCompile>
@@ -973,6 +976,9 @@
     </ClInclude>
     <ClInclude Include="settings\storage\ShortcutSettingsSerialization.h">
       <Filter>Settings\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="settings\views\SettingsBreadcrumb.h">
+      <Filter>Settings\Views</Filter>
     </ClInclude>
     <ClInclude Include="settings\views\SettingsView.h">
       <Filter>Settings\Views</Filter>

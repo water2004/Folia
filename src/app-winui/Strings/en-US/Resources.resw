@@ -68,6 +68,7 @@
   <data name="DefinitionHasNoReference" xml:space="preserve"><value>This definition has no reference.</value></data>
   <data name="GoToDefinition" xml:space="preserve"><value>Go to definition</value></data>
   <data name="BackToReference" xml:space="preserve"><value>Back to reference</value></data>
+  <data name="SettingsBack" xml:space="preserve"><value>Back</value></data>
   <data name="CreateDefinition" xml:space="preserve"><value>Create definition</value></data>
   <data name="ResizeFailed" xml:space="preserve"><value>Resize failed: {0}</value></data>
   <data name="RenderFailed" xml:space="preserve"><value>Render failed: {0}</value></data>

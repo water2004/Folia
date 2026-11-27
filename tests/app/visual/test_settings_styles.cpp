@@ -47,6 +47,17 @@ Button Action(DependencyObject const& parent, winrt::hstring const& label) {
         if (auto found = Action(Media::VisualTreeHelper::GetChild(parent, i), label)) return found;
     return nullptr;
 }
+BreadcrumbBarItem Crumb(DependencyObject const& parent, winrt::hstring const& title) {
+    if (auto item = parent.try_as<BreadcrumbBarItem>(); item &&
+        winrt::unbox_value_or<winrt::hstring>(item.Content(), {}) == title) return item;
+    for (int i = 0; i < Media::VisualTreeHelper::GetChildrenCount(parent); ++i)
+        if (auto item = Crumb(Media::VisualTreeHelper::GetChild(parent, i), title)) return item;
+    return nullptr;
+}
+void InvokeCrumb(BreadcrumbBarItem const& item) {
+    auto peer = Automation::Peers::FrameworkElementAutomationPeer::CreatePeerForElement(item);
+    peer.GetPattern(Automation::Peers::PatternInterface::Invoke).as<Automation::Provider::IInvokeProvider>().Invoke();
+}
 CheckBox Effort(DependencyObject const& parent, winrt::hstring const& label) {
     if (auto choices = First<VariableSizedWrapGrid>(parent))
         for (auto const& child : choices.Children())
@@ -104,6 +115,52 @@ void SaveSettingsImage(Grid const& root, std::string_view name) {
 }
 
 suite settings_style_tests = [] {
+    "settings breadcrumb labels stay anchored when the current page becomes an ancestor"_test = [] {
+        using namespace winrt::Folia;
+        ModelSettingsPage fixture(SettingsView::Page::Providers);
+        auto const settingsRoot = fixture.root.Children().GetAt(0).as<ContentControl>().Content().as<Grid>();
+        auto const header = settingsRoot.Children().GetAt(0);
+        auto visibleLabel = [&](auto&& self, DependencyObject const& root, winrt::hstring const& title) -> TextBlock {
+            if (auto element = root.try_as<UIElement>(); element && element.Visibility() == Visibility::Collapsed) return nullptr;
+            if (auto label = root.try_as<TextBlock>(); label && label.Text() == title) return label;
+            for (int i = 0; i < Media::VisualTreeHelper::GetChildrenCount(root); ++i)
+                if (auto label = self(self, Media::VisualTreeHelper::GetChild(root, i), title)) return label;
+            return nullptr;
+        };
+        auto position = [&](winrt::hstring const& title) {
+            fixture.root.UpdateLayout();
+            auto label = visibleLabel(visibleLabel, header, title);
+            expect(fatal(label != nullptr)) << winrt::to_string(title);
+            return label.TransformToVisual(fixture.root).TransformPoint({0, 0});
+        };
+        auto samePosition = [](auto before, auto after) {
+            expect(std::abs(after.X - before.X) < 0.5f && std::abs(after.Y - before.Y) < 0.5f)
+                << "breadcrumb text moved from" << before.X << before.Y << "to" << after.X << after.Y;
+        };
+        auto category = Localize(L"ChatProviders");
+        auto provider = Localize(L"ChatAddProvider");
+        auto model = Localize(L"ChatAddModel");
+        auto const categoryStart = position(category);
+        InvokeAction(Action(fixture.page, provider));
+        Pump([&] { return Action(fixture.page, model) != nullptr; });
+        samePosition(categoryStart, position(category));
+        auto const providerStart = position(provider);
+        InvokeAction(Action(fixture.page, model));
+        Pump([&] { return Field<TextBox>(fixture.page, Localize(L"ChatModelName")) != nullptr; });
+        samePosition(categoryStart, position(category));
+        samePosition(providerStart, position(provider));
+        auto back = Action(header, Localize(L"SettingsBack"));
+        expect(fatal(back != nullptr));
+        InvokeAction(back);
+        Pump([&] { return Action(fixture.page, model) != nullptr; });
+        samePosition(providerStart, position(provider));
+        InvokeCrumb(Crumb(header, category));
+        Pump([&] { return Action(fixture.page, provider) != nullptr; });
+        samePosition(categoryStart, position(category));
+        InvokeCrumb(Crumb(header, Localize(L"Settings")));
+        Pump([&] { return header.Visibility() == Visibility::Collapsed; });
+    };
+
     "document media settings select a Mermaid theme independently of Folia"_test = [] {
         Window window;
         Grid root;
@@ -201,7 +258,7 @@ suite settings_style_tests = [] {
         expect(Field<TextBox>(fixture.page, Localize(L"AIBaseUrl")) == nullptr);
         InvokeAction(card);
         Pump([&] { return Action(fixture.page, Localize(L"ChatAddModel")) != nullptr; });
-        auto back = Action(fixture.root, Localize(L"ChatProviders"));
+        auto back = Crumb(fixture.root, Localize(L"ChatProviders"));
         auto providerName = Field<TextBox>(fixture.page, Localize(L"ChatProviderName"));
         auto providerProtocol = Field<ComboBox>(fixture.page, Localize(L"AIProtocol"));
         if (!expect(back && providerName && providerProtocol)) return;
@@ -246,7 +303,7 @@ suite settings_style_tests = [] {
         auto high = Effort(fixture.page, L"high");
         if (!expect(name && upstream && none && high && level)) return;
         expect(Field<TextBox>(fixture.page, Localize(L"AIBaseUrl")) == nullptr);
-        expect(Action(fixture.root, L"Model settings fixture") != nullptr);
+        expect(Crumb(fixture.root, L"Model settings fixture") != nullptr);
         name.Text(L"Manual model");
         upstream.Text(L"custom-model");
         expect(!none.IsChecked().GetBoolean() && !high.IsChecked().GetBoolean());

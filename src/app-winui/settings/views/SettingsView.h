@@ -3,6 +3,7 @@
 #include "settings/storage/AppSettings.h"
 #include "settings/latex/LatexCommandCatalog.h"
 #include "settings/views/LatexCommandSettingsComponents.h"
+#include "settings/views/SettingsBreadcrumb.h"
 #include "theme/ThemeCatalog.h"
 
 import folia.platform.editor_shortcut_settings;
@@ -44,8 +45,7 @@ namespace winrt::Folia
         winrt::Microsoft::UI::Xaml::UIElement BuildThemesPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildLicensesPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildAboutPage();
-        void SetSubpage(winrt::hstring const& title = {}, std::function<void()> back = {},
-            winrt::hstring const& child = {}, std::function<void()> parent = {});
+        void SetNavigationPath(settings_ui::SettingsBreadcrumb::Path children = {}, std::function<void()> openCategory = {});
         void LoadSelectedLicense();
         void RefreshThemeList();
         void UpdateThemePreview();
@@ -92,17 +92,7 @@ namespace winrt::Folia
         HWND owner_ = nullptr;
         ApplySettings applySettings_;
         winrt::Microsoft::UI::Xaml::Controls::ContentControl pageHost_{nullptr};
-        winrt::Microsoft::UI::Xaml::Controls::Button homeButton_;
-        winrt::Microsoft::UI::Xaml::Controls::TextBlock pageCrumb_;
-        winrt::Microsoft::UI::Xaml::Controls::Button categoryCrumb_;
-        winrt::Microsoft::UI::Xaml::Controls::StackPanel subpageCrumbs_;
-        winrt::Microsoft::UI::Xaml::Controls::TextBlock subpageTitle_;
-        winrt::Microsoft::UI::Xaml::Controls::Button parentCrumb_;
-        winrt::Microsoft::UI::Xaml::Controls::StackPanel childCrumbs_;
-        winrt::Microsoft::UI::Xaml::Controls::TextBlock childTitle_;
-        std::function<void()> subpageBack_;
-        std::function<void()> parentBack_;
-        winrt::Microsoft::UI::Xaml::FrameworkElement pageNavigation_{nullptr};
+        settings_ui::SettingsBreadcrumb breadcrumb_;
         std::vector<std::pair<Page, winrt::Microsoft::UI::Xaml::Controls::Button>> categoryButtons_;
         std::vector<winrt::Microsoft::UI::Xaml::Controls::Button::Click_revoker> navigationClicks_;
         Page currentPage_ = Page::Home;

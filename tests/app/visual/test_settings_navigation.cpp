@@ -47,7 +47,7 @@ suite settings_navigation_tests = [] {
             Invoke(target);
         };
         go(L"SettingsCategoryLicenses");
-        go(L"SettingsHomeButton");
+        go(L"SettingsBackButton");
         go(L"SettingsCategoryAICompletion");
         auto settingsTab = tabs.SelectedItem();
         Invoke(settings);
