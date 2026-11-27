@@ -7,6 +7,7 @@ target_include_directories(folia_ai PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../th
 target_sources(folia_ai
     PUBLIC FILE_SET CXX_MODULES FILES
         agent/Agent.ixx
+        agent/SearchQuery.ixx
         completion/completion.ixx
         providers/ModelTypes.ixx
         providers/providers.ixx
@@ -19,6 +20,7 @@ target_sources(folia_ai
     PRIVATE FILE_SET ai_internals TYPE CXX_MODULES FILES
         agent/Context.ixx
         agent/HostedSearch.ixx
+        agent/ToolOutput.ixx
         providers/JsonParsing.cpp
         providers/adapters/Adapters.cpp
         providers/adapters/SearchAction.cpp
@@ -30,6 +32,7 @@ target_sources(folia_ai
         agent/Agent.cpp
         agent/Context.cpp
         agent/HostedSearch.cpp
+        agent/ToolOutput.cpp
         completion/completion.cpp
         completion/edit.cpp
         providers/ModelAdapter.cpp

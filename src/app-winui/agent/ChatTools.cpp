@@ -4,6 +4,8 @@
 #include "workspace/WorkspaceFileKind.h"
 #include <wil/resource.h>
 
+import folia.ai.agent.search_query;
+
 namespace winrt::Folia::chat {
     using folia::ai::Json;
     using folia::ai::agent::Tool;
@@ -37,7 +39,9 @@ namespace winrt::Folia::chat {
         // for matches and snippets spanning I/O chunks, including multi-byte characters.
         template<class Read>
         Json Search(Json const& args, std::size_t size, Read read, std::stop_token stop) {
-            auto query = args.at("query").get<std::string>();
+            auto parsed = folia::ai::agent::ReadSearchQuery(args);
+            if (!parsed) return {{"error", parsed.error()}};
+            auto query = *parsed;
             if (query.empty() || query.size() > 512) return Error("Use a literal query of 1 to 512 UTF-8 bytes");
             auto pos = Offset(args);
             if (pos > size) return Error("Offset outside source");
@@ -278,8 +282,11 @@ namespace winrt::Folia::chat {
                 {{"id", id}, {"offset", offset}}, Json::array({"id"}), [get, cited, tabLink](Json const& args, auto stop) {
                     return cited(Page((*get)(args, stop).text, Offset(args)), tabLink(args), Offset(args));
                 }));
+            auto search = folia::ai::agent::SearchQueryProperties();
+            search["id"] = id;
+            search["offset"] = offset;
             tools.push_back(Define("search_open_tab", "Find literal text throughout an open document. Matches include snippets and byte offsets for read_open_tab.",
-                {{"id", id}, {"query", {{"type", "string"}}}, {"offset", offset}}, Json::array({"id", "query"}), [get, cited, tabLink](Json const& args, auto stop) {
+                std::move(search), Json::array({"id", "query"}), [get, cited, tabLink](Json const& args, auto stop) {
                     std::string_view text((*get)(args, stop).text);
                     return cited(Search(args, text.size(), [text](auto at, auto length) { return text.substr(at, length); }, stop), tabLink(args), 0);
                 }));
@@ -313,8 +320,11 @@ namespace winrt::Folia::chat {
                 {{"path", path}, {"offset", offset}}, Json::array(), [workspace](auto const& args, auto stop) { return workspace->List(args, stop); }));
             tools.push_back(Define("read_workspace_file", "Read a page of a UTF-8 text file within the approved workspace.",
                 {{"path", path}, {"offset", offset}}, Json::array({"path"}), [workspace, citeFile](auto const& args, auto) { return citeFile(workspace->Read(args), args); }));
+            auto search = folia::ai::agent::SearchQueryProperties();
+            search["path"] = path;
+            search["offset"] = offset;
             tools.push_back(Define("search_workspace_file", "Find literal text in a workspace file and return matching snippets and UTF-8 byte offsets.",
-                {{"path", path}, {"query", {{"type", "string"}}}, {"offset", offset}}, Json::array({"path", "query"}),
+                std::move(search), Json::array({"path", "query"}),
                 [workspace, citeFile](auto const& args, auto stop) { return citeFile(workspace->Find(args, stop), args); }));
             tools.push_back(Define("link_workspace_file", "Get a clickable Folia link to a file. Set line to a one-based source line when known.",
                 {{"path", path}, {"line", {{"type", "integer"}, {"minimum", 1}}}}, Json::array({"path"}),

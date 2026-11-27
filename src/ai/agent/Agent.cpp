@@ -2,6 +2,7 @@ module folia.ai.agent;
 import std;
 import folia.ai.agent.context;
 import folia.ai.agent.hosted_tools;
+import folia.ai.agent.tool_output;
 import folia.ai.providers;
 
 namespace folia::ai::agent {
@@ -17,50 +18,13 @@ namespace folia::ai::agent {
             if (stop.stop_requested()) throw std::runtime_error("Cancelled");
         }
 
-        std::string ToolPreview(Json const& body) {
-            std::string display;
-            for (auto key : {"error", "text"}) {
-                if (auto it = body.find(key); it != body.end() && it->is_string())
-                    display = it->get<std::string>();
+        Json InvokeTool(Tool const* tool, Json const& args, std::stop_token stop) {
+            if (!tool) return {{"error", "Tool unavailable in this conversation"}};
+            try {
+                return tool->invoke(args, stop);
+            } catch (std::exception const&) {
+                return {{"error", "Tool could not complete the requested operation"}};
             }
-            for (auto key : {"matches", "headings", "entries", "tabs"}) {
-                auto items = body.find(key);
-                if (items == body.end() || !items->is_array()) continue;
-                for (auto const& item : *items) {
-                    for (auto field : {"snippet", "heading", "name", "title"}) {
-                        auto it = item.find(field);
-                        if (it == item.end() || !it->is_string()) continue;
-                        if (!display.empty()) display += "\n";
-                        if (item.contains("offset")) display += "@" + item.at("offset").dump() + "  ";
-                        display += it->get<std::string>();
-                    }
-                    if (display.size() > 1024) break;
-                }
-            }
-            if (display.empty()) display = body.dump();
-            if (display.size() > 1024) {
-                std::size_t end = 1024;
-                while ((static_cast<unsigned char>(display[end]) & 0xc0) == 0x80) --end;
-                display.resize(end);
-                display += "…";
-            }
-            return display;
-        }
-
-        Message Receipt(ToolCall const& call, std::span<Tool const> tools, std::stop_token stop) {
-            auto tool = std::ranges::find_if(tools, [&](Tool const& entry) { return entry.definition.name == call.name; });
-            Json body;
-            if (tool == tools.end()) body = {{"error", "Tool unavailable in this conversation"}};
-            else {
-                try {
-                    body = tool->invoke(Json::parse(call.arguments), stop);
-                } catch (std::exception const&) {
-                    body = {{"error", "Tool could not complete the requested operation"}};
-                }
-            }
-            auto receipt = Text(MessageRole::Tool, body.dump(-1, ' ', false, Json::error_handler_t::replace));
-            receipt.toolCallId = call.id;
-            return receipt;
         }
     }
 
@@ -97,11 +61,11 @@ namespace folia::ai::agent {
         };
         wire.messages = ProjectHistory(history, options);
         auto historySize = wire.messages.size();
-        std::set<std::string> seenCallIds;
+        ToolReceipts toolReceipts;
         wire.maxOutputTokens = options.outputTokens;
         for (;;) {
             CheckStop(stop);
-            FitContext(wire, historySize, history, options, request, notify, stop);
+            FitContext(wire, historySize, toolReceipts, history, options, request, notify, stop);
             if (progress) progress(ProgressKind::StepStarted, {});
             const auto textStart = reply.markdown.size(), reasoningStart = reply.reasoning.size();
             const auto firstMarker = reply.steps.size();
@@ -183,7 +147,7 @@ namespace folia::ai::agent {
                 result = request(wire, stop, stream);
             } catch (ContextWindowExceeded const&) {
                 CheckStop(stop);
-                if (!FitContext(wire, historySize, history, options, request, notify, stop, true)) throw;
+                if (!FitContext(wire, historySize, toolReceipts, history, options, request, notify, stop, true)) throw;
                 result = request(wire, stop, stream);
             }
             CheckStop(stop);
@@ -230,7 +194,7 @@ namespace folia::ai::agent {
                 return std::move(reply);
             }
             for (auto const& call : result.message.toolCalls)
-                if (!seenCallIds.insert(call.id).second)
+                if (!toolReceipts.try_emplace(call.id).second)
                     throw ProtocolError("The service reused a tool call ID");
             auto batch = result.message.toolCalls;
             wire.messages.push_back(std::move(result.message));
@@ -246,10 +210,12 @@ namespace folia::ai::agent {
                     activity.target += (activity.target.empty() ? "" : " · ") + query->get<std::string>();
                 auto description = call.name + " " + activity.target;
                 if (progress) progress(ProgressKind::Reading, description);
-                auto receipt = Receipt(call, tools, stop);
-                auto body = Json::parse(PlainText(receipt), nullptr, false);
-                activity.failed = body.contains("error");
-                activity.detail = ToolPreview(body);
+                auto output = FormatToolOutput(InvokeTool(descriptor == tools.end() ? nullptr : &*descriptor, args, stop));
+                auto receipt = Text(MessageRole::Tool, std::move(output.text));
+                receipt.toolCallId = call.id;
+                toolReceipts.at(call.id) = std::move(output.retained);
+                activity.failed = output.failed;
+                activity.detail = std::move(output.preview);
                 if (progress) progress(ProgressKind::ToolResult, Json{{"action", description},
                     {"failed", activity.failed}, {"detail", activity.detail}}.dump());
                 reply.activities.push_back(std::move(activity));

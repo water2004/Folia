@@ -984,6 +984,8 @@
     <ClCompile Include="..\ai\providers\StreamResponse.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)ai_providers_StreamResponse.obj</ObjectFileName></ClCompile>
     <ClCompile Include="..\ai\agent\Context.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)ai_agent_Context.obj</ObjectFileName></ClCompile>
     <ClCompile Include="..\ai\agent\HostedSearch.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)ai_agent_HostedSearch.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\agent\SearchQuery.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)ai_agent_SearchQuery.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\agent\ToolOutput.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)ai_agent_ToolOutput.obj</ObjectFileName></ClCompile>
     <ClCompile Include="..\ai\providers\adapters\Adapters.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><CompileAs>CompileAsCppModuleInternalPartition</CompileAs><ObjectFileName>$(IntDir)ai_providers_adapters_Adapters.obj</ObjectFileName></ClCompile>
     <ClCompile Include="..\ai\providers\adapters\SearchAction.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><CompileAs>CompileAsCppModuleInternalPartition</CompileAs><ObjectFileName>$(IntDir)ai_providers_adapters_SearchAction.obj</ObjectFileName></ClCompile>
     <ClCompile Include="..\ai\providers\adapters\anthropic\AnthropicParsing.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><CompileAs>CompileAsCppModuleInternalPartition</CompileAs><ObjectFileName>$(IntDir)ai_providers_adapters_anthropic_AnthropicParsing.obj</ObjectFileName></ClCompile>
@@ -1028,6 +1030,7 @@
     <ClCompile Include="..\ai\agent\Agent.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="..\ai\agent\Context.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="..\ai\agent\HostedSearch.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
+    <ClCompile Include="..\ai\agent\ToolOutput.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="editor\session\EditorSession.Completion.cpp" />
     <ClCompile Include="editor\rendering\EditorCompletionPreview.cpp" />
   </ItemGroup>

@@ -396,6 +396,12 @@
     <ClCompile Include="..\ai\agent\HostedSearch.ixx">
       <Filter>Agent Chat</Filter>
     </ClCompile>
+    <ClCompile Include="..\ai\agent\SearchQuery.ixx">
+      <Filter>Agent Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\agent\ToolOutput.ixx">
+      <Filter>Agent Chat</Filter>
+    </ClCompile>
     <ClCompile Include="..\ai\providers\adapters\Adapters.cpp">
       <Filter>AI Protocols</Filter>
     </ClCompile>
@@ -481,6 +487,9 @@
       <Filter>Agent Chat</Filter>
     </ClCompile>
     <ClCompile Include="..\ai\agent\HostedSearch.cpp">
+      <Filter>Agent Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\agent\ToolOutput.cpp">
       <Filter>Agent Chat</Filter>
     </ClCompile>
     <ClCompile Include="..\platform\windows\ai\ModelHttpClient.cpp">

@@ -1,6 +1,7 @@
 #include "support/folia_test.hpp"
 
 import folia.ai.agent;
+import folia.ai.agent.search_query;
 import folia.ai.providers;
 
 namespace {
@@ -35,14 +36,67 @@ namespace {
                 const auto& denied = wire.messages.back();
                 expect(allowed.toolCallId == "one");
                 expect(denied.toolCallId == "two");
-                expect(Json::parse(PlainText(allowed)).at("text") == "permitted");
-                expect(Json::parse(PlainText(denied)).contains("error"));
+                expect(PlainText(allowed).contains("\npermitted\n"));
+                expect(PlainText(denied).contains("Tool unavailable in this conversation"));
                 return Answer("**Result**");
             };
             auto reply = Run(history, Options{"fixture"}, std::span(&tool, 1), request, {}, {});
             expect(reply.markdown == "**Result**");
             expect(history.entries.size() == 1_u);
             expect(steps == 2_i);
+        };
+
+        "search distinguishes a literal backslash from an explicitly requested control character"_test = [] {
+            const auto latex = Json::parse(R"({"query":"\\nu"})");
+            const auto ambiguous = Json::parse(R"({"query":"\nu"})");
+            const auto tab = Json::parse(R"({"query":"\text"})");
+            const auto multiline = Json::parse(R"({"query":"line\r\nu","match_control_characters":true})");
+            expect(ReadSearchQuery(latex).value() == R"(\nu)");
+            expect(!ReadSearchQuery(ambiguous) && !ReadSearchQuery(tab));
+            expect(ReadSearchQuery(multiline).value() == "line\r\nu");
+            expect(ReadSearchQuery(Json::object()).value().empty());
+        };
+
+        "all model protocols receive literal excerpts and their original tool call identity"_test = [] {
+            const std::string excerpt = "Start\r\nu follows a line break\nMath: \\nu\n```md\nblock\n```\n";
+            const std::string snippet = "Here\nu starts a new line, followed by \\nu";
+            History history{{{MessageRole::User, "Find the notation"}}};
+            Tool tool{{"read", "Read text", Json::object()}, [&](Json const&, std::stop_token) {
+                return Json{{"text", excerpt}, {"next_offset", 1024}, {"link", "folia-doc:reference"},
+                    {"matches", Json::array({{{"offset", 7}, {"snippet", snippet}}})}};
+            }};
+            auto request = [&](ModelRequest const& wire, std::stop_token, Progress const&) {
+                if (wire.messages.back().role == MessageRole::User) {
+                    ModelResult result;
+                    result.finish = FinishReason::ToolCalls;
+                    result.message.toolCalls = {{"read-notation", "read", "{}"}};
+                    return result;
+                }
+                auto const& receipt = wire.messages.back();
+                auto text = PlainText(receipt);
+                expect(receipt.toolCallId == "read-notation");
+                expect(text.contains(excerpt) && text.contains(snippet));
+                expect(!text.contains(R"(Start\r\nu)") && !text.contains(R"(Here\nu)"));
+                expect(text.contains(R"("next_offset":1024)") && text.contains("folia-doc:reference"));
+                expect(text.contains(R"("offset":7)") && text.contains("matches[0].snippet"));
+                for (auto protocol : {ApiProtocol::Responses, ApiProtocol::ChatCompletions, ApiProtocol::AnthropicMessages}) {
+                    auto payload = Json::parse(BuildRequest(protocol, wire).dump());
+                    if (protocol == ApiProtocol::Responses) {
+                        auto const& result = payload["input"].back();
+                        expect(result["call_id"] == "read-notation" && result["output"] == text);
+                    } else if (protocol == ApiProtocol::ChatCompletions) {
+                        auto const& result = payload["messages"].back();
+                        expect(result["tool_call_id"] == "read-notation" && result["content"] == text);
+                    } else {
+                        auto const& result = payload["messages"].back()["content"].back();
+                        expect(result["tool_use_id"] == "read-notation" && result["content"] == text);
+                    }
+                }
+                return Answer("Done");
+            };
+            auto reply = Run(history, Options{"fixture"}, std::span(&tool, 1), request, {}, {});
+            expect(reply.markdown == "Done");
+            expect(reply.activities.front().detail.contains(excerpt) && reply.activities.front().detail.contains(snippet));
         };
 
         "agent forwards a complete directory page with long names and its continuation offset"_test = [] {
@@ -113,8 +167,7 @@ namespace {
                 if (wire.cacheSession.empty()) {
                     expect(wire.tools.empty());
                     expect(!wire.webSearch);
-                    const auto input = Json::parse(PlainText(wire.messages.back()));
-                    expect(!input.at("transcript").empty());
+                    expect(PlainText(wire.messages.back()).contains("User message\n"));
                     return Answer("Summary");
                 }
                 expect(PlainText(wire.messages.back()) == "Latest question");
@@ -187,14 +240,44 @@ namespace {
             expect(invocations == 1_u && requests == 3_u && summaries == 1_u);
         };
 
+        "trimming an earlier literal tool excerpt keeps its cursor and the complete latest result"_test = [] {
+            History history{{{MessageRole::User, "Read two pages"}}};
+            unsigned invocations = 0, requests = 0;
+            Tool tool{{"read", "Read a range", Json::object()}, [&](Json const&, std::stop_token) {
+                if (++invocations == 1)
+                    return Json{{"text", "Old line\nu\n" + std::string(2048, 'x')}, {"next_offset", 2080}, {"link", "folia-doc:old"}};
+                return Json{{"text", "New line\nu and \\nu"}};
+            }};
+            auto request = [&](ModelRequest const& wire, std::stop_token, Progress const&) {
+                ++requests;
+                if (requests <= 2) {
+                    ModelResult result;
+                    result.finish = FinishReason::ToolCalls;
+                    result.message.toolCalls = {{"page-" + std::to_string(requests), "read", "{}"}};
+                    return result;
+                }
+                if (requests == 3) throw ContextWindowExceeded("context_length_exceeded");
+                auto const& old = wire.messages[wire.messages.size() - 3];
+                expect(old.toolCallId == "page-1" && wire.messages.back().toolCallId == "page-2");
+                auto retained = Json::parse(PlainText(old));
+                expect(retained["next_offset"] == 2080 && retained["link"] == "folia-doc:old");
+                expect(retained.contains("omitted"));
+                expect(PlainText(wire.messages.back()).contains("New line\nu and \\nu"));
+                return Answer("Done");
+            };
+            expect(Run(history, Options{"fixture"}, std::span(&tool, 1), request, {}, {}).markdown == "Done");
+            expect(invocations == 2_u && requests == 4_u);
+        };
+
         "manual compaction keeps the transcript and checkpoints only complete turns"_test = [] {
-            History history{{{MessageRole::User, "Remember page seven"}, {MessageRole::Assistant, "Recorded"},
+            const std::string original = "Remember page seven\nu and the command \\nu";
+            History history{{{MessageRole::User, original}, {MessageRole::Assistant, "Recorded"},
                              {MessageRole::User, "Next question"}}};
             int requests = 0;
             auto summarize = [&](ModelRequest const& wire, std::stop_token, Progress const&) {
                 ++requests;
                 expect(wire.tools.empty() && !wire.webSearch);
-                expect(PlainText(wire.messages.back()).find("page seven") != std::string::npos);
+                expect(PlainText(wire.messages.back()).contains(original));
                 expect(PlainText(wire.messages.back()).find("Next question") == std::string::npos);
                 return Answer("Page seven");
             };

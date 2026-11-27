@@ -3,6 +3,8 @@
 #include "agent/ChatFiles.h"
 #include "storage/JsonRecords.h"
 
+import folia.ai.agent.search_query;
+
 namespace winrt::Folia::chat {
     using namespace records;
     using namespace storage;
@@ -166,11 +168,13 @@ namespace winrt::Folia::chat {
 
     folia::ai::agent::Tool ConversationHistoryTool(std::string id) {
         const Json cursor{{"type", "integer"}, {"minimum", 0}};
+        auto properties = folia::ai::agent::SearchQueryProperties();
+        properties["query"]["maxLength"] = 128;
+        for (auto key : {"before", "message", "offset"}) properties[key] = cursor;
         folia::ai::agent::Tool tool;
         tool.definition = {"conversation_history",
             "Recall original messages in this conversation, including compacted history. Search with a literal query or browse newest first; pass next_before to continue. To read a hit, pass its message ID and optional UTF-8 offset.",
-            {{"type", "object"}, {"properties", {{"query", {{"type", "string"}, {"maxLength", 128}}},
-                 {"before", cursor}, {"message", cursor}, {"offset", cursor}}}, {"additionalProperties", false}}};
+            {{"type", "object"}, {"properties", std::move(properties)}, {"additionalProperties", false}}};
         tool.invoke = [id = std::move(id)](Json const& args, std::stop_token stop) -> Json {
             auto position = [&](char const* key) -> std::optional<std::uintmax_t> {
                 if (!args.contains(key)) return {};
@@ -180,7 +184,9 @@ namespace winrt::Folia::chat {
             };
             auto message = position("message");
             auto before = message ? message : position("before");
-            auto query = args.value("query", "");
+            auto parsed = folia::ai::agent::ReadSearchQuery(args);
+            if (!parsed) return {{"error", parsed.error()}};
+            auto query = *parsed;
             if (query.size() > 512) return {{"error", "Use a shorter search term"}};
             ReverseJournal journal(Path(LogFolder(), id, L".jsonl"), before);
             auto start = journal.Position();

@@ -225,6 +225,44 @@ namespace {
             expect(snapshots == 1_i);
         };
 
+        "agent text search keeps LaTeX and real line breaks distinct"_test = [] {
+            const std::string source = "Unix\nu here\nWindows\r\nu here\nMath: \\nu\n";
+            auto folder = std::filesystem::temp_directory_path() / ("folia-agent-search-" + records::NewId());
+            std::filesystem::create_directory(folder);
+            auto file = folder / "test.md";
+            auto cleanup = wil::scope_exit([&] { DeleteFileW(file.c_str()); RemoveDirectoryW(folder.c_str()); });
+            std::ofstream(file, std::ios::binary) << source;
+            std::vector<chat::OpenTab> tabs{{"Notes", 1, [&](std::stop_token) { return chat::TabSnapshot{source}; }}};
+            auto tools = chat::MakeTools(tabs, folder);
+            auto check = [&](std::string_view name, Json const& subject) {
+                auto tool = std::ranges::find_if(tools, [&](auto const& item) { return item.definition.name == name; });
+                if (!expect(tool != tools.end())) return;
+                auto search = [&](std::string_view json) {
+                    auto args = Json::parse(json);
+                    args.update(subject);
+                    return tool->invoke(args, {});
+                };
+                expect(search(R"({"query":"\nu"})").contains("error"));
+                auto latex = search(R"({"query":"\\nu"})").at("matches");
+                if (expect(latex.size() == 1_u)) expect(latex[0]["offset"] == source.find(R"(\nu)"));
+                auto unixLine = search(R"({"query":"Unix\nu","match_control_characters":true})").at("matches");
+                if (expect(unixLine.size() == 1_u)) expect(unixLine[0]["offset"] == 0);
+                auto windowsLine = search(R"({"query":"Windows\r\nu","match_control_characters":true})").at("matches");
+                if (expect(windowsLine.size() == 1_u)) expect(windowsLine[0]["offset"] == source.find("Windows"));
+            };
+            check("search_open_tab", {{"id", 1}});
+            check("search_workspace_file", {{"path", "test.md"}});
+
+            auto conversation = chat::NewConversation("Literal search");
+            auto removeConversation = wil::scope_exit([&] { chat::DeleteConversation(conversation.id); });
+            chat::AppendEntry(conversation.id, {folia::ai::MessageRole::User, source});
+            auto recall = chat::ConversationHistoryTool(conversation.id);
+            expect(recall.invoke(Json::parse(R"({"query":"\nu"})"), {}).contains("error"));
+            expect(recall.invoke(Json::parse(R"({"query":"\\nu"})"), {}).at("matches").size() == 1_u);
+            expect(recall.invoke(Json::parse(R"({"query":"Windows\r\nu","match_control_characters":true})"), {})
+                .at("matches").size() == 1_u);
+        };
+
         "agent streams native Markdown through unstable tails and preserves selection"_test = [] {
             EditorSession session;
             auto stream = session.BeginMarkdownStream();
@@ -687,8 +725,10 @@ namespace {
             view->Progress(StepStarted, {});
             view->Progress(ReasoningSnapshot, L"核对笔记中的边界条件");
             view->Progress(TextDelta, L"## 结论\n\n这里需要有界性。");
-            view->Progress(Reading, L"search_open_tab theorem.md · 有界性");
-            view->Progress(ToolResult, L"{\"action\":\"search_open_tab theorem.md · 有界性\",\"detail\":\"line 17\"}");
+            const auto query = L"theorem.md · \nu and \\nu";
+            const auto search = winrt::hstring(L"search_open_tab ") + query;
+            view->Progress(Reading, search);
+            view->Progress(ToolResult, winrt::to_hstring(Json{{"action", winrt::to_string(search)}, {"detail", "line 17"}}.dump()));
             view->Progress(StepStarted, {});
             view->Progress(TextDelta, L"见文档第十七行。");
             chat::Entry reply{folia::ai::MessageRole::Assistant};
@@ -697,7 +737,7 @@ namespace {
             reply.markdown = second + "\n\n" + winrt::to_string(L"见文档第十七行。");
             reply.reasoning = winrt::to_string(L"核对笔记中的边界条件");
             reply.activities = {{"read_workspace_file", "notes.md", false, "3. Convergence"},
-                {"search_open_tab", winrt::to_string(L"theorem.md · 有界性"), false, "line 17"}};
+                {"search_open_tab", winrt::to_string(query), false, "line 17"}};
             auto n = reply.reasoning.size();
             reply.steps = {{first.size(),0,0},{first.size(),0,1},{first.size(),n,1},{second.size(),n,1},
                 {second.size(),n,2},{reply.markdown.size(),n,2}};
@@ -722,6 +762,7 @@ namespace {
                     }) != nullptr);
                 }
                 auto lastTrace = children.GetAt(3);
+                expect(std::wstring_view(Automation::AutomationProperties::GetName(caption(lastTrace))).contains(L"\u240Au and \\nu"));
                 Invoke(caption(lastTrace));
                 expect(Find<Button>(lastTrace, [](auto const& b) { return b.Name() == L"ChatActivityItem"; }) == nullptr);
                 expect(Find<TextBlock>(lastTrace, [](auto const& t) { return t.Text() == L"line 17"; }) != nullptr);

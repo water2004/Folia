@@ -28,7 +28,14 @@ namespace winrt::Folia::chat {
             return Localize((std::wstring(L"ChatAction") + action.group + tense).c_str());
         }
         hstring WithTarget(hstring const& label, std::string_view target) {
-            return target.empty() ? label : label + L"  " + to_hstring(target);
+            if (target.empty()) return label;
+            std::wstring title(to_hstring(target));
+            for (auto& c : title) {
+                // A single-line caption shows control characters without inventing a backslash escape.
+                if (c < 0x20) c += 0x2400;
+                else if (c == 0x7f) c = 0x2421;
+            }
+            return label + L"  " + hstring(title);
         }
         hstring Brief(hstring const& text) {
             std::wstring_view view(text);
