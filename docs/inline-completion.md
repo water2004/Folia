@@ -88,7 +88,7 @@ sequences and combining marks.
 
 ## Responsibilities
 
-- `src/completion`: portable request context, bounded cache, proposal state,
+- `src/ai/completion`: portable request context, bounded cache, proposal state,
   acceptance boundaries and prompt policy. No Windows or editor mutations.
 - Vendored protocol adapters: request/response/SSE mapping for Chat Completions,
   Responses and Anthropic Messages; no tools, agent loop or session history.

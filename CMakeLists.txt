@@ -60,7 +60,6 @@ endif()
 add_subdirectory(src/markdown)
 add_subdirectory(src/math/editor)
 add_subdirectory(src/highlight)
-add_subdirectory(src/completion)
 add_subdirectory(src/ai)
 
 set(FOLIA_SOURCE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")

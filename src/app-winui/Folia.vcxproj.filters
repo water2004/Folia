@@ -7,6 +7,9 @@
     <Filter Include="Agent Chat">
       <UniqueIdentifier>{31F7B54E-C992-49A0-BB10-E3EB09F1D142}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AI Completion">
+      <UniqueIdentifier>{e2a83546-b428-4a6c-8fd4-08c9265d71b6}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Editor">
       <UniqueIdentifier>{d66d082f-cb5d-4f22-9865-670fe1bd5691}</UniqueIdentifier>
     </Filter>
@@ -356,6 +359,15 @@
     </ClCompile>
     <ClCompile Include="agent\ChatComposerExtras.cpp">
       <Filter>Agent Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\completion\completion.ixx">
+      <Filter>AI Completion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\completion\completion.cpp">
+      <Filter>AI Completion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\completion\edit.cpp">
+      <Filter>AI Completion</Filter>
     </ClCompile>
     <ClCompile Include="..\ai\agent\Agent.cpp">
       <Filter>Agent Chat</Filter>
