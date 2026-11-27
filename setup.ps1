@@ -74,19 +74,28 @@ if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
 }
 
 Write-Host 'Building the native SVG normalizer...'
-$PreviousRustFlags = $env:RUSTFLAGS
+$PreviousEncodedFlags = $env:CARGO_ENCODED_RUSTFLAGS
 try {
-    $StaticCrtFlag = '-C target-feature=+crt-static'
-    if (-not $env:RUSTFLAGS -or -not $env:RUSTFLAGS.Contains($StaticCrtFlag)) {
-        $env:RUSTFLAGS = (($env:RUSTFLAGS, $StaticCrtFlag) -join ' ').Trim()
-    }
+    # Cargo's unit separator keeps each remap intact when a profile or checkout contains spaces.
+    $separator = [char]31
+    $flags = if ($PreviousEncodedFlags) { $PreviousEncodedFlags.Split($separator) }
+             elseif ($env:RUSTFLAGS) { $env:RUSTFLAGS.Trim() -split '\s+' }
+    $cargoRoot = if ($env:CARGO_HOME) { $env:CARGO_HOME } else { Join-Path $env:USERPROFILE '.cargo' }
+    $rustSysroot = & rustc --print sysroot
+    if ($LASTEXITCODE -ne 0) { throw 'Could not locate the active Rust toolchain.' }
+    $env:CARGO_ENCODED_RUSTFLAGS = (@($flags | Where-Object { $_ }) + @(
+        '-C', 'target-feature=+crt-static', "--remap-path-prefix=$Root=.",
+        "--remap-path-prefix=$([IO.Path]::GetFullPath($cargoRoot))=cargo",
+        "--remap-path-prefix=$rustSysroot=rust",
+        '-C', 'link-arg=/PDBALTPATH:folia_svg_normalizer.pdb'
+    )) -join $separator
     & cargo build --jobs 4 --locked --release --manifest-path $SvgNormalizerManifest --target-dir $SvgNormalizerTarget
     if ($LASTEXITCODE -ne 0) {
         throw "SVG normalizer build failed with exit code $LASTEXITCODE"
     }
 }
 finally {
-    $env:RUSTFLAGS = $PreviousRustFlags
+    $env:CARGO_ENCODED_RUSTFLAGS = $PreviousEncodedFlags
 }
 
 if (-not (Test-Path -LiteralPath $SvgNormalizerOutput)) {
