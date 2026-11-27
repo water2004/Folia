@@ -557,7 +557,7 @@
   <data name="ChatNoProviderModels" xml:space="preserve"><value>添加模型后，可以获取上游信息或手动填写模型 ID。</value></data>
   <data name="ChatAllowedEfforts" xml:space="preserve"><value>可用推理档位</value></data>
   <data name="ChatDefaultEffort" xml:space="preserve"><value>默认推理档位</value></data>
-  <data name="ChatApplyModel" xml:space="preserve"><value>应用到供应商</value></data>
+  <data name="ChatSaveModel" xml:space="preserve"><value>保存模型</value></data>
   <data name="ChatSaveProvider" xml:space="preserve"><value>保存供应商</value></data>
   <data name="AIPredictionBehavior" xml:space="preserve"><value>预测行为</value></data>
   <data name="ChatUseFullUrl" xml:space="preserve"><value>使用完整请求 URL</value></data>

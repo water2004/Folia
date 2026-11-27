@@ -45,6 +45,10 @@ namespace winrt::Folia::models {
 
     std::vector<ModelProfile> Profiles();
     ModelProfile SaveProfile(ModelProfile, std::optional<std::wstring> key);
+    void SaveConnection(ModelProfile, std::optional<std::wstring> key);
+    void SaveModel(std::string const& providerId, ConfiguredModel model);
+    void DeleteModel(std::string const& providerId, std::string const& modelId);
+    void SetModelEnabled(std::string const& providerId, std::string const& modelId, bool enabled);
     std::string ImportLegacyCompletion(folia::platform::completion::CompletionConfig const&,
                                       std::wstring const& credentialTarget);
     void DeleteProfile(std::string const& id);

@@ -120,7 +120,7 @@ namespace winrt::Folia::settings_ui {
         panel_.Children().Append(cards::Section(Localize(L"ChatModelCapabilities"), capabilities));
 
         auto buttons = ButtonRow();
-        auto apply = Action(L"ChatApplyModel");
+        auto apply = Action(L"ChatSaveModel");
         apply.Style(ResourceStyle(L"SettingsPrimaryButtonStyle"));
         command(apply, [weak, save = std::move(save)] { if (auto self = weak.lock()) self->Apply(save); });
         buttons.Children().Append(apply);
@@ -129,7 +129,13 @@ namespace winrt::Folia::settings_ui {
         buttons.Children().Append(close);
         if (remove) {
             auto deleteModel = Action(L"Remove");
-            command(deleteModel, std::move(remove));
+            command(deleteModel, [weak, remove = std::move(remove)] {
+                if (auto self = weak.lock()) {
+                    try { remove(); }
+                    catch (std::exception const& e) { cards::Status(self->validation_, to_hstring(e.what()), true); }
+                    catch (hresult_error const& e) { cards::Status(self->validation_, e.message(), true); }
+                }
+            });
             buttons.Children().Append(deleteModel);
         }
         panel_.Children().Append(buttons);
@@ -207,7 +213,9 @@ namespace winrt::Folia::settings_ui {
         model.vision = vision_.IsOn();
         model.webSearch = !route_.search.empty() && search_.IsOn();
         model.webFetch = readPagesRow_ && readPagesRow_.Visibility() == Visibility::Visible && readPages_.IsOn();
-        save(std::move(model));
+        try { save(std::move(model)); }
+        catch (std::exception const& e) { cards::Status(validation_, to_hstring(e.what()), true); }
+        catch (hresult_error const& e) { cards::Status(validation_, e.message(), true); }
     }
 
     void ProviderModelForm::SetCatalog(std::vector<folia::platform::completion::CompletionModel> models) {

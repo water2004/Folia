@@ -557,7 +557,7 @@
   <data name="ChatNoProviderModels" xml:space="preserve"><value>Add a model to fetch its metadata or enter an upstream ID.</value></data>
   <data name="ChatAllowedEfforts" xml:space="preserve"><value>Available reasoning levels</value></data>
   <data name="ChatDefaultEffort" xml:space="preserve"><value>Default reasoning level</value></data>
-  <data name="ChatApplyModel" xml:space="preserve"><value>Apply to provider</value></data>
+  <data name="ChatSaveModel" xml:space="preserve"><value>Save model</value></data>
   <data name="ChatSaveProvider" xml:space="preserve"><value>Save provider</value></data>
   <data name="AIPredictionBehavior" xml:space="preserve"><value>Prediction behavior</value></data>
   <data name="ChatUseFullUrl" xml:space="preserve"><value>Use full request URL</value></data>

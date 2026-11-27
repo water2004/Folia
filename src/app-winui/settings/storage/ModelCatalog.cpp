@@ -150,6 +150,44 @@ namespace winrt::Folia::models {
         return SaveProfileLocked(std::move(profile), key);
     }
 
+    namespace {
+        auto& RequireRecord(auto& records, std::string const& id) {
+            auto it = std::ranges::find_if(records, [&](auto const& record) { return record.id == id; });
+            if (it == records.end()) throw std::runtime_error("This configuration no longer exists.");
+            return *it;
+        }
+
+        void UpdateModels(std::string const& providerId, auto change) {
+            std::lock_guard lock(files);
+            auto profile = RequireRecord(Catalog(), providerId);
+            change(profile.models);
+            SaveProfileLocked(std::move(profile), std::nullopt);
+        }
+    }
+
+    void SaveConnection(ModelProfile connection, std::optional<std::wstring> key) {
+        std::lock_guard lock(files);
+        if (!connection.id.empty()) connection.models = RequireRecord(Catalog(), connection.id).models;
+        SaveProfileLocked(std::move(connection), key);
+    }
+
+    void SaveModel(std::string const& providerId, ConfiguredModel model) {
+        UpdateModels(providerId, [&](auto& models) {
+            if (model.id.empty()) models.push_back(std::move(model));
+            else RequireRecord(models, model.id) = std::move(model);
+        });
+    }
+
+    void DeleteModel(std::string const& providerId, std::string const& modelId) {
+        UpdateModels(providerId, [&](auto& models) {
+            std::erase_if(models, [&](auto const& model) { return model.id == modelId; });
+        });
+    }
+
+    void SetModelEnabled(std::string const& providerId, std::string const& modelId, bool enabled) {
+        UpdateModels(providerId, [&](auto& models) { RequireRecord(models, modelId).enabled = enabled; });
+    }
+
     std::string ImportLegacyCompletion(folia::platform::completion::CompletionConfig const& legacy,
                                        std::wstring const& credentialTarget) {
         namespace transport = folia::platform::models;

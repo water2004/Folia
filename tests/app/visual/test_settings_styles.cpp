@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "app/support/TestPaths.h"
 #include "settings/storage/ModelCatalog.h"
+#include "storage/AssetPaths.h"
+#include "storage/JsonRecords.h"
 #include <wil/resource.h>
 #include "support/folia_test.hpp"
 #include "../support/DocumentControllerFixture.h"
@@ -263,7 +265,7 @@ suite settings_style_tests = [] {
         expect(fixture.applied->completion.reasoningEffort == "high");
     };
 
-    "provider settings stage a model and its reasoning configuration until the provider is saved"_test = [] {
+    "saving a model survives leaving settings without saving the provider again"_test = [] {
         using namespace winrt::Folia;
         auto provider = models::SaveProfile({{}, "Model settings fixture", "https://fixture.invalid/v1"}, std::nullopt);
         auto cleanup = wil::scope_exit([&] { models::DeleteProfile(provider.id); });
@@ -331,11 +333,12 @@ suite settings_style_tests = [] {
         Pump([&] { return level.Items().Size() == 3; });
         level.SelectedIndex(1);
         SaveSettingsImage(fixture.root, "provider-model.png");
-        InvokeAction(Action(fixture.page, Localize(L"ChatApplyModel")));
+        InvokeAction(Action(fixture.page, Localize(L"ChatSaveModel")));
         Pump([&] { return Description(fixture.page, L"custom-model · none, high") != nullptr; });
-        expect(std::ranges::none_of(models::AvailableModels(), [&](auto const& model) { return model.provider.id == provider.id; }));
-        InvokeAction(Action(fixture.page, Localize(L"ChatSaveProvider")));
-        Pump([&] { return std::ranges::any_of(models::AvailableModels(), [&](auto const& model) { return model.provider.id == provider.id; }); });
+        fixture.view->Navigate(SettingsView::Page::General);
+        fixture.view->Navigate(SettingsView::Page::Providers);
+        fixture.root.UpdateLayout();
+        fixture.page = fixture.view->PageContent().as<FrameworkElement>();
         auto configured = models::AvailableModels();
         auto found = std::ranges::find_if(configured, [&](auto const& choice) { return choice.provider.id == provider.id; });
         if (!expect(found != configured.end())) return;
@@ -366,10 +369,14 @@ suite settings_style_tests = [] {
         toggle = Field<ToggleSwitch>(fixture.page, LocalizeFormat(L"ChatToggleModel", {L"Manual model"}));
         if (!expect(toggle && toggle.IsOn())) return;
         toggle.IsOn(false);
-        expect(models::Resolve(found->model.id).model.enabled);
-        InvokeAction(Action(fixture.page, Localize(L"ChatSaveProvider")));
+        InvokeCrumb(Crumb(fixture.root, Localize(L"ChatProviders")));
         Pump([&] { return Action(fixture.page, L"Model settings fixture") != nullptr; });
         expect(throws([&] { (void)models::Resolve(found->model.id); }));
+        auto saved = records::Read(records::Path(AssetPath(L"ai-models") / L"providers", provider.id, L".json"));
+        auto const& diskModel = saved.at("models").at(0);
+        expect(diskModel.at("id").get<std::string>() == found->model.id);
+        expect(diskModel.at("upstream").get<std::string>() == "custom-model");
+        expect(!diskModel.at("enabled").get<bool>());
         auto allProviders = models::Profiles();
         auto stored = std::ranges::find(allProviders, provider.id, &models::ModelProfile::id);
         if (expect(stored != allProviders.end()) && expect(stored->models.size() == 1_u)) {
@@ -438,7 +445,7 @@ suite settings_style_tests = [] {
         expect(!search.IsOn());
         expect(!Effort(fixture.page, L"high").IsChecked().GetBoolean());
         catalog.SelectedIndex(0);
-        InvokeAction(Action(fixture.page, Localize(L"ChatApplyModel")));
+        InvokeAction(Action(fixture.page, Localize(L"ChatSaveModel")));
         Pump([&] { return Action(fixture.page, L"First fixture") != nullptr; });
         expect(Action(fixture.page, L"fixture-two") == nullptr);
         InvokeAction(Action(fixture.page, Localize(L"ChatSaveProvider")));
@@ -502,9 +509,9 @@ suite settings_style_tests = [] {
         search.IsOn(true);
         pages.IsOn(true);
         Field<TextBox>(fixture.page, Localize(L"ChatUpstreamModel")).Text(L"aliased-model");
-        InvokeAction(Action(fixture.page, Localize(L"ChatApplyModel")));
+        InvokeAction(Action(fixture.page, Localize(L"ChatSaveModel")));
         Pump([&] { return Action(fixture.page, L"aliased-model") != nullptr; });
-        InvokeAction(Action(fixture.page, Localize(L"ChatSaveProvider")));
+        InvokeCrumb(Crumb(fixture.root, Localize(L"ChatProviders")));
         Pump([&] { return Action(fixture.page, L"Proxy settings fixture") != nullptr; });
         auto configured = models::Profiles();
         auto saved = std::ranges::find(configured, "Proxy settings fixture", &models::ModelProfile::name);

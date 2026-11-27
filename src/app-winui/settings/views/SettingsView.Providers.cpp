@@ -135,6 +135,12 @@ namespace winrt::Folia {
             void ShowProvider() {
                 CancelQuery();
                 modelForm.reset();
+                if (!draft.id.empty()) {
+                    auto providers = Profiles();
+                    auto saved = std::ranges::find(providers, draft.id, &ModelProfile::id);
+                    if (saved == providers.end()) { ShowList(); return; }
+                    draft.models = std::move(saved->models);
+                }
                 DrawModels();
                 SetPage(providerForm, {{ProviderTitle(), {}}});
             }
@@ -460,31 +466,44 @@ namespace winrt::Folia {
                     }
                     auto enabled = cards::Switch(model.enabled);
                     Automation::AutomationProperties::SetName(enabled, LocalizeFormat(L"ChatToggleModel", {title}));
-                    enabled.Toggled([weak = weak_from_this(), index](auto const& sender, auto const&) {
-                        if (auto self = weak.lock()) self->draft.models.at(index).enabled = sender.template as<ToggleSwitch>().IsOn();
+                    enabled.Toggled([weak = weak_from_this(), id = model.id, index](auto const& sender, auto const&) {
+                        if (auto self = weak.lock()) {
+                            const auto on = sender.template as<ToggleSwitch>().IsOn();
+                            try {
+                                SetModelEnabled(self->draft.id, id, on);
+                                self->draft.models.at(index).enabled = on;
+                            } catch (std::exception const& error) {
+                                self->DrawModels();
+                                self->Report(to_hstring(error.what()), true);
+                            } catch (hresult_error const& error) {
+                                self->DrawModels();
+                                self->Report(error.message(), true);
+                            }
+                        }
                     });
                     children.Append(cards::LinkWithSwitch({title, detail, cards::Icon(WorkspaceIcon::Model)}, enabled,
                         [weak = weak_from_this(), index] { if (auto self = weak.lock()) self->EditModel(index); }));
                 }
             }
 
+            ModelProfile ValidatedConnection() const {
+                auto connection = Connection();
+                transport::CompletionConfig config;
+                config.baseUrl = connection.baseUrl;
+                config.protocol = static_cast<int>(connection.protocol);
+                config.fullUrl = connection.fullUrl;
+                config.catalogUrl = connection.catalogUrl;
+                auto error = transport::ValidateCompletionService(config);
+                if (!error.empty()) throw std::invalid_argument(error);
+                if (connection.name.empty() || connection.name.size() > 128)
+                    throw std::invalid_argument(to_string(Localize(L"ChatInvalidProfile")));
+                connection.iconPng = draft.iconPng;
+                return connection;
+            }
+
             void Save() {
                 try {
-                    auto connection = Connection();
-                    transport::CompletionConfig config;
-                    config.baseUrl = connection.baseUrl;
-                    config.protocol = static_cast<int>(connection.protocol);
-                    config.fullUrl = connection.fullUrl;
-                    config.catalogUrl = connection.catalogUrl;
-                    auto error = transport::ValidateCompletionService(config);
-                    if (!error.empty()) throw std::invalid_argument(error);
-                    if (connection.name.empty() || connection.name.size() > 128) {
-                        Report(Localize(L"ChatInvalidProfile"), true);
-                        return;
-                    }
-                    connection.models = draft.models;
-                    connection.iconPng = draft.iconPng;
-                    SaveProfile(std::move(connection), NewKey());
+                    SaveConnection(ValidatedConnection(), NewKey());
                     ShowList();
                 } catch (std::exception const& e) { Report(to_hstring(e.what()), true); }
                 catch (hresult_error const& e) { Report(e.message(), true); }
@@ -516,17 +535,22 @@ namespace winrt::Folia {
                 auto model = index ? draft.models.at(*index) : ConfiguredModel{};
                 auto title = index ? to_hstring(model.Label()) : Localize(L"ChatAddModel");
                 auto weak = weak_from_this();
-                auto save = [weak, index](ConfiguredModel result) {
+                auto save = [weak](ConfiguredModel result) {
                     if (auto self = weak.lock()) {
-                        if (index) self->draft.models.at(*index) = std::move(result);
-                        else self->draft.models.push_back(std::move(result));
-                        self->ShowProvider();
+                        if (self->draft.id.empty()) {
+                            auto provider = self->ValidatedConnection();
+                            provider.models.push_back(std::move(result));
+                            self->OpenEditor(SaveProfile(std::move(provider), self->NewKey()));
+                        } else {
+                            SaveModel(self->draft.id, std::move(result));
+                            self->ShowProvider();
+                        }
                     }
                 };
                 auto back = [weak] { if (auto self = weak.lock()) self->ShowProvider(); };
-                auto remove = index ? ProviderModelForm::Command([weak, index] {
+                auto remove = index ? ProviderModelForm::Command([weak, id = model.id] {
                     if (auto self = weak.lock()) {
-                        self->draft.models.erase(self->draft.models.begin() + *index);
+                        DeleteModel(self->draft.id, id);
                         self->ShowProvider();
                     }
                 }) : ProviderModelForm::Command{};
