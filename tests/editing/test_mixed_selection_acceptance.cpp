@@ -86,8 +86,11 @@ suite mixed_selection_acceptance_tests = [] {
     for (const auto kind : {CommandKind::DeleteSelection, CommandKind::InsertText,
             CommandKind::Paste, CommandKind::InsertNewline}) {
         Editor editor(source);
-        expect(fatal(editor.execute_command({.kind = CommandKind::SelectAll})));
-        auto selection = editor.selection();
+        // Ctrl+A inside a table cell selects that cell's text. Exercise a
+        // document-wide range here, including when the first block is a table.
+        auto full_range = document_select_all(editor.document());
+        expect(fatal(full_range.has_value()));
+        auto selection = *full_range;
         if (reversed) std::swap(selection.anchor, selection.active);
         editor.set_selection(selection);
         const auto before = editor.markdown_utf8();
