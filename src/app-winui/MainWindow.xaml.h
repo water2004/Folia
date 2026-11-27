@@ -39,6 +39,8 @@ namespace winrt::Folia::implementation
         explicit MainWindow(winrt::hstring const& initialDocumentPath);
         void DocumentTabLoaded(Windows::Foundation::IInspectable const& sender,
             Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void ChatRowPrepared(Microsoft::UI::Xaml::FrameworkElement const& sender,
+            Microsoft::UI::Xaml::DataContextChangedEventArgs const& args);
         void DocumentTabPrepared(Microsoft::UI::Xaml::FrameworkElement const& sender,
             Microsoft::UI::Xaml::DataContextChangedEventArgs const& args);
         void DocumentTabDoubleTapped(Windows::Foundation::IInspectable const& sender,
@@ -106,6 +108,8 @@ namespace winrt::Folia::implementation
         void NewDocument();
         winrt::fire_and_forget OpenWorkspaceFile(std::filesystem::path path, winrt::Folia::WorkspaceOpenMode mode,
             std::optional<winrt::Folia::EditorSourceLocation> location = {});
+        bool CanReplaceWorkspacePreview(std::uint64_t document) const;
+        void PresentWorkspaceTab(WorkspaceOpenResult const& result);
         void ApplyDocumentLocation();
         void OpenChatDocument(std::uint64_t chatDocument, std::string_view tabKey, std::filesystem::path const&, EditorSourceLocation);
         std::uint64_t lastEditorDocument = 0;
@@ -156,7 +160,8 @@ namespace winrt::Folia::implementation
         void SelectWorkspacePane(WorkspacePane);
         void RegisterAgentChats();
         void RefreshChatList();
-        void OpenAgentChat(std::string id = {});
+        void SelectChatListItem(std::string const& id);
+        void OpenAgentChat(std::string id = {}, WorkspaceOpenMode mode = WorkspaceOpenMode::Preview);
         void UpdateAgentChatPages();
         void UpdateAgentChatTheme();
         void ReleaseClosedAgentChats();
@@ -288,7 +293,7 @@ namespace winrt::Folia::implementation
         std::optional<WindowMaterial> appliedReadingMaterial;
         bool selectedTabBackdropUpdatePending = false;
         WorkspacePane workspacePane = WorkspacePane::Files;
-        std::vector<std::string> chatListIds;
+        std::unordered_map<std::string, int> chatListIndex;
         std::unordered_map<std::uint64_t, std::shared_ptr<chat::ChatView>> agentChatViews;
         bool updatingRailSelection = false;
         TabDragPresentation dragPresentation;

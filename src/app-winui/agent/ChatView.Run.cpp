@@ -79,6 +79,7 @@ namespace winrt::Folia::chat {
                 extras_->Clear();
                 input_.Text({});
             }
+            KeepPreview();
             transcript_->SetTitle(to_hstring(conversation_.title));
             transcript_->Refresh(true);
             transcript_->Begin();

@@ -66,39 +66,42 @@ namespace winrt::Folia {
         return found == documents_.end() ? nullptr : *found;
     }
 
-    std::shared_ptr<WorkspaceDocument> WorkspaceDocuments::OpenChat(std::string id, std::string title) {
-        if (auto existing = FindChat(id)) return existing;
+    WorkspaceOpenResult WorkspaceDocuments::OpenChat(std::string id, std::string title, WorkspaceOpenMode mode, PreviewFilter const& filter) {
+        if (auto existing = FindChat(id)) {
+            if (mode == WorkspaceOpenMode::Keep) existing->kept = true;
+            return {std::move(existing), {}, false};
+        }
         auto chat = std::make_shared<WorkspaceDocument>(AllocateWorkspaceItemId(), WorkspaceTabKind::Chat);
         chat->chatId = std::move(id);
         chat->chatTitle = std::move(title);
-        chat->kept = true;
-        documents_.push_back(chat);
-        return chat;
+        return Place(std::move(chat), mode, filter);
     }
 
-    WorkspaceOpenResult WorkspaceDocuments::Open(std::filesystem::path path, WorkspaceOpenMode mode,
-        std::function<bool(std::uint64_t)> const& canReplacePreview) {
+    WorkspaceOpenResult WorkspaceDocuments::Open(std::filesystem::path path, WorkspaceOpenMode mode, PreviewFilter const& filter) {
         if (path.empty() || !path.is_absolute()) throw std::invalid_argument("Workspace file paths must be absolute");
         path = path.lexically_normal();
-        for (auto const& document : documents_)
-            if (!document->kept && document->IsModified()) document->kept = true;
-        if (auto document = Find(path)) {
-            if (mode == WorkspaceOpenMode::Keep) document->kept = true;
-            return {std::move(document), {}, false};
+        if (auto existing = Find(path)) {
+            if (mode == WorkspaceOpenMode::Keep || existing->IsModified()) existing->kept = true;
+            return {std::move(existing), {}, false};
         }
-        std::optional<std::uint64_t> replaced;
-        auto preview = std::ranges::find_if(documents_, [&](auto const& document) {
-            return !document->kept && !document->IsModified() && (!canReplacePreview || canReplacePreview(document->id));
-        });
         auto kind = IsWorkspaceImage(ClassifyWorkspaceFile(path)) ? WorkspaceTabKind::Image : WorkspaceTabKind::Editor;
         auto document = std::make_shared<WorkspaceDocument>(AllocateWorkspaceItemId(), kind);
         document->path = std::move(path);
+        return Place(std::move(document), mode, filter);
+    }
+
+    WorkspaceOpenResult WorkspaceDocuments::Place(std::shared_ptr<WorkspaceDocument> document, WorkspaceOpenMode mode,
+        PreviewFilter const& canReplacePreview) {
         document->kept = mode == WorkspaceOpenMode::Keep;
-        if (preview != documents_.end()) {
-            replaced = (*preview)->id;
-            *preview = document;
-        } else documents_.push_back(document);
-        return {std::move(document), replaced, true};
+        for (auto& candidate : documents_) {
+            if (candidate->IsModified()) candidate->kept = true;
+            if (candidate->kept || (canReplacePreview && !canReplacePreview(candidate->id))) continue;
+            auto replaced = candidate->id;
+            candidate = document;
+            return {std::move(document), replaced, true};
+        }
+        documents_.push_back(document);
+        return {std::move(document), {}, true};
     }
 
     void WorkspaceDocuments::Activate(std::uint64_t id) {

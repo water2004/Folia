@@ -13,6 +13,28 @@ namespace {
     using namespace document_tests;
 
     suite workspace_documents = [] {
+        "workspace chats and files share a preview slot and promote an existing tab in place"_test = [] {
+            WorkspaceDocuments workspace;
+            auto initial = workspace.Active()->id;
+            auto chat = workspace.OpenChat("one", "Same title", WorkspaceOpenMode::Preview);
+            expect(chat.replaced == initial && !chat.document->kept);
+            auto next = workspace.OpenChat("two", "Same title", WorkspaceOpenMode::Preview);
+            expect(next.replaced == chat.document->id && workspace.Items().size() == 1_u);
+            auto pinned = workspace.OpenChat("two", "Same title", WorkspaceOpenMode::Keep);
+            expect(!pinned.created && pinned.document == next.document && pinned.document->kept);
+            auto file = workspace.Open(std::filesystem::absolute(L"preview.md"), WorkspaceOpenMode::Preview);
+            auto other = workspace.OpenChat("three", "Chat", WorkspaceOpenMode::Preview,
+                [&](auto candidate) { return candidate != file.document->id; });
+            expect(!other.replaced && !other.document->kept);
+            auto replacement = workspace.OpenChat("four", "Chat", WorkspaceOpenMode::Preview,
+                [&](auto candidate) { return candidate == file.document->id; });
+            expect(replacement.replaced == file.document->id);
+            auto back = workspace.Open(std::filesystem::absolute(L"next.md"), WorkspaceOpenMode::Preview,
+                [&](auto candidate) { return candidate == replacement.document->id; });
+            expect(back.replaced == replacement.document->id && workspace.FindChat("three") == other.document);
+            expect(workspace.FindChat("two") == pinned.document);
+        };
+
         "workspace recent files and folders persist deduplicated in separate lists"_test = [] {
             TestDirectory fixture;
             auto historyFile = fixture.path / L"recent.json";

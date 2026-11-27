@@ -57,9 +57,10 @@ namespace winrt::Folia {
         std::shared_ptr<WorkspaceDocument> FindSettings() const noexcept;
         std::shared_ptr<WorkspaceDocument> OpenSettings();
         std::shared_ptr<WorkspaceDocument> FindChat(std::string_view id) const noexcept;
-        std::shared_ptr<WorkspaceDocument> OpenChat(std::string id, std::string title);
+        using PreviewFilter = std::function<bool(std::uint64_t)>;
+        WorkspaceOpenResult OpenChat(std::string id, std::string title, WorkspaceOpenMode, PreviewFilter const& = {});
         WorkspaceOpenResult Open(std::filesystem::path path, WorkspaceOpenMode mode,
-            std::function<bool(std::uint64_t)> const& canReplacePreview = {});
+            PreviewFilter const& canReplacePreview = {});
         void Activate(std::uint64_t id);
         bool Keep(std::uint64_t id);
         bool ObserveEdit(std::uint64_t id);
@@ -70,6 +71,7 @@ namespace winrt::Folia {
         void Reorder(std::span<std::uint64_t const> ids);
 
     private:
+        WorkspaceOpenResult Place(std::shared_ptr<WorkspaceDocument>, WorkspaceOpenMode, PreviewFilter const&);
         static bool SamePath(std::filesystem::path const& left, std::filesystem::path const& right);
         std::vector<std::shared_ptr<WorkspaceDocument>> documents_;
         std::shared_ptr<WorkspaceDocument> active_;

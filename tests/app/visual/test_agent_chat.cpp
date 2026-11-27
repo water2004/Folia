@@ -31,8 +31,13 @@ namespace winrt::Folia::implementation {
         static auto const& Theme(MainWindow* shell) { return shell->themeProfile; }
         static auto Host(MainWindow* shell) { return shell->AgentChatHost(); }
         static auto Sidebar(MainWindow* shell) { return shell->ChatList(); }
+        static void RefreshSidebar(MainWindow* shell) { shell->RefreshChatList(); }
         static auto Active(MainWindow* shell) { return shell->workspaceDocuments.Active(); }
-        static void Open(MainWindow* shell, std::string id) { shell->OpenAgentChat(std::move(id)); }
+        static void Open(MainWindow* shell, std::string id, WorkspaceOpenMode mode = WorkspaceOpenMode::Preview) {
+            shell->OpenAgentChat(std::move(id), mode);
+        }
+        static auto TabCount(MainWindow* shell) { return shell->editorGroups.Views(shell->editorGroups.ActiveGroup()).size(); }
+        static void KeepActive(MainWindow* shell) { shell->workspaceDocuments.Keep(Active(shell)->id); }
         static void Dark(MainWindow* shell) {
             shell->appSettings.themeId = "folia.dark";
             shell->UpdateTheme();
@@ -461,6 +466,56 @@ namespace {
             Capture(window, "activity-timeline.png");
         };
 
+        "agent sessions share the preview tab until kept or edited"_test = [] {
+            auto window = visual_tests::Window();
+            auto shell = Access::Impl(window);
+            Access::KeepActive(shell);
+            auto first = chat::NewConversation("Preview");
+            auto second = chat::NewConversation("Preview");
+            auto cleanup = wil::scope_exit([&] {
+                chat::DeleteConversation(first.id);
+                chat::DeleteConversation(second.id);
+            });
+            Access::RefreshSidebar(shell);
+            auto items = Access::Sidebar(shell).Items();
+            unsigned matches = 0;
+            for (std::uint32_t i = 0; i < items.Size(); ++i) {
+                auto item = items.GetAt(i);
+                if (item.as<winrt::Windows::Foundation::IStringable>().ToString() != L"Preview") continue;
+                std::uint32_t index{};
+                expect(items.IndexOf(item, index) && index == i);
+                ++matches;
+            }
+            expect(matches >= 2_u);
+            auto originalCount = Access::TabCount(shell);
+            Access::Open(shell, first.id);
+            auto host = Access::Host(shell);
+            Pump([&] { host.UpdateLayout(); return host.IsLoaded() && host.Content() && host.ActualWidth() > 0; });
+            expect(!Access::Active(shell)->kept);
+            Access::Open(shell, second.id);
+            auto secondTab = Access::Active(shell);
+            expect(secondTab->chatId == second.id && !secondTab->kept);
+            expect(Access::TabCount(shell) == originalCount + 1);
+            Access::Open(shell, second.id, WorkspaceOpenMode::Keep);
+            expect(Access::Active(shell) == secondTab && secondTab->kept);
+            Access::Open(shell, first.id);
+            auto firstTab = Access::Active(shell);
+            expect(!firstTab->kept && Access::TabCount(shell) == originalCount + 2);
+            TextBox input{nullptr};
+            Pump([&] {
+                host.UpdateLayout();
+                input = Find<TextBox>(host, [](auto const& box) { return box.PlaceholderText() == Localize(L"ChatPrompt"); });
+                return input && input.IsLoaded();
+            });
+            input.Text(L"An unsent draft");
+            Pump([&] { return firstTab->kept; });
+            Access::Open(shell, second.id);
+            Access::Open(shell, first.id);
+            expect(Access::Active(shell) == firstTab && input.Text() == L"An unsent draft");
+            Access::CloseId(shell, firstTab->id);
+            Access::CloseId(shell, secondTab->id);
+        };
+
         "agent split toolbar opens and revisits the cited line beside the chat"_test = [] {
             auto window = visual_tests::Window();
             auto shell = Access::Impl(window);
@@ -606,6 +661,7 @@ namespace {
             expect(addChat && Grid::GetColumn(addChat) == 1);
             Pump([&] { return sidebar.SelectedIndex() >= 0 && sidebar.ContainerFromIndex(sidebar.SelectedIndex()) != nullptr; });
             auto row = sidebar.ContainerFromIndex(sidebar.SelectedIndex()).as<ListViewItem>();
+            Pump([&] { return Find<TextBlock>(row, [](auto const& text) { return text.Text() == L"Temporary conversation"; }) != nullptr; });
             auto menu = row.ContextFlyout().try_as<MenuFlyout>();
             if (expect(menu != nullptr) && expect(menu.Items().Size() == 2_u)) {
                 expect(winrt::to_string(menu.Items().GetAt(0).as<MenuFlyoutItem>().Text()) == winrt::to_string(Localize(L"ChatRename")));

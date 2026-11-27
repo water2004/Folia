@@ -8,6 +8,20 @@ namespace winrt::Folia::implementation {
     using namespace Microsoft::UI::Xaml;
     using namespace Microsoft::UI::Xaml::Controls;
 
+    namespace {
+        struct ChatListEntry : implements<ChatListEntry, Windows::Foundation::IStringable> {
+            explicit ChatListEntry(chat::Conversation const& conversation)
+                : id(conversation.id), title(to_hstring(conversation.title)) {}
+            hstring ToString() const { return title; }
+            std::string id;
+            hstring title;
+        };
+
+        std::string const& ChatId(Windows::Foundation::IInspectable const& item) {
+            return get_self<ChatListEntry>(item.as<Windows::Foundation::IStringable>())->id;
+        }
+    }
+
     void MainWindow::OpenChatDocument(std::uint64_t chatDocument, std::string_view key, std::filesystem::path const& path, EditorSourceLocation location) {
         auto destination = editorGroups.ActiveGroup();
         if (editorGroups.IsSplit()) {
@@ -33,22 +47,37 @@ namespace winrt::Folia::implementation {
         } else ShowError(Localize(L"ChatMissingReference"));
     }
 
+    void MainWindow::ChatRowPrepared(FrameworkElement const& sender, DataContextChangedEventArgs const& args) {
+        auto item = args.NewValue().try_as<Windows::Foundation::IStringable>();
+        auto label = item ? item.ToString() : hstring{};
+        sender.as<TextBlock>().Text(label);
+        ToolTipService::SetToolTip(sender, item ? box_value(label) : nullptr);
+    }
+
     void MainWindow::RegisterAgentChats() {
         ChatSidebarTitle().Text(Localize(L"ChatSessions"));
         NewChatButton().Click(WindowEvent([this](auto const&, auto const&) { OpenAgentChat(); }));
         ChatList().ItemClick(WindowEvent([this](auto const&, ItemClickEventArgs const& args) {
-            std::uint32_t index{};
-            if (ChatList().Items().IndexOf(args.ClickedItem(), index) && index < chatListIds.size())
-                OpenAgentChat(chatListIds[index]);
+            OpenAgentChat(ChatId(args.ClickedItem()));
         }));
+        ChatList().AddHandler(UIElement::DoubleTappedEvent(), box_value(Input::DoubleTappedEventHandler(WindowEvent([this](auto const&, Input::DoubleTappedRoutedEventArgs const& args) {
+            for (auto node = args.OriginalSource().try_as<DependencyObject>(); node && node != ChatList(); node = Media::VisualTreeHelper::GetParent(node)) {
+                if (auto row = node.try_as<ListViewItem>()) {
+                    if (auto item = ChatList().ItemFromContainer(row)) {
+                        OpenAgentChat(ChatId(item), WorkspaceOpenMode::Keep);
+                        args.Handled(true);
+                    }
+                    break;
+                }
+            }
+        }))), true);
         ChatList().ContainerContentChanging(WindowEvent([this](auto const&, ContainerContentChangingEventArgs const& args) {
             auto row = args.ItemContainer();
-            const auto index = args.ItemIndex();
-            if (args.InRecycleQueue() || index < 0 || !std::cmp_less(index, chatListIds.size())) {
+            if (args.InRecycleQueue() || !args.Item()) {
                 row.ContextFlyout(nullptr);
                 return;
             }
-            auto const& id = chatListIds[index];
+            auto const& id = ChatId(args.Item());
             MenuFlyout menu;
             menu.MenuFlyoutPresenterStyle(DocumentActionsButton().Flyout().as<MenuFlyout>().MenuFlyoutPresenterStyle());
             for (auto const& [action, remove] : {std::pair{L"ChatRename", false}, std::pair{L"ChatDelete", true}}) {
@@ -64,25 +93,27 @@ namespace winrt::Folia::implementation {
     void MainWindow::RefreshChatList() {
         try {
             auto active = workspaceDocuments.Active();
-            auto selected = ChatList().SelectedIndex();
-            auto id = active->kind == WorkspaceTabKind::Chat ? active->chatId :
-                selected >= 0 && std::cmp_less(selected, chatListIds.size()) ? chatListIds[selected] : std::string{};
+            auto selected = ChatList().SelectedItem();
+            auto id = active->kind == WorkspaceTabKind::Chat ? active->chatId : selected ? ChatId(selected) : std::string{};
             auto chats = chat::Conversations();
             auto items = ChatList().Items();
             items.Clear();
-            chatListIds.clear();
-            int next = -1;
+            chatListIndex.clear();
             for (auto const& conversation : chats) {
-                chatListIds.push_back(conversation.id);
-                items.Append(box_value(to_hstring(conversation.title)));
-                if (conversation.id == id) next = static_cast<int>(items.Size()) - 1;
+                chatListIndex.emplace(conversation.id, static_cast<int>(items.Size()));
+                items.Append(make<ChatListEntry>(conversation));
             }
-            ChatList().SelectedIndex(next);
+            SelectChatListItem(id);
         } catch (std::exception const& e) { ShowError(to_hstring(e.what())); }
         catch (hresult_error const& e) { ShowError(e.message()); }
     }
 
-    void MainWindow::OpenAgentChat(std::string id) {
+    void MainWindow::SelectChatListItem(std::string const& id) {
+        auto found = chatListIndex.find(id);
+        ChatList().SelectedIndex(found == chatListIndex.end() ? -1 : found->second);
+    }
+
+    void MainWindow::OpenAgentChat(std::string id, WorkspaceOpenMode mode) {
         if (windowClosed || closePending || closingDocument) return;
         try {
             chat::Conversation conversation;
@@ -90,20 +121,24 @@ namespace winrt::Folia::implementation {
             if (created) conversation = chat::NewConversation(to_string(Localize(L"ChatNew")));
             else {
                 if (auto existing = App::Current()->FindChatWindow(id); existing && existing != this) {
-                    existing->ActivateDocument(existing->workspaceDocuments.FindChat(id)->id);
+                    auto tab = existing->workspaceDocuments.FindChat(id);
+                    if (mode == WorkspaceOpenMode::Keep && existing->workspaceDocuments.Keep(tab->id)) existing->UpdateDocumentTab(tab->id);
+                    existing->ActivateDocument(tab->id);
                     existing->Activate();
                     return;
                 }
                 conversation = chat::LoadConversation(id);
             }
-            auto tab = workspaceDocuments.OpenChat(conversation.id, conversation.title);
-            ActivateDocument(tab->id);
-            RefreshDocumentTabs();
-            if (created) RefreshChatList();
+            textInputController.FocusLeave();
+            auto result = workspaceDocuments.OpenChat(conversation.id, conversation.title, created ? WorkspaceOpenMode::Keep : mode,
+                [this, created](auto candidate) { return !created && CanReplaceWorkspacePreview(candidate); });
+            if (result.created) PresentWorkspaceTab(result);
             else {
-                auto found = std::ranges::find(chatListIds, conversation.id);
-                if (found != chatListIds.end()) ChatList().SelectedIndex(static_cast<int>(found - chatListIds.begin()));
+                ActivateDocument(result.document->id);
+                UpdateDocumentTab(result.document->id);
             }
+            if (created) RefreshChatList();
+            else SelectChatListItem(conversation.id);
         } catch (std::exception const& e) { ShowError(to_hstring(e.what())); }
         catch (hresult_error const& e) { ShowError(e.message()); }
     }
@@ -133,6 +168,7 @@ namespace winrt::Folia::implementation {
                 conversation = chat::RenameConversation(id, to_string(name.Text()));
                 if (auto existing = App::Current()->FindChatWindow(id)) {
                     auto tab = existing->workspaceDocuments.FindChat(id);
+                    existing->workspaceDocuments.Keep(tab->id);
                     tab->chatTitle = conversation.title;
                     if (auto found = existing->agentChatViews.find(tab->id); found != existing->agentChatViews.end())
                         found->second->SetTitle(conversation.title);
@@ -225,6 +261,9 @@ namespace winrt::Folia::implementation {
                     if (main->settingsView) main->settingsView->Navigate(SettingsView::Page::Providers);
                 }
             };
+            host.keep = [window, id = document->id] {
+                if (auto main = window.get(); main && main->workspaceDocuments.Keep(id)) main->UpdateDocumentTab(id);
+            };
             host.changed = [window, id = document->id](chat::Conversation const& conversation) {
                 if (auto main = window.get()) {
                     if (auto tab = main->workspaceDocuments.Find(id)) {
@@ -252,8 +291,7 @@ namespace winrt::Folia::implementation {
             assign(front, activePage);
             assign(back, passivePage);
             if (entering) {
-                auto found = std::ranges::find(chatListIds, active->chatId);
-                if (found != chatListIds.end()) ChatList().SelectedIndex(static_cast<int>(found - chatListIds.begin()));
+                SelectChatListItem(active->chatId);
                 DispatcherQueue().TryEnqueue([page = std::weak_ptr(activePage), window = get_weak(), id = active->id] {
                     if (auto main = window.get(); main && main->IsActiveDocument(id))
                         if (auto view = page.lock()) view->Activate();

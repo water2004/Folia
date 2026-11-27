@@ -1,8 +1,11 @@
 # Agent chat
 
-Open **Conversations** from the left rail. Select **+** beside the heading to
-start a chat, or select a previous conversation. Each conversation has one tab
-across the application's windows. Closing the tab preserves its messages.
+Open **Conversations** from the left rail. Select **+** to start a chat in a
+kept tab. Single-clicking an existing conversation reuses the active group's
+preview tab, shared with the file browser. Double-click a session to keep it.
+Typing a draft, adding an image, changing its settings, or sending a message
+also keeps the tab. Each conversation has one tab across the application's
+windows. Closing the tab preserves its messages.
 Right-click a conversation to rename it or delete its local history.
 
 Open **Settings → AI providers** and select or add a provider. In its editor,

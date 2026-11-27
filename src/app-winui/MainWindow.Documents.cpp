@@ -184,6 +184,23 @@ namespace winrt::Folia::implementation {
             LocalizeFormat(kind == RecentWorkspaceKind::Folder ? L"StatusFolderFailed" : L"StatusOpenFailed", {error.message()});
     }
 
+    bool MainWindow::CanReplaceWorkspacePreview(std::uint64_t document) const {
+        return editorGroups.ViewFor(editorGroups.ActiveGroup(), document) && editorGroups.ViewCount(document) == 1;
+    }
+
+    void MainWindow::PresentWorkspaceTab(WorkspaceOpenResult const& result) {
+        auto previous = workspaceDocuments.Active();
+        auto group = editorGroups.ActiveGroup();
+        auto views = editorGroups.Views(group);
+        auto slot = result.replaced ? std::ranges::find(views, *result.replaced, &WorkspaceEditorView::document) : views.end();
+        auto id = result.document->id;
+        auto view = editorGroups.Add(group, id, static_cast<std::size_t>(slot - views.begin()));
+        if (editorGroups.ViewCount(id) > 1) workspaceDocuments.Keep(id);
+        ActivateView(view);
+        RefreshDocumentTabs();
+        if (result.replaced == previous->id && previous->editor) previous->editor->controller.Detach();
+    }
+
     winrt::fire_and_forget MainWindow::OpenWorkspaceFile(std::filesystem::path path, winrt::Folia::WorkspaceOpenMode mode,
         std::optional<winrt::Folia::EditorSourceLocation> location) {
         try {
@@ -198,24 +215,12 @@ namespace winrt::Folia::implementation {
                 co_return;
             }
             textInputController.FocusLeave();
-            auto previous = workspaceDocuments.Active();
-            auto group = editorGroups.ActiveGroup();
-            auto result = workspaceDocuments.Open(path, mode, [this, group](auto candidate) {
-                return editorGroups.ViewFor(group, candidate) && editorGroups.ViewCount(candidate) == 1;
-            });
+            auto result = workspaceDocuments.Open(path, mode, [this](auto candidate) { return CanReplaceWorkspacePreview(candidate); });
             if (location && result.document->editor) result.document->editor->pendingLocation = location;
-            auto id = result.document->id;
-            auto view = editorGroups.Add(group, id);
-            if (editorGroups.ViewCount(id) > 1) workspaceDocuments.Keep(id);
-            ActivateView(view);
-            RefreshDocumentTabs();
+            PresentWorkspaceTab(result);
             if (location) ApplyDocumentLocation();
             if (result.document->editor && result.document->editor->loaded)
                 recentWorkspace.Remember(RecentWorkspaceKind::File, result.document->path);
-            if (result.replaced) {
-                if (previous->id == *result.replaced && previous->editor) previous->editor->controller.Detach();
-                // The old preview's last shared owner releases its session/cache.
-            }
         } catch (winrt::hresult_error const& error) {
             ShowError(WorkspaceOpenError(RecentWorkspaceKind::File, path, error));
         }

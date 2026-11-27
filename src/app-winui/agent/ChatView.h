@@ -18,7 +18,7 @@ namespace winrt::Folia::chat {
         std::function<std::vector<OpenTab>()> tabs;
         std::function<std::filesystem::path()> currentFolder;
         std::function<void()> settings;
-        std::function<void()> newChat, rename, split;
+        std::function<void()> newChat, rename, split, keep;
         std::function<void(std::string const&, ChatTranscript::Documents const&)> openDocument;
         std::function<void(Conversation const&)> changed;
     };
@@ -47,6 +47,7 @@ namespace winrt::Folia::chat {
         void Command(std::string const&);
         fire_and_forget PickImages();
         void SetBusy(bool);
+        void KeepPreview();
         void SaveOptions();
         void Report(hstring const&);
         fire_and_forget PickFolder();

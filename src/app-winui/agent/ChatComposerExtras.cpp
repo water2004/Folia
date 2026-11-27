@@ -304,6 +304,7 @@ namespace winrt::Folia::chat {
                 if (!vision_ || sending_) co_return;
                 images_.push_back({std::vector<std::uint8_t>(bytes.begin(), bytes.end())});
                 previews_.push_back(preview);
+                if (imageAdded) imageAdded();
                 PaintImages();
             }
         } catch (hresult_error const& error) { report_(error.message()); }

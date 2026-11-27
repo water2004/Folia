@@ -88,6 +88,10 @@ namespace winrt::Folia::chat {
         extras_ = ChatComposerExtras::Create(input_, host_.tabs,
             [weak] { if (auto view = weak.lock()) return view->conversation_.folder; return std::filesystem::path{}; },
             [weak](hstring const& message) { if (auto view = weak.lock()) view->Report(message); });
+        input_.TextChanging([weak](auto const&, auto const&) {
+            if (auto view = weak.lock(); view && view->host_.keep && !view->input_.Text().empty()) view->KeepPreview();
+        });
+        extras_->imageAdded = [weak] { if (auto view = weak.lock()) view->KeepPreview(); };
         extras_->command = [weak](auto const& name) { if (auto self = weak.lock()) self->Command(name); };
         editor.Children().Append(extras_->Element());
         editor.Children().Append(input_);
@@ -315,11 +319,15 @@ namespace winrt::Folia::chat {
         composer_.VerticalAlignment(empty ? VerticalAlignment::Center : VerticalAlignment::Bottom);
     }
 
+    void ChatView::KeepPreview() {
+        if (auto keep = std::exchange(host_.keep, {})) keep();
+    }
+
     void ChatView::SaveOptions() {
         if (busy_) return;
         conversation_.openTabs = openTabs_.IsChecked();
         RefreshAccessLabel();
-        try { SaveConversationOptions(conversation_); }
+        try { SaveConversationOptions(conversation_); KeepPreview(); }
         catch (std::exception const& error) { Report(to_hstring(error.what())); }
     }
 

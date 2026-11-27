@@ -18,6 +18,7 @@ namespace winrt::Folia::chat {
         bool Pasting() const { return pasting_; }
         void Clear();
         std::function<void(std::string const&)> command;
+        std::function<void()> imageAdded;
         void BeginMention();
         fire_and_forget PasteImages(Windows::ApplicationModel::DataTransfer::DataPackageView);
         void SetVision(bool);
