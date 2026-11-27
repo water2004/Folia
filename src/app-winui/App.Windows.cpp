@@ -140,12 +140,17 @@ namespace winrt::Folia::implementation {
         }
         return nullptr;
     }
-    void App::UpdateWindowViewSettings(MainWindow const* source, MediaDisplaySettings const& media, WorkspaceAppearance const& appearance) {
+    void App::UpdateWindowViewSettings(MainWindow const* source, AppSettings const& settings) {
         for (auto const& item : windows) {
             auto window = winrt::get_self<MainWindow>(item.window.as<winrt::Folia::MainWindow>());
             if (window != source && !window->windowClosed) {
-                window->UpdateMediaSettings(media);
-                window->UpdateWorkspaceAppearance(appearance);
+                window->UpdateMediaSettings(settings.media);
+                window->UpdateWorkspaceAppearance(settings.appearance);
+                if (window->appSettings.themeId != settings.themeId) {
+                    window->appSettings.themeId = settings.themeId;
+                    window->UpdateTheme();
+                    if (window->settingsView) window->settingsView->UpdateAppliedTheme(settings.themeId);
+                }
             }
         }
     }

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "App.xaml.g.h"
-#include "media/MediaDisplaySettings.h"
 #include "workspace/WorkspaceLaunch.h"
-#include "workspace/WorkspaceAppearance.h"
 #include <wil/resource.h>
+
+namespace winrt::Folia { struct AppSettings; }
 
 namespace winrt::Folia::implementation
 {
@@ -22,7 +22,7 @@ namespace winrt::Folia::implementation
         MainWindow* FindTabWindow(std::uint64_t view) const;
         MainWindow* FindReferencedDocument(std::string_view tabKey, std::filesystem::path const&, std::uint64_t& documentId) const;
         MainWindow* FindChatWindow(std::string_view id) const;
-        void UpdateWindowViewSettings(MainWindow const* source, MediaDisplaySettings const& media, WorkspaceAppearance const& appearance);
+        void UpdateWindowViewSettings(MainWindow const* source, AppSettings const& settings);
 
     private:
         friend struct WorkspaceWindowTestAccess;

@@ -47,10 +47,11 @@ namespace winrt::Folia::chat {
         }
     }
 
-    std::shared_ptr<ChatTranscript> ChatTranscript::Create(std::string id, folia::ThemeProfile const& theme) {
+    std::shared_ptr<ChatTranscript> ChatTranscript::Create(std::string id, folia::ThemeProfile const& theme, MediaDisplaySettings const& media) {
         auto view = std::make_shared<ChatTranscript>();
         view->id_ = std::move(id);
-        view->theme_ = theme;
+        view->appearance_->SetTheme(theme);
+        view->appearance_->media = media;
         view->Build();
         view->Refresh(true);
         return view;
@@ -171,9 +172,17 @@ namespace winrt::Folia::chat {
         UpdateNavigation();
     }
     void ChatTranscript::SetTheme(folia::ThemeProfile const& theme) {
-        theme_ = theme;
-        if (liveTurn_) liveTurn_->SetTheme(theme);
-        for (auto const& turn : turns_) turn->SetTheme(theme);
+        appearance_->SetTheme(theme);
+        RefreshAppearance();
+    }
+    void ChatTranscript::SetMediaDisplaySettings(MediaDisplaySettings const& media) {
+        if (appearance_->media == media) return;
+        appearance_->media = media;
+        RefreshAppearance();
+    }
+    void ChatTranscript::RefreshAppearance() {
+        if (liveTurn_) liveTurn_->RefreshAppearance();
+        for (auto const& turn : turns_) turn->RefreshAppearance();
     }
     void ChatTranscript::SetInset(double inset) {
         auto padding = column_.Padding();
@@ -293,7 +302,7 @@ namespace winrt::Folia::chat {
     }
 
     std::shared_ptr<ChatTurnView> ChatTranscript::MakeTurn() {
-        return std::make_shared<ChatTurnView>(theme_, [weak = weak_from_this()](auto const& link, auto const& documents) {
+        return std::make_shared<ChatTurnView>(appearance_, [weak = weak_from_this()](auto const& link, auto const& documents) {
             if (auto self = weak.lock(); self && self->openDocument) self->openDocument(link, documents);
         });
     }

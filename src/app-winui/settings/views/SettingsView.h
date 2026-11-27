@@ -33,6 +33,7 @@ namespace winrt::Folia
         void CancelShortcutCapture();
         void UpdateWorkspaceAppearance(WorkspaceAppearance const& appearance);
         void UpdateMediaSettings(MediaDisplaySettings const& media);
+        void UpdateAppliedTheme(std::string const& id);
         void Detach();
 
     private:

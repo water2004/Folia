@@ -5,9 +5,10 @@
 namespace winrt::Folia::chat {
     class ChatTranscript : public std::enable_shared_from_this<ChatTranscript> {
     public:
-        static std::shared_ptr<ChatTranscript> Create(std::string, folia::ThemeProfile const&);
+        static std::shared_ptr<ChatTranscript> Create(std::string, folia::ThemeProfile const&, MediaDisplaySettings const&);
         Microsoft::UI::Xaml::Controls::Grid Element() const { return root_; }
         void SetTheme(folia::ThemeProfile const&);
+        void SetMediaDisplaySettings(MediaDisplaySettings const&);
         void SetInset(double);
         void Refresh(bool latest);
         void Begin();
@@ -31,7 +32,8 @@ namespace winrt::Folia::chat {
         void Append(Entry const&, bool latest);
         void UpdateNavigation();
         std::string id_;
-        folia::ThemeProfile theme_;
+        void RefreshAppearance();
+        std::shared_ptr<ChatMarkdownAppearance> appearance_ = std::make_shared<ChatMarkdownAppearance>();
         HistoryPage page_;
         std::vector<std::uintmax_t> boundaries_;
         std::vector<std::shared_ptr<ChatTurnView>> turns_;

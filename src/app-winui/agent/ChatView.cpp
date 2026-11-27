@@ -32,25 +32,24 @@ namespace winrt::Folia::chat {
         cancellation_.request_stop();
     }
 
-    std::shared_ptr<ChatView> ChatView::Create(Conversation conversation, ViewHost host, folia::ThemeProfile const& theme) {
+    std::shared_ptr<ChatView> ChatView::Create(Conversation conversation, ViewHost host, folia::ThemeProfile const& theme, MediaDisplaySettings const& media) {
         auto view = std::shared_ptr<ChatView>(new ChatView(std::move(conversation), std::move(host)));
-        view->SetTheme(theme);
-        view->Build();
+        view->Build(theme, media);
         return view;
     }
 
     void ChatView::SetTheme(folia::ThemeProfile const& theme) {
-        theme_ = theme;
         palette_.Apply(theme.colors);
-        if (transcript_) transcript_->SetTheme(theme);
+        transcript_->SetTheme(theme);
     }
 
-    void ChatView::Build() {
+    void ChatView::Build(folia::ThemeProfile const& theme, MediaDisplaySettings const& media) {
         const auto weak = weak_from_this();
         auto click = [weak](auto member) {
             return [weak, member](auto const&, auto const&) { if (auto view = weak.lock()) ((*view).*member)(); };
         };
-        transcript_ = ChatTranscript::Create(conversation_.id, theme_);
+        palette_.Apply(theme.colors);
+        transcript_ = ChatTranscript::Create(conversation_.id, theme, media);
         transcript_->SetTitle(to_hstring(conversation_.title));
         transcript_->openDocument = [weak](auto const& link, auto const& documents) {
             if (auto view = weak.lock(); view && view->host_.openDocument) view->host_.openDocument(link, documents);

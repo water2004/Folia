@@ -45,17 +45,13 @@ namespace winrt::Folia::implementation
         if (latexSuggestionsChanged)
             latexCompletionController.SetEnabled(appSettings.latexSuggestionsEnabled);
         if (themeChanged) UpdateTheme();
-        if (mediaChanged) {
-            editorRenderer.SetMediaDisplaySettings(appSettings.media);
-            if (otherEditorRenderer) otherEditorRenderer->SetMediaDisplaySettings(appSettings.media);
-            QueueOtherGroupRender();
-        }
+        if (mediaChanged) ApplyMediaToViews();
         if (appearanceChanged) {
             ApplyBarLayout();
             if (!themeChanged) ApplyWorkspaceMaterial();
         }
-        if (mediaChanged || appearanceChanged)
-            App::Current()->UpdateWindowViewSettings(this, appSettings.media, appSettings.appearance);
+        if (themeChanged || mediaChanged || appearanceChanged)
+            App::Current()->UpdateWindowViewSettings(this, appSettings);
         return std::nullopt;
     }
 
@@ -63,10 +59,16 @@ namespace winrt::Folia::implementation
     {
         if (appSettings.media == settings) return;
         appSettings.media = settings;
-        editorRenderer.SetMediaDisplaySettings(settings);
-        if (otherEditorRenderer) otherEditorRenderer->SetMediaDisplaySettings(settings);
-        QueueOtherGroupRender();
+        ApplyMediaToViews();
         if (settingsView) settingsView->UpdateMediaSettings(settings);
+    }
+
+    void MainWindow::ApplyMediaToViews()
+    {
+        editorRenderer.SetMediaDisplaySettings(appSettings.media);
+        if (otherEditorRenderer) otherEditorRenderer->SetMediaDisplaySettings(appSettings.media);
+        UpdateAgentChatMedia();
+        QueueOtherGroupRender();
         if (!SettingsActive()) RenderEditorSurface();
     }
 

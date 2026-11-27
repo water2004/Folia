@@ -277,6 +277,7 @@ namespace winrt::Folia::implementation {
         }
         chat->Rehost(ChatHostFor(document));
         chat->SetTheme(themeProfile);
+        chat->SetMediaDisplaySettings(appSettings.media);
         agentChatViews.insert(std::move(page));
     }
 
@@ -293,7 +294,7 @@ namespace winrt::Folia::implementation {
         auto getView = [&](std::shared_ptr<WorkspaceDocument> const& document) -> std::shared_ptr<chat::ChatView> {
             if (!document || document->kind != WorkspaceTabKind::Chat) return {};
             if (auto found = agentChatViews.find(document->id); found != agentChatViews.end()) return found->second;
-            auto result = chat::ChatView::Create(chat::LoadConversation(document->chatId), ChatHostFor(document), themeProfile);
+            auto result = chat::ChatView::Create(chat::LoadConversation(document->chatId), ChatHostFor(document), themeProfile, appSettings.media);
             agentChatViews.emplace(document->id, result);
             return result;
         };
@@ -322,6 +323,10 @@ namespace winrt::Folia::implementation {
 
     void MainWindow::UpdateAgentChatTheme() {
         for (auto const& [_, chat] : agentChatViews) chat->SetTheme(themeProfile);
+    }
+
+    void MainWindow::UpdateAgentChatMedia() {
+        for (auto const& [_, chat] : agentChatViews) chat->SetMediaDisplaySettings(appSettings.media);
     }
 
     void MainWindow::ReleaseClosedAgentChats() {

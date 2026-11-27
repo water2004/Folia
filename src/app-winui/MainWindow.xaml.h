@@ -163,6 +163,7 @@ namespace winrt::Folia::implementation
         void TakeChatPage(MainWindow& source, std::shared_ptr<WorkspaceDocument> const& document);
         void UpdateAgentChatPages();
         void UpdateAgentChatTheme();
+        void UpdateAgentChatMedia();
         void ReleaseClosedAgentChats();
         winrt::fire_and_forget ManageAgentChat(std::string id, bool remove);
         void SetSidebarOpen(bool open);
@@ -195,6 +196,7 @@ namespace winrt::Folia::implementation
         void SetDocumentCommandsVisible(bool visible);
         std::optional<winrt::hstring> ApplySettings(winrt::Folia::AppSettings const& settings);
         void UpdateMediaSettings(winrt::Folia::MediaDisplaySettings const& settings);
+        void ApplyMediaToViews();
         void RegisterCommandHandlers();
         void ToggleSourceMode();
         void UpdateSourceModeUi();

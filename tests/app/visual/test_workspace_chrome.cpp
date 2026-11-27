@@ -23,7 +23,7 @@ namespace {
         explicit ChromeWindow(bool pinDocumentTools = false) {
             auto app = winrt::Folia::implementation::App::Current();
             window = app->CreateMainWindow();
-            if (pinDocumentTools) app->UpdateWindowViewSettings(nullptr, {}, {});
+            if (pinDocumentTools) app->UpdateWindowViewSettings(nullptr, {});
             window.Title(L"Folia workspace visual test");
             expect(!!::AreDpiAwarenessContextsEqual(::GetThreadDpiAwarenessContext(), DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2));
             HWND handle{};

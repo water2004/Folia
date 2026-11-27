@@ -25,7 +25,7 @@ namespace winrt::Folia::chat {
 
     class ChatView : public std::enable_shared_from_this<ChatView> {
     public:
-        static std::shared_ptr<ChatView> Create(Conversation, ViewHost, folia::ThemeProfile const&);
+        static std::shared_ptr<ChatView> Create(Conversation, ViewHost, folia::ThemeProfile const&, MediaDisplaySettings const&);
         ~ChatView();
         Microsoft::UI::Xaml::FrameworkElement Element() const { return root_; }
         void Activate();
@@ -33,11 +33,12 @@ namespace winrt::Folia::chat {
         void SetTitle(std::string title);
         void ShowSplit(bool available) { split_.Visibility(available && host_.split ? Microsoft::UI::Xaml::Visibility::Visible : Microsoft::UI::Xaml::Visibility::Collapsed); }
         void SetTheme(folia::ThemeProfile const&);
+        void SetMediaDisplaySettings(MediaDisplaySettings const& media) { transcript_->SetMediaDisplaySettings(media); }
 
     private:
         static constexpr std::size_t maxQuestionBytes = 16'000;
         ChatView(Conversation, ViewHost);
-        void Build();
+        void Build(folia::ThemeProfile const&, MediaDisplaySettings const&);
         void RefreshAccessLabel();
         void SelectModel(int index);
         void RefreshProfiles();
@@ -60,7 +61,6 @@ namespace winrt::Folia::chat {
             std::optional<std::vector<OpenTab>>, bool retry, std::stop_token, Microsoft::UI::Dispatching::DispatcherQueue);
 
         Conversation conversation_;
-        folia::ThemeProfile theme_;
         std::optional<std::uint64_t> usedTokens_;
         std::optional<std::uint64_t> cachedTokens_;
         std::string usageModel_;

@@ -40,7 +40,7 @@ namespace winrt::Folia::implementation {
     void App::OnLaunched(Microsoft::UI::Xaml::LaunchActivatedEventArgs const&) {
         auto window = CreateMainWindow();
         // The shared shell fixture starts with pinned bars regardless of the developer's saved preferences.
-        UpdateWindowViewSettings(nullptr, {}, {});
+        UpdateWindowViewSettings(nullptr, {});
         visualWindow = window;
         window.Activate();
         window.DispatcherQueue().TryEnqueue([this, window] {

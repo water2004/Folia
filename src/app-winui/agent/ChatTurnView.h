@@ -9,9 +9,9 @@ namespace winrt::Folia::chat {
     public:
         using Documents = std::vector<folia::ai::agent::DocumentReference>;
         using OpenDocument = std::function<void(std::string const&, Documents const&)>;
-        ChatTurnView(folia::ThemeProfile const&, OpenDocument);
+        ChatTurnView(std::shared_ptr<ChatMarkdownAppearance const>, OpenDocument);
         auto Element() const { return root_; }
-        void SetTheme(folia::ThemeProfile const&);
+        void RefreshAppearance();
         void AddReference(folia::ai::agent::DocumentReference ref) { documents_->push_back(std::move(ref)); }
         void Progress(folia::ai::agent::ProgressKind, hstring const&);
         void Finish(Entry const&);
@@ -22,7 +22,7 @@ namespace winrt::Folia::chat {
         void SealText();
         void CloseActivity();
         Microsoft::UI::Xaml::Controls::StackPanel root_;
-        folia::ThemeProfile theme_;
+        std::shared_ptr<ChatMarkdownAppearance const> appearance_;
         OpenDocument open_;
         std::shared_ptr<Documents> documents_ = std::make_shared<Documents>();
         std::vector<std::shared_ptr<ChatReplySurface>> surfaces_;

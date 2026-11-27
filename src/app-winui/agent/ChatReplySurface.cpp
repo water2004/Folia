@@ -11,12 +11,12 @@ namespace winrt::Folia::chat {
     using namespace Microsoft::UI::Xaml;
     using namespace Microsoft::UI::Xaml::Controls;
 
-    std::shared_ptr<ChatReplySurface> ChatReplySurface::Create(std::string const& markdown, folia::ThemeProfile const& theme) {
+    std::shared_ptr<ChatReplySurface> ChatReplySurface::Create(std::string const& markdown, std::shared_ptr<ChatMarkdownAppearance const> appearance) {
         auto self = std::make_shared<ChatReplySurface>();
         self->markdown_ = markdown;
         auto text = to_hstring(markdown);
         self->session_.SetText(text);
-        self->SetTheme(theme);
+        self->appearance_ = std::move(appearance);
         Automation::AutomationProperties::SetName(self->paper_, text);
         self->paper_.Name(L"ChatMarkdownReply");
         self->paper_.Height(32);
@@ -139,23 +139,22 @@ namespace winrt::Folia::chat {
         paper_.ContextFlyout(menu);
     }
 
-    void ChatReplySurface::SetTheme(folia::ThemeProfile const& theme) {
-        theme_ = theme;
-        theme_.layout.document_horizontal_padding = 1;
-        theme_.layout.document_vertical_padding = 2;
-        theme_.layout.block_gap = 6;
+    void ChatMarkdownAppearance::SetTheme(folia::ThemeProfile const& profile) {
+        theme = profile;
+        theme.layout.document_horizontal_padding = 1;
+        theme.layout.document_vertical_padding = 2;
+        theme.layout.block_gap = 6;
         auto scale = 15.f / (std::max)(1.f, theme.typography.body.size);
-        for (auto* font : {&theme_.typography.body, &theme_.typography.code, &theme_.typography.heading1,
-                           &theme_.typography.heading2, &theme_.typography.heading3}) {
+        for (auto* font : {&theme.typography.body, &theme.typography.code, &theme.typography.heading1,
+                           &theme.typography.heading2, &theme.typography.heading3}) {
             font->size *= scale;
             font->line_height *= scale;
         }
-        session_.SetTheme(theme_);
-        if (renderer_) renderer_->SetTheme(theme_);
-        Draw(true);
+        ++themeRevision;
     }
 
     void ChatReplySurface::Draw(bool dirty) {
+        needsRedraw_ |= dirty;
         if (drawing_ || !paper_.IsLoaded() || paper_.ActualWidth() < 2) return;
         auto height = paper_.Height();
         if (bottom_ <= 0 || top_ >= height || !std::isfinite(bottom_) || bottom_ <= top_) return;
@@ -165,10 +164,17 @@ namespace winrt::Folia::chat {
         auto top = (std::clamp)(double(top_), 0., height);
         auto bottom = (std::clamp)(double(bottom_), top, height);
         auto start = Canvas::GetTop(slice_);
-        if (!dirty && renderer_ && top >= start && bottom <= start + slice_.Height()) return;
-        if (!renderer_) {
-            renderer_ = std::make_unique<EditorSurfaceRenderer>();
-            renderer_->SetTheme(theme_);
+        if (!needsRedraw_ && renderer_ && top >= start && bottom <= start + slice_.Height()) return;
+        needsRedraw_ = false;
+        const bool firstFrame = !renderer_;
+        if (firstFrame) renderer_ = std::make_unique<EditorSurfaceRenderer>();
+        if (appliedTheme_ != appearance_->themeRevision) {
+            session_.SetTheme(appearance_->theme);
+            renderer_->SetTheme(appearance_->theme);
+            appliedTheme_ = appearance_->themeRevision;
+        }
+        renderer_->SetMediaDisplaySettings(appearance_->media);
+        if (firstFrame) {
             renderer_->Initialize(slice_);
             renderer_->SetInvalidateCallback([weak = weak_from_this()] { if (auto item = weak.lock()) item->Draw(true); });
         }

@@ -30,6 +30,8 @@ namespace winrt::Folia::implementation {
             shell->agentChatViews.at(Active(shell)->id)->SetTheme(theme);
         }
         static auto const& Theme(MainWindow* shell) { return shell->themeProfile; }
+        static auto Media(MainWindow* shell) { return shell->appSettings.media; }
+        static void SetMedia(MainWindow* shell, MediaDisplaySettings const& media) { shell->UpdateMediaSettings(media); }
         static auto Host(MainWindow* shell) { return shell->AgentChatHost(); }
         static auto Sidebar(MainWindow* shell) { return shell->ChatList(); }
         static void RefreshSidebar(MainWindow* shell) { shell->RefreshChatList(); }
@@ -88,7 +90,7 @@ namespace {
         peer.GetPattern(Automation::Peers::PatternInterface::Invoke).as<Automation::Provider::IInvokeProvider>().Invoke();
     }
 
-    void Capture(Window const& window, std::filesystem::path const& name) {
+    std::size_t Capture(Window const& window, std::filesystem::path const& name, std::optional<std::uint32_t> sample = {}) {
         // Composite the actual window for visual inspection, including the Direct2D reply.
         HWND hwnd{};
         window.as<IWindowNative>()->get_WindowHandle(&hwnd);
@@ -107,18 +109,54 @@ namespace {
         auto until = std::chrono::steady_clock::now() + std::chrono::milliseconds(450);
         Pump([&] { return std::chrono::steady_clock::now() >= until; });
         DwmFlush();
+        std::size_t matches = 0;
         if (PrintWindow(hwnd, dc, 2) && bits) {
+            if (sample) {
+                auto pixels = std::span(static_cast<std::uint32_t const*>(bits), static_cast<std::size_t>(w) * h);
+                matches = std::ranges::count_if(pixels, [&](auto pixel) { return (pixel & 0xffffff) == *sample; });
+            }
+            if (!name.empty()) {
             winrt::Windows::Storage::Streams::Buffer pixels(w*h*4);
             pixels.Length(w*h*4);
             std::memcpy(pixels.data(), bits, pixels.Length());
             for (std::uint32_t i = 3; i < pixels.Length(); i += 4) pixels.data()[i] = 255;
             visual_tests::SavePng(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
                 / "build/tests/agent-chat" / name, w, h, pixels);
+            }
         }
         SelectObject(dc, old); DeleteObject(dib); DeleteDC(dc); ReleaseDC(nullptr, screen);
+        return matches;
     }
 
     suite agent_chat_tests = [] {
+        "agent Mermaid uses the reading theme on open and repaints the existing reply on setting changes"_test = [] {
+            auto window = visual_tests::Window();
+            auto shell = Access::Impl(window);
+            auto original = Access::Media(shell);
+            auto media = original;
+            media.mermaidTheme = "forest";
+            Access::SetMedia(shell, media);
+            auto conversation = chat::NewConversation("Diagram theme");
+            chat::AppendEntry(conversation.id, {folia::ai::MessageRole::User, "Diagram"});
+            chat::AppendEntry(conversation.id, {folia::ai::MessageRole::Assistant,
+                "```mermaid\nflowchart LR\n A[Start] --> B[Finish]\n```"});
+            Access::Open(shell, conversation.id);
+            auto restore = wil::scope_exit([&] {
+                Access::Close(shell); Access::SetMedia(shell, original); chat::DeleteConversation(conversation.id);
+            });
+            auto forest = [&] { return Capture(window, {}, 0xcde498) > 120; };
+            Pump(forest);
+            expect(forest()) << "forest node fill on the rendered conversation";
+            media.mermaidTheme = "dark";
+            Access::SetMedia(shell, media);
+            Pump([&] { return !forest(); });
+            expect(!forest()) << "old node fill removed";
+            media.mermaidTheme = "forest";
+            Access::SetMedia(shell, media);
+            Pump(forest);
+            expect(forest()) << "same visible reply repainted";
+        };
+
         "agent workspace tools page only the approved root and reject absolute and parent paths"_test = [] {
             auto folder = std::filesystem::temp_directory_path() / ("folia-agent-tool-" + records::NewId());
             std::filesystem::create_directory(folder);
@@ -396,7 +434,7 @@ namespace {
             Pump([&] { return findText(L"Question 8") && scroll.VerticalOffset() > 60; });
             Pump([&] { root.UpdateLayout(); return scroll.ScrollableHeight() - scroll.VerticalOffset() < 2; });
             // Inject streaming events into a transcript mounted in the same window.
-            auto transcript = chat::ChatTranscript::Create(conversation.id, Access::Theme(shell));
+            auto transcript = chat::ChatTranscript::Create(conversation.id, Access::Theme(shell), {});
             host.Content(transcript->Element());
             root = transcript->Element();
             scroll = Find<ScrollViewer>(root, [](auto const& item) { return item.Name() == L"ConversationScroll"; });
@@ -420,7 +458,7 @@ namespace {
             auto host = Access::Host(shell);
             auto old = host.Content();
             auto cleanup = wil::scope_exit([&] { host.Content(old); Access::Close(shell); chat::DeleteConversation(conversation.id); });
-            auto view = chat::ChatTranscript::Create(conversation.id, Access::Theme(shell));
+            auto view = chat::ChatTranscript::Create(conversation.id, Access::Theme(shell), {});
             host.Content(view->Element());
             view->Begin();
             view->Progress(StepStarted, {});
@@ -481,7 +519,7 @@ namespace {
             };
             host.UpdateLayout();
             check(root);
-            auto reopened = chat::ChatTranscript::Create(conversation.id, Access::Theme(shell));
+            auto reopened = chat::ChatTranscript::Create(conversation.id, Access::Theme(shell), {});
             host.Content(reopened->Element());
             Pump([&] { root = Find<StackPanel>(host, [](auto const& e) { return e.Name() == L"ChatTurn"; }); return root && root.IsLoaded(); });
             check(root);

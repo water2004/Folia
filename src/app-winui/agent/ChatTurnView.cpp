@@ -6,13 +6,13 @@ namespace winrt::Folia::chat {
     using folia::ai::agent::ProgressKind;
     using folia::ai::agent::StepEnd;
 
-    ChatTurnView::ChatTurnView(folia::ThemeProfile const& theme, OpenDocument open) : theme_(theme), open_(std::move(open)) {
+    ChatTurnView::ChatTurnView(std::shared_ptr<ChatMarkdownAppearance const> appearance, OpenDocument open)
+        : appearance_(std::move(appearance)), open_(std::move(open)) {
         root_.Spacing(6);
         root_.Name(L"ChatTurn");
     }
-    void ChatTurnView::SetTheme(folia::ThemeProfile const& theme) {
-        theme_ = theme;
-        for (auto const& surface : surfaces_) surface->SetTheme(theme);
+    void ChatTurnView::RefreshAppearance() {
+        for (auto const& surface : surfaces_) surface->RefreshAppearance();
     }
     void ChatTurnView::SealText() {
         if (surface_) surface_->Seal();
@@ -39,7 +39,7 @@ namespace winrt::Folia::chat {
         if (followingActivity && piece.starts_with("\n\n")) piece.remove_prefix(2);
         if (piece.empty()) return;
         if (!surface_) {
-            surface_ = ChatReplySurface::Create(initial ? std::string(piece) : std::string{}, theme_);
+            surface_ = ChatReplySurface::Create(initial ? std::string(piece) : std::string{}, appearance_);
             surface_->openDocument = [open = open_, documents = documents_](auto const& link) { open(link, *documents); };
             root_.Children().Append(surface_->Element());
             surfaces_.push_back(surface_);

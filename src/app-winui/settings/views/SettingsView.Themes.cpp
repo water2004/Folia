@@ -55,6 +55,13 @@ namespace winrt::Folia
         return settings_ui::PageScroll(page);
     }
 
+    void SettingsView::UpdateAppliedTheme(std::string const& id)
+    {
+        if (settings_.themeId == appliedSettings_.themeId) settings_.themeId = id;
+        appliedSettings_.themeId = id;
+        if (themePicker_) RefreshThemeList();
+    }
+
     void SettingsView::RefreshThemeList()
     {
         refreshing_ = true;
