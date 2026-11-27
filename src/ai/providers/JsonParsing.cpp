@@ -1,6 +1,6 @@
-#include "JsonParsing.h"
-
-#include <set>
+module folia.ai.providers:json;
+import std;
+import folia.ai.model;
 
 namespace folia::ai {
 namespace {

@@ -1,5 +1,6 @@
-#pragma once
-#include "../ModelTypes.h"
+module folia.ai.providers:search_actions;
+import std;
+import folia.ai.model;
 
 namespace folia::ai {
 inline std::string WebOperation(Json const& item, char const* member) {

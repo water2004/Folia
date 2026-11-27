@@ -2,8 +2,9 @@
 #include "agent/ChatModelTransport.h"
 #include "agent/ChatView.h"
 #include "ui/ControlHelpers.h"
-#include "providers/ModelValidation.h"
 #include <wil/resource.h>
+
+import folia.ai.providers;
 
 namespace winrt::Folia::chat {
     using namespace ui;

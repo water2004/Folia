@@ -1,7 +1,7 @@
 #pragma once
 
-#include "providers/ModelTypes.h"
 import std;
+import folia.ai.model;
 
 namespace folia::platform::models {
     enum class Route { Model, Catalog };

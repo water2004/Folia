@@ -1,14 +1,14 @@
-#pragma once
-#include "PromptCache.h"
-#include <cstdint>
+module;
 #include <nlohmann/json.hpp>
-#include <optional>
-#include <stdexcept>
-#include <string>
-#include <string_view>
-#include <vector>
 
-namespace folia::ai {
+export module folia.ai.model;
+import std;
+
+export namespace folia::ai {
+enum class ApiProtocol { ChatCompletions, Responses, AnthropicMessages };
+enum class CacheDialect { Automatic, Custom, OpenAI, Anthropic, OpenRouter, RoutingKey };
+enum class ModelCatalogSchema { Protocol, OpenRouter };
+
 inline constexpr std::size_t maxRequestMessages = 512;
 struct ContextWindowExceeded : std::runtime_error { using std::runtime_error::runtime_error; };
 using Json = nlohmann::json;

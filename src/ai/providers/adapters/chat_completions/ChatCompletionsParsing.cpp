@@ -1,16 +1,11 @@
-#pragma once
-#include "../../JsonParsing.h"
-#include "HostedActivity.h"
-#include "../../ModelAdapter.h"
-#include "../../ModelValidation.h"
-#include <algorithm>
-#include <cctype>
-#include <map>
-#include <set>
-#include <string_view>
+module folia.ai.providers:chat_completions;
+import std;
+import folia.ai.model;
+import :json;
+import :validation;
+import :chat_activity;
 
-namespace folia::ai {
-namespace {
+namespace folia::ai::chat_completions {
 constexpr std::size_t MaxTextBytes = 4 * 1024 * 1024;
 constexpr std::size_t MaxImageBytes = 20 * 1024 * 1024;
 constexpr std::size_t MaxToolCount = 128;
@@ -266,5 +261,4 @@ ModelResult ParseFull(Json const& response) {
     ValidateResult(result);
     return result;
 } // namespace
-} // namespace
-} // namespace folia::ai
+} // namespace folia::ai::chat_completions

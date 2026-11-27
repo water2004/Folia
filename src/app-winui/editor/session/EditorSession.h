@@ -14,7 +14,7 @@ import folia.core.source_editor;
 import folia.core.theme;
 import folia.platform.editor_shortcuts;
 import folia.math.editor.syntax;
-import folia.completion;
+import folia.ai.completion;
 
 namespace winrt::Folia
 {

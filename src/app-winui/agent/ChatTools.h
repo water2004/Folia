@@ -1,7 +1,9 @@
 #pragma once
 
-#include "agent/Agent.h"
 #include "editor/session/EditorSourceLocation.h"
+
+import std;
+import folia.ai.agent;
 
 namespace winrt::Folia::chat {
     struct TabSnapshot {

@@ -1,5 +1,7 @@
-#include "agent/HostedSearch.h"
-#include "providers/HostedSearch.h"
+module folia.ai.agent.hosted_tools;
+import std;
+import folia.ai.agent;
+import folia.ai.providers;
 
 namespace folia::ai::agent {
     bool NeedsIsolatedWebRequest(Options const& options, std::span<Tool const> localTools) {

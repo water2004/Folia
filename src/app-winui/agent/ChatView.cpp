@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "agent/ChatHints.h"
 #include "agent/ChatView.h"
-#include "providers/HostedSearch.h"
 #include "ui/ControlHelpers.h"
 #include "workspace/WorkspaceIcons.h"
 #include <shobjidl.h>
@@ -11,6 +10,8 @@
 #include <winrt/Microsoft.UI.Input.h>
 #include <winrt/Microsoft.UI.Xaml.Automation.h>
 #include <wil/resource.h>
+
+import folia.ai.providers;
 
 namespace winrt::Folia::chat {
     using namespace ui;

@@ -1,5 +1,6 @@
-#include "SseParser.h"
-#include "JsonParsing.h"
+module folia.ai.providers;
+import std;
+
 namespace folia::ai {
 std::vector<SseEvent> SseParser::Feed(std::string_view bytes) {
     if (pending_.size() + bytes.size() > 1024u * 1024u)

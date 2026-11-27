@@ -1,9 +1,10 @@
 #pragma once
 
-#include "providers/ModelTypes.h"
 #include "storage/RecordId.h"
 #include <wil/resource.h>
+
 import std;
+import folia.ai.model;
 
 namespace winrt::Folia::records {
     using folia::ai::Json;

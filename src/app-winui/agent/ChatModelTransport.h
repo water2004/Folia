@@ -1,7 +1,9 @@
 #pragma once
 
-#include "agent/Agent.h"
 #include "settings/storage/ModelCatalog.h"
+
+import std;
+import folia.ai.agent;
 
 namespace winrt::Folia::chat {
     folia::ai::agent::Request MakeChatRequest(models::ProviderConnection connection,

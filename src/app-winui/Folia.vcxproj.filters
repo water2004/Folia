@@ -7,6 +7,9 @@
     <Filter Include="Agent Chat">
       <UniqueIdentifier>{31F7B54E-C992-49A0-BB10-E3EB09F1D142}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AI Protocols">
+      <UniqueIdentifier>{328ea873-0f82-428e-9ee8-912a123520b7}</UniqueIdentifier>
+    </Filter>
     <Filter Include="AI Completion">
       <UniqueIdentifier>{e2a83546-b428-4a6c-8fd4-08c9265d71b6}</UniqueIdentifier>
     </Filter>
@@ -359,6 +362,108 @@
     </ClCompile>
     <ClCompile Include="agent\ChatComposerExtras.cpp">
       <Filter>Agent Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\agent\Agent.ixx">
+      <Filter>Agent Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\ModelTypes.ixx">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\providers.ixx">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\HostedTools.ixx">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\ModelAdapter.ixx">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\ModelCodec.ixx">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\ModelValidation.ixx">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\SseParser.ixx">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\StreamResponse.ixx">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\agent\Context.ixx">
+      <Filter>Agent Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\agent\HostedSearch.ixx">
+      <Filter>Agent Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\Adapters.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\SearchAction.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\anthropic\AnthropicParsing.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\chat_completions\HostedActivity.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\chat_completions\ChatCompletionsParsing.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\responses\ResponsesParsing.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\JsonParsing.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\ModelAdapter.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\ModelCodec.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\ModelTypes.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\ModelValidation.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\PromptCache.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\SseParser.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\StreamResponse.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\anthropic\Request.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\anthropic\Response.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\anthropic\StreamDecoder.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\chat_completions\Request.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\chat_completions\Response.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\chat_completions\StreamDecoder.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\responses\Request.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\responses\Response.cpp">
+      <Filter>AI Protocols</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\responses\StreamDecoder.cpp">
+      <Filter>AI Protocols</Filter>
     </ClCompile>
     <ClCompile Include="..\ai\completion\completion.ixx">
       <Filter>AI Completion</Filter>

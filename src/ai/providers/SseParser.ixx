@@ -1,8 +1,7 @@
-#pragma once
-#include <string>
-#include <string_view>
-#include <vector>
-namespace folia::ai {
+export module folia.ai.providers:sse;
+import std;
+
+export namespace folia::ai {
 struct SseEvent {
     std::string event;
     std::string data;

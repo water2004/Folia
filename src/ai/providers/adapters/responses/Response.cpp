@@ -1,7 +1,11 @@
-#include "../Adapters.h"
-#include "Internal.h"
+module folia.ai.providers;
+import std;
+import :dispatch;
+import :responses;
 
 namespace folia::ai {
+using namespace responses;
+
 ModelResult ParseResponsesResponse(Json const& response) {
     if (!response.is_object() || String(response, "status") == "failed")
         Bad("Responses request failed.");

@@ -1,10 +1,10 @@
-#include "providers/ModelAdapter.h"
-#include "providers/StreamResponse.h"
 #include <windows.h>
 #include <wincred.h>
 #include <winhttp.h>
 #include <winrt/base.h>
 #include "windows/ai/ModelHttpClient.h"
+
+import folia.ai.providers;
 
 namespace folia::platform::models {
 void ValidateUrl(std::string const& base) {

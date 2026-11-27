@@ -1,7 +1,13 @@
-#include "../Adapters.h"
-#include "Internal.h"
+module folia.ai.providers;
+import std;
+import :dispatch;
+import :chat_completions;
+import :json;
+import :chat_activity;
 
 namespace folia::ai {
+using namespace chat_completions;
+
 class ChatDecoder final : public IResponseDecoder {
     struct Call {
         std::string id, name, arguments;

@@ -1,21 +1,51 @@
-# Shared model protocols. Initial MIT source recorded in source-lock.json.
-add_library(folia_model_providers STATIC)
-target_compile_features(folia_model_providers PUBLIC cxx_std_23)
-set_target_properties(folia_model_providers PROPERTIES CXX_SCAN_FOR_MODULES OFF)
-file(GLOB_RECURSE provider_sources CONFIGURE_DEPENDS providers/*.cpp)
-target_sources(folia_model_providers PRIVATE ${provider_sources})
-target_include_directories(folia_model_providers PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../third_party/nlohmann-json/include)
+add_library(folia_ai STATIC)
+add_library(folia::ai ALIAS folia_ai)
+target_compile_features(folia_ai PUBLIC cxx_std_23)
+set_target_properties(folia_ai PROPERTIES CXX_MODULE_STD ON)
+target_include_directories(folia_ai PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../third_party/nlohmann-json/include)
 
-add_library(folia_agent STATIC agent/Agent.cpp agent/Context.cpp agent/HostedSearch.cpp)
-add_library(folia::agent ALIAS folia_agent)
-target_compile_features(folia_agent PUBLIC cxx_std_23)
-set_target_properties(folia_agent PROPERTIES CXX_MODULE_STD ON)
-target_link_libraries(folia_agent PUBLIC folia_model_providers)
-
-add_library(folia_completion STATIC)
-add_library(folia::completion ALIAS folia_completion)
-target_compile_features(folia_completion PUBLIC cxx_std_23)
-set_target_properties(folia_completion PROPERTIES CXX_MODULE_STD ON)
-target_sources(folia_completion PUBLIC FILE_SET CXX_MODULES FILES completion/completion.ixx)
-target_sources(folia_completion PRIVATE completion/completion.cpp completion/edit.cpp)
+target_sources(folia_ai
+    PUBLIC FILE_SET CXX_MODULES FILES
+        agent/Agent.ixx
+        completion/completion.ixx
+        providers/ModelTypes.ixx
+        providers/providers.ixx
+        providers/HostedTools.ixx
+        providers/ModelAdapter.ixx
+        providers/ModelCodec.ixx
+        providers/ModelValidation.ixx
+        providers/SseParser.ixx
+        providers/StreamResponse.ixx
+    PRIVATE FILE_SET ai_internals TYPE CXX_MODULES FILES
+        agent/Context.ixx
+        agent/HostedSearch.ixx
+        providers/JsonParsing.cpp
+        providers/adapters/Adapters.cpp
+        providers/adapters/SearchAction.cpp
+        providers/adapters/anthropic/AnthropicParsing.cpp
+        providers/adapters/chat_completions/HostedActivity.cpp
+        providers/adapters/chat_completions/ChatCompletionsParsing.cpp
+        providers/adapters/responses/ResponsesParsing.cpp
+    PRIVATE
+        agent/Agent.cpp
+        agent/Context.cpp
+        agent/HostedSearch.cpp
+        completion/completion.cpp
+        completion/edit.cpp
+        providers/ModelAdapter.cpp
+        providers/ModelCodec.cpp
+        providers/ModelTypes.cpp
+        providers/ModelValidation.cpp
+        providers/PromptCache.cpp
+        providers/SseParser.cpp
+        providers/StreamResponse.cpp
+        providers/adapters/anthropic/Request.cpp
+        providers/adapters/anthropic/Response.cpp
+        providers/adapters/anthropic/StreamDecoder.cpp
+        providers/adapters/chat_completions/Request.cpp
+        providers/adapters/chat_completions/Response.cpp
+        providers/adapters/chat_completions/StreamDecoder.cpp
+        providers/adapters/responses/Request.cpp
+        providers/adapters/responses/Response.cpp
+        providers/adapters/responses/StreamDecoder.cpp
+)

@@ -1,9 +1,8 @@
-#pragma once
-
-#include "providers/ModelTypes.h"
+export module folia.ai.agent;
 import std;
+export import folia.ai.model;
 
-namespace folia::ai::agent {
+export namespace folia::ai::agent {
     struct Source {
         std::string title;
         std::string url;

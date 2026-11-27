@@ -1,8 +1,8 @@
-#pragma once
+export module folia.ai.agent.hosted_tools;
+import std;
+import folia.ai.agent;
 
-#include "agent/Agent.h"
-
-namespace folia::ai::agent {
+export namespace folia::ai::agent {
     bool NeedsIsolatedWebRequest(Options const& options, std::span<Tool const> localTools);
 
     // Only the public query or URL crosses into the isolated request.

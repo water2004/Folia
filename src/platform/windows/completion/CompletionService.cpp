@@ -1,4 +1,3 @@
-#include "providers/ModelValidation.h"
 #include <windows.h>
 #include <winrt/base.h>
 #include "windows/completion/CompletionService.h"
@@ -6,6 +5,8 @@
 #include "windows/ai/ModelHttpClient.h"
 
 import std;
+
+import folia.ai.providers;
 
 namespace folia::platform::completion {
 std::string ResolveCompletionEndpoint(CompletionConfig const& config) {

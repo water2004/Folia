@@ -96,7 +96,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\src\ai;$(ProjectDir)..\..\third_party\nlohmann-json\include;$(ProjectDir)..\platform;$(ProjectDir)..\math\include;$(FoliaIcuRoot)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\third_party\nlohmann-json\include;$(ProjectDir)..\platform;$(ProjectDir)..\math\include;$(FoliaIcuRoot)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalOptions>%(AdditionalOptions) /bigobj /utf-8</AdditionalOptions>
@@ -973,25 +973,42 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="..\ai\completion\completion.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
+    <ClCompile Include="..\ai\agent\Agent.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)ai_agent_Agent.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\ModelTypes.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)ai_providers_ModelTypes.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\providers.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)ai_providers_providers.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\HostedTools.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)ai_providers_HostedTools.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\ModelAdapter.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)ai_providers_ModelAdapter.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\ModelCodec.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)ai_providers_ModelCodec.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\ModelValidation.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)ai_providers_ModelValidation.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\SseParser.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)ai_providers_SseParser.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\StreamResponse.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)ai_providers_StreamResponse.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\agent\Context.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)ai_agent_Context.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\agent\HostedSearch.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)ai_agent_HostedSearch.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\Adapters.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><CompileAs>CompileAsCppModuleInternalPartition</CompileAs><ObjectFileName>$(IntDir)ai_providers_adapters_Adapters.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\SearchAction.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><CompileAs>CompileAsCppModuleInternalPartition</CompileAs><ObjectFileName>$(IntDir)ai_providers_adapters_SearchAction.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\anthropic\AnthropicParsing.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><CompileAs>CompileAsCppModuleInternalPartition</CompileAs><ObjectFileName>$(IntDir)ai_providers_adapters_anthropic_AnthropicParsing.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\chat_completions\HostedActivity.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><CompileAs>CompileAsCppModuleInternalPartition</CompileAs><ObjectFileName>$(IntDir)ai_providers_adapters_chat_completions_HostedActivity.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\chat_completions\ChatCompletionsParsing.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><CompileAs>CompileAsCppModuleInternalPartition</CompileAs><ObjectFileName>$(IntDir)ai_providers_adapters_chat_completions_ChatCompletionsParsing.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\responses\ResponsesParsing.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><CompileAs>CompileAsCppModuleInternalPartition</CompileAs><ObjectFileName>$(IntDir)ai_providers_adapters_responses_ResponsesParsing.obj</ObjectFileName></ClCompile>
     <ClCompile Include="..\ai\completion\completion.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="..\ai\completion\edit.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
-    <ClCompile Include="..\..\src\ai\providers\adapters\anthropic\Request.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_anthropic_Request.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\src\ai\providers\adapters\anthropic\Response.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_anthropic_Response.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\src\ai\providers\adapters\anthropic\StreamDecoder.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_anthropic_StreamDecoder.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\src\ai\providers\adapters\chat_completions\Request.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_chat_completions_Request.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\src\ai\providers\adapters\chat_completions\Response.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_chat_completions_Response.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\src\ai\providers\adapters\chat_completions\StreamDecoder.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_chat_completions_StreamDecoder.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\src\ai\providers\adapters\responses\Request.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_responses_Request.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\src\ai\providers\adapters\responses\Response.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_responses_Response.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\src\ai\providers\adapters\responses\StreamDecoder.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_responses_StreamDecoder.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\src\ai\providers\JsonParsing.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_JsonParsing.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\src\ai\providers\ModelAdapter.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_ModelAdapter.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\src\ai\providers\PromptCache.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_PromptCache.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\src\ai\providers\ModelCodec.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_ModelCodec.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\src\ai\providers\ModelTypes.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_ModelTypes.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\src\ai\providers\ModelValidation.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_ModelValidation.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\src\ai\providers\SseParser.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_SseParser.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\src\ai\providers\StreamResponse.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_StreamResponse.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\anthropic\Request.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_anthropic_Request.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\anthropic\Response.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_anthropic_Response.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\anthropic\StreamDecoder.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_anthropic_StreamDecoder.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\chat_completions\Request.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_chat_completions_Request.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\chat_completions\Response.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_chat_completions_Response.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\chat_completions\StreamDecoder.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_chat_completions_StreamDecoder.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\responses\Request.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_responses_Request.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\responses\Response.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_responses_Response.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\adapters\responses\StreamDecoder.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_responses_StreamDecoder.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\JsonParsing.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><CompileAs>CompileAsCppModuleInternalPartition</CompileAs><ObjectFileName>$(IntDir)providers_providers_JsonParsing.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\ModelAdapter.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_ModelAdapter.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\PromptCache.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_PromptCache.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\ModelCodec.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_ModelCodec.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\ModelTypes.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_ModelTypes.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\ModelValidation.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_ModelValidation.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\SseParser.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_SseParser.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\ai\providers\StreamResponse.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_StreamResponse.obj</ObjectFileName></ClCompile>
     <ClCompile Include="..\platform\windows\completion\CompletionService.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>

@@ -1,8 +1,11 @@
-#include "../Adapters.h"
-#include "../../HostedSearch.h"
-#include "Internal.h"
+module folia.ai.providers;
+import std;
+import :dispatch;
+import :anthropic;
 
 namespace folia::ai {
+using namespace anthropic;
+
 RequestHeaders AnthropicHeaders(std::string_view apiKey) {
     return {{"x-api-key", std::string(apiKey)}, {"anthropic-version", "2023-06-01"}};
 }

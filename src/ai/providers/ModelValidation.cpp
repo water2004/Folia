@@ -1,10 +1,6 @@
-#include "ModelValidation.h"
-
-#include "JsonParsing.h"
-
-#include <algorithm>
-#include <iterator>
-#include <set>
+module folia.ai.providers;
+import std;
+import :json;
 
 namespace folia::ai {
 namespace {

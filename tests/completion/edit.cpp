@@ -1,6 +1,6 @@
 #include "support/completion_prompt.hpp"
 #include "support/folia_test.hpp"
-import folia.completion;
+import folia.ai.completion;
 
 namespace {
 using namespace boost::ut;

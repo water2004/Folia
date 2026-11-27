@@ -88,10 +88,10 @@ sequences and combining marks.
 
 ## Responsibilities
 
-- `src/ai/completion`: portable request context, bounded cache, proposal state,
-  acceptance boundaries and prompt policy. No Windows or editor mutations.
-- Vendored protocol adapters: request/response/SSE mapping for Chat Completions,
-  Responses and Anthropic Messages; no tools, agent loop or session history.
+- `src/ai/completion` (`folia.ai.completion`) owns portable request context, the
+  bounded cache, proposal state, acceptance boundaries and prompt policy.
+- `src/ai/providers` exports the model contract and the request, response and
+  SSE codecs for Chat Completions, Responses and Anthropic Messages.
 - Windows transport: asynchronous worker execution, streamed HTTP, cancellation,
   response limits and credential storage. No renderer or document access.
 - Application completion controller: immutable document snapshots, debounce,

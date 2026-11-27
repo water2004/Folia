@@ -1,7 +1,7 @@
-#pragma once
-
-#include "../SearchAction.h"
-#include <algorithm>
+module folia.ai.providers:chat_activity;
+import std;
+import folia.ai.model;
+import :search_actions;
 
 namespace folia::ai::chat_search {
 inline void ReadAnnotations(Json const& message, ModelResult& result) {

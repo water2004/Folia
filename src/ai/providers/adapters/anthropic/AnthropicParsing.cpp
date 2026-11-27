@@ -1,15 +1,11 @@
-#pragma once
-#include "../SearchAction.h"
-#include "../../JsonParsing.h"
-#include "../../ModelAdapter.h"
-#include "../../ModelValidation.h"
-#include <algorithm>
-#include <map>
-#include <set>
-#include <utility>
+module folia.ai.providers:anthropic;
+import std;
+import folia.ai.model;
+import :json;
+import :validation;
+import :search_actions;
 
-namespace folia::ai {
-namespace {
+namespace folia::ai::anthropic {
 [[noreturn]] void Bad() {
     throw ProtocolError("Invalid Anthropic protocol message.");
 }
@@ -100,5 +96,4 @@ void ReadToolUse(ModelResult& result, Json const& b) {
         Bad();
     result.message.toolCalls.push_back(std::move(c));
 } // namespace
-} // namespace
-} // namespace folia::ai
+} // namespace folia::ai::anthropic

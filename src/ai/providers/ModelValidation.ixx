@@ -1,9 +1,8 @@
-#pragma once
+export module folia.ai.providers:validation;
+import std;
+import folia.ai.model;
 
-#include "ModelTypes.h"
-#include <string_view>
-
-namespace folia::ai {
+export namespace folia::ai {
 void ValidateRequest(ModelRequest const& request);
 void ValidateResult(ModelResult const& result);
 void ValidateReasoningText(std::string_view text);

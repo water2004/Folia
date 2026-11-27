@@ -1,7 +1,7 @@
 #pragma once
 #include "windows/completion/CompletionService.h"
-#include "providers/ModelCatalogSchema.h"
-#include "providers/ModelTypes.h"
+
+import folia.ai.model;
 namespace folia::platform::completion {
 // Credentials are supplied separately; the transport never reads app settings.
 CompletionResult RequestCompletionHttp(CompletionConfig const&, folia::completion::Prompt const&,

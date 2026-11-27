@@ -1,8 +1,8 @@
-#pragma once
+export module folia.ai.providers:hosted_tools;
+import std;
+import folia.ai.model;
 
-#include "ModelTypes.h"
-
-namespace folia::ai {
+export namespace folia::ai {
 inline std::string_view SearchDialectId(WebSearchDialect dialect) {
     switch (dialect) {
     case WebSearchDialect::Standard: return "standard";

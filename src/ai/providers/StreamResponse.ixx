@@ -1,8 +1,10 @@
-#pragma once
+export module folia.ai.providers:stream;
+import std;
+import folia.ai.model;
+import :protocol;
+import :sse;
 
-#include "ModelAdapter.h"
-
-namespace folia::ai {
+export namespace folia::ai {
 
 class StreamResponse final {
   public:

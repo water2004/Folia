@@ -1,7 +1,8 @@
 #pragma once
-#include "providers/PromptCache.h"
+
 import std;
-import folia.completion;
+import folia.ai.completion;
+import folia.ai.model;
 
 namespace folia::platform::completion {
 struct CompletionConfig {

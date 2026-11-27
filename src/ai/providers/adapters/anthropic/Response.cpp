@@ -1,7 +1,11 @@
-#include "../Adapters.h"
-#include "Internal.h"
+module folia.ai.providers;
+import std;
+import :dispatch;
+import :anthropic;
 
 namespace folia::ai {
+using namespace anthropic;
+
 ModelResult ParseAnthropicResponse(Json const& response) {
     try {
         if (!response.is_object() || !IsString(response, "type") || response["type"] != "message" ||

@@ -1,8 +1,11 @@
-#include "../Adapters.h"
-#include "../../HostedSearch.h"
-#include "Internal.h"
+module folia.ai.providers;
+import std;
+import :dispatch;
+import :responses;
 
 namespace folia::ai {
+using namespace responses;
+
 RequestHeaders ResponsesHeaders(std::string_view apiKey) {
     return {{"Authorization", "Bearer " + std::string(apiKey)}};
 }

@@ -1,4 +1,6 @@
-#include "agent/Context.h"
+module folia.ai.agent.context;
+import std;
+import folia.ai.agent;
 
 namespace folia::ai::agent {
     namespace {

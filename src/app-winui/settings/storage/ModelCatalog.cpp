@@ -1,11 +1,12 @@
 #include "pch.h"
 #include "settings/storage/ModelCatalog.h"
 #include "settings/storage/ProviderPresets.h"
-#include "providers/ModelValidation.h"
 #include "storage/JsonRecords.h"
 #include "storage/AssetPaths.h"
 #include "windows/ai/ModelHttpClient.h"
 #include "windows/completion/CompletionService.h"
+
+import folia.ai.providers;
 
 namespace winrt::Folia::models {
     using namespace records;

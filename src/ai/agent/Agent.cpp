@@ -1,6 +1,8 @@
-#include "agent/Context.h"
-#include "agent/HostedSearch.h"
-#include "providers/ModelValidation.h"
+module folia.ai.agent;
+import std;
+import folia.ai.agent.context;
+import folia.ai.agent.hosted_tools;
+import folia.ai.providers;
 
 namespace folia::ai::agent {
     namespace {

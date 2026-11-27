@@ -1,10 +1,5 @@
-#include "HostedSearch.h"
-#include "ModelCodec.h"
-
-#include "ModelValidation.h"
-
-#include <initializer_list>
-#include <limits>
+module folia.ai.providers;
+import std;
 
 namespace folia::ai {
 namespace {
@@ -254,8 +249,8 @@ bool HasOnlyFields(Json const& value, std::initializer_list<char const*> fields)
 bool HasOnlyUsageFields(Json const& value) {
     if (!value.is_object() || value.size() > 4)
         return false;
-    for (auto const& [name, field] : value.items()) {
-        (void)field;
+    for (auto const& field : value.items()) {
+        auto const& name = field.key();
         if (name != "input" && name != "output" && name != "total" && name != "cached")
             return false;
     }

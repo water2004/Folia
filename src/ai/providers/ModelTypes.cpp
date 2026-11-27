@@ -1,7 +1,5 @@
-#include "ModelTypes.h"
-
-#include <array>
-#include <utility>
+module folia.ai.model;
+import std;
 
 namespace folia::ai {
 namespace {

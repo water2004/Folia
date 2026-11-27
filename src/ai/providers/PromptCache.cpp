@@ -1,5 +1,6 @@
-#include "adapters/Adapters.h"
-#include <charconv>
+module folia.ai.providers;
+import std;
+import :dispatch;
 
 namespace folia::ai {
 bool SupportsCacheBreakpoints(CacheDialect dialect, ApiProtocol protocol, std::string_view model,

@@ -1,4 +1,4 @@
-export module folia.completion;
+export module folia.ai.completion;
 import std;
 
 export namespace folia::completion {

@@ -1,7 +1,13 @@
-#include "../Adapters.h"
-#include "Internal.h"
+module folia.ai.providers;
+import std;
+import :dispatch;
+import :anthropic;
+import :json;
+import :search_actions;
 
 namespace folia::ai {
+using namespace anthropic;
+
 class AnthropicDecoder final : public IResponseDecoder {
     ModelResult result_;
     bool started_{}, messageStopped_{}, finished_{}, sawMessageDelta_{}, refusal_{};

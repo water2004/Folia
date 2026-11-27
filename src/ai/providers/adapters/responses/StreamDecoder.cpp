@@ -1,7 +1,12 @@
-#include "../Adapters.h"
-#include "Internal.h"
+module folia.ai.providers;
+import std;
+import :dispatch;
+import :responses;
+import :search_actions;
 
 namespace folia::ai {
+using namespace responses;
+
 class Decoder final : public IResponseDecoder {
     std::set<std::uint64_t> sequences_;
     std::unordered_map<int, Json> added_;

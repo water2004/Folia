@@ -1,8 +1,11 @@
-#include "../Adapters.h"
-#include "../../HostedSearch.h"
-#include "Internal.h"
+module folia.ai.providers;
+import std;
+import :dispatch;
+import :chat_completions;
 
 namespace folia::ai {
+using namespace chat_completions;
+
 RequestHeaders ChatCompletionsHeaders(std::string_view apiKey) {
     return {{"Authorization", "Bearer " + std::string(apiKey)}};
 }
@@ -38,7 +41,9 @@ Json BuildChatCompletionsRequest(ModelRequest const& request, ProviderRequestOpt
                 auto const& replay = m.providerState["chat_message"];
                 if (!replay.is_object())
                     Invalid();
-                for (auto const& [key, value] : replay.items()) {
+                for (auto const& entry : replay.items()) {
+                    auto const& key = entry.key();
+                    auto const& value = entry.value();
                     if (key == "role" || key == "content" || key == "tool_calls")
                         continue;
                     if (key == "server_tool_calls" && value.is_array() && value.size() <= 128) {

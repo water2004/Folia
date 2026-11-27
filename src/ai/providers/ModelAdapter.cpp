@@ -1,5 +1,7 @@
-#include "ModelAdapter.h"
-#include "adapters/Adapters.h"
+module folia.ai.providers;
+import std;
+import :dispatch;
+
 namespace folia::ai {
 RequestHeaders BuildHeaders(ApiProtocol protocol, std::string_view apiKey) {
     switch (protocol) {

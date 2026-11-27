@@ -1,5 +1,5 @@
 #pragma once
-import folia.completion;
+import folia.ai.completion;
 import folia.markdown.utf;
 
 namespace completion_tests {

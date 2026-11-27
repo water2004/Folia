@@ -1,11 +1,11 @@
-#include "providers/ModelAdapter.h"
-#include "providers/ModelValidation.h"
 #include <winrt/base.h>
 #include "windows/completion/CompletionHttpTransport.h"
 #include "windows/ai/ModelHttpClient.h"
 
 import std;
 import folia.markdown.utf;
+
+import folia.ai.providers;
 
 namespace folia::platform::completion {
 CompletionResult RequestCompletionHttp(CompletionConfig const& config, folia::completion::Prompt const& prompt,
@@ -109,9 +109,13 @@ CompletionModelPage ParseCompletionModels(std::string_view json, int protocol, a
             auto declared = capabilities.find("effort");
             if (declared != capabilities.end() && !declared->is_null()) {
                 if (!declared->is_object() || declared->size() > 33) throw std::runtime_error("Invalid reasoning capabilities.");
-                if (declared->value("supported", false))
-                    for (auto const& [name, value] : declared->items())
-                        if (name != "supported" && value.is_object() && value.value("supported", false)) addLevel(model, name);
+                if (declared->value("supported", false)) {
+                    for (auto const& effort : declared->items()) {
+                        auto const& options = effort.value();
+                        if (effort.key() != "supported" && options.is_object() && options.value("supported", false))
+                            addLevel(model, effort.key());
+                    }
+                }
             }
         }
         if (std::ranges::find(page.models, model.id, &CompletionModel::id) == page.models.end()) page.models.push_back(std::move(model));

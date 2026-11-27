@@ -1,12 +1,13 @@
 #include "pch.h"
 #include "windows/ai/ModelHttpClient.h"
-#include "providers/ModelAdapter.h"
 #include "settings/storage/ProviderPresets.h"
 #include "settings/storage/ModelCatalog.h"
 #include "support/CompletionPromptSettings.h"
 #include "support/folia_test.hpp"
 #include "windows/completion/CompletionHttpTransport.h"
 #include "support/CompletionHttpServer.h"
+
+import folia.ai.providers;
 
 namespace {
 using namespace boost::ut;

@@ -1,8 +1,7 @@
-#include "agent/Agent.h"
-#include "providers/ModelAdapter.h"
-#include "providers/ModelCodec.h"
-#include "providers/StreamResponse.h"
 #include "support/folia_test.hpp"
+
+import folia.ai.agent;
+import folia.ai.providers;
 
 namespace {
     using namespace boost::ut;

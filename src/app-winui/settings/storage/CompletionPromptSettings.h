@@ -1,7 +1,7 @@
 #pragma once
 #include <winrt/Windows.Data.Json.h>
 import std;
-import folia.completion;
+import folia.ai.completion;
 
 namespace winrt::Folia {
 folia::completion::PromptSettings LoadCompletionPromptSettings();

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "editor/rendering/layout/EditorContentPreparation.h"
 import folia.markdown.utf;
-import folia.completion;
+import folia.ai.completion;
 
 namespace winrt::Folia {
 namespace {

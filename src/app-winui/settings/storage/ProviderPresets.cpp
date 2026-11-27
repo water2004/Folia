@@ -45,8 +45,9 @@ namespace winrt::Folia::models {
                         route.search.push_back(dialect);
                     }
                     if (auto pages = spec.find("pages"); pages != spec.end())
-                        for (auto const& [format, mode] : pages->items())
-                            route.pages.emplace(folia::ai::ParseSearchDialect(format), folia::ai::ParsePageAccess(mode.get<std::string>()));
+                        for (auto const& tool : pages->items())
+                            route.pages.emplace(folia::ai::ParseSearchDialect(tool.key()),
+                                                folia::ai::ParsePageAccess(tool.value().get<std::string>()));
                     if (preset.Find(route.protocol)) throw std::runtime_error("Duplicate provider protocol");
                     preset.routes.push_back(std::move(route));
                 }

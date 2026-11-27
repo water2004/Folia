@@ -1,8 +1,7 @@
 #pragma once
 
-#include "providers/HostedSearch.h"
-#include "providers/ModelCatalogSchema.h"
 import std;
+import folia.ai.providers;
 
 namespace winrt::Folia::models {
     struct ProviderRoute {

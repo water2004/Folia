@@ -1,8 +1,9 @@
-#pragma once
-#include "ModelTypes.h"
-#include "SseParser.h"
-#include <memory>
-namespace folia::ai {
+export module folia.ai.providers:protocol;
+import std;
+import folia.ai.model;
+import :sse;
+
+export namespace folia::ai {
 class IResponseDecoder {
   public:
     virtual ~IResponseDecoder() = default;
@@ -16,4 +17,6 @@ using RequestHeaders = std::vector<std::pair<std::string, std::string>>;
 RequestHeaders BuildHeaders(ApiProtocol protocol, std::string_view apiKey);
 ModelResult ParseResponse(ApiProtocol protocol, Json const& response);
 std::unique_ptr<IResponseDecoder> CreateStreamDecoder(ApiProtocol protocol);
+bool SupportsCacheBreakpoints(CacheDialect dialect, ApiProtocol protocol, std::string_view model,
+                              bool explicitOptIn = false) noexcept;
 } // namespace folia::ai

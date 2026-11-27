@@ -1,6 +1,7 @@
 #pragma once
 
-#include "agent/Agent.h"
+import std;
+import folia.ai.agent;
 
 namespace winrt::Folia::chat {
     using folia::ai::agent::Entry;

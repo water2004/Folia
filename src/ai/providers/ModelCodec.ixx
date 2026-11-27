@@ -1,8 +1,8 @@
-#pragma once
+export module folia.ai.providers:codec;
+import std;
+import folia.ai.model;
 
-#include "ModelTypes.h"
-
-namespace folia::ai {
+export namespace folia::ai {
 Json ToJson(ModelRequest const& request);
 ModelRequest RequestFromJson(Json const& value);
 Json ToJson(ModelResult const& result);

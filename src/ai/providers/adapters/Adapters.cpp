@@ -1,8 +1,9 @@
-#pragma once
+module folia.ai.providers:dispatch;
+import std;
+import folia.ai.model;
+import :protocol;
 
-#include "../ModelAdapter.h"
-
-// Internal protocol entry points. Public callers should use ModelAdapter.h.
+// Dispatch entry points shared by the three protocol adapters.
 namespace folia::ai {
 void ApplyPromptCache(Json& body, ModelRequest const& request, ProviderRequestOptions options, ApiProtocol protocol);
 void MarkCacheBoundaries(Json& content, Message const& message, char const* textType);

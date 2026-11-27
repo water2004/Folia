@@ -1,6 +1,5 @@
-#include "StreamResponse.h"
-
-#include <iterator>
+module folia.ai.providers;
+import std;
 
 namespace folia::ai {
 

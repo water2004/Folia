@@ -1,18 +1,11 @@
-#pragma once
-#include "../SearchAction.h"
-#include "../../JsonParsing.h"
-#include "../../ModelAdapter.h"
-#include "../../ModelValidation.h"
-#include <algorithm>
-#include <limits>
-#include <map>
-#include <set>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
+module folia.ai.providers:responses;
+import std;
+import folia.ai.model;
+import :json;
+import :validation;
+import :search_actions;
 
-namespace folia::ai {
-namespace {
+namespace folia::ai::responses {
 [[noreturn]] void Bad(char const* message, ProtocolFailure failure = ProtocolFailure::InvalidData) {
     throw ProtocolError(message, failure);
 }
@@ -229,5 +222,4 @@ ModelResult ParseTerminal(Json const& response, bool incomplete) {
     ValidateResult(result);
     return result;
 } // namespace
-} // namespace
-} // namespace folia::ai
+} // namespace folia::ai::responses
