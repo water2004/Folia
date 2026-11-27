@@ -1,3 +1,4 @@
+import { browserExecutable } from './oracle/browser-executable.mjs';
 import assert from 'node:assert/strict';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -19,7 +20,7 @@ if(!process.argv.includes('--library')) {
     '---\ntitle: Main\nconfig:\n  htmlLabels: false\n---\nrequirementDiagram\nrequirement R {\nverifyMethod: test\n}\nelement E {\ntype: module\n}\nR - verifies -> E\n',
   ]];
   const layouts=['dagre','elk'];
-  const browser=await chromium.launch({executablePath:process.env.FOLIA_BROWSER??'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--allow-file-access-from-files']});
+  const browser=await chromium.launch({executablePath:browserExecutable(),headless:true,args:['--allow-file-access-from-files']});
   const rows=[];
   try {
     for(const layout of layouts) for(const [name,source] of successes) for(const theme of ['default','dark']) {

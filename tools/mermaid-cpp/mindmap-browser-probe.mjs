@@ -1,5 +1,6 @@
 // Measured Mindmap SVG observations. CoSE layout positions are independently
 // verified against the isolated Cytoscape 3.34.0 consumer.
+import { browserExecutable } from './oracle/browser-executable.mjs';
 import assert from 'node:assert/strict';
 import {mkdirSync,writeFileSync,readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
@@ -42,7 +43,7 @@ document.body.replaceChildren(Object.assign(document.createElement('pre'),{id:'r
 }catch(e){document.body.replaceChildren(Object.assign(document.createElement('pre'),{id:'error',textContent:String(e.stack)}));}
 </script>`;
 const file=resolve(directory,'probe.html');writeFileSync(file,html);
-const browser=await chromium.launch({executablePath:process.env.FOLIA_BROWSER??'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--allow-file-access-from-files']});
+const browser=await chromium.launch({executablePath:browserExecutable(),headless:true,args:['--allow-file-access-from-files']});
 try {
  const page=await browser.newPage({viewport:{width:1600,height:1200}});await page.goto(pathToFileURL(file).href);
  await page.waitForSelector('pre#result,pre#error',{timeout:60000});

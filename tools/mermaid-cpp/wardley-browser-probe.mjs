@@ -1,3 +1,4 @@
+import { browserExecutable } from './oracle/browser-executable.mjs';
 import assert from 'node:assert/strict';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -9,7 +10,7 @@ assert.equal(JSON.parse(readFileSync('tools/mermaid-cpp/oracle/node_modules/merm
 
 import inspectWardley from './oracle/observations/wardley.mjs';
 export {inspectWardley};
-export const edge=process.env.FOLIA_BROWSER??'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
+export const edge=browserExecutable();
 if(process.argv[1]&&pathToFileURL(resolve(process.argv[1])).href===import.meta.url){
   const dir=resolve(process.argv[2]??'build/mermaid-cpp/wardley-browser');mkdirSync(dir,{recursive:true});
   const url=pathToFileURL(resolve('tools/mermaid-cpp/oracle/node_modules/mermaid/dist/mermaid.esm.mjs')).href;

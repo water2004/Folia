@@ -1,3 +1,4 @@
+import { browserExecutable } from './oracle/browser-executable.mjs';
 import assert from 'node:assert/strict';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -10,7 +11,7 @@ export {inspectCynefin};
 if(!process.argv.includes('--library')) {
   const directory=resolve(process.argv[2]??'build/mermaid-cpp/cynefin-browser');mkdirSync(directory,{recursive:true});
   const url=pathToFileURL(resolve('tools/mermaid-cpp/oracle/node_modules/mermaid/dist/mermaid.esm.mjs')).href;
-  const valid=cases.filter(c=>c[2]===null);const browser=await chromium.launch({executablePath:process.env.FOLIA_BROWSER??'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--allow-file-access-from-files']});const rows=[];
+  const valid=cases.filter(c=>c[2]===null);const browser=await chromium.launch({executablePath:browserExecutable(),headless:true,args:['--allow-file-access-from-files']});const rows=[];
   try{for(const [name,source] of valid)for(const theme of ['default','dark']){
     const config={startOnLoad:false,theme,fontFamily:'Arial',themeVariables:{fontFamily:'Arial'},look:'classic',cynefin:{seed:31}};
     const file=resolve(directory,'probe.html');writeFileSync(file,`<!doctype html><meta charset="utf-8"><body><script type="module">const {default:mermaid}=await import(${JSON.stringify(url)});try{mermaid.initialize(${JSON.stringify(config)});const {svg}=await mermaid.render('mermaid-cynefin',${JSON.stringify(source)});document.body.innerHTML=svg;const observation=(${inspectCynefin.toString()})();document.body.innerHTML='<pre id="result"></pre>';document.querySelector('pre').textContent=JSON.stringify({svg,...observation})}catch(e){document.body.innerHTML='<pre id="error"></pre>';document.querySelector('pre').textContent=e.stack}</script>`);

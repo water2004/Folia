@@ -1,5 +1,6 @@
 // Optional, real-browser observations of stock Mermaid v12.2.0 (KaTeX).
 // This is intentionally not described as an official v12 MathJax renderer.
+import { browserExecutable } from '../oracle/browser-executable.mjs';
 import assert from 'node:assert/strict';
 import {mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {join, resolve} from 'node:path';
@@ -17,8 +18,7 @@ const htmlPath = join(destination, 'host.html');
 writeFileSync(htmlPath, `<!doctype html><meta charset="utf-8"><body style="margin:0">` +
   `<script type="module">import mermaid from ${JSON.stringify(pathToFileURL(join(packageRoot,
     'dist/mermaid.esm.mjs')).href)};window.mermaid=mermaid;</script>`);
-const executablePath = process.env.FOLIA_BROWSER ?? (process.platform === 'win32' ?
-  'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' : '/usr/bin/chromium');
+const executablePath = browserExecutable();
 const browser = await chromium.launch({executablePath, headless: true,
   args: ['--allow-file-access-from-files']});
 const records = [];

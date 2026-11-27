@@ -1,4 +1,5 @@
 // Source-matched Class geometry, measured in an isolated browser.
+import { browserExecutable } from './oracle/browser-executable.mjs';
 import assert from 'node:assert/strict';
 import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
@@ -26,7 +27,7 @@ for(const f of lock.elkAdapter.files){const i=map.sources.findIndex(s=>s.endsWit
  document.body.innerHTML='<pre id="result"></pre>';document.querySelector('pre').textContent=JSON.stringify(rows);
  }catch(e){document.body.innerHTML='<pre id="error"></pre>';document.querySelector('pre').textContent=e.stack;}</script>`;
  const file=resolve(directory,'probe.html');writeFileSync(file,html);
- const browser=await chromium.launch({executablePath:process.env.FOLIA_BROWSER??'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--allow-file-access-from-files']});
+ const browser=await chromium.launch({executablePath:browserExecutable(),headless:true,args:['--allow-file-access-from-files']});
  let rows;
  try { const page=await browser.newPage();await page.goto(pathToFileURL(file).href);
  await page.waitForSelector('pre#result,pre#error',{timeout:60000});assert.equal(await page.locator('#error').count(),0,await page.locator('pre').textContent());

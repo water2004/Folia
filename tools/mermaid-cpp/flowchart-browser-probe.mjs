@@ -1,4 +1,5 @@
 // Real browser observations from the locked Mermaid bundle. No estimated boxes.
+import { browserExecutable } from './oracle/browser-executable.mjs';
 import assert from 'node:assert/strict';
 import {mkdirSync,writeFileSync,readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
@@ -243,7 +244,7 @@ document.body.replaceChildren(Object.assign(document.createElement('pre'),{id:'r
 } catch(e) {document.body.innerHTML='<pre id="error"></pre>';document.querySelector('pre').textContent=String(e.stack);}
 </script>`;
 const file=resolve(directory,'probe.html');writeFileSync(file,html);
-const browser=process.env.FOLIA_BROWSER??'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
+const browser=browserExecutable();
 const instance=await chromium.launch({executablePath:browser,headless:true,args:['--allow-file-access-from-files']});
 let rows;
 try {

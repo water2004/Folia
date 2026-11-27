@@ -1,4 +1,5 @@
 // The existing Architecture corpus through its original browser renderer.
+import { browserExecutable } from './oracle/browser-executable.mjs';
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync,mkdirSync,readdirSync} from 'node:fs';
 import {resolve} from 'node:path';
@@ -37,5 +38,5 @@ try {
 }catch(e){document.body.replaceChildren(Object.assign(document.createElement('pre'),{id:'error',textContent:String(e.stack)}));}
 </script>`;
 const file=resolve(directory,'probe.html');writeFileSync(file,html);
-const browser=await chromium.launch({executablePath:process.env.FOLIA_BROWSER??'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--allow-file-access-from-files']});
+const browser=await chromium.launch({executablePath:browserExecutable(),headless:true,args:['--allow-file-access-from-files']});
 try{const page=await browser.newPage({viewport:{width:1600,height:1200}});await page.goto(pathToFileURL(file).href);await page.waitForSelector('pre#result,pre#error',{timeout:60000});assert.equal(await page.locator('#error').count(),0,await page.locator('body').textContent());const result=JSON.parse(await page.locator('#result').textContent());assert.equal(result.length,12);writeFileSync(resolve(directory,'original.json'),JSON.stringify(result,null,2));const hex=s=>Array.from({length:s.length},(_,i)=>s.charCodeAt(i).toString(16).padStart(4,'0')).join('');writeFileSync(resolve(directory,'measurements.tsv'),result.map(row=>row.name+'\t'+hex(JSON.stringify(row))).join('\n')+'\n');for(const row of result)writeFileSync(resolve(directory,row.name+'.svg'),row.svg);console.log('Architecture: original six-diagram SVG corpus in both themes recorded.');}finally{await browser.close();}

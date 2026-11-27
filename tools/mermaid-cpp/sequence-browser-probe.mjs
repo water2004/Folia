@@ -1,4 +1,5 @@
 // Original Sequence SVG geometry with an explicit Arial sans-serif environment.
+import { browserExecutable } from './oracle/browser-executable.mjs';
 import assert from 'node:assert/strict';
 import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
@@ -72,7 +73,7 @@ if(!process.argv.includes('--library')) {
  }catch(e){document.body.innerHTML='<pre id="error"></pre>';document.querySelector('pre').textContent=e.stack;}
  </script>`;
  const file=resolve(directory,'probe.html');writeFileSync(file,html);
- const browser=await chromium.launch({executablePath:process.env.FOLIA_BROWSER??'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--allow-file-access-from-files']});
+ const browser=await chromium.launch({executablePath:browserExecutable(),headless:true,args:['--allow-file-access-from-files']});
  let rows;
  try {
   const page=await browser.newPage();const cdp=await page.context().newCDPSession(page);

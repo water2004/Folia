@@ -1,11 +1,11 @@
+import { browserExecutable } from './oracle/browser-executable.mjs';
 import assert from 'node:assert/strict';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium } from './oracle/node_modules/playwright-core/index.mjs';
 
-export const executablePath = process.env.FOLIA_BROWSER ??
-  'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
+export const executablePath = browserExecutable();
 
 import observeErrorSvg from './oracle/observations/error.mjs';
 export {observeErrorSvg};

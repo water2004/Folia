@@ -1,3 +1,4 @@
+import { browserExecutable } from './oracle/browser-executable.mjs';
 import assert from 'node:assert/strict';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -12,8 +13,7 @@ const mermaidUrl = pathToFileURL(resolve(
   'tools/mermaid-cpp/oracle/node_modules/mermaid/dist/mermaid.esm.mjs'
 )).href;
 const browser = await chromium.launch({
-  executablePath: process.env.FOLIA_BROWSER ??
-    'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
+  executablePath: browserExecutable(),
   headless: true,
   args: ['--allow-file-access-from-files'],
 });

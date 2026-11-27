@@ -1,3 +1,4 @@
+import { browserExecutable } from './oracle/browser-executable.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
@@ -10,8 +11,7 @@ import { cases, invalid } from './venn-cases.mjs';
 import inspectVenn from './oracle/observations/venn.mjs';
 export {inspectVenn};
 
-export const edge = process.env.FOLIA_BROWSER
-  ?? 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
+export const edge = browserExecutable();
 
 function verifyLayout(mermaidFile) {
   const {vennLayout: lock, stateBundle} = JSON.parse(readFileSync('docs/mermaid-cpp/source-lock.json', 'utf8'));

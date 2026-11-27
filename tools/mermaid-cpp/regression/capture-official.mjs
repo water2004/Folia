@@ -1,6 +1,7 @@
 // Capture complete SVGs from the pinned, unmodified official renderers.
 // Packet and Info have no DOM measurement dependency. Other families require Chromium;
 // an unavailable browser is a failed gate, never replaced with estimated boxes.
+import { browserExecutable } from '../oracle/browser-executable.mjs';
 import assert from 'node:assert/strict';
 import {mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
@@ -65,8 +66,7 @@ let browserVersion;
 const browserCases = cases.filter(item => !measurementFreeFamilies.has(item.family));
 try {
   if (browserCases.length) {
-    const executablePath = argument('browser') ?? process.env.FOLIA_BROWSER ??
-      (process.platform === 'win32' ? 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe' : '/usr/bin/chromium');
+    const executablePath = argument('browser') ?? browserExecutable();
     browser = await chromium.launch({executablePath, headless: true,
       args: ['--allow-file-access-from-files']});
     browserVersion = browser.version();

@@ -1,13 +1,13 @@
 // Real SVG measurement, on the same Windows host as the native probe.
 // No browser profile, JavaScript runtime, or browser dependency enters Folia.
+import { browserExecutable } from './oracle/browser-executable.mjs';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { spawnSync } from 'node:child_process';
+import { chromium } from './oracle/node_modules/playwright-core/index.mjs';
 import assert from 'node:assert/strict';
 
 const directory = resolve(process.argv[2] ?? 'build/mermaid-cpp');
-const browser = process.env.FOLIA_BROWSER ?? 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
 mkdirSync(directory, { recursive: true });
 const cases = [];
 for (const family of ['Arial', 'Segoe UI', 'Times New Roman']) {
@@ -37,13 +37,15 @@ document.body.replaceChildren(Object.assign(document.createElement('pre'),
 </script>`;
 const file = resolve(directory, 'browser-text-probe.html');
 writeFileSync(file, html);
-const run = spawnSync(browser, ['--headless', '--disable-gpu', '--no-first-run',
-  '--no-default-browser-check', `--user-data-dir=${resolve(directory, 'browser-profile')}`,
-  '--dump-dom', pathToFileURL(file).href], { encoding: 'utf8', timeout: 60000, windowsHide: true });
-assert.equal(run.status, 0, run.error?.message ?? run.stderr);
-const match = run.stdout.match(/<pre id="result">(.*?)<\/pre>/s);
-assert(match, `Browser did not return measurements: ${run.stderr}`);
-const rows = JSON.parse(decodeURIComponent(match[1]));
+const browser = await chromium.launch({ executablePath: browserExecutable(), headless: true });
+let rows;
+try {
+  const page = await browser.newPage();
+  await page.goto(pathToFileURL(file).href);
+  rows = JSON.parse(decodeURIComponent(await page.locator('#result').innerText()));
+} finally {
+  await browser.close();
+}
 assert.equal(rows.length, cases.length);
 assert.deepEqual(rows.map(({family,size,text})=>({family,size,text})),cases,
   'Browser transport changed a measured display string');

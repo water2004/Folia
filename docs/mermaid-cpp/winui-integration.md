@@ -57,7 +57,7 @@ runs. The tracked worker tests do not require PDF artifacts or a printer driver.
   normalization and compares glyph paths against the same SVG with only that
   text removed; absence of HTML alone is insufficient.
 - Integration-owner full final Release DLL gate: **76/76**, 382 glyph elements,
-  recorded in `D:/md-cpp/build/mermaid-full-winui-release-gate-final/results.json`.
+  recorded in `build/mermaid-full-winui-release-gate-final/results.json`.
   WiX manifest generation verified the two DLLs plus all 17 notices (19 required
   entries); this did not build an MSI.
 - Independent normalizer `cargo test --offline --locked --jobs 2` passed 4/4;
