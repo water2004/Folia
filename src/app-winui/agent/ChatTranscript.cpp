@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "agent/ChatHints.h"
 #include "agent/ChatMotion.h"
 #include "agent/ChatTranscript.h"
 #include "ui/ControlHelpers.h"
@@ -19,7 +20,7 @@ namespace winrt::Folia::chat {
             button.Style(ui::ResourceStyle(L"ChatActionStyle"));
             button.Content(content);
             Automation::AutomationProperties::SetName(button, Localize(name));
-            ToolTipService::SetToolTip(button, box_value(Localize(name)));
+            SetHint(button, Localize(name));
         }
         TextBlock Text(hstring const& value, bool muted = false) {
             TextBlock text;

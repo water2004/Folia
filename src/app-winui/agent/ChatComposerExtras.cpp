@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "agent/ChatHints.h"
 #include "agent/ChatMotion.h"
 #include <winrt/Windows.ApplicationModel.DataTransfer.h>
 #include <winrt/Windows.Graphics.Imaging.h>
@@ -254,7 +255,7 @@ namespace winrt::Folia::chat {
             FontIcon x; x.Glyph(L"\uE711"); x.FontSize(10); row.Children().Append(x);
             remove.Content(row);
             Automation::AutomationProperties::SetName(remove, Localize(L"ChatRemoveImage"));
-            ToolTipService::SetToolTip(remove, box_value(Localize(L"ChatRemoveImage")));
+            SetHint(remove, Localize(L"ChatRemoveImage"));
             remove.Click([weak = weak_from_this(), i](auto const&, auto const&) {
                 if (auto view = weak.lock(); view && i < view->images_.size()) {
                     view->images_.erase(view->images_.begin() + i);

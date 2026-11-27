@@ -180,6 +180,7 @@
     <ClInclude Include="ui\ControlHelpers.h" />
     <ClInclude Include="agent\ChatEffortScale.h" />
     <ClInclude Include="agent\ChatModelPicker.h" />
+    <ClInclude Include="agent\ChatHints.h" />
     <ClInclude Include="agent\ChatMotion.h" />
     <ClInclude Include="agent\ChatPalette.h" />
     <ClInclude Include="agent\ChatReplySurface.h" />
@@ -808,6 +809,7 @@
     <ClCompile Include="settings\storage\ProviderPresets.cpp" />
     <ClCompile Include="settings\storage\ModelCatalog.cpp" />
     <ClCompile Include="agent\ChatTools.cpp" />
+    <ClCompile Include="agent\ChatHints.cpp" />
     <ClCompile Include="agent\ChatView.cpp" />
     <ClCompile Include="agent\ChatView.Run.cpp" />
     <ClCompile Include="agent\ChatEffortScale.cpp" />

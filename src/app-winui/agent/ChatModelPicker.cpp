@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "agent/ChatHints.h"
 #include "agent/ChatMotion.h"
 #include "agent/ChatModelPicker.h"
 #include "ui/ControlHelpers.h"
@@ -14,7 +15,7 @@ namespace winrt::Folia::chat {
         void NameAction(Button const& button, wchar_t const* key) {
             auto label = Localize(key);
             Automation::AutomationProperties::SetName(button, label);
-            ToolTipService::SetToolTip(button, box_value(label));
+            SetHint(button, label);
         }
 
         hstring EffortLabel(std::string_view level) {
@@ -150,7 +151,7 @@ namespace winrt::Folia::chat {
             ListViewItem item;
             item.Content(content);
             Automation::AutomationProperties::SetName(item, name);
-            ToolTipService::SetToolTip(item, box_value(name));
+            SetHint(item, name);
             list_.Items().Append(item);
         }
         list_.SelectedIndex(selected);
@@ -206,6 +207,6 @@ namespace winrt::Folia::chat {
         auto summary = chipName_.Text();
         if (!levels_.empty()) summary = summary + L" · " + label;
         Automation::AutomationProperties::SetName(chip_, summary);
-        ToolTipService::SetToolTip(chip_, box_value(summary));
+        SetHint(chip_, summary);
     }
 }

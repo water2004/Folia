@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "agent/ChatHints.h"
 #include "agent/ChatView.h"
 #include "providers/HostedSearch.h"
 #include "ui/ControlHelpers.h"
@@ -21,7 +22,7 @@ namespace winrt::Folia::chat {
         void Label(Button const& button, wchar_t const* key) {
             auto name = Localize(key);
             Automation::AutomationProperties::SetName(button, name);
-            ToolTipService::SetToolTip(button, box_value(name));
+            SetHint(button, name);
         }
 
     }
@@ -210,7 +211,7 @@ namespace winrt::Folia::chat {
             button.Content(MakeWorkspaceIcon(icon, palette_.onAccent));
             Label(button, key);
         }
-        ToolTipService::SetToolTip(send_, box_value(Localize(L"ChatSendKeys")));
+        SetHint(send_, Localize(L"ChatSendKeys"));
         Put(bar_, stop_, 0, 4);
         Put(bar_, send_, 0, 4);
         editor.Children().Append(bar_);
@@ -325,7 +326,7 @@ namespace winrt::Folia::chat {
         auto hint = LocalizeFormat(L"ChatUsageHint", {used ? to_hstring(*used) : Localize(L"ChatNotReported"),
             limit ? to_hstring(*limit) : Localize(L"ChatNotConfigured")});
         if (used && cachedTokens_) hint = hint + L"\n" + LocalizeFormat(L"ChatCachedUsage", {to_hstring(*cachedTokens_)});
-        ToolTipService::SetToolTip(contextMeter_, box_value(hint));
+        SetHint(contextMeter_, hint);
         Automation::AutomationProperties::SetName(contextMeter_, hint);
     }
 

@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "agent/ChatHints.h"
 #include "agent/ChatView.h"
 #include "App.xaml.h"
 #include "MainWindow.xaml.h"
@@ -18,7 +19,7 @@ namespace winrt::Folia::implementation {
         };
 
         void UpdateTitleHint(TextBlock const& label) {
-            ToolTipService::SetToolTip(label, label.IsTextTrimmed() ? box_value(label.Text()) : nullptr);
+            chat::SetHint(label, label.IsTextTrimmed() ? label.Text() : hstring{});
         }
 
         std::string const& ChatId(Windows::Foundation::IInspectable const& item) {
