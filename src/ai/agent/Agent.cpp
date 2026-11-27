@@ -6,7 +6,6 @@ import folia.ai.providers;
 
 namespace folia::ai::agent {
     namespace {
-        constexpr std::size_t maxReceiptBytes = 12'000;
         Message Text(MessageRole role, std::string text) {
             Message message;
             message.role = role;
@@ -59,9 +58,7 @@ namespace folia::ai::agent {
                     body = {{"error", "Tool could not complete the requested operation"}};
                 }
             }
-            auto json = body.dump(-1, ' ', false, Json::error_handler_t::replace);
-            if (json.size() > maxReceiptBytes) json = R"({"error":"Result too large; request a smaller range"})";
-            auto receipt = Text(MessageRole::Tool, std::move(json));
+            auto receipt = Text(MessageRole::Tool, body.dump(-1, ' ', false, Json::error_handler_t::replace));
             receipt.toolCallId = call.id;
             return receipt;
         }

@@ -45,6 +45,34 @@ namespace {
             expect(steps == 2_i);
         };
 
+        "agent forwards a complete directory page with long names and its continuation offset"_test = [] {
+            History history{{{MessageRole::User, "List the workspace"}}};
+            std::string namePrefix;
+            for (int i = 0; i < 160; ++i) namePrefix += "长";
+            Json entries = Json::array();
+            for (int i = 0; i < 40; ++i)
+                entries.push_back({{"name", namePrefix + std::to_string(i) + ".md"}, {"directory", false}});
+            const Json page{{"entries", std::move(entries)}, {"next_offset", 40}};
+            expect(page.dump().size() > 12'000_u);
+
+            Tool list{{"list_workspace", "List a page of workspace entries", Json::object()},
+                [&](Json const&, std::stop_token) { return page; }};
+            auto request = [&](ModelRequest const& wire, std::stop_token, Progress const&) {
+                auto const& message = wire.messages.back();
+                if (message.role == MessageRole::User) {
+                    ModelResult result;
+                    result.finish = FinishReason::ToolCalls;
+                    result.message.toolCalls = {{"directory-page", "list_workspace", "{}"}};
+                    return result;
+                }
+                expect(message.toolCallId == "directory-page");
+                expect(Json::parse(PlainText(message)) == page);
+                return Answer("Done");
+            };
+            auto reply = Run(history, Options{"fixture"}, std::span(&list, 1), request, {}, {});
+            expect(reply.markdown == "Done");
+        };
+
         "agent grants the configured output allowance to every request"_test = [] {
             History history{{{MessageRole::User, "Read the sections"}}};
             Options options{"fixture"};
