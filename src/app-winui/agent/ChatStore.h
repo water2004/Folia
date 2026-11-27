@@ -33,6 +33,7 @@ namespace winrt::Folia::chat {
     std::string StoreImage(std::string const& chat, std::span<std::uint8_t const> png);
     folia::ai::ContentPart LoadImage(std::string const& chat, std::string const& id);
     History LoadHistory(std::string const& id);
+    folia::ai::agent::Tool ConversationHistoryTool(std::string id);
     void AppendCompaction(std::string const& id, History const&);
     void AppendEntry(std::string const& id, Entry const&, History const* checkpoint = nullptr, std::size_t skippedTail = 0);
 }

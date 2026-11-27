@@ -62,6 +62,7 @@ namespace winrt::Folia::chat {
         Conversation conversation_;
         folia::ThemeProfile theme_;
         std::optional<std::uint64_t> usedTokens_;
+        std::optional<std::uint64_t> cachedTokens_;
         std::string usageModel_;
         ViewHost host_;
         ChatPalette palette_;

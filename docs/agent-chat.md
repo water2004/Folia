@@ -17,7 +17,8 @@ Chat and inline prediction select from the same model catalog. Open the model
 chip in chat to choose a reasoning level supported by the current model. Select
 the model name to switch to another enabled model. The context indicator shows
 the input tokens reported for the latest request to that model and its configured
-window. Hover over the indicator for exact counts.
+window. Hover over the indicator for exact counts, including cached input tokens
+when the provider reports them.
 
 Press Enter to send or Shift+Enter for a new line. The + menu attaches images or inserts a reference. Type `@` to select an open
 Markdown document or a path inside the selected workspace. Use the arrow keys
@@ -74,6 +75,23 @@ transcript. The Sources menu opens a URL on selection. Markdown replies use
 Folia's native renderer with automatic remote image fetching disabled.
 
 ## Implementation
+
+The chat request starts with stable instructions and the permitted tool schemas.
+A saved summary and the recent conversation follow. The active turn appends
+tool calls, their results and any protocol state needed to continue the request.
+Images from recent turns use the model's vision capability. When a request
+approaches the context limit, Folia trims older tool results, then summarizes
+complete older exchanges if it still needs space. The current question and the
+latest tool batch stay together. The assistant can search the original local
+conversation and page through a matching message after compaction.
+
+Chats use a stable session identifier on routes that accept it. Supported
+OpenAI models combine rolling caching with explicit boundaries at the instructions
+and saved summary. Anthropic uses automatic ephemeral caching. OpenRouter passes
+a session identifier and uses the selected upstream model's caching contract.
+xAI receives a routing key. DeepSeek and Gemini use their automatic caches.
+Custom connections rely on the endpoint's defaults for chat. The inline prediction
+cache setting applies separately. Reported cache reads come from the service.
 
 - `src/ai/providers` owns the protocol formats and stream termination checks.
   `src/platform/windows/ai` owns HTTPS, model endpoint resolution, and Credential

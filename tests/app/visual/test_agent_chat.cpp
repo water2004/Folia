@@ -294,6 +294,7 @@ namespace {
                 entry.activities.push_back({"search_open_tab", "Notes", false, "match"});
                 entry.steps.push_back({entry.markdown.size(), entry.reasoning.size(), 1});
                 entry.usage.inputTokens = 201;
+                entry.usage.cachedInputTokens = 124;
                 if (t == 9) {
                     auto checkpoint = chat::LoadHistory(id);
                     checkpoint.summary = "Earlier turns";
@@ -312,6 +313,7 @@ namespace {
             expect(context.summary == "Earlier turns" && context.entries.front().markdown == "8");
             expect(recent.entries.back().activities.front().detail == "match");
             expect(recent.entries.back().usage.inputTokens.value_or(0) == 201_u);
+            expect(recent.entries.back().usage.cachedInputTokens.value_or(0) == 124_u);
             context.summary = "All eleven turns";
             context.summarized = context.entries.size();
             chat::AppendCompaction(id, context);
@@ -321,6 +323,13 @@ namespace {
             expect(visible.entries.size() == 8_u && visible.compactions == std::vector<std::size_t>{8});
             chat::AppendEntry(id, {folia::ai::MessageRole::User, "Next"});
             expect(chat::LoadHistory(id).entries.front().markdown == "Next");
+            auto recall = chat::ConversationHistoryTool(id);
+            auto results = recall.invoke(Json{{"query", std::string(64, 'a') + "0"}}, {});
+            auto match = results.at("matches").at(0);
+            auto original = recall.invoke(Json{{"message", match.at("message")}, {"offset", std::uint64_t{19990}}}, {});
+            expect(original.at("text").get<std::string>().starts_with(std::string(10, 'a')));
+            expect(original.at("next_offset").is_null());
+            expect(recall.invoke(Json{{"query", "saved summary"}}, {}).at("matches").empty());
         };
 
         "agent transcript pages on demand and preserves the reading position during output"_test = [] {

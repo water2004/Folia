@@ -95,6 +95,7 @@ namespace winrt::Folia::chat {
             }
             entry.modelId = event.value("modelId", "");
             if (event.contains("inputTokens")) entry.usage.inputTokens = event.at("inputTokens").get<std::uint64_t>();
+            if (event.contains("cachedInputTokens")) entry.usage.cachedInputTokens = event.at("cachedInputTokens").get<std::uint64_t>();
             if (event.contains("outputTokens")) entry.usage.outputTokens = event.at("outputTokens").get<std::uint64_t>();
             if (auto items = event.find("tools"); items != event.end() && items->is_array())
                 for (auto const& tool : *items)
@@ -219,6 +220,62 @@ namespace winrt::Folia::chat {
         return history;
     }
 
+    folia::ai::agent::Tool ConversationHistoryTool(std::string id) {
+        const Json cursor{{"type", "integer"}, {"minimum", 0}};
+        folia::ai::agent::Tool tool;
+        tool.definition = {"conversation_history",
+            "Recall original messages in this conversation, including compacted history. Search with a literal query or browse newest first; pass next_before to continue. To read a hit, pass its message ID and optional UTF-8 offset.",
+            {{"type", "object"}, {"properties", {{"query", {{"type", "string"}, {"maxLength", 128}}},
+                 {"before", cursor}, {"message", cursor}, {"offset", cursor}}}, {"additionalProperties", false}}};
+        tool.invoke = [id = std::move(id)](Json const& args, std::stop_token stop) -> Json {
+            auto position = [&](char const* key) -> std::optional<std::uintmax_t> {
+                if (!args.contains(key)) return {};
+                auto const& n = args.at(key);
+                if (!n.is_number_unsigned()) throw std::invalid_argument("Invalid history position");
+                return n.get<std::uintmax_t>();
+            };
+            auto message = position("message");
+            auto before = message ? message : position("before");
+            auto query = args.value("query", "");
+            if (query.size() > 512) return {{"error", "Use a shorter search term"}};
+            ReverseJournal journal(Path(LogFolder(), id, L".jsonl"), before);
+            auto start = journal.Position();
+            if (before && *before != start) return {{"error", "Invalid history cursor"}};
+            Json matches = Json::array();
+            for (unsigned scanned = 0; scanned < 64 && start - journal.Position() < 2 * 1024 * 1024; ++scanned) {
+                if (stop.stop_requested()) throw std::runtime_error("Cancelled");
+                auto key = journal.Position();
+                auto record = journal.Previous();
+                if (!record) break;
+                if (!record->second) continue;
+                auto const& entry = *record->second;
+                auto const& text = entry.markdown;
+                auto role = entry.role == MessageRole::User ? "user" : "assistant";
+                auto boundary = [&](std::size_t at) {
+                    while (at && at < text.size() && (static_cast<unsigned char>(text[at]) & 0xc0) == 0x80) --at;
+                    return at;
+                };
+                if (message) {
+                    auto offset = position("offset").value_or(0);
+                    if (offset > text.size() || boundary(offset) != offset) return {{"error", "Invalid text offset"}};
+                    auto end = boundary((std::min)(text.size(), static_cast<std::size_t>(offset) + 3000));
+                    return {{"role", role}, {"text", text.substr(offset, end - offset)},
+                            {"next_offset", end < text.size() ? Json(end) : Json(nullptr)}};
+                }
+                auto hit = text.find(query);
+                if (hit == text.npos || text.empty()) continue;
+                auto from = boundary(hit > 128 ? hit - 128 : 0);
+                auto to = boundary((std::min)(text.size(), hit + query.size() + 256));
+                matches.push_back({{"message", key}, {"role", role}, {"offset", from}, {"snippet", text.substr(from, to - from)}});
+                if (matches.size() >= 6) break;
+            }
+            if (message) return {{"error", "Message not found"}};
+            auto next = journal.Position();
+            return {{"matches", std::move(matches)}, {"next_before", next && next < start ? Json(next) : Json(nullptr)}};
+        };
+        return tool;
+    }
+
     std::filesystem::path AttachmentPath(std::string const& chat, std::string const& id) {
         return Path(Path(LogFolder(), chat, L".media"), id, L".png");
     }
@@ -279,6 +336,7 @@ namespace winrt::Folia::chat {
         if (!entry.reasoning.empty()) value["reasoning"] = entry.reasoning;
         if (!entry.modelId.empty()) value["modelId"] = entry.modelId;
         if (entry.usage.inputTokens) value["inputTokens"] = *entry.usage.inputTokens;
+        if (entry.usage.cachedInputTokens) value["cachedInputTokens"] = *entry.usage.cachedInputTokens;
         if (entry.usage.outputTokens) value["outputTokens"] = *entry.usage.outputTokens;
         for (auto const& tool : entry.activities)
             value["tools"].push_back({{"name", tool.name}, {"target", tool.target}, {"failed", tool.failed}, {"detail", tool.detail}, {"pending", tool.pending}});
@@ -295,7 +353,7 @@ namespace winrt::Folia::chat {
         if (entry.outputLimit) value["outputLimit"] = true;
         if (entry.interrupted) value["interrupted"] = true;
         if (!entry.images.empty()) value["images"] = entry.images;
-        if (checkpoint && (checkpoint->summarized || checkpoint->retired)) {
+        if (checkpoint && checkpoint->summarized) {
             value["summary"] = checkpoint->summary;
             value["summarized"] = checkpoint->retired + checkpoint->summarized;
             value["retained"] = checkpoint->entries.size() - checkpoint->summarized + skippedTail + 1;

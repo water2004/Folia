@@ -12,6 +12,7 @@ namespace winrt::Folia::chat {
             WorkspaceIcon icon;
         };
         constexpr Action actions[]{
+            {"conversation_history", L"History", WorkspaceIcon::Chat},
             {"list_open_tabs", L"Tabs", WorkspaceIcon::Document}, {"read_open_tab", L"Read", WorkspaceIcon::Document},
             {"outline_open_tab", L"Outline", WorkspaceIcon::Outline}, {"search_open_tab", L"Find", WorkspaceIcon::Outline},
             {"list_workspace", L"Folder", WorkspaceIcon::Folder}, {"read_workspace_file", L"Read", WorkspaceIcon::Document},

@@ -48,7 +48,7 @@ namespace winrt::Folia::chat {
             co_await resume_background();
             auto history = LoadHistory(id);
             Options options{model.upstream};
-            if (model.maxInputTokens) options.inputBytes = *model.maxInputTokens;
+            if (model.maxInputTokens) options.contextTokens = *model.maxInputTokens;
             if (model.maxOutputTokens) options.outputTokens = *model.maxOutputTokens;
             changed = folia::ai::agent::Compact(history, options, [&](auto const& wire, auto token, auto const&) {
                 return folia::platform::models::RequestChat(profile.baseUrl, profile.protocol, wire, ProfileKey(profile), token,
@@ -62,6 +62,7 @@ namespace winrt::Folia::chat {
                 view->SetBusy(false);
                 if (changed) {
                     view->usedTokens_.reset();
+                    view->cachedTokens_.reset();
                     view->UpdateUsage();
                     view->transcript_->Refresh(true);
                 }
@@ -196,26 +197,29 @@ namespace winrt::Folia::chat {
         Entry partial{MessageRole::Assistant};
         bool writing = false;
         std::string titlePrompt;
+        History history;
+        std::size_t skippedTail = 0;
         try {
-            auto history = LoadHistory(conversation.id);
+            history = LoadHistory(conversation.id);
             auto recordedCount = history.entries.size();
             if (retry) {
                 while (!history.entries.empty() && history.entries.back().role == MessageRole::Assistant &&
                     (history.entries.back().interrupted || !history.entries.back().error.empty())) history.entries.pop_back();
             }
-            auto skippedTail = recordedCount - history.entries.size();
+            skippedTail = recordedCount - history.entries.size();
             if (!history.retired && history.entries.size() == 1) titlePrompt = history.entries.front().markdown;
             auto tools = MakeTools(std::move(tabs), conversation.folder, [&](auto const& ref) {
                 partial.documents.push_back(ref);
                 queue.TryEnqueue([weak, ref] { if (auto view = weak.lock(); view && view->busy_) view->transcript_->AddReference(ref); });
             });
             auto search = HostedSearchFormat(model, profile);
+            tools.insert(tools.begin(), ConversationHistoryTool(conversation.id));
             Options options{model.upstream, model.ResolveEffort(conversation.effort), conversation.search ? search : std::nullopt};
+            options.cacheSession = conversation.id;
             const auto pages = HostedPageAccess(model, profile);
             if (pages == folia::ai::PageAccess::WithSearch ? options.webSearch.has_value() : conversation.readPages)
                 options.pages = pages;
-            // A UTF-8 byte budget conservatively bounds text tokens without guessing the upstream tokenizer.
-            if (model.maxInputTokens) options.inputBytes = *model.maxInputTokens;
+            if (model.maxInputTokens) options.contextTokens = *model.maxInputTokens;
             if (model.maxOutputTokens) options.outputTokens = *model.maxOutputTokens;
             if (model.vision) options.loadImage = [&](std::string const& image) { return LoadImage(conversation.id, image); };
             auto dispatch = [&](ProgressKind kind, std::string_view text) {
@@ -224,6 +228,7 @@ namespace winrt::Folia::chat {
                     if (auto view = weak.lock(); view && view->busy_) {
                         if (kind == ProgressKind::InputUsage) {
                             view->usedTokens_ = std::stoull(value.c_str());
+                            view->cachedTokens_.reset();
                             view->usageModel_ = view->conversation_.model;
                             view->UpdateUsage();
                         } else view->transcript_->Progress(kind, value);
@@ -257,7 +262,8 @@ namespace winrt::Folia::chat {
                     dispatch(kind, text);
                 }
             };
-            folia::ai::ProviderRequestOptions adapter{search.value_or(folia::ai::WebSearchDialect::Standard), Preset(profile.providerType).explicitThinkingToggle};
+            auto const& preset = Preset(profile.providerType);
+            folia::ai::ProviderRequestOptions adapter{search.value_or(folia::ai::WebSearchDialect::Standard), preset.explicitThinkingToggle, preset.cache};
             auto request = [&](auto const& wire, auto token, folia::ai::agent::Progress const& progress) {
                 return folia::platform::models::RequestChat(profile.baseUrl, profile.protocol, wire, ProfileKey(profile), token,
                     profile.fullUrl, adapter, [&](folia::ai::StreamEvent const& event) {
@@ -281,7 +287,7 @@ namespace winrt::Folia::chat {
             partial.modelId = model.id;
             partial.interrupted = stop.stop_requested();
             if (!partial.interrupted) partial.error = to_string(hstring(error));
-            try { AppendEntry(conversation.id, partial); error.clear(); }
+            try { AppendEntry(conversation.id, partial, &history, skippedTail); error.clear(); }
             catch (std::exception const& exception) { error = to_hstring(exception.what()); }
         }
         bool generate = answer && !titlePrompt.empty() && !stop.stop_requested();
@@ -292,6 +298,7 @@ namespace winrt::Folia::chat {
             if (answer) {
                 view->usageModel_ = answer->modelId;
                 view->usedTokens_ = answer->usage.inputTokens;
+                view->cachedTokens_ = answer->usage.cachedInputTokens;
                 view->UpdateUsage();
             }
             view->transcript_->Finish();

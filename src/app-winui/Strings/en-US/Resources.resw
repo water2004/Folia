@@ -607,6 +607,7 @@
   <data name="ChatSendKeys" xml:space="preserve"><value>Send (Enter), new line (Shift+Enter)</value></data>
   <data name="ChatMention" xml:space="preserve"><value>Mention a document</value></data>
   <data name="ChatUsageHint" xml:space="preserve"><value>Last request input: {0} tokens. Model context limit: {1} tokens.</value></data>
+  <data name="ChatCachedUsage" xml:space="preserve"><value>{0} input tokens were read from the provider cache.</value></data>
   <data name="ChatNotReported" xml:space="preserve"><value>unreported</value></data>
   <data name="ChatNotConfigured" xml:space="preserve"><value>unspecified</value></data>
   <data name="ChatImageMessage" xml:space="preserve"><value>Image</value></data>
@@ -628,6 +629,8 @@
   <data name="ChatActionOutlineNow" xml:space="preserve"><value>Reading outline</value></data>
   <data name="ChatActionOutlineDone" xml:space="preserve"><value>Read outline</value></data>
   <data name="ChatActionFindNow" xml:space="preserve"><value>Searching document</value></data>
+  <data name="ChatActionHistoryNow" xml:space="preserve"><value>Reading conversation history</value></data>
+  <data name="ChatActionHistoryDone" xml:space="preserve"><value>Read conversation history</value></data>
   <data name="ChatActionFindDone" xml:space="preserve"><value>Searched document</value></data>
   <data name="ChatActionFolderNow" xml:space="preserve"><value>Browsing folder</value></data>
   <data name="ChatActionFolderDone" xml:space="preserve"><value>Browsed folder</value></data>

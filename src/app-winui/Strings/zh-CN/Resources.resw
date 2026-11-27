@@ -607,6 +607,7 @@
   <data name="ChatSendKeys" xml:space="preserve"><value>发送 (Enter)，换行 (Shift+Enter)</value></data>
   <data name="ChatMention" xml:space="preserve"><value>引用文档</value></data>
   <data name="ChatUsageHint" xml:space="preserve"><value>最近一次模型请求的输入用量为 {0} token，模型上下文上限为 {1} token。</value></data>
+  <data name="ChatCachedUsage" xml:space="preserve"><value>其中 {0} token 命中供应商缓存。</value></data>
   <data name="ChatNotReported" xml:space="preserve"><value>未报告</value></data>
   <data name="ChatNotConfigured" xml:space="preserve"><value>未设置</value></data>
   <data name="ChatImageMessage" xml:space="preserve"><value>图片</value></data>
@@ -628,6 +629,8 @@
   <data name="ChatActionOutlineNow" xml:space="preserve"><value>正在查看大纲</value></data>
   <data name="ChatActionOutlineDone" xml:space="preserve"><value>已查看大纲</value></data>
   <data name="ChatActionFindNow" xml:space="preserve"><value>正在搜索文档</value></data>
+  <data name="ChatActionHistoryNow" xml:space="preserve"><value>正在查阅会话记录</value></data>
+  <data name="ChatActionHistoryDone" xml:space="preserve"><value>已查阅会话记录</value></data>
   <data name="ChatActionFindDone" xml:space="preserve"><value>已搜索文档</value></data>
   <data name="ChatActionFolderNow" xml:space="preserve"><value>正在浏览文件夹</value></data>
   <data name="ChatActionFolderDone" xml:space="preserve"><value>已浏览文件夹</value></data>

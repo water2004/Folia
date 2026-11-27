@@ -60,6 +60,7 @@ namespace winrt::Folia::chat {
         if (auto last = transcript_->LastReply(); last && !transcript_->EndsWithCompaction()) {
             usageModel_ = last->modelId;
             usedTokens_ = last->usage.inputTokens;
+            cachedTokens_ = last->usage.cachedInputTokens;
         }
         composer_.Spacing(4);
         composer_.MaxWidth(760);
@@ -331,6 +332,7 @@ namespace winrt::Folia::chat {
         usage_.Text(label);
         auto hint = LocalizeFormat(L"ChatUsageHint", {used ? to_hstring(*used) : Localize(L"ChatNotReported"),
             limit ? to_hstring(*limit) : Localize(L"ChatNotConfigured")});
+        if (used && cachedTokens_) hint = hint + L"\n" + LocalizeFormat(L"ChatCachedUsage", {to_hstring(*cachedTokens_)});
         ToolTipService::SetToolTip(contextMeter_, box_value(hint));
         Automation::AutomationProperties::SetName(contextMeter_, hint);
     }
