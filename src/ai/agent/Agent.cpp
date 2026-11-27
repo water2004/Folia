@@ -6,8 +6,6 @@ import folia.ai.providers;
 
 namespace folia::ai::agent {
     namespace {
-        constexpr std::size_t maxSteps = 8;
-        constexpr std::size_t maxCalls = 16;
         constexpr std::size_t maxReceiptBytes = 12'000;
         Message Text(MessageRole role, std::string text) {
             Message message;
@@ -102,11 +100,9 @@ namespace folia::ai::agent {
         };
         wire.messages = ProjectHistory(history, options);
         auto historySize = wire.messages.size();
-        std::set<std::string> seenIds;
-        std::map<std::pair<std::string, std::string>, std::size_t> repetitions;
-        std::size_t calls = 0;
+        std::set<std::string> seenCallIds;
         wire.maxOutputTokens = options.outputTokens;
-        for (std::size_t step = 0; step < maxSteps; ++step) {
+        for (;;) {
             CheckStop(stop);
             FitContext(wire, historySize, history, options, request, notify, stop);
             if (progress) progress(ProgressKind::StepStarted, {});
@@ -236,14 +232,9 @@ namespace folia::ai::agent {
                 if (reply.markdown.empty() && !reply.outputLimit) throw std::runtime_error("The service returned no answer");
                 return std::move(reply);
             }
-            if (calls + result.message.toolCalls.size() > maxCalls || step + 1 == maxSteps)
-                throw std::runtime_error("Conversation turn reached its tool limit");
-            for (auto const& call : result.message.toolCalls) {
-                if (!seenIds.insert(call.id).second ||
-                    ++repetitions[{call.name, Json::parse(call.arguments).dump()}] > 2)
-                    throw std::runtime_error("The service repeated a tool call");
-            }
-            calls += result.message.toolCalls.size();
+            for (auto const& call : result.message.toolCalls)
+                if (!seenCallIds.insert(call.id).second)
+                    throw ProtocolError("The service reused a tool call ID");
             auto batch = result.message.toolCalls;
             wire.messages.push_back(std::move(result.message));
             for (auto const& call : batch) {
@@ -269,6 +260,5 @@ namespace folia::ai::agent {
                 reply.steps.push_back(boundary());
             }
         }
-        throw std::runtime_error("Conversation turn reached its step limit");
     }
 }

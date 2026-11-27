@@ -187,22 +187,79 @@ namespace {
             expect(history.summary == "Page seven" && history.summarized == 2_u);
         };
 
-        "agent enforces tool repetition limits before dispatching repeated calls"_test = [] {
+        "agent completes long tool sequences including repeated arguments and a server pause"_test = [] {
             History history{{{MessageRole::User, "Work"}}};
-            int called = 0;
+            constexpr int toolRounds = 12;
+            int requests = 0, invocations = 0;
             Tool tool{{"read_document", "Read", Json::object()}, [&](Json const&, std::stop_token) {
-                ++called;
+                ++invocations;
                 return Json::object();
             }};
-            auto request = [index = 0](ModelRequest const&, std::stop_token, Progress const&) mutable {
+            auto request = [&](ModelRequest const& wire, std::stop_token, Progress const&) {
+                if (requests > 0 && requests <= toolRounds) {
+                    expect(wire.messages[wire.messages.size() - 2].toolCallId == std::to_string(requests * 2 - 1));
+                    expect(wire.messages.back().toolCallId == std::to_string(requests * 2));
+                }
+                ++requests;
+                if (requests == toolRounds + 1) {
+                    auto paused = Answer("Still working");
+                    paused.finish = FinishReason::Continue;
+                    return paused;
+                }
+                if (requests > toolRounds + 1) {
+                    expect(PlainText(wire.messages.back()) == "Still working");
+                    return Answer("Done");
+                }
                 ModelResult result;
                 result.finish = FinishReason::ToolCalls;
-                result.message.toolCalls.push_back({std::to_string(++index), "read_document", "{}"});
-                result.usage.outputTokens = 100;
+                result.message.toolCalls = {
+                    {std::to_string(requests * 2 - 1), "read_document", "{}"},
+                    {std::to_string(requests * 2), "read_document", "{}"}};
+                return result;
+            };
+            auto reply = Run(history, Options{"fixture"}, std::span(&tool, 1), request, {}, {});
+            expect(reply.markdown == "Still working\n\nDone");
+            expect(reply.activities.size() == 24_u);
+            expect(invocations == 24_i && requests == 14_i);
+        };
+
+        "agent rejects a reused tool call ID before dispatching the batch"_test = [] {
+            History history{{{MessageRole::User, "Work"}}};
+            int requests = 0, invocations = 0;
+            Tool tool{{"read_document", "Read", Json::object()}, [&](Json const&, std::stop_token) {
+                ++invocations;
+                return Json::object();
+            }};
+            auto request = [&](ModelRequest const&, std::stop_token, Progress const&) {
+                if (++requests > 2) return Answer("Done");
+                ModelResult result;
+                result.finish = FinishReason::ToolCalls;
+                if (requests == 2) result.message.toolCalls.push_back({"second", "read_document", "{}"});
+                result.message.toolCalls.push_back({"first", "read_document", "{}"});
                 return result;
             };
             expect(throws([&] { (void)Run(history, Options{"fixture"}, std::span(&tool, 1), request, {}, {}); }));
-            expect(called == 2_i);
+            expect(invocations == 1_i && requests == 2_i);
+        };
+
+        "stopping an agent prevents the next queued tool and model request"_test = [] {
+            History history{{{MessageRole::User, "Work"}}};
+            std::stop_source cancel;
+            int requests = 0, invocations = 0;
+            Tool tool{{"read_document", "Read", Json::object()}, [&](Json const&, std::stop_token) {
+                ++invocations;
+                cancel.request_stop();
+                return Json::object();
+            }};
+            auto request = [&](ModelRequest const&, std::stop_token, Progress const&) {
+                if (++requests > 1) return Answer("Done");
+                ModelResult result;
+                result.finish = FinishReason::ToolCalls;
+                result.message.toolCalls = {{"first", "read_document", "{}"}, {"second", "read_document", "{}"}};
+                return result;
+            };
+            expect(throws([&] { (void)Run(history, Options{"fixture"}, std::span(&tool, 1), request, {}, cancel.get_token()); }));
+            expect(invocations == 1_i && requests == 1_i);
         };
 
         "agent applies a configured thinking switch independently of hosted search"_test = [] {
