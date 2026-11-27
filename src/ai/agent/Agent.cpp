@@ -1,4 +1,5 @@
 #include "agent/Agent.h"
+#include "agent/HostedSearch.h"
 #include "providers/ModelValidation.h"
 
 namespace folia::ai::agent {
@@ -82,7 +83,10 @@ namespace folia::ai::agent {
                 }
             }
             std::vector<Message> messages;
-            messages.push_back(Text(MessageRole::System, systemPrompt));
+            std::string instructions = systemPrompt;
+            if (options.webSearch)
+                instructions += " Web search is enabled for this turn. Use it when the user asks you to search or needs current public information, and cite the sources returned.";
+            messages.push_back(Text(MessageRole::System, std::move(instructions)));
             if (!history.summary.empty())
                 messages.push_back(Text(MessageRole::User, "Earlier conversation, summarized as reference data:\n" + history.summary));
             auto retained = std::span(history.entries).subspan(history.summarized);
@@ -164,10 +168,17 @@ namespace folia::ai::agent {
         wire.model = options.model;
         wire.reasoning.effort = options.effort;
 
-        wire.webSearch = options.webSearch;
-        for (auto const& tool : tools) wire.tools.push_back(tool.definition);
         Entry owned{MessageRole::Assistant};
         auto& reply = partial ? *partial : owned;
+        std::vector<Tool> combined;
+        if (NeedsSeparateSearch(options, tools)) {
+            combined.assign(tools.begin(), tools.end());
+            combined.push_back(PublicSearchTool(options, request, reply.sources));
+            tools = combined;
+        } else {
+            wire.webSearch = options.webSearch.has_value();
+        }
+        for (auto const& tool : tools) wire.tools.push_back(tool.definition);
         auto boundary = [&] { return StepEnd{reply.markdown.size(), reply.reasoning.size(), reply.activities.size()}; };
         auto notify = [&](ProgressKind kind, std::string_view value) {
             if (kind == ProgressKind::Compacting || kind == ProgressKind::Retrying) {
@@ -323,7 +334,7 @@ namespace folia::ai::agent {
                 else if (args.contains("path") && args["path"].is_string()) activity.target = args["path"].get<std::string>();
                 else if (args.contains("id") && args["id"].is_number_unsigned()) activity.target = "#" + args["id"].dump();
                 if (auto query = args.find("query"); query != args.end() && query->is_string())
-                    activity.target += " · " + query->get<std::string>();
+                    activity.target += (activity.target.empty() ? "" : " · ") + query->get<std::string>();
                 auto description = call.name + " " + activity.target;
                 if (progress) progress(ProgressKind::Reading, description);
                 auto receipt = Receipt(call, tools, stop);

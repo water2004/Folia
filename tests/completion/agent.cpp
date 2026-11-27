@@ -174,6 +174,44 @@ namespace {
             expect(reply.steps[2].text == 11_u && reply.steps[2].tools == 1_u);
         };
 
+        "agent keeps local tools and selected reasoning when the search format requires an isolated query"_test = [] {
+            Tool local{{"list_open_tabs","List tabs",{{"type","object"}}}, [](auto const&, auto) { return Json::array(); }};
+            Options options{"proxy-alias", "none", WebSearchDialect::DeepSeek};
+            History history{{{MessageRole::User, "A local private draft"}, {MessageRole::Assistant, "Reviewed"}, {MessageRole::User,"Find public docs"}}};
+            unsigned requests = 0;
+            auto request = [&](ModelRequest const& wire, auto, Progress const&) {
+                ++requests;
+                expect(wire.reasoning.effort == "none");
+                if (wire.webSearch) {
+                    expect(wire.tools.empty() && wire.messages.size() == 2_u);
+                    expect(PlainText(wire.messages.back()) == "public Python documentation");
+                    auto result = Answer("Official docs.");
+                    result.searches.push_back({"external", "Python", false});
+                    result.citations.push_back({"Python", "https://docs.python.org/"});
+                    return result;
+                }
+                expect(wire.tools.size() == 2_u && wire.tools.back().name == "web_search");
+                if (requests == 1) {
+                    auto result = Answer("");
+                    result.finish = FinishReason::ToolCalls;
+                    result.message.toolCalls.push_back({"s", "web_search", R"({"query":"public Python documentation"})"});
+                    return result;
+                }
+                expect(PlainText(wire.messages.back()).find("https://docs.python.org/") != std::string::npos);
+                return Answer("Docs");
+            };
+            auto turn = Run(history, options, std::span(&local, 1), request, {}, {});
+            expect(requests == 3_u && turn.markdown == "Docs");
+            expect(turn.sources.size() == 1_u && turn.sources.front().title == "Python");
+            expect(turn.activities.size() == 1_u && !turn.activities.front().failed);
+            options.effort = "high";
+            auto together = [&](ModelRequest const& wire, auto, Progress const&) {
+                expect(wire.webSearch && wire.tools.size() == 1_u && wire.reasoning.effort == "high");
+                return Answer("Together");
+            };
+            expect(Run(history, options, std::span(&local, 1), together, {}, {}).markdown == "Together");
+        };
+
         "agent only labels provider supplied summaries and requests no summarization"_test = [] {
             auto turn = [](bool withSummary) {
                 History history{{{MessageRole::User, "Read"}}};
@@ -284,7 +322,7 @@ namespace {
                 expect(replay["tools"].size() == 1_u);
                 return Answer("Search finished");
             };
-            auto reply = Run(history, Options{"fixture", {}, true}, {}, request, {}, {});
+            auto reply = Run(history, Options{"fixture", {}, WebSearchDialect::Standard}, {}, request, {}, {});
             expect(reply.markdown == "Search finished");
             expect(reply.activities.size() == 1_u && reply.activities.front().detail == "example");
             expect(steps == 2_i);

@@ -302,14 +302,9 @@ ai::ModelResult Request(std::string const& baseUrl, ai::ApiProtocol protocol, ai
     return streaming ? decoder.Finish() : ParseResponse(protocol, Json::parse(response));
 }
 
-ai::ModelResult Request(std::string const& baseUrl, ai::ApiProtocol protocol, ai::ModelRequest const& request,
-                        std::wstring key, std::stop_token stop, TextDelta const& delta, bool fullUrl, StreamObserver const& observe) {
-    return Request(baseUrl, protocol, ai::BuildRequest(protocol, request), std::move(key), stop, delta, std::chrono::seconds(90), fullUrl, observe);
-}
-
 ai::ModelResult RequestChat(std::string const& address, ai::ApiProtocol protocol, ai::ModelRequest const& wire,
-    std::wstring key, std::stop_token stop, bool fullUrl, StreamObserver const& observe, std::function<void(unsigned)> const& onRetry) {
-    auto prepared = ai::BuildRequest(protocol, wire);
+    std::wstring key, std::stop_token stop, bool fullUrl, ai::ProviderRequestOptions options, StreamObserver const& observe, std::function<void(unsigned)> const& onRetry) {
+    auto prepared = ai::BuildRequest(protocol, wire, options);
     for (unsigned attempt = 0; ; ++attempt) {
         if (stop.stop_requested()) throw std::runtime_error("Cancelled");
         bool started = false;

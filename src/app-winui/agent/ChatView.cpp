@@ -191,7 +191,6 @@ namespace winrt::Folia::chat {
         split_.Click([weak](auto const&, auto const&) { if (auto self = weak.lock(); self && self->host_.split) self->host_.split(); });
         Put(transcript_->Header(), split_, 0, 4);
         openTabs_.Text(Localize(L"ChatAllowOpenTabs"));
-        web_.Text(Localize(L"ChatAllowSearch"));
         for (auto const& [button, icon, key] : {std::tuple{stop_, WorkspaceIcon::Stop, L"ChatStop"},
             std::tuple{send_, WorkspaceIcon::Send, L"ChatSend"}}) {
             button.Style(settings_ui::ResourceStyle(L"ChatSendStyle"));
@@ -261,7 +260,7 @@ namespace winrt::Folia::chat {
             if (nameCount.at(label) > 1) label += " · " + profile->name;
             choices.push_back(to_hstring(label));
             if (model.id == conversation_.model) active = static_cast<int>(routes_.size());
-            const bool hostedSearch = CanUseHostedSearch(model, *profile);
+            const bool hostedSearch = HostedSearchFormat(model, *profile).has_value();
             routes_.push_back({std::move(model), hostedSearch});
         }
         if (active < 0 && conversation_.model.empty() && !routes_.empty()) active = 0;
@@ -277,7 +276,7 @@ namespace winrt::Folia::chat {
             conversation_.effort.clear();
         }
         const bool hostedSearch = route && route->hostedSearch;
-        web_.Visibility(hostedSearch ? Visibility::Visible : Visibility::Collapsed);
+        web_.Text(Localize(hostedSearch ? L"ChatAllowSearch" : L"ChatSearchUnavailable"));
         web_.IsEnabled(hostedSearch && !busy_);
         extras_->SetVision(chosen && chosen->vision);
         web_.IsChecked(hostedSearch && conversation_.search);

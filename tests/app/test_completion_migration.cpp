@@ -35,6 +35,12 @@ namespace {
             expect(!model.webSearch && !profile.allowWebSearch);
             expect(static_cast<bool>(models::ProfileKey(profile) == L"migration-test-key"));
 
+            auto sameEndpoint = profile;
+            sameEndpoint.providerType = "deepseek";
+            expect(static_cast<bool>(models::ProfileKey(sameEndpoint) == L"migration-test-key"));
+            sameEndpoint.baseUrl += "/another";
+            expect(throws<std::runtime_error>([&] { models::ProfileKey(sameEndpoint); }));
+
             keys::StoreKey(legacyTarget, L"changed-legacy-key");
             expect(models::ImportLegacyCompletion(legacy, legacyTarget) == id);
             expect(models::Profiles().size() == count + 1);

@@ -379,6 +379,63 @@ suite settings_style_tests = [] {
         expect(saved->fullUrl && saved->allowWebSearch);
     };
 
+    "provider presets supply editable endpoints and scope model search formats"_test = [] {
+        using namespace winrt::Folia;
+        ModelSettingsPage fixture(SettingsView::Page::Providers);
+        InvokeAction(Action(fixture.page, Localize(L"ChatAddProvider")));
+        Pump([&] { return Field<ComboBox>(fixture.page, Localize(L"AIProviderType")) != nullptr; });
+        auto type = Field<ComboBox>(fixture.page, Localize(L"AIProviderType"));
+        auto protocol = Field<ComboBox>(fixture.page, Localize(L"AIProtocol"));
+        auto name = Field<TextBox>(fixture.page, Localize(L"ChatProviderName"));
+        auto address = Field<TextBox>(fixture.page, Localize(L"AIBaseUrl"));
+        auto allow = Field<ToggleSwitch>(fixture.page, Localize(L"ChatProviderWebSearch"));
+        if (!expect(type && protocol && name && address && allow)) return;
+        auto select = [](ComboBox const& box, winrt::hstring const& label) {
+            for (unsigned i = 0; i < box.Items().Size(); ++i)
+                if (winrt::unbox_value<winrt::hstring>(box.Items().GetAt(i)) == label) {
+                    box.SelectedIndex(i);
+                    return true;
+                }
+            return false;
+        };
+        expect(select(type, L"Anthropic"));
+        expect(!protocol.IsEnabled() && protocol.Items().Size() == 1_u && name.Text() == L"Anthropic");
+        expect(address.Text() == L"https://api.anthropic.com/v1");
+        expect(select(type, L"Google Gemini"));
+        expect(!allow.IsEnabled() && !protocol.IsEnabled());
+        expect(select(type, L"DeepSeek"));
+        expect(allow.IsEnabled() && protocol.IsEnabled() && protocol.Items().Size() == 3_u);
+        expect(name.Text() == L"DeepSeek");
+        name.Text(L"Proxy settings fixture");
+        address.Text(L"https://gateway.example.test/v1");
+        expect(select(type, L"OpenAI"));
+        expect(select(type, L"DeepSeek"));
+        expect(name.Text() == L"Proxy settings fixture" && address.Text() == L"https://gateway.example.test/v1");
+        allow.IsOn(true);
+        fixture.root.UpdateLayout();
+        SaveSettingsImage(fixture.root, "preset-connection.png");
+        InvokeAction(Action(fixture.page, Localize(L"ChatAddModel")));
+        Pump([&] { return Field<ToggleSwitch>(fixture.page, Localize(L"ChatModelWebSearch")) != nullptr; });
+        auto search = Field<ToggleSwitch>(fixture.page, Localize(L"ChatModelWebSearch"));
+        auto format = Field<ComboBox>(fixture.page, Localize(L"AISearchFormat"));
+        if (!expect(search && format)) return;
+        expect(!format.IsEnabled());
+        search.IsOn(true);
+        expect(format.IsEnabled() && format.Items().Size() == 3_u);
+        expect(select(format, Localize(L"AISearchFormatStandard")));
+        Field<TextBox>(fixture.page, Localize(L"ChatUpstreamModel")).Text(L"aliased-model");
+        InvokeAction(Action(fixture.page, Localize(L"ChatApplyModel")));
+        Pump([&] { return Action(fixture.page, L"aliased-model") != nullptr; });
+        InvokeAction(Action(fixture.page, Localize(L"ChatSaveProvider")));
+        Pump([&] { return Action(fixture.page, L"Proxy settings fixture") != nullptr; });
+        auto configured = models::Profiles();
+        auto saved = std::ranges::find(configured, "Proxy settings fixture", &models::ModelProfile::name);
+        if (!expect(saved != configured.end())) return;
+        auto cleanup = wil::scope_exit([&] { models::DeleteProfile(saved->id); });
+        expect(saved->providerType == "deepseek" && saved->protocol == models::ApiProtocol::Responses);
+        expect(saved->models.size() == 1_u && models::HostedSearchFormat(saved->models.front(), *saved) == folia::ai::WebSearchDialect::Standard);
+    };
+
     "provider connection check cancels when the configured credentials change"_test = [] {
         using namespace winrt::Folia;
         completion_tests::Server server({}, 200, true, "application/json");

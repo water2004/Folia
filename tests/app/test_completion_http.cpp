@@ -1,5 +1,8 @@
 #include "pch.h"
 #include "windows/ai/ModelHttpClient.h"
+#include "providers/ModelAdapter.h"
+#include "settings/storage/ProviderPresets.h"
+#include "settings/storage/ModelCatalog.h"
 #include "support/CompletionPromptSettings.h"
 #include "support/folia_test.hpp"
 #include "windows/completion/CompletionHttpTransport.h"
@@ -14,6 +17,62 @@ std::string const response = R"(data: {"choices":[{"index":0,"delta":{"content":
     R"(data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]})" "\n\n"
     "data: [DONE]\n\n";
 suite completion_http_tests = [] {
+    "hosted search follows explicit provider and model choices at the same proxy address"_test = [] {
+        using namespace folia::ai;
+        using namespace winrt::Folia::models;
+        ModelProfile profile{{}, "Gateway", "https://example.test/v1", ApiProtocol::Responses};
+        ConfiguredModel model;
+        model.upstream = "my-model";
+        model.webSearch = true;
+        ModelRequest request;
+        request.model = model.upstream;
+        request.messages.push_back({MessageRole::User, {{ContentKind::Text, "Find a public source"}}});
+        request.tools.push_back({"list_open_tabs", "List tabs", Json{{"type","object"},{"properties",Json::object()}}});
+        auto tools = [&] {
+            auto format = HostedSearchFormat(model, profile);
+            request.webSearch = format.has_value();
+            return BuildRequest(profile.protocol, request, {format.value_or(WebSearchDialect::Standard)}).at("tools");
+        };
+        expect(tools().size() == 1_u);
+        profile.allowWebSearch = true;
+        profile.providerType = "openai";
+        expect(tools().back() == Json{{"type", "web_search"}});
+        profile.providerType = "deepseek";
+        auto both = tools();
+        expect(both.size() == 2_u && both.front().at("name") == "list_open_tabs");
+        expect(both.back() == Json{{"type", "deepseek_web_search"}});
+        model.searchFormat = WebSearchDialect::Standard;
+        expect(tools().back() == Json{{"type", "web_search"}});
+        model.searchFormat.reset();
+        profile.protocol = ApiProtocol::AnthropicMessages;
+        expect(tools().back() == Json{{"type", "deepseek_web_search"}, {"name", "deepseek_web_search"}});
+        profile.protocol = ApiProtocol::ChatCompletions;
+        profile.providerType = "openrouter";
+        expect(tools().back() == Json{{"type", "openrouter:web_search"}});
+        profile.providerType = "custom";
+        expect(tools().size() == 1_u);
+        model.searchFormat = WebSearchDialect::DeepSeek;
+        expect(tools().back().at("type") == "deepseek_web_search");
+        profile.providerType = "google-gemini";
+        expect(tools().size() == 1_u);
+        model.webSearch = false;
+        profile.providerType = "deepseek";
+        expect(tools().size() == 1_u);
+    };
+
+    "model discovery uses the selected catalog schema for an aliased OpenRouter model"_test = [] {
+        auto payload = R"({"data":[{"id":"alias","name":"Alias via gateway","context_length":64000,
+            "top_provider":{"max_completion_tokens":4096},"architecture":{"input_modalities":["text","image"]}},
+            {"id":"text-only"}]})";
+        auto catalog = ParseCompletionModels(payload, 1, folia::ai::ModelCatalogSchema::OpenRouter);
+        auto const& model = catalog.models.front();
+        expect(model.name == "Alias via gateway" && model.vision);
+        expect(model.maxInputTokens.value_or(0) == 64000_u && model.maxOutputTokens.value_or(0) == 4096_u);
+        expect(model.reasoningEfforts.empty() && !model.webSearch);
+        expect(!catalog.models.back().maxInputTokens && !catalog.models.back().vision);
+        expect(ParseCompletionModels(payload, 1).models.front().name.empty());
+    };
+
     "agent HTTP retries transient failures before output and never replays a partial stream"_test = [] {
         using namespace folia::ai;
         using folia::platform::models::RequestChat;
@@ -21,21 +80,21 @@ suite completion_http_tests = [] {
         wire.messages.push_back({MessageRole::User, {{ContentKind::Text, "hi"}}});
         Server recover("", 503, false, "text/event-stream", {}, 4096, {response}, {200});
         unsigned retries = 0;
-        auto answer = RequestChat(recover.baseUrl, ApiProtocol::ChatCompletions, wire, {}, {}, false, {}, [&](unsigned i) { retries = i; });
+        auto answer = RequestChat(recover.baseUrl, ApiProtocol::ChatCompletions, wire, {}, {}, false, {}, {}, [&](unsigned i) { retries = i; });
         expect(retries == 1_u && recover.receivedRequests.load() == 2_i);
         expect(PlainText(answer.message) == " hello");
         auto partial = response.substr(0, response.find("\n\n") + 2);
         Server interrupted(partial, 200, false, "text/event-stream", {}, 4096, {response});
         std::string received;
-        expect(throws([&] { RequestChat(interrupted.baseUrl, ApiProtocol::ChatCompletions, wire, {}, {}, false,
+        expect(throws([&] { RequestChat(interrupted.baseUrl, ApiProtocol::ChatCompletions, wire, {}, {}, false, {},
             [&](auto const& e) { if (e.kind == StreamEventKind::TextDelta) received += e.text; }); }));
         expect(received == " hello" && interrupted.receivedRequests.load() == 1_i);
         Server denied("{}", 401, false, "application/json");
-        expect(throws([&] { RequestChat(denied.baseUrl, ApiProtocol::ChatCompletions, wire, {}, {}, false, {}); }));
+        expect(throws([&] { RequestChat(denied.baseUrl, ApiProtocol::ChatCompletions, wire, {}, {}, false, {}, {}); }));
         expect(denied.receivedRequests.load() == 1_i);
         std::stop_source stop;
         Server waiting("", 429);
-        expect(throws([&] { RequestChat(waiting.baseUrl, ApiProtocol::ChatCompletions, wire, {}, stop.get_token(), false, {},
+        expect(throws([&] { RequestChat(waiting.baseUrl, ApiProtocol::ChatCompletions, wire, {}, stop.get_token(), false, {}, {},
             [&](unsigned) { stop.request_stop(); }); }));
         expect(waiting.receivedRequests.load() == 1_i);
     };

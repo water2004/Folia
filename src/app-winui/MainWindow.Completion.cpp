@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "settings/storage/ProviderPresets.h"
 #include "settings/storage/ModelCatalog.h"
 #include "MainWindow.xaml.h"
 #include "localization/Localization.h"
@@ -14,6 +15,7 @@ namespace {
         config.fullUrl = provider.fullUrl;
         config.reasoningEffort = model.ResolveEffort(effort);
         config.modelOutputLimit = model.maxOutputTokens;
+        config.explicitThinkingToggle = models::Preset(provider.providerType).explicitThinkingToggle;
     }
 }
 

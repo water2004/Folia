@@ -83,7 +83,7 @@ function Write-Component {
 
     if ($Record.Kind -eq 'Asset' -and (
         ($Record.Directory -ieq 'themes' -and [System.IO.Path]::GetExtension($Record.Name) -iin @('.json', '.png')) -or
-        $Record.Relative -ieq 'latex/commands.json' -or $Record.Relative -ieq 'completion.json')) {
+        $Record.Relative -iin @('latex/commands.json', 'completion.json', 'provider-presets.json'))) {
         # Built-in themes, command catalogs and prompt defaults are application resources.
         # Remove exactly this packaged file before InstallFiles, including on
         # repair, so MSI's unversioned-file preservation cannot retain schema 1.

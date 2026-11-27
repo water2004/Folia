@@ -53,17 +53,25 @@ Type `/` for conversation commands, including model selection and access setting
 After the first successful reply, Folia requests a short title from the configured
 model. Renaming the conversation takes precedence over the generated title.
 
-Hosted web search requires permission on the provider connection, a model that
-supports it, and opt-in in the conversation. Responses uses the hosted
-`web_search` tool. Anthropic Messages uses `web_search_20250305` and handles a
-hosted `pause_turn`. Folia reads declared search support from Messages model
-metadata when available. Search availability can also depend on the upstream
-account and request options. Chat Completions search uses dedicated models and
-a separate request option. Folia's per-conversation search control is available
-through Responses and Messages. Hosted search data and citations come from the
-configured provider. Model replies are displayed
-with Folia's native Markdown renderer. The Sources menu opens URLs on explicit
-selection, and automatic image fetching is disabled in the transcript.
+The provider editor offers DeepSeek, OpenAI, Anthropic, Google Gemini, OpenRouter,
+xAI, and custom connections. The provider type supplies the available protocols,
+default address and hosted tool formats. Proxy addresses and model aliases work
+with the same presets. Existing untyped connections open as Custom.
+
+Search requires a connection that allows it, a configured model with search
+enabled, and permission in the current conversation. Models inherit the route's
+search format or can select an alternative in their model settings. For example,
+a DeepSeek Responses profile can use DeepSeek search for Flash and standard
+Responses search for Pro. DeepSeek's hosted search accepts local functions in
+thinking mode. With thinking off and local tools available, Folia exposes a search
+function to the agent. Each invocation sends just the public query through the
+same model and endpoint and returns the cited result to the turn. Google Gemini
+uses its OpenAI-compatible chat endpoint. Its native Search grounding tool
+requires Google's native API.
+
+Folia renders the provider's actual search events and citation URLs in the
+transcript. The Sources menu opens a URL on selection. Markdown replies use
+Folia's native renderer with automatic remote image fetching disabled.
 
 ## Implementation
 

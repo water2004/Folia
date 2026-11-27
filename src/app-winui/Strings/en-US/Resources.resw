@@ -521,6 +521,7 @@
   <data name="ChatPrompt" xml:space="preserve"><value>Describe your task</value></data>
   <data name="ChatAllowOpenTabs" xml:space="preserve"><value>Allow reading open Markdown tabs</value></data>
   <data name="ChatAllowSearch" xml:space="preserve"><value>Enable provider web search</value></data>
+  <data name="ChatSearchUnavailable" xml:space="preserve"><value>Web search (disabled for this model or provider)</value></data>
   <data name="ChatPermissionHint" xml:space="preserve"><value>Selected content may be sent to the model provider when needed. Change access between turns.</value></data>
   <data name="ChatNoWorkspace" xml:space="preserve"><value>No workspace access</value></data>
   <data name="ChatUseCurrentFolder" xml:space="preserve"><value>Allow reading the open folder</value></data>
@@ -635,4 +636,12 @@
   <data name="ChatActionWebDone" xml:space="preserve"><value>Searched the web</value></data>
   <data name="ChatActionToolNow" xml:space="preserve"><value>Running tool</value></data>
   <data name="ChatActionToolDone" xml:space="preserve"><value>Ran tool</value></data>
+  <data name="AIProviderType" xml:space="preserve"><value>Provider type</value></data>
+  <data name="AIProviderCustom" xml:space="preserve"><value>Custom</value></data>
+  <data name="AISearchFormat" xml:space="preserve"><value>Search tool format</value></data>
+  <data name="AISearchFormatChoose" xml:space="preserve"><value>Choose a search tool format</value></data>
+  <data name="AISearchFormatDefault" xml:space="preserve"><value>Provider default</value></data>
+  <data name="AISearchFormatStandard" xml:space="preserve"><value>Protocol standard</value></data>
+  <data name="AISearchFormatDeepSeek" xml:space="preserve"><value>DeepSeek search</value></data>
+  <data name="AISearchFormatOpenRouter" xml:space="preserve"><value>OpenRouter search</value></data>
 </root>

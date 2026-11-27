@@ -15,6 +15,7 @@ namespace winrt::Folia::models {
         std::optional<std::uint32_t> maxInputTokens, maxOutputTokens;
         bool vision = false;
         bool enabled = true;
+        std::optional<folia::ai::WebSearchDialect> searchFormat;
 
         std::string const& Label() const { return name.empty() ? upstream : name; }
         std::string ResolveEffort(std::string_view selection) const;
@@ -28,6 +29,7 @@ namespace winrt::Folia::models {
         bool fullUrl = false;
         std::string catalogUrl;
         bool allowWebSearch = false;
+        std::string providerType = "custom";
     };
 
     std::vector<ModelProfile> Profiles();
@@ -38,5 +40,5 @@ namespace winrt::Folia::models {
     std::wstring ProfileKey(ModelProfile const& connection);
     std::vector<ConfiguredModel> Models();
     std::pair<ConfiguredModel, ModelProfile> Resolve(std::string const& modelId);
-    bool CanUseHostedSearch(ConfiguredModel const& model, ModelProfile const& profile) noexcept;
+    std::optional<folia::ai::WebSearchDialect> HostedSearchFormat(ConfiguredModel const&, ModelProfile const&);
 }

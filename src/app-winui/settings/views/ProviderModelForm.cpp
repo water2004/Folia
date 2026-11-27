@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "agent/ChatControls.h"
-#include "providers/ModelValidation.h"
 #include "settings/views/ProviderModelForm.h"
 #include "settings/views/SettingsCards.h"
 
@@ -26,20 +25,21 @@ namespace winrt::Folia::settings_ui {
             return value ? to_hstring(*value) : hstring{};
         }
 
-        std::span<std::string_view const> EffortPresets(models::ApiProtocol protocol) {
+        std::vector<std::string_view> EffortPresets(models::ProviderRoute const& route) {
             static constexpr std::string_view openAI[]{"none", "minimal", "low", "medium", "high", "xhigh", "max"};
             static constexpr std::string_view messages[]{"low", "medium", "high", "xhigh", "max"};
-            if (protocol == models::ApiProtocol::AnthropicMessages) return messages;
-            return openAI;
+            if (!route.effortChoices.empty()) return {route.effortChoices.begin(), route.effortChoices.end()};
+            if (route.protocol == models::ApiProtocol::AnthropicMessages) return {std::begin(messages), std::end(messages)};
+            return {std::begin(openAI), std::end(openAI)};
         }
     }
 
-    ProviderModelForm::ProviderModelForm(models::ConfiguredModel draft, models::ApiProtocol protocol)
-        : draft_(std::move(draft)), protocol_(protocol) {}
+    ProviderModelForm::ProviderModelForm(models::ConfiguredModel draft, models::ProviderRoute const& route)
+        : draft_(std::move(draft)), route_(route) {}
 
-    std::shared_ptr<ProviderModelForm> ProviderModelForm::Create(models::ConfiguredModel model, models::ApiProtocol protocol,
+    std::shared_ptr<ProviderModelForm> ProviderModelForm::Create(models::ConfiguredModel model, models::ProviderRoute const& route,
         Save save, Command cancel, Command remove, Command fetch) {
-        auto form = std::shared_ptr<ProviderModelForm>(new ProviderModelForm(std::move(model), protocol));
+        auto form = std::shared_ptr<ProviderModelForm>(new ProviderModelForm(std::move(model), route));
         form->Build(std::move(save), std::move(cancel), std::move(remove), std::move(fetch));
         return form;
     }
@@ -76,6 +76,7 @@ namespace winrt::Folia::settings_ui {
             model.maxOutputTokens = metadata.maxOutputTokens;
             model.vision = metadata.vision;
             model.webSearch = metadata.webSearch;
+            model.searchFormat = metadata.searchFormat;
             self->Fill(model);
         });
 
@@ -102,11 +103,26 @@ namespace winrt::Folia::settings_ui {
         auto capabilities = cards::List();
         vision_ = cards::Switch();
         capabilities.Children().Append(cards::Setting({Localize(L"ChatModelVision"), {}, cards::Icon(WorkspaceIcon::Image)}, vision_));
-        if (folia::ai::SupportsOptionalHostedSearch(protocol_)) {
+        if (!route_.search.empty()) {
             search_ = cards::Switch();
             capabilities.Children().Append(cards::Setting(
                 {Localize(L"ChatModelWebSearch"), Localize(L"ChatModelWebSearchHint"), cards::Icon(WorkspaceIcon::Network)},
                 search_, cards::Placement::Wrap));
+        }
+        if (route_.search.size() > 1) {
+            searchFormat_ = Choice();
+            cards::ChoiceStyle(searchFormat_);
+            searchFormat_.Items().Append(box_value(Localize(route_.requiresSearchFormat ? L"AISearchFormatChoose" : L"AISearchFormatDefault")));
+            for (auto format : route_.search) {
+                using enum folia::ai::WebSearchDialect;
+                auto label = format == Standard ? L"AISearchFormatStandard" : format == DeepSeek ? L"AISearchFormatDeepSeek" : L"AISearchFormatOpenRouter";
+                searchFormat_.Items().Append(box_value(Localize(label)));
+            }
+            capabilities.Children().Append(cards::Setting({Localize(L"AISearchFormat"), {}, cards::Icon(WorkspaceIcon::Source)},
+                searchFormat_, cards::Placement::Wrap));
+            search_.Toggled([weak](auto const&, auto const&) {
+                if (auto self = weak.lock()) self->searchFormat_.IsEnabled(self->search_.IsOn());
+            });
         }
         panel_.Children().Append(cards::Section(Localize(L"ChatModelCapabilities"), capabilities));
 
@@ -136,9 +152,14 @@ namespace winrt::Folia::settings_ui {
         output_.Text(FormatLimit(model.maxOutputTokens));
         vision_.IsOn(model.vision);
         search_.IsOn(model.webSearch);
+        if (searchFormat_) {
+            auto item = model.searchFormat ? std::ranges::find(route_.search, *model.searchFormat) : route_.search.end();
+            searchFormat_.SelectedIndex(item == route_.search.end() ? 0 : static_cast<int>(item - route_.search.begin() + 1));
+            searchFormat_.IsEnabled(model.webSearch);
+        }
         levels_.clear();
         efforts_.Children().Clear();
-        auto presets = EffortPresets(protocol_);
+        auto presets = EffortPresets(route_);
         for (auto level : presets)
             AddEffort(level, std::ranges::contains(model.efforts, level));
         for (auto const& level : model.efforts)
@@ -186,7 +207,14 @@ namespace winrt::Folia::settings_ui {
         }
         model.effort = SelectedEffort(defaultEffort_);
         model.vision = vision_.IsOn();
-        model.webSearch = folia::ai::SupportsOptionalHostedSearch(protocol_) && search_.IsOn();
+        model.webSearch = !route_.search.empty() && search_.IsOn();
+        model.searchFormat.reset();
+        if (searchFormat_ && searchFormat_.SelectedIndex() > 0)
+            model.searchFormat = route_.search.at(searchFormat_.SelectedIndex() - 1);
+        if (model.webSearch && route_.requiresSearchFormat && !model.searchFormat) {
+            cards::Status(validation_, Localize(L"AISearchFormatChoose"), true);
+            return;
+        }
         save(std::move(model));
     }
 

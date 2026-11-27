@@ -521,6 +521,7 @@
   <data name="ChatPrompt" xml:space="preserve"><value>描述你想做的事</value></data>
   <data name="ChatAllowOpenTabs" xml:space="preserve"><value>允许读取打开的 Markdown 页签</value></data>
   <data name="ChatAllowSearch" xml:space="preserve"><value>启用供应商联网搜索</value></data>
+  <data name="ChatSearchUnavailable" xml:space="preserve"><value>联网搜索（此模型或供应商未启用）</value></data>
   <data name="ChatPermissionHint" xml:space="preserve"><value>按需读取的数据可能会发给模型供应商。可在两轮对话之间调整权限。</value></data>
   <data name="ChatNoWorkspace" xml:space="preserve"><value>无工作区访问权限</value></data>
   <data name="ChatUseCurrentFolder" xml:space="preserve"><value>允许读取当前打开的文件夹</value></data>
@@ -635,4 +636,12 @@
   <data name="ChatActionWebDone" xml:space="preserve"><value>已搜索网页</value></data>
   <data name="ChatActionToolNow" xml:space="preserve"><value>正在调用工具</value></data>
   <data name="ChatActionToolDone" xml:space="preserve"><value>已调用工具</value></data>
+  <data name="AIProviderType" xml:space="preserve"><value>供应商类型</value></data>
+  <data name="AIProviderCustom" xml:space="preserve"><value>自定义</value></data>
+  <data name="AISearchFormat" xml:space="preserve"><value>搜索工具格式</value></data>
+  <data name="AISearchFormatChoose" xml:space="preserve"><value>请选择搜索工具格式</value></data>
+  <data name="AISearchFormatDefault" xml:space="preserve"><value>供应商默认</value></data>
+  <data name="AISearchFormatStandard" xml:space="preserve"><value>协议标准格式</value></data>
+  <data name="AISearchFormatDeepSeek" xml:space="preserve"><value>DeepSeek 联网搜索</value></data>
+  <data name="AISearchFormatOpenRouter" xml:space="preserve"><value>OpenRouter 联网搜索</value></data>
 </root>

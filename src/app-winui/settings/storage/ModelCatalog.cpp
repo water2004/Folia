@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "settings/storage/ModelCatalog.h"
+#include "settings/storage/ProviderPresets.h"
 #include "providers/ModelValidation.h"
 #include "storage/JsonRecords.h"
 #include "storage/AssetPaths.h"
@@ -26,6 +27,8 @@ namespace winrt::Folia::models {
                 std::move(effort), data.value("webSearch", false), std::move(levels)};
             if (auto size = data.value("maxInputTokens", 0u)) model.maxInputTokens = size;
             if (auto size = data.value("maxOutputTokens", 0u)) model.maxOutputTokens = size;
+            if (auto mode = data.find("searchFormat"); mode != data.end())
+                model.searchFormat = folia::ai::ParseSearchDialect(mode->get_ref<std::string const&>());
             model.vision = data.value("vision", false);
             model.enabled = data.value("enabled", true);
             return model;
@@ -39,6 +42,7 @@ namespace winrt::Folia::models {
         StoredProvider DecodeProfile(Json const& data, std::string id) {
             ModelProfile profile{std::move(id), data.at("name").get<std::string>(), data.at("baseUrl").get<std::string>(),
                 folia::ai::ParseProtocol(data.at("protocol").get<std::string>())};
+            profile.providerType = data.value("providerType", "custom");
             profile.iconPng = data.value("iconPng", "");
             profile.fullUrl = data.value("fullUrl", false);
             profile.catalogUrl = data.value("catalogUrl", "");
@@ -89,6 +93,7 @@ namespace winrt::Folia::models {
                 Json entry{{"id", model.id}, {"name", model.name}, {"upstream", model.upstream},
                     {"effort", model.effort}, {"efforts", model.efforts}, {"webSearch", model.webSearch},
                     {"vision", model.vision}, {"enabled", model.enabled}};
+                if (model.searchFormat) entry["searchFormat"] = folia::ai::SearchDialectId(*model.searchFormat);
                 if (model.maxInputTokens) entry["maxInputTokens"] = *model.maxInputTokens;
                 if (model.maxOutputTokens) entry["maxOutputTokens"] = *model.maxOutputTokens;
                 out.push_back(std::move(entry));
@@ -103,8 +108,12 @@ namespace winrt::Folia::models {
         return !effort.empty() && allowed(effort) ? effort : std::string{};
     }
 
-    bool CanUseHostedSearch(ConfiguredModel const& model, ModelProfile const& profile) noexcept {
-        return model.webSearch && profile.allowWebSearch && folia::ai::SupportsOptionalHostedSearch(profile.protocol);
+    std::optional<folia::ai::WebSearchDialect> HostedSearchFormat(ConfiguredModel const& model, ModelProfile const& profile) {
+        if (!model.webSearch || !profile.allowWebSearch) return {};
+        auto route = Preset(profile.providerType).Find(profile.protocol);
+        if (!route || route->search.empty()) return {};
+        if (!model.searchFormat) return route->requiresSearchFormat ? std::nullopt : std::optional(route->search.front());
+        return std::ranges::contains(route->search, *model.searchFormat) ? model.searchFormat : std::nullopt;
     }
 
     std::vector<ModelProfile> Profiles() {
@@ -114,6 +123,12 @@ namespace winrt::Folia::models {
 
     static ModelProfile SaveProfileLocked(ModelProfile profile, std::optional<std::wstring> const& key) {
         if (profile.id.empty()) profile.id = NewId();
+        auto route = Preset(profile.providerType).Find(profile.protocol);
+        if (!route) throw std::invalid_argument("The selected provider does not offer this protocol.");
+        for (auto& model : profile.models) {
+            if (model.searchFormat && !std::ranges::contains(route->search, *model.searchFormat))
+                model.searchFormat.reset();
+        }
         auto models = EncodeModels(profile);
         auto& catalog = Catalog();
         auto existing = std::ranges::find(catalog, profile.id, &ModelProfile::id);
@@ -131,7 +146,7 @@ namespace winrt::Folia::models {
         try {
             Json data{{"name", profile.name}, {"baseUrl", profile.baseUrl},
                 {"protocol", folia::ai::ProtocolName(profile.protocol)}, {"configuredModels", std::move(models)},
-                {"fullUrl", profile.fullUrl}, {"allowWebSearch", profile.allowWebSearch}};
+                {"fullUrl", profile.fullUrl}, {"allowWebSearch", profile.allowWebSearch}, {"providerType", profile.providerType}};
             if (!profile.catalogUrl.empty()) data["catalogUrl"] = profile.catalogUrl;
             if (!profile.iconPng.empty()) data["iconPng"] = profile.iconPng;
             Write(path, data);
@@ -221,7 +236,7 @@ namespace winrt::Folia::models {
             auto model = std::ranges::find(profile.models, id, &ConfiguredModel::id);
             if (model != profile.models.end() && model->enabled)
                 return {*model, {profile.id, profile.name, profile.baseUrl, profile.protocol, {}, {},
-                    profile.fullUrl, profile.catalogUrl, profile.allowWebSearch}};
+                    profile.fullUrl, profile.catalogUrl, profile.allowWebSearch, profile.providerType}};
         }
         throw std::runtime_error("The selected AI model is unavailable.");
     }

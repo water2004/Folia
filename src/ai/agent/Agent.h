@@ -64,7 +64,7 @@ namespace folia::ai::agent {
     struct Options {
         std::string model;
         std::string effort;
-        bool webSearch = false;
+        std::optional<WebSearchDialect> webSearch;
         std::size_t inputBytes = 96'000;
         std::uint32_t outputTokens = 4'096;
         std::function<ContentPart(std::string const&)> loadImage;

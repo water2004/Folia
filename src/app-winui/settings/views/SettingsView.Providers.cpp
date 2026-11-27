@@ -3,7 +3,7 @@
 #include "settings/views/ProviderModelForm.h"
 #include "settings/views/SettingsCards.h"
 #include "settings/views/SettingsView.h"
-#include "providers/ModelValidation.h"
+#include "settings/views/ProviderConnectionPicker.h"
 #include "workspace/WorkspaceIcons.h"
 #include "windows/completion/CompletionHttpTransport.h"
 #include <shobjidl.h>
@@ -16,7 +16,6 @@ namespace winrt::Folia {
         using namespace chat;
         using namespace models;
         using namespace settings_ui;
-        using folia::ai::SupportsOptionalHostedSearch;
         namespace transport = folia::platform::completion;
         using namespace Windows::Storage::Streams;
         namespace image = Windows::Graphics::Imaging;
@@ -136,7 +135,7 @@ namespace winrt::Folia {
             StackPanel providerForm{nullptr};
             std::shared_ptr<ProviderModelForm> modelForm;
             TextBox name, base, catalogAddress;
-            ComboBox protocol = Choice();
+            std::shared_ptr<ProviderConnectionPicker> providerPicker;
             PasswordBox key;
             ToggleSwitch fullUrl, search;
             TextBlock status, connectionStatus;
@@ -174,11 +173,12 @@ namespace winrt::Folia {
             }
 
             ModelProfile Connection() const {
-                auto api = static_cast<ApiProtocol>(protocol.SelectedIndex());
-                ModelProfile connection{draft.id, FieldText(name), FieldText(base), api};
+                auto const& route = providerPicker->Route();
+                ModelProfile connection{draft.id, FieldText(name), FieldText(base), route.protocol};
+                connection.providerType = providerPicker->Type().id;
                 connection.fullUrl = fullUrl.IsOn();
                 if (connection.fullUrl) connection.catalogUrl = FieldText(catalogAddress);
-                connection.allowWebSearch = SupportsOptionalHostedSearch(api) && search.IsOn();
+                connection.allowWebSearch = !route.search.empty() && search.IsOn();
                 return connection;
             }
 
@@ -186,6 +186,7 @@ namespace winrt::Folia {
                 if (!fetching) return;
                 auto current = Connection();
                 if (current.baseUrl != pendingConnection.baseUrl || current.protocol != pendingConnection.protocol ||
+                    current.providerType != pendingConnection.providerType ||
                     current.fullUrl != pendingConnection.fullUrl || current.catalogUrl != pendingConnection.catalogUrl ||
                     pendingKey != NewKey())
                     CancelQuery();
@@ -320,11 +321,21 @@ namespace winrt::Folia {
                 Put(providerName, name, 0, 1);
                 connection.Children().Append(providerName);
 
-                cards::ChoiceStyle(protocol);
-                for (auto label : {L"OpenAI Chat Completions", L"OpenAI Responses", L"Anthropic Messages"})
-                    protocol.Items().Append(box_value(label));
-                connection.Children().Append(cards::Setting(
-                    {Localize(L"AIProtocol"), {}, cards::Icon(WorkspaceIcon::Source)}, protocol));
+                providerPicker = std::make_shared<ProviderConnectionPicker>();
+                providerPicker->Build(connection, draft.providerType, draft.protocol,
+                    [weak = weak_from_this()](ProviderPreset const& previous, ProviderRoute const& oldRoute) {
+                        if (auto self = weak.lock()) {
+                            auto const& type = self->providerPicker->Type();
+                            auto const& route = self->providerPicker->Route();
+                            auto display = FieldText(self->name);
+                            if (display.empty() || display == previous.name) self->name.Text(to_hstring(type.name));
+                            auto address = FieldText(self->base);
+                            if (!self->fullUrl.IsOn() && (address.empty() || address == oldRoute.address))
+                                self->base.Text(to_hstring(route.address));
+                            self->search.IsEnabled(!route.search.empty());
+                            self->ConnectionChanged();
+                        }
+                    });
 
                 TextField(key, Localize(L"AIKey"));
                 if (!draft.id.empty()) key.PlaceholderText(Localize(L"ChatKeepProviderKey"));
@@ -367,12 +378,11 @@ namespace winrt::Folia {
                         ToolTipService::SetToolTip(self->base, box_value(Localize(full ? L"ChatFullUrlHint" : L"AIBaseUrlDescription")));
                         self->base.PlaceholderText(full ? L"https://api.example.com/custom/generate" : L"https://api.example.com/v1");
                         self->catalogAddress.IsEnabled(full);
-                        self->search.IsEnabled(SupportsOptionalHostedSearch(static_cast<ApiProtocol>(self->protocol.SelectedIndex())));
+                        self->search.IsEnabled(!self->providerPicker->Route().search.empty());
                         self->ConnectionChanged();
                     }
                 };
                 fullUrl.Toggled([update](auto const&, auto const&) { update(); });
-                protocol.SelectionChanged([update](auto const&, auto const&) { update(); });
                 update();
                 auto section = SectionPanel();
                 section.Children().Append(cards::Section(Localize(L"AIService"), connection));
@@ -386,7 +396,6 @@ namespace winrt::Folia {
                 draft = std::move(profile);
                 name = TextBox{};
                 base = TextBox{};
-                protocol = Choice();
                 key = PasswordBox{};
                 clearKeyOnSave = false;
                 fullUrl = cards::Switch(draft.fullUrl);
@@ -404,7 +413,6 @@ namespace winrt::Folia {
                 auto form = PagePanel();
                 form.Style(ResourceStyle(L"SettingsOptionPageStyle"));
                 form.Children().Append(BuildConnection());
-                protocol.SelectedIndex(static_cast<int>(draft.protocol));
                 DrawMark();
 
                 auto add = Action(L"ChatAddModel");
@@ -562,7 +570,7 @@ namespace winrt::Folia {
                     }
                 }) : ProviderModelForm::Command{};
                 auto fetch = [weak] { if (auto self = weak.lock()) self->StartQuery(ModelQuery::Fetch); };
-                modelForm = ProviderModelForm::Create(std::move(model), Connection().protocol,
+                modelForm = ProviderModelForm::Create(std::move(model), providerPicker->Route(),
                     std::move(save), back, std::move(remove), std::move(fetch));
                 breadcrumb(ProviderTitle(), [weak] { if (auto self = weak.lock()) self->ShowList(); }, title, back);
                 SetPage(modelForm->Element());
@@ -593,7 +601,7 @@ namespace winrt::Folia {
                     config.fullUrl = profile.fullUrl;
                     config.catalogUrl = profile.catalogUrl;
                     offered = transport::FetchCompletionModels(config, stop,
-                        key ? std::move(*key) : profile.id.empty() ? std::wstring{} : ProfileKey(profile));
+                        key ? std::move(*key) : profile.id.empty() ? std::wstring{} : ProfileKey(profile), Preset(profile.providerType).catalog);
                 } catch (std::exception const& e) { error = to_hstring(e.what()); }
                 catch (hresult_error const& e) { error = e.message(); }
                 if (stop.stop_requested()) co_return;

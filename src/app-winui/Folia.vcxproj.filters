@@ -132,6 +132,9 @@
     <ClInclude Include="settings\views\SettingsCards.h">
       <Filter>Settings\Views</Filter>
     </ClInclude>
+    <ClInclude Include="settings\views\ProviderConnectionPicker.h">
+      <Filter>Settings\Views</Filter>
+    </ClInclude>
     <ClInclude Include="settings\views\ProviderModelForm.h">
       <Filter>Settings\Views</Filter>
     </ClInclude>
@@ -155,6 +158,9 @@
     </ClInclude>
     <ClInclude Include="agent\ChatComposerExtras.h">
       <Filter>Agent Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="settings\storage\ProviderPresets.h">
+      <Filter>Settings\Storage</Filter>
     </ClInclude>
     <ClInclude Include="settings\storage\ModelCatalog.h">
       <Filter>Settings\Storage</Filter>
@@ -282,6 +288,9 @@
     <ClCompile Include="agent\ChatStore.cpp">
       <Filter>Agent Chat</Filter>
     </ClCompile>
+    <ClCompile Include="settings\storage\ProviderPresets.cpp">
+      <Filter>Settings\Storage</Filter>
+    </ClCompile>
     <ClCompile Include="settings\storage\ModelCatalog.cpp">
       <Filter>Settings</Filter>
     </ClCompile>
@@ -315,6 +324,9 @@
     <ClCompile Include="..\ai\agent\Agent.cpp">
       <Filter>Agent Chat</Filter>
     </ClCompile>
+    <ClCompile Include="..\ai\agent\HostedSearch.cpp">
+      <Filter>Agent Chat</Filter>
+    </ClCompile>
     <ClCompile Include="..\platform\windows\ai\ModelHttpClient.cpp">
       <Filter>Platform Modules</Filter>
     </ClCompile>
@@ -343,6 +355,9 @@
       <Filter>Settings\Views</Filter>
     </ClCompile>
     <ClCompile Include="settings\views\SettingsView.Providers.cpp">
+      <Filter>Settings\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="settings\views\ProviderConnectionPicker.cpp">
       <Filter>Settings\Views</Filter>
     </ClCompile>
     <ClCompile Include="settings\views\ProviderModelForm.cpp">

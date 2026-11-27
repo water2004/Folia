@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "settings/storage/ProviderPresets.h"
 #include "agent/ChatView.h"
 #include "agent/ChatControls.h"
 #include "providers/ModelValidation.h"
@@ -117,7 +118,8 @@ namespace winrt::Folia::chat {
             question.role = MessageRole::User;
             question.content.push_back({ContentKind::Text, std::move(prompt)});
             wire.messages = {std::move(instruction), std::move(question)};
-            auto result = folia::platform::models::Request(profile.baseUrl, profile.protocol, wire, ProfileKey(profile), {}, {}, profile.fullUrl);
+            auto result = folia::platform::models::RequestChat(profile.baseUrl, profile.protocol, wire, ProfileKey(profile), {},
+                profile.fullUrl, {.explicitThinkingToggle = Preset(profile.providerType).explicitThinkingToggle}, {});
             if (result.finish != FinishReason::Completed) co_return;
             auto text = PlainText(result.message);
             auto start = text.find_first_not_of(" \t\r\n\"");
@@ -161,8 +163,8 @@ namespace winrt::Folia::chat {
                 partial.documents.push_back(ref);
                 queue.TryEnqueue([weak, ref] { if (auto view = weak.lock(); view && view->busy_) view->transcript_->AddReference(ref); });
             });
-            Options options{model.upstream, model.ResolveEffort(conversation.effort),
-                            conversation.search && CanUseHostedSearch(model, profile)};
+            auto search = HostedSearchFormat(model, profile);
+            Options options{model.upstream, model.ResolveEffort(conversation.effort), conversation.search ? search : std::nullopt};
             // A UTF-8 byte budget conservatively bounds text tokens without guessing the upstream tokenizer.
             if (model.maxInputTokens) options.inputBytes = *model.maxInputTokens;
             if (model.maxOutputTokens) options.outputTokens = *model.maxOutputTokens;
@@ -206,9 +208,10 @@ namespace winrt::Folia::chat {
                     dispatch(kind, text);
                 }
             };
+            folia::ai::ProviderRequestOptions adapter{search.value_or(folia::ai::WebSearchDialect::Standard), Preset(profile.providerType).explicitThinkingToggle};
             auto request = [&](auto const& wire, auto token, folia::ai::agent::Progress const& progress) {
                 return folia::platform::models::RequestChat(profile.baseUrl, profile.protocol, wire, ProfileKey(profile), token,
-                    profile.fullUrl, [&](folia::ai::StreamEvent const& event) {
+                    profile.fullUrl, adapter, [&](folia::ai::StreamEvent const& event) {
                         if (!progress) return;
                         if (event.kind == folia::ai::StreamEventKind::TextDelta) progress(ProgressKind::TextDelta, event.text);
                         if (event.kind == folia::ai::StreamEventKind::ReasoningDelta)
