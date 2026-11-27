@@ -1,6 +1,8 @@
 #pragma once
 #include "agent/ChatStore.h"
 #include "agent/ChatTurnView.h"
+#include "editor/interaction/EditorFrameScheduler.h"
+import folia.platform.editor_scroll_state;
 
 namespace winrt::Folia::chat {
     class ChatTranscript : public std::enable_shared_from_this<ChatTranscript> {
@@ -29,6 +31,8 @@ namespace winrt::Folia::chat {
         void Build();
         void Show(bool navigate);
         void Follow();
+        void AttachScrolling(Microsoft::UI::Xaml::Controls::Grid const& page);
+        void Wheel(Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args);
         void Append(Entry const&, bool latest);
         void UpdateNavigation();
         std::string id_;
@@ -47,5 +51,7 @@ namespace winrt::Folia::chat {
         bool finishing_ = false;
         bool following_ = true, posted_ = false, busy_ = false;
         double offset_ = 0;
+        folia::platform::editor::EditorScrollState wheel_;
+        EditorFrameScheduler wheelFrames_;
     };
 }

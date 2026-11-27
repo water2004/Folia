@@ -13,6 +13,7 @@ namespace winrt::Folia
         ~EditorFrameScheduler();
         void Attach(FrameCallback frameCallback);
         void Detach();
+        bool Running() const noexcept { return renderingToken.value != 0; }
         void Start();
         void Stop();
 

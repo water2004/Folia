@@ -28,6 +28,13 @@ namespace winrt::Folia::implementation {
         return point.X < divider.X + divider.Width / 2 ? EditorGroup::Left : EditorGroup::Right;
     }
 
+    std::optional<EditorGroup> MainWindow::TabStripAt(Windows::Foundation::Point point) {
+        auto group = GroupAtWorkspacePoint(point);
+        auto strip = group == EditorGroup::Left ? TabViewport() : RightTabViewport();
+        if (Contains(ElementBounds(strip, Root()), point)) return group;
+        return {};
+    }
+
     std::optional<MainWindow::GroupDropTarget> MainWindow::GroupDropAt(Windows::Foundation::Point point, std::uint64_t view) {
         auto root = Root();
         auto groupAt = [&](EditorGroup group, bool onStrip) -> std::optional<GroupDropTarget> {
@@ -52,8 +59,7 @@ namespace winrt::Folia::implementation {
             return GroupDropTarget{group, index, std::clamp(marker, clip.X, clip.X + clip.Width), onStrip};
         };
 
-        if (Contains(ElementBounds(TabViewport(), root), point)) return groupAt(EditorGroup::Left, true);
-        if (editorGroups.IsSplit() && Contains(ElementBounds(RightTabViewport(), root), point)) return groupAt(EditorGroup::Right, true);
+        if (auto group = TabStripAt(point)) return groupAt(*group, true);
         if (!Contains(ElementBounds(ReadingMotionFrame(), root), point)) return {};
         return groupAt(GroupAtWorkspacePoint(point), false);
     }

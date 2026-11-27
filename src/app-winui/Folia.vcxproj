@@ -816,6 +816,7 @@
     <ClCompile Include="agent\ChatActivityView.cpp" />
     <ClCompile Include="agent\ChatTurnView.cpp" />
     <ClCompile Include="agent\ChatTranscript.cpp" />
+    <ClCompile Include="agent\ChatTranscript.Scroll.cpp" />
     <ClCompile Include="agent\ChatComposerExtras.cpp" />
     <ClCompile Include="editor\document\EditorDocumentController.Relocation.cpp" />
     <ClCompile Include="editor\document\EditorDocumentController.Save.cpp" />

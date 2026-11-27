@@ -2,6 +2,8 @@
 import std;
 #include "App.xaml.h"
 #include "MainWindow.xaml.h"
+#include <windowsx.h>
+#include <winrt/Microsoft.UI.Content.h>
 #include <winrt/Microsoft.UI.Interop.h>
 
 namespace winrt::Folia::implementation {
@@ -26,7 +28,7 @@ namespace winrt::Folia::implementation {
     LRESULT CALLBACK App::TabMouseHook(int code, WPARAM message, LPARAM data) noexcept {
         if (code == HC_ACTION) {
             try {
-                if (RouteTabMiddleButton(message, *reinterpret_cast<MOUSEHOOKSTRUCT const*>(data))) return 1;
+                if (RouteTabMouse(message, data)) return 1;
             } catch (...) {
                 // Preserve normal message delivery if dispatch fails.
             }
@@ -34,11 +36,13 @@ namespace winrt::Folia::implementation {
         return ::CallNextHookEx(nullptr, code, message, data);
     }
 
-    bool App::RouteTabMiddleButton(WPARAM message, MOUSEHOOKSTRUCT const& mouse) {
+    bool App::RouteTabMouse(WPARAM message, LPARAM data) {
+        auto const& mouse = *reinterpret_cast<MOUSEHOOKSTRUCT const*>(data);
+        const bool wheel = message == WM_MOUSEWHEEL || message == WM_MOUSEHWHEEL;
         const bool release = message == WM_MBUTTONUP || message == WM_NCMBUTTONUP;
         const bool captionPress = mouse.wHitTestCode == HTCAPTION
             && (message == WM_NCMBUTTONDOWN || message == WM_NCMBUTTONDBLCLK);
-        if (!release && !captionPress) return false;
+        if (!wheel && !release && !captionPress) return false;
 
         // WinUI dispatches caption input to a child HWND of the main window.
         auto window = ::GetAncestor(mouse.hwnd, GA_ROOT);
@@ -47,6 +51,14 @@ namespace winrt::Folia::implementation {
         if (!owner) return false;
         auto target = owner->get_strong();
         const Windows::Graphics::PointInt32 point{mouse.pt.x, mouse.pt.y};
+        if (wheel) {
+            // Tab faces occupy non-client drag regions. Wheel input there never reaches XAML.
+            auto root = target->Root().XamlRoot();
+            if (!root) return false;
+            auto group = target->TabStripAt(root.CoordinateConverter().ConvertScreenToLocal(point));
+            auto delta = GET_WHEEL_DELTA_WPARAM(reinterpret_cast<MOUSEHOOKSTRUCTEX const*>(data)->mouseData);
+            return group && target->ScrollTabsWithWheel(message == WM_MOUSEHWHEEL ? -delta : delta, *group);
+        }
         return release ? target->ReleaseTabMiddlePress(point) : target->BeginTabMiddlePress(point);
     }
 

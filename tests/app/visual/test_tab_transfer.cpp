@@ -6,6 +6,7 @@
 #include <wil/resource.h>
 #include "visual_window.h"
 #include "EditorPixelCapture.h"
+#include "MouseInput.h"
 #include "MainWindow.xaml.h"
 #include "windows/media/images/ImageSource.h"
 #include "workspace/WorkspaceIcons.h"
@@ -88,7 +89,7 @@ namespace winrt::Folia::implementation {
         }
         static void PointerBegin(Microsoft::UI::Xaml::Window const& window, Windows::Graphics::PointInt32 point) { Impl(window)->BeginTabPointerGesture(point); }
         static bool MiddleMouse(WPARAM message, MOUSEHOOKSTRUCT const& mouse) {
-            return App::RouteTabMiddleButton(message, mouse);
+            return App::RouteTabMouse(message, reinterpret_cast<LPARAM>(&mouse));
         }
         static void Sidebar(Microsoft::UI::Xaml::Window const& window, bool open) { Impl(window)->SetSidebarOpen(open); }
         static bool ScrollTabs(Microsoft::UI::Xaml::Window const& window, int delta, EditorGroup group = EditorGroup::Left) {
@@ -892,6 +893,48 @@ namespace {
             Pump([&] { return addX() > overflowAdd + 175.; });
             expect(viewport.ActualWidth() > oldWidth + 180.);
             expect(tabs.ActualWidth() <= viewport.ActualWidth() + 1.);
+        };
+        "real wheel bursts reverse immediately at either end of a tab strip"_test = [] {
+            using winrt::Windows::Foundation::Point;
+            OwnedWindow owned(App()->CreateMainWindow());
+            auto window = owned.window;
+            auto root = window.Content().as<FrameworkElement>();
+            const auto scale = root.XamlRoot().RasterizationScale();
+            window.AppWindow().Resize({static_cast<int>(720 * scale), static_cast<int>(480 * scale)});
+            for (int i = 0; i < 22; ++i) Access::New(window);
+            auto viewer = Access::TabScroller(window);
+            Pump([&] { return viewer.ScrollableWidth() > viewer.ViewportWidth() * 2; });
+            auto presenter = viewer.as<Controls::IControlProtected>().GetTemplateChild(L"ScrollContentPresenter").as<FrameworkElement>();
+            app_tests::MouseInput input(window);
+            input.Move(presenter, Point{static_cast<float>(presenter.ActualWidth() / 2.), 16});
+            auto settle = [] {
+                const auto until = std::chrono::steady_clock::now() + std::chrono::milliseconds(650);
+                Pump([&] { return std::chrono::steady_clock::now() >= until; });
+            };
+            auto wheel = [&](int delta, int count) {
+                input.Wheel(delta, count);
+                settle();
+                return viewer.HorizontalOffset();
+            };
+            settle();
+            auto selection = Access::Tabs(window).SelectedItem();
+            const auto end = viewer.ScrollableWidth();
+            const auto step = viewer.ViewportWidth() / 3.;
+            for (const auto direction : {1, -1}) {
+                const auto edge = direction > 0 ? 0. : end;
+                viewer.ChangeView(edge, nullptr, nullptr, true);
+                settle();
+                auto blocked = wheel(direction * WHEEL_DELTA, 3);
+                auto one = wheel(-direction * WHEEL_DELTA, 1);
+                auto two = wheel(-direction * WHEEL_DELTA, 1);
+                auto burst = wheel(-direction * WHEEL_DELTA, 2);
+                auto trace = std::format("edge={} offsets={},{},{},{}", edge, blocked, one, two, burst);
+                expect(std::abs(blocked - edge) <= 1.) << trace;
+                expect(std::abs(one - (edge + direction * step)) <= 2.) << trace;
+                expect((two - one) * direction >= step - 2.) << trace;
+                expect((burst - two) * direction >= 2 * step - 2.) << trace;
+            }
+            expect(Access::Tabs(window).SelectedItem() == selection);
         };
         "overflowing right tabs track arrow clicks and scroll boundaries"_test = [] {
             using winrt::Folia::EditorGroup;

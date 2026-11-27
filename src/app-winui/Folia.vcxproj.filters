@@ -351,6 +351,9 @@
     <ClCompile Include="agent\ChatTranscript.cpp">
       <Filter>Agent Chat</Filter>
     </ClCompile>
+    <ClCompile Include="agent\ChatTranscript.Scroll.cpp">
+      <Filter>Agent Chat</Filter>
+    </ClCompile>
     <ClCompile Include="agent\ChatComposerExtras.cpp">
       <Filter>Agent Chat</Filter>
     </ClCompile>

@@ -22,14 +22,6 @@ namespace winrt::Folia::implementation {
             TabScrollArrow{L"NextTabScrollArrow", L"ScrollTabsRight", 1.},
         };
 
-        bool ScrollTabStrip(ScrollViewer const& viewer, double steps) {
-            if (!viewer || !steps || viewer.ScrollableWidth() <= 0.) return false;
-            const auto offset = std::clamp(viewer.HorizontalOffset() + steps * viewer.ViewportWidth() / 3.,
-                0., viewer.ScrollableWidth());
-            if (offset != viewer.HorizontalOffset()) viewer.ChangeView(offset, nullptr, nullptr, true);
-            return true;
-        }
-
         void UpdateTabScrollArrows(ScrollViewer const& viewer) {
             auto parts = viewer.as<IControlProtected>();
             const auto offset = viewer.HorizontalOffset();
@@ -271,20 +263,29 @@ namespace winrt::Folia::implementation {
         return GroupTabs(group).as<IControlProtected>().GetTemplateChild(L"AddButton").try_as<Button>();
     }
 
+    bool MainWindow::ScrollTabStrip(double steps, EditorGroup group) {
+        auto& parts = tabStripParts[static_cast<std::size_t>(group)];
+        auto viewer = parts.scroller.get();
+        if (!viewer || !steps || viewer.ScrollableWidth() <= 0.) return false;
+        // ChangeView publishes its offset asynchronously. Each wheel pulse
+        // starts from the last requested position, including a clamped endpoint.
+        const auto from = std::clamp(parts.requestedOffset.value_or(viewer.HorizontalOffset()), 0., viewer.ScrollableWidth());
+        const auto to = std::clamp(from + steps * viewer.ViewportWidth() / 3., 0., viewer.ScrollableWidth());
+        if (to != from) {
+            parts.requestedOffset = to;
+            if (!viewer.ChangeView(to, nullptr, nullptr, true)) parts.requestedOffset.reset();
+        }
+        return true;
+    }
+
     bool MainWindow::ScrollTabsWithWheel(int delta, EditorGroup group) {
-        return ScrollTabStrip(TabStripScroller(group), -static_cast<double>(delta) / WHEEL_DELTA);
+        return ScrollTabStrip(-static_cast<double>(delta) / WHEEL_DELTA, group);
     }
 
     void MainWindow::RegisterGroupTabs(EditorGroup group) {
         auto tabs = GroupTabs(group);
         tabs.TabItemsSource(group == EditorGroup::Left ? tabSource : rightTabSource);
         tabs.AddTabButtonClick(WindowEvent([this, group](auto const&, auto const&) { NewDocumentInGroup(group); }));
-        tabs.AddHandler(UIElement::PointerWheelChangedEvent(), box_value(Input::PointerEventHandler(
-            WindowEvent([this, group](auto const& sender, Input::PointerRoutedEventArgs const& args) {
-                auto properties = args.GetCurrentPoint(sender.template as<UIElement>()).Properties();
-                if ((!properties.IsHorizontalMouseWheel() || !args.Handled()) && ScrollTabsWithWheel(properties.MouseWheelDelta(), group))
-                    args.Handled(true);
-            }))), true);
         tabs.Loaded(WindowEvent([this, group](auto const&, auto const&) { PrepareGroupTabStrip(group); }));
         tabs.SelectionChanged(WindowEvent([this, group](auto const&, auto const&) {
             RefreshTabCaptionRegion();
@@ -340,15 +341,25 @@ namespace winrt::Folia::implementation {
             auto label = Localize(arrow.label);
             Automation::AutomationProperties::SetName(button, label);
             ToolTipService::SetToolTip(button, box_value(label));
-            button.Click([weak = make_weak(viewer), direction = arrow.direction](auto const&, auto const&) {
-                if (auto scroll = weak.get()) ScrollTabStrip(scroll, direction);
-            });
+            button.Click(WindowEvent([this, group, direction = arrow.direction](auto const&, auto const&) {
+                ScrollTabStrip(direction, group);
+            }));
         }
         UpdateTabScrollArrows(viewer);
         if (viewer == parts.scroller.get()) return;
         parts.scroller = make_weak(viewer);
-        viewer.ViewChanged(WindowEvent([this](auto const& sender, auto const&) {
-            UpdateTabScrollArrows(sender.template as<ScrollViewer>());
+        parts.requestedOffset.reset();
+        auto content = scrollParts.GetTemplateChild(L"ScrollContentPresenter").as<FrameworkElement>();
+        content.PointerWheelChanged(WindowEvent([this, group](auto const& sender, Input::PointerRoutedEventArgs const& args) {
+            auto properties = args.GetCurrentPoint(sender.template as<UIElement>()).Properties();
+            const auto delta = properties.MouseWheelDelta();
+            if (ScrollTabsWithWheel(properties.IsHorizontalMouseWheel() ? -delta : delta, group)) args.Handled(true);
+        }));
+        viewer.ViewChanged(WindowEvent([this, group](auto const& sender, auto const&) {
+            auto scroll = sender.template as<ScrollViewer>();
+            auto& target = tabStripParts[static_cast<std::size_t>(group)].requestedOffset;
+            if (target && std::abs(scroll.HorizontalOffset() - *target) < 1.) target.reset();
+            UpdateTabScrollArrows(scroll);
             UpdateReadingGroupCorners();
             UpdateSelectedTabBackdrop();
             RefreshTabCaptionRegion();
@@ -399,6 +410,7 @@ namespace winrt::Folia::implementation {
                     if (auto selected = tabs.ContainerFromItem(tabs.SelectedItem()).try_as<TabViewItem>(); selected && selected.IsLoaded()) {
                         BringIntoViewOptions options;
                         options.AnimationDesired(false);
+                        window->tabStripParts[static_cast<std::size_t>(group)].requestedOffset.reset();
                         selected.StartBringIntoView(options);
                     }
                 }

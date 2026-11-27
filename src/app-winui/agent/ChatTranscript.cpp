@@ -127,20 +127,7 @@ namespace winrt::Folia::chat {
         latest_.Visibility(Visibility::Collapsed);
         Put(root_, latest_, 1);
         latest_.Click([weak](auto const&, auto const&) { if (auto view = weak.lock()) view->Latest(); });
-        scroll_.ViewChanging([weak](auto const&, ScrollViewerViewChangingEventArgs const& args) {
-            if (auto view = weak.lock(); view && args.NextView().VerticalOffset() + 1 < view->scroll_.VerticalOffset())
-                view->following_ = false;
-        });
-        scroll_.ViewChanged([weak](auto const&, auto const&) {
-            if (auto view = weak.lock()) {
-                auto y = view->scroll_.VerticalOffset();
-                if (y + 1 < view->offset_) view->following_ = false;
-                if (y >= view->scroll_.ScrollableHeight() - 2 && view->boundaries_.empty()) view->following_ = true;
-                view->offset_ = y;
-                view->UpdateNavigation();
-            }
-        });
-        column_.SizeChanged([weak](auto const&, auto const&) { if (auto view = weak.lock()) view->Follow(); });
+        AttachScrolling(page);
     }
 
     void ChatTranscript::UpdateNavigation() {
@@ -155,24 +142,6 @@ namespace winrt::Folia::chat {
         if (appearing) Reveal(latest_, 0, 5);
     }
 
-    void ChatTranscript::Follow() {
-        if (posted_ || !following_ || !boundaries_.empty()) return;
-        posted_ = true;
-        root_.DispatcherQueue().TryEnqueue([weak = weak_from_this()] {
-            if (auto view = weak.lock()) {
-                view->posted_ = false;
-                if (view->following_ && view->boundaries_.empty())
-                    view->scroll_.ChangeView(nullptr, view->scroll_.ScrollableHeight(), nullptr, true);
-            }
-        });
-    }
-
-    void ChatTranscript::Latest() {
-        following_ = true;
-        if (!boundaries_.empty()) { boundaries_.clear(); Show(false); }
-        Follow();
-        UpdateNavigation();
-    }
     void ChatTranscript::SetTheme(folia::ThemeProfile const& theme) {
         appearance_->SetTheme(theme);
         RefreshAppearance();
@@ -193,7 +162,7 @@ namespace winrt::Folia::chat {
         latest_.Margin({0, 0, 0, inset + 3});
     }
     void ChatTranscript::Refresh(bool latest) {
-        if (latest) { boundaries_.clear(); following_ = true; }
+        if (latest) { wheelFrames_.Stop(); boundaries_.clear(); following_ = true; }
         if (boundaries_.empty()) Show(false);
     }
     Entry const* ChatTranscript::LastReply() const {
@@ -228,6 +197,7 @@ namespace winrt::Folia::chat {
         live_.Visibility(busy_ && boundaries_.empty() ? Visibility::Visible : Visibility::Collapsed);
         working_.Visibility(live_.Visibility());
         if (navigate) {
+            wheelFrames_.Stop();
             following_ = false;
             scroll_.ChangeView(nullptr, 0., nullptr, true);
         } else Follow();

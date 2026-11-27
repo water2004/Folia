@@ -12,6 +12,7 @@
 #include "App.xaml.h"
 #include "MainWindow.xaml.h"
 #include "visual_window.h"
+#include "MouseInput.h"
 #include "../support/CompletionHttpServer.h"
 #include "../support/DocumentControllerFixture.h"
 #include "localization/Localization.h"
@@ -506,6 +507,63 @@ namespace {
             picker.SetReasoning({}, {});
             expect(chosen.size() == 1_u);
             flyout.Hide();
+        };
+
+        "the chat wheel animates reading-distance steps and reverses away from the live edge"_test = [] {
+            auto conversation = chat::NewConversation("Wheel fixture");
+            auto cleanup = wil::scope_exit([&] { chat::DeleteConversation(conversation.id); });
+            std::string markdown;
+            for (int i = 0; i < 80; ++i) markdown += "Text to scroll through.\n\n";
+            chat::AppendEntry(conversation.id, {folia::ai::MessageRole::Assistant, markdown});
+
+            auto window = visual_tests::Window();
+            auto shell = Access::Impl(window);
+            Access::Open(shell, conversation.id);
+            auto close = wil::scope_exit([&] { Access::Close(shell); });
+            auto host = Access::Host(shell);
+            Pump([&] { return host.Content() != nullptr; });
+            ScrollViewer viewer{nullptr};
+            Pump([&] {
+                viewer = Find<ScrollViewer>(host.Content().try_as<DependencyObject>(), [](auto const& item) { return item.Name() == L"ConversationScroll"; });
+                return viewer && viewer.IsLoaded() && viewer.ScrollableHeight() > 500
+                    && viewer.ScrollableHeight() - viewer.VerticalOffset() < 1;
+            });
+            app_tests::MouseInput mouse(window);
+            mouse.Move(viewer, {static_cast<float>(viewer.ActualWidth() * .5), static_cast<float>(viewer.ActualHeight() * .35)});
+            using Clock = std::chrono::steady_clock;
+            std::vector<double> distances;
+            auto bottom = viewer.VerticalOffset();
+            // Windows can combine or accelerate consecutive physical wheel pulses.
+            // The reading curve consumes the delta delivered by each routed event.
+            double expected = bottom;
+            auto wheelEvent = winrt::box_value(Input::PointerEventHandler([&](auto const&, Input::PointerRoutedEventArgs const& e) {
+                expected = std::clamp(expected - e.GetCurrentPoint(viewer).Properties().MouseWheelDelta(), 0., viewer.ScrollableHeight());
+            }));
+            viewer.AddHandler(UIElement::PointerWheelChangedEvent(), wheelEvent, true);
+            auto detach = wil::scope_exit([&] { viewer.RemoveHandler(UIElement::PointerWheelChangedEvent(), wheelEvent); });
+            auto changed = viewer.ViewChanged(winrt::auto_revoke, [&](auto const&, auto const&) {
+                distances.push_back(bottom - viewer.VerticalOffset());
+            });
+            auto settle = [] {
+                auto until = Clock::now() + std::chrono::milliseconds(1100);
+                Pump([&] { return Clock::now() >= until; });
+            };
+            settle();
+            mouse.Wheel(WHEEL_DELTA);
+            settle();
+            expect(std::abs(bottom - viewer.VerticalOffset() - WHEEL_DELTA) < 1.)
+                << std::format("one notch moved {} DIPs", bottom - viewer.VerticalOffset());
+            expect(std::ranges::count_if(distances, [](double d) { return d > 2. && d < 118.; }) > 2)
+                << "the reading curve presents intermediate positions";
+            mouse.Wheel(WHEEL_DELTA, 2);
+            settle();
+            expect(expected < bottom - WHEEL_DELTA && std::abs(expected - viewer.VerticalOffset()) < 1.) << "consecutive pulses accumulate the delivered distance";
+            mouse.Wheel(-WHEEL_DELTA, 5);
+            settle();
+            expect(std::abs(bottom - viewer.VerticalOffset()) < 1.) << std::format("return ended {} DIPs from bottom", bottom - viewer.VerticalOffset());
+            mouse.Wheel(WHEEL_DELTA / 4, 2);
+            settle();
+            expect(expected < bottom && std::abs(expected - viewer.VerticalOffset()) < 1.) << "fractional pulses reverse away from the live edge";
         };
 
         "agent activity stays between its text passages, live and after reopening"_test = [] {

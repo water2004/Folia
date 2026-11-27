@@ -70,6 +70,7 @@ namespace winrt::Folia::implementation
         void RegisterTabTransferHandlers();
         struct GroupDropTarget { EditorGroup group; std::size_t index; float indicatorX; bool onStrip; };
         EditorGroup GroupAtWorkspacePoint(Windows::Foundation::Point point);
+        std::optional<EditorGroup> TabStripAt(Windows::Foundation::Point point);
         std::optional<GroupDropTarget> GroupDropAt(Windows::Foundation::Point point, std::uint64_t view);
         void SetTabDropIndicator(std::optional<GroupDropTarget> const& drop);
         void StartNativeTabDrag(Microsoft::UI::Input::EnteringMoveSizeEventArgs const&);
@@ -129,6 +130,7 @@ namespace winrt::Folia::implementation
         void CancelTabMiddlePress();
         Microsoft::UI::Xaml::Controls::TabView GroupTabs(EditorGroup group);
         Microsoft::UI::Xaml::Controls::ScrollViewer TabStripScroller(EditorGroup group = EditorGroup::Left);
+        bool ScrollTabStrip(double steps, EditorGroup group);
         bool ScrollTabsWithWheel(int delta, EditorGroup group = EditorGroup::Left);
         void RegisterGroupTabs(EditorGroup group);
         void PrepareGroupTabStrip(EditorGroup group);
@@ -256,6 +258,7 @@ namespace winrt::Folia::implementation
             winrt::weak_ref<Microsoft::UI::Xaml::FrameworkElement> list;
             winrt::weak_ref<Microsoft::UI::Xaml::Controls::ScrollViewer> scroller;
             std::array<winrt::weak_ref<Microsoft::UI::Xaml::Controls::Primitives::RepeatButton>, 2> arrows;
+            std::optional<double> requestedOffset;
         };
         std::array<TabStripParts, 2> tabStripParts;
         winrt::Folia::FolderExplorerController folderExplorer;

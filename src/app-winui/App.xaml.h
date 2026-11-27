@@ -31,7 +31,7 @@ namespace winrt::Folia::implementation
         void OpenWorkspaceWindows(winrt::Folia::WorkspaceLaunchRequest const& request);
         void OnWindowClosed(Microsoft::UI::WindowId id);
         static LRESULT CALLBACK TabMouseHook(int code, WPARAM message, LPARAM data) noexcept;
-        static bool RouteTabMiddleButton(WPARAM message, MOUSEHOOKSTRUCT const& mouse);
+        static bool RouteTabMouse(WPARAM message, LPARAM data);
         Microsoft::Windows::AppLifecycle::AppInstance activationInstance{nullptr};
         Microsoft::Windows::AppLifecycle::AppInstance::Activated_revoker activationSubscription;
         wil::unique_hhook tabMouseHook;
