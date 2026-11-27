@@ -111,6 +111,7 @@ namespace winrt::Folia
         void SetScrollOffset(float value);
         float ScrollOffset() const;
         float MaximumScrollOffset() const;
+        float DocumentHeight() const noexcept { return totalDocumentHeight; }
         float ViewportHeight() const;
         float ViewportWidth() const;
         void FocusCaret(bool focused) {

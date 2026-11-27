@@ -8,6 +8,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
                 <ResourceDictionary Source="theme/Settings.xaml"/>
+                <ResourceDictionary Source="agent/ChatChrome.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <x:Double x:Key="TabViewItemMinWidth">104</x:Double>
             <x:Double x:Key="TabViewItemMaxWidth">200</x:Double>

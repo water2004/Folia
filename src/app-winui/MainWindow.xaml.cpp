@@ -136,6 +136,7 @@ namespace winrt::Folia::implementation
     winrt::hstring MainWindow::LocalizedDocumentName()
     {
         auto active = workspaceDocuments.Active();
+        if (active->kind == WorkspaceTabKind::Chat) return to_hstring(active->chatTitle);
         if (active->editor && editorSession().HasFile()) return editorSession().DisplayName();
         if (!active->path.empty()) return winrt::hstring(active->path.filename().c_str());
         return Localize(SettingsActive() ? L"Settings" : L"UntitledMarkdown");

@@ -130,6 +130,7 @@ namespace winrt::Folia::implementation {
 
     void MainWindow::SplitEditor() {
         if (closePending || closingDocument || relocatingFiles || SettingsActive() || editorGroups.IsSplit()) return;
+        if (workspaceDocuments.Active()->kind == WorkspaceTabKind::Chat) return;
         SaveEditorView(presentedEditorView);
         auto view = editorGroups.Split();
         if (!view) return;
@@ -260,7 +261,8 @@ namespace winrt::Folia::implementation {
             SettingsViewHost().Visibility(settings ? Visibility::Visible : Visibility::Collapsed);
         }
         const bool image = document->kind == WorkspaceTabKind::Image;
-        auto name = settings ? Localize(L"Settings") : document->path.empty()
+        auto name = document->kind == WorkspaceTabKind::Chat ? to_hstring(document->chatTitle)
+            : settings ? Localize(L"Settings") : document->path.empty()
             ? Localize(L"UntitledMarkdown") : winrt::hstring(document->path.filename().c_str());
         OtherToolbarFilename().Text(name);
         auto editor = document->editor.get();

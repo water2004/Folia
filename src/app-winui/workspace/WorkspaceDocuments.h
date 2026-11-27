@@ -7,7 +7,7 @@
 
 namespace winrt::Folia {
     enum class WorkspaceOpenMode { Preview, Keep };
-    enum class WorkspaceTabKind { Editor, Image, Settings };
+    enum class WorkspaceTabKind { Editor, Image, Settings, Chat };
 
     std::uint64_t AllocateWorkspaceItemId();
 
@@ -31,6 +31,7 @@ namespace winrt::Folia {
         const WorkspaceTabKind kind;
         const std::unique_ptr<WorkspaceEditorDocument> editor;
         std::filesystem::path path;
+        std::string chatId, chatTitle;
         bool kept = false;
     };
 
@@ -53,6 +54,8 @@ namespace winrt::Folia {
         std::shared_ptr<WorkspaceDocument> New(WorkspaceOpenMode mode = WorkspaceOpenMode::Keep);
         std::shared_ptr<WorkspaceDocument> FindSettings() const noexcept;
         std::shared_ptr<WorkspaceDocument> OpenSettings();
+        std::shared_ptr<WorkspaceDocument> FindChat(std::string_view id) const noexcept;
+        std::shared_ptr<WorkspaceDocument> OpenChat(std::string id, std::string title);
         WorkspaceOpenResult Open(std::filesystem::path path, WorkspaceOpenMode mode,
             std::function<bool(std::uint64_t)> const& canReplacePreview = {});
         void Activate(std::uint64_t id);

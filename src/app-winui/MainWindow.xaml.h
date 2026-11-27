@@ -29,6 +29,8 @@
 #include "workspace/TabDragPresentation.h"
 #include "workspace/WorkspaceSidebarMotion.h"
 
+namespace winrt::Folia::chat { class ChatView; }
+
 namespace winrt::Folia::implementation
 {
     struct MainWindow : MainWindowT<MainWindow>
@@ -51,6 +53,7 @@ namespace winrt::Folia::implementation
             };
         }
         friend struct WorkspaceWindowTestAccess;
+        friend struct AgentChatWindowTestAccess;
         friend struct CompletionWindowTestAccess;
         friend struct TextInputWindowTestAccess;
         friend struct App;
@@ -145,7 +148,15 @@ namespace winrt::Folia::implementation
         Microsoft::UI::Xaml::Controls::Button NewTabButton(EditorGroup group = EditorGroup::Left);
         void ApplyBarLayout();
         void RegisterWorkspaceLayout();
-        void SelectWorkspacePane(bool outline);
+        enum class WorkspacePane { Files, Outline, Chats };
+        void SelectWorkspacePane(WorkspacePane);
+        void RegisterAgentChats();
+        void RefreshChatList();
+        void OpenAgentChat(std::string id = {});
+        void UpdateAgentChatPages();
+        void UpdateAgentChatTheme();
+        void ReleaseClosedAgentChats();
+        winrt::fire_and_forget ManageAgentChat(std::string id, bool remove);
         void SetSidebarOpen(bool open);
         void UpdateWorkspaceAppearance(WorkspaceAppearance const& settings);
         void EnsureSelectedTabVisible();
@@ -272,7 +283,9 @@ namespace winrt::Folia::implementation
         std::optional<WindowMaterial> appliedMaterial;
         std::optional<WindowMaterial> appliedReadingMaterial;
         bool selectedTabBackdropUpdatePending = false;
-        bool outlineSelected = false;
+        WorkspacePane workspacePane = WorkspacePane::Files;
+        std::vector<std::string> chatListIds;
+        std::unordered_map<std::uint64_t, std::shared_ptr<chat::ChatView>> agentChatViews;
         bool updatingRailSelection = false;
         TabDragPresentation dragPresentation;
         std::optional<float> tabGrabOffset;

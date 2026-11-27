@@ -55,7 +55,8 @@ namespace winrt::Folia::implementation {
         if (!header) return;
         auto iconHost = header.Children().GetAt(0).as<ContentControl>();
         const bool settings = document.kind == WorkspaceTabKind::Settings;
-        auto icon = document.kind == WorkspaceTabKind::Image ? WorkspaceIcon::Image : document.path.empty()
+        const bool chat = document.kind == WorkspaceTabKind::Chat;
+        auto icon = chat ? WorkspaceIcon::Chat : document.kind == WorkspaceTabKind::Image ? WorkspaceIcon::Image : document.path.empty()
             ? WorkspaceIcon::Markdown : WorkspaceFileIcon(ClassifyWorkspaceFile(document.path));
         auto iconId = settings ? -2 : static_cast<int>(icon);
         if (winrt::unbox_value_or<int>(iconHost.Tag(), -1) != iconId) {
@@ -66,7 +67,7 @@ namespace winrt::Folia::implementation {
         }
         auto title = header.Children().GetAt(1).as<TextBlock>();
         auto dirty = header.Children().GetAt(2).as<TextBlock>();
-        auto name = settings ? Localize(L"Settings") : document.path.empty()
+        auto name = chat ? to_hstring(document.chatTitle) : settings ? Localize(L"Settings") : document.path.empty()
             ? Localize(L"UntitledMarkdown") : winrt::hstring(document.path.filename().c_str());
         auto label = name;
         for (auto const& other : workspaceDocuments.Items()) {
@@ -84,6 +85,7 @@ namespace winrt::Folia::implementation {
 
     void MainWindow::RefreshDocumentTabs() {
         if (updatingTabs || windowClosed) return;
+        ReleaseClosedAgentChats();
         updatingTabs = true;
         struct Reset { bool& value; ~Reset() { value = false; } } reset{updatingTabs};
         std::vector<std::uint64_t> removed;

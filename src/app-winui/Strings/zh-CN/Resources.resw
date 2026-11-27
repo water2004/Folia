@@ -145,8 +145,6 @@
   <data name="OpenSourceProject" xml:space="preserve"><value>折笺是一个开源项目</value></data>
   <data name="OpenSourceDescription" xml:space="preserve"><value>欢迎查看源码、反馈问题，并一起打磨专注而原生的 Markdown 编辑体验。</value></data>
   <data name="LicenseSummary" xml:space="preserve"><value>MIT 许可证 · 每份构建均附带完整第三方许可清单</value></data>
-  <data name="BuiltForWindows" xml:space="preserve"><value>为 Windows 而生</value></data>
-  <data name="TechnologyDescription" xml:space="preserve"><value>WinUI 3 外壳 · C++23 文档引擎 · DirectWrite/Direct2D 渲染 · 原生数学公式和 Mermaid</value></data>
   <data name="FollowWindowsTheme" xml:space="preserve"><value>跟随 Windows</value></data>
   <data name="AutomaticThemeDescription" xml:space="preserve"><value>自动切换浅色、深色和高对比度</value></data>
   <data name="BuiltIn" xml:space="preserve"><value>内置</value></data>
@@ -160,6 +158,7 @@
   <data name="CustomThemeRemoved" xml:space="preserve"><value>自定义主题已移除</value></data>
   <data name="ThemeApplied" xml:space="preserve"><value>主题已应用</value></data>
   <data name="SettingsFallback" xml:space="preserve"><value>设置已回退：{0}</value></data>
+  <data name="AIModelMigrationFailed" xml:space="preserve"><value>无法迁移旧版 AI 模型：{0}</value></data>
   <data name="UnableSaveSettings" xml:space="preserve"><value>无法保存设置：{0}</value></data>
   <data name="IgnoredDuplicateTheme" xml:space="preserve"><value>已忽略重复的主题 ID：{0}</value></data>
   <data name="UnableEnumerateThemeDirectory" xml:space="preserve"><value>无法枚举主题目录：{0}</value></data>
@@ -368,9 +367,7 @@
   <data name="AIEagernessDescription" xml:space="preserve"><value>通过提示词控制是否主动建议，与模型推理力度独立。积极档会在存在多种写法时尝试简短续写，但不保证每次都有建议。</value></data>
   <data name="AIReasoning" xml:space="preserve"><value>推理力度</value></data>
   <data name="AIReasoningDefault" xml:space="preserve"><value>服务默认</value></data>
-  <data name="AIReasoningChoices" xml:space="preserve"><value>选择档位</value></data>
   <data name="AIModelChoices" xml:space="preserve"><value>选择模型</value></data>
-  <data name="AIReasoningDescription" xml:space="preserve"><value>可选择上游声明的思考档位，也可手动填写。留空或选择服务默认时不发送力度参数。</value></data>
   <data name="AIContextKB" xml:space="preserve"><value>上下文大小（KB，1–64）</value></data>
   <data name="AIOutputTokens" xml:space="preserve"><value>最大输出 token（16–4096）</value></data>
   <data name="AIBudgetInvalid" xml:space="preserve"><value>请输入整数：上下文为 1–64 KB，输出为 16–4096 token。</value></data>
@@ -387,8 +384,6 @@
   <data name="AIFetchModelsBusy" xml:space="preserve"><value>获取中…</value></data>
   <data name="AINoModels" xml:space="preserve"><value>上游未返回可用模型，可自行填写模型 ID。</value></data>
   <data name="AIModelsFetched" xml:space="preserve"><value>已获取 {0} 个模型。可下拉选择或自行填写。</value></data>
-  <data name="AIReasoningSelectModel" xml:space="preserve"><value>可获取模型以读取上游声明的思考档位，也可手动填写。留空或选择服务默认时不发送力度参数。</value></data>
-  <data name="AIReasoningMissingMetadata" xml:space="preserve"><value>上游未提供可用的思考档位信息，可手动填写。留空或选择服务默认时不发送力度参数。</value></data>
   <data name="AIExplicitCache" xml:space="preserve"><value>显式提示缓存</value></data>
   <data name="AIExplicitCacheDescription" xml:space="preserve"><value>仅在服务和模型支持显式缓存断点时开启。Folia 在稳定上下文末尾标记断点，是否写入或命中缓存及相关费用由服务决定。</value></data>
   <data name="ShortcutScopeTable" xml:space="preserve"><value>表格区域</value></data>
@@ -504,4 +499,122 @@
   <data name="TableDuplicateRows" xml:space="preserve"><value>复制行到下方</value></data>
   <data name="TableDuplicateColumns" xml:space="preserve"><value>复制列到右侧</value></data>
   <data name="TableDelete" xml:space="preserve"><value>删除表格</value></data>
+  <data name="ChatSessions" xml:space="preserve"><value>会话</value></data>
+  <data name="ChatNew" xml:space="preserve"><value>新建聊天</value></data>
+  <data name="ChatRename" xml:space="preserve"><value>重命名会话</value></data>
+  <data name="ChatDelete" xml:space="preserve"><value>删除会话</value></data>
+  <data name="ChatDeleteConfirm" xml:space="preserve"><value>从此设备删除此会话及其所有消息？</value></data>
+  <data name="ChatModels" xml:space="preserve"><value>模型</value></data>
+  <data name="ChatProviderName" xml:space="preserve"><value>供应商名称</value></data>
+  <data name="ChatAddProvider" xml:space="preserve"><value>添加供应商</value></data>
+  <data name="ChatRemoveProvider" xml:space="preserve"><value>移除供应商</value></data>
+  <data name="ChatRemoveProviderConfirm" xml:space="preserve"><value>移除此供应商、旗下模型和保存的 API Key？会话记录会保留。</value></data>
+  <data name="ChatKeepProviderKey" xml:space="preserve"><value>留空则保留已保存的密钥</value></data>
+  <data name="ChatClearProviderKey" xml:space="preserve"><value>清除已保存的密钥</value></data>
+  <data name="ChatUndoClearProviderKey" xml:space="preserve"><value>撤销清除</value></data>
+  <data name="ChatClearProviderKeyPending" xml:space="preserve"><value>保存供应商后清除密钥。</value></data>
+  <data name="ChatInvalidProfile" xml:space="preserve"><value>请填写供应商名称，最长 128 字节。</value></data>
+  <data name="ChatFetchingModels" xml:space="preserve"><value>正在获取模型…</value></data>
+  <data name="ChatOlderMessages" xml:space="preserve"><value>显示更早的消息</value></data>
+  <data name="ChatSources" xml:space="preserve"><value>来源</value></data>
+  <data name="ChatEmpty" xml:space="preserve"><value>今天想做什么？</value></data>
+  <data name="ChatPrompt" xml:space="preserve"><value>描述你想做的事</value></data>
+  <data name="ChatAllowOpenTabs" xml:space="preserve"><value>允许读取打开的 Markdown 页签</value></data>
+  <data name="ChatAllowSearch" xml:space="preserve"><value>启用供应商联网搜索</value></data>
+  <data name="ChatPermissionHint" xml:space="preserve"><value>按需读取的数据可能会发给模型供应商。可在两轮对话之间调整权限。</value></data>
+  <data name="ChatNoWorkspace" xml:space="preserve"><value>无工作区访问权限</value></data>
+  <data name="ChatUseCurrentFolder" xml:space="preserve"><value>允许读取当前打开的文件夹</value></data>
+  <data name="ChatChooseFolder" xml:space="preserve"><value>选择其他文件夹…</value></data>
+  <data name="ChatNoCurrentFolder" xml:space="preserve"><value>请先在本窗口打开文件夹。</value></data>
+  <data name="ChatStop" xml:space="preserve"><value>停止</value></data>
+  <data name="ChatSend" xml:space="preserve"><value>发送</value></data>
+  <data name="ChatYou" xml:space="preserve"><value>你</value></data>
+  <data name="ChatAssistant" xml:space="preserve"><value>Agent</value></data>
+  <data name="ChatNeedsProvider" xml:space="preserve"><value>请在「设置 → AI 供应商」中添加模型，然后在输入框下方选择。</value></data>
+  <data name="ChatInvalidPrompt" xml:space="preserve"><value>消息超过长度限制。</value></data>
+  <data name="ChatAlreadyRunning" xml:space="preserve"><value>此会话正在另一个页签运行。</value></data>
+  <data name="ChatWorking" xml:space="preserve"><value>正在处理…</value></data>
+  <data name="ChatCompacting" xml:space="preserve"><value>正在整理较早的对话…</value></data>
+  <data name="ChatReading" xml:space="preserve"><value>正在读取已授权的上下文…</value></data>
+  <data name="ChatStopped" xml:space="preserve"><value>已停止</value></data>
+  <data name="ChatProviders" xml:space="preserve"><value>AI 供应商</value></data>
+  <data name="ChatProvidersDescription" xml:space="preserve"><value>管理供应商连接，以及聊天和输入预测可用的模型。</value></data>
+  <data name="ChatAddModel" xml:space="preserve"><value>添加模型</value></data>
+  <data name="ChatModelName" xml:space="preserve"><value>显示名称</value></data>
+  <data name="ChatUpstreamModel" xml:space="preserve"><value>上游模型 ID</value></data>
+  <data name="ChatModelWebSearch" xml:space="preserve"><value>模型支持网页搜索工具</value></data>
+  <data name="ChatModelWebSearchHint" xml:space="preserve"><value>由上游服务对该模型提供，可查看模型的接口文档。</value></data>
+  <data name="ChatInvalidModel" xml:space="preserve"><value>请检查上游模型 ID、显示名称和可选的 token 上限。</value></data>
+  <data name="ChatPickModel" xml:space="preserve"><value>选择模型</value></data>
+  <data name="ChatEffortNone" xml:space="preserve"><value>无</value></data>
+  <data name="ChatEffortMinimal" xml:space="preserve"><value>极低</value></data>
+  <data name="ChatEffortLow" xml:space="preserve"><value>低</value></data>
+  <data name="ChatEffortMedium" xml:space="preserve"><value>中</value></data>
+  <data name="ChatEffortHigh" xml:space="preserve"><value>高</value></data>
+  <data name="ChatEffortExtraHigh" xml:space="preserve"><value>极高</value></data>
+  <data name="ChatEffortMax" xml:space="preserve"><value>最高</value></data>
+  <data name="ChatAccess" xml:space="preserve"><value>权限</value></data>
+  <data name="ChatWorkspace" xml:space="preserve"><value>工作区</value></data>
+  <data name="ChatReadOnly" xml:space="preserve"><value>只读</value></data>
+  <data name="ChatModelDefaultEffort" xml:space="preserve"><value>模型默认</value></data>
+  <data name="ChatNoProviders" xml:space="preserve"><value>添加供应商后，即可在折笺中使用它的模型。</value></data>
+  <data name="ChatChooseProviderIcon" xml:space="preserve"><value>选择图标…</value></data>
+  <data name="ChatResetProviderIcon" xml:space="preserve"><value>使用名称缩写</value></data>
+  <data name="ChatInvalidProviderIcon" xml:space="preserve"><value>请选择有效的 PNG 图片。文件须小于 4 MB，宽高均不能超过 4096 像素。</value></data>
+  <data name="ChatTestConnection" xml:space="preserve"><value>测试连接</value></data>
+  <data name="ChatTestingConnection" xml:space="preserve"><value>正在测试连接…</value></data>
+  <data name="ChatConnectionOK" xml:space="preserve"><value>模型列表可访问，耗时 {0} 毫秒。</value></data>
+  <data name="ChatNoProviderModels" xml:space="preserve"><value>添加模型后，可以获取上游信息或手动填写模型 ID。</value></data>
+  <data name="ChatAllowedEfforts" xml:space="preserve"><value>可用推理档位</value></data>
+  <data name="ChatDefaultEffort" xml:space="preserve"><value>默认推理档位</value></data>
+  <data name="ChatApplyModel" xml:space="preserve"><value>应用到供应商</value></data>
+  <data name="ChatSaveProvider" xml:space="preserve"><value>保存供应商</value></data>
+  <data name="AIPredictionBehavior" xml:space="preserve"><value>预测行为</value></data>
+  <data name="ChatUseFullUrl" xml:space="preserve"><value>使用完整请求 URL</value></data>
+  <data name="ChatRequestUrl" xml:space="preserve"><value>完整请求 URL</value></data>
+  <data name="ChatFullUrlHint" xml:space="preserve"><value>模型请求将直接发送到此地址。</value></data>
+  <data name="ChatCatalogUrl" xml:space="preserve"><value>模型列表 URL（可选）</value></data>
+  <data name="ChatCatalogUrlPlaceholder" xml:space="preserve"><value>自定义请求路径时可指定模型列表地址</value></data>
+  <data name="ChatConnectionOptions" xml:space="preserve"><value>连接选项</value></data>
+  <data name="ChatProviderWebSearch" xml:space="preserve"><value>允许此连接使用网页搜索</value></data>
+  <data name="ChatProviderWebSearchHint" xml:space="preserve"><value>模型须支持搜索，并在会话中开启。</value></data>
+  <data name="ChatChooseUpstream" xml:space="preserve"><value>选择上游模型</value></data>
+  <data name="ChatNoFetchedModels" xml:space="preserve"><value>获取列表后可选择模型</value></data>
+  <data name="ChatModelDetails" xml:space="preserve"><value>模型信息</value></data>
+  <data name="ChatModelContextLimit" xml:space="preserve"><value>上下文窗口（token）</value></data>
+  <data name="ChatModelOutputLimit" xml:space="preserve"><value>最大输出（token）</value></data>
+  <data name="ChatModelEffortHint" xml:space="preserve"><value>勾选此模型支持的档位。全部不勾选时，使用服务默认值。</value></data>
+  <data name="ChatModelCapabilities" xml:space="preserve"><value>模型能力</value></data>
+  <data name="ChatModelVision" xml:space="preserve"><value>视觉输入</value></data>
+  <data name="ChatToggleModel" xml:space="preserve"><value>启用 {0}</value></data>
+  <data name="ChatManageProviders" xml:space="preserve"><value>管理供应商</value></data>
+  <data name="ChatModelSource" xml:space="preserve"><value>模型来源</value></data>
+  <data name="SettingsRelated" xml:space="preserve"><value>相关设置</value></data>
+  <data name="ChatThinking" xml:space="preserve"><value>思考</value></data>
+  <data name="ChatNewerMessages" xml:space="preserve"><value>较新的对话</value></data>
+  <data name="ChatLatest" xml:space="preserve"><value>回到最新消息</value></data>
+  <data name="ChatRecent" xml:space="preserve"><value>最近的对话</value></data>
+  <data name="ChatEarlierPage" xml:space="preserve"><value>往前 {0} 页</value></data>
+  <data name="ChatToolTabs" xml:space="preserve"><value>查看打开的文档</value></data>
+  <data name="ChatToolReadTab" xml:space="preserve"><value>读取文档</value></data>
+  <data name="ChatToolOutline" xml:space="preserve"><value>查看大纲</value></data>
+  <data name="ChatToolSearchTab" xml:space="preserve"><value>搜索文档</value></data>
+  <data name="ChatToolDirectory" xml:space="preserve"><value>浏览文件夹</value></data>
+  <data name="ChatToolReadFile" xml:space="preserve"><value>读取文件</value></data>
+  <data name="ChatToolFindFile" xml:space="preserve"><value>搜索文件</value></data>
+  <data name="ChatToolFailed" xml:space="preserve"><value>失败</value></data>
+  <data name="ChatOpenTab" xml:space="preserve"><value>已打开的文档</value></data>
+  <data name="ChatOpenTabs" xml:space="preserve"><value>打开的文档</value></data>
+  <data name="ChatRemoveImage" xml:space="preserve"><value>移除图片</value></data>
+  <data name="ChatNeedsVision" xml:space="preserve"><value>请选择支持视觉输入的模型以发送图片。</value></data>
+  <data name="ChatImageLimit" xml:space="preserve"><value>每条消息最多附加四张图片。</value></data>
+  <data name="ChatToolWebSearch" xml:space="preserve"><value>联网搜索</value></data>
+  <data name="ChatInterrupted" xml:space="preserve"><value>回复已中断</value></data>
+  <data name="ChatPreparingImage" xml:space="preserve"><value>正在准备图片，请稍候。</value></data>
+  <data name="ChatSendKeys" xml:space="preserve"><value>发送 (Enter)，换行 (Shift+Enter)</value></data>
+  <data name="ChatMention" xml:space="preserve"><value>引用文档 (@)</value></data>
+  <data name="ChatUsageHint" xml:space="preserve"><value>最近一次模型请求的输入用量为 {0} token，模型上下文上限为 {1} token。</value></data>
+  <data name="ChatNotReported" xml:space="preserve"><value>未报告</value></data>
+  <data name="ChatNotConfigured" xml:space="preserve"><value>未设置</value></data>
+  <data name="ChatImageMessage" xml:space="preserve"><value>图片</value></data>
 </root>

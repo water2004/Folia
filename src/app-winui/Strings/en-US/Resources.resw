@@ -145,8 +145,6 @@
   <data name="OpenSourceProject" xml:space="preserve"><value>Folia is an open-source project</value></data>
   <data name="OpenSourceDescription" xml:space="preserve"><value>Explore the source, report issues, and help shape a focused native Markdown editor.</value></data>
   <data name="LicenseSummary" xml:space="preserve"><value>MIT License · Third-party notices are included with every build</value></data>
-  <data name="BuiltForWindows" xml:space="preserve"><value>Built for Windows</value></data>
-  <data name="TechnologyDescription" xml:space="preserve"><value>WinUI 3 shell · C++23 document engine · DirectWrite/Direct2D rendering · Native math and Mermaid</value></data>
   <data name="FollowWindowsTheme" xml:space="preserve"><value>Follow Windows</value></data>
   <data name="AutomaticThemeDescription" xml:space="preserve"><value>Automatic light, dark, and high contrast</value></data>
   <data name="BuiltIn" xml:space="preserve"><value>Built-in</value></data>
@@ -160,6 +158,7 @@
   <data name="CustomThemeRemoved" xml:space="preserve"><value>Custom theme removed</value></data>
   <data name="ThemeApplied" xml:space="preserve"><value>Theme applied</value></data>
   <data name="SettingsFallback" xml:space="preserve"><value>Settings fallback: {0}</value></data>
+  <data name="AIModelMigrationFailed" xml:space="preserve"><value>Could not migrate the previous AI model: {0}</value></data>
   <data name="UnableSaveSettings" xml:space="preserve"><value>Unable to save settings: {0}</value></data>
   <data name="IgnoredDuplicateTheme" xml:space="preserve"><value>Ignored duplicate theme id: {0}</value></data>
   <data name="UnableEnumerateThemeDirectory" xml:space="preserve"><value>Unable to enumerate theme directory: {0}</value></data>
@@ -368,9 +367,7 @@
   <data name="AIEagernessDescription" xml:space="preserve"><value>Controls how readily the prompt asks for a suggestion, independently of model reasoning. Proactive mode tries a short continuation even when several phrasings are possible; useful suggestions are not guaranteed.</value></data>
   <data name="AIReasoning" xml:space="preserve"><value>Reasoning effort</value></data>
   <data name="AIReasoningDefault" xml:space="preserve"><value>Service default</value></data>
-  <data name="AIReasoningChoices" xml:space="preserve"><value>Choose level</value></data>
   <data name="AIModelChoices" xml:space="preserve"><value>Choose model</value></data>
-  <data name="AIReasoningDescription" xml:space="preserve"><value>Select an advertised reasoning level or enter one manually. Blank or service default sends no effort parameter.</value></data>
   <data name="AIContextKB" xml:space="preserve"><value>Context size (KB, 1–64)</value></data>
   <data name="AIOutputTokens" xml:space="preserve"><value>Maximum output tokens (16–4096)</value></data>
   <data name="AIBudgetInvalid" xml:space="preserve"><value>Enter whole numbers: 1–64 KB of context and 16–4096 output tokens.</value></data>
@@ -387,8 +384,6 @@
   <data name="AIFetchModelsBusy" xml:space="preserve"><value>Fetching…</value></data>
   <data name="AINoModels" xml:space="preserve"><value>The service returned no models. You can enter a model ID.</value></data>
   <data name="AIModelsFetched" xml:space="preserve"><value>Fetched {0} models. Select one or enter a model ID.</value></data>
-  <data name="AIReasoningSelectModel" xml:space="preserve"><value>Fetch models for advertised reasoning levels, or enter a value manually. Blank or service default sends no effort parameter.</value></data>
-  <data name="AIReasoningMissingMetadata" xml:space="preserve"><value>The service did not provide usable reasoning-level information. You can enter a value manually; blank or service default sends no effort parameter.</value></data>
   <data name="AIExplicitCache" xml:space="preserve"><value>Explicit prompt caching</value></data>
   <data name="AIExplicitCacheDescription" xml:space="preserve"><value>Enable only if your service and model support explicit cache breakpoints. Folia marks the end of the reusable context. The service determines cache eligibility and charges.</value></data>
   <data name="ShortcutScopeTable" xml:space="preserve"><value>Table</value></data>
@@ -504,4 +499,122 @@
   <data name="TableDuplicateRows" xml:space="preserve"><value>Duplicate rows</value></data>
   <data name="TableDuplicateColumns" xml:space="preserve"><value>Duplicate columns</value></data>
   <data name="TableDelete" xml:space="preserve"><value>Delete table</value></data>
+  <data name="ChatSessions" xml:space="preserve"><value>Conversations</value></data>
+  <data name="ChatNew" xml:space="preserve"><value>New chat</value></data>
+  <data name="ChatRename" xml:space="preserve"><value>Rename conversation</value></data>
+  <data name="ChatDelete" xml:space="preserve"><value>Delete conversation</value></data>
+  <data name="ChatDeleteConfirm" xml:space="preserve"><value>Delete this conversation and its messages from this device?</value></data>
+  <data name="ChatModels" xml:space="preserve"><value>Models</value></data>
+  <data name="ChatProviderName" xml:space="preserve"><value>Provider name</value></data>
+  <data name="ChatAddProvider" xml:space="preserve"><value>Add a provider</value></data>
+  <data name="ChatRemoveProvider" xml:space="preserve"><value>Remove provider</value></data>
+  <data name="ChatRemoveProviderConfirm" xml:space="preserve"><value>Remove this provider, its models, and its saved API key? Your conversations will be kept.</value></data>
+  <data name="ChatKeepProviderKey" xml:space="preserve"><value>Leave blank to keep the saved key</value></data>
+  <data name="ChatClearProviderKey" xml:space="preserve"><value>Clear the saved key</value></data>
+  <data name="ChatUndoClearProviderKey" xml:space="preserve"><value>Undo clearing the key</value></data>
+  <data name="ChatClearProviderKeyPending" xml:space="preserve"><value>The key will be cleared when you save this provider.</value></data>
+  <data name="ChatInvalidProfile" xml:space="preserve"><value>Enter a provider name of up to 128 bytes.</value></data>
+  <data name="ChatFetchingModels" xml:space="preserve"><value>Fetching models…</value></data>
+  <data name="ChatOlderMessages" xml:space="preserve"><value>Show older messages</value></data>
+  <data name="ChatSources" xml:space="preserve"><value>Sources</value></data>
+  <data name="ChatEmpty" xml:space="preserve"><value>What are we working on?</value></data>
+  <data name="ChatPrompt" xml:space="preserve"><value>Describe your task</value></data>
+  <data name="ChatAllowOpenTabs" xml:space="preserve"><value>Allow reading open Markdown tabs</value></data>
+  <data name="ChatAllowSearch" xml:space="preserve"><value>Enable provider web search</value></data>
+  <data name="ChatPermissionHint" xml:space="preserve"><value>Selected content may be sent to the model provider when needed. Change access between turns.</value></data>
+  <data name="ChatNoWorkspace" xml:space="preserve"><value>No workspace access</value></data>
+  <data name="ChatUseCurrentFolder" xml:space="preserve"><value>Allow reading the open folder</value></data>
+  <data name="ChatChooseFolder" xml:space="preserve"><value>Choose another folder…</value></data>
+  <data name="ChatNoCurrentFolder" xml:space="preserve"><value>Open a folder in this window first.</value></data>
+  <data name="ChatStop" xml:space="preserve"><value>Stop</value></data>
+  <data name="ChatSend" xml:space="preserve"><value>Send</value></data>
+  <data name="ChatYou" xml:space="preserve"><value>You</value></data>
+  <data name="ChatAssistant" xml:space="preserve"><value>Agent</value></data>
+  <data name="ChatNeedsProvider" xml:space="preserve"><value>Add a model under Settings → AI providers, then select it below the message box.</value></data>
+  <data name="ChatInvalidPrompt" xml:space="preserve"><value>The message exceeds the length limit.</value></data>
+  <data name="ChatAlreadyRunning" xml:space="preserve"><value>This conversation is running in another tab.</value></data>
+  <data name="ChatWorking" xml:space="preserve"><value>Working…</value></data>
+  <data name="ChatCompacting" xml:space="preserve"><value>Summarizing earlier messages…</value></data>
+  <data name="ChatReading" xml:space="preserve"><value>Reading permitted context…</value></data>
+  <data name="ChatStopped" xml:space="preserve"><value>Stopped</value></data>
+  <data name="ChatProviders" xml:space="preserve"><value>AI providers</value></data>
+  <data name="ChatProvidersDescription" xml:space="preserve"><value>Manage provider connections and the models available for chat and inline prediction.</value></data>
+  <data name="ChatAddModel" xml:space="preserve"><value>Add a model</value></data>
+  <data name="ChatModelName" xml:space="preserve"><value>Display name</value></data>
+  <data name="ChatUpstreamModel" xml:space="preserve"><value>Upstream model ID</value></data>
+  <data name="ChatModelWebSearch" xml:space="preserve"><value>Model supports the web search tool</value></data>
+  <data name="ChatModelWebSearchHint" xml:space="preserve"><value>Check the upstream API documentation for this model.</value></data>
+  <data name="ChatInvalidModel" xml:space="preserve"><value>Check the upstream model ID, display name, and optional token limits.</value></data>
+  <data name="ChatPickModel" xml:space="preserve"><value>Select model</value></data>
+  <data name="ChatEffortNone" xml:space="preserve"><value>None</value></data>
+  <data name="ChatEffortMinimal" xml:space="preserve"><value>Minimal</value></data>
+  <data name="ChatEffortLow" xml:space="preserve"><value>Low</value></data>
+  <data name="ChatEffortMedium" xml:space="preserve"><value>Medium</value></data>
+  <data name="ChatEffortHigh" xml:space="preserve"><value>High</value></data>
+  <data name="ChatEffortExtraHigh" xml:space="preserve"><value>Extra high</value></data>
+  <data name="ChatEffortMax" xml:space="preserve"><value>Maximum</value></data>
+  <data name="ChatAccess" xml:space="preserve"><value>Access</value></data>
+  <data name="ChatWorkspace" xml:space="preserve"><value>Workspace</value></data>
+  <data name="ChatReadOnly" xml:space="preserve"><value>Read only</value></data>
+  <data name="ChatModelDefaultEffort" xml:space="preserve"><value>Model default</value></data>
+  <data name="ChatNoProviders" xml:space="preserve"><value>Add a provider to make its models available in Folia.</value></data>
+  <data name="ChatChooseProviderIcon" xml:space="preserve"><value>Choose icon…</value></data>
+  <data name="ChatResetProviderIcon" xml:space="preserve"><value>Use initials</value></data>
+  <data name="ChatInvalidProviderIcon" xml:space="preserve"><value>Choose a valid PNG under 4 MB and up to 4096 pixels per side.</value></data>
+  <data name="ChatTestConnection" xml:space="preserve"><value>Test connection</value></data>
+  <data name="ChatTestingConnection" xml:space="preserve"><value>Testing connection…</value></data>
+  <data name="ChatConnectionOK" xml:space="preserve"><value>Model list is reachable ({0} ms).</value></data>
+  <data name="ChatNoProviderModels" xml:space="preserve"><value>Add a model to fetch its metadata or enter an upstream ID.</value></data>
+  <data name="ChatAllowedEfforts" xml:space="preserve"><value>Available reasoning levels</value></data>
+  <data name="ChatDefaultEffort" xml:space="preserve"><value>Default reasoning level</value></data>
+  <data name="ChatApplyModel" xml:space="preserve"><value>Apply to provider</value></data>
+  <data name="ChatSaveProvider" xml:space="preserve"><value>Save provider</value></data>
+  <data name="AIPredictionBehavior" xml:space="preserve"><value>Prediction behavior</value></data>
+  <data name="ChatUseFullUrl" xml:space="preserve"><value>Use full request URL</value></data>
+  <data name="ChatRequestUrl" xml:space="preserve"><value>Full request URL</value></data>
+  <data name="ChatFullUrlHint" xml:space="preserve"><value>Folia will send model requests to this URL exactly as entered.</value></data>
+  <data name="ChatCatalogUrl" xml:space="preserve"><value>Model list URL (optional)</value></data>
+  <data name="ChatCatalogUrlPlaceholder" xml:space="preserve"><value>Set this for a custom endpoint path</value></data>
+  <data name="ChatConnectionOptions" xml:space="preserve"><value>Connection options</value></data>
+  <data name="ChatProviderWebSearch" xml:space="preserve"><value>Allow web search on this connection</value></data>
+  <data name="ChatProviderWebSearchHint" xml:space="preserve"><value>Requires model support and permission in the conversation.</value></data>
+  <data name="ChatChooseUpstream" xml:space="preserve"><value>Upstream model</value></data>
+  <data name="ChatNoFetchedModels" xml:space="preserve"><value>Fetch models to make a selection</value></data>
+  <data name="ChatModelDetails" xml:space="preserve"><value>Model details</value></data>
+  <data name="ChatModelContextLimit" xml:space="preserve"><value>Context window (tokens)</value></data>
+  <data name="ChatModelOutputLimit" xml:space="preserve"><value>Maximum output (tokens)</value></data>
+  <data name="ChatModelEffortHint" xml:space="preserve"><value>Check the levels this model supports. Leave them unchecked to use the service default.</value></data>
+  <data name="ChatModelCapabilities" xml:space="preserve"><value>Capabilities</value></data>
+  <data name="ChatModelVision" xml:space="preserve"><value>Image input</value></data>
+  <data name="ChatToggleModel" xml:space="preserve"><value>Enable {0}</value></data>
+  <data name="ChatManageProviders" xml:space="preserve"><value>Manage providers</value></data>
+  <data name="ChatModelSource" xml:space="preserve"><value>Model source</value></data>
+  <data name="SettingsRelated" xml:space="preserve"><value>Related settings</value></data>
+  <data name="ChatThinking" xml:space="preserve"><value>Thinking</value></data>
+  <data name="ChatNewerMessages" xml:space="preserve"><value>Newer exchanges</value></data>
+  <data name="ChatLatest" xml:space="preserve"><value>Go to latest message</value></data>
+  <data name="ChatRecent" xml:space="preserve"><value>Latest exchanges</value></data>
+  <data name="ChatEarlierPage" xml:space="preserve"><value>{0} pages back</value></data>
+  <data name="ChatToolTabs" xml:space="preserve"><value>Listed open documents</value></data>
+  <data name="ChatToolReadTab" xml:space="preserve"><value>Read document</value></data>
+  <data name="ChatToolOutline" xml:space="preserve"><value>Inspected outline</value></data>
+  <data name="ChatToolSearchTab" xml:space="preserve"><value>Searched document</value></data>
+  <data name="ChatToolDirectory" xml:space="preserve"><value>Listed folder</value></data>
+  <data name="ChatToolReadFile" xml:space="preserve"><value>Read file</value></data>
+  <data name="ChatToolFindFile" xml:space="preserve"><value>Searched file</value></data>
+  <data name="ChatToolFailed" xml:space="preserve"><value>Failed</value></data>
+  <data name="ChatOpenTab" xml:space="preserve"><value>Open document</value></data>
+  <data name="ChatOpenTabs" xml:space="preserve"><value>Open documents</value></data>
+  <data name="ChatRemoveImage" xml:space="preserve"><value>Remove image</value></data>
+  <data name="ChatNeedsVision" xml:space="preserve"><value>Choose a model with image input to send an image.</value></data>
+  <data name="ChatImageLimit" xml:space="preserve"><value>Attach up to four images per message.</value></data>
+  <data name="ChatToolWebSearch" xml:space="preserve"><value>Web search</value></data>
+  <data name="ChatInterrupted" xml:space="preserve"><value>Reply interrupted</value></data>
+  <data name="ChatPreparingImage" xml:space="preserve"><value>Preparing the image. Try again in a moment.</value></data>
+  <data name="ChatSendKeys" xml:space="preserve"><value>Send (Enter), new line (Shift+Enter)</value></data>
+  <data name="ChatMention" xml:space="preserve"><value>Mention a document (@)</value></data>
+  <data name="ChatUsageHint" xml:space="preserve"><value>Last request input: {0} tokens. Model context limit: {1} tokens.</value></data>
+  <data name="ChatNotReported" xml:space="preserve"><value>unreported</value></data>
+  <data name="ChatNotConfigured" xml:space="preserve"><value>unspecified</value></data>
+  <data name="ChatImageMessage" xml:space="preserve"><value>Image</value></data>
 </root>

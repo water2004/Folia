@@ -94,6 +94,13 @@ namespace winrt::Folia::implementation {
         }
         return nullptr;
     }
+    MainWindow* App::FindChatWindow(std::string_view id) const {
+        for (auto const& item : windows) {
+            auto owner = winrt::get_self<MainWindow>(item.window.as<winrt::Folia::MainWindow>());
+            if (!owner->windowClosed && owner->workspaceDocuments.FindChat(id)) return owner;
+        }
+        return nullptr;
+    }
     void App::UpdateWindowViewSettings(MainWindow const* source, MediaDisplaySettings const& media, WorkspaceAppearance const& appearance) {
         for (auto const& item : windows) {
             auto window = winrt::get_self<MainWindow>(item.window.as<winrt::Folia::MainWindow>());

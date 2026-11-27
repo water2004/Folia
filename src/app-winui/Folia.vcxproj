@@ -96,7 +96,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\third_party\model-providers;$(ProjectDir)..\..\third_party\nlohmann-json\include;$(ProjectDir)..\platform;$(ProjectDir)..\math\include;$(FoliaIcuRoot)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\..\src\ai;$(ProjectDir)..\..\third_party\nlohmann-json\include;$(ProjectDir)..\platform;$(ProjectDir)..\math\include;$(FoliaIcuRoot)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalOptions>%(AdditionalOptions) /bigobj /utf-8</AdditionalOptions>
@@ -165,6 +165,13 @@
     <ClInclude Include="settings\storage\ShortcutSettingsSerialization.h" />
     <ClInclude Include="settings\views\SettingsView.h" />
     <ClInclude Include="settings\views\SettingsViewSupport.h" />
+    <ClInclude Include="settings\views\SettingsCards.h" />
+    <ClInclude Include="settings\views\ProviderModelForm.h" />
+    <ClInclude Include="agent\ChatModelPicker.h" />
+    <ClInclude Include="agent\ChatReplySurface.h" />
+    <ClInclude Include="agent\ChatTranscript.h" />
+    <ClInclude Include="agent\ChatComposerExtras.h" />
+    <ClInclude Include="settings\storage\ModelCatalog.h" />
     <ClInclude Include="settings\latex\LatexCommandCatalog.h" />
     <ClInclude Include="settings\views\LatexCommandSettingsComponents.h" />
     <ClInclude Include="settings\views\ShortcutSettingsComponents.h" />
@@ -257,6 +264,7 @@
     <ApplicationDefinition Include="App.xaml" />
     <Page Include="MainWindow.xaml" />
     <Page Include="theme\Settings.xaml" />
+    <Page Include="agent\ChatChrome.xaml" />
     <Page Include="workspace\FolderExplorer.xaml"><SubType>Designer</SubType></Page>
     <Page Include="workspace\WorkspaceChrome.xaml" />
   </ItemGroup>
@@ -770,6 +778,15 @@
     <ClCompile Include="workspace\FolderExplorerController.DragDrop.cpp" />
     <ClCompile Include="workspace\WorkspaceFileCoordinator.cpp" />
     <ClCompile Include="workspace\FolderExplorerController.cpp" />
+    <ClCompile Include="MainWindow.Agent.cpp" />
+    <ClCompile Include="agent\ChatStore.cpp" />
+    <ClCompile Include="settings\storage\ModelCatalog.cpp" />
+    <ClCompile Include="agent\ChatTools.cpp" />
+    <ClCompile Include="agent\ChatView.cpp" />
+    <ClCompile Include="agent\ChatModelPicker.cpp" />
+    <ClCompile Include="agent\ChatReplySurface.cpp" />
+    <ClCompile Include="agent\ChatTranscript.cpp" />
+    <ClCompile Include="agent\ChatComposerExtras.cpp" />
     <ClCompile Include="editor\document\EditorDocumentController.Relocation.cpp" />
     <ClCompile Include="editor\document\EditorDocumentController.Save.cpp" />
     <ClCompile Include="editor\document\EditorDocumentController.Clipboard.cpp" />
@@ -953,31 +970,37 @@
     <ClCompile Include="..\completion\completion.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="..\completion\completion.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="..\completion\edit.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
-    <ClCompile Include="..\..\third_party\model-providers\providers\adapters\anthropic\Request.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_anthropic_Request.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\third_party\model-providers\providers\adapters\anthropic\Response.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_anthropic_Response.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\third_party\model-providers\providers\adapters\anthropic\StreamDecoder.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_anthropic_StreamDecoder.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\third_party\model-providers\providers\adapters\chat_completions\Request.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_chat_completions_Request.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\third_party\model-providers\providers\adapters\chat_completions\Response.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_chat_completions_Response.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\third_party\model-providers\providers\adapters\chat_completions\StreamDecoder.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_chat_completions_StreamDecoder.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\third_party\model-providers\providers\adapters\responses\Request.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_responses_Request.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\third_party\model-providers\providers\adapters\responses\Response.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_responses_Response.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\third_party\model-providers\providers\adapters\responses\StreamDecoder.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_responses_StreamDecoder.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\third_party\model-providers\providers\JsonParsing.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_JsonParsing.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\third_party\model-providers\providers\ModelAdapter.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_ModelAdapter.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\third_party\model-providers\providers\ModelCodec.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_ModelCodec.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\third_party\model-providers\providers\ModelTypes.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_ModelTypes.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\third_party\model-providers\providers\ModelValidation.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_ModelValidation.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\third_party\model-providers\providers\SseParser.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_SseParser.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="..\..\third_party\model-providers\providers\StreamResponse.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_StreamResponse.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\..\src\ai\providers\adapters\anthropic\Request.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_anthropic_Request.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\..\src\ai\providers\adapters\anthropic\Response.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_anthropic_Response.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\..\src\ai\providers\adapters\anthropic\StreamDecoder.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_anthropic_StreamDecoder.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\..\src\ai\providers\adapters\chat_completions\Request.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_chat_completions_Request.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\..\src\ai\providers\adapters\chat_completions\Response.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_chat_completions_Response.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\..\src\ai\providers\adapters\chat_completions\StreamDecoder.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_chat_completions_StreamDecoder.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\..\src\ai\providers\adapters\responses\Request.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_responses_Request.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\..\src\ai\providers\adapters\responses\Response.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_responses_Response.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\..\src\ai\providers\adapters\responses\StreamDecoder.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_responses_StreamDecoder.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\..\src\ai\providers\JsonParsing.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_JsonParsing.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\..\src\ai\providers\ModelAdapter.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_ModelAdapter.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\..\src\ai\providers\ModelCodec.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_ModelCodec.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\..\src\ai\providers\ModelTypes.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_ModelTypes.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\..\src\ai\providers\ModelValidation.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_ModelValidation.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\..\src\ai\providers\SseParser.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_SseParser.obj</ObjectFileName></ClCompile>
+    <ClCompile Include="..\..\src\ai\providers\StreamResponse.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_StreamResponse.obj</ObjectFileName></ClCompile>
     <ClCompile Include="..\platform\windows\completion\CompletionService.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\platform\windows\completion\CompletionHttpTransport.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\platform\windows\ai\ModelHttpClient.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="completion\InlineCompletionController.cpp" />
     <ClCompile Include="MainWindow.Completion.cpp" />
     <ClCompile Include="settings\views\SettingsView.Completion.cpp" />
+    <ClCompile Include="settings\views\SettingsView.Providers.cpp" />
+    <ClCompile Include="settings\views\ProviderModelForm.cpp" />
+    <ClCompile Include="..\ai\agent\Agent.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="editor\session\EditorSession.Completion.cpp" />
     <ClCompile Include="editor\rendering\EditorCompletionPreview.cpp" />
   </ItemGroup>

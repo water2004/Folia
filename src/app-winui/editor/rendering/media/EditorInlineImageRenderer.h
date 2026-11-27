@@ -43,7 +43,8 @@ namespace winrt::Folia
             std::wstring const& baseDirectory,
             bool animate = true,
             int maximumWidthPercent = MediaDisplaySettings::imageWidths.back(),
-            std::optional<float> maximumHeight = std::nullopt);
+            std::optional<float> maximumHeight = std::nullopt,
+            bool allowResources = true);
         std::vector<ImageDraw> Resolve(IDWriteTextLayout* layout, std::vector<DisplayInlineText::ImageOverlay> const& overlays, float availableWidth, bool loadContent = true) const;
         void ReleaseGif(std::string_view source) const;
         void Draw(IDWriteTextLayout* layout, D2D1_POINT_2F origin, std::vector<ImageDraw> const& images) const;
@@ -58,5 +59,6 @@ namespace winrt::Folia
         bool animate = true;
         float widthFraction;
         std::optional<float> maximumHeight;
+        bool allowResources;
     };
 }

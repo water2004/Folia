@@ -15,6 +15,18 @@
     <path id="add" d="M12 5v14M5 12h14"/>
     <path id="more" d="M5.5 12h.5m5.75 0h.5m5.75 0h.5"/>
     <path id="split-editor" d="M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2ZM12 5v14m4-9v4m-2-2h4"/>
+    <path id="agent-chat" d="M19 4H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2v4l5-4h7a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2ZM7 9h10M7 13h6"/>
+    <path id="send-message" d="M12 20V4m-6 6 6-6 6 6"/>
+    <path id="stop-message" d="M8 6h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"/>
+    <path id="read-access" d="M12 3 4 6v6c0 4 4 7 8 9 4-2 8-5 8-9V6L12 3Zm-3 9 2 2 4-4"/>
+    <path id="expand-choice" d="m6 9 6 6 6-6"/>
+    <path id="test-connection" d="M13 3 5 13h6l-1 8 9-11h-7l1-7Z"/>
+    <path id="provider-service" d="M5 5h14v6H5z M5 13h14v6H5z M8 8h.1 M8 16h.1 M12 8h4 M12 16h4"/>
+    <path id="settings-model" d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Zm0 9 8-4.5m-8 4.5L4 7.5m8 4.5v9"/>
+    <path id="settings-network" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM3 12h18m-9-9c2.3 2.4 3.5 5.5 3.5 9s-1.2 6.6-3.5 9c-2.3-2.4-3.5-5.5-3.5-9S9.7 5.4 12 3Z"/>
+    <path id="settings-reasoning" d="M5 6h14M5 12h14M5 18h14M8 4v4m8 2v4m-5 2v4"/>
+    <path id="settings-prediction" d="m12 3 2.1 6.9L21 12l-6.9 2.1L12 21l-2.1-6.9L3 12l6.9-2.1L12 3Z"/>
+    <path id="settings-cache" d="M19 6c0 1.7-3.1 3-7 3S5 7.7 5 6s3.1-3 7-3 7 1.3 7 3ZM5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/>
     <path id="table-row-grip" d="M9 7h.2m5.6 0h.2M9 12h.2m5.6 0h.2M9 17h.2m5.6 0h.2"/>
     <path id="table-column-grip" d="M7 9h.2m4.8 0h.2m4.8 0h.2M7 15h.2m4.8 0h.2m4.8 0h.2"/>
     <path id="table-resize" d="M12 4v16M3 12h6m-3-3-3 3 3 3m9-3h6m-3-3 3 3-3 3"/>

@@ -44,6 +44,7 @@ namespace winrt::Folia::implementation {
         if (source->editorGroups.ViewCount(id) != 1) return false;
         auto document = source->workspaceDocuments.Find(id);
         if (document && document->kind == WorkspaceTabKind::Settings && workspaceDocuments.FindSettings()) return false;
+        if (document && document->kind == WorkspaceTabKind::Chat && workspaceDocuments.FindChat(document->chatId)) return false;
         return document && !workspaceDocuments.Find(id)
             && (document->path.empty() || !workspaceDocuments.Find(document->path));
     }

@@ -61,7 +61,7 @@ $libraryArgs = @([regex]::Matches($libraryCommand, '(?i)(?:"[^"]+\.lib"|[^\s"]+\
 $compileRecords = @(Get-Content (Join-Path $objects 'Folia.tlog/CL.command.1.tlog'))
 $baseline = $null
 for ($i = 0; $i + 1 -lt $compileRecords.Count; ++$i) {
-    if ($compileRecords[$i] -match 'EDITORDOCUMENTCONTROLLER\.CPP$') { $baseline = $compileRecords[$i + 1]; break }
+    if ($compileRecords[$i] -match '\\EDITOR\\DOCUMENT\\EDITORDOCUMENTCONTROLLER\.CPP$') { $baseline = $compileRecords[$i + 1]; break }
 }
 if (-not $baseline) { throw 'No controller compile command found; run build_app.ps1 first.' }
 $references = @()

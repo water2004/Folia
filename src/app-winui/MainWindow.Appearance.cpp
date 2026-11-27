@@ -186,6 +186,7 @@ namespace winrt::Folia::implementation
             editor->themeRevision = workspaceThemeRevision;
         }
         editorRenderer.SetTheme(themeProfile);
+        UpdateAgentChatTheme();
         if (otherEditorRenderer) otherEditorRenderer->SetTheme(themeProfile);
         if (settingsView)
         {

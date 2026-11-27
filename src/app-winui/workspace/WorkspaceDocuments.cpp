@@ -54,6 +54,23 @@ namespace winrt::Folia {
         return settings;
     }
 
+    std::shared_ptr<WorkspaceDocument> WorkspaceDocuments::FindChat(std::string_view id) const noexcept {
+        auto found = std::ranges::find_if(documents_, [&](auto const& doc) {
+            return doc->kind == WorkspaceTabKind::Chat && doc->chatId == id;
+        });
+        return found == documents_.end() ? nullptr : *found;
+    }
+
+    std::shared_ptr<WorkspaceDocument> WorkspaceDocuments::OpenChat(std::string id, std::string title) {
+        if (auto existing = FindChat(id)) return existing;
+        auto chat = std::make_shared<WorkspaceDocument>(AllocateWorkspaceItemId(), WorkspaceTabKind::Chat);
+        chat->chatId = std::move(id);
+        chat->chatTitle = std::move(title);
+        chat->kept = true;
+        documents_.push_back(chat);
+        return chat;
+    }
+
     WorkspaceOpenResult WorkspaceDocuments::Open(std::filesystem::path path, WorkspaceOpenMode mode,
         std::function<bool(std::uint64_t)> const& canReplacePreview) {
         if (path.empty() || !path.is_absolute()) throw std::invalid_argument("Workspace file paths must be absolute");

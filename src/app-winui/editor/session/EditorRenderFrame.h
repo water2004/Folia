@@ -33,5 +33,6 @@ namespace winrt::Folia::detail
         std::optional<folia::TableCellSelection> tableSelection;
         const std::unordered_map<std::uint64_t, float>* tableScrollOffsets = nullptr;
         folia::NodeId tableTextOwner{};
+        bool allowImageResources = true;
     };
 }

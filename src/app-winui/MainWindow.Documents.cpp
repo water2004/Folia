@@ -124,6 +124,7 @@ namespace winrt::Folia::implementation {
         presentedEditorView = view;
         UpdateEditorGroupLayout();
         if (enteringSettings || leavingSettings) ShowSettingsPage(enteringSettings);
+        UpdateAgentChatPages();
         UpdateWorkspaceContent();
         ExternalChangeInfoBar().IsOpen(false);
         SetOperationProgress(false);
@@ -262,7 +263,7 @@ namespace winrt::Folia::implementation {
         SaveAsButton().IsEnabled(editor && !loading);
         SourceModeButton().IsEnabled(editor && !loading);
         EncodingButton().IsEnabled(editor && !loading && editor->session.HasFile());
-        SplitEditorButton().IsEnabled(movable && !editorGroups.IsSplit() && !loading && !SettingsActive());
+        SplitEditorButton().IsEnabled(movable && !editorGroups.IsSplit() && !loading && workspaceDocuments.Active()->kind != WorkspaceTabKind::Chat && !SettingsActive());
         QueueOtherGroupRender();
     }
 }

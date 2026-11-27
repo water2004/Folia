@@ -17,7 +17,7 @@ namespace winrt::Folia::implementation {
         EncodingButton().Visibility(editorVisibility);
         ImagePreviewPane().Visibility(workspaceDocuments.Active()->kind == WorkspaceTabKind::Image ? Visibility::Visible : Visibility::Collapsed);
         SetDocumentCommandsVisible(editing);
-        ReloadButton().Visibility(SettingsActive() ? Visibility::Collapsed : Visibility::Visible);
+        ReloadButton().Visibility(editing || workspaceDocuments.Active()->kind == WorkspaceTabKind::Image ? Visibility::Visible : Visibility::Collapsed);
         UpdateWorkspaceLayout();
     }
 

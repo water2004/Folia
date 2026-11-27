@@ -16,7 +16,8 @@ namespace winrt::Folia
         std::wstring const& baseDirectory,
         bool animate,
         int maximumWidthPercent,
-        std::optional<float> maximumHeight)
+        std::optional<float> maximumHeight,
+        bool allowResources)
         : resources(resources),
           cache(cache),
           styleSheet(styleSheet),
@@ -25,14 +26,15 @@ namespace winrt::Folia
           baseDirectory(baseDirectory),
           animate(animate),
           widthFraction(static_cast<float>(maximumWidthPercent) / 100.0f),
-          maximumHeight(maximumHeight)
+          maximumHeight(maximumHeight),
+          allowResources(allowResources)
     {
     }
 
     std::vector<EditorInlineImageRenderer::ImageDraw> EditorInlineImageRenderer::Resolve(IDWriteTextLayout* layout, std::vector<DisplayInlineText::ImageOverlay> const& overlays, float availableWidth, bool loadContent) const
     {
         std::vector<ImageDraw> resolved;
-        if (!layout) return resolved;
+        if (!layout || !allowResources) return resolved;
         if (!overlays.empty()) layout->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_DEFAULT, 0.0f, 0.0f);
         resolved.reserve(overlays.size());
         for (auto const& overlay : overlays)

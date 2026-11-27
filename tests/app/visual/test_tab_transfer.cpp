@@ -79,7 +79,9 @@ namespace winrt::Folia::implementation {
         static auto TabScroller(Microsoft::UI::Xaml::Window const& window, EditorGroup group = EditorGroup::Left) {
             return Impl(window)->TabStripScroller(group);
         }
-        static void Pane(Microsoft::UI::Xaml::Window const& window, bool outline) { Impl(window)->SelectWorkspacePane(outline); }
+        static void Pane(Microsoft::UI::Xaml::Window const& window, bool outline) {
+            Impl(window)->SelectWorkspacePane(outline ? MainWindow::WorkspacePane::Outline : MainWindow::WorkspacePane::Files);
+        }
         static void PointerEnd(Microsoft::UI::Xaml::Window const& window) { Impl(window)->EndTabPointerGesture(); }
         static void EnterMove(Microsoft::UI::Xaml::Window const& window) {
             Impl(window)->EnterTabMove(Microsoft::UI::Input::InputNonClientPointerSource::GetForWindowId(window.AppWindow().Id()));
