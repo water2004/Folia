@@ -1,8 +1,9 @@
 #include "pch.h"
 #include "agent/ChatTurnView.h"
-#include "agent/ChatControls.h"
+#include "ui/ControlHelpers.h"
 
 namespace winrt::Folia::chat {
+    using namespace ui;
     using folia::ai::agent::ProgressKind;
     using folia::ai::agent::StepEnd;
 

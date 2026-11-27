@@ -1,12 +1,14 @@
 #include "pch.h"
 #include "settings/storage/ProviderPresets.h"
-#include "agent/ChatControls.h"
+#include "settings/storage/ModelCatalog.h"
+#include "ui/ControlHelpers.h"
+#include "settings/views/ModelEffortChoice.h"
 #include "settings/views/SettingsCards.h"
 #include "settings/views/SettingsView.h"
 
 namespace winrt::Folia {
     Microsoft::UI::Xaml::UIElement SettingsView::BuildCompletionPage() {
-        using namespace chat;
+        using namespace ui;
         using namespace models;
         using namespace settings_ui;
         auto panel = PagePanel();

@@ -129,6 +129,15 @@
     <ClInclude Include="agent\ChatFiles.h">
       <Filter>Agent Chat</Filter>
     </ClInclude>
+    <ClInclude Include="ui\ControlHelpers.h">
+      <Filter>Application Shell</Filter>
+    </ClInclude>
+    <ClInclude Include="settings\views\ModelEffortChoice.h">
+      <Filter>Settings\Views</Filter>
+    </ClInclude>
+    <ClInclude Include="settings\views\ProviderIdentity.h">
+      <Filter>Settings\Views</Filter>
+    </ClInclude>
     <ClInclude Include="settings\views\SettingsViewSupport.h">
       <Filter>Settings\Views</Filter>
     </ClInclude>
@@ -293,6 +302,9 @@
     </ClCompile>
     <ClCompile Include="agent\ChatJournal.cpp">
       <Filter>Agent Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="settings\views\ProviderIdentity.cpp">
+      <Filter>Settings\Views</Filter>
     </ClCompile>
     <ClCompile Include="agent\ChatStore.cpp">
       <Filter>Agent Chat</Filter>

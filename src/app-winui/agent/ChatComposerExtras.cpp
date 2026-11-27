@@ -5,10 +5,12 @@
 #include <winrt/Windows.Security.Cryptography.h>
 #include <winrt/Windows.System.h>
 #include "agent/ChatComposerExtras.h"
-#include "agent/ChatControls.h"
+#include "ui/ControlHelpers.h"
+#include <winrt/Microsoft.UI.Xaml.Automation.h>
 #include <wil/resource.h>
 
 namespace winrt::Folia::chat {
+    using namespace ui;
     using namespace Windows::ApplicationModel::DataTransfer;
     using namespace Windows::Storage::Streams;
     using Windows::System::VirtualKey;
@@ -45,7 +47,7 @@ namespace winrt::Folia::chat {
         self->list_.MaxHeight(168);
         self->list_.IsItemClickEnabled(true);
         self->list_.SingleSelectionFollowsFocus(false);
-        self->list_.ItemContainerStyle(settings_ui::ResourceStyle(L"ChatModelPickerItemStyle"));
+        self->list_.ItemContainerStyle(ui::ResourceStyle(L"ChatModelPickerItemStyle"));
         self->list_.ItemClick([weak](auto const&, ItemClickEventArgs const& args) {
             if (auto view = weak.lock()) {
                 std::uint32_t i{};
@@ -242,7 +244,7 @@ namespace winrt::Folia::chat {
         thumbnails_.Children().Clear();
         for (std::size_t i = 0; i < images_.size(); ++i) {
             Button remove;
-            remove.Style(settings_ui::ResourceStyle(L"ChatActionStyle"));
+            remove.Style(ui::ResourceStyle(L"ChatActionStyle"));
             remove.Padding({2,2,2,2}); remove.Height(46);
             StackPanel row;
             row.Orientation(Orientation::Horizontal);

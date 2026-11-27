@@ -1,10 +1,12 @@
 #include "pch.h"
 #include "agent/ChatMotion.h"
 #include "agent/ChatActivityView.h"
-#include "agent/ChatControls.h"
+#include "ui/ControlHelpers.h"
+#include <winrt/Microsoft.UI.Xaml.Automation.h>
 #include "workspace/WorkspaceIcons.h"
 
 namespace winrt::Folia::chat {
+    using namespace ui;
     namespace {
         struct Action {
             std::string_view name;
@@ -47,7 +49,7 @@ namespace winrt::Folia::chat {
 
         TextBlock Detail(hstring const& text) {
             TextBlock body;
-            body.Style(settings_ui::ResourceStyle(L"ChatModelPickerSecondaryLabelStyle"));
+            body.Style(ui::ResourceStyle(L"ChatModelPickerSecondaryLabelStyle"));
             body.Name(L"ChatActivityDetail");
             body.FontSize(12);
             body.TextWrapping(TextWrapping::Wrap);
@@ -68,7 +70,7 @@ namespace winrt::Folia::chat {
     Button ChatActivityView::Header(std::optional<std::size_t> index, hstring const& text, bool expanded) {
         Button button;
         button.Name(index ? L"ChatActivityItem" : L"ChatActivitySummary");
-        button.Style(settings_ui::ResourceStyle(L"ChatActionStyle"));
+        button.Style(ui::ResourceStyle(L"ChatActionStyle"));
         button.HorizontalAlignment(HorizontalAlignment::Left);
         button.HorizontalContentAlignment(HorizontalAlignment::Stretch);
         button.Height(26);
@@ -88,7 +90,7 @@ namespace winrt::Folia::chat {
         Put(line, icon, 0);
         line.ColumnSpacing(6);
         TextBlock title;
-        title.Style(settings_ui::ResourceStyle(L"ChatModelPickerSecondaryLabelStyle"));
+        title.Style(ui::ResourceStyle(L"ChatModelPickerSecondaryLabelStyle"));
         title.FontSize(12);
         title.TextWrapping(TextWrapping::NoWrap);
         title.TextTrimming(TextTrimming::CharacterEllipsis);

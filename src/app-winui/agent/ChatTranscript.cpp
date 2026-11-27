@@ -1,27 +1,29 @@
 #include "pch.h"
 #include "agent/ChatMotion.h"
 #include "agent/ChatTranscript.h"
-#include "agent/ChatControls.h"
+#include "ui/ControlHelpers.h"
+#include <winrt/Microsoft.UI.Xaml.Automation.h>
 #include "workspace/WorkspaceIcons.h"
 #include <winrt/Windows.ApplicationModel.DataTransfer.h>
 #include <winrt/Windows.System.h>
 #include <winrt/Windows.Storage.h>
 
 namespace winrt::Folia::chat {
+    using namespace ui;
     using namespace Microsoft::UI::Xaml;
     using namespace Controls;
     using folia::ai::MessageRole;
     using folia::ai::agent::ProgressKind;
     namespace {
         void SmallButton(Button const& button, Windows::Foundation::IInspectable const& content, wchar_t const* name) {
-            button.Style(settings_ui::ResourceStyle(L"ChatActionStyle"));
+            button.Style(ui::ResourceStyle(L"ChatActionStyle"));
             button.Content(content);
             Automation::AutomationProperties::SetName(button, Localize(name));
             ToolTipService::SetToolTip(button, box_value(Localize(name)));
         }
         TextBlock Text(hstring const& value, bool muted = false) {
             TextBlock text;
-            text.Style(settings_ui::ResourceStyle(muted ? L"ChatModelPickerSecondaryLabelStyle" : L"ChatModelPickerLabelStyle"));
+            text.Style(ui::ResourceStyle(muted ? L"ChatModelPickerSecondaryLabelStyle" : L"ChatModelPickerLabelStyle"));
             text.FontSize(muted ? 12 : 15);
             text.TextWrapping(TextWrapping::Wrap);
             text.TextTrimming(TextTrimming::None);
@@ -64,7 +66,7 @@ namespace winrt::Folia::chat {
         header_.MinHeight(32);
         header_.Padding({12,0,8,0});
         header_.ColumnSpacing(6);
-        title_.Style(settings_ui::ResourceStyle(L"ChatModelPickerLabelStyle"));
+        title_.Style(ui::ResourceStyle(L"ChatModelPickerLabelStyle"));
         title_.FontWeight(Windows::UI::Text::FontWeights::SemiBold());
         Put(header_, title_, 0);
         Put(header_, nav_, 0, 1);
@@ -74,7 +76,7 @@ namespace winrt::Folia::chat {
         nav_.Spacing(6);
         SmallButton(older_, MakeWorkspaceIcon(WorkspaceIcon::ChevronLeft), L"ChatOlderMessages");
         SmallButton(newer_, MakeWorkspaceIcon(WorkspaceIcon::ChevronRight), L"ChatNewerMessages");
-        pageLabel_.Style(settings_ui::ResourceStyle(L"ChatModelPickerSecondaryLabelStyle"));
+        pageLabel_.Style(ui::ResourceStyle(L"ChatModelPickerSecondaryLabelStyle"));
         for (auto element : {older_.as<UIElement>(), pageLabel_.as<UIElement>(), newer_.as<UIElement>()}) nav_.Children().Append(element);
         older_.Click([weak](auto const&, auto const&) {
             if (auto view = weak.lock(); view && view->page_.before) {
@@ -118,7 +120,7 @@ namespace winrt::Folia::chat {
         });
         Put(root_, scroll_, 1);
         SmallButton(latest_, MakeWorkspaceIcon(WorkspaceIcon::ArrowDown), L"ChatLatest");
-        latest_.Style(settings_ui::ResourceStyle(L"DefaultButtonStyle"));
+        latest_.Style(ui::ResourceStyle(L"DefaultButtonStyle"));
         latest_.Width(32); latest_.Height(32); latest_.Padding({0,0,0,0}); latest_.CornerRadius({16,16,16,16});
         latest_.VerticalAlignment(VerticalAlignment::Bottom);
         latest_.HorizontalAlignment(HorizontalAlignment::Center);
@@ -237,7 +239,7 @@ namespace winrt::Folia::chat {
         row.Spacing(5);
         if (entry.role == MessageRole::User) {
             Border bubble;
-            bubble.Style(settings_ui::ResourceStyle(L"ChatUserBubbleStyle"));
+            bubble.Style(ui::ResourceStyle(L"ChatUserBubbleStyle"));
             bubble.MaxWidth(570);
             bubble.Margin({28, 0, 0, 0});
             StackPanel body;

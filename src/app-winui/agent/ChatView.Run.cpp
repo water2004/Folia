@@ -1,12 +1,13 @@
 #include "pch.h"
 #include "settings/storage/ProviderPresets.h"
 #include "agent/ChatView.h"
-#include "agent/ChatControls.h"
+#include "ui/ControlHelpers.h"
 #include "providers/ModelValidation.h"
 #include "windows/ai/ModelHttpClient.h"
 #include <wil/resource.h>
 
 namespace winrt::Folia::chat {
+    using namespace ui;
     using namespace models;
     using folia::ai::MessageRole;
     using folia::ai::agent::Options;

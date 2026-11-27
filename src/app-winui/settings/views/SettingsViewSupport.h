@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ui/ControlHelpers.h"
+
 #include <winrt/Microsoft.UI.Xaml.Automation.h>
 import folia.core.theme;
 
@@ -39,10 +41,7 @@ namespace winrt::Folia::settings_ui
         return Xaml::Media::FontFamily(winrt::to_hstring(family));
     }
 
-    inline Xaml::Style ResourceStyle(wchar_t const* key)
-    {
-        return Xaml::Application::Current().Resources().Lookup(winrt::box_value(key)).as<Xaml::Style>();
-    }
+    using ui::ResourceStyle;
 
     inline Controls::ComboBox Choice()
     {

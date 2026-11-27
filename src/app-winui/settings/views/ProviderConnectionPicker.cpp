@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "settings/views/ProviderConnectionPicker.h"
-#include "agent/ChatControls.h"
+#include "ui/ControlHelpers.h"
 #include "settings/views/SettingsCards.h"
 
 namespace winrt::Folia::settings_ui {
-    using namespace chat;
+    using namespace ui;
     using namespace Microsoft::UI::Xaml::Controls;
     using folia::ai::ApiProtocol;
 

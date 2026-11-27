@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "agent/ChatView.h"
 #include "providers/HostedSearch.h"
-#include "agent/ChatControls.h"
+#include "ui/ControlHelpers.h"
 #include "workspace/WorkspaceIcons.h"
 #include <shobjidl.h>
 #include <winrt/Windows.ApplicationModel.DataTransfer.h>
@@ -12,6 +12,7 @@
 #include <wil/resource.h>
 
 namespace winrt::Folia::chat {
+    using namespace ui;
     using namespace models;
     using namespace Microsoft::UI::Xaml;
     using namespace Microsoft::UI::Xaml::Controls;
@@ -70,14 +71,14 @@ namespace winrt::Folia::chat {
         empty_.Margin({0, 0, 0, 14});
         composer_.Children().Append(empty_);
         status_.TextWrapping(TextWrapping::Wrap);
-        status_.Style(settings_ui::ResourceStyle(L"SettingsHintTextStyle"));
+        status_.Style(ui::ResourceStyle(L"SettingsHintTextStyle"));
         Report({});
         composer_.Children().Append(status_);
         Border card;
-        card.Style(settings_ui::ResourceStyle(L"ChatComposerCardStyle"));
+        card.Style(ui::ResourceStyle(L"ChatComposerCardStyle"));
         StackPanel editor;
         editor.Spacing(3);
-        input_.Style(settings_ui::ResourceStyle(L"ChatComposerInputStyle"));
+        input_.Style(ui::ResourceStyle(L"ChatComposerInputStyle"));
         auto clear = Microsoft::UI::Xaml::Media::SolidColorBrush(Microsoft::UI::Colors::Transparent());
         for (auto key : {L"TextControlBackground", L"TextControlBackgroundPointerOver", L"TextControlBackgroundFocused",
                          L"TextControlBorderBrush", L"TextControlBorderBrushPointerOver", L"TextControlBorderBrushFocused"})
@@ -119,7 +120,7 @@ namespace winrt::Folia::chat {
 
         Columns(bar_, {false, false, true, false, false});
         bar_.ColumnSpacing(3);
-        mention_.Style(settings_ui::ResourceStyle(L"ChatActionStyle"));
+        mention_.Style(ui::ResourceStyle(L"ChatActionStyle"));
         mention_.Content(MakeWorkspaceIcon(WorkspaceIcon::Add));
         Label(mention_, L"ChatAddContent");
         MenuFlyout attachments;
@@ -140,15 +141,15 @@ namespace winrt::Folia::chat {
         });
         mention_.Flyout(attachments);
         Put(bar_, mention_, 0);
-        accessChip_.Style(settings_ui::ResourceStyle(L"ChatActionStyle"));
-        accessLabel_.Style(settings_ui::ResourceStyle(L"ChatModelPickerSecondaryLabelStyle"));
+        accessChip_.Style(ui::ResourceStyle(L"ChatActionStyle"));
+        accessLabel_.Style(ui::ResourceStyle(L"ChatModelPickerSecondaryLabelStyle"));
         accessLabel_.FontSize(12);
         accessLabel_.TextTrimming(TextTrimming::CharacterEllipsis);
         accessChip_.Content(accessLabel_);
         Label(accessChip_, L"ChatAccess");
         Put(bar_, accessChip_, 0, 1);
         usage_.Name(L"ChatContextUsage");
-        usage_.Style(settings_ui::ResourceStyle(L"ChatModelPickerSecondaryLabelStyle"));
+        usage_.Style(ui::ResourceStyle(L"ChatModelPickerSecondaryLabelStyle"));
         usage_.FontSize(11);
         usage_.Margin({2, 0, 4, 0});
         contextMeter_.Orientation(Orientation::Horizontal);
@@ -159,7 +160,7 @@ namespace winrt::Folia::chat {
         contextRing_.MinWidth(0); contextRing_.MinHeight(0);
         Grid meter;
         Border track;
-        track.Style(settings_ui::ResourceStyle(L"ChatContextTrackStyle"));
+        track.Style(ui::ResourceStyle(L"ChatContextTrackStyle"));
         Put(meter, track, 0);
         Put(meter, contextRing_, 0);
         contextMeter_.Children().Append(meter);
@@ -167,7 +168,7 @@ namespace winrt::Folia::chat {
         Put(transcript_->Header(), contextMeter_, 0, 2);
         if (host_.rename) {
             Button rename;
-            rename.Style(settings_ui::ResourceStyle(L"ChatActionStyle"));
+            rename.Style(ui::ResourceStyle(L"ChatActionStyle"));
             FontIcon pencil;
             pencil.Glyph(L"\uE70F"); pencil.FontSize(13);
             rename.Content(pencil);
@@ -191,7 +192,7 @@ namespace winrt::Folia::chat {
             [weak] { if (auto view = weak.lock()) view->host_.settings(); });
         modelPicker_->SetPalette(palette_);
         Put(bar_, modelPicker_->Element(), 0, 3);
-        split_.Style(settings_ui::ResourceStyle(L"ChatActionStyle"));
+        split_.Style(ui::ResourceStyle(L"ChatActionStyle"));
         auto splitIcon = MakeWorkspaceIcon(WorkspaceIcon::SplitEditor);
         splitIcon.Width(15); splitIcon.Height(15);
         split_.Content(splitIcon);
@@ -202,7 +203,7 @@ namespace winrt::Folia::chat {
         openTabs_.Text(Localize(L"ChatAllowOpenTabs"));
         for (auto const& [button, icon, key] : {std::tuple{stop_, WorkspaceIcon::Stop, L"ChatStop"},
             std::tuple{send_, WorkspaceIcon::Send, L"ChatSend"}}) {
-            button.Style(settings_ui::ResourceStyle(L"ChatSendStyle"));
+            button.Style(ui::ResourceStyle(L"ChatSendStyle"));
             button.Background(palette_.accent);
             button.Foreground(palette_.onAccent);
             button.Content(MakeWorkspaceIcon(icon, palette_.onAccent));

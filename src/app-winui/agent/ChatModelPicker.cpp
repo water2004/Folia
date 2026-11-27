@@ -1,13 +1,15 @@
 #include "pch.h"
 #include "agent/ChatMotion.h"
 #include "agent/ChatModelPicker.h"
-#include "agent/ChatControls.h"
+#include "ui/ControlHelpers.h"
+#include <winrt/Microsoft.UI.Xaml.Automation.h>
 #include "agent/ChatPalette.h"
 #include <wil/resource.h>
 #include <winrt/Microsoft.UI.Xaml.Hosting.h>
 #include <winrt/Windows.UI.ViewManagement.h>
 
 namespace winrt::Folia::chat {
+    using namespace ui;
     namespace {
         void NameAction(Button const& button, wchar_t const* key) {
             auto label = Localize(key);
@@ -67,7 +69,7 @@ namespace winrt::Folia::chat {
         Automation::AutomationProperties::SetName(efforts_, Localize(L"AIReasoning"));
 
         flyout_.Placement(Primitives::FlyoutPlacementMode::TopEdgeAlignedRight);
-        flyout_.FlyoutPresenterStyle(settings_ui::ResourceStyle(L"ChatModelPickerPresenterStyle"));
+        flyout_.FlyoutPresenterStyle(ui::ResourceStyle(L"ChatModelPickerPresenterStyle"));
         flyout_.Content(panel);
         chip_.Flyout(flyout_);
         opening_ = flyout_.Opening(winrt::auto_revoke, [this](auto const&, auto const&) { ShowModels(levels_.empty()); });
@@ -119,7 +121,7 @@ namespace winrt::Folia::chat {
             content.ColumnDefinitions().GetAt(1).Width(GridLengthHelper::FromPixels(16));
             content.ColumnSpacing(10);
             TextBlock title;
-            title.Style(settings_ui::ResourceStyle(L"ChatModelPickerLabelStyle"));
+            title.Style(ui::ResourceStyle(L"ChatModelPickerLabelStyle"));
             title.Text(name);
             Put(content, title, 0);
             FontIcon check;

@@ -358,9 +358,6 @@
   <data name="AIBaseUrlDescription" xml:space="preserve"><value>例如 https://api.example.com/v1。会根据所选协议自动补全请求路径。</value></data>
   <data name="AIModel" xml:space="preserve"><value>模型</value></data>
   <data name="AIKey" xml:space="preserve"><value>API Key（Windows 凭据管理器）</value></data>
-  <data name="AIKeyUnchanged" xml:space="preserve"><value>留空保留已保存的密钥</value></data>
-  <data name="AIClearKey" xml:space="preserve"><value>删除已保存的密钥</value></data>
-  <data name="AICompletionBudget" xml:space="preserve"><value>按每次请求设置上下文和输出上限，只发送光标附近的 UTF-8 文本。不自动重试、不保存磁盘建议缓存。输出 token 可能包含推理，费用和支持的推理档位取决于服务及模型。</value></data>
   <data name="AIEagerness" xml:space="preserve"><value>补全主动程度</value></data>
   <data name="AIEagernessConservative" xml:space="preserve"><value>保守</value></data>
   <data name="AIEagernessBalanced" xml:space="preserve"><value>均衡</value></data>
@@ -368,7 +365,6 @@
   <data name="AIEagernessDescription" xml:space="preserve"><value>通过提示词控制是否主动建议，与模型推理力度独立。积极档会在存在多种写法时尝试简短续写，但不保证每次都有建议。</value></data>
   <data name="AIReasoning" xml:space="preserve"><value>推理力度</value></data>
   <data name="AIReasoningDefault" xml:space="preserve"><value>服务默认</value></data>
-  <data name="AIModelChoices" xml:space="preserve"><value>选择模型</value></data>
   <data name="AIContextKB" xml:space="preserve"><value>上下文大小（KB，1–64）</value></data>
   <data name="AIOutputTokens" xml:space="preserve"><value>最大输出 token（16–4096）</value></data>
   <data name="AIBudgetInvalid" xml:space="preserve"><value>请输入整数：上下文为 1–64 KB，输出为 16–4096 token。</value></data>
@@ -379,12 +375,8 @@
   <data name="AIRequestFailed" xml:space="preserve"><value>AI：请求失败</value></data>
   <data name="SettingsSaved" xml:space="preserve"><value>设置已保存。</value></data>
   <data name="AIService" xml:space="preserve"><value>服务</value></data>
-  <data name="AICredentials" xml:space="preserve"><value>凭据</value></data>
-  <data name="AIModelPlaceholder" xml:space="preserve"><value>选择或输入模型 ID</value></data>
   <data name="AIFetchModels" xml:space="preserve"><value>获取模型</value></data>
-  <data name="AIFetchModelsBusy" xml:space="preserve"><value>获取中…</value></data>
   <data name="AINoModels" xml:space="preserve"><value>上游未返回可用模型，可自行填写模型 ID。</value></data>
-  <data name="AIModelsFetched" xml:space="preserve"><value>已获取 {0} 个模型。可下拉选择或自行填写。</value></data>
   <data name="AIExplicitCache" xml:space="preserve"><value>显式提示缓存</value></data>
   <data name="AIExplicitCacheDescription" xml:space="preserve"><value>仅在服务和模型支持显式缓存断点时开启。Folia 在稳定上下文末尾标记断点，是否写入或命中缓存及相关费用由服务决定。</value></data>
   <data name="ShortcutScopeTable" xml:space="preserve"><value>表格区域</value></data>
@@ -525,22 +517,17 @@
   <data name="ChatAllowOpenTabs" xml:space="preserve"><value>允许读取打开的 Markdown 页签</value></data>
   <data name="ChatAllowSearch" xml:space="preserve"><value>启用供应商联网搜索</value></data>
   <data name="ChatSearchUnavailable" xml:space="preserve"><value>联网搜索（此模型或供应商未启用）</value></data>
-  <data name="ChatPermissionHint" xml:space="preserve"><value>按需读取的数据可能会发给模型供应商。可在两轮对话之间调整权限。</value></data>
   <data name="ChatNoWorkspace" xml:space="preserve"><value>无工作区访问权限</value></data>
   <data name="ChatUseCurrentFolder" xml:space="preserve"><value>允许读取当前打开的文件夹</value></data>
   <data name="ChatChooseFolder" xml:space="preserve"><value>选择其他文件夹…</value></data>
   <data name="ChatNoCurrentFolder" xml:space="preserve"><value>请先在本窗口打开文件夹。</value></data>
   <data name="ChatStop" xml:space="preserve"><value>停止</value></data>
   <data name="ChatSend" xml:space="preserve"><value>发送</value></data>
-  <data name="ChatYou" xml:space="preserve"><value>你</value></data>
-  <data name="ChatAssistant" xml:space="preserve"><value>Agent</value></data>
   <data name="ChatNeedsProvider" xml:space="preserve"><value>请在「设置 → AI 供应商」中添加模型，然后在输入框下方选择。</value></data>
   <data name="ChatInvalidPrompt" xml:space="preserve"><value>消息超过长度限制。</value></data>
   <data name="ChatAlreadyRunning" xml:space="preserve"><value>此会话正在另一个页签运行。</value></data>
   <data name="ChatWorking" xml:space="preserve"><value>正在处理…</value></data>
   <data name="ChatCompacting" xml:space="preserve"><value>正在整理较早的对话…</value></data>
-  <data name="ChatReading" xml:space="preserve"><value>正在读取已授权的上下文…</value></data>
-  <data name="ChatStopped" xml:space="preserve"><value>已停止</value></data>
   <data name="ChatProviders" xml:space="preserve"><value>AI 供应商</value></data>
   <data name="ChatProvidersDescription" xml:space="preserve"><value>管理供应商连接，以及聊天和输入预测可用的模型。</value></data>
   <data name="ChatAddModel" xml:space="preserve"><value>添加模型</value></data>
@@ -559,7 +546,6 @@
   <data name="ChatEffortMax" xml:space="preserve"><value>最高</value></data>
   <data name="ChatAccess" xml:space="preserve"><value>权限</value></data>
   <data name="ChatWorkspace" xml:space="preserve"><value>工作区</value></data>
-  <data name="ChatReadOnly" xml:space="preserve"><value>只读</value></data>
   <data name="ChatModelDefaultEffort" xml:space="preserve"><value>模型默认</value></data>
   <data name="ChatNoProviders" xml:space="preserve"><value>添加供应商后，即可在折笺中使用它的模型。</value></data>
   <data name="ChatChooseProviderIcon" xml:space="preserve"><value>选择图标…</value></data>

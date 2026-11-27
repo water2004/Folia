@@ -358,9 +358,6 @@
   <data name="AIBaseUrlDescription" xml:space="preserve"><value>For example, https://api.example.com/v1. The request path is added for the selected protocol.</value></data>
   <data name="AIModel" xml:space="preserve"><value>Model</value></data>
   <data name="AIKey" xml:space="preserve"><value>API key (Windows Credential Manager)</value></data>
-  <data name="AIKeyUnchanged" xml:space="preserve"><value>Leave empty to keep the saved key</value></data>
-  <data name="AIClearKey" xml:space="preserve"><value>Remove saved key</value></data>
-  <data name="AICompletionBudget" xml:space="preserve"><value>Choose the context and output limits per request. Only nearby UTF-8 document text is sent. No automatic retry or disk suggestion cache. Output tokens may include reasoning; costs and supported reasoning levels depend on the service and model.</value></data>
   <data name="AIEagerness" xml:space="preserve"><value>Suggestion frequency</value></data>
   <data name="AIEagernessConservative" xml:space="preserve"><value>Conservative</value></data>
   <data name="AIEagernessBalanced" xml:space="preserve"><value>Balanced</value></data>
@@ -368,7 +365,6 @@
   <data name="AIEagernessDescription" xml:space="preserve"><value>Controls how readily the prompt asks for a suggestion, independently of model reasoning. Proactive mode tries a short continuation even when several phrasings are possible; useful suggestions are not guaranteed.</value></data>
   <data name="AIReasoning" xml:space="preserve"><value>Reasoning effort</value></data>
   <data name="AIReasoningDefault" xml:space="preserve"><value>Service default</value></data>
-  <data name="AIModelChoices" xml:space="preserve"><value>Choose model</value></data>
   <data name="AIContextKB" xml:space="preserve"><value>Context size (KB, 1–64)</value></data>
   <data name="AIOutputTokens" xml:space="preserve"><value>Maximum output tokens (16–4096)</value></data>
   <data name="AIBudgetInvalid" xml:space="preserve"><value>Enter whole numbers: 1–64 KB of context and 16–4096 output tokens.</value></data>
@@ -379,12 +375,8 @@
   <data name="AIRequestFailed" xml:space="preserve"><value>AI: request failed</value></data>
   <data name="SettingsSaved" xml:space="preserve"><value>Settings saved.</value></data>
   <data name="AIService" xml:space="preserve"><value>Service</value></data>
-  <data name="AICredentials" xml:space="preserve"><value>Credentials</value></data>
-  <data name="AIModelPlaceholder" xml:space="preserve"><value>Select or enter a model ID</value></data>
   <data name="AIFetchModels" xml:space="preserve"><value>Fetch models</value></data>
-  <data name="AIFetchModelsBusy" xml:space="preserve"><value>Fetching…</value></data>
   <data name="AINoModels" xml:space="preserve"><value>The service returned no models. You can enter a model ID.</value></data>
-  <data name="AIModelsFetched" xml:space="preserve"><value>Fetched {0} models. Select one or enter a model ID.</value></data>
   <data name="AIExplicitCache" xml:space="preserve"><value>Explicit prompt caching</value></data>
   <data name="AIExplicitCacheDescription" xml:space="preserve"><value>Enable only if your service and model support explicit cache breakpoints. Folia marks the end of the reusable context. The service determines cache eligibility and charges.</value></data>
   <data name="ShortcutScopeTable" xml:space="preserve"><value>Table</value></data>
@@ -525,22 +517,17 @@
   <data name="ChatAllowOpenTabs" xml:space="preserve"><value>Allow reading open Markdown tabs</value></data>
   <data name="ChatAllowSearch" xml:space="preserve"><value>Enable provider web search</value></data>
   <data name="ChatSearchUnavailable" xml:space="preserve"><value>Web search (disabled for this model or provider)</value></data>
-  <data name="ChatPermissionHint" xml:space="preserve"><value>Selected content may be sent to the model provider when needed. Change access between turns.</value></data>
   <data name="ChatNoWorkspace" xml:space="preserve"><value>No workspace access</value></data>
   <data name="ChatUseCurrentFolder" xml:space="preserve"><value>Allow reading the open folder</value></data>
   <data name="ChatChooseFolder" xml:space="preserve"><value>Choose another folder…</value></data>
   <data name="ChatNoCurrentFolder" xml:space="preserve"><value>Open a folder in this window first.</value></data>
   <data name="ChatStop" xml:space="preserve"><value>Stop</value></data>
   <data name="ChatSend" xml:space="preserve"><value>Send</value></data>
-  <data name="ChatYou" xml:space="preserve"><value>You</value></data>
-  <data name="ChatAssistant" xml:space="preserve"><value>Agent</value></data>
   <data name="ChatNeedsProvider" xml:space="preserve"><value>Add a model under Settings → AI providers, then select it below the message box.</value></data>
   <data name="ChatInvalidPrompt" xml:space="preserve"><value>The message exceeds the length limit.</value></data>
   <data name="ChatAlreadyRunning" xml:space="preserve"><value>This conversation is running in another tab.</value></data>
   <data name="ChatWorking" xml:space="preserve"><value>Working…</value></data>
   <data name="ChatCompacting" xml:space="preserve"><value>Summarizing earlier messages…</value></data>
-  <data name="ChatReading" xml:space="preserve"><value>Reading permitted context…</value></data>
-  <data name="ChatStopped" xml:space="preserve"><value>Stopped</value></data>
   <data name="ChatProviders" xml:space="preserve"><value>AI providers</value></data>
   <data name="ChatProvidersDescription" xml:space="preserve"><value>Manage provider connections and the models available for chat and inline prediction.</value></data>
   <data name="ChatAddModel" xml:space="preserve"><value>Add a model</value></data>
@@ -559,7 +546,6 @@
   <data name="ChatEffortMax" xml:space="preserve"><value>Maximum</value></data>
   <data name="ChatAccess" xml:space="preserve"><value>Access</value></data>
   <data name="ChatWorkspace" xml:space="preserve"><value>Workspace</value></data>
-  <data name="ChatReadOnly" xml:space="preserve"><value>Read only</value></data>
   <data name="ChatModelDefaultEffort" xml:space="preserve"><value>Model default</value></data>
   <data name="ChatNoProviders" xml:space="preserve"><value>Add a provider to make its models available in Folia.</value></data>
   <data name="ChatChooseProviderIcon" xml:space="preserve"><value>Choose icon…</value></data>

@@ -1,10 +1,11 @@
 #include "pch.h"
-#include "agent/ChatControls.h"
+#include "ui/ControlHelpers.h"
+#include "settings/views/ModelEffortChoice.h"
 #include "settings/views/ProviderModelForm.h"
 #include "settings/views/SettingsCards.h"
 
 namespace winrt::Folia::settings_ui {
-    using namespace chat;
+    using namespace ui;
     using namespace Microsoft::UI::Xaml;
     using namespace Microsoft::UI::Xaml::Controls;
 
