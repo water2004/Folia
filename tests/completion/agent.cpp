@@ -116,6 +116,25 @@ namespace {
             expect(called == 2_i);
         };
 
+        "agent applies a configured thinking switch independently of hosted search"_test = [] {
+            ModelRequest wire;
+            wire.model = "gateway-alias";
+            wire.messages.push_back({MessageRole::User, {{ContentKind::Text, "Hello"}}});
+            ProviderRequestOptions adapter{.explicitThinkingToggle=true};
+            wire.reasoning.effort = "none";
+            for (auto protocol : {ApiProtocol::AnthropicMessages, ApiProtocol::ChatCompletions}) {
+                auto body = BuildRequest(protocol, wire, adapter);
+                expect(body["thinking"]["type"] == "disabled");
+                expect(!body.contains("output_config") && !body.contains("reasoning_effort"));
+            }
+            expect(!BuildRequest(ApiProtocol::ChatCompletions, wire).contains("thinking"));
+            wire.reasoning.effort = "high";
+            auto body = BuildRequest(ApiProtocol::ChatCompletions, wire, adapter);
+            expect(body["thinking"]["type"] == "enabled" && body["reasoning_effort"] == "high");
+            body = BuildRequest(ApiProtocol::Responses, wire, adapter);
+            expect(!body.contains("thinking") && body["reasoning"]["effort"] == "high");
+        };
+
         "agent encodes hosted search by protocol and preserves citation metadata"_test = [] {
             ModelRequest request;
             request.model = "fixture";
@@ -196,6 +215,40 @@ namespace {
             expect(fatal(started.size() == 1_u && failed.size() == 1_u));
             expect(started.front().kind == StreamEventKind::WebSearchStarted && started.front().text == "reading");
             expect(failed.front().kind == StreamEventKind::WebSearchFailed && failed.front().callId == "s");
+        };
+
+        "agent reads Chat Completions hosted search events, citations and replay"_test = [] {
+            auto chat = CreateStreamDecoder(ApiProtocol::ChatCompletions);
+            Json call{{"id","srv-search"},{"type","deepseek_web_search"},{"action",{{"queries",{"public docs","updates"}}}}};
+            auto chunk = [](Json choice) {
+                choice["index"] = 0;
+                return SseEvent{{}, Json{{"choices",Json::array({std::move(choice)})}}.dump()};
+            };
+            auto event = [&](char const* type) {
+                return chat->OnEvent(chunk({{"delta",Json::object()},
+                    {"server_tool_event",{{"type",type},{"step",0},{"call",call}}}}));
+            };
+            auto start = event("call_started");
+            call["status"] = "completed";
+            auto done = event("call_completed");
+            expect(fatal(start.size() == 1_u && done.size() == 1_u));
+            expect(start.front().text == "public docs · updates" && start.front().kind == StreamEventKind::WebSearchStarted);
+            expect(done.front().kind == StreamEventKind::WebSearchCompleted);
+            Json item{{"type","url_citation"},{"url_citation",{{"url","https://example.test/source"},{"title","Source"}}}};
+            Json steps = Json::array({{{"calls",Json::array({call})}}});
+            Json message{{"role","assistant"},{"content","Answer"},{"server_tool_calls",steps},{"annotations",{item,item}}};
+            chat->OnEvent(chunk({{"delta",message},{"finish_reason","stop"}}));
+            chat->OnEvent({{}, "[DONE]"});
+            Json full{{"choices",Json::array({{{"index",0},{"message",message},{"finish_reason","stop"}}})}};
+            for (auto result : {chat->Finish(), ParseResponse(ApiProtocol::ChatCompletions, full)}) {
+                expect(fatal(result.searches.size() == 1_u && result.citations.size() == 1_u));
+                expect(result.searches.front().id == "srv-search" && !result.searches.front().failed);
+                expect(result.citations.front().url == "https://example.test/source");
+                ModelRequest next;
+                next.model = "fixture";
+                next.messages.push_back(result.message);
+                expect(BuildRequest(ApiProtocol::ChatCompletions, next)["messages"][0]["server_tool_calls"] == steps);
+            }
         };
 
         "agent preserves partial streamed text and tool steps after interruption"_test = [] {

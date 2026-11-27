@@ -16,6 +16,7 @@ struct CompletionConfig {
     bool fullUrl = false;
     std::string catalogUrl;
     std::optional<std::uint32_t> modelOutputLimit;
+    bool explicitThinkingToggle = false;
     bool operator==(CompletionConfig const&) const = default;
 };
 struct CompletionResult {

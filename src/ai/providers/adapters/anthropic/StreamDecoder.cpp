@@ -77,8 +77,8 @@ class AnthropicDecoder final : public IResponseDecoder {
             auto bt = b["type"].get<std::string>();
             if (bt == "text" && IsString(b, "text") && !b["text"].get<std::string>().empty())
                 out.push_back({StreamEventKind::TextDelta, b["text"].get<std::string>()});
-            if (bt == "server_tool_use" && String(b, "name") == "web_search")
-                out.push_back({StreamEventKind::WebSearchStarted, b.contains("input") ? String(b["input"], "query") : "", String(b, "id")});
+            if (bt == "server_tool_use" && IsWebSearch(b))
+                out.push_back({StreamEventKind::WebSearchStarted, SearchTarget(b, "input"), String(b, "id")});
             if (bt == "web_search_tool_result") {
                 bool failed = b.contains("content") && b["content"].is_object() && String(b["content"], "type") == "web_search_tool_result_error";
                 out.push_back({failed ? StreamEventKind::WebSearchFailed : StreamEventKind::WebSearchCompleted, {}, String(b, "tool_use_id")});
@@ -163,8 +163,8 @@ class AnthropicDecoder final : public IResponseDecoder {
                     b.erase("_partial_json");
                 }
                 if (b["type"] == "tool_use") ReadToolUse(result_, b);
-                else if (String(b, "name") == "web_search" && b.contains("input"))
-                    out.push_back({StreamEventKind::WebSearchStarted, String(b["input"], "query"), String(b, "id")});
+                else if (IsWebSearch(b) && b.contains("input"))
+                    out.push_back({StreamEventKind::WebSearchStarted, SearchTarget(b, "input"), String(b, "id")});
             }
         } else if (type == "message_delta") {
             if (sawMessageDelta_)

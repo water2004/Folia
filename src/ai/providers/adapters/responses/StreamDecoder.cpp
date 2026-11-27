@@ -380,7 +380,7 @@ class Decoder final : public IResponseDecoder {
             if (String(item, "type") == "web_search_call") {
                 auto kind = added ? StreamEventKind::WebSearchStarted : String(item, "status") == "failed" ?
                     StreamEventKind::WebSearchFailed : StreamEventKind::WebSearchCompleted;
-                out.push_back({kind, SearchTarget(item), String(item, "id")});
+                out.push_back({kind, SearchTarget(item, "action"), String(item, "id")});
             }
         }
         else if (type == "response.output_text.delta" || type == "output_text.delta")

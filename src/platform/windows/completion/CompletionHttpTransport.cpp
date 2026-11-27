@@ -31,7 +31,7 @@ CompletionResult RequestCompletionHttp(CompletionConfig const& config, folia::co
     } else {
         add(MessageRole::User, prompt.context + prompt.cursor);
     }
-    auto request = BuildRequest(protocol, model);
+    auto request = BuildRequest(protocol, model, {.explicitThinkingToggle = config.explicitThinkingToggle});
     if (hasBreakpoint) {
         // The Responses adapter maps user content parts in order. Mark only
         // the stable part of the document message assembled above.
@@ -47,7 +47,7 @@ CompletionResult RequestCompletionHttp(CompletionConfig const& config, folia::co
     output.truncated = result.finish == FinishReason::Truncated;
     return output;
 }
-CompletionModelPage ParseCompletionModels(std::string_view json, int protocol) {
+CompletionModelPage ParseCompletionModels(std::string_view json, int protocol, ai::ModelCatalogSchema schema) {
     if (json.size() > 1024 * 1024) throw std::runtime_error("Model metadata exceeds limit.");
     auto root = folia::ai::Json::parse(json);
     auto found = root.find("data");
@@ -67,22 +67,29 @@ CompletionModelPage ParseCompletionModels(std::string_view json, int protocol) {
         model.id = item.value("id", std::string{});
         if (model.id.empty() || model.id.size() > 128 || model.id.find_first_of("\r\n\0", 0, 3) != std::string::npos)
             throw std::runtime_error("Invalid model identifier.");
-        if (auto name = item.find("display_name"); protocol == 2 && name != item.end() && name->is_string())
+        if (auto name = item.find(schema == ai::ModelCatalogSchema::OpenRouter ? "name" : "display_name");
+            (schema == ai::ModelCatalogSchema::OpenRouter || protocol == 2) && name != item.end() && name->is_string())
             model.name = name->get<std::string>();
         if (model.name.size() > 256 || model.name.find_first_of("\r\n\0", 0, 3) != std::string::npos)
             throw std::runtime_error("Invalid model display name.");
-        // The OpenAI Models schema does not declare reasoning capabilities.
-        // Read the Messages capability schema only for its own protocol.
-        if (protocol == 2) {
-            auto limit = [&](char const* key) -> std::optional<std::uint32_t> {
-                auto value = item.find(key);
-                if (value == item.end() || !value->is_number_integer()) return {};
-                auto count = value->get<std::uint64_t>();
-                if (count == 0 || count > (std::numeric_limits<std::uint32_t>::max)()) return {};
-                return static_cast<std::uint32_t>(count);
-            };
-            model.maxInputTokens = limit("max_input_tokens");
-            model.maxOutputTokens = limit("max_tokens");
+        auto limit = [](ai::Json const& record, char const* key) -> std::optional<std::uint32_t> {
+            auto value = record.find(key);
+            if (value == record.end() || !value->is_number_integer()) return {};
+            auto count = value->get<std::uint64_t>();
+            if (!count || count > (std::numeric_limits<std::uint32_t>::max)()) return {};
+            return static_cast<std::uint32_t>(count);
+        };
+        if (schema == ai::ModelCatalogSchema::OpenRouter) {
+            model.maxInputTokens = limit(item, "context_length");
+            if (auto top = item.find("top_provider"); top != item.end())
+                model.maxOutputTokens = limit(*top, "max_completion_tokens");
+            if (auto architecture = item.find("architecture"); architecture != item.end()) {
+                auto inputs = architecture->find("input_modalities");
+                model.vision = inputs != architecture->end() && inputs->is_array() && std::ranges::contains(*inputs, "image");
+            }
+        } else if (protocol == 2) {
+            model.maxInputTokens = limit(item, "max_input_tokens");
+            model.maxOutputTokens = limit(item, "max_tokens");
         }
         if (protocol == 2 && item.contains("capabilities") && !item["capabilities"].is_null()) {
             auto const& capabilities = item.at("capabilities");
@@ -93,8 +100,13 @@ CompletionModelPage ParseCompletionModels(std::string_view json, int protocol) {
                 return flag != entry->end() && flag->is_boolean() && flag->template get<bool>();
             };
             model.vision = supported(capabilities, "image_input");
-            if (auto tools = capabilities.find("server_tools"); tools != capabilities.end())
-                model.webSearch = supported(*tools, "web_search");
+            if (auto tools = capabilities.find("server_tools"); tools != capabilities.end()) {
+                bool standard = supported(*tools, "web_search");
+                bool deepseek = supported(*tools, "deepseek_web_search");
+                model.webSearch = standard || deepseek;
+                if (standard != deepseek)
+                    model.searchFormat = standard ? ai::WebSearchDialect::Standard : ai::WebSearchDialect::DeepSeek;
+            }
             auto declared = capabilities.find("effort");
             if (declared != capabilities.end() && !declared->is_null()) {
                 if (!declared->is_object() || declared->size() > 33) throw std::runtime_error("Invalid reasoning capabilities.");
@@ -111,7 +123,7 @@ CompletionModelPage ParseCompletionModels(std::string_view json, int protocol) {
     }
     return page;
 }
-std::vector<CompletionModel> FetchCompletionModels(CompletionConfig const& config, std::stop_token stop, std::wstring key) {
+std::vector<CompletionModel> FetchCompletionModels(CompletionConfig const& config, std::stop_token stop, std::wstring key, ai::ModelCatalogSchema schema) {
     auto endpoint = ResolveCompletionModelsEndpoint(config);
     std::vector<CompletionModel> models;
     std::vector<std::string> cursors;
@@ -119,7 +131,7 @@ std::vector<CompletionModel> FetchCompletionModels(CompletionConfig const& confi
     for (int count = 0; count < 16; ++count) {
         auto response = models::ReadCatalogPage(static_cast<ai::ApiProtocol>(config.protocol), url, key, stop);
         if (stop.stop_requested()) return {};
-        auto page = ParseCompletionModels(response, config.protocol);
+        auto page = ParseCompletionModels(response, config.protocol, schema);
         for (auto& model : page.models)
             if (std::ranges::find(models, model.id, &CompletionModel::id) == models.end()) models.push_back(std::move(model));
         if (models.size() > 4096) throw std::runtime_error("Model list exceeds limit.");

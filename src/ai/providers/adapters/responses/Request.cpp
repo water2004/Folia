@@ -1,11 +1,12 @@
 #include "../Adapters.h"
+#include "../../HostedSearch.h"
 #include "Internal.h"
 
 namespace folia::ai {
 RequestHeaders ResponsesHeaders(std::string_view apiKey) {
     return {{"Authorization", "Bearer " + std::string(apiKey)}};
 }
-Json BuildResponsesRequest(ModelRequest const& request) {
+Json BuildResponsesRequest(ModelRequest const& request, ProviderRequestOptions options) {
     ValidateRequest(request);
     if (!SupportsReasoningOptions(ApiProtocol::Responses, request.reasoning))
         throw ProtocolError("Reasoning options are unsupported for Responses.");
@@ -57,7 +58,8 @@ Json BuildResponsesRequest(ModelRequest const& request) {
                          {"description", tool.description},
                          {"strict", false},
                          {"parameters", tool.inputSchema}});
-    if (request.webSearch) tools.push_back({{"type", "web_search"}});
+    if (request.webSearch)
+        tools.push_back(HostedSearchTool(ApiProtocol::Responses, options.search));
     Json body = {{"model", request.model},
                  {"input", std::move(input)},
                  {"tools", std::move(tools)},

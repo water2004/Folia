@@ -66,6 +66,12 @@ struct ReasoningOptions {
     std::string effort;
     bool summary{};
 };
+enum class WebSearchDialect { Standard, DeepSeek, OpenRouter };
+struct ProviderRequestOptions {
+    WebSearchDialect search = WebSearchDialect::Standard;
+    bool explicitThinkingToggle = false;
+};
+
 struct ModelRequest {
     std::string model;
     std::vector<Message> messages;

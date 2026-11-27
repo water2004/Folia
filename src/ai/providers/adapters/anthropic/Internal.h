@@ -1,4 +1,5 @@
 #pragma once
+#include "../SearchAction.h"
 #include "../../JsonParsing.h"
 #include "../../ModelAdapter.h"
 #include "../../ModelValidation.h"
@@ -42,12 +43,15 @@ std::string RoleName(MessageRole r) {
 Json TextBlock(std::string const& text) {
     return Json{{"type", "text"}, {"text", text}};
 }
+bool IsWebSearch(Json const& block) {
+    auto name = String(block, "name");
+    return name == "web_search" || name == "deepseek_web_search";
+}
 void AddHostedSearches(ModelResult& result, Json const& content) {
     for (auto const& b : content) {
         if (!IsString(b, "type")) continue;
-        if (b["type"] == "server_tool_use" && IsString(b, "name") && b["name"] == "web_search" &&
-            IsString(b, "id") && b.contains("input") && IsString(b["input"], "query") && result.searches.size() < 32) {
-            result.searches.push_back({String(b, "id"), String(b["input"], "query")});
+        if (b["type"] == "server_tool_use" && IsWebSearch(b) && IsString(b, "id") && result.searches.size() < 32) {
+            result.searches.push_back({String(b, "id"), SearchTarget(b, "input")});
         } else if (b["type"] == "web_search_tool_result" && IsString(b, "tool_use_id") &&
                    b.contains("content") && IsString(b["content"], "type") && b["content"]["type"] == "web_search_tool_result_error") {
             auto search = std::ranges::find(result.searches, String(b, "tool_use_id"), &HostedSearch::id);

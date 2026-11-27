@@ -1,5 +1,6 @@
 #pragma once
 #include "../../JsonParsing.h"
+#include "HostedActivity.h"
 #include "../../ModelAdapter.h"
 #include "../../ModelValidation.h"
 #include <algorithm>
@@ -247,6 +248,7 @@ ModelResult ParseFull(Json const& response) {
     if (source.contains("tool_calls"))
         replay["tool_calls"] = source["tool_calls"];
     result.message.providerState["chat_message"] = std::move(replay);
+    chat_search::ReadSteps(source, result);
     if (response.contains("id")) {
         if (!response["id"].is_string() || response["id"].get<std::string>().size() > 256)
             Invalid();

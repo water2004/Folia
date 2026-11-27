@@ -1,11 +1,12 @@
 #include "../Adapters.h"
+#include "../../HostedSearch.h"
 #include "Internal.h"
 
 namespace folia::ai {
 RequestHeaders AnthropicHeaders(std::string_view apiKey) {
     return {{"x-api-key", std::string(apiKey)}, {"anthropic-version", "2023-06-01"}};
 }
-Json BuildAnthropicRequest(ModelRequest const& request) {
+Json BuildAnthropicRequest(ModelRequest const& request, ProviderRequestOptions options) {
     ValidateRequest(request);
     if (!SupportsReasoningOptions(ApiProtocol::AnthropicMessages, request.reasoning))
         throw ProtocolError("Reasoning options are unsupported for Anthropic Messages.");
@@ -65,14 +66,18 @@ Json BuildAnthropicRequest(ModelRequest const& request) {
         for (auto const& t : request.tools)
             out["tools"].push_back(Json{
                 {"name", t.name}, {"description", t.description}, {"input_schema", t.inputSchema}});
-        if (request.webSearch)
-            out["tools"].push_back({{"type", "web_search_20250305"}, {"name", "web_search"}, {"max_uses", 3}});
+        if (request.webSearch) out["tools"].push_back(HostedSearchTool(ApiProtocol::AnthropicMessages, options.search));
     }
-    if (!request.reasoning.effort.empty())
-        out["output_config"] = {{"effort", request.reasoning.effort}};
+    if (!request.reasoning.effort.empty()) {
+        const bool thinking = request.reasoning.effort != "none";
+        if (options.explicitThinkingToggle)
+            out["thinking"] = {{"type", thinking ? "enabled" : "disabled"}};
+        if (thinking || !options.explicitThinkingToggle)
+            out["output_config"] = {{"effort", request.reasoning.effort}};
+    }
     // Explicit opt-in targets the adaptive-thinking API, not legacy token-budget thinking.
     // Compatible services/models may reject it; preserve their failure rather than guessing.
-    if (request.reasoning.summary)
+    if (request.reasoning.summary && !options.explicitThinkingToggle)
         out["thinking"] = {{"type", "adaptive"}, {"display", "summarized"}};
     return out;
 }

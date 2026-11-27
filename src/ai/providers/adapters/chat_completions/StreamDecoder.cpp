@@ -79,10 +79,12 @@ class ChatDecoder final : public IResponseDecoder {
             Fail();
         auto const& choice = choices[0];
         sawChoice_ = true;
+        chat_search::ReadEvent(choice, out);
         if (choice.contains("delta")) {
             auto const& delta = choice["delta"];
             if (!delta.is_object())
                 Fail();
+            chat_search::ReadSteps(delta, result_);
             if (delta.contains("role") &&
                 (!delta["role"].is_string() || delta["role"] != "assistant"))
                 Fail();

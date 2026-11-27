@@ -1,11 +1,12 @@
 #include "../Adapters.h"
+#include "../../HostedSearch.h"
 #include "Internal.h"
 
 namespace folia::ai {
 RequestHeaders ChatCompletionsHeaders(std::string_view apiKey) {
     return {{"Authorization", "Bearer " + std::string(apiKey)}};
 }
-Json BuildChatCompletionsRequest(ModelRequest const& request) {
+Json BuildChatCompletionsRequest(ModelRequest const& request, ProviderRequestOptions options) {
     ValidateRequest(request);
     if (!SupportsReasoningOptions(ApiProtocol::ChatCompletions, request.reasoning))
         throw ProtocolError("Reasoning options are unsupported for Chat Completions.");
@@ -37,6 +38,10 @@ Json BuildChatCompletionsRequest(ModelRequest const& request) {
                 for (auto const& [key, value] : replay.items()) {
                     if (key == "role" || key == "content" || key == "tool_calls")
                         continue;
+                    if (key == "server_tool_calls" && value.is_array() && value.size() <= 128) {
+                        out[key] = value;
+                        continue;
+                    }
                     if (key.size() > 64 || (!value.is_string() && !value.is_null()))
                         Invalid();
                     if (value.is_string() && value.get<std::string>().size() > MaxTextBytes)
@@ -51,7 +56,7 @@ Json BuildChatCompletionsRequest(ModelRequest const& request) {
                  {"messages", std::move(messages)},
                  {"max_tokens", request.maxOutputTokens},
                  {"stream", request.stream}};
-    if (!request.tools.empty()) {
+    if (!request.tools.empty() || request.webSearch) {
         Json tools = Json::array();
         std::set<std::string> names;
         for (auto const& t : request.tools) {
@@ -64,13 +69,19 @@ Json BuildChatCompletionsRequest(ModelRequest const& request) {
                                {"description", t.description},
                                {"parameters", t.inputSchema}}}});
         }
+        if (request.webSearch) tools.push_back(HostedSearchTool(ApiProtocol::ChatCompletions, options.search));
         body["tools"] = std::move(tools);
         body["tool_choice"] = "auto";
     }
     if (request.stream)
         body["stream_options"] = {{"include_usage", true}};
-    if (!request.reasoning.effort.empty())
-        body["reasoning_effort"] = request.reasoning.effort;
+    if (!request.reasoning.effort.empty()) {
+        const bool thinking = request.reasoning.effort != "none";
+        if (options.explicitThinkingToggle)
+            body["thinking"] = {{"type", thinking ? "enabled" : "disabled"}};
+        if (thinking || !options.explicitThinkingToggle)
+            body["reasoning_effort"] = request.reasoning.effort;
+    }
     return body;
 }
 } // namespace folia::ai

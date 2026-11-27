@@ -11,7 +11,7 @@ class IResponseDecoder {
     // Missing terminal events or incomplete tool arguments fail closed.
     virtual ModelResult Finish() = 0;
 };
-Json BuildRequest(ApiProtocol protocol, ModelRequest const& request);
+Json BuildRequest(ApiProtocol protocol, ModelRequest const& request, ProviderRequestOptions = {});
 using RequestHeaders = std::vector<std::pair<std::string, std::string>>;
 RequestHeaders BuildHeaders(ApiProtocol protocol, std::string_view apiKey);
 ModelResult ParseResponse(ApiProtocol protocol, Json const& response);

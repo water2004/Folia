@@ -12,15 +12,15 @@ RequestHeaders BuildHeaders(ApiProtocol protocol, std::string_view apiKey) {
     }
     throw ProtocolError("Unsupported API protocol");
 }
-Json BuildRequest(ApiProtocol protocol, ModelRequest const& request) {
+Json BuildRequest(ApiProtocol protocol, ModelRequest const& request, ProviderRequestOptions options) {
     // Each protocol entry point owns validation; dispatch does not traverse the request again.
     switch (protocol) {
     case ApiProtocol::ChatCompletions:
-        return BuildChatCompletionsRequest(request);
+        return BuildChatCompletionsRequest(request, options);
     case ApiProtocol::Responses:
-        return BuildResponsesRequest(request);
+        return BuildResponsesRequest(request, options);
     case ApiProtocol::AnthropicMessages:
-        return BuildAnthropicRequest(request);
+        return BuildAnthropicRequest(request, options);
     }
     throw ProtocolError("Unsupported API protocol");
 }
