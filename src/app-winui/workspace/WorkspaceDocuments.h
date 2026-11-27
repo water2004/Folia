@@ -4,6 +4,7 @@
 #include "editor/document/EditorDocumentController.h"
 #include "windows/media/math/MathJaxRenderer.h"
 #include "workspace/WorkspaceFileKind.h"
+#include "editor/session/EditorSourceLocation.h"
 
 namespace winrt::Folia {
     enum class WorkspaceOpenMode { Preview, Keep };
@@ -19,18 +20,19 @@ namespace winrt::Folia {
         bool opening = false;
         bool controllerAttached = false;
         std::uint64_t openSerial = 0;
+        std::optional<EditorSourceLocation> pendingLocation;
         std::uint64_t themeRevision = 0;
     };
 
     struct WorkspaceDocument {
-        explicit WorkspaceDocument(std::uint64_t value, WorkspaceTabKind type = WorkspaceTabKind::Editor)
-            : id(value), kind(type), editor(type == WorkspaceTabKind::Editor ? std::make_unique<WorkspaceEditorDocument>() : nullptr) {}
+        explicit WorkspaceDocument(std::uint64_t value, WorkspaceTabKind type = WorkspaceTabKind::Editor);
 
         bool IsModified() const { return editor && editor->controller.IsModified(); }
         const std::uint64_t id;
         const WorkspaceTabKind kind;
         const std::unique_ptr<WorkspaceEditorDocument> editor;
         std::filesystem::path path;
+        const std::string referenceKey;
         std::string chatId, chatTitle;
         bool kept = false;
     };

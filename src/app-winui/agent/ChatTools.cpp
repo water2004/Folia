@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "agent/ChatTools.h"
+#include "storage/JsonRecords.h"
+#include "workspace/WorkspaceFileKind.h"
 #include <wil/resource.h>
 
 namespace winrt::Folia::chat {
@@ -119,6 +121,18 @@ namespace winrt::Folia::chat {
                 }, stop);
             }
 
+            bool Viewable(std::string const& relative) const {
+                auto file = Open(relative, GENERIC_READ);
+                FILE_STANDARD_INFO info{};
+                if (GetFileType(file.get()) != FILE_TYPE_DISK ||
+                    !GetFileInformationByHandleEx(file.get(), FileStandardInfo, &info, sizeof(info)) || info.Directory) return false;
+                if (ClassifyWorkspaceFile(std::filesystem::path(std::wstring(to_hstring(relative)))) != WorkspaceFileKind::Other) return true;
+                std::array<char, pageBytes + 4> buffer{};
+                DWORD count{};
+                if (!ReadFile(file.get(), buffer.data(), static_cast<DWORD>(buffer.size()), &count, nullptr)) return false;
+                return !Page(std::string_view(buffer.data(), count), 0).contains("error");
+            }
+
             Json List(Json const& args, std::stop_token stop, std::wstring_view prefix = {}) const {
                 auto file = Open(args.value("path", "."), FILE_LIST_DIRECTORY | FILE_READ_ATTRIBUTES);
                 alignas(FILE_ID_BOTH_DIR_INFO) std::array<std::byte, 16384> data;
@@ -191,7 +205,51 @@ namespace winrt::Folia::chat {
         return matches;
     }
 
-    std::vector<Tool> MakeTools(std::optional<std::vector<OpenTab>> tabs, std::filesystem::path const& folder) {
+    std::optional<ReferenceTarget> ResolveDocumentLink(std::string_view link, std::span<const folia::ai::agent::DocumentReference> docs) {
+        if (!link.starts_with("folia-doc:")) return {};
+        link.remove_prefix(10);
+        auto split = link.find('#');
+        auto number = [](std::string_view text, std::size_t& result) {
+            auto [end, error] = std::from_chars(text.data(), text.data() + text.size(), result);
+            return error == std::errc{} && end == text.data() + text.size();
+        };
+        auto token = link.substr(0, split);
+        if (token.size() != 32) return {};
+        auto doc = std::ranges::find(docs, token, &folia::ai::agent::DocumentReference::token);
+        if (doc == docs.end()) return {};
+        EditorSourceLocation location;
+        if (split != link.npos) {
+            auto fragment = link.substr(split + 1);
+            if (fragment.empty() || !number(fragment.substr(1), location.value)) return {};
+            if (fragment.front() == 'L' && location.value) location.kind = EditorSourceLocation::Kind::Line;
+            else if (fragment.front() == 'B') location.kind = EditorSourceLocation::Kind::Utf8Byte;
+            else return {};
+        }
+        return ReferenceTarget{*doc, location};
+    }
+
+    std::vector<Tool> MakeTools(std::optional<std::vector<OpenTab>> tabs, std::filesystem::path const& folder, OnReference onReference) {
+        using Ref = folia::ai::agent::DocumentReference;
+        auto docs = std::make_shared<std::vector<Ref>>();
+        auto link = [docs, onReference](Ref const& doc) {
+            auto where = std::ranges::find_if(*docs, [&](auto const& saved) {
+                return saved.tabKey == doc.tabKey && saved.path == doc.path;
+            });
+            if (where == docs->end()) {
+                docs->push_back(doc);
+                where = std::prev(docs->end());
+                where->token = records::NewId();
+                if (onReference) onReference(*where);
+            }
+            return "folia-doc:" + where->token;
+        };
+        auto cited = [](Json value, std::string const& uri, std::size_t offset) {
+            if (value.contains("error")) return value;
+            value["link"] = offset ? uri + "#B" + std::to_string(offset) : uri;
+            if (auto hits = value.find("matches"); hits != value.end())
+                for (auto& hit : *hits) hit["link"] = uri + "#B" + hit.at("offset").dump();
+            return value;
+        };
         std::vector<Tool> tools;
         Json offset{{"type", "integer"}, {"description", "Omit for the first page. Use next_offset for the next page."}};
         if (tabs) {
@@ -206,26 +264,27 @@ namespace winrt::Folia::chat {
                 return cached;
             };
             auto get = std::make_shared<decltype(snapshot)>(std::move(snapshot));
+            auto tabLink = [source, link](Json const& args) { return link(source->at(args.at("id").get<std::size_t>() - 1).document); };
             Json id{{"type", "integer"}};
             tools.push_back(Define("list_open_tabs", "List Folia Markdown tabs. Supply offset to continue.",
-                {{"offset", offset}}, Json::array(), [source](auto const& args, auto) {
+                {{"offset", offset}}, Json::array(), [source, link](auto const& args, auto) {
                     Json items = Json::array();
                     auto index = Offset(args);
                     for (; index < source->size() && items.size() < 32; ++index)
-                        items.push_back({{"id", index + 1}, {"title", source->at(index).title}, {"readable", bool(source->at(index).read)}});
+                        items.push_back({{"id", index + 1}, {"title", source->at(index).title}, {"readable", bool(source->at(index).read)}, {"link", link(source->at(index).document)}});
                     return Json{{"tabs", items}, {"next_offset", index < source->size() ? Json(index) : Json(nullptr)}};
                 }));
             tools.push_back(Define("read_open_tab", "Read Markdown at a UTF-8 byte offset, including unsaved edits.",
-                {{"id", id}, {"offset", offset}}, Json::array({"id"}), [get](auto const& args, auto stop) {
-                    return Page((*get)(args, stop).text, Offset(args));
+                {{"id", id}, {"offset", offset}}, Json::array({"id"}), [get, cited, tabLink](Json const& args, auto stop) {
+                    return cited(Page((*get)(args, stop).text, Offset(args)), tabLink(args), Offset(args));
                 }));
             tools.push_back(Define("search_open_tab", "Find literal text throughout an open document. Matches include snippets and byte offsets for read_open_tab.",
-                {{"id", id}, {"query", {{"type", "string"}}}, {"offset", offset}}, Json::array({"id", "query"}), [get](auto const& args, auto stop) {
+                {{"id", id}, {"query", {{"type", "string"}}}, {"offset", offset}}, Json::array({"id", "query"}), [get, cited, tabLink](Json const& args, auto stop) {
                     std::string_view text((*get)(args, stop).text);
-                    return Search(args, text.size(), [text](auto at, auto length) { return text.substr(at, length); }, stop);
+                    return cited(Search(args, text.size(), [text](auto at, auto length) { return text.substr(at, length); }, stop), tabLink(args), 0);
                 }));
             tools.push_back(Define("outline_open_tab", "List parsed Markdown headings and levels. Search a heading to locate its section.",
-                {{"id", id}, {"offset", offset}}, Json::array({"id"}), [get](auto const& args, auto stop) {
+                {{"id", id}, {"offset", offset}}, Json::array({"id"}), [get, tabLink](Json const& args, auto stop) {
                     auto const& outline = (*get)(args, stop).outline;
                     Json items = Json::array();
                     auto index = Offset(args);
@@ -235,19 +294,38 @@ namespace winrt::Folia::chat {
                         while (length < heading.size() && length && (static_cast<unsigned char>(heading[length]) & 0xc0) == 0x80) --length;
                         items.push_back({{"level", level}, {"heading", heading.substr(0, length)}});
                     }
-                    return Json{{"headings", items}, {"next_offset", index < outline.size() ? Json(index) : Json(nullptr)}};
+                    return Json{{"headings", items}, {"link", tabLink(args)}, {"next_offset", index < outline.size() ? Json(index) : Json(nullptr)}};
                 }));
+            for (auto& tool : tools) tool.target = [source](Json const& args) {
+                auto id = args.value("id", std::int64_t{});
+                return id > 0 && std::cmp_less_equal(id, source->size()) ? source->at(id - 1).title : std::string{};
+            };
         }
         if (!folder.empty()) {
             auto workspace = std::make_shared<Folder>(folder);
+            auto citeFile = [folder, link, cited](Json value, Json const& args) {
+                if (value.contains("error")) return value;
+                auto path = (folder / std::filesystem::path(std::wstring(to_hstring(args.at("path").get<std::string>())))).lexically_normal();
+                return cited(std::move(value), link({{}, to_string(hstring(path.native()))}), Offset(args));
+            };
             Json path{{"type", "string"}, {"description", "Workspace-relative path"}};
             tools.push_back(Define("list_workspace", "List a page of directory entries. Omit path for the root directory.",
                 {{"path", path}, {"offset", offset}}, Json::array(), [workspace](auto const& args, auto stop) { return workspace->List(args, stop); }));
             tools.push_back(Define("read_workspace_file", "Read a page of a UTF-8 text file within the approved workspace.",
-                {{"path", path}, {"offset", offset}}, Json::array({"path"}), [workspace](auto const& args, auto) { return workspace->Read(args); }));
+                {{"path", path}, {"offset", offset}}, Json::array({"path"}), [workspace, citeFile](auto const& args, auto) { return citeFile(workspace->Read(args), args); }));
             tools.push_back(Define("search_workspace_file", "Find literal text in a workspace file and return matching snippets and UTF-8 byte offsets.",
                 {{"path", path}, {"query", {{"type", "string"}}}, {"offset", offset}}, Json::array({"path", "query"}),
-                [workspace](auto const& args, auto stop) { return workspace->Find(args, stop); }));
+                [workspace, citeFile](auto const& args, auto stop) { return citeFile(workspace->Find(args, stop), args); }));
+            tools.push_back(Define("link_workspace_file", "Get a clickable Folia link to a file. Set line to a one-based source line when known.",
+                {{"path", path}, {"line", {{"type", "integer"}, {"minimum", 1}}}}, Json::array({"path"}),
+                [workspace, citeFile](Json const& args, auto) {
+                    if (!workspace->Viewable(args.at("path").get<std::string>())) return Error("This file cannot be displayed in Folia");
+                    auto line = args.value("line", std::int64_t{1});
+                    if (line < 1) return Error("Line numbers start at one");
+                    auto result = citeFile(Json::object(), args);
+                    if (args.contains("line")) result["link"] = result["link"].get<std::string>() + "#L" + std::to_string(line);
+                    return result;
+                }));
         }
         return tools;
     }

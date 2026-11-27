@@ -94,6 +94,22 @@ namespace winrt::Folia::implementation {
         }
         return nullptr;
     }
+    MainWindow* App::FindReferencedDocument(std::string_view key, std::filesystem::path const& path, std::uint64_t& id) const {
+        auto locate = [&](bool byKey) -> MainWindow* {
+            for (auto const& item : windows) {
+                auto owner = winrt::get_self<MainWindow>(item.window.as<winrt::Folia::MainWindow>());
+                if (owner->windowClosed) continue;
+                auto tab = byKey ? nullptr : owner->workspaceDocuments.Find(path);
+                if (byKey) for (auto const& doc : owner->workspaceDocuments.Items())
+                    if (doc->referenceKey == key) { tab = doc; break; }
+                if (tab) { id = tab->id; return owner; }
+            }
+            return nullptr;
+        };
+        if (!key.empty()) if (auto owner = locate(true)) return owner;
+        return path.empty() ? nullptr : locate(false);
+    }
+
     MainWindow* App::FindChatWindow(std::string_view id) const {
         for (auto const& item : windows) {
             auto owner = winrt::get_self<MainWindow>(item.window.as<winrt::Folia::MainWindow>());

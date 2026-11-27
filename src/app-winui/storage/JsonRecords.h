@@ -1,22 +1,12 @@
 #pragma once
 
 #include "providers/ModelTypes.h"
+#include "storage/RecordId.h"
 #include <wil/resource.h>
 import std;
 
 namespace winrt::Folia::records {
     using folia::ai::Json;
-
-    inline std::string NewId() {
-        GUID id{};
-        check_hresult(CoCreateGuid(&id));
-        wchar_t text[39]{};
-        StringFromGUID2(id, text, 39);
-        std::string result;
-        for (auto c : std::wstring_view(text))
-            if (c != L'{' && c != L'}' && c != L'-') result += static_cast<char>(std::towlower(c));
-        return result;
-    }
 
     inline std::filesystem::path Path(std::filesystem::path const& folder, std::string const& id, wchar_t const* extension) {
         if (id.size() != 32 || !std::ranges::all_of(id, [](char c) {

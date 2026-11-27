@@ -16,9 +16,11 @@ namespace winrt::Folia::chat {
 
     std::vector<Conversation> Conversations();
     Conversation NewConversation(std::string title);
+    bool CanGenerateTitle(std::string const& id);
     Conversation LoadConversation(std::string const& id);
     void SaveConversationOptions(Conversation&);
-    Conversation RenameConversation(std::string const& id, std::string title, bool automatic = false);
+    enum class TitleSource { User, Prompt, Model };
+    Conversation RenameConversation(std::string const& id, std::string title, TitleSource = TitleSource::User);
     void DeleteConversation(std::string const& id);
     struct HistoryPage {
         std::vector<Entry> entries;
@@ -29,5 +31,5 @@ namespace winrt::Folia::chat {
     std::string StoreImage(std::string const& chat, std::span<std::uint8_t const> png);
     folia::ai::ContentPart LoadImage(std::string const& chat, std::string const& id);
     History LoadHistory(std::string const& id);
-    void AppendEntry(std::string const& id, Entry const&, History const* checkpoint = nullptr);
+    void AppendEntry(std::string const& id, Entry const&, History const* checkpoint = nullptr, std::size_t skippedTail = 0);
 }

@@ -32,6 +32,11 @@ namespace winrt::Folia::chat {
         return List<Conversation>(LogFolder(), DecodeChat);
     }
 
+    bool CanGenerateTitle(std::string const& id) {
+        std::lock_guard lock(files);
+        return Read(Path(LogFolder(), id, L".json")).value("autoTitle", false);
+    }
+
     Conversation LoadConversation(std::string const& id) {
         std::lock_guard lock(files);
         return DecodeChat(Read(Path(LogFolder(), id, L".json")), id);
@@ -55,14 +60,14 @@ namespace winrt::Folia::chat {
             WriteConversation(path, conversation, stored.value("autoTitle", false));
     }
 
-    Conversation RenameConversation(std::string const& id, std::string title, bool automatic) {
+    Conversation RenameConversation(std::string const& id, std::string title, TitleSource source) {
         std::lock_guard lock(files);
         auto path = Path(LogFolder(), id, L".json");
         auto stored = Read(path);
         auto conversation = DecodeChat(stored, id);
-        if (!automatic || stored.value("autoTitle", false)) {
+        if (source == TitleSource::User || stored.value("autoTitle", false)) {
             conversation.title = std::move(title);
-            WriteConversation(path, conversation, false);
+            WriteConversation(path, conversation, source == TitleSource::Prompt);
         }
         return conversation;
     }
@@ -84,21 +89,34 @@ namespace winrt::Folia::chat {
                 for (auto const& item : *sources)
                     entry.sources.push_back({item.at("title").get<std::string>(), item.at("url").get<std::string>()});
             entry.reasoning = event.value("reasoning", "");
+            for (auto const& caption : event.value("reasoningSummaries", Json::array())) {
+                auto offset = caption.at("offset").get<std::size_t>();
+                if (offset < entry.reasoning.size()) entry.reasoningSummaries.push_back({offset, caption.at("text").get<std::string>()});
+            }
             entry.modelId = event.value("modelId", "");
             if (event.contains("inputTokens")) entry.usage.inputTokens = event.at("inputTokens").get<std::uint64_t>();
             if (event.contains("outputTokens")) entry.usage.outputTokens = event.at("outputTokens").get<std::uint64_t>();
             if (auto items = event.find("tools"); items != event.end() && items->is_array())
                 for (auto const& tool : *items)
-                    entry.activities.push_back({tool.at("name").get<std::string>(), tool.value("target", ""), tool.value("failed", false), tool.value("detail", "")});
+                    entry.activities.push_back({tool.at("name").get<std::string>(), tool.value("target", ""), tool.value("failed", false), tool.value("detail", ""), tool.value("pending", false)});
             folia::ai::agent::StepEnd last;
             for (auto const& item : event.value("steps", Json::array())) {
                 folia::ai::agent::StepEnd end{item.at(0), item.at(1), item.at(2)};
                 if (end.text < last.text || end.text > entry.markdown.size() ||
                     end.reasoning < last.reasoning || end.reasoning > entry.reasoning.size() ||
                     end.tools < last.tools || end.tools > entry.activities.size()) break;
+                if (item.size() > 3) {
+                    auto notice = item.at(3).get<std::string>();
+                    if (notice == "compact") end.notice = folia::ai::agent::StepEnd::Notice::Compaction;
+                    if (notice == "retry") { end.notice = folia::ai::agent::StepEnd::Notice::Retry; end.attempt = item.at(4); }
+                }
                 entry.steps.push_back(end);
                 last = end;
             }
+            for (auto const& doc : event.value("documents", Json::array()))
+                entry.documents.push_back({doc.value("tab", ""), doc.value("path", ""), doc.value("token", "")});
+            entry.error = event.value("error", std::string{});
+            entry.outputLimit = event.value("outputLimit", false);
             entry.interrupted = event.value("interrupted", false);
             entry.images = event.value("images", std::vector<std::string>{});
             return entry;
@@ -222,7 +240,7 @@ namespace winrt::Folia::chat {
             CryptographicBuffer::CreateFromByteArray(bytes)))};
     }
 
-    void AppendEntry(std::string const& id, Entry const& entry, History const* checkpoint) {
+    void AppendEntry(std::string const& id, Entry const& entry, History const* checkpoint, std::size_t skippedTail) {
         std::lock_guard lock(files);
         auto path = Path(LogFolder(), id, L".jsonl");
         if (!std::filesystem::exists(Path(LogFolder(), id, L".json")))
@@ -238,14 +256,24 @@ namespace winrt::Folia::chat {
         if (entry.usage.inputTokens) value["inputTokens"] = *entry.usage.inputTokens;
         if (entry.usage.outputTokens) value["outputTokens"] = *entry.usage.outputTokens;
         for (auto const& tool : entry.activities)
-            value["tools"].push_back({{"name", tool.name}, {"target", tool.target}, {"failed", tool.failed}, {"detail", tool.detail}});
-        for (auto const& end : entry.steps) value["steps"].push_back({end.text, end.reasoning, end.tools});
+            value["tools"].push_back({{"name", tool.name}, {"target", tool.target}, {"failed", tool.failed}, {"detail", tool.detail}, {"pending", tool.pending}});
+        for (auto const& caption : entry.reasoningSummaries)
+            value["reasoningSummaries"].push_back({{"offset", caption.offset}, {"text", caption.text}});
+        for (auto const& end : entry.steps) {
+            Json marker = {end.text, end.reasoning, end.tools};
+            if (end.notice == folia::ai::agent::StepEnd::Notice::Compaction) marker.push_back("compact");
+            if (end.notice == folia::ai::agent::StepEnd::Notice::Retry) { marker.push_back("retry"); marker.push_back(end.attempt); }
+            value["steps"].push_back(std::move(marker));
+        }
+        for (auto const& doc : entry.documents) value["documents"].push_back({{"tab", doc.tabKey}, {"path", doc.path}, {"token", doc.token}});
+        if (!entry.error.empty()) value["error"] = entry.error;
+        if (entry.outputLimit) value["outputLimit"] = true;
         if (entry.interrupted) value["interrupted"] = true;
         if (!entry.images.empty()) value["images"] = entry.images;
         if (checkpoint && (checkpoint->summarized || checkpoint->retired)) {
             value["summary"] = checkpoint->summary;
             value["summarized"] = checkpoint->retired + checkpoint->summarized;
-            value["retained"] = checkpoint->entries.size() - checkpoint->summarized + 1;
+            value["retained"] = checkpoint->entries.size() - checkpoint->summarized + skippedTail + 1;
         }
         // A leading separator lets the next event recover after a partial tail write.
         auto line = "\n" + value.dump() + "\n";

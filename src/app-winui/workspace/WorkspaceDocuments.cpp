@@ -1,8 +1,13 @@
 #include "pch.h"
 import std;
 #include "workspace/WorkspaceDocuments.h"
+#include "storage/RecordId.h"
 
 namespace winrt::Folia {
+    WorkspaceDocument::WorkspaceDocument(std::uint64_t value, WorkspaceTabKind type)
+        : id(value), kind(type), editor(type == WorkspaceTabKind::Editor ? std::make_unique<WorkspaceEditorDocument>() : nullptr),
+          referenceKey(type == WorkspaceTabKind::Editor ? records::NewId() : std::string{}) {}
+
     std::uint64_t AllocateWorkspaceItemId() {
         static std::atomic_uint64_t next{1};
         return next.fetch_add(1, std::memory_order_relaxed);
