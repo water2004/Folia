@@ -141,7 +141,7 @@
                     <Grid x:Name="Track" Margin="2,0" Height="20" VerticalAlignment="Center" IsHitTestVisible="False">
                         <Border x:Name="Rail" CornerRadius="10"
                                 BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1"/>
-                        <Border x:Name="Fill" Width="0" HorizontalAlignment="Left" CornerRadius="10"/>
+                        <Border x:Name="Fill" HorizontalAlignment="Stretch" CornerRadius="10"/>
                         <Canvas x:Name="Ticks"/>
                     </Grid>
                     <Canvas x:Name="ThumbLayer" Height="26" VerticalAlignment="Center" IsHitTestVisible="False">

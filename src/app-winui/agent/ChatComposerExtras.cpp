@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "agent/ChatMotion.h"
 #include <winrt/Windows.ApplicationModel.DataTransfer.h>
 #include <winrt/Windows.Graphics.Imaging.h>
 #include <winrt/Windows.Security.Cryptography.h>
@@ -15,7 +16,8 @@ namespace winrt::Folia::chat {
 
     namespace {
         constexpr std::pair<std::string_view, wchar_t const*> commands[] = {
-            {"/new", L"ChatNew"}, {"/model", L"ChatPickModel"}, {"/access", L"ChatAccess"}, {"/latest", L"ChatLatest"}
+            {"/new", L"ChatNew"}, {"/model", L"ChatPickModel"}, {"/access", L"ChatAccess"}, {"/latest", L"ChatLatest"},
+            {"/compact", L"ChatCompactCommand"}
         };
 
         bool CanStartMention(wchar_t previous) {
@@ -77,6 +79,11 @@ namespace winrt::Folia::chat {
         input_.Focus(FocusState::Programmatic);
         auto text = input_.Text();
         auto start = input_.SelectionStart();
+        if (tokenStart_ >= 0 && std::wstring_view(text).substr(tokenStart_, 1) == L"@") {
+            dismissed_ = {};
+            Update();
+            return;
+        }
         input_.SelectedText(start && !CanStartMention(std::wstring_view(text)[start - 1]) ? L" @" : L"@");
         auto end = input_.SelectionStart() + input_.SelectionLength();
         input_.Select(end, 0);
@@ -161,7 +168,9 @@ namespace winrt::Folia::chat {
             list_.Items().Append(box_value(item));
         }
         list_.SelectedIndex(choices_.empty() ? -1 : (std::clamp)(selected, 0, static_cast<int>(choices_.size()) - 1));
+        const bool appearing = list_.Visibility() != Visibility::Visible && !choices_.empty();
         list_.Visibility(choices_.empty() ? Visibility::Collapsed : Visibility::Visible);
+        if (appearing) Reveal(list_, 0, 5);
     }
     void ChatComposerExtras::Accept(int index) {
         if (index < 0 || !std::cmp_less(index, choices_.size()) || tokenStart_ < 0) return;

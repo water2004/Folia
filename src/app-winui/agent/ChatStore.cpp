@@ -17,13 +17,13 @@ namespace winrt::Folia::chat {
         Conversation DecodeChat(Json const& data, std::string id) {
             return {std::move(id), data.at("title").get<std::string>(), data.value("model", ""),
                 data.value("effort", ""), std::wstring(to_hstring(data.value("folder", ""))),
-                data.value("openTabs", false), data.value("search", false)};
+                data.value("openTabs", false), data.value("search", false), data.value("readPages", false)};
         }
 
         void WriteConversation(std::filesystem::path const& path, Conversation const& conversation, bool autoTitle) {
             Write(path, {{"title", conversation.title}, {"model", conversation.model},
                  {"effort", conversation.effort}, {"folder", to_string(hstring(conversation.folder.native()))},
-                 {"openTabs", conversation.openTabs}, {"search", conversation.search}, {"autoTitle", autoTitle}});
+                 {"openTabs", conversation.openTabs}, {"search", conversation.search}, {"readPages", conversation.readPages}, {"autoTitle", autoTitle}});
         }
     }
 
@@ -136,7 +136,7 @@ namespace winrt::Folia::chat {
                 end_ = (std::min)(size, before.value_or(size));
             }
 
-            std::optional<std::pair<Json, Entry>> Previous() {
+            std::optional<std::pair<Json, std::optional<Entry>>> Previous() {
                 for (;;) {
                     std::vector<std::string> suffix;
                     std::size_t total = 0;
@@ -159,6 +159,9 @@ namespace winrt::Folia::chat {
                     auto event = Json::parse(line, nullptr, false);
                     if (!event.is_object()) continue;
                     try {
+                        if (event.value("kind", "") == "compact" && event.at("summary").is_string() &&
+                            event.at("retained").is_number_unsigned() && event.at("summarized").is_number_unsigned())
+                            return std::pair{std::move(event), std::optional<Entry>{}};
                         auto entry = DecodeEntry(event);
                         return std::pair{std::move(event), std::move(entry)};
                     } catch (Json::exception const&) {} catch (std::invalid_argument const&) {}
@@ -178,14 +181,17 @@ namespace winrt::Folia::chat {
         HistoryPage page;
         unsigned turns = 0;
         while (auto record = journal.Previous()) {
-            auto user = record->second.role == MessageRole::User;
-            page.entries.push_back(std::move(record->second));
+            if (!record->second) { page.compactions.push_back(page.entries.size()); continue; }
+            auto user = record->second->role == MessageRole::User;
+            page.entries.push_back(std::move(*record->second));
             if (user && ++turns == 4) {
                 auto boundary = journal.Position();
                 if (journal.Previous()) page.before = boundary;
                 break;
             }
         }
+        for (auto& position : page.compactions) position = page.entries.size() - position;
+        std::ranges::reverse(page.compactions);
         std::ranges::reverse(page.entries);
         return page;
     }
@@ -206,7 +212,7 @@ namespace winrt::Folia::chat {
                 history.summary = event.at("summary").get<std::string>();
                 history.summarized = event.value("summarized", std::size_t{});
             }
-            history.entries.push_back(std::move(entry));
+            if (entry) history.entries.push_back(std::move(*entry));
             if (needed && history.entries.size() >= *needed) break;
         }
         std::ranges::reverse(history.entries);
@@ -240,11 +246,30 @@ namespace winrt::Folia::chat {
             CryptographicBuffer::CreateFromByteArray(bytes)))};
     }
 
+    namespace {
+        void WriteEvent(std::string const& id, Json const& value) {
+            auto path = Path(LogFolder(), id, L".jsonl");
+            if (!std::filesystem::exists(Path(LogFolder(), id, L".json")))
+                throw std::runtime_error("Conversation was removed");
+            // A leading separator lets the next event recover after a partial tail write.
+            auto line = "\n" + value.dump() + "\n";
+            wil::unique_hfile file(CreateFileW(path.c_str(), FILE_APPEND_DATA | FILE_READ_ATTRIBUTES, FILE_SHARE_READ,
+                nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_WRITE_THROUGH, nullptr));
+            DWORD count{};
+            if (!file ||
+                !WriteFile(file.get(), line.data(), static_cast<DWORD>(line.size()), &count, nullptr) || count != line.size())
+                throw std::runtime_error("Could not save conversation message");
+        }
+    }
+
+    void AppendCompaction(std::string const& id, History const& history) {
+        std::lock_guard lock(files);
+        WriteEvent(id, {{"kind", "compact"}, {"summary", history.summary}, {"summarized", history.retired + history.summarized},
+                        {"retained", history.entries.size() - history.summarized}});
+    }
+
     void AppendEntry(std::string const& id, Entry const& entry, History const* checkpoint, std::size_t skippedTail) {
         std::lock_guard lock(files);
-        auto path = Path(LogFolder(), id, L".jsonl");
-        if (!std::filesystem::exists(Path(LogFolder(), id, L".json")))
-            throw std::runtime_error("Conversation was removed");
         Json value{{"role", entry.role == MessageRole::User ? "user" : "assistant"}, {"markdown", entry.markdown}};
         if (!entry.sources.empty()) {
             value["sources"] = Json::array();
@@ -275,13 +300,6 @@ namespace winrt::Folia::chat {
             value["summarized"] = checkpoint->retired + checkpoint->summarized;
             value["retained"] = checkpoint->entries.size() - checkpoint->summarized + skippedTail + 1;
         }
-        // A leading separator lets the next event recover after a partial tail write.
-        auto line = "\n" + value.dump() + "\n";
-        wil::unique_hfile file(CreateFileW(path.c_str(), FILE_APPEND_DATA | FILE_READ_ATTRIBUTES, FILE_SHARE_READ,
-            nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_WRITE_THROUGH, nullptr));
-        DWORD count{};
-        if (!file ||
-            !WriteFile(file.get(), line.data(), static_cast<DWORD>(line.size()), &count, nullptr) || count != line.size())
-            throw std::runtime_error("Could not save conversation message");
+        WriteEvent(id, value);
     }
 }

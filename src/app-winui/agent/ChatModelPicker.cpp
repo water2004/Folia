@@ -1,8 +1,11 @@
 #include "pch.h"
+#include "agent/ChatMotion.h"
 #include "agent/ChatModelPicker.h"
 #include "agent/ChatControls.h"
 #include "agent/ChatPalette.h"
 #include <wil/resource.h>
+#include <winrt/Microsoft.UI.Xaml.Hosting.h>
+#include <winrt/Windows.UI.ViewManagement.h>
 
 namespace winrt::Folia::chat {
     namespace {
@@ -80,7 +83,7 @@ namespace winrt::Folia::chat {
             auto index = static_cast<std::size_t>(std::llround(efforts_.Value()));
             if (updating_ || index >= levels_.size()) return;
             auto level = levels_.at(index);
-            PresentReasoning(level);
+            PresentReasoning(level, true);
             selectEffort(level);
         });
         modelChanged_ = list_.SelectionChanged(winrt::auto_revoke, [this, selectModel = std::move(selectModel)](auto const&, auto const&) {
@@ -148,9 +151,11 @@ namespace winrt::Folia::chat {
     }
 
     void ChatModelPicker::ShowModels(bool show) {
+        const bool changed = show != (models_.Visibility() == Visibility::Visible);
         models_.Visibility(show ? Visibility::Visible : Visibility::Collapsed);
         reasoning_.Visibility(show ? Visibility::Collapsed : Visibility::Visible);
         back_.Visibility(levels_.empty() ? Visibility::Collapsed : Visibility::Visible);
+        if (changed && flyout_.IsOpen()) Reveal(show ? models_ : reasoning_, show ? 8.f : -8.f, 0);
         if (show && list_.SelectedItem()) list_.ScrollIntoView(list_.SelectedItem());
     }
 
@@ -184,15 +189,43 @@ namespace winrt::Folia::chat {
         DrawScale();
     }
 
-    void ChatModelPicker::DrawScale() {
+    void ChatModelPicker::DrawScale(bool animate) {
         if (levels_.size() < 2 || !track_.ActualWidth()) return;
         auto w = track_.ActualWidth();
         constexpr double inset = 12;
         auto step = (w - 2 * inset) / static_cast<double>(levels_.size() - 1);
-        auto center = inset + efforts_.Value() * step;
         auto value = efforts_.Value();
-        fill_.Width(value == 0 ? 0. : value == efforts_.Maximum() ? w : center);
-        Canvas::SetLeft(knob_, track_.Margin().Left + center - knob_.Width() / 2);
+        if (!scaleMotion_) {
+            auto visual = Hosting::ElementCompositionPreview::GetElementVisual(fill_);
+            auto compositor = visual.Compositor();
+            scaleMotion_ = compositor.CreatePropertySet();
+            scaleMotion_.InsertScalar(L"Position", 0.f);
+            scaleMotion_.InsertScalar(L"Travel", 0.f);
+            auto bind = [&](auto const& target, wchar_t const* property, wchar_t const* formula) {
+                auto expression = compositor.CreateExpressionAnimation(formula);
+                expression.SetReferenceParameter(L"slider", scaleMotion_);
+                target.StartAnimation(property, expression);
+            };
+            auto clip = compositor.CreateInsetClip();
+            visual.Clip(clip);
+            bind(clip, L"RightInset", L"slider.Position <= 0 ? slider.Travel + 24 : slider.Position >= 1 ? 0 : 12 + (1-slider.Position)*slider.Travel");
+            Hosting::ElementCompositionPreview::SetIsTranslationEnabled(knob_, true);
+            bind(Hosting::ElementCompositionPreview::GetElementVisual(knob_), L"Translation.X", L"slider.Position * slider.Travel");
+        }
+        Canvas::SetLeft(knob_, track_.Margin().Left);
+        scaleMotion_.InsertScalar(L"Travel", static_cast<float>((std::max)(0., w - 2 * inset)));
+        const auto position = static_cast<float>(value / efforts_.Maximum());
+        if (animate && Windows::UI::ViewManagement::UISettings().AnimationsEnabled()) {
+            auto compositor = scaleMotion_.Compositor();
+            auto motion = compositor.CreateScalarKeyFrameAnimation();
+            motion.InsertExpressionKeyFrame(0, L"this.StartingValue");
+            motion.InsertKeyFrame(1, position, compositor.CreateCubicBezierEasingFunction({.2f,.8f}, {.25f,1.f}));
+            motion.Duration(std::chrono::milliseconds(140));
+            scaleMotion_.StartAnimation(L"Position", motion);
+        } else {
+            scaleMotion_.StopAnimation(L"Position");
+            scaleMotion_.InsertScalar(L"Position", position);
+        }
         for (unsigned i = 0; i < ticks_.Children().Size(); ++i) {
             auto tick = ticks_.Children().GetAt(i).as<Border>();
             tick.Background(i < value ? onAccent_ : muted_);
@@ -202,7 +235,7 @@ namespace winrt::Folia::chat {
         }
     }
 
-    void ChatModelPicker::PresentReasoning(std::string_view overrideEffort) {
+    void ChatModelPicker::PresentReasoning(std::string_view overrideEffort, bool animate) {
         auto restore = wil::scope_exit([&, previous = std::exchange(updating_, true)] { updating_ = previous; });
         if (!std::ranges::contains(levels_, overrideEffort)) overrideEffort = {};
         auto effective = overrideEffort.empty() ? std::string_view(defaultEffort_) : overrideEffort;
@@ -211,7 +244,7 @@ namespace winrt::Folia::chat {
         efforts_.Value(match == levels_.end() ? 0. : static_cast<double>(match - levels_.begin()));
         effortTitle_.Text(label);
         Automation::AutomationProperties::SetHelpText(efforts_, label);
-        DrawScale();
+        DrawScale(animate);
         chipEffort_.Text(label);
         chipEffort_.Visibility(levels_.empty() ? Visibility::Collapsed : Visibility::Visible);
         auto summary = chipName_.Text();

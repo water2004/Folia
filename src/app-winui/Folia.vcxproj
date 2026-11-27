@@ -171,6 +171,7 @@
     <ClInclude Include="settings\views\ProviderConnectionPicker.h" />
     <ClInclude Include="settings\views\ProviderModelForm.h" />
     <ClInclude Include="agent\ChatModelPicker.h" />
+    <ClInclude Include="agent\ChatMotion.h" />
     <ClInclude Include="agent\ChatPalette.h" />
     <ClInclude Include="agent\ChatReplySurface.h" />
     <ClInclude Include="agent\ChatActivityView.h" />

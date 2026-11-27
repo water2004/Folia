@@ -11,6 +11,7 @@ namespace winrt::Folia::chat {
         std::filesystem::path folder;
         bool openTabs = false;
         bool search = false;
+        bool readPages = false;
         bool operator==(Conversation const&) const = default;
     };
 
@@ -24,6 +25,7 @@ namespace winrt::Folia::chat {
     void DeleteConversation(std::string const& id);
     struct HistoryPage {
         std::vector<Entry> entries;
+        std::vector<std::size_t> compactions; // Number of messages preceding each manual checkpoint on this page.
         std::uintmax_t before = 0;
     };
     HistoryPage ReadHistoryPage(std::string const&, std::optional<std::uintmax_t> before = {});
@@ -31,5 +33,6 @@ namespace winrt::Folia::chat {
     std::string StoreImage(std::string const& chat, std::span<std::uint8_t const> png);
     folia::ai::ContentPart LoadImage(std::string const& chat, std::string const& id);
     History LoadHistory(std::string const& id);
+    void AppendCompaction(std::string const& id, History const&);
     void AppendEntry(std::string const& id, Entry const&, History const* checkpoint = nullptr, std::size_t skippedTail = 0);
 }

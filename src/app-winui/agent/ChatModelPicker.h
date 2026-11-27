@@ -18,8 +18,8 @@ namespace winrt::Folia::chat {
     private:
         void ShowModels(bool show);
         void RefreshSelection();
-        void DrawScale();
-        void PresentReasoning(std::string_view overrideEffort);
+        void DrawScale(bool animate = false);
+        void PresentReasoning(std::string_view overrideEffort, bool animate = false);
 
         Microsoft::UI::Xaml::Controls::Button chip_{nullptr}, modelLink_{nullptr}, back_{nullptr}, configure_{nullptr};
         Microsoft::UI::Xaml::Controls::Flyout flyout_;
@@ -36,6 +36,7 @@ namespace winrt::Folia::chat {
         int checked_ = -1;
         std::vector<std::string> levels_;
         std::string defaultEffort_;
+        Microsoft::UI::Composition::CompositionPropertySet scaleMotion_{nullptr};
         bool updating_ = false;
         Microsoft::UI::Xaml::Controls::Primitives::FlyoutBase::Opening_revoker opening_;
         Microsoft::UI::Xaml::Controls::Primitives::Selector::SelectionChanged_revoker modelChanged_;

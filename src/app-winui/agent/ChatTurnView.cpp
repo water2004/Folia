@@ -87,7 +87,7 @@ namespace winrt::Folia::chat {
             if (lastReason_) lastReason_->Summary(value);
         } else if (kind == ProgressKind::HostedSearch) {
             auto update = folia::ai::Json::parse(to_string(value));
-            auto description = "web_search " + update.value("target", "");
+            auto description = update.value("operation", "web_search") + " " + update.value("target", "");
             auto id = update.at("id").get<std::string>();
             auto it = searches_.find(id);
             if (it == searches_.end()) {

@@ -25,6 +25,52 @@ namespace winrt::Folia::chat {
 
     void ChatView::Send() { if (!extras_->RunTypedCommand()) StartTurn(false); }
 
+    fire_and_forget ChatView::CompactContext() {
+        auto weak = weak_from_this();
+        auto queue = root_.DispatcherQueue();
+        auto id = conversation_.id;
+        auto index = modelPicker_->SelectedIndex();
+        if (transcript_->Empty()) { Report(Localize(L"ChatNothingToCompact")); co_return; }
+        if (index < 0) { Report(Localize(L"ChatNeedsProvider")); co_return; }
+        {
+            std::lock_guard lock(runningMutex);
+            if (!running.insert(id).second) { Report(Localize(L"ChatAlreadyRunning")); co_return; }
+        }
+        auto release = wil::scope_exit([&] { std::lock_guard lock(runningMutex); running.erase(id); });
+        cancellation_ = {};
+        auto stop = cancellation_.get_token();
+        bool changed = false;
+        hstring status;
+        try {
+            auto [model, profile] = Resolve(routes_.at(index).model.id);
+            SetBusy(true);
+            Report(Localize(L"ChatCompacting"));
+            co_await resume_background();
+            auto history = LoadHistory(id);
+            Options options{model.upstream};
+            if (model.maxInputTokens) options.inputBytes = *model.maxInputTokens;
+            if (model.maxOutputTokens) options.outputTokens = *model.maxOutputTokens;
+            changed = folia::ai::agent::Compact(history, options, [&](auto const& wire, auto token, auto const&) {
+                return folia::platform::models::RequestChat(profile.baseUrl, profile.protocol, wire, ProfileKey(profile), token,
+                    profile.fullUrl, {.explicitThinkingToggle = Preset(profile.providerType).explicitThinkingToggle}, {});
+            }, stop);
+            if (changed) AppendCompaction(id, history);
+        } catch (std::exception const& error) { status = to_hstring(error.what()); }
+        catch (hresult_error const& error) { status = error.message(); }
+        queue.TryEnqueue([weak, changed, stopped = stop.stop_requested(), status] {
+            if (auto view = weak.lock()) {
+                view->SetBusy(false);
+                if (changed) {
+                    view->usedTokens_.reset();
+                    view->UpdateUsage();
+                    view->transcript_->Refresh(true);
+                }
+                view->Report(stopped ? Localize(L"ChatInterrupted") : !status.empty() ? status :
+                    changed ? hstring{} : Localize(L"ChatNothingToCompact"));
+            }
+        });
+    }
+
     void ChatView::StartTurn(bool retry) {
         if (busy_) return;
         if (extras_->Pasting()) { Report(Localize(L"ChatPreparingImage")); return; }
@@ -165,6 +211,9 @@ namespace winrt::Folia::chat {
             });
             auto search = HostedSearchFormat(model, profile);
             Options options{model.upstream, model.ResolveEffort(conversation.effort), conversation.search ? search : std::nullopt};
+            const auto pages = HostedPageAccess(model, profile);
+            if (pages == folia::ai::PageAccess::WithSearch ? options.webSearch.has_value() : conversation.readPages)
+                options.pages = pages;
             // A UTF-8 byte budget conservatively bounds text tokens without guessing the upstream tokenizer.
             if (model.maxInputTokens) options.inputBytes = *model.maxInputTokens;
             if (model.maxOutputTokens) options.outputTokens = *model.maxOutputTokens;
@@ -218,7 +267,7 @@ namespace winrt::Folia::chat {
                             progress(event.reasoningKind == folia::ai::ReasoningKind::Summary ? ProgressKind::SummaryDelta : ProgressKind::ReasoningDelta, event.text);
                         using enum folia::ai::StreamEventKind;
                         if (event.kind == WebSearchStarted || event.kind == WebSearchCompleted || event.kind == WebSearchFailed)
-                            progress(ProgressKind::HostedSearch, folia::ai::Json{{"id", event.callId}, {"target", event.text},
+                            progress(ProgressKind::HostedSearch, folia::ai::Json{{"id", event.callId}, {"target", event.text}, {"operation", event.name},
                                 {"done", event.kind != WebSearchStarted}, {"failed", event.kind == WebSearchFailed}}.dump());
                     }, [&](unsigned attempt) { if (progress) progress(ProgressKind::Retrying, std::to_string(attempt)); });
             };

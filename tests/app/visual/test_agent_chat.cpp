@@ -312,6 +312,15 @@ namespace {
             expect(context.summary == "Earlier turns" && context.entries.front().markdown == "8");
             expect(recent.entries.back().activities.front().detail == "match");
             expect(recent.entries.back().usage.inputTokens.value_or(0) == 201_u);
+            context.summary = "All eleven turns";
+            context.summarized = context.entries.size();
+            chat::AppendCompaction(id, context);
+            auto reopened = chat::LoadHistory(id);
+            expect(reopened.entries.empty() && reopened.retired == 22_u && reopened.summary == "All eleven turns");
+            auto visible = chat::ReadHistoryPage(id);
+            expect(visible.entries.size() == 8_u && visible.compactions == std::vector<std::size_t>{8});
+            chat::AppendEntry(id, {folia::ai::MessageRole::User, "Next"});
+            expect(chat::LoadHistory(id).entries.front().markdown == "Next");
         };
 
         "agent transcript pages on demand and preserves the reading position during output"_test = [] {
@@ -642,7 +651,7 @@ namespace {
                 "usage":{"input_tokens":1864,"output_tokens":103},"output":[{"type":"reasoning","id":"r1",
                 "summary":[{"type":"summary_text","text":"先查看打开的文档，再核对两种推导。"}]},
                 {"type":"message","role":"assistant","content":[{"type":"output_text",
-                "text":"### 等差数列的和\n\n把首尾两项配对，每一组都等于 **101**。一共有 50 组。\n\n$$\nS = 50 \\times 101 = 5050\n$$\n\n同样的思路也适用于任意等差数列。"}]}]})", R"({"id":"title","status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"首尾配对求和"}]}]})"});
+                "text":"### 等差数列的和\n\n把首尾两项配对，每一组都等于 **101**。一共有 50 组。\n\n$$\nS = 50 \\times 101 = 5050\n$$\n\n同样的思路也适用于任意等差数列。"}]}]})", R"({"id":"title","status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"首尾配对求和"}]}]})", R"({"id":"summary","status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"已解释首尾配对求和。"}]}]})"});
             models::ModelProfile draft{{}, "Loopback agent test", server.baseUrl + "/custom/complete"};
             draft.fullUrl = true;
             draft.allowWebSearch = true;
@@ -738,12 +747,20 @@ namespace {
                 efforts.Value(level);
                 panel.UpdateLayout();
                 auto top = knob.TransformToVisual(thumbLayer).TransformPoint({0,0});
-                if (level == 0) expect(fill.ActualWidth() == 0.) << "first stop has no colored fill at its left edge";
+                auto settled = std::chrono::steady_clock::now() + std::chrono::milliseconds(220);
+                Pump([&] { return std::chrono::steady_clock::now() >= settled; });
                 expect(top.X >= 0 && top.Y >= 1 && top.X + knob.ActualWidth() <= thumbLayer.ActualWidth() &&
                        top.Y + knob.ActualHeight() < thumbLayer.ActualHeight()) << "entire thumb fits inside its own layer at every stop";
                 Media::Imaging::RenderTargetBitmap snapshot;
                 document_tests::Await(snapshot.RenderAsync(panel));
                 auto sliderPixels = document_tests::Await(snapshot.GetPixelsAsync());
+                const auto point = fill.TransformToVisual(panel).TransformPoint({static_cast<float>(fill.ActualWidth() * .28), 5});
+                const auto x = static_cast<int>(point.X * snapshot.PixelWidth() / panel.ActualWidth());
+                const auto y = static_cast<int>(point.Y * snapshot.PixelHeight() / panel.ActualHeight());
+                auto pixel = sliderPixels.data() + 4 * (y * snapshot.PixelWidth() + x);
+                auto accent = fill.Background().as<Media::SolidColorBrush>().Color();
+                const bool filled = std::abs(pixel[2]-int(accent.R)) + std::abs(pixel[1]-int(accent.G)) + std::abs(pixel[0]-int(accent.B)) < 9;
+                expect(filled == (level > 0)) << "slider paints the selected fraction after settling at " << level;
                 visual_tests::SavePng(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
                     / "build/tests/agent-chat" / filename, snapshot.PixelWidth(), snapshot.PixelHeight(), sliderPixels);
             }
@@ -785,16 +802,15 @@ namespace {
             auto accessEvent = accessMenu.Closed(winrt::auto_revoke, [&](auto const&, auto const&) { accessClosed = true; });
             accessMenu.ShowAt(access);
             Pump([&] { return accessMenu.IsOpen() && allowSearch.IsLoaded() && allowSearch.ActualWidth() > 0; });
-            // Native menus can have a separate popup HWND outside the captured main window.
-            DependencyObject menuVisual = allowSearch;
-            while (menuVisual && !menuVisual.try_as<MenuFlyoutPresenter>())
-                menuVisual = Media::VisualTreeHelper::GetParent(menuVisual);
-            auto presenter = menuVisual.as<MenuFlyoutPresenter>();
-            winrt::Microsoft::UI::Xaml::Media::Imaging::RenderTargetBitmap accessImage;
-            document_tests::Await(accessImage.RenderAsync(presenter));
-            auto accessPixels = document_tests::Await(accessImage.GetPixelsAsync());
-            visual_tests::SavePng(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
-                / "build/tests/agent-chat/access.png", accessImage.PixelWidth(), accessImage.PixelHeight(), accessPixels);
+            auto captureMenu = [&](DependencyObject node, wchar_t const* filename) {
+                while (node && !node.try_as<MenuFlyoutPresenter>()) node = Media::VisualTreeHelper::GetParent(node);
+                Media::Imaging::RenderTargetBitmap bitmap;
+                document_tests::Await(bitmap.RenderAsync(node.as<MenuFlyoutPresenter>()));
+                auto pixels = document_tests::Await(bitmap.GetPixelsAsync());
+                visual_tests::SavePng(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
+                    / "build/tests/agent-chat" / filename, bitmap.PixelWidth(), bitmap.PixelHeight(), pixels);
+            };
+            captureMenu(allowSearch, L"access.png");
             accessMenu.Hide();
             Pump([&] { return accessClosed; });
             auto mention = Find<Button>(host, [](auto const& item) {
@@ -802,6 +818,15 @@ namespace {
             });
             auto attachments = mention.Flyout().as<MenuFlyout>();
             expect(attachments.Items().Size() == 2_u);
+            auto reference = attachments.Items().GetAt(0).as<MenuFlyoutItem>();
+            auto addImage = attachments.Items().GetAt(1).as<MenuFlyoutItem>();
+            attachments.ShowAt(mention);
+            Pump([&] { return reference.IsLoaded() && reference.ActualWidth() > 0; });
+            expect(reference.KeyboardAcceleratorTextOverride() == L"@" && !std::wstring_view(reference.Text()).contains(L'@'));
+            expect(!addImage.IsEnabled());
+            captureMenu(reference, L"add-content.png");
+            attachments.Hide();
+            Pump([&] { return !attachments.IsOpen(); });
             input.Text(L"@"); input.Select(1, 0);
             auto suggestions = Find<ListView>(host, [](auto const& item) { return item.Name() == L"ChatMentionList"; });
             Pump([&] { return suggestions && suggestions.Visibility() == Visibility::Visible && suggestions.Items().Size(); });
@@ -875,6 +900,15 @@ namespace {
             expect(server.receivedRequests.load() == 3_i);
             expect(server.request.starts_with("POST /custom/complete HTTP/1.1"));
             expect(server.requests.at(0).find("\"type\":\"web_search\"") != std::string::npos);
+            input.Text(L"/compact");
+            input.Select(input.Text().size(), 0);
+            input.Focus(FocusState::Programmatic);
+            PostMessageW(GetFocus(), WM_KEYDOWN, VK_RETURN, 0x001C0001);
+            PostMessageW(GetFocus(), WM_KEYUP, VK_RETURN, 0xC01C0001);
+            Pump([&] { return chat::LoadHistory(conversation.id).summary == "已解释首尾配对求和。"; });
+            auto compacted = chat::ReadHistoryPage(conversation.id);
+            expect(compacted.entries.size() == 2_u && compacted.compactions == std::vector<std::size_t>{2});
+            expect(server.receivedRequests.load() == 4_i);
             Access::Close(shell);
             Pump([&] { return Access::Active(shell)->kind == WorkspaceTabKind::Editor; });
             Access::Open(shell, conversation.id);

@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "agent/ChatMotion.h"
 #include "agent/ChatActivityView.h"
 #include "agent/ChatControls.h"
 #include "workspace/WorkspaceIcons.h"
@@ -15,7 +16,7 @@ namespace winrt::Folia::chat {
             {"outline_open_tab", L"Outline", WorkspaceIcon::Outline}, {"search_open_tab", L"Find", WorkspaceIcon::Outline},
             {"list_workspace", L"Folder", WorkspaceIcon::Folder}, {"read_workspace_file", L"Read", WorkspaceIcon::Document},
             {"link_workspace_file", L"Locate", WorkspaceIcon::Document}, {"web_search", L"Web", WorkspaceIcon::Network},
-            {"search_workspace_file", L"Find", WorkspaceIcon::Outline}};
+            {"web_fetch", L"Page", WorkspaceIcon::Network}, {"search_workspace_file", L"Find", WorkspaceIcon::Outline}};
         Action Identify(std::string_view name) {
             auto it = std::ranges::find(actions, name, &Action::name);
             return it == std::end(actions) ? Action{name, L"Tool", WorkspaceIcon::Document} : *it;
@@ -94,10 +95,9 @@ namespace winrt::Folia::chat {
         if (index) items_[*index].caption = title;
         else { summary_ = title; summaryButton_ = button; }
         Put(line, title, 0, 1);
-        FontIcon arrow;
-        arrow.FontSize(8);
-        arrow.Opacity(.65);
-        arrow.Glyph(expanded ? L"\uE70D" : L"\uE76C");
+        auto arrow = MakeWorkspaceIcon(expanded ? WorkspaceIcon::Chevron : WorkspaceIcon::ChevronRight, L"FoliaShellMutedForegroundBrush");
+        arrow.Width(11);
+        arrow.Height(11);
         bool disclose = (!index && items_.size() > 1) || !item.detail.empty();
         if (disclose) Put(line, arrow, 0, 2);
         button.IsTabStop(disclose);
@@ -111,6 +111,7 @@ namespace winrt::Folia::chat {
         if (index) items_.at(*index).expanded = !items_.at(*index).expanded;
         else expanded_ = !expanded_;
         Refresh();
+        if (expanded_ || (index && items_.at(*index).expanded)) Reveal(details_, 0, -3);
     }
     hstring ChatActivityView::Caption() const {
         if (!complete_) return items_.back().title;
@@ -197,6 +198,7 @@ namespace winrt::Folia::chat {
         auto& item = items_.at(index);
         auto space = description.find(' ');
         auto target = space == description.npos ? std::string_view{} : std::string_view(description).substr(space + 1);
+        item.action = description.substr(0, space);
         if (!done) {
             item.title = WithTarget(ActionLabel(Identify(item.action), L"Now"), target);
             item.finished = Localize(L"ChatUnfinished") + L" · " + item.title;

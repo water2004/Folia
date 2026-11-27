@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "agent/ChatView.h"
+#include "providers/HostedSearch.h"
 #include "agent/ChatControls.h"
 #include "workspace/WorkspaceIcons.h"
 #include <shobjidl.h>
@@ -56,7 +57,7 @@ namespace winrt::Folia::chat {
         };
         transcript_->retry = [weak] { if (auto self = weak.lock()) self->StartTurn(true); };
         Put(root_, transcript_->Element(), 0);
-        if (auto last = transcript_->LastReply()) {
+        if (auto last = transcript_->LastReply(); last && !transcript_->EndsWithCompaction()) {
             usageModel_ = last->modelId;
             usedTokens_ = last->usage.inputTokens;
         }
@@ -122,7 +123,10 @@ namespace winrt::Folia::chat {
         mention_.Content(MakeWorkspaceIcon(WorkspaceIcon::Add));
         Label(mention_, L"ChatAddContent");
         MenuFlyout attachments;
+        attachments.Placement(Primitives::FlyoutPlacementMode::TopEdgeAlignedLeft);
         MenuFlyoutItem mention, image;
+        mention.Icon(SymbolIcon(Symbol::Document));
+        image.Icon(SymbolIcon(Symbol::Pictures));
         mention.Text(Localize(L"ChatMention")); mention.KeyboardAcceleratorTextOverride(L"@");
         image.Text(Localize(L"ChatAddImage"));
         mention.Click([weak](auto const&, auto const&) { if (auto self = weak.lock()) self->extras_->BeginMention(); });
@@ -230,6 +234,13 @@ namespace winrt::Folia::chat {
                 view->SaveOptions();
             }
         });
+        readPages_.Text(Localize(L"ChatAllowPageRead"));
+        readPages_.Click([weak](auto const&, auto const&) {
+            if (auto view = weak.lock(); view && !view->busy_) {
+                view->conversation_.readPages = view->readPages_.IsChecked();
+                view->SaveOptions();
+            }
+        });
         send_.Click(click(&ChatView::Send));
         stop_.Click([weak](auto const&, auto const&) {
             if (auto view = weak.lock()) view->cancellation_.request_stop();
@@ -266,7 +277,8 @@ namespace winrt::Folia::chat {
             choices.push_back(to_hstring(label));
             if (model.id == conversation_.model) active = static_cast<int>(routes_.size());
             const bool hostedSearch = HostedSearchFormat(model, *profile).has_value();
-            routes_.push_back({std::move(model), hostedSearch});
+            auto pages = HostedPageAccess(model, *profile);
+            routes_.push_back({std::move(model), hostedSearch, pages});
         }
         if (active < 0 && conversation_.model.empty() && !routes_.empty()) active = 0;
         modelPicker_->SetModels(choices, active);
@@ -281,7 +293,13 @@ namespace winrt::Folia::chat {
             conversation_.effort.clear();
         }
         const bool hostedSearch = route && route->hostedSearch;
-        web_.Text(Localize(hostedSearch ? L"ChatAllowSearch" : L"ChatSearchUnavailable"));
+        auto pages = route ? route->pages : folia::ai::PageAccess::None;
+        web_.Text(Localize(pages == folia::ai::PageAccess::WithSearch ? L"ChatSearchAndBrowse" :
+            hostedSearch ? L"ChatAllowSearch" : L"ChatSearchUnavailable"));
+        const bool independent = folia::ai::SeparatePageTool(pages);
+        readPages_.Visibility(independent ? Visibility::Visible : Visibility::Collapsed);
+        readPages_.IsChecked(independent && conversation_.readPages);
+        readPages_.IsEnabled(independent && !busy_);
         web_.IsEnabled(hostedSearch && !busy_);
         extras_->SetVision(chosen && chosen->vision);
         web_.IsChecked(hostedSearch && conversation_.search);
@@ -346,6 +364,7 @@ namespace winrt::Folia::chat {
         workspace.Text(folder.empty() ? Localize(L"ChatWorkspace") : hstring(folder.native()));
         menu.Items().Append(workspace);
         menu.Items().Append(web_);
+        menu.Items().Append(readPages_);
         const auto weak = weak_from_this();
         auto add = [&](wchar_t const* label, auto action) {
             MenuFlyoutItem item;
@@ -394,6 +413,7 @@ namespace winrt::Folia::chat {
         for (auto const& control : {accessChip_, mention_, send_}) control.IsEnabled(!busy);
         auto index = modelPicker_->SelectedIndex();
         web_.IsEnabled(!busy && index >= 0 && routes_.at(index).hostedSearch);
+        readPages_.IsEnabled(!busy && index >= 0 && folia::ai::SeparatePageTool(routes_.at(index).pages));
         send_.Visibility(busy ? Visibility::Collapsed : Visibility::Visible);
         stop_.Visibility(busy ? Visibility::Visible : Visibility::Collapsed);
     }
@@ -402,6 +422,7 @@ namespace winrt::Folia::chat {
         if (name == "/new" && host_.newChat) host_.newChat();
         else if (name == "/model" && !busy_) modelPicker_->Open();
         else if (name == "/access" && !busy_) accessChip_.Flyout().ShowAt(accessChip_);
+        else if (name == "/compact" && !busy_) CompactContext();
         else if (name == "/latest") transcript_->Latest();
     }
 

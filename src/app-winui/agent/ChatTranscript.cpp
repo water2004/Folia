@@ -1,6 +1,8 @@
 #include "pch.h"
+#include "agent/ChatMotion.h"
 #include "agent/ChatTranscript.h"
 #include "agent/ChatControls.h"
+#include "workspace/WorkspaceIcons.h"
 #include <winrt/Windows.ApplicationModel.DataTransfer.h>
 #include <winrt/Windows.System.h>
 #include <winrt/Windows.Storage.h>
@@ -11,9 +13,9 @@ namespace winrt::Folia::chat {
     using folia::ai::MessageRole;
     using folia::ai::agent::ProgressKind;
     namespace {
-        void SmallButton(Button const& button, hstring const& content, wchar_t const* name) {
+        void SmallButton(Button const& button, Windows::Foundation::IInspectable const& content, wchar_t const* name) {
             button.Style(settings_ui::ResourceStyle(L"ChatActionStyle"));
-            button.Content(box_value(content));
+            button.Content(content);
             Automation::AutomationProperties::SetName(button, Localize(name));
             ToolTipService::SetToolTip(button, box_value(Localize(name)));
         }
@@ -69,8 +71,8 @@ namespace winrt::Folia::chat {
         nav_.Orientation(Orientation::Horizontal);
         nav_.HorizontalAlignment(HorizontalAlignment::Center);
         nav_.Spacing(6);
-        SmallButton(older_, L"‹", L"ChatOlderMessages");
-        SmallButton(newer_, L"›", L"ChatNewerMessages");
+        SmallButton(older_, MakeWorkspaceIcon(WorkspaceIcon::ChevronLeft), L"ChatOlderMessages");
+        SmallButton(newer_, MakeWorkspaceIcon(WorkspaceIcon::ChevronRight), L"ChatNewerMessages");
         pageLabel_.Style(settings_ui::ResourceStyle(L"ChatModelPickerSecondaryLabelStyle"));
         for (auto element : {older_.as<UIElement>(), pageLabel_.as<UIElement>(), newer_.as<UIElement>()}) nav_.Children().Append(element);
         older_.Click([weak](auto const&, auto const&) {
@@ -114,7 +116,7 @@ namespace winrt::Folia::chat {
             column.Width((std::min)(static_cast<double>(width), column.MaxWidth()));
         });
         Put(root_, scroll_, 1);
-        SmallButton(latest_, L"↓", L"ChatLatest");
+        SmallButton(latest_, MakeWorkspaceIcon(WorkspaceIcon::ArrowDown), L"ChatLatest");
         latest_.Style(settings_ui::ResourceStyle(L"DefaultButtonStyle"));
         latest_.Width(32); latest_.Height(32); latest_.Padding({0,0,0,0}); latest_.CornerRadius({16,16,16,16});
         latest_.VerticalAlignment(VerticalAlignment::Bottom);
@@ -144,8 +146,10 @@ namespace winrt::Folia::chat {
         newer_.IsEnabled(!boundaries_.empty());
         pageLabel_.Text(boundaries_.empty() ? Localize(L"ChatRecent") :
             LocalizeFormat(L"ChatEarlierPage", {to_hstring(boundaries_.size())}));
-        latest_.Visibility(!boundaries_.empty() || (!following_ && scroll_.ScrollableHeight() - scroll_.VerticalOffset() > 32)
-            ? Visibility::Visible : Visibility::Collapsed);
+        const bool show = !boundaries_.empty() || (!following_ && scroll_.ScrollableHeight() - scroll_.VerticalOffset() > 32);
+        const bool appearing = show && latest_.Visibility() == Visibility::Collapsed;
+        latest_.Visibility(show ? Visibility::Visible : Visibility::Collapsed);
+        if (appearing) Reveal(latest_, 0, 5);
     }
 
     void ChatTranscript::Follow() {
@@ -194,7 +198,7 @@ namespace winrt::Folia::chat {
     void ChatTranscript::Show(bool navigate) {
         auto end = boundaries_.empty() ? std::optional<std::uintmax_t>{} : boundaries_.back();
         auto page = ReadHistoryPage(id_, end);
-        bool append = !navigate && page.before == page_.before && page_.entries.size() <= page.entries.size() &&
+        bool append = !navigate && page.compactions == page_.compactions && page.before == page_.before && page_.entries.size() <= page.entries.size() &&
             std::equal(page_.entries.begin(), page_.entries.end(), page.entries.begin(), [](auto const& a, auto const& b) {
                 return a.role == b.role && a.markdown == b.markdown && a.images == b.images;
             });
@@ -205,7 +209,11 @@ namespace winrt::Folia::chat {
         }
         if (!append) { messages_.Children().Clear(); turns_.clear(); }
         page_ = std::move(page);
-        for (auto const& entry : std::span(page_.entries).subspan(start)) Append(entry, boundaries_.empty() && &entry == &page_.entries.back());
+        for (auto i = start; i <= page_.entries.size(); ++i) {
+            if ((!append || i > start) && std::ranges::contains(page_.compactions, i))
+                messages_.Children().Append(Text(Localize(L"ChatCompacted"), true));
+            if (i < page_.entries.size()) Append(page_.entries[i], boundaries_.empty() && i + 1 == page_.entries.size());
+        }
         live_.Visibility(busy_ && boundaries_.empty() ? Visibility::Visible : Visibility::Collapsed);
         working_.Visibility(live_.Visibility());
         if (navigate) {
@@ -246,7 +254,7 @@ namespace winrt::Folia::chat {
                 row.Children().Append(Text(message, true));
                 if (latest && !entry.outputLimit) {
                     Button again;
-                    SmallButton(again, Localize(L"ChatRetry"), L"ChatRetry");
+                    SmallButton(again, box_value(Localize(L"ChatRetry")), L"ChatRetry");
                     again.HorizontalAlignment(HorizontalAlignment::Left);
                     again.Click([weak = weak_from_this()](auto const&, auto const&) {
                         if (auto view = weak.lock(); view && view->retry) view->retry();
@@ -269,7 +277,7 @@ namespace winrt::Folia::chat {
                 }
                 if (menu.Items().Size()) {
                     Button sources;
-                    SmallButton(sources, Localize(L"ChatSources"), L"ChatSources");
+                    SmallButton(sources, box_value(Localize(L"ChatSources")), L"ChatSources");
                     sources.Flyout(menu);
                     row.Children().Append(sources);
                 }

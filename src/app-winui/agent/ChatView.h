@@ -45,6 +45,7 @@ namespace winrt::Folia::chat {
         void ArrangeComposer();
         void Send();
         void StartTurn(bool retry);
+        fire_and_forget CompactContext();
         void Command(std::string const&);
         fire_and_forget PickImages();
         void SetBusy(bool);
@@ -67,6 +68,7 @@ namespace winrt::Folia::chat {
         struct Route {
             ConfiguredModel model;
             bool hostedSearch = false;
+            folia::ai::PageAccess pages = folia::ai::PageAccess::None;
         };
         std::vector<Route> routes_;
         std::stop_source cancellation_;
@@ -81,6 +83,6 @@ namespace winrt::Folia::chat {
         Microsoft::UI::Xaml::Controls::ProgressRing contextRing_;
         Microsoft::UI::Xaml::Controls::TextBlock status_, empty_, accessLabel_, usage_;
         Microsoft::UI::Xaml::Controls::Button accessChip_, send_, stop_, mention_, split_;
-        Microsoft::UI::Xaml::Controls::ToggleMenuFlyoutItem openTabs_, web_;
+        Microsoft::UI::Xaml::Controls::ToggleMenuFlyoutItem openTabs_, web_, readPages_;
     };
 }

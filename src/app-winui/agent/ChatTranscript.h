@@ -21,6 +21,7 @@ namespace winrt::Folia::chat {
         std::function<void()> retry;
         void AddReference(folia::ai::agent::DocumentReference ref) { if (liveTurn_) liveTurn_->AddReference(std::move(ref)); }
         bool Empty() const { return page_.entries.empty(); }
+        bool EndsWithCompaction() const { return !page_.compactions.empty() && page_.compactions.back() == page_.entries.size(); }
         Entry const* LastReply() const;
         Entry const* LastQuestion() const;
     private:

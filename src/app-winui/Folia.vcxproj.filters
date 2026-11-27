@@ -141,6 +141,9 @@
     <ClInclude Include="agent\ChatModelPicker.h">
       <Filter>Agent Chat</Filter>
     </ClInclude>
+    <ClInclude Include="agent\ChatMotion.h">
+      <Filter>Agent Chat</Filter>
+    </ClInclude>
     <ClInclude Include="agent\ChatPalette.h">
       <Filter>Agent Chat</Filter>
     </ClInclude>
