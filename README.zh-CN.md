@@ -39,6 +39,10 @@ CST 组成，因此结构化编辑不需要重新生成或规范化用户没有�
   会被投影为原生块级与行内样式，包括常用文字样式、图片/链接流以及
   `align`/`text-align`；HTML 注释不会渲染，Ctrl+单击本地链接时会解析经过
   百分号编码的路径与锚点。应用不会嵌入浏览器界面。
+- **Agent 对话** — 在文档旁打开聊天，用 `@` 引用页签或授权读取指定文件夹。
+  回复以 Markdown 流式显示，点击文档引用可跳到原文。聊天和行内补全共用设置中的模型目录。
+- **左右分屏** — 同时查看两个页签组，可调整宽度，在组或窗口之间拖动页签。
+  从资源管理器拖入的文件会在落点所在的分栏打开。
 - **专注阅读** — 支持可配置主题、中英文界面、无边框 WinUI 外壳、文件关联，
   以及带逐页进度和取消操作的原生 Windows PDF 导出。
 - **文件夹工作区** — 按需展开文件树，单击预览、双击或编辑后固定标签，
@@ -91,7 +95,7 @@ powershell -ExecutionPolicy Bypass -File .\build_app.ps1 -Configuration Release 
 构建当前用户安装的 x64 MSI：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.8.1
+powershell -ExecutionPolicy Bypass -File .\build_msi.ps1
 ```
 
 安装器会生成自包含 Windows App SDK 的 Release 应用，因此目标电脑无需另行
@@ -113,7 +117,7 @@ powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.8.1
 构建自包含的 x64 便携 ZIP：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\build_portable.ps1 -Version 0.8.1
+powershell -ExecutionPolicy Bypass -File .\build_portable.ps1
 ```
 
 将 `build/portable/Folia-<version>-x64-portable.zip` 解压到可写目录后，

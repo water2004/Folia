@@ -30,6 +30,11 @@ the user did not change.
 
 ## Highlights
 
+- **Agent conversations** — chat alongside a document, reference an open tab with `@`,
+  or grant read access to a folder. Replies stream as Markdown and can link to
+  a source line. Chat and inline completion share the models configured in Settings.
+- **Side-by-side editors** — split a window into two tab groups, resize them, and
+  drag tabs between groups or windows. Dropping files opens them in the target group.
 - **Source faithful** — preserves marker spelling, escapes, whitespace, link
   syntax, and temporarily incomplete editing states.
 - **Native editing** — WYSIWYG and monospaced source modes, line numbers and
@@ -106,7 +111,7 @@ powershell -ExecutionPolicy Bypass -File .\build_app.ps1 -Configuration Release 
 Build the per-user x64 MSI with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.8.1
+powershell -ExecutionPolicy Bypass -File .\build_msi.ps1
 ```
 
 The installer creates a self-contained Windows App SDK build, so the target
@@ -130,7 +135,7 @@ Normal developer builds continue to use their existing Assets location.
 Build the self-contained x64 portable ZIP with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\build_portable.ps1 -Version 0.8.1
+powershell -ExecutionPolicy Bypass -File .\build_portable.ps1
 ```
 
 Extract `build/portable/Folia-<version>-x64-portable.zip` to a writable folder and
