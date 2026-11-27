@@ -38,9 +38,9 @@ namespace winrt::Folia
         float LineHeightFor(bool code, std::vector<InlineStyleRange> const& ranges) const;
         float LineHeightFor(EditorFlowTextFormat format) const;
         void ApplyStyles(IDWriteTextLayout* layout, std::vector<InlineStyleRange> const& ranges) const;
-        void ApplyNaturalLineSpacing(IDWriteTextLayout* layout) const;
+        float ApplyLineGap(IDWriteTextLayout* layout, float themeAdvance, bool continues = false) const;
         float MeasureHeight(IDWriteTextLayout* layout, float fallbackHeight,
-            bool enforceMinimum = true) const;
+            bool enforceMinimum = true, float trailingGap = 0.0f) const;
 
     private:
         EditorRenderResources& resources;

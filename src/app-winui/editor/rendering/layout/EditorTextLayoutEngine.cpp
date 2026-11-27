@@ -316,7 +316,6 @@ namespace winrt::Folia
             ApplyIndentInlineObjects(layout.Get(), value.indentOverlays);
             ApplyTaskCheckboxInlineObjects(layout.Get(), value.taskCheckboxOverlays);
             if (configure) configure(layout.Get(), value);
-            ApplyNaturalLineSpacing(layout.Get());
             return layout;
         };
 
@@ -580,28 +579,49 @@ namespace winrt::Folia
         ApplyCodeSpanSpacing(layout, ranges);
     }
 
-    void EditorTextLayoutEngine::ApplyNaturalLineSpacing(IDWriteTextLayout* layout) const
+    float EditorTextLayoutEngine::ApplyLineGap(IDWriteTextLayout* layout, float themeAdvance, bool continues) const
     {
-        // Inline objects and oversized spans need at least their natural height.
-        if (!layout || styleSheet.lineSpacingScale <= 1.0f) return;
+        if (!layout || styleSheet.lineGapScale == 1.0f) return 0.0f;
+        DWRITE_TEXT_METRICS text{};
+        if (FAILED(layout->GetMetrics(&text)) || text.lineCount == 0 || (text.lineCount == 1 && !continues))
+            return 0.0f;
         DWRITE_LINE_SPACING_METHOD method{};
-        float height = 0, baseline = 0;
-        if (FAILED(layout->GetLineSpacing(&method, &height, &baseline))
-            || method != DWRITE_LINE_SPACING_METHOD_DEFAULT) return;
-        ::Microsoft::WRL::ComPtr<IDWriteTextLayout3> extended;
-        if (SUCCEEDED(layout->QueryInterface(IID_PPV_ARGS(extended.GetAddressOf())))) {
-            DWRITE_LINE_SPACING spacing{DWRITE_LINE_SPACING_METHOD_PROPORTIONAL, styleSheet.lineSpacingScale,
-                1.0f, 0.5f, DWRITE_FONT_LINE_GAP_USAGE_DEFAULT};
-            winrt::check_hresult(extended->SetLineSpacing(&spacing));
+        float advance = 0, baseline = 0;
+        if (FAILED(layout->GetLineSpacing(&method, &advance, &baseline))) return 0.0f;
+        if (method == DWRITE_LINE_SPACING_METHOD_UNIFORM) {
+            FLOAT x = 0.0f, y = 0.0f;
+            DWRITE_HIT_TEST_METRICS first{};
+            if (FAILED(layout->HitTestTextPosition(0, FALSE, &x, &y, &first))) return 0.0f;
+            auto clearance = (std::max)(0.0f, advance - first.height);
+            auto extra = clearance * (styleSheet.lineGapScale - 1.0f);
+            if (extra != 0.0f)
+                winrt::check_hresult(layout->SetLineSpacing(method, advance + extra, baseline));
+            return extra;
         }
+
+        // A natural line can contain a tall formula or image. Put the additional
+        // leading below its content and preserve the natural baseline.
+        auto clearance = (std::max)(0.0f, themeAdvance - layout->GetFontSize());
+        auto extra = clearance * (std::max)(0.0f, styleSheet.lineGapScale - 1.0f);
+        ::Microsoft::WRL::ComPtr<IDWriteTextLayout3> extended;
+        if (extra == 0.0f || FAILED(layout->QueryInterface(IID_PPV_ARGS(extended.GetAddressOf())))) return 0.0f;
+        std::vector<DWRITE_LINE_METRICS> lines(text.lineCount);
+        UINT32 count = 0;
+        if (FAILED(layout->GetLineMetrics(lines.data(), text.lineCount, &count)) || count == 0) return 0.0f;
+        auto fraction = extra / (std::max)(1.0f, themeAdvance);
+        DWRITE_LINE_SPACING spacing{DWRITE_LINE_SPACING_METHOD_PROPORTIONAL, 1.0f + fraction,
+            1.0f, 0.0f, DWRITE_FONT_LINE_GAP_USAGE_DEFAULT};
+        winrt::check_hresult(extended->SetLineSpacing(&spacing));
+        return lines[count - 1].height * fraction;
     }
 
     float EditorTextLayoutEngine::MeasureHeight(IDWriteTextLayout* layout, float fallbackHeight,
-        bool enforceMinimum) const
+        bool enforceMinimum, float trailingGap) const
     {
         if (!layout) return fallbackHeight;
         DWRITE_TEXT_METRICS metrics{};
         if (FAILED(layout->GetMetrics(&metrics))) return fallbackHeight;
-        return enforceMinimum ? (std::max)(fallbackHeight, metrics.height) : metrics.height;
+        auto height = metrics.height - trailingGap;
+        return enforceMinimum ? (std::max)(fallbackHeight, height) : height;
     }
 }

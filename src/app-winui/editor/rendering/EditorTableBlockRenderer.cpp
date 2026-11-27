@@ -290,7 +290,6 @@ namespace winrt::Folia
                     if (header) layout->SetFontWeight(DWRITE_FONT_WEIGHT_SEMI_BOLD, textRange);
                     textLayoutEngine.ApplyStyles(layout.Get(), display.ranges);
                     ApplyMathInlineObjects(layout.Get(), display.mathOverlays);
-                    textLayoutEngine.ApplyNaturalLineSpacing(layout.Get());
                     auto alignment = column < special.table_aligns.size() ? special.table_aligns[column] : folia::TableAlignment::None;
                     if (alignment == folia::TableAlignment::Center) layout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
                     else if (alignment == folia::TableAlignment::Right) layout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
@@ -314,11 +313,6 @@ namespace winrt::Folia
                                 }
                             }
                         }
-                    DWRITE_TEXT_METRICS metrics{};
-                    if (SUCCEEDED(layout->GetMetrics(&metrics)))
-                    {
-                        cellTextHeight = metrics.height;
-                    }
                 }
                 std::vector<PreparedTable::MathPreview> previews;
                 auto previewHeight = 0.0f;
@@ -331,13 +325,15 @@ namespace winrt::Folia
                     if (!preparedPreview.floating) previewHeight += preparedPreview.Height() + 24.0f;
                     previews.push_back(std::move(preparedPreview));
                 }
-                if (span.rows == 1)
-                    rowHeights[row] = (std::max)(rowHeights[row], cellTextHeight + previewHeight + 2 * verticalPadding);
                 auto images = inlineImageRenderer.Resolve(
                     layout.Get(),
                     display.imageOverlays,
                     contentWidth,
                     requestEmbedded);
+                auto trailingGap = textLayoutEngine.ApplyLineGap(layout.Get(), styleSheet.body.lineHeight);
+                cellTextHeight = textLayoutEngine.MeasureHeight(layout.Get(), cellTextHeight, false, trailingGap);
+                if (span.rows == 1)
+                    rowHeights[row] = (std::max)(rowHeights[row], cellTextHeight + previewHeight + 2 * verticalPadding);
                 prepared.pendingImage = prepared.pendingImage || std::ranges::any_of(
                     images,
                     [](auto const& image) { return image.pending; });
@@ -683,28 +679,10 @@ namespace winrt::Folia
                     display, cell.displayToSource, textBrush, cell.paintPlan, cell.layoutLines);
                 for (auto const& overlay : display.footnoteOverlays)
                 {
-                    UINT32 count = 0;
-                    auto result = cell.layout->HitTestTextRange(
-                        overlay.displayStart,
-                        overlay.displayLength,
-                        cell.textOrigin.x,
-                        cell.textOrigin.y,
-                        nullptr,
-                        0,
-                        &count);
-                    if (result != E_NOT_SUFFICIENT_BUFFER || count == 0) continue;
-                    std::vector<DWRITE_HIT_TEST_METRICS> metrics(count);
-                    if (FAILED(cell.layout->HitTestTextRange(
-                            overlay.displayStart,
-                            overlay.displayLength,
-                            cell.textOrigin.x,
-                            cell.textOrigin.y,
-                            metrics.data(),
-                            count,
-                            &count))) continue;
-                    for (UINT32 index = 0; index < count; ++index)
+                    auto metrics = folia::platform::editor::TextRangeContentMetrics(
+                        cell.layout.Get(), overlay.displayStart, overlay.displayLength, cell.textOrigin);
+                    for (auto const& metric : metrics)
                     {
-                        auto const& metric = metrics[index];
                         interactionMap.footnoteHits.push_back({
                             D2D1::RectF(
                                 metric.left,

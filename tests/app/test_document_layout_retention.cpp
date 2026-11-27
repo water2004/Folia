@@ -172,25 +172,52 @@ namespace {
     }
 
     suite document_layout_retention_tests = [] {
-        "text layout scales real wrapped lines and document margins"_test = [] {
+        "text layout changes wrapped gaps without growing the line boxes"_test = [] {
             EditorSession session;
-            session.SetText(L"Text layout changes the line height across several lines of wrapped text in a narrow split pane.");
-            auto frame = session.RenderFrame();
-            MeasurementFixture baseline(255), widerMargin(255, {100, 100, 175}), looser(255, {100, 150, 100}), larger(255, {135, 100, 100});
+            session.SetText(L"Text layout changes the gap across several lines of wrapped text in a narrow split pane.");
+            MeasurementFixture baseline(255), widerMargin(255, {100, 100, 175}),
+                looser(255, {100, 170, 100}), tighter(255, {100, 90, 100}), larger(255, {135, 100, 100});
+            struct Measurement {
+                float height = 0, width = 0;
+                folia::platform::editor::EditorLayoutLines rows;
+                std::vector<D2D1_RECT_F> selection;
+            };
             auto measure = [&](auto& fixture) {
-                std::pair<float, float> measured;
+                auto frame = session.RenderFrame();
+                Measurement measured;
                 fixture.WithPreparer(frame, [&](auto& preparer, auto&, float width) {
                     auto prepared = preparer.Prepare(frame.renderModel.blocks.front(), false, false);
-                    measured = {prepared.height, width};
+                    auto const& visual = prepared.Visuals();
+                    measured = {prepared.height, width, visual.layoutLines,
+                        InlineRangeRectangles(visual.layout.Get(), 0, 15, {})};
                 });
                 return measured;
             };
-            auto [height, width] = measure(baseline);
-            auto [looserHeight, looserWidth] = measure(looser);
-            expect(height > 0.0f && looserHeight > height * 1.35f && width == looserWidth);
-            expect(measure(larger).first > height);
-            expect(measure(widerMargin).second < width - 20.0f);
+            auto base = measure(baseline);
+            auto spaced = measure(looser);
+            auto tight = measure(tighter);
+            expect(fatal(base.rows && spaced.rows && base.rows->size() > 1 && base.rows->size() == spaced.rows->size()));
+            expect(spaced.height > base.height && tight.height < base.height && base.width == spaced.width);
+            expect(looser.sheet.body.lineHeight == baseline.sheet.body.lineHeight);
+            auto boundsHeight = [](D2D1_RECT_F const& bounds) { return bounds.bottom - bounds.top; };
+            auto top = base.rows->front().rect.top;
+            expect(std::abs(top - spaced.rows->front().rect.top) < 0.05f);
+            auto gapChange = (*spaced.rows)[1].rect.top - (*base.rows)[1].rect.top;
+            expect(gapChange > 0.0f);
+            for (std::size_t index = 0; index < base.rows->size(); ++index) {
+                auto const& before = (*base.rows)[index].rect;
+                auto const& after = (*spaced.rows)[index].rect;
+                expect(std::abs(boundsHeight(before) - boundsHeight(after)) < 0.05f);
+                expect(std::abs(boundsHeight(before) - boundsHeight((*tight.rows)[index].rect)) < 0.05f);
+            }
+            expect(std::abs((spaced.height - base.height) - gapChange * static_cast<float>(base.rows->size() - 1)) < 0.1f);
+            expect(fatal(!base.selection.empty() && !spaced.selection.empty()));
+            expect(std::abs(boundsHeight(base.selection.front()) - boundsHeight(spaced.selection.front())) < 0.05f);
+            expect(measure(larger).height > base.height);
+            expect(measure(widerMargin).width < base.width - 20.0f);
             expect(widerMargin.sheet.verticalPadding > baseline.sheet.verticalPadding);
+            session.SetText(L"One line");
+            expect(std::abs(measure(baseline).height - measure(looser).height) < 0.05f);
         };
         "markdown image uses the available width and configured limit at its intrinsic ratio"_test = [] {
             MeasurementFixture fixture;

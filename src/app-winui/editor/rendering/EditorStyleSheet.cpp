@@ -16,12 +16,12 @@ namespace
         return { value.c_str(), value.size() };
     }
 
-    winrt::Folia::EditorFontStyle ConvertFont(folia::ThemeFont const& font, float fontScale, float lineSpacingScale)
+    winrt::Folia::EditorFontStyle ConvertFont(folia::ThemeFont const& font, float fontScale)
     {
         return {
             ToWide(font.family),
             font.size * fontScale,
-            font.line_height * fontScale * lineSpacingScale,
+            font.line_height * fontScale,
             static_cast<DWRITE_FONT_WEIGHT>(font.weight),
             font.italic ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL,
         };
@@ -37,9 +37,9 @@ namespace winrt::Folia
         sheet.marker.sizeEm = sheet.markerAssets->size_em;
         sheet.marker.gapEm = sheet.markerAssets->gap_em;
         sheet.fontScale = options.font / 100.0f;
-        sheet.lineSpacingScale = options.lineSpacing / 100.0f;
+        sheet.lineGapScale = options.lineSpacing / 100.0f;
         auto font = [&](folia::ThemeFont const& value) {
-            return ConvertFont(value, sheet.fontScale, sheet.lineSpacingScale);
+            return ConvertFont(value, sheet.fontScale);
         };
         sheet.body = font(theme.typography.body);
         sheet.heading1 = font(theme.typography.heading1);

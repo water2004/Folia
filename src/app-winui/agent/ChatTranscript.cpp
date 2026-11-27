@@ -157,9 +157,11 @@ namespace winrt::Folia::chat {
     }
     void ChatTranscript::SetTextLayout(TextLayoutOptions const& layout) {
         if (appearance_->textLayout == layout) return;
+        auto fontChanged = appearance_->textLayout.font != layout.font;
         appearance_->textLayout = layout;
         ArrangeColumn(scroll_.ActualWidth());
-        for (auto const& message : userMessages_) ApplyChatTextLayout(message, chatBodyFontSize, layout);
+        if (fontChanged)
+            for (auto const& message : userMessages_) ApplyChatTextSize(message, chatBodyFontSize, layout);
         RefreshAppearance();
         Follow();
     }
@@ -242,7 +244,7 @@ namespace winrt::Folia::chat {
             }
             if (!entry.markdown.empty()) {
                 auto message = Text(to_hstring(entry.markdown));
-                ApplyChatTextLayout(message, chatBodyFontSize, appearance_->textLayout);
+                ApplyChatTextSize(message, chatBodyFontSize, appearance_->textLayout);
                 body.Children().Append(message);
                 userMessages_.push_back(std::move(message));
             }

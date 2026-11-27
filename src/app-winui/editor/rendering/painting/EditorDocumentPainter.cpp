@@ -8,6 +8,8 @@ import folia.markdown.utf;
 
 namespace winrt::Folia
 {
+    using folia::platform::editor::TextRangeContentMetrics;
+
     void EditorDocumentPainter::DrawInlineText(folia::NodeId owner, IDWriteTextLayout* layout, D2D1_POINT_2F origin,
         DisplayInlineText const& display, EditorDisplayMapping const& mapping, ID2D1Brush* textBrush,
         std::shared_ptr<const folia::platform::editor::EditorTextPaintPlan> const& paintPlan,
@@ -192,28 +194,9 @@ namespace winrt::Folia
         if (!layout) return;
         for (auto const& overlay : overlays)
         {
-            UINT32 count = 0;
-            auto result = layout->HitTestTextRange(
-                overlay.displayStart,
-                overlay.displayLength,
-                origin.x,
-                origin.y,
-                nullptr,
-                0,
-                &count);
-            if (result != E_NOT_SUFFICIENT_BUFFER || count == 0) continue;
-            std::vector<DWRITE_HIT_TEST_METRICS> metrics(count);
-            if (FAILED(layout->HitTestTextRange(
-                    overlay.displayStart,
-                    overlay.displayLength,
-                    origin.x,
-                    origin.y,
-                    metrics.data(),
-                    count,
-                    &count))) continue;
-            for (UINT32 index = 0; index < count; ++index)
+            auto metrics = TextRangeContentMetrics(layout, overlay.displayStart, overlay.displayLength, origin);
+            for (auto const& metric : metrics)
             {
-                auto const& metric = metrics[index];
                 interactionMap.footnoteHits.push_back({
                     D2D1::RectF(
                         metric.left,
@@ -320,14 +303,10 @@ namespace winrt::Folia
             start = (std::max)(start, visible.first);
             end = (std::min)(end, visible.second);
             if (start >= end) continue;
-            UINT32 count = 0;
-            auto length = static_cast<UINT32>(end - start);
-            if (layout->HitTestTextRange(static_cast<UINT32>(start), length, origin.x, origin.y, nullptr, 0, &count) != E_NOT_SUFFICIENT_BUFFER || count == 0) continue;
-            std::vector<DWRITE_HIT_TEST_METRICS> metrics(count);
-            if (FAILED(layout->HitTestTextRange(static_cast<UINT32>(start), length, origin.x, origin.y, metrics.data(), count, &count))) continue;
-            for (UINT32 metricIndex = 0; metricIndex < count; ++metricIndex)
+            auto metrics = TextRangeContentMetrics(layout,
+                static_cast<UINT32>(start), static_cast<UINT32>(end - start), origin);
+            for (auto const& metric : metrics)
             {
-                auto const& metric = metrics[metricIndex];
                 target.push_back({
                     D2D1::RectF(metric.left, metric.top, metric.left + metric.width, metric.top + metric.height),
                     (metric.bidiLevel & 1) != 0});
@@ -361,18 +340,10 @@ namespace winrt::Folia
                 start = (std::max)(start, visible.first);
                 end = (std::min)(end, visible.second);
                 if (start >= end) continue;
-                UINT32 count = 0;
-                auto const length = static_cast<UINT32>(end - start);
-                if (layout->HitTestTextRange(
-                        static_cast<UINT32>(start), length, origin.x, origin.y,
-                        nullptr, 0, &count) != E_NOT_SUFFICIENT_BUFFER || count == 0) continue;
-                std::vector<DWRITE_HIT_TEST_METRICS> metrics(count);
-                if (FAILED(layout->HitTestTextRange(
-                        static_cast<UINT32>(start), length, origin.x, origin.y,
-                        metrics.data(), count, &count))) continue;
-                for (UINT32 metricIndex = 0; metricIndex < count; ++metricIndex)
+                auto metrics = TextRangeContentMetrics(layout,
+                    static_cast<UINT32>(start), static_cast<UINT32>(end - start), origin);
+                for (auto const& metric : metrics)
                 {
-                    auto const& metric = metrics[metricIndex];
                     auto const rect = D2D1::RectF(
                         metric.left,
                         metric.top,

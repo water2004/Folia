@@ -59,7 +59,7 @@ namespace winrt::Folia::chat {
             TextBlock body;
             body.Style(ui::ResourceStyle(L"ChatModelPickerSecondaryLabelStyle"));
             body.Name(L"ChatActivityDetail");
-            ApplyChatTextLayout(body, 12, layout);
+            ApplyChatTextSize(body, 12, layout);
             body.TextWrapping(TextWrapping::Wrap);
             body.TextTrimming(TextTrimming::None);
             body.IsTextSelectionEnabled(true);
@@ -169,9 +169,9 @@ namespace winrt::Folia::chat {
         root_.Children().Append(details_);
     }
     void ChatActivityView::SetTextLayout(TextLayoutOptions const& layout) {
-        if (textLayout_ == layout) return;
+        if (textLayout_.font == layout.font) return;
         textLayout_ = layout;
-        for (auto const& item : items_) if (item.body) ApplyChatTextLayout(item.body, 12, layout);
+        for (auto const& item : items_) if (item.body) ApplyChatTextSize(item.body, 12, layout);
     }
     void ChatActivityView::Reason(hstring const& value) {
         if (value.empty()) return;

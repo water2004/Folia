@@ -4,6 +4,7 @@ module;
 
 module folia.platform.editor_interaction;
 import std;
+import folia.platform.editor_inline_layout;
 
 namespace folia::platform::editor
 {
@@ -176,7 +177,12 @@ namespace folia::platform::editor
             line.displayStart = textPosition;
             line.displayEnd = visibleEnd;
             line.wrapContinuation = lineIndex > 0 && previousNewlineLength == 0;
-            line.rect = D2D1::RectF(0, lineTop, width, lineTop + metric.height);
+            FLOAT x = 0.0f, y = 0.0f;
+            DWRITE_HIT_TEST_METRICS hit{};
+            auto measured = SUCCEEDED(layout->HitTestTextPosition(textPosition, FALSE, &x, &y, &hit));
+            auto top = measured ? hit.top : lineTop;
+            auto height = measured ? hit.height : metric.height;
+            line.rect = D2D1::RectF(0, top, width, top + height);
             auto first = (std::min)(static_cast<std::size_t>(textPosition), mapping.size());
             auto end = (std::min)(static_cast<std::size_t>(visibleEnd) + 1, mapping.size());
             // Generated prefixes, padding and control rows do not own source
@@ -354,28 +360,12 @@ namespace folia::platform::editor
                 static_cast<std::size_t>(line.displayEnd));
             if (displayEnd <= displayStart) continue;
 
-            UINT32 count = 0;
-            auto hit = layout->HitTestTextRange(
+            auto metrics = TextRangeContentMetrics(layout,
                 static_cast<UINT32>(displayStart),
                 static_cast<UINT32>(displayEnd - displayStart),
-                textOrigin.x,
-                textOrigin.y,
-                nullptr,
-                0,
-                &count);
-            if (hit != E_NOT_SUFFICIENT_BUFFER || count == 0) continue;
-            std::vector<DWRITE_HIT_TEST_METRICS> metrics(count);
-            if (FAILED(layout->HitTestTextRange(
-                    static_cast<UINT32>(displayStart),
-                    static_cast<UINT32>(displayEnd - displayStart),
-                    textOrigin.x,
-                    textOrigin.y,
-                    metrics.data(),
-                    count,
-                    &count))) continue;
-            for (UINT32 index = 0; index < count; ++index)
+                textOrigin);
+            for (auto const& metric : metrics)
             {
-                auto const& metric = metrics[index];
                 result.push_back(D2D1::RectF(
                     metric.left,
                     metric.top,

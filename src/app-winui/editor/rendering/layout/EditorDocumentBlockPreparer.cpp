@@ -674,10 +674,15 @@ namespace winrt::Folia
                 (std::max)(1.0f, preview.svg.height * scale),
             });
         }
+        auto themeAdvance = textLayoutEngine.LineHeightFor(prepared.appliedFlow.format);
+        auto continues = block.fragment_continues
+            || (block.source_mode && block.id != frame.renderModel.blocks.back().id);
+        auto trailingGap = textLayoutEngine.ApplyLineGap(visual.layout.Get(), themeAdvance, continues);
         visual.textHeight = textLayoutEngine.MeasureHeight(
             visual.layout.Get(),
-            textLayoutEngine.LineHeightFor(prepared.appliedFlow.format),
-            !prepared.appliedFlow.fragmented);
+            themeAdvance,
+            !prepared.appliedFlow.fragmented,
+            trailingGap);
         visual.layoutLines = folia::platform::editor::BuildEditorTextLines(
             visual.layout.Get(), visual.display.displayToSource, block.source_span, contentWidth);
         visual.paintPlan = folia::platform::editor::EditorTextPaintPlan::Prepare(visual.layout.Get());
@@ -687,7 +692,8 @@ namespace winrt::Folia
         for (auto const& preview : visual.mermaidPreviews)
             previewHeight += preview.height + 24.0f;
         prepared.previewHeight = previewHeight;
-        prepared.height = visual.textHeight + previewHeight + paddingTop + paddingBottom;
+        prepared.height = visual.textHeight + previewHeight + paddingTop + paddingBottom
+            + (continues ? trailingGap : 0.0f);
         prepared.geometryMeasured = true;
         visual.display.displayToSource.for_each_run(0, visual.display.displayToSource.size(),
             [&](auto, auto, auto first, auto) { addOwner(first.container_id); return true; });

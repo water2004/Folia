@@ -64,7 +64,7 @@ namespace folia::platform::editor
         return Microsoft::WRL::Make<InlinePlaceholder>(metrics, before, after);
     }
 
-    static std::vector<DWRITE_HIT_TEST_METRICS> InlineRangeMetrics(
+    export std::vector<DWRITE_HIT_TEST_METRICS> TextRangeContentMetrics(
         IDWriteTextLayout* layout, UINT32 start, UINT32 length, D2D1_POINT_2F origin)
     {
         if (!layout || length == 0) return {};
@@ -75,6 +75,18 @@ namespace folia::platform::editor
         if (FAILED(layout->HitTestTextRange(start, length, origin.x, origin.y,
                 metrics.data(), count, &count))) return {};
         metrics.resize(count);
+        // Range hits include the full distance to the next line, including
+        // leading. Point hits measure the actual shaped content in that row.
+        for (auto& metric : metrics)
+        {
+            FLOAT x = 0.0f, y = 0.0f;
+            DWRITE_HIT_TEST_METRICS content{};
+            if (SUCCEEDED(layout->HitTestTextPosition(metric.textPosition, FALSE, &x, &y, &content)))
+            {
+                metric.top = origin.y + content.top;
+                metric.height = content.height;
+            }
+        }
         return metrics;
     }
 
@@ -110,7 +122,7 @@ namespace folia::platform::editor
     export std::vector<D2D1_RECT_F> InlineRangeRectangles(
         IDWriteTextLayout* layout, UINT32 start, UINT32 length, D2D1_POINT_2F origin)
     {
-        return MergeRangeRectangles(InlineRangeMetrics(layout, start, length, origin));
+        return MergeRangeRectangles(TextRangeContentMetrics(layout, start, length, origin));
     }
 
     export std::vector<D2D1_RECT_F> SyntaxIconRectangles(

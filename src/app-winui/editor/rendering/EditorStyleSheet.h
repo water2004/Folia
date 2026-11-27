@@ -64,7 +64,7 @@ namespace winrt::Folia
         float verticalPadding = 40.0f;
         float marginScale = 1.0f;
         float fontScale = 1.0f;
-        float lineSpacingScale = 1.0f;
+        float lineGapScale = 1.0f;
         float blockGap = 6.0f;
     };
 

@@ -229,6 +229,10 @@ namespace {
             chatMargin.Value(125);
             Pump([&] { return question.FontSize() == 21.0 && chatColumn.Padding().Left == 22.5; });
             Capture(window, "text-layout-chat.png");
+            auto singleLineHeight = question.ActualHeight();
+            auto reply = Find<Canvas>(host, [](auto const& item) { return item.Name() == L"ChatMarkdownReply"; });
+            expect(fatal(static_cast<bool>(reply)));
+            auto originalReplyHeight = reply.Height();
             chatFlyout.Hide();
             Pump([&] { return !chatFlyout.IsOpen(); });
 
@@ -279,6 +283,8 @@ namespace {
             const winrt::Windows::UI::Color darkInk{255, dark.shell_fg.r, dark.shell_fg.g, dark.shell_fg.b};
             expect(ink && ink.Color() == darkInk);
             Capture(window, "text-layout-chat-dark.png");
+            expect(std::abs(question.ActualHeight() - singleLineHeight) < 0.2);
+            expect(reply.Height() > originalReplyHeight);
             chatFlyout.Hide();
             Pump([&] { return !chatFlyout.IsOpen(); });
             Access::Close(shell);
