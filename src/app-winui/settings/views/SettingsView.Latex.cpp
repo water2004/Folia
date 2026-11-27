@@ -29,11 +29,8 @@ namespace winrt::Folia
             {Localize(L"LatexSuggestionsToggle"), Localize(L"LatexRankingDescription"), cards::Icon(L"\xE943")},
             latexSuggestionsToggle_, cards::Placement::Wrap));
 
-        MenuFlyout overviewFlyout;
-        MenuFlyoutItem resetUsage;
-        resetUsage.Text(Localize(L"ResetLatexUsage"));
+        auto resetUsage = SecondaryAction(Localize(L"ResetLatexUsage"));
         resetUsage.Click([this](auto const&, auto const&) { ResetLatexUsage(); });
-        overviewFlyout.Items().Append(resetUsage);
         auto addCommand = SecondaryAction(Localize(L"AddCommand"));
         addCommand.Click([this](auto const&, auto const&)
         {
@@ -41,7 +38,7 @@ namespace winrt::Folia
         });
         auto actions = ButtonRow();
         actions.Children().Append(addCommand);
-        actions.Children().Append(cards::MoreActions(Localize(L"MoreActions"), overviewFlyout));
+        actions.Children().Append(resetUsage);
         page.Children().Append(cards::SectionHeader(Localize(L"LatexCommandList"), actions));
 
         latexRows_ = latexCommandList_.ContainerContentChanging(winrt::auto_revoke,

@@ -161,6 +161,16 @@ suite settings_style_tests = [] {
         Pump([&] { return header.Visibility() == Visibility::Collapsed; });
     };
 
+    "recent LaTeX command usage resets from a visible button"_test = [] {
+        using namespace winrt::Folia;
+        ModelSettingsPage fixture(SettingsView::Page::Latex);
+        auto reset = Action(fixture.page, Localize(L"ResetLatexUsage"));
+        expect(fatal(reset && Action(fixture.page, Localize(L"AddCommand"))));
+        expect(reset.Flyout() == nullptr);
+        InvokeAction(reset);
+        Pump([&] { return Description(fixture.page, Localize(L"LatexUsageReset")) != nullptr; });
+    };
+
     "document media settings select a Mermaid theme independently of Folia"_test = [] {
         Window window;
         Grid root;
