@@ -88,6 +88,8 @@ namespace winrt::Folia::implementation {
         }
         static void ExitMove(Microsoft::UI::Xaml::Window const& window) { Impl(window)->ExitTabMove(); }
         static void Moving(Microsoft::UI::Xaml::Window const& window, bool value) { Impl(window)->tabMoveInProgress = value; }
+        static bool PressedTab(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->tabGrabOffset.has_value(); }
+        static bool Idle(Microsoft::UI::Xaml::Window const& window) { return !Impl(window)->tabPointerDown && !Impl(window)->tabMoveInProgress; }
         static auto Items(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->tabSource; }
         static auto Binding(Microsoft::UI::Xaml::Window const& window, std::uint64_t id) { return Impl(window)->tabItems.at(id); }
         static auto View(Microsoft::UI::Xaml::Window const& window, std::uint64_t id) {
@@ -98,10 +100,14 @@ namespace winrt::Folia::implementation {
             return Impl(window)->BeginTabTearOut(Binding(window, id))->get_strong().as<winrt::Folia::MainWindow>().as<Microsoft::UI::Xaml::Window>();
         }
         static bool Complete(Microsoft::UI::Xaml::Window const& window, Windows::Foundation::IInspectable const& item) {
-            return Impl(window)->CompleteTabTearOut(Impl(window)->FindTransferTab(item));
+            auto id = unbox_value<std::uint64_t>(item);
+            auto owner = App::Current()->FindTabWindow(id);
+            return owner && Impl(window)->CompleteTabTearOut(owner->tabItems.at(id));
         }
         static bool AllowDrop(Microsoft::UI::Xaml::Window const& window, Windows::Foundation::IInspectable const& item) {
-            return Impl(window)->PrepareExternalTab(item);
+            auto id = unbox_value<std::uint64_t>(item);
+            auto owner = App::Current()->FindTabWindow(id);
+            return owner && Impl(window)->CanDockTab(owner->tabItems.at(id));
         }
         static void End(Microsoft::UI::Xaml::Window const& window) { Impl(window)->EndTabDrag(); }
         static DWORD Cloaked(Microsoft::UI::Xaml::Window const& window) {
@@ -189,7 +195,7 @@ namespace {
             Pump([&] { return window.Content().as<FrameworkElement>().IsLoaded(); });
             Pump([&] { return winrt::Folia::EditorRendererTestAccess::Ready(Access::Renderer(window)); });
         }
-        ~OwnedWindow() { if (window) Access::Close(window); }
+        ~OwnedWindow() { if (window && !Access::Closed(window)) Access::Close(window); }
     };
     auto App() { return winrt::Folia::implementation::App::Current(); }
     FrameworkElement TabPart(DependencyObject const& element, std::wstring_view name) {
@@ -226,7 +232,151 @@ namespace {
         }
         return colors;
     }
+    using ScreenPoint = winrt::Windows::Graphics::PointInt32;
+
+    FrameworkElement FirstTab(Window const& window, winrt::Folia::EditorGroup group) {
+        auto tabs = Access::GroupTabs(window, group);
+        FrameworkElement item{nullptr};
+        Pump([&] {
+            window.Content().as<FrameworkElement>().UpdateLayout();
+            item = tabs.ContainerFromIndex(0).try_as<FrameworkElement>();
+            return item && item.IsLoaded() && item.ActualWidth() > 0;
+        });
+        return item;
+    }
+
+    ScreenPoint CenterOnScreen(FrameworkElement const& element) {
+        element.UpdateLayout();
+        return element.XamlRoot().CoordinateConverter().ConvertLocalToScreen(element.TransformToVisual(nullptr).TransformPoint(
+            {static_cast<float>(element.ActualWidth() / 2), static_cast<float>(element.ActualHeight() / 2)}));
+    }
+
+    // The native move loop is modal. Feed a real mouse gesture from the input thread
+    // while the test UI thread dispatches normally, including a physical button release.
+    void DragTab(Window const& source, FrameworkElement const& item, ScreenPoint end) {
+        auto start = CenterOnScreen(item);
+        auto hwnd = Access::Handle(source);
+        source.Activate();
+        ::SetForegroundWindow(hwnd);
+        Pump([&] { return ::GetAncestor(::WindowFromPoint({start.X, start.Y}), GA_ROOT) == hwnd; });
+        POINT previous{};
+        ::GetCursorPos(&previous);
+        auto restore = wil::scope_exit([&] { ::SetCursorPos(previous.x, previous.y); });
+        std::atomic<bool> released = false;
+        std::jthread mouse([&] {
+            auto button = [](DWORD flags) { INPUT input{}; input.type = INPUT_MOUSE; input.mi.dwFlags = flags; ::SendInput(1, &input, sizeof(input)); };
+            ::SetCursorPos(start.X, start.Y);
+            ::Sleep(65);
+            button(MOUSEEVENTF_LEFTDOWN);
+            ::Sleep(95);
+            for (int i = 1; i <= 32; ++i) {
+                ::SetCursorPos(start.X + (end.X-start.X)*i/32, start.Y + (end.Y-start.Y)*i/32);
+                ::Sleep(16);
+            }
+            ::Sleep(160);
+            button(MOUSEEVENTF_LEFTUP);
+            released = true;
+        });
+        Pump([&] { return released.load(); });
+        Pump([&] { return Access::Idle(source); });
+    }
+
     suite tab_transfer_tests = [] {
+        "native pointer moves both untitled views into the same editor group"_test = [] {
+            using winrt::Folia::EditorGroup;
+            OwnedWindow source(App()->CreateMainWindow());
+            auto win = source.window;
+            auto root = win.Content().as<FrameworkElement>();
+            auto& groups = Access::Groups(win);
+            Automation::Peers::ButtonAutomationPeer(root.FindName(L"SplitEditorButton").as<Controls::Button>())
+                .as<Automation::Provider::IInvokeProvider>().Invoke();
+            auto left = groups.Selected(EditorGroup::Left), right = groups.Selected(EditorGroup::Right);
+            Pump([&] { return Access::GroupTabs(win, EditorGroup::Right).ContainerFromIndex(0) != nullptr; });
+            auto leftTab = FirstTab(win, EditorGroup::Left);
+            auto rightTab = FirstTab(win, EditorGroup::Right);
+            DragTab(win, rightTab, CenterOnScreen(leftTab));
+            Pump([&] { return !groups.IsSplit(); });
+            expect(groups.Find(left) && groups.Find(right) && left != right);
+            expect(groups.Views(EditorGroup::Left).size() == 2_u && groups.Selected(EditorGroup::Left) == right);
+            expect(Access::Documents(win).Items().size() == 1_u);
+        };
+        "native pointer tears a distinct file out of a split and docks a standalone tab into either side"_test = [] {
+            using winrt::Folia::EditorGroup;
+            auto base = visual_tests::Window().AppWindow();
+            base.Hide();
+            auto restoreBase = wil::scope_exit([&] { base.Show(false); });
+            OwnedWindow source(App()->CreateMainWindow());
+            auto win = source.window;
+            auto root = win.Content().as<FrameworkElement>();
+            RECT work{};
+            ::SystemParametersInfoW(SPI_GETWORKAREA, 0, &work, 0);
+            const auto w = (work.right-work.left)/2 - 20, h = (work.bottom-work.top)*2/3;
+            auto split = [&] {
+                Automation::Peers::ButtonAutomationPeer(root.FindName(L"SplitEditorButton").as<Controls::Button>())
+                    .as<Automation::Provider::IInvokeProvider>().Invoke();
+                Pump([&] { return Access::Groups(win).IsSplit(); });
+            };
+            win.AppWindow().MoveAndResize({work.left + 6, work.top + 20, w, h});
+            split();
+            auto& groups = Access::Groups(win);
+            auto duplicate = groups.Selected(EditorGroup::Right);
+            Access::New(win);
+            auto outgoing = groups.Selected(EditorGroup::Right);
+            Access::Edit(win, U"separate unsaved document");
+            auto document = Access::Documents(win).Active();
+            Access::CloseView(win, duplicate);
+            Pump([&] { return groups.IsSplit() && groups.Views(EditorGroup::Right).size() == 1; });
+            auto tab = FirstTab(win, EditorGroup::Right);
+            DragTab(win, tab, {work.left + w + w/3, work.top + 2*h/3});
+            Pump([&] { return App()->FindTabWindow(outgoing) != Access::Impl(win); });
+            auto floating = App()->FindTabWindow(outgoing);
+            if (!expect(fatal(floating != nullptr))) return;
+            auto floatingWin = floating->get_strong().as<winrt::Folia::MainWindow>().as<Window>();
+            expect(floatingWin.AppWindow().IsVisible() && Access::Cloaked(floatingWin) == 0_u);
+            OwnedWindow detached(floatingWin);
+            expect(!groups.IsSplit() && Access::Documents(floatingWin).Active() == document);
+            expect(document->editor->session.TextUtf8() == "separate unsaved document");
+            split();
+            auto dock = [&](Window const& moving, EditorGroup group) {
+                auto id = Access::Groups(moving).Selected(EditorGroup::Left);
+                moving.AppWindow().MoveAndResize({work.right - w - 6, work.top + 20, w, h});
+                win.Activate();
+                root.UpdateLayout();
+                auto target = FirstTab(win, group);
+                auto destination = CenterOnScreen(target);
+                auto item = FirstTab(moving, EditorGroup::Left);
+                DragTab(moving, item, destination);
+                Pump([&] { return groups.GroupOf(id) == group && Access::Closed(moving); });
+            };
+            dock(floatingWin, EditorGroup::Right);
+            expect(groups.Selected(EditorGroup::Right) == outgoing);
+            OwnedWindow second(App()->CreateMainWindow());
+            auto incoming = Access::Groups(second.window).Selected(EditorGroup::Left);
+            dock(second.window, EditorGroup::Left);
+            expect(groups.Selected(EditorGroup::Left) == incoming);
+        };
+        "split groups can detach one dirty document view while the other window retains its history"_test = [] {
+            using winrt::Folia::EditorGroup;
+            OwnedWindow source(App()->CreateMainWindow()), target(App()->CreateMainWindow());
+            auto win = source.window;
+            win.Activate();
+            Access::Edit(win, U"shared");
+            auto document = Access::Documents(win).Active();
+            auto button = win.Content().as<FrameworkElement>().FindName(L"SplitEditorButton").as<Controls::Button>();
+            Automation::Peers::ButtonAutomationPeer(button).as<Automation::Provider::IInvokeProvider>().Invoke();
+            auto view = Access::Groups(win).Selected(EditorGroup::Right);
+            expect(Access::Transfer(win, view, target.window, 0));
+            expect(!Access::Groups(win).IsSplit() && Access::Documents(win).Active() == document);
+            target.window.Activate();
+            Access::Edit(target.window, U" again");
+            expect(document->editor->session.TextUtf8() == "shared again");
+            Access::CloseView(target.window, view);
+            Pump([&] { return !Access::Groups(target.window).Find(view); });
+            win.Activate();
+            expect(Access::Documents(win).Active() == document && document->IsModified());
+            expect(document->editor->session.ExecuteCommand(folia::Command{folia::CommandKind::Undo}));
+            expect(document->editor->session.TextUtf8() == "shared");
+        };
         "split groups move the reading material when switching right tabs"_test = [] {
             using winrt::Folia::EditorGroup;
             using winrt::Folia::WindowMaterial;
@@ -373,7 +523,7 @@ namespace {
                 auto blank = tabs.TabStripFooter().as<FrameworkElement>();
                 auto add = tabs.as<Controls::IControlProtected>().GetTemplateChild(L"AddButton").as<FrameworkElement>();
                 auto tab = tabs.ContainerFromIndex(0).as<FrameworkElement>();
-                Pump([&] { return captionAt(blank) && !captionAt(add) && !captionAt(tab); });
+                Pump([&] { return captionAt(blank) && !captionAt(add) && captionAt(tab); });
             }
         };
         "split groups use the reading surface only on each selected tab"_test = [] {
@@ -452,9 +602,10 @@ namespace {
             expect(Access::MoveView(window, first->id, EditorGroup::Right, 2));
             expect(Access::MoveView(window, second->id, EditorGroup::Right, 0));
             expect(!groups.IsSplit());
-            expect(groups.Selected(EditorGroup::Left) == right);
-            expect(Access::Items(window).Size() == 2_u);
-            expect(Access::Items(window).GetAt(1) == item);
+            expect(groups.Selected(EditorGroup::Left) == second->id);
+            expect(groups.ViewCount(second->id) == 2_u && groups.Find(right));
+            expect(Access::Items(window).Size() == 3_u);
+            expect(Access::Items(window).GetAt(2) == item);
             expect(Access::Documents(window).Items().size() == 2_u);
 
             Automation::Peers::ButtonAutomationPeer(button).as<Automation::Provider::IInvokeProvider>().Invoke();
@@ -462,7 +613,7 @@ namespace {
             auto newRight = groups.Selected(EditorGroup::Right);
             expect(Access::MoveView(window, newRight, EditorGroup::Left, 0));
             expect(!groups.IsSplit());
-            expect(groups.Selected(EditorGroup::Left) == right);
+            expect(groups.Selected(EditorGroup::Left) == newRight && groups.ViewCount(second->id) == 3_u);
             expect(Access::Documents(window).Active() == second);
         };
         "split groups retain settings in its visible editor group"_test = [] {
@@ -1039,9 +1190,11 @@ namespace {
             };
             Access::Hover(window, {100,4});
             auto tools = root.FindName(L"DocumentToolbar").as<FrameworkElement>();
-            Pump([&] { return tools.Opacity() == 1.; });
+            auto keep = root.FindName(L"KeepLocalButton").as<FrameworkElement>();
+            // Hit testing becomes available after the InfoBar's opening transition.
+            Pump([&] { return tools.Opacity() == 1. && reachable(close) && reachable(keep); });
             expect(reachable(close)) << "the close button is the pointer target";
-            expect(reachable(root.FindName(L"KeepLocalButton").as<FrameworkElement>()));
+            expect(reachable(keep));
             Peers::ButtonAutomationPeer(close).GetPattern(Peers::PatternInterface::Invoke).as<Provider::IInvokeProvider>().Invoke();
             Pump([&] { return !error.IsOpen(); });
             expect(external.IsOpen()) << "dismissing an error preserves an outstanding disk change";
@@ -1231,14 +1384,14 @@ namespace {
                 Access::PointerBegin(source.window, point(Access::View(source.window, document->id)));
                 tabs.SelectedItem(Access::Binding(source.window, document->id)->item);
                 expect(Access::Documents(source.window).Active() == document) << "selected document" << document->id;
-                expect(tabs.CanTearOutTabs()) << "visible tab owns the native move" << document->id;
+                expect(Access::PressedTab(source.window)) << "visible tab owns the native move" << document->id;
                 // Selection can route the release to XAML instead. A new native
                 // move must use its own pointer origin even without PointerEnd.
                 Access::PointerBegin(source.window, point(root.FindName(L"TitleDragArea").as<FrameworkElement>()));
-                expect(!tabs.CanTearOutTabs()) << "a previous tab press cannot own a later caption move";
+                expect(!Access::PressedTab(source.window)) << "a previous tab press cannot own a later caption move";
                 expect(Access::Documents(source.window).Items().size() == 2_u);
                 Access::PointerEnd(source.window);
-                Pump([&] { return tabs.CanTearOutTabs(); });
+                expect(Access::Idle(source.window));
             }
         };
         "the blank title bar moves the window with the sidebar open or closed"_test = [] {
@@ -1267,10 +1420,10 @@ namespace {
                 root.UpdateLayout();
                 Pump([&] { return captionAt(center(drag)) && !captionAt(center(add)); });
                 Access::PointerBegin(window, center(drag));
-                expect(!Access::Tabs(window).CanTearOutTabs());
+                expect(!Access::PressedTab(window));
                 expect(captionAt(center(drag)));
                 Access::PointerEnd(window);
-                Pump([&] { return Access::Tabs(window).CanTearOutTabs(); });
+                expect(Access::Idle(window));
             }
         };
         "middle mouse closes the pressed caption tab only on a matching release"_test = [] {
@@ -1354,19 +1507,19 @@ namespace {
                 auto active = Access::Documents(source.window).Active()->id;
                 const auto tab = Access::View(source.window, active);
                 Access::PointerBegin(source.window, screenCenter(tab));
-                expect(tabs.CanTearOutTabs());
+                expect(Access::PressedTab(source.window));
                 Access::PointerEnd(source.window);
-                Pump([&] { return tabs.CanTearOutTabs(); }); expect(tabs.CanTearOutTabs());
+                expect(Access::Idle(source.window));
                 const auto caption = screenCenter(root.FindName(L"TitleDragArea").as<FrameworkElement>());
                 Access::PointerBegin(source.window, caption);
-                expect(!tabs.CanTearOutTabs());
+                expect(!Access::PressedTab(source.window));
                 Access::Moving(source.window, true);
                 Access::PointerEnd(source.window);
                 settle(std::chrono::milliseconds(20));
-                expect(!tabs.CanTearOutTabs()) << "release must not reattach native tab callbacks during caption movement";
+                expect(!Access::PressedTab(source.window)) << "release must not reattach native tab callbacks during caption movement";
                 Access::Moving(source.window, false);
                 Access::PointerEnd(source.window);
-                Pump([&] { return tabs.CanTearOutTabs(); }); expect(tabs.CanTearOutTabs());
+                expect(Access::Idle(source.window));
                 expect(Access::Documents(source.window).Active()->id == active);
                 expect(Access::Documents(source.window).Items().size() == 11_u);
                 // A queued idle callback from a previous gesture cannot arm a
@@ -1375,9 +1528,9 @@ namespace {
                 Access::PointerEnd(source.window);
                 Access::PointerBegin(source.window, caption);
                 settle(std::chrono::milliseconds(20));
-                expect(!tabs.CanTearOutTabs());
+                expect(!Access::PressedTab(source.window));
                 Access::PointerEnd(source.window);
-                Pump([&] { return tabs.CanTearOutTabs(); }); expect(tabs.CanTearOutTabs());
+                expect(Access::Idle(source.window));
             }
         };
         "completion status uses the native ring only while a request is running"_test = [] {
@@ -1608,17 +1761,6 @@ namespace {
                 expect(Access::Documents(source.window).Find(document->id) == document);
             }
         };
-        "single-tab native merge can tear back into its original window before release"_test = [] {
-            OwnedWindow source(App()->CreateMainWindow()), target(App()->CreateMainWindow());
-            auto document = Access::Documents(source.window).Active();
-            auto item = Access::Binding(source.window, document->id)->item;
-            expect(Access::AllowDrop(target.window, item));
-            expect(Access::Transfer(source.window, document->id, target.window, 0));
-            expect(Access::Complete(target.window, item));
-            expect(Access::Documents(source.window).Active() == document);
-            expect(Access::Documents(source.window).Items().size() == 1_u);
-            Access::End(source.window);
-        };
         "empty tabs merge before the receiving window is loaded"_test = [] {
             OwnedWindow source(App()->CreateMainWindow());
             auto document = Access::Documents(source.window).Active();
@@ -1637,21 +1779,21 @@ namespace {
             OwnedWindow source(App()->CreateMainWindow()), target(App()->CreateMainWindow());
             auto document = Access::Documents(source.window).Active();
             auto existing = Access::Documents(target.window).Active();
-            expect(Access::Transfer(source.window, document->id, target.window, 1));
+            expect(Access::Transfer(source.window, document->id, target.window, 1)) << "merge into the second empty window";
             Access::RequestNativeClose(source.window);
             Pump([&] { return Access::Closed(source.window); });
             source.window = nullptr;
             for (int i = 0; i < 6; ++i) {
                 Access::Tabs(target.window).SelectedItem(Access::Binding(target.window, existing->id)->item);
-                expect(Access::Documents(target.window).Active() == existing);
+                expect(Access::Documents(target.window).Active() == existing) << "select the pre-existing tab" << i;
                 Access::Tabs(target.window).SelectedItem(Access::Binding(target.window, document->id)->item);
-                expect(Access::Documents(target.window).Active() == document);
+                expect(Access::Documents(target.window).Active() == document) << "select the merged tab" << i;
             }
             auto receiving = Access::TearOutWindow(target.window);
-            expect(Access::Transfer(target.window, document->id, receiving, 0));
+            expect(Access::Transfer(target.window, document->id, receiving, 0)) << "tear the merged tab out again";
             OwnedWindow detached(receiving);
             Access::Edit(detached.window, U"moved empty document");
-            expect(document->editor->session.TextUtf8() == "moved empty document");
+            expect(document->editor->session.TextUtf8() == "moved empty document") << "focused editor receives input";
         };
         "closed window notifications cannot access detached or destroyed controllers"_test = [] {
             OwnedWindow owned(App()->CreateMainWindow());
@@ -1679,7 +1821,6 @@ namespace {
             auto originalTab = Access::View(source.window, document->id);
             Access::New(source.window);
             OwnedWindow target(Access::TearOutWindow(source.window));
-            expect(Access::Tabs(source.window).CanTearOutTabs() && Access::Tabs(target.window).CanTearOutTabs());
             expect(App()->FindMainWindow(target.window.AppWindow().Id()) == Access::Impl(target.window));
             folia::reset_core_operation_counters();
             expect(Access::Transfer(source.window, document->id, target.window, 0));

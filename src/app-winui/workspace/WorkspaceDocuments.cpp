@@ -132,7 +132,6 @@ namespace winrt::Folia {
         if (found == documents_.end()) return false;
         if (active_ && active_->id == id)
             throw std::logic_error("Activate the replacement document before closing the current document");
-        if (auto const& editor = (*found)->editor) editor->controller.Detach();
         documents_.erase(found);
         return true;
     }
@@ -150,16 +149,20 @@ namespace winrt::Folia {
         documents_ = std::move(ordered);
     }
 
-    void WorkspaceDocuments::TransferTo(std::uint64_t id, WorkspaceDocuments& target, std::size_t index) {
+    void WorkspaceDocuments::TransferTo(std::uint64_t id, WorkspaceDocuments& target, std::size_t index, bool keepSource) {
         auto document = Find(id);
-        if (!document || this == &target || document == active_)
+        if (!document || this == &target || (!keepSource && document == active_))
             throw std::logic_error("Transfer requires an inactive document and a different workspace");
+        if (target.Find(id) == document) {
+            if (!keepSource) std::erase(documents_, document);
+            return;
+        }
         if (target.Find(id) || (!document->path.empty() && target.Find(document->path))
             || (document->kind == WorkspaceTabKind::Settings && target.FindSettings()))
             throw std::logic_error("The target workspace already owns this document");
         // Allocate before changing either owner. Shared-pointer moves cannot throw.
         target.documents_.reserve(target.documents_.size() + 1);
         target.documents_.insert(target.documents_.begin() + (std::min)(index, target.documents_.size()), document);
-        std::erase(documents_, document);
+        if (!keepSource) std::erase(documents_, document);
     }
 }

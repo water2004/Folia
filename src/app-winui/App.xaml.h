@@ -17,6 +17,8 @@ namespace winrt::Folia::implementation
         void OnLaunched(Microsoft::UI::Xaml::LaunchActivatedEventArgs const&);
         Microsoft::UI::Xaml::Window CreateMainWindow(winrt::hstring const& path = {});
         MainWindow* FindMainWindow(Microsoft::UI::WindowId id) const;
+        MainWindow* OtherDocumentWindow(MainWindow const* source, std::uint64_t id) const;
+        void RefreshSharedDocument(MainWindow const* source, std::uint64_t id);
         MainWindow* FindTabWindow(std::uint64_t view) const;
         MainWindow* FindReferencedDocument(std::string_view tabKey, std::filesystem::path const&, std::uint64_t& documentId) const;
         MainWindow* FindChatWindow(std::string_view id) const;

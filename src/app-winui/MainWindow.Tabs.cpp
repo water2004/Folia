@@ -1,6 +1,7 @@
 #include "pch.h"
 import std;
 #include "MainWindow.xaml.h"
+#include "App.xaml.h"
 #include "localization/Localization.h"
 #include "workspace/WorkspaceIcons.h"
 #include <winrt/Microsoft.UI.Xaml.Automation.h>
@@ -43,10 +44,13 @@ namespace winrt::Folia::implementation {
         auto document = workspaceDocuments.Find(id);
         if (!document) return;
         for (auto group : {EditorGroup::Left, EditorGroup::Right}) {
-            auto found = tabItems.find(editorGroups.ViewFor(group, id));
-            if (found != tabItems.end())
-                if (auto tab = GroupTabs(group).ContainerFromItem(found->second->item).try_as<TabViewItem>())
-                    UpdateTabHeader(tab, *document);
+            for (auto const& view : editorGroups.Views(group)) {
+                if (view.document != id) continue;
+                auto found = tabItems.find(view.id);
+                if (found != tabItems.end())
+                    if (auto tab = GroupTabs(group).ContainerFromItem(found->second->item).try_as<TabViewItem>())
+                        UpdateTabHeader(tab, *document);
+            }
         }
     }
 
@@ -134,8 +138,14 @@ namespace winrt::Folia::implementation {
         for (auto group : {EditorGroup::Left, EditorGroup::Right}) {
             auto selection = tabItems.find(editorGroups.Selected(group));
             auto tabs = GroupTabs(group);
-            if (selection != tabItems.end() && tabs.SelectedItem() != selection->second->item)
-                tabs.SelectedItem(selection->second->item);
+            if (selection == tabItems.end()) continue;
+            auto const& item = selection->second->item;
+            auto items = group == EditorGroup::Left ? tabSource : rightTabSource;
+            std::uint32_t index{};
+            // TabView accepts SelectedItem before it belongs to the strip, but its
+            // internal list then keeps the old selection and swallows the next click.
+            if (items.IndexOf(item, index) && (tabs.SelectedItem() != item || tabs.SelectedIndex() != static_cast<int>(index)))
+                tabs.SelectedIndex(static_cast<int>(index));
         }
         UpdateSelectedTabBackdrop();
         UpdateReadingGroupCorners();
@@ -197,7 +207,7 @@ namespace winrt::Folia::implementation {
         UpdateLoadingState();
         try {
             if (presentedEditorView == view) textInputController.FocusLeave();
-            if (!document->editor || co_await document->editor->controller.ConfirmCloseAsync()) {
+            if (!document->editor || App::Current()->OtherDocumentWindow(this, id) || co_await document->editor->controller.ConfirmCloseAsync()) {
                 if (presentedEditorView == view) {
                     auto next = SettingsActive() && previousDocumentTab ? FindDocumentView(*previousDocumentTab) : 0;
                     if (!next) next = editorGroups.Replacement(view);
@@ -291,7 +301,6 @@ namespace winrt::Folia::implementation {
             RefreshTabCaptionRegion();
             UpdateSelectedTabBackdrop();
         }));
-        RegisterGroupDragHandlers(group);
     }
 
     void MainWindow::PrepareGroupTabStrip(EditorGroup group) {

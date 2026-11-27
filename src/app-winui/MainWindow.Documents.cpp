@@ -1,6 +1,8 @@
 #include "pch.h"
 import std;
 #include "MainWindow.xaml.h"
+#include "App.xaml.h"
+#include <winrt/Microsoft.UI.Interop.h>
 #include "localization/Localization.h"
 
 namespace winrt::Folia::implementation {
@@ -15,6 +17,16 @@ namespace winrt::Folia::implementation {
     }
     bool MainWindow::IsActiveDocument(std::uint64_t id) const noexcept {
         return !windowClosed && workspaceDocuments.Active()->id == id;
+    }
+
+    void MainWindow::ClaimDocumentPresentation() {
+        auto doc = workspaceDocuments.Active();
+        if (!doc->editor || doc->editor->presenter == WindowHandle()) return;
+        AttachDocumentController(doc);
+        if (auto view = editorGroups.Find(presentedEditorView); view && view->selection)
+            doc->editor->session.SetSelection(*view->selection);
+        RenderEditorSurface();
+        if (!doc->editor->loaded) LoadWorkspaceDocument(doc);
     }
 
     void MainWindow::AttachDocumentController(std::shared_ptr<winrt::Folia::WorkspaceDocument> const& document) {
@@ -62,6 +74,15 @@ namespace winrt::Folia::implementation {
             },
             [active](auto const& message) { if (auto window = active()) window->ShowError(message); }};
         auto& editor = *document->editor;
+        if (editor.presenter == WindowHandle()) return;
+        if (editor.presenter) {
+            if (auto previous = App::Current()->FindMainWindow(Microsoft::UI::GetWindowIdFromWindow(editor.presenter)))
+                previous->SaveEditorView(previous->presentedEditorView);
+            editor.controller.SuspendPresentation();
+            ++editor.openSerial;
+            editor.opening = false;
+        }
+        editor.presenter = WindowHandle();
         if (editor.controllerAttached) editor.controller.RebindPresentation(std::move(presentation));
         else editor.controller.Attach(editor.session, std::move(presentation));
         editor.controller.SetSaveDialogs([weak, id]() -> Windows::Foundation::IAsyncOperation<ContentDialogResult> {
@@ -105,9 +126,12 @@ namespace winrt::Folia::implementation {
             scrollController.Stop();
             if (footnoteFlyout) footnoteFlyout.Hide();
             SaveEditorView(presentedEditorView);
-            editor->controller.SuspendPresentation();
-            ++editor->openSerial;
-            editor->opening = false;
+            if (editor->presenter == WindowHandle()) {
+                editor->controller.SuspendPresentation();
+                editor->presenter = nullptr;
+                ++editor->openSerial;
+                editor->opening = false;
+            }
             editor->math = editorRenderer.TakeMathCache();
         } else if (previous->kind == WorkspaceTabKind::Image) {
             if (editorGroups.IsSplit() && WorkspaceImage().Source()) {
@@ -147,6 +171,7 @@ namespace winrt::Folia::implementation {
             editorRenderer.RestoreMathCache(std::move(*editor->math));
             editor->math.reset();
         }
+        AttachDocumentController(document);
         if (entry->selection) editor->session.SetSelection(*entry->selection);
         editorRenderer.SetScrollOffset(0);
         InitializeTextInput();
@@ -272,7 +297,7 @@ namespace winrt::Folia::implementation {
 
     void MainWindow::UpdateLoadingState() {
         auto movable = !closePending && !closingDocument && !relocatingFiles;
-        UpdateTabTransferAvailability();
+        RefreshTabCaptionRegion();
         auto const& editor = workspaceDocuments.Active()->editor;
         bool loading = editor && (editor->opening || editor->controller.IsLoading());
         auto showProgress = loading || operationActive;
@@ -284,7 +309,7 @@ namespace winrt::Folia::implementation {
         SaveAsButton().IsEnabled(editor && !loading);
         SourceModeButton().IsEnabled(editor && !loading);
         EncodingButton().IsEnabled(editor && !loading && editor->session.HasFile());
-        SplitEditorButton().IsEnabled(movable && !editorGroups.IsSplit() && !loading && !SettingsActive());
+        SplitEditorButton().IsEnabled(movable && !loading && !SettingsActive());
         QueueOtherGroupRender();
     }
 }

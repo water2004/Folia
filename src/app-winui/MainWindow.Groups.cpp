@@ -88,7 +88,6 @@ namespace winrt::Folia::implementation {
             }
         }));
         DocumentColumn().SizeChanged(WindowEvent([this](auto const&, auto const&) { UpdateEditorGroupLayout(); }));
-        RegisterGroupDragSurface();
         OtherEditorSurface().Loaded(WindowEvent([this](auto const&, auto const&) { QueueOtherGroupRender(); }));
         OtherEditorSurface().SizeChanged(WindowEvent([this](auto const&, auto const&) { QueueOtherGroupRender(); }));
         otherDocumentTools.Attach(OtherReadingCard(), OtherDocumentToolbar(), OtherDocumentViewport());
@@ -164,7 +163,8 @@ namespace winrt::Folia::implementation {
     void MainWindow::SaveEditorView(std::uint64_t view) {
         if (auto entry = editorGroups.Find(view); entry && HasActiveEditor()) {
             entry->viewport = CaptureViewport(editorRenderer);
-            entry->selection = editorSession().Selection();
+            if (workspaceDocuments.Active()->editor->presenter == WindowHandle())
+                entry->selection = editorSession().Selection();
         }
     }
 
@@ -208,9 +208,8 @@ namespace winrt::Folia::implementation {
         SplitEditorButton().Visibility(split ? Visibility::Collapsed : Visibility::Visible);
         Automation::AutomationProperties::SetName(OtherDocumentViewport(), Localize(activeRight ? L"LeftEditorGroup" : L"RightEditorGroup"));
         UpdateReadingGroupCorners();
-        UpdateTabTransferAvailability();
+        RefreshTabCaptionRegion();
         if (!split) {
-            CancelGroupDrag();
             ReleaseOtherGroupRenderer();
         }
         ApplyBarLayout();

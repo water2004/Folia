@@ -4,6 +4,7 @@ import std;
 #include "MainWindow.xaml.h"
 #include <winrt/Microsoft.UI.Content.h>
 #include <winrt/Microsoft.UI.Interop.h>
+#include <dwmapi.h>
 
 namespace winrt::Folia::implementation {
     using namespace Microsoft::UI::Xaml;
@@ -19,54 +20,6 @@ namespace winrt::Folia::implementation {
             return point.X >= bounds.X && point.X < bounds.X + bounds.Width
                 && point.Y >= bounds.Y && point.Y < bounds.Y + bounds.Height;
         }
-    }
-
-    void MainWindow::RegisterGroupDragHandlers(EditorGroup group) {
-        auto tabs = GroupTabs(group);
-        tabs.AddHandler(UIElement::PointerPressedEvent(), box_value(Input::PointerEventHandler(
-            WindowEvent([this, group](auto const&, Input::PointerRoutedEventArgs const& args) {
-                if (!editorGroups.IsSplit() || groupTabDrag || closePending || closingDocument || relocatingFiles) return;
-                auto root = Root();
-                auto point = args.GetCurrentPoint(root);
-                if (!point.Properties().IsLeftButtonPressed()) return;
-                for (auto node = args.OriginalSource().try_as<DependencyObject>(); node; node = Media::VisualTreeHelper::GetParent(node)) {
-                    if (node.try_as<Primitives::ButtonBase>()) return;
-                    if (auto tab = node.try_as<TabViewItem>()) {
-                        if (!tab.Tag()) return;
-                        auto view = unbox_value<std::uint64_t>(tab.Tag());
-                        if (editorGroups.GroupOf(view) != group) return;
-                        ActivateView(view);
-                        if (root.CapturePointer(args.Pointer())) {
-                            groupTabDrag.emplace(GroupTabDrag{view, point.Position(), args.Pointer()});
-                            args.Handled(true);
-                        }
-                        return;
-                    }
-                }
-            }))), true);
-    }
-
-    void MainWindow::RegisterGroupDragSurface() {
-        auto root = Root();
-        auto route = [&](auto event, bool releasing) {
-            root.AddHandler(event, box_value(Input::PointerEventHandler(
-                WindowEvent([this, releasing](auto const&, Input::PointerRoutedEventArgs const& args) {
-                    UpdateGroupDrag(args, releasing);
-                }))), true);
-        };
-        route(UIElement::PointerMovedEvent(), false);
-        route(UIElement::PointerReleasedEvent(), true);
-        auto cancel = WindowEvent([this](auto const&, Input::PointerRoutedEventArgs const& args) {
-            if (groupTabDrag && groupTabDrag->pointer.PointerId() == args.Pointer().PointerId()) CancelGroupDrag();
-        });
-        root.PointerCaptureLost(cancel);
-        root.PointerCanceled(cancel);
-        root.AddHandler(UIElement::KeyDownEvent(), box_value(Input::KeyEventHandler(
-            WindowEvent([this](auto const&, Input::KeyRoutedEventArgs const& args) {
-                if (!groupTabDrag || args.Key() != Windows::System::VirtualKey::Escape) return;
-                CancelGroupDrag();
-                args.Handled(true);
-            }))), true);
     }
 
     std::optional<MainWindow::GroupDropTarget> MainWindow::GroupDropAt(Windows::Foundation::Point point, std::uint64_t view) {
@@ -90,7 +43,7 @@ namespace winrt::Folia::implementation {
                 }
                 marker = bounds.X + bounds.Width;
             }
-            return GroupDropTarget{group, index, std::clamp(marker, clip.X, clip.X + clip.Width)};
+            return GroupDropTarget{group, index, std::clamp(marker, clip.X, clip.X + clip.Width), onStrip};
         };
 
         if (Contains(ElementBounds(TabViewport(), root), point)) return groupAt(EditorGroup::Left, true);
@@ -100,81 +53,136 @@ namespace winrt::Folia::implementation {
         return groupAt(right ? EditorGroup::Right : EditorGroup::Left, false);
     }
 
-    void MainWindow::UpdateGroupDrag(Input::PointerRoutedEventArgs const& args, bool releasing) {
-        if (!groupTabDrag || groupTabDrag->pointer.PointerId() != args.Pointer().PointerId()) return;
-        auto pointer = args.GetCurrentPoint(Root());
-        // Some pointer devices also report a release while another button is held.
-        if (releasing && pointer.Properties().IsLeftButtonPressed()) return;
-        auto point = pointer.Position();
-        auto& drag = *groupTabDrag;
-        if (!drag.started) {
-            const auto scale = Root().XamlRoot().RasterizationScale();
-            drag.started = std::abs(point.X - drag.origin.X) * scale > ::GetSystemMetrics(SM_CXDRAG)
-                || std::abs(point.Y - drag.origin.Y) * scale > ::GetSystemMetrics(SM_CYDRAG);
+    void MainWindow::SetTabDropIndicator(std::optional<GroupDropTarget> const& target) {
+        auto indicator = GroupTabDropIndicator();
+        if (target) {
+            auto origin = ElementBounds(TabGroups(), Root());
+            indicator.Margin({(std::max)(0.f, target->indicatorX - origin.X - 1.f), 3, 0, 3});
         }
-        args.Handled(true);
-        auto target = drag.started ? GroupDropAt(point, drag.view) : std::nullopt;
-        if (!releasing) {
-            auto indicator = GroupTabDropIndicator();
-            if (target) {
-                auto origin = ElementBounds(TabGroups(), Root());
-                indicator.Margin({(std::max)(0.f, target->indicatorX - origin.X - 1.f), 3, 0, 3});
-            }
-            indicator.Visibility(target ? Visibility::Visible : Visibility::Collapsed);
-            return;
-        }
-
-        auto finished = drag;
-        CancelGroupDrag();
-        if (!finished.started) return;
-        if (!target) {
-            DropGroupTabOutside(finished.view);
-            return;
-        }
-        DispatcherQueue().TryEnqueue([weak = get_weak(), view = finished.view, drop = *target] {
-            if (auto window = weak.get(); window && !window->windowClosed) window->MoveEditorView(view, drop.group, drop.index);
-        });
+        indicator.Visibility(target ? Visibility::Visible : Visibility::Collapsed);
     }
 
-    void MainWindow::CancelGroupDrag() {
-        if (auto drag = std::exchange(groupTabDrag, std::nullopt)) {
-            if (!windowClosed) {
-                GroupTabDropIndicator().Visibility(Visibility::Collapsed);
-                Root().ReleasePointerCapture(drag->pointer);
+    void MainWindow::StartNativeTabDrag(Microsoft::UI::Input::EnteringMoveSizeEventArgs const& args) {
+        auto screen = nativeTabPress.value_or(args.PointerScreenPoint());
+        BeginTabPointerGesture(screen);
+        if (!tabGrabOffset || closePending || closingDocument || relocatingFiles) return;
+        auto hit = HitTestVisibleTab(screen);
+        if (!hit) return;
+        ActivateView(hit->id);
+        auto tab = tabItems.at(hit->id);
+        if (editorGroups.Views(EditorGroup::Left).size() + editorGroups.Views(EditorGroup::Right).size() == 1) {
+            draggingTab = tab;
+            tab->tearOutWindow = get_weak();
+            return;
+        }
+        auto host = BeginTabTearOut(tab);
+        // The native move loop owns one HWND. Redirect it to a prepared host whenever other views stay behind.
+        WINDOWPLACEMENT placement{sizeof(placement)};
+        winrt::check_bool(::GetWindowPlacement(WindowHandle(), &placement));
+        auto normal = placement.rcNormalPosition;
+        RECT bounds{};
+        winrt::check_bool(::GetWindowRect(WindowHandle(), &bounds));
+        winrt::check_bool(::SetWindowPos(host->WindowHandle(), WindowHandle(), bounds.left, bounds.top,
+            normal.right - normal.left, normal.bottom - normal.top, SWP_NOACTIVATE | SWP_SHOWWINDOW));
+        host->Root().UpdateLayout();
+        args.MoveSizeWindowId(host->AppWindow().Id());
+    }
+
+    namespace {
+        HWND WindowBelow(Windows::Graphics::PointInt32 screen, HWND floating) {
+            POINT point{screen.X, screen.Y};
+            auto top = ::GetAncestor(::WindowFromPoint(point), GA_ROOT);
+            if (top != floating) return top;
+            for (auto window = ::GetWindow(floating, GW_HWNDNEXT); window; window = ::GetWindow(window, GW_HWNDNEXT)) {
+                RECT rect{};
+                if (!::IsWindowVisible(window) || ::IsIconic(window) || !::GetWindowRect(window, &rect) || !::PtInRect(&rect, point)) continue;
+                DWORD cloaked{};
+                if (SUCCEEDED(::DwmGetWindowAttribute(window, DWMWA_CLOAKED, &cloaked, sizeof(cloaked))) && cloaked) continue;
+                if (::GetWindowLongPtrW(window, GWL_EXSTYLE) & WS_EX_TRANSPARENT) continue;
+                return window;
             }
+            return nullptr;
         }
     }
 
-    void MainWindow::DropGroupTabOutside(std::uint64_t view) {
-        auto tab = tabItems.find(view);
-        if (tab == tabItems.end() || editorGroups.ViewCount(tab->second->document) != 1) return;
-        POINT point{};
-        if (!::GetCursorPos(&point)) return;
-        auto root = ::GetAncestor(::WindowFromPoint(point), GA_ROOT);
-        if (root == WindowHandle()) return;
-        auto target = root ? App::Current()->FindMainWindow(Microsoft::UI::GetWindowIdFromWindow(root)) : nullptr;
-        if (target && !target->CanAcceptTab(tab->second)) return;
+    void MainWindow::TrackNativeTabDrag(Microsoft::UI::Input::WindowRectChangingEventArgs const& args) {
+        if (!draggingTab || !tabMoveInProgress) return;
+        auto owner = draggingTab->owner.get(), host = draggingTab->tearOutWindow.get();
+        if (!owner || !host) return;
+        auto screen = args.PointerScreenPoint();
+        const auto view = unbox_value<std::uint64_t>(draggingTab->item);
+        auto hwnd = WindowBelow(screen, host->WindowHandle());
+        auto target = hwnd ? App::Current()->FindMainWindow(Microsoft::UI::GetWindowIdFromWindow(hwnd)) : nullptr;
         std::optional<GroupDropTarget> drop;
-        if (target && target->Root().XamlRoot()) {
-            auto local = target->Root().XamlRoot().CoordinateConverter().ConvertScreenToLocal(Windows::Graphics::PointInt32{point.x, point.y});
-            drop = target->GroupDropAt(local, view);
+        if (target && !target->windowClosed && (target == owner.get() || target->CanDockTab(draggingTab))) {
+            auto point = target->Root().XamlRoot().CoordinateConverter().ConvertScreenToLocal(screen);
+            drop = target->GroupDropAt(point, view);
+            // Dropping back onto the page a tab was just pulled from should leave it in its floating window.
+            if (drop && !drop->onStrip && detachedFrom.get().get() == target &&
+                (!target->editorGroups.IsSplit() || drop->group == detachedGroup)) drop.reset();
         }
-        DispatcherQueue().TryEnqueue([weak = get_weak(), target = target ? target->get_weak() : weak_ref<MainWindow>{},
-                                        item = tab->second, point, drop, create = target == nullptr] {
-            auto source = weak.get();
-            if (!source || source->windowClosed || source->editorGroups.ViewCount(item->document) != 1) return;
-            auto receiving = target.get();
-            if (create) {
-                auto window = source->CreateTabWindow();
-                winrt::check_bool(::SetWindowPos(window->WindowHandle(), nullptr, point.x - 40, point.y - 18,
-                    0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE));
-                receiving = window->get_strong();
+        if (auto old = dropWindow.get(); old && (!drop || old.get() != target)) old->SetTabDropIndicator({});
+        dropWindow = drop ? target->get_weak() : weak_ref<MainWindow>{};
+        pendingDrop = drop;
+        if (drop) target->SetTabDropIndicator(drop);
+
+        if (owner != host && !drop) {
+            auto group = *owner->editorGroups.GroupOf(view);
+            auto views = owner->editorGroups.Views(group);
+            auto index = std::ranges::find(views, view, &WorkspaceEditorView::id) - views.begin();
+            if (!CompleteTabTearOut(draggingTab)) return;
+            detachedFrom = owner->get_weak();
+            detachedGroup = group;
+            detachedIndex = index;
+            host->AppWindow().Show(false);
+            host->Root().UpdateLayout();
+            auto tab = host->DocumentTabs().ContainerFromItem(draggingTab->item).try_as<TabViewItem>();
+            if (tab) {
+                auto rect = ElementBounds(tab, host->Root());
+                auto anchor = host->Root().XamlRoot().CoordinateConverter().ConvertLocalToScreen(
+                    Windows::Foundation::Point{rect.X + (std::min)(*tabGrabOffset, rect.Width), rect.Y + rect.Height / 2});
+                RECT bounds{};
+                ::GetWindowRect(host->WindowHandle(), &bounds);
+                windowGrab = {anchor.X - bounds.left, anchor.Y - bounds.top};
             }
-            if (receiving) {
-                auto group = drop ? drop->group : receiving->editorGroups.ActiveGroup();
-                auto index = drop ? drop->index : receiving->editorGroups.Views(group).size();
-                receiving->TransferTab(item, index, group);
-            }
-        });
+        }
+        if (detachedFrom.get()) {
+            auto rect = args.NewWindowRect();
+            rect.X = screen.X - windowGrab.X;
+            rect.Y = screen.Y - windowGrab.Y;
+            args.NewWindowRect(rect);
+        }
+    }
+
+    void MainWindow::FinishNativeTabDrag() {
+        auto target = dropWindow.get();
+        auto drop = std::exchange(pendingDrop, {});
+        dropWindow = {};
+        if (target && !target->windowClosed) target->SetTabDropIndicator({});
+        if (!draggingTab) return;
+        auto owner = draggingTab->owner.get(), host = draggingTab->tearOutWindow.get();
+        if (!owner || !host) return;
+        auto view = unbox_value<std::uint64_t>(draggingTab->item);
+        bool cancelled = (::GetAsyncKeyState(VK_ESCAPE) & 0x8000) != 0;
+        if (cancelled) {
+            target = detachedFrom.get();
+            drop = GroupDropTarget{detachedGroup, detachedIndex, 0, true};
+        }
+        detachedFrom = {};
+        windowGrab = {};
+        if (target && !target->windowClosed && drop) {
+            if (owner == target) target->MoveEditorView(view, drop->group, drop->index);
+            else if (target->TransferTab(draggingTab, drop->index, drop->group)) target->Activate();
+        }
+        if (draggingTab->owner.get() != host) {
+            // Closing from inside the native move callback can reenter input teardown.
+            host->AppWindow().Hide();
+            host->DispatcherQueue().TryEnqueue([weak = host->get_weak()] {
+                if (auto window = weak.get(); window && !window->windowClosed && (window->preparedTabWindow || window->transferPlaceholder)) {
+                    window->closeApproved = true;
+                    window->Close();
+                }
+            });
+        } else host->Activate();
     }
 }

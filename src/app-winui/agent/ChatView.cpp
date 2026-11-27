@@ -51,7 +51,9 @@ namespace winrt::Folia::chat {
         };
         transcript_ = ChatTranscript::Create(conversation_.id, theme_);
         transcript_->SetTitle(to_hstring(conversation_.title));
-        transcript_->openDocument = host_.openDocument;
+        transcript_->openDocument = [weak](auto const& link, auto const& documents) {
+            if (auto view = weak.lock(); view && view->host_.openDocument) view->host_.openDocument(link, documents);
+        };
         transcript_->retry = [weak] { if (auto self = weak.lock()) self->StartTurn(true); };
         Put(root_, transcript_->Element(), 0);
         if (auto last = transcript_->LastReply()) {
@@ -85,7 +87,10 @@ namespace winrt::Folia::chat {
         input_.MaxHeight(162);
         input_.PlaceholderText(Localize(L"ChatPrompt"));
         input_.MaxLength(maxQuestionBytes);
-        extras_ = ChatComposerExtras::Create(input_, host_.tabs,
+        extras_ = ChatComposerExtras::Create(input_, [weak] {
+            if (auto view = weak.lock()) return view->host_.tabs();
+            return std::vector<OpenTab>{};
+        },
             [weak] { if (auto view = weak.lock()) return view->conversation_.folder; return std::filesystem::path{}; },
             [weak](hstring const& message) { if (auto view = weak.lock()) view->Report(message); });
         input_.TextChanging([weak](auto const&, auto const&) {

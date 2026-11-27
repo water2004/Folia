@@ -28,12 +28,14 @@ namespace winrt::Folia {
 
     std::uint64_t WorkspaceEditorGroups::ViewFor(EditorGroup group, std::uint64_t document) const {
         auto views = Views(group);
+        if (auto active = Find(Selected(group)); active && active->document == document) return active->id;
         auto found = std::ranges::find(views, document, &WorkspaceEditorView::document);
         return found == views.end() ? 0 : found->id;
     }
 
     std::size_t WorkspaceEditorGroups::ViewCount(std::uint64_t document) const {
-        return (ViewFor(EditorGroup::Left, document) != 0) + (ViewFor(EditorGroup::Right, document) != 0);
+        return std::ranges::count(Views(EditorGroup::Left), document, &WorkspaceEditorView::document)
+            + std::ranges::count(Views(EditorGroup::Right), document, &WorkspaceEditorView::document);
     }
 
     std::uint64_t WorkspaceEditorGroups::Add(EditorGroup group, std::uint64_t document, std::size_t index) {
@@ -91,14 +93,17 @@ namespace winrt::Folia {
     }
 
     void WorkspaceEditorGroups::ForgetDocument(std::uint64_t document) {
-        // Removing the last left view can bring the right group across.
-        Remove(ViewFor(EditorGroup::Right, document));
-        Remove(ViewFor(EditorGroup::Left, document));
+        for (auto& state : groups_) {
+            std::erase_if(state.views, [document](auto const& view) { return view.document == document; });
+            if (std::ranges::find(state.views, state.selected, &WorkspaceEditorView::id) == state.views.end())
+                state.selected = state.views.empty() ? 0 : state.views.front().id;
+        }
+        Normalize();
     }
 
     std::uint64_t WorkspaceEditorGroups::Move(std::uint64_t view, EditorGroup target, std::size_t index) {
         auto group = GroupOf(view);
-        if (!group || !IsSplit()) return 0;
+        if (!group || (target == EditorGroup::Right && !IsSplit())) return 0;
         auto& from = State(*group);
         auto found = std::ranges::find(from.views, view, &WorkspaceEditorView::id);
         auto entry = *found;
@@ -112,15 +117,14 @@ namespace winrt::Folia {
             }
             return view;
         }
-        auto existing = ViewFor(target, entry.document);
-        if (!existing) Insert(target, entry, index);
+        Insert(target, entry, index);
         // Remove the original by iterator so both groups briefly owning the
         // same view ID cannot make a lookup select the receiving group.
         from.views.erase(found);
         if (from.selected == view)
             from.selected = from.views.empty() ? 0 : from.views[(std::min)(previousIndex, from.views.size() - 1)].id;
         Normalize();
-        return existing ? existing : view;
+        return view;
     }
 
     bool WorkspaceEditorGroups::Reorder(EditorGroup group, std::span<std::uint64_t const> order) {

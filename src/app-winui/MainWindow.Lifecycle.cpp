@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "MainWindow.xaml.h"
+#include "App.xaml.h"
 #include "localization/Localization.h"
 
 namespace winrt::Folia::implementation {
@@ -31,8 +32,11 @@ namespace winrt::Folia::implementation {
             textInputController.FocusLeave();
             std::vector<std::shared_ptr<winrt::Folia::WorkspaceDocument>> documents(workspaceDocuments.Items().begin(), workspaceDocuments.Items().end());
             bool approved = true;
-            for (auto const& document : documents)
-                if (document->editor && !co_await document->editor->controller.ConfirmCloseAsync()) { approved = false; break; }
+            for (auto const& document : documents) {
+                if (!document->editor || !document->IsModified() || App::Current()->OtherDocumentWindow(this, document->id)) continue;
+                ActivateDocument(document->id);
+                if (!co_await document->editor->controller.ConfirmCloseAsync()) { approved = false; break; }
+            }
             if (approved) { closeApproved = true; Close(); }
         } catch (winrt::hresult_error const& error) {
             ShowError(LocalizeFormat(L"StatusSaveFailed", {error.message()}));

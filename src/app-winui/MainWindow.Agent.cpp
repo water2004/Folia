@@ -181,6 +181,105 @@ namespace winrt::Folia::implementation {
         catch (hresult_error const& error) { if (!windowClosed) ShowError(error.message()); }
     }
 
+    chat::ViewHost MainWindow::ChatHostFor(std::shared_ptr<WorkspaceDocument> const& document) {
+        auto window = get_weak();
+        chat::ViewHost host;
+        host.window = WindowHandle();
+        host.tabs = [window] {
+            std::vector<chat::OpenTab> snapshot;
+            if (auto main = window.get()) {
+                for (auto const& tab : main->workspaceDocuments.Items()) {
+                    if (!tab->editor) continue;
+                    chat::OpenTab data;
+                    data.documentId = tab->id;
+
+                    data.document = {tab->referenceKey, to_string(hstring(tab->path.native()))};
+                    data.title = to_string(tab->path.empty() ? Localize(L"UntitledMarkdown") : hstring(tab->path.filename().native()));
+                    if (tab->editor->loaded) {
+                        auto revision = tab->editor->session.ContentState();
+                        auto serial = tab->editor->openSerial;
+                        data.read = [window, queue = main->DispatcherQueue(), id = tab->id, revision, serial](std::stop_token stop) {
+                            auto task = std::make_shared<std::packaged_task<chat::TabSnapshot()>>([=] {
+                                auto main = window.get();
+                                auto doc = main ? main->workspaceDocuments.Find(id) : nullptr;
+                                if (stop.stop_requested() || !doc || !doc->editor || !doc->editor->loaded ||
+                                    doc->editor->openSerial != serial || doc->editor->session.ContentState() != revision)
+                                    throw std::runtime_error("Tab changed or closed; start a new turn to read its current contents");
+                                auto& session = doc->editor->session;
+                                chat::TabSnapshot result{session.TextUtf8()};
+                                for (auto item : session.RenderModel().outline.flat_items())
+                                    result.outline.emplace_back(item->level, item->title_plain_text);
+                                return result;
+                            });
+                            auto result = task->get_future();
+                            if (!queue.TryEnqueue([task] { (*task)(); })) throw std::runtime_error("Window closed");
+                            while (result.wait_for(std::chrono::milliseconds(30)) != std::future_status::ready)
+                                if (stop.stop_requested()) throw std::runtime_error("Cancelled");
+                            return result.get();
+                        };
+                    }
+                    snapshot.push_back(std::move(data));
+                }
+            }
+            std::unordered_map<std::string, unsigned> counts;
+            for (auto const& tab : snapshot) ++counts[tab.title];
+            for (auto& tab : snapshot) {
+                if (counts.at(tab.title) > 1) tab.title += " (#" + std::to_string(tab.documentId) + ")";
+            }
+            return snapshot;
+        };
+        host.currentFolder = [window] {
+            if (auto main = window.get()) return main->folderExplorer.RootPath();
+            return std::filesystem::path{};
+        };
+        host.openDocument = [window, chatId = document->id](auto const& link, auto const& docs) {
+            if (auto main = window.get()) {
+                auto target = chat::ResolveDocumentLink(link, docs);
+                if (!target) { main->ShowError(Localize(L"ChatMissingReference")); return; }
+                auto const& [ref, location] = *target;
+                main->OpenChatDocument(chatId, ref.tabKey, std::wstring(to_hstring(ref.path)), location);
+            }
+        };
+        host.split = [window] { if (auto main = window.get()) main->SplitEditor(); };
+        host.newChat = [window] { if (auto main = window.get()) main->OpenAgentChat(); };
+        host.rename = [window, id = document->chatId] { if (auto main = window.get()) main->ManageAgentChat(id, false); };
+        host.settings = [window] {
+            if (auto main = window.get()) {
+                main->OpenSettingsTab();
+                if (main->settingsView) main->settingsView->Navigate(SettingsView::Page::Providers);
+            }
+        };
+        host.keep = [window, id = document->id] {
+            if (auto main = window.get(); main && main->workspaceDocuments.Keep(id)) main->UpdateDocumentTab(id);
+        };
+        host.changed = [window, id = document->id](chat::Conversation const& conversation) {
+            if (auto main = window.get()) {
+                if (auto tab = main->workspaceDocuments.Find(id)) {
+                    tab->chatTitle = conversation.title;
+                    main->UpdateDocumentTab(id);
+                    if (main->IsActiveDocument(id)) main->UpdateDocumentInfo();
+                    if (main->workspacePane == WorkspacePane::Chats) main->RefreshChatList();
+                }
+            }
+        };
+        return host;
+    }
+
+    void MainWindow::TakeChatPage(MainWindow& source, std::shared_ptr<WorkspaceDocument> const& document) {
+        auto page = source.agentChatViews.extract(document->id);
+        if (page.empty()) return;
+        auto& chat = page.mapped();
+        for (auto const& host : {source.AgentChatHost(), source.OtherAgentChatHost()}) {
+            if (host.Content() == chat->Element()) {
+                host.Content(nullptr);
+                host.UpdateLayout();
+            }
+        }
+        chat->Rehost(ChatHostFor(document));
+        chat->SetTheme(themeProfile);
+        agentChatViews.insert(std::move(page));
+    }
+
     void MainWindow::UpdateAgentChatPages() {
         auto assign = [](ContentControl const& host, std::shared_ptr<chat::ChatView> const& view) {
             auto desired = view ? view->Element().as<Windows::Foundation::IInspectable>() : nullptr;
@@ -194,87 +293,7 @@ namespace winrt::Folia::implementation {
         auto getView = [&](std::shared_ptr<WorkspaceDocument> const& document) -> std::shared_ptr<chat::ChatView> {
             if (!document || document->kind != WorkspaceTabKind::Chat) return {};
             if (auto found = agentChatViews.find(document->id); found != agentChatViews.end()) return found->second;
-            auto window = get_weak();
-            chat::ViewHost host;
-            host.window = WindowHandle();
-            host.tabs = [window] {
-                std::vector<chat::OpenTab> snapshot;
-                if (auto main = window.get()) {
-                    for (auto const& tab : main->workspaceDocuments.Items()) {
-                        if (!tab->editor) continue;
-                        chat::OpenTab data;
-                        data.documentId = tab->id;
-
-                        data.document = {tab->referenceKey, to_string(hstring(tab->path.native()))};
-                        data.title = to_string(tab->path.empty() ? Localize(L"UntitledMarkdown") : hstring(tab->path.filename().native()));
-                        if (tab->editor->loaded) {
-                            auto revision = tab->editor->session.ContentState();
-                            auto serial = tab->editor->openSerial;
-                            data.read = [window, queue = main->DispatcherQueue(), id = tab->id, revision, serial](std::stop_token stop) {
-                                auto task = std::make_shared<std::packaged_task<chat::TabSnapshot()>>([=] {
-                                    auto main = window.get();
-                                    auto doc = main ? main->workspaceDocuments.Find(id) : nullptr;
-                                    if (stop.stop_requested() || !doc || !doc->editor || !doc->editor->loaded ||
-                                        doc->editor->openSerial != serial || doc->editor->session.ContentState() != revision)
-                                        throw std::runtime_error("Tab changed or closed; start a new turn to read its current contents");
-                                    auto& session = doc->editor->session;
-                                    chat::TabSnapshot result{session.TextUtf8()};
-                                    for (auto item : session.RenderModel().outline.flat_items())
-                                        result.outline.emplace_back(item->level, item->title_plain_text);
-                                    return result;
-                                });
-                                auto result = task->get_future();
-                                if (!queue.TryEnqueue([task] { (*task)(); })) throw std::runtime_error("Window closed");
-                                while (result.wait_for(std::chrono::milliseconds(30)) != std::future_status::ready)
-                                    if (stop.stop_requested()) throw std::runtime_error("Cancelled");
-                                return result.get();
-                            };
-                        }
-                        snapshot.push_back(std::move(data));
-                    }
-                }
-                std::unordered_map<std::string, unsigned> counts;
-                for (auto const& tab : snapshot) ++counts[tab.title];
-                for (auto& tab : snapshot) {
-                    if (counts.at(tab.title) > 1) tab.title += " (#" + std::to_string(tab.documentId) + ")";
-                }
-                return snapshot;
-            };
-            host.currentFolder = [window] {
-                if (auto main = window.get()) return main->folderExplorer.RootPath();
-                return std::filesystem::path{};
-            };
-            host.openDocument = [window, chatId = document->id](auto const& link, auto const& docs) {
-                if (auto main = window.get()) {
-                    auto target = chat::ResolveDocumentLink(link, docs);
-                    if (!target) { main->ShowError(Localize(L"ChatMissingReference")); return; }
-                    auto const& [ref, location] = *target;
-                    main->OpenChatDocument(chatId, ref.tabKey, std::wstring(to_hstring(ref.path)), location);
-                }
-            };
-            host.split = [window] { if (auto main = window.get()) main->SplitEditor(); };
-            host.newChat = [window] { if (auto main = window.get()) main->OpenAgentChat(); };
-            host.rename = [window, id = document->chatId] { if (auto main = window.get()) main->ManageAgentChat(id, false); };
-            host.settings = [window] {
-                if (auto main = window.get()) {
-                    main->OpenSettingsTab();
-                    if (main->settingsView) main->settingsView->Navigate(SettingsView::Page::Providers);
-                }
-            };
-            host.keep = [window, id = document->id] {
-                if (auto main = window.get(); main && main->workspaceDocuments.Keep(id)) main->UpdateDocumentTab(id);
-            };
-            host.changed = [window, id = document->id](chat::Conversation const& conversation) {
-                if (auto main = window.get()) {
-                    if (auto tab = main->workspaceDocuments.Find(id)) {
-                        tab->chatTitle = conversation.title;
-                        main->UpdateDocumentTab(id);
-                        if (main->IsActiveDocument(id)) main->UpdateDocumentInfo();
-                        if (main->workspacePane == WorkspacePane::Chats) main->RefreshChatList();
-                    }
-                }
-            };
-            auto result = chat::ChatView::Create(chat::LoadConversation(document->chatId), std::move(host), themeProfile);
+            auto result = chat::ChatView::Create(chat::LoadConversation(document->chatId), ChatHostFor(document), themeProfile);
             agentChatViews.emplace(document->id, result);
             return result;
         };

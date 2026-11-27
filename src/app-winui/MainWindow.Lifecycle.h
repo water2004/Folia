@@ -55,6 +55,8 @@ namespace winrt::Folia::detail {
             winrt::Microsoft::UI::Input::EnteredMoveSizeEventArgs>;
         using EnteringHandler = winrt::Windows::Foundation::TypedEventHandler<Source,
             winrt::Microsoft::UI::Input::EnteringMoveSizeEventArgs>;
+        using ChangingHandler = winrt::Windows::Foundation::TypedEventHandler<Source,
+            winrt::Microsoft::UI::Input::WindowRectChangingEventArgs>;
         using PointerHandler = winrt::Windows::Foundation::TypedEventHandler<Source,
             winrt::Microsoft::UI::Input::NonClientPointerEventArgs>;
         TabDragCompletionSubscription() = default;
@@ -62,12 +64,13 @@ namespace winrt::Folia::detail {
         TabDragCompletionSubscription& operator=(TabDragCompletionSubscription const&) = delete;
         ~TabDragCompletionSubscription() { Reset(); }
         void Attach(Source source, EnteringHandler const& entering,
-            Handler const& handler, EnteredHandler const& entered,
+            Handler const& handler, EnteredHandler const& entered, ChangingHandler const& changing,
             PointerHandler const& pressed, PointerHandler const& released) {
             Reset();
             entering_ = source.EnteringMoveSize(entering);
             token_ = source.ExitedMoveSize(handler);
             entered_ = source.EnteredMoveSize(entered);
+            changing_ = source.WindowRectChanging(changing);
             pressed_ = source.PointerPressed(pressed);
             released_ = source.PointerReleased(released);
             source_ = std::move(source);
@@ -77,6 +80,7 @@ namespace winrt::Folia::detail {
                 source_.EnteringMoveSize(entering_);
                 source_.ExitedMoveSize(token_);
                 source_.EnteredMoveSize(entered_);
+                source_.WindowRectChanging(changing_);
                 source_.PointerPressed(pressed_);
                 source_.PointerReleased(released_);
             }
@@ -86,7 +90,7 @@ namespace winrt::Folia::detail {
     private:
         Source source_{nullptr};
         winrt::event_token token_{};
-        winrt::event_token entering_{}, entered_{}, pressed_{}, released_{};
+        winrt::event_token entering_{}, entered_{}, changing_{}, pressed_{}, released_{};
     };
 
     // AppWindow does not expose IWeakReferenceSource. Own its event subscription

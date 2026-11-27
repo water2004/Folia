@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "MainWindow.xaml.h"
+#include "App.xaml.h"
 #include "localization/Localization.h"
 #include "storage/AssetPaths.h"
 #include <winrt/Microsoft.UI.Xaml.Automation.h>
@@ -142,7 +143,7 @@ namespace winrt::Folia::implementation
         return Localize(SettingsActive() ? L"Settings" : L"UntitledMarkdown");
     }
 
-    void MainWindow::UpdateDocumentInfo()
+    void MainWindow::UpdateDocumentInfo(bool notifyPeers)
     {
         auto const displayName = LocalizedDocumentName();
         auto active = workspaceDocuments.Active();
@@ -160,6 +161,7 @@ namespace winrt::Folia::implementation
         EncodingButton().IsEnabled(editorSession().HasFile());
         workspaceDocuments.ObserveEdit(active->id);
         UpdateDocumentTab(active->id);
+        if (notifyPeers && active->editor->presenter == WindowHandle()) App::Current()->RefreshSharedDocument(this, active->id);
     }
 
     void MainWindow::UpdateSourceModeUi()

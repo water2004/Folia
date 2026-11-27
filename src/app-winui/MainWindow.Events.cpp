@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "MainWindow.xaml.h"
+#include "App.xaml.h"
 #include "localization/Localization.h"
 
 import folia.core.command;
@@ -92,6 +93,7 @@ namespace winrt::Folia::implementation
                 DispatcherQueue().TryEnqueue([weak = get_weak()] {
                     auto window = weak.get();
                     if (!window || window->windowClosed || ::GetActiveWindow() != window->WindowHandle()) return;
+                    window->ClaimDocumentPresentation();
                     auto editing = window->EditorSurface().FocusState() != Microsoft::UI::Xaml::FocusState::Unfocused && !window->SettingsActive();
                     window->animationController.Focus(editing);
                     if (editing) window->textInputController.FocusEnter();
@@ -119,7 +121,6 @@ namespace winrt::Folia::implementation
         Closed(WindowEvent([this](auto const&, auto const&)
         {
             windowClosed = true;
-            CancelGroupDrag();
             documentTools.Stop();
             otherDocumentTools.Stop();
             ReleaseOtherGroupRenderer();
@@ -135,8 +136,17 @@ namespace winrt::Folia::implementation
             if (settingsView) settingsView->Detach();
             folderExplorer.Detach();
             ClearImagePreview();
-            for (auto const& document : workspaceDocuments.Items())
-                if (document->editor) document->editor->controller.Detach();
+            for (auto const& document : workspaceDocuments.Items()) {
+                auto const& editor = document->editor;
+                if (!editor) continue;
+                auto other = App::Current()->OtherDocumentWindow(this, document->id);
+                if (!other) editor->controller.Detach();
+                else if (editor->presenter == WindowHandle()) {
+                    editor->controller.SuspendPresentation();
+                    editor->presenter = nullptr;
+                    if (other->IsActiveDocument(document->id)) other->ClaimDocumentPresentation();
+                }
+            }
             sidebarController.Detach();
             pointerController.Detach();
             latexCompletionController.Detach();

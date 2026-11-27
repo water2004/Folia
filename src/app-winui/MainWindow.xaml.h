@@ -29,7 +29,7 @@
 #include "workspace/TabDragPresentation.h"
 #include "workspace/WorkspaceSidebarMotion.h"
 
-namespace winrt::Folia::chat { class ChatView; }
+namespace winrt::Folia::chat { class ChatView; struct ViewHost; }
 
 namespace winrt::Folia::implementation
 {
@@ -67,25 +67,22 @@ namespace winrt::Folia::implementation
             winrt::weak_ref<MainWindow> tearOutWindow;
         };
         void RegisterTabTransferHandlers();
-        void RegisterGroupDragHandlers(EditorGroup group);
-        void RegisterGroupDragSurface();
-        struct GroupDropTarget { EditorGroup group; std::size_t index; float indicatorX; };
+        struct GroupDropTarget { EditorGroup group; std::size_t index; float indicatorX; bool onStrip; };
         std::optional<GroupDropTarget> GroupDropAt(Windows::Foundation::Point point, std::uint64_t view);
-        void UpdateGroupDrag(Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args, bool releasing);
-        void CancelGroupDrag();
-        void DropGroupTabOutside(std::uint64_t view);
-        void UpdateTabTransferAvailability();
+        void SetTabDropIndicator(std::optional<GroupDropTarget> const& drop);
+        void StartNativeTabDrag(Microsoft::UI::Input::EnteringMoveSizeEventArgs const&);
+        void TrackNativeTabDrag(Microsoft::UI::Input::WindowRectChangingEventArgs const&);
+        void FinishNativeTabDrag();
         void RefreshTabCaptionRegion();
         MainWindow* CreateTabWindow();
         void SynchronizeTabOrder();
         void QueueTabOrderSync();
         bool CanAcceptTab(std::shared_ptr<DocumentTab> const& tab) const;
         bool TransferTab(std::shared_ptr<DocumentTab> tab, std::size_t index, EditorGroup group = EditorGroup::Left);
-        std::shared_ptr<DocumentTab> FindTransferTab(Windows::Foundation::IInspectable const& item);
         MainWindow* BeginTabTearOut(std::shared_ptr<DocumentTab> const& tab);
         bool CompleteTabTearOut(std::shared_ptr<DocumentTab> const& tab);
-        bool PrepareExternalTab(Windows::Foundation::IInspectable const& item);
-        bool ContainsTabDragPoint(Windows::Graphics::PointInt32 point);
+        bool CanDockTab(std::shared_ptr<DocumentTab> const& tab) const;
+        bool ContainsTabDragPoint(Windows::Graphics::PointInt32 point, EditorGroup group = EditorGroup::Left);
         struct TabHit { std::uint64_t id; float grabOffset; bool closable; };
         std::optional<TabHit> HitTestVisibleTab(Windows::Graphics::PointInt32 point);
         void BeginTabPointerGesture(Windows::Graphics::PointInt32 point);
@@ -93,10 +90,10 @@ namespace winrt::Folia::implementation
         void EndTabPointerGesture();
         void EnterTabMove(Microsoft::UI::Input::InputNonClientPointerSource const& pointer);
         void ExitTabMove();
-        void RestoreIdleTabTransfer();
         void EndTabDrag();
         void RevealTabWindow();
         void AttachControllers();
+        void ClaimDocumentPresentation();
         void AttachDocumentController(std::shared_ptr<winrt::Folia::WorkspaceDocument> const& document);
         winrt::Folia::EditorSession& editorSession() noexcept;
         winrt::Folia::EditorDocumentController& documentController() noexcept;
@@ -162,6 +159,8 @@ namespace winrt::Folia::implementation
         void RefreshChatList();
         void SelectChatListItem(std::string const& id);
         void OpenAgentChat(std::string id = {}, WorkspaceOpenMode mode = WorkspaceOpenMode::Preview);
+        chat::ViewHost ChatHostFor(std::shared_ptr<WorkspaceDocument> const& document);
+        void TakeChatPage(MainWindow& source, std::shared_ptr<WorkspaceDocument> const& document);
         void UpdateAgentChatPages();
         void UpdateAgentChatTheme();
         void ReleaseClosedAgentChats();
@@ -199,7 +198,7 @@ namespace winrt::Folia::implementation
         void RegisterCommandHandlers();
         void ToggleSourceMode();
         void UpdateSourceModeUi();
-        void UpdateDocumentInfo();
+        void UpdateDocumentInfo(bool notifyPeers = true);
         winrt::fire_and_forget ShowEncodingPicker(bool saveWithEncoding);
         void ShowFindBar(bool replace);
         void HideFindBar();
@@ -239,13 +238,12 @@ namespace winrt::Folia::implementation
         std::uint64_t otherRenderedView = 0;
         std::uint64_t otherImageDocument = 0;
         bool otherGroupRenderPending = false;
-        struct GroupTabDrag {
-            std::uint64_t view;
-            Windows::Foundation::Point origin;
-            Microsoft::UI::Xaml::Input::Pointer pointer;
-            bool started = false;
-        };
-        std::optional<GroupTabDrag> groupTabDrag;
+        weak_ref<MainWindow> dropWindow;
+        std::optional<GroupDropTarget> pendingDrop;
+        weak_ref<MainWindow> detachedFrom;
+        EditorGroup detachedGroup = EditorGroup::Left;
+        std::size_t detachedIndex = 0;
+        Windows::Graphics::PointInt32 windowGrab{};
         struct TabStripParts {
             winrt::weak_ref<Microsoft::UI::Xaml::FrameworkElement> list;
             winrt::weak_ref<Microsoft::UI::Xaml::Controls::ScrollViewer> scroller;
@@ -298,6 +296,7 @@ namespace winrt::Folia::implementation
         bool updatingRailSelection = false;
         TabDragPresentation dragPresentation;
         std::optional<float> tabGrabOffset;
+        std::optional<Windows::Graphics::PointInt32> nativeTabPress;
         bool operationActive = false;
         bool windowClosed = false;
         Windows::Foundation::IAsyncAction imagePreviewLoad{nullptr};

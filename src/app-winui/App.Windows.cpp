@@ -87,6 +87,29 @@ namespace winrt::Folia::implementation {
                 return winrt::get_self<MainWindow>(item.window.as<winrt::Folia::MainWindow>());
         return nullptr;
     }
+    MainWindow* App::OtherDocumentWindow(MainWindow const* source, std::uint64_t id) const {
+        for (auto const& item : windows) {
+            auto window = get_self<MainWindow>(item.window.as<winrt::Folia::MainWindow>());
+            if (window != source && !window->windowClosed && window->workspaceDocuments.Find(id)) return window;
+        }
+        return nullptr;
+    }
+
+    void App::RefreshSharedDocument(MainWindow const* source, std::uint64_t id) {
+        for (auto const& item : windows) {
+            auto window = get_self<MainWindow>(item.window.as<winrt::Folia::MainWindow>());
+            if (window == source || window->windowClosed || !window->workspaceDocuments.Find(id)) continue;
+            if (window->IsActiveDocument(id)) {
+                window->UpdateDocumentInfo(false);
+                window->UpdateSourceModeUi();
+                window->RenderEditorSurface();
+            } else {
+                window->UpdateDocumentTab(id);
+                window->QueueOtherGroupRender();
+            }
+        }
+    }
+
     MainWindow* App::FindTabWindow(std::uint64_t view) const {
         for (auto const& item : windows) {
             auto owner = winrt::get_self<MainWindow>(item.window.as<winrt::Folia::MainWindow>());

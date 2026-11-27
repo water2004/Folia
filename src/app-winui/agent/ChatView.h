@@ -29,6 +29,7 @@ namespace winrt::Folia::chat {
         ~ChatView();
         Microsoft::UI::Xaml::FrameworkElement Element() const { return root_; }
         void Activate();
+        void Rehost(ViewHost host) { host_ = std::move(host); }
         void SetTitle(std::string title);
         void ShowSplit(bool available) { split_.Visibility(available && host_.split ? Microsoft::UI::Xaml::Visibility::Visible : Microsoft::UI::Xaml::Visibility::Collapsed); }
         void SetTheme(folia::ThemeProfile const&);

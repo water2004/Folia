@@ -8,6 +8,7 @@
 #include <winrt/Windows.ApplicationModel.DataTransfer.h>
 #include <winrt/Windows.System.h>
 #include "support/folia_test.hpp"
+#include "App.xaml.h"
 #include "MainWindow.xaml.h"
 #include "visual_window.h"
 #include "../support/CompletionHttpServer.h"
@@ -45,6 +46,9 @@ namespace winrt::Folia::implementation {
         static void Close(MainWindow* shell) { shell->CloseDocumentAsync(Active(shell)->id); }
         static void CloseRightView(MainWindow* shell) {
             shell->CloseEditorViewAsync(shell->editorGroups.Selected(EditorGroup::Right));
+        }
+        static bool MoveActive(MainWindow* source, MainWindow* target) {
+            return target->TransferTab(source->tabItems.at(source->SelectedEditorView()), 0);
         }
         static bool Split(MainWindow* shell) { return shell->editorGroups.IsSplit(); }
         static std::uint64_t Companion(MainWindow* shell) {
@@ -567,7 +571,7 @@ namespace {
         };
 
         "agent keeps a dropped reply inline, streams the retry and preserves a manual title"_test = [] {
-            std::string part = R"(data: {"choices":[{"index":0,"delta":{"content":"### First streamed heading\\n\\n"},"finish_reason":null}]})" "\n\n";
+            std::string part = R"(data: {"choices":[{"index":0,"delta":{"content":"### First streamed heading\n\n"},"finish_reason":null}]})" "\n\n";
             std::string more = R"(data: {"choices":[{"index":0,"delta":{"content":"**Second part**"},"finish_reason":null}]})" "\n\n";
             std::string done = R"(data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]})" "\n\ndata: [DONE]\n\n";
             completion_tests::Server server(part, 200, false, "text/event-stream", std::chrono::milliseconds(250), part.size(),
@@ -601,6 +605,12 @@ namespace {
             auto note = Find<TextBlock>(host, [&](auto const& e) { return winrt::to_string(e.Text()) == failed.entries.back().error; });
             expect(note != nullptr);
             Capture(window, "interrupted.png");
+            auto other = winrt::Folia::implementation::App::Current()->CreateMainWindow();
+            other.Activate();
+            auto receiver = Access::Impl(other);
+            auto closeOther = wil::scope_exit([&] { other.Close(); });
+            Pump([&] { return other.Content().as<FrameworkElement>().IsLoaded(); });
+            window.Activate();
             Invoke(action(L"ChatRetry"));
             Pump([&] { return server.receivedRequests == 3 && action(L"ChatStop") != nullptr; });
             auto live = [&] { return Find<Canvas>(host, [](auto const& c) {
@@ -608,7 +618,13 @@ namespace {
             }); };
             Pump([&] { return live() != nullptr && chat::LoadHistory(conversation.id).entries.size() == 2; });
             auto original = live();
-            Capture(window, "streaming.png");
+            input.Text(L"Unsent follow-up");
+            expect(Access::MoveActive(shell, receiver));
+            host = Access::Host(receiver);
+            other.Activate();
+            Pump([&] { return input.IsLoaded() && input.XamlRoot() == host.XamlRoot(); });
+            expect(input.Text() == L"Unsent follow-up");
+            Capture(other, "streaming.png");
             Pump([&] { return action(L"ChatStop") == nullptr && chat::LoadHistory(conversation.id).entries.size() == 3; });
             expect(std::wstring_view(Automation::AutomationProperties::GetName(original)).contains(L"Second part"));
             const auto result = chat::LoadHistory(conversation.id);
@@ -616,6 +632,7 @@ namespace {
             expect(chat::LoadConversation(conversation.id).title == "Pinned title");
             expect(server.receivedRequests.load() == 3);
             expect(server.requests.back().find("62000") != std::string::npos);
+            expect(Access::MoveActive(receiver, shell));
         };
 
         "agent chat opens a tab, calls the configured model, and reopens the saved conversation"_test = [] {

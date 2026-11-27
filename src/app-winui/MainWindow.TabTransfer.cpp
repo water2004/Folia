@@ -41,8 +41,9 @@ namespace winrt::Folia::implementation {
         auto source = tab->owner.get();
         if (!source || source.get() == this || source->windowClosed || source->closePending || source->closingDocument || source->relocatingFiles) return false;
         auto id = tab->document;
-        if (source->editorGroups.ViewCount(id) != 1) return false;
+        if (!source->editorGroups.Find(unbox_value<std::uint64_t>(tab->item))) return false;
         auto document = source->workspaceDocuments.Find(id);
+        if (document && workspaceDocuments.Find(id) == document) return true;
         if (document && document->kind == WorkspaceTabKind::Settings && workspaceDocuments.FindSettings()) return false;
         if (document && document->kind == WorkspaceTabKind::Chat && workspaceDocuments.FindChat(document->chatId)) return false;
         return document && !workspaceDocuments.Find(id)
@@ -63,7 +64,7 @@ namespace winrt::Folia::implementation {
         };
         {
             Mutating mutation(*source, *this);
-            if (source->IsActiveDocument(id)) {
+            if (source->presentedEditorView == view) {
                 if (auto next = source->editorGroups.Replacement(view)) source->ActivateView(next);
                 else {
                     auto placeholder = source->workspaceDocuments.New(WorkspaceOpenMode::Preview);
@@ -72,7 +73,7 @@ namespace winrt::Folia::implementation {
                 }
             }
             auto entry = *source->editorGroups.Find(view);
-            source->workspaceDocuments.TransferTo(id, workspaceDocuments, index);
+            source->workspaceDocuments.TransferTo(id, workspaceDocuments, index, source->editorGroups.ViewCount(id) > 1);
             source->editorGroups.Remove(view);
             for (auto items : {source->tabSource, source->rightTabSource}) {
                 std::uint32_t at = 0;
@@ -85,6 +86,7 @@ namespace winrt::Folia::implementation {
             editorGroups.Insert(group, entry, index);
             tabItems.emplace(view, tab);
             if (document->editor) document->editor->themeRevision = 0;
+            if (document->kind == WorkspaceTabKind::Chat) TakeChatPage(*source, document);
             ActivateView(view);
             if (transferPlaceholder && *transferPlaceholder != id) {
                 auto placeholder = workspaceDocuments.Find(*transferPlaceholder);
@@ -129,12 +131,6 @@ namespace winrt::Folia::implementation {
         preparedTabWindow = false;
         preparedTabOwner = {};
     }
-    std::shared_ptr<MainWindow::DocumentTab> MainWindow::FindTransferTab(Windows::Foundation::IInspectable const& item) {
-        auto id = winrt::unbox_value<std::uint64_t>(item);
-        if (auto owner = App::Current()->FindTabWindow(id))
-            if (auto found = owner->tabItems.find(id); found != owner->tabItems.end() && found->second->item == item) return found->second;
-        return {};
-    }
     MainWindow* MainWindow::BeginTabTearOut(std::shared_ptr<DocumentTab> const& tab) {
         EndTabDrag();
         auto target = CreateTabWindow();
@@ -155,28 +151,14 @@ namespace winrt::Folia::implementation {
         }
         draggingTab.reset();
     }
-    bool MainWindow::PrepareExternalTab(Windows::Foundation::IInspectable const& item) {
-        auto tab = FindTransferTab(item);
-        // WinUI enumerates loaded TabViews, including hidden/preparation hosts.
-        // Such windows are not user-visible drop destinations.
-        if (preparedTabWindow || !AppWindow().IsVisible() || !CanAcceptTab(tab)) return false;
-        if (!tab->tearOutWindow.get()) {
-            // A one-tab drag moves its existing window and raises no
-            // TabTearOutWindowRequested event.
-            if (auto source = tab->owner.get()) {
-                source->draggingTab = tab;
-                tab->tearOutWindow = source;
-            }
-        }
-        return true;
+    bool MainWindow::CanDockTab(std::shared_ptr<DocumentTab> const& tab) const {
+        return !windowClosed && !preparedTabWindow && AppWindow().IsVisible() && CanAcceptTab(tab);
     }
-    bool MainWindow::ContainsTabDragPoint(Windows::Graphics::PointInt32 point) {
-        auto tabs = DocumentTabs();
+    bool MainWindow::ContainsTabDragPoint(Windows::Graphics::PointInt32 point, EditorGroup group) {
+        auto tabs = GroupTabs(group);
         auto list = tabs.as<IControlProtected>().GetTemplateChild(L"TabListView").try_as<FrameworkElement>();
         if (!list || !list.IsLoaded() || list.ActualWidth() <= 0 || list.ActualHeight() <= 0) return false;
-        // Use precisely the element and coordinate system used by WinUI's
-        // DragTabWithinTabView. PopulateTabViewList also includes AddButton;
-        // accepting that extra region can cause an immediate tear-out again.
+        // Only a visible item in the list can start a tab gesture.
         auto bounds = list.TransformToVisual(nullptr).TransformBounds({0, 0,
             static_cast<float>(list.ActualWidth()), static_cast<float>(list.ActualHeight())});
         auto local = list.XamlRoot().CoordinateConverter().ConvertScreenToLocal(point);
@@ -184,10 +166,12 @@ namespace winrt::Folia::implementation {
             && local.Y >= bounds.Y && local.Y <= bounds.Y + bounds.Height;
     }
     std::optional<MainWindow::TabHit> MainWindow::HitTestVisibleTab(Windows::Graphics::PointInt32 point) {
-        auto tabs = DocumentTabs();
-        if (ContainsTabDragPoint(point)) {
+        for (auto group : {EditorGroup::Left, EditorGroup::Right}) {
+            if (editorGroups.Views(group).empty() || !ContainsTabDragPoint(point, group)) continue;
+            auto tabs = GroupTabs(group);
+            auto items = group == EditorGroup::Left ? tabSource : rightTabSource;
             const auto local = tabs.XamlRoot().CoordinateConverter().ConvertScreenToLocal(point);
-            auto viewer = TabStripScroller();
+            auto viewer = TabStripScroller(group);
             auto viewport = viewer ? viewer.as<IControlProtected>().GetTemplateChild(L"ScrollContentPresenter").try_as<FrameworkElement>() : nullptr;
             auto bounds = [](FrameworkElement const& element) {
                 return element.TransformToVisual(nullptr).TransformBounds({0, 0,
@@ -199,11 +183,11 @@ namespace winrt::Folia::implementation {
             // Use the same container geometry as TabView::GetTabAtPoint, clipped
             // to the viewport so offscreen tabs cannot claim either scroll arrow.
             if (viewport && contains(bounds(viewport))) {
-                for (std::uint32_t i = 0; i < tabSource.Size(); ++i) {
+                for (std::uint32_t i = 0; i < items.Size(); ++i) {
                     if (auto tab = tabs.ContainerFromIndex(i).try_as<TabViewItem>()) {
                         auto rect = bounds(tab);
                         if (contains(rect)) return TabHit{
-                            winrt::unbox_value<std::uint64_t>(tabSource.GetAt(i)), local.X - rect.X, tab.IsClosable()};
+                            winrt::unbox_value<std::uint64_t>(items.GetAt(i)), local.X - rect.X, tab.IsClosable()};
                     }
                 }
             }
@@ -216,22 +200,6 @@ namespace winrt::Folia::implementation {
         EndTabDrag();
         auto hit = HitTestVisibleTab(point);
         tabGrabOffset = hit ? std::optional{hit->grabOffset} : std::nullopt;
-        // The native TabView move loop must only participate in a gesture
-        // that actually started on a visible tab. Caption movement remains
-        // ordinary window movement, including after a previous tab click.
-        UpdateTabTransferAvailability();
-    }
-    void MainWindow::UpdateTabTransferAvailability() {
-        if (tabMoveInProgress || windowClosed) return;
-        auto tabs = DocumentTabs();
-        const bool nativeDrag = !editorGroups.IsSplit() && !closePending && !closingDocument && !relocatingFiles;
-        // Split groups use the workspace's pointer capture and drop indicator.
-        // Leaving WinUI drop enabled also activates its tab drag presentation.
-        if (tabs.AllowDrop() != nativeDrag) tabs.AllowDrop(nativeDrag);
-        if (tabs.CanDragTabs() != nativeDrag) tabs.CanDragTabs(nativeDrag);
-        if (tabs.CanReorderTabs() != nativeDrag) tabs.CanReorderTabs(nativeDrag);
-        const bool tearOut = nativeDrag && (!tabPointerDown || tabGrabOffset.has_value());
-        if (tabs.CanTearOutTabs() != tearOut) tabs.CanTearOutTabs(tearOut);
     }
 
     void MainWindow::RefreshTabCaptionRegion() {
@@ -242,13 +210,9 @@ namespace winrt::Folia::implementation {
             if (!window) return;
             window->tabRegionsPending = false;
             if (window->windowClosed || window->tabMoveInProgress) return;
-            auto tabs = window->DocumentTabs();
-            auto list = tabs.as<IControlProtected>().GetTemplateChild(L"TabListView").try_as<FrameworkElement>();
-            if (!list || !list.IsLoaded()) return;
-            auto button = window->NewTabButton();
-            if (!button) return;
+            if (!window->DocumentTabs().IsLoaded()) return;
             auto id = window->AppWindow().Id();
-            auto island = tabs.XamlRoot().CoordinateConverter();
+            auto island = window->Root().XamlRoot().CoordinateConverter();
             auto native = Microsoft::UI::Content::ContentCoordinateConverter::CreateForWindowId(id);
             auto bounds = [](FrameworkElement const& element) { return element.TransformToVisual(nullptr).TransformBounds(
                 {0, 0, static_cast<float>(element.ActualWidth()), static_cast<float>(element.ActualHeight())}); };
@@ -258,53 +222,42 @@ namespace winrt::Folia::implementation {
                 auto r = native.ConvertScreenToLocal(island.ConvertLocalToScreen(rect));
                 region.push_back({static_cast<int>(r.X), static_cast<int>(r.Y), static_cast<int>(r.Width), static_cast<int>(r.Height)});
             };
-            if (window->editorGroups.IsSplit()) {
-                auto left = bounds(window->TabViewport());
-                auto right = bounds(window->RightTabViewport());
-                auto addGroup = [&](Windows::Foundation::Rect strip, Button const& button) {
-                    const auto end = strip.X + strip.Width;
-                    auto blank = end;
-                    if (button && button.IsLoaded()) {
-                        const auto action = bounds(button);
-                        blank = std::clamp(action.X + action.Width, strip.X, end);
-                    }
-                    add(caption, {blank, strip.Y, end - blank, strip.Height});
-                };
-                addGroup(left, button);
-                addGroup(right, window->NewTabButton(EditorGroup::Right));
-                const auto leftEnd = left.X + left.Width;
-                add(caption, {leftEnd, left.Y, right.X - leftEnd, left.Height});
-            } else {
-                auto strip = bounds(window->TopChrome());
-                auto tabList = bounds(list);
-                auto actions = bounds(button);
-                auto captionStart = bounds(window->CaptionInset()).X;
-                // The shelf above the tabs and the space after the add button
-                // move the window. WinUI's tab list owns the tear-out gesture.
-                add(caption, {tabList.X, strip.Y, captionStart - tabList.X, tabList.Y - strip.Y});
-                add(caption, {actions.X + actions.Width, tabList.Y, captionStart - actions.X - actions.Width, tabList.Height});
-                if (tabs.CanTearOutTabs()) add(caption, tabList);
-                // WinUI claims the full tab list as caption for tear-out. Keep
-                // its buttons in client input even when those rectangles overlap.
-                if (auto viewer = window->TabStripScroller()) {
-                    auto parts = viewer.as<IControlProtected>();
-                    for (auto const& reference : window->tabStripParts[static_cast<std::size_t>(EditorGroup::Left)].arrows)
-                        if (auto arrow = reference.get(); arrow && viewer.ComputedHorizontalScrollBarVisibility() == Visibility::Visible)
-                            add(passthrough, bounds(arrow));
-                    if (auto viewport = parts.GetTemplateChild(L"ScrollContentPresenter").try_as<FrameworkElement>()) {
-                        const auto clip = bounds(viewport);
-                        for (std::uint32_t index = 0; index < window->tabSource.Size(); ++index) {
-                            auto tab = tabs.ContainerFromIndex(index).try_as<Control>();
-                            if (!tab) continue;
-                            auto close = tab.as<IControlProtected>().GetTemplateChild(L"CloseButton").try_as<Button>();
-                            if (!close || close.Visibility() != Visibility::Visible) continue;
-                            auto rect = bounds(close);
-                            const auto left = (std::max)(rect.X, clip.X);
-                            const auto right = (std::min)(rect.X + rect.Width, clip.X + clip.Width);
-                            add(passthrough, {left, rect.Y, right - left, rect.Height});
-                        }
-                    }
+            for (auto group : {EditorGroup::Left, EditorGroup::Right}) {
+                if (window->editorGroups.Views(group).empty()) continue;
+                auto tabs = window->GroupTabs(group);
+                auto viewport = group == EditorGroup::Left ? window->TabViewport() : window->RightTabViewport();
+                auto strip = bounds(viewport);
+                auto list = tabs.as<IControlProtected>().GetTemplateChild(L"TabListView").try_as<FrameworkElement>();
+                auto plus = window->NewTabButton(group);
+                if (!list || !plus) continue;
+                auto items = bounds(list);
+                auto action = bounds(plus);
+                // Keep buttons in client input, and let the same native move handler see either strip.
+                add(caption, {items.X, strip.Y, action.X - items.X, strip.Height});
+                add(caption, {action.X + action.Width, strip.Y, strip.X + strip.Width - action.X - action.Width, strip.Height});
+                add(passthrough, action);
+                auto viewer = window->TabStripScroller(group);
+                if (!viewer) continue;
+                auto content = viewer.as<IControlProtected>().GetTemplateChild(L"ScrollContentPresenter").try_as<FrameworkElement>();
+                if (!content) continue;
+                const auto clip = bounds(content);
+                for (auto const& reference : window->tabStripParts[static_cast<std::size_t>(group)].arrows)
+                    if (auto arrow = reference.get(); arrow && viewer.ComputedHorizontalScrollBarVisibility() == Visibility::Visible)
+                        add(passthrough, bounds(arrow));
+                for (std::uint32_t i = 0; i < window->editorGroups.Views(group).size(); ++i) {
+                    auto tab = tabs.ContainerFromIndex(i).try_as<Control>();
+                    if (!tab) continue;
+                    auto close = tab.as<IControlProtected>().GetTemplateChild(L"CloseButton").try_as<Button>();
+                    if (!close || close.Visibility() != Visibility::Visible) continue;
+                    auto rect = bounds(close);
+                    auto left = (std::max)(rect.X, clip.X);
+                    auto right = (std::min)(rect.X + rect.Width, clip.X + clip.Width);
+                    add(passthrough, {left, rect.Y, right - left, rect.Height});
                 }
+            }
+            if (window->editorGroups.IsSplit()) {
+                auto left = bounds(window->TabViewport()), right = bounds(window->RightTabViewport());
+                add(caption, {left.X + left.Width, left.Y, right.X - left.X - left.Width, left.Height});
             }
             auto pointer = Microsoft::UI::Input::InputNonClientPointerSource::GetForWindowId(id);
             using Microsoft::UI::Input::NonClientRegionKind;
@@ -314,27 +267,24 @@ namespace winrt::Folia::implementation {
                 pointer.SetRegionRects(NonClientRegionKind::Passthrough, passthrough);
         });
     }
-    void MainWindow::RestoreIdleTabTransfer() {
-        DispatcherQueue().TryEnqueue([weak = get_weak()] {
-            if (auto window = weak.get(); window && !window->windowClosed
-                && !window->tabPointerDown && !window->tabMoveInProgress)
-                window->UpdateTabTransferAvailability();
-        });
-    }
     void MainWindow::EndTabPointerGesture() {
         tabPointerDown = false;
-        if (!tabMoveInProgress) RestoreIdleTabTransfer();
+        if (!tabMoveInProgress) tabGrabOffset.reset();
     }
     void MainWindow::EnterTabMove(Microsoft::UI::Input::InputNonClientPointerSource const& pointer) {
         tabMoveInProgress = true;
         if (!tabPointerDown || !tabGrabOffset) return;
-        if (draggingTab && IsActiveDocument(draggingTab->document))
-            dragPresentation.Start(DocumentTabs(), draggingTab->item, *tabGrabOffset, pointer);
+        if (draggingTab && draggingTab->tearOutWindow.get().get() != this) {
+            auto view = unbox_value<std::uint64_t>(draggingTab->item);
+            if (auto group = editorGroups.GroupOf(view)) dragPresentation.Start(GroupTabs(*group), draggingTab->item, *tabGrabOffset, pointer);
+        }
     }
     void MainWindow::ExitTabMove() {
         tabMoveInProgress = false;
         animationController.SetPaused(false);
+        FinishNativeTabDrag();
         EndTabDrag();
+        RefreshTabCaptionRegion();
         EndTabPointerGesture();
     }
     LRESULT CALLBACK MainWindow::TabPressSubclass(HWND window, UINT message, WPARAM wparam, LPARAM lparam,
@@ -342,13 +292,18 @@ namespace winrt::Folia::implementation {
         if (message == WM_NCDESTROY) ::RemoveWindowSubclass(window, TabPressSubclass, id);
         auto owner = reinterpret_cast<MainWindow*>(context);
         if (message == WM_CAPTURECHANGED || message == WM_CANCELMODE) owner->CancelTabMiddlePress();
-        if (message == WM_NCLBUTTONDOWN && wparam == HTCAPTION) {
+        if ((message == WM_NCLBUTTONDOWN || message == WM_NCLBUTTONDBLCLK) && wparam == HTCAPTION) {
             auto self = owner->get_strong();
             const Windows::Graphics::PointInt32 point{GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)};
-            if (!self->tabMoveInProgress && self->DocumentTabs().CanTearOutTabs()) {
+            if (!self->tabMoveInProgress) {
                 if (auto tab = self->HitTestVisibleTab(point)) {
-                    // The SDK starts its tear-out loop on mouse-down. Wait for
-                    // the system drag threshold before forwarding a tab press.
+                    if (message == WM_NCLBUTTONDBLCLK) {
+                        self->ActivateView(tab->id);
+                        if (auto view = self->editorGroups.Find(tab->id); view && self->workspaceDocuments.Keep(view->document))
+                            self->UpdateDocumentTab(view->document);
+                        return 0;
+                    }
+                    // Keep the original press even if crossing the drag threshold takes the pointer outside the tab.
                     if (!(::GetAsyncKeyState(VK_LBUTTON) & 0x8000) || !::DragDetect(window, {point.X, point.Y})) {
                         if (!self->windowClosed) {
                             self->ActivateView(tab->id);
@@ -356,6 +311,10 @@ namespace winrt::Folia::implementation {
                         }
                         return 0;
                     }
+                    self->nativeTabPress = point;
+                    auto result = ::DefSubclassProc(window, message, wparam, lparam);
+                    self->nativeTabPress.reset();
+                    return result;
                 }
             }
         }
@@ -367,7 +326,7 @@ namespace winrt::Folia::implementation {
                 // A tab click can finish as client input without a non-client
                 // release. Resolve every move from its own native start point.
                 if (args.MoveSizeOperation() == Microsoft::UI::Input::MoveSizeOperation::Move) {
-                    BeginTabPointerGesture(args.PointerScreenPoint());
+                    StartNativeTabDrag(args);
                 } else tabGrabOffset.reset();
             }),
             WindowEvent([this](auto const&, auto const&) { ExitTabMove(); }),
@@ -378,6 +337,7 @@ namespace winrt::Folia::implementation {
                 if (args.MoveSizeOperation() == Microsoft::UI::Input::MoveSizeOperation::Move && !tabGrabOffset)
                     animationController.SetPaused(true);
             }),
+            WindowEvent([this](auto const&, auto const& args) { TrackNativeTabDrag(args); }),
             WindowEvent([this](auto const&, Microsoft::UI::Input::NonClientPointerEventArgs const& args) {
                 if (args.PointerDeviceType() == Microsoft::UI::Input::PointerDeviceType::Mouse
                     && !(::GetAsyncKeyState(VK_LBUTTON) & 0x8000)) return;
@@ -388,8 +348,14 @@ namespace winrt::Folia::implementation {
                 if (!(::GetAsyncKeyState(VK_LBUTTON) & 0x8000)) EndTabPointerGesture();
             }));
         winrt::check_bool(::SetWindowSubclass(WindowHandle(), TabPressSubclass, 0, reinterpret_cast<DWORD_PTR>(this)));
-        // Register the origin check before TabView attaches its move callbacks.
-        UpdateTabTransferAvailability();
+        for (auto group : {EditorGroup::Left, EditorGroup::Right}) {
+            auto tabs = GroupTabs(group);
+            tabs.CanTearOutTabs(false);
+            tabs.CanDragTabs(false);
+            tabs.CanReorderTabs(false);
+            tabs.AllowDrop(false);
+        }
+        RefreshTabCaptionRegion();
         DocumentColumn().SizeChanged(WindowEvent([this](auto const&, auto const&) { RefreshTabCaptionRegion(); }));
         DocumentTabs().TabItemsChanged(WindowEvent([this](auto const&, auto const&) {
             QueueTabOrderSync();
@@ -398,27 +364,6 @@ namespace winrt::Folia::implementation {
         RightDocumentTabs().TabItemsChanged(WindowEvent([this](auto const&, auto const&) {
             QueueTabOrderSync();
             RefreshTabCaptionRegion();
-        }));
-        DocumentTabs().TabTearOutWindowRequested(WindowEvent([this](auto const&, auto const& args) {
-            auto items = args.Items();
-            if (items.size() == 1)
-                if (auto tab = FindTransferTab(items[0])) args.NewWindowId(BeginTabTearOut(tab)->AppWindow().Id());
-        }));
-        DocumentTabs().TabTearOutRequested(WindowEvent([this](auto const&, auto const& args) {
-            // The shipped SDK never fills args.NewWindowId(). The gesture's
-            // host follows the data item even after it merges into another view.
-            auto items = args.Items();
-            if (items.size() == 1) CompleteTabTearOut(FindTransferTab(items[0]));
-        }));
-        DocumentTabs().ExternalTornOutTabsDropping(WindowEvent([this](auto const&, auto const& args) {
-            auto items = args.Items();
-            POINT point{};
-            args.AllowDrop(items.size() == 1 && ::GetCursorPos(&point)
-                && ContainsTabDragPoint({point.x, point.y}) && PrepareExternalTab(items[0]));
-        }));
-        DocumentTabs().ExternalTornOutTabsDropped(WindowEvent([this](auto const&, auto const& args) {
-            auto items = args.Items();
-            if (items.size() == 1) TransferTab(FindTransferTab(items[0]), static_cast<std::size_t>((std::max)(0, args.DropIndex())));
         }));
     }
 }

@@ -19,6 +19,7 @@ namespace winrt::Folia {
         bool loaded = false;
         bool opening = false;
         bool controllerAttached = false;
+        HWND presenter = nullptr;
         std::uint64_t openSerial = 0;
         std::optional<EditorSourceLocation> pendingLocation;
         std::uint64_t themeRevision = 0;
@@ -66,8 +67,8 @@ namespace winrt::Folia {
         bool ObserveEdit(std::uint64_t id);
         void RefreshPath(std::uint64_t id);
         bool Remove(std::uint64_t id);
-        // Move the same session/controller; the source must activate its successor first.
-        void TransferTo(std::uint64_t id, WorkspaceDocuments& target, std::size_t index);
+        // Keep a shared session when other views remain in the source window.
+        void TransferTo(std::uint64_t id, WorkspaceDocuments& target, std::size_t index, bool keepSource = false);
         void Reorder(std::span<std::uint64_t const> ids);
 
     private:
