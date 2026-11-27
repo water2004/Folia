@@ -168,7 +168,8 @@
                     ItemContainerStyle="{StaticResource WorkspaceNavigationItemStyle}">
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock DataContextChanged="ChatRowPrepared" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock DataContextChanged="ChatRowPrepared" TextTrimming="CharacterEllipsis"
+                                       IsTextTrimmedChanged="ChatTitleTrimmingChanged"/>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>

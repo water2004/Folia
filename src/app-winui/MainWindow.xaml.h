@@ -40,6 +40,8 @@ namespace winrt::Folia::implementation
         void DocumentTabLoaded(Windows::Foundation::IInspectable const& sender,
             Microsoft::UI::Xaml::RoutedEventArgs const& args);
         void DocumentTabSizeChanged(Windows::Foundation::IInspectable const&, Microsoft::UI::Xaml::SizeChangedEventArgs const&);
+        void ChatTitleTrimmingChanged(Microsoft::UI::Xaml::Controls::TextBlock const& label,
+            Microsoft::UI::Xaml::Controls::IsTextTrimmedChangedEventArgs const&);
         void ChatRowPrepared(Microsoft::UI::Xaml::FrameworkElement const& sender,
             Microsoft::UI::Xaml::DataContextChangedEventArgs const& args);
         void DocumentTabPrepared(Microsoft::UI::Xaml::FrameworkElement const& sender,

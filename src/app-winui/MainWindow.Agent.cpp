@@ -17,6 +17,10 @@ namespace winrt::Folia::implementation {
             hstring title;
         };
 
+        void UpdateTitleHint(TextBlock const& label) {
+            ToolTipService::SetToolTip(label, label.IsTextTrimmed() ? box_value(label.Text()) : nullptr);
+        }
+
         std::string const& ChatId(Windows::Foundation::IInspectable const& item) {
             return get_self<ChatListEntry>(item.as<Windows::Foundation::IStringable>())->id;
         }
@@ -49,9 +53,13 @@ namespace winrt::Folia::implementation {
 
     void MainWindow::ChatRowPrepared(FrameworkElement const& sender, DataContextChangedEventArgs const& args) {
         auto item = args.NewValue().try_as<Windows::Foundation::IStringable>();
-        auto label = item ? item.ToString() : hstring{};
-        sender.as<TextBlock>().Text(label);
-        ToolTipService::SetToolTip(sender, item ? box_value(label) : nullptr);
+        auto label = sender.as<TextBlock>();
+        label.Text(item ? item.ToString() : hstring{});
+        UpdateTitleHint(label);
+    }
+
+    void MainWindow::ChatTitleTrimmingChanged(TextBlock const& label, IsTextTrimmedChangedEventArgs const&) {
+        UpdateTitleHint(label);
     }
 
     void MainWindow::RegisterAgentChats() {
