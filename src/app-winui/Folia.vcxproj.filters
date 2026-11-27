@@ -126,6 +126,9 @@
     <ClInclude Include="settings\storage\CompletionPromptSettings.h">
       <Filter>Settings\Storage</Filter>
     </ClInclude>
+    <ClInclude Include="agent\ChatFiles.h">
+      <Filter>Agent Chat</Filter>
+    </ClInclude>
     <ClInclude Include="settings\views\SettingsViewSupport.h">
       <Filter>Settings\Views</Filter>
     </ClInclude>
@@ -287,6 +290,9 @@
     </ClCompile>
     <ClCompile Include="MainWindow.Agent.cpp">
       <Filter>Application Shell</Filter>
+    </ClCompile>
+    <ClCompile Include="agent\ChatJournal.cpp">
+      <Filter>Agent Chat</Filter>
     </ClCompile>
     <ClCompile Include="agent\ChatStore.cpp">
       <Filter>Agent Chat</Filter>

@@ -7,6 +7,7 @@ import std;
 
 namespace winrt::Folia::records {
     using folia::ai::Json;
+    inline constexpr std::size_t MaxRecordBytes = 512 * 1024;
 
     inline std::filesystem::path Path(std::filesystem::path const& folder, std::string const& id, wchar_t const* extension) {
         if (id.size() != 32 || !std::ranges::all_of(id, [](char c) {
@@ -16,17 +17,19 @@ namespace winrt::Folia::records {
     }
 
     inline Json Read(std::filesystem::path const& path) {
-        if (std::filesystem::file_size(path) > 512 * 1024) throw std::runtime_error("Invalid record metadata");
+        if (std::filesystem::file_size(path) > MaxRecordBytes) throw std::runtime_error("Invalid record metadata");
         std::ifstream stream(path, std::ios::binary);
         return Json::parse(stream);
     }
 
     inline void Write(std::filesystem::path const& path, Json const& value) {
+        auto encoded = value.dump();
+        if (encoded.size() > MaxRecordBytes) throw std::length_error("Record metadata is too large");
         std::filesystem::create_directories(path.parent_path());
         auto temp = path.parent_path() / (std::wstring(to_hstring(NewId())) + L".tmp");
         auto cleanup = wil::scope_exit([&] { DeleteFileW(temp.c_str()); });
         std::ofstream stream(temp, std::ios::binary | std::ios::trunc);
-        stream << value.dump();
+        stream.write(encoded.data(), encoded.size());
         stream.close();
         if (!stream || !MoveFileExW(temp.c_str(), path.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH))
             throw std::runtime_error("Could not save record metadata");
