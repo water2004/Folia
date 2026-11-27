@@ -190,6 +190,37 @@ namespace
                 expect(session.Text() == original);
             }
         };
+
+        "blank quote rows can be clicked and edited in their original flow"_test = [] {
+            auto xaml = winrt::Microsoft::UI::Xaml::Hosting::WindowsXamlManager::InitializeForCurrentThread();
+            const std::array fixtures{
+                std::pair{L">\n> aaa\n>\n> bbb\n", ">filled\n> aaa\n>\n> bbb\n"},
+                std::pair{L">\n\n> aaa\n>\n> bbb\n", ">filled\n\n> aaa\n>\n> bbb\n"},
+                std::pair{L"> - >\n>   > aaa\n>   >\n>   > bbb\n", "> - >filled\n>   > aaa\n>   >\n>   > bbb\n"},
+            };
+            for (const auto& [source, expected] : fixtures) {
+                EditorSession session;
+                session.SetText(source);
+                const auto original = session.TextUtf8();
+                const auto blank = session.Selection().active;
+                expect(session.EditableSource(blank.container_id) == std::optional<std::u32string>{U""});
+                expect(session.ExecuteCommand({.kind = folia::CommandKind::MoveDocumentEnd}));
+                winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel panel;
+                EditorSurfaceRenderer renderer;
+                renderer.Initialize(panel);
+                renderer.Resize(panel, 500, 500);
+                renderer.Render(session.RenderFrame());
+                auto bounds = renderer.CaretBounds(blank);
+                if (!expect(bounds.has_value())) continue;
+                auto hit = renderer.HitTest(bounds->left + 6.f, (bounds->top + bounds->bottom) * .5f);
+                if (!expect(hit && hit->container_id == blank.container_id && hit->source_offset == 0u)) continue;
+                session.SetSelection(folia::TextSelection::caret(*hit));
+                expect(session.ExecuteCommand(folia::Command::InsertText(U"filled")));
+                expect(session.TextUtf8() == expected);
+                expect(session.ExecuteCommand({.kind = folia::CommandKind::Undo}));
+                expect(session.TextUtf8() == original);
+            }
+        };
         "block delimiter tiles align with TeX and scale with the source line height"_test = [] {
             EditorRenderResources resources;
             winrt::check_hresult(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory),

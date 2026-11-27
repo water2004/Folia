@@ -1236,6 +1236,7 @@ struct Builder {
                 auto rb = base(BlockStyle::paragraph(theme.layout));
                 if (b.inline_content().source.empty() && b.text_special().opening_marker.empty() && b.text_special().closing_marker.empty()) {
                     rb.kind = RenderBlockKind::Blank;
+                    rb.inline_items.push_back(InlineRenderItem::plain_text({}, rb.content_span));
                     return rb;
                 }
                 InlineStyle s = InlineStyle::plain();

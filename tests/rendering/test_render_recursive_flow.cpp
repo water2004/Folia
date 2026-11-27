@@ -222,6 +222,10 @@ suite render_recursive_flow_tests = [] {
             && item.special().display_text == std::u32string(13, U' ');
     });
     expect(fatal(bool(blank_indent != model.blocks[0].inline_items.end())));
+    expect(std::ranges::any_of(model.blocks[0].inline_items, [&](const auto& item) {
+        return item.kind == InlineRenderItem::Kind::Text && item.text.empty()
+            && item.source_span == TextSpan{blank_id, {0, 0}};
+    }));
 };
 
 "callout_markers_share_three_visual_categories_and_render_a_generated_label"_test = [] {

@@ -258,7 +258,7 @@ namespace winrt::Folia
         bool requestEmbedded,
         bool highPriority)
     {
-        if (block.kind == folia::RenderBlockKind::Blank)
+        if (block.kind == folia::RenderBlockKind::Blank && block.inline_items.empty())
         {
             DisplayInlineText display;
             AppendGeneratedText(
