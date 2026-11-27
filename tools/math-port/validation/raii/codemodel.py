@@ -19,7 +19,7 @@ def configured_codemodel_summary(data):
         if key in data:
             result[key] = data[key]
     if data["authoritative"]:
-        for key in ("sourceRoot", "buildRoot", "configuration", "foliaMathSourceCount", "foliaMathInterfaceCount",
+        for key in ("configuration", "foliaMathSourceCount", "foliaMathInterfaceCount",
                     "bridgeSourceMember", "bridgeTargets", "allTargetMathMembership", "foliaMathSources"):
             result[key] = data[key]
         result["targets"] = [{"name": target["name"], "id": target["id"], "type": target.get("type"),

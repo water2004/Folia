@@ -1714,8 +1714,6 @@
       "extraFontInputs": [],
       "limitation": "Codemodel records the last configure result; it does not attest unchanged non-CMake glob contents or source file content hashes."
     },
-    "sourceRoot": "D:\\md-cpp",
-    "buildRoot": "D:\\md-cpp\\build\\core",
     "configuration": "Debug",
     "foliaMathSourceCount": 561,
     "foliaMathInterfaceCount": 248,

@@ -71,7 +71,7 @@ Before any adoption decision, a host-level oracle should compare the candidate a
 
 `regress` commit: `771e6c8fa1e472ef86c45b5206b37fa4e4494e25`; crate version: 0.12.0. `MathJax-src` commit: `fb987178c2d279a99b0db5ea02e751691703955e`.
 
-SHA-256 evidence (paths relative to `D:/md-cpp`):
+SHA-256 evidence (paths relative to the repository root):
 
 | File | SHA-256 |
 |---|---|

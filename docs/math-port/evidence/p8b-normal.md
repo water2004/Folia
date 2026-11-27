@@ -17,7 +17,7 @@ its module-level MML policy tables only; token, layout, base, empty, text, and
 XML branches belong to the sibling packets.
 
 The only implementation file is
-[`mml_node.cpp`](/D:/md-cpp/src/math/core/mml_tree/mml_node.cpp). It is an
+[`mml_node.cpp`](../../../src/math/core/mml_tree/mml_node.cpp). It is an
 implementation unit of the root-frozen `folia.math.core.mml_tree.mml_node`
 module, imports the host binding and `std`, and retains the MathJax Apache-2.0
 provenance header. `TEXCLASS`, `TEXCLASSNAMES`, `attributeTuple`,

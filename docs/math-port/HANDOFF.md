@@ -8,6 +8,8 @@
 - 已通过 Release 原生 SVG/C ABI 套件、WinUI Release 构建、36 项 WinUI 编辑器测试、连续改宽逐帧可画回归以及标签切换释放 SVG 需求回归。首次准备仍只保留几何，已有 SVG 正在等待替换时可预载新结果。日志在 `build/math-width-{bridge-tests-final,winui-build-final,editor-tests-final,visual-tests-final,workspace-tests}.log`。
 - 当前任务完成。已验证的应用产物是 `build/app-winui/bin/x64/Release/Folia.exe`，自动化测试驱动编辑视口宽度，未手动拖拽桌面窗口或操作侧栏。无活动 agents、构建或测试。下一步仅按新反馈继续。
 
+- 0.9.0 发布前核对了 RAII 文件清单。对外的清单保留仓库相对证据路径，本机源码和构建绝对目录只供读取 CMake File API 时校验。82 项 RAII 工具测试通过，数学渲染基线沿用上述结果。
+
 ## 历史任务：测试系统重构（2026-11-24，已完成）
 
 - Windows 主分支集成以重构分支 `f3b073b9` 为基线。修正测试语料的路径校验、跨盘符诊断路径和 Windows 临时目录短路径处理。统一入口的 core、conformance、tooling 三套在 MSVC 下通过 19/19 个 CTest 条目，包括 Math Python 工具回归。主工程 Release Math DLL 构建通过。日志位于 `build/portable-test-merge/`。
@@ -74,7 +76,7 @@
 
 ## 10 MB 连续段落加载（上一轮已交付，历史）
 
-- 用户文件 `C:/Users/think book/Downloads/sample-10mb.md` 仅查元数据（10485760 字节），未读取内容或用 Folia 打开。用户提供内容为无空行重复英文，已用相同结构自建测试；原文件继续不要打开。
+- 用户文件 `%USERPROFILE%/Downloads/sample-10mb.md` 仅查元数据（10485760 字节），未读取内容或用 Folia 打开。用户提供内容为无空行重复英文，已用相同结构自建测试；原文件继续不要打开。
 - 根因：EditorContentPreparation 每次追加都 utf16_len(已累积文本)，导致长段落平方增长；EditorDisplayMapping 每 UTF16 单元 32 字节且布局/interaction 复制。已改公共追加取构建中 mapping.size，平台 mapping 用常量/线性区间存储、保持值语义与同一 source 坐标；CreateFlow 无缩进不再复制整个 display，连续普通文字合并相同 style ranges，控件边界保留。
 - 同轮：纯文本序列化复用同一 visitor/planner，但不生成坐标映射；投影仍有完整映射，转出时 move 避免再复制。加载主题先于 Open，未变化不再重建 render model。原始 bytes 解码后释放。
 - 进度改为 Blocks/Inlines/Indexes 真实阶段（长段落物理行及行内扫描均可进度/取消），未知工作量显示 indeterminate。数学遍历不能在 WaitForIdle 前完成；首次显示通知返回后才撤进度。中央提示绑定实际状态。没有按有无公式分流或更改块树编辑职责。
@@ -315,7 +317,7 @@
 - 已验：Debug最终构建tab-selection-boundary-build.log通过；完整visual **25项946断言**（tab-regression-final-visual.log、对应-stdout.log），3次真实startup/close全exit0（tab-regression-final-startup.log），真实多窗口激活/Unicode/相对路径/独立进程全过（tab-regression-final-activation.log）。包含未加载目标、空页合并/正常关闭源窗、同gesture反复合并拆出、click-only cloak/switchers、原会话/history/viewport、duplicate拒绝。
 - 选中标签原生排序另有可复现失败：SelectionChanged→ActivateDocument→RefreshDocumentTabs反向修改集合，顺序无法一致（tab-selected-reorder-before.log超时）。已分离SelectDocumentTab（仅选择）与模型结构变化后的RefreshDocumentTabs；定向after 1项4断言通过，再跑上述全套成功。旧直接Transfer空页/未加载target本来也过，不能把它当原生协议已覆盖。
 - 上轮代码22bea8fe及交接b0c4dccf仅本地提交。其MSI已被当前checkpoint候选替换，旧产物大小/散列不再用于交付。
-- 用户真实安装版10:46崩溃记录0xc000027b、WER8000ffff；转储C:/Users/think book/AppData/Local/CrashDumps/Folia.exe.52828.dmp。缺stowed异常指针内存，未证明具体异常调用；不冒称确定根因。
+- 用户真实安装版10:46崩溃记录0xc000027b、WER8000ffff；转储%LOCALAPPDATA%/CrashDumps/Folia.exe.52828.dmp。缺stowed异常指针内存，未证明具体异常调用；不冒称确定根因。
 - 0.5.3已正式发布且不改标签：35e56265，CI40577471717/job122447644967成功，Release https://github.com/water2004/Folia/releases/tag/v0.5.3 ，MSI53,722,497字节，SHA256 2ca50713200c8f5f5769c35b172ff5dbfac07b15fe2e686500a9c9625a889a35。历史全套基线core764/500069、platform84/4249、controller134/18718、visual19/875。
 
 ## 本轮实现与已解决问题
