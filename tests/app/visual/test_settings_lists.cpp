@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "app/support/TestPaths.h"
 #include "support/folia_test.hpp"
 #include "../support/DocumentControllerFixture.h"
 #include "visual_window.h"
@@ -41,7 +42,7 @@ suite settings_list_tests = [] {
     "settings lists realize only viewport rows and reuse unchanged pages"_test = [] {
         Window window; Grid root; window.Content(root); window.Title(L"Folia settings list test");
         auto latex = std::make_shared<winrt::Folia::LatexCommandCatalog>();
-        std::ofstream timings(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
+        std::ofstream timings(app_tests::RepositoryRoot()
             / "build/settings-lists-timing.log");
         auto started = std::chrono::steady_clock::now();
         ContentControl pageHost;

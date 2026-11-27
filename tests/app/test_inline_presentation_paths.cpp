@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "app/support/TestPaths.h"
 #include "support/folia_test.hpp"
 #include "editor/session/EditorSession.h"
 #include "editor/rendering/layout/EditorDocumentBlockPreparer.h"
@@ -52,7 +53,7 @@ namespace {
             EditorSvgPainter svg(resources, cache);
             EditorInlineImageRenderer images(resources, cache, sheet, normalizer, svg, frame.baseDirectory);
             EditorDocumentPainter painter(resources, sheet, interaction, syntax, {}, false, 20 + width,
-                selection, highlights, frame.renderModel.editable_index);
+                selection, frame.tableTextOwner, highlights, frame.renderModel.editable_index);
             EditorDocumentBlockPreparer preparer(frame, resources, cache, sheet, engine, images,
                 painter, math, mermaid, normalizer, syntax, selection.active, width, true, true, false, 0, 0);
             EditorPreparedDocument document;
@@ -248,7 +249,7 @@ namespace {
                 expect(native.mathBrackets.size() == (incomplete ? std::size_t{1} : std::size_t{2}));
                 for (auto const& bracket : native.mathBrackets) expect(bracket.matched == !incomplete);
                 expect(session.TextUtf8() == before);
-                if (caseIndex == 0) native.Save(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path()
+                if (caseIndex == 0) native.Save(app_tests::RepositoryRoot()
                     / "build/tests/math-editor-source.png", pixels);
                 ++caseIndex;
             }
@@ -325,7 +326,7 @@ namespace {
                 expect(changed > 5_u);
                 expect(maximumDelta <= (theme == folia::Theme::Light ? 75 : 130))
                     << "matching brackets must not borrow the selection fill or bright accent border";
-                auto directory = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path() / "build/tests";
+                auto directory = app_tests::RepositoryRoot() / "build/tests";
                 native.Save(directory / (theme == folia::Theme::Light ? "math-brackets-light.png" : "math-brackets-dark.png"), marked);
             }
         };
@@ -383,7 +384,7 @@ namespace {
                     auto after = session.Text();
                     auto afterSelection = session.Selection();
                     auto pixels = containsCaret();
-                    if (row == 0) native.Save(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path()
+                    if (row == 0) native.Save(app_tests::RepositoryRoot()
                         / "build/tests/inline-presentation/code-newline.png", pixels);
                     folia::Command undo; undo.kind = folia::CommandKind::Undo;
                     expect(session.ExecuteCommand(undo));
@@ -418,7 +419,7 @@ namespace {
                 for (int x = static_cast<int>(std::ceil(raw.headerRect.left)); x < raw.headerRect.right; ++x)
                     changed += reading[y * 600 + x] != editing[y * 600 + x];
                 expect(changed == 0_u) << "focusing code replaced its native language label";
-                auto directory = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path() / "build/tests/inline-presentation";
+                auto directory = app_tests::RepositoryRoot() / "build/tests/inline-presentation";
                 native.Save(directory / (theme == folia::Theme::Light ? "code-header-light.png" : "code-header-dark.png"), editing);
             }
         };

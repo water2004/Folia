@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "app/support/TestPaths.h"
 #include "support/folia_test.hpp"
 #include "../support/DocumentControllerFixture.h"
 #include "MainWindow.xaml.h"
@@ -190,7 +191,7 @@ namespace {
                     static_cast<int>(f.root.ActualHeight() * scale)));
                 auto pixels = Await(bitmap.GetPixelsAsync());
                 expect(pixels.Length() == static_cast<std::uint32_t>(bitmap.PixelWidth() * bitmap.PixelHeight() * 4));
-                auto artifacts = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path() / L"build/tests/workspace-chrome";
+                auto artifacts = app_tests::RepositoryRoot() / L"build/tests/workspace-chrome";
                 SavePng(artifacts / (L"light-" + std::to_wstring(int(scale * 100)) + L".png"), bitmap.PixelWidth(), bitmap.PixelHeight(), pixels);
             }
         } catch (winrt::hresult_error const& error) { throw std::runtime_error(winrt::to_string(error.message()) + " HRESULT " + std::to_string(error.code().value)); } };
@@ -246,7 +247,7 @@ namespace {
             expect(card.CornerRadius().TopLeft > 0. && card.Margin().Right > 0.);
             expect(!f.root.FindName(L"StatusBar"));
             Capture native(f.root, raster);
-            auto artifacts = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path() / L"build/tests/workspace-chrome";
+            auto artifacts = app_tests::RepositoryRoot() / L"build/tests/workspace-chrome";
             SavePng(artifacts / L"native-scale.png", native.bitmap.PixelWidth(), native.bitmap.PixelHeight(), native.pixels);
             SavePng(artifacts / L"native-titlebar.png", static_cast<std::uint32_t>(360 * native.scale), static_cast<std::uint32_t>(48 * native.scale), native.pixels, native.bitmap.PixelWidth());
         };
@@ -298,7 +299,7 @@ namespace {
             auto cardTop = f.Find<Grid>(L"ReadingCard").TransformToVisual(f.root).TransformPoint({0, 0}).Y;
             expect(activeBounds.Y + activeBounds.Height <= cardTop);
             Capture narrow(f.root, f.root.XamlRoot().RasterizationScale());
-            auto artifacts = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path() / L"build/tests/workspace-chrome";
+            auto artifacts = app_tests::RepositoryRoot() / L"build/tests/workspace-chrome";
             SavePng(artifacts / L"narrow-tabs.png", narrow.bitmap.PixelWidth(), narrow.bitmap.PixelHeight(), narrow.pixels);
             SavePng(artifacts / L"overflow-controls-native.png", narrow.bitmap.PixelWidth(), static_cast<int>(50 * narrow.scale), narrow.pixels, narrow.bitmap.PixelWidth());
             auto viewer = Descendant(tabs, L"ScrollViewer").as<ScrollViewer>();
@@ -327,7 +328,7 @@ namespace {
 
         "workspace chrome sidebar and source icons have distinct complete silhouettes"_test = [] {
             ChromeWindow f;
-            auto artifacts = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path() / L"build/tests/workspace-chrome";
+            auto artifacts = app_tests::RepositoryRoot() / L"build/tests/workspace-chrome";
             for (auto name : {L"SidebarButton", L"SourceModeButton"}) {
                 auto button = f.Find<Primitives::ToggleButton>(name);
                 auto icon = button.Content().as<Viewbox>();
@@ -357,7 +358,7 @@ namespace {
                 Media::Imaging::RenderTargetBitmap iconBitmap;
                 Await(iconBitmap.RenderAsync(icon, 80, 80));
                 auto iconPixels = Await(iconBitmap.GetPixelsAsync());
-                auto artifacts = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path() / L"build/tests/workspace-chrome";
+                auto artifacts = app_tests::RepositoryRoot() / L"build/tests/workspace-chrome";
                 SavePng(artifacts / (std::wstring(name) + L".png"), iconBitmap.PixelWidth(), iconBitmap.PixelHeight(), iconPixels);
                 auto transform = path.TransformToVisual(f.root);
                 for (double scale : {1., 1.25, 1.5, 2.}) {

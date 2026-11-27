@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "app/support/TestPaths.h"
 #include "support/folia_test.hpp"
 #include "settings/storage/CompletionPromptSettings.h"
 
@@ -22,7 +23,7 @@ suite completion_settings_tests = [] {
         expect(throws([&] { (void)ParseCompletionPromptSettings(invalid); }));
     };
     "completion prompt files are editable data with bounded reads and no compiled fallback"_test = [] {
-        auto root = std::filesystem::path{__FILE__}.parent_path().parent_path().parent_path()
+        auto root = app_tests::RepositoryRoot()
             / "build/tests/completion-settings";
         std::filesystem::create_directories(root);
         auto path = root / "prompt.json";

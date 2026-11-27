@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "app/support/TestPaths.h"
 #include "support/folia_test.hpp"
 #include "theme/ThemeConfig.h"
 #include "editor/rendering/EditorStyleSheet.h"
@@ -25,7 +26,7 @@ namespace
         {
             GUID id{};
             winrt::check_hresult(CoCreateGuid(&id));
-            auto directory = std::filesystem::path{__FILE__}.parent_path().parent_path().parent_path() / "build/tests";
+            auto directory = app_tests::RepositoryRoot() / "build/tests";
             std::filesystem::create_directories(directory);
             source = directory / (L"marker-theme-" + winrt::to_hstring(id) + L".json").c_str();
             imported = source;

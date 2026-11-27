@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "app/support/TestPaths.h"
 #include "agent/ChatStore.h"
 #include "settings/storage/ModelCatalog.h"
 #include "storage/JsonRecords.h"
@@ -120,7 +121,7 @@ namespace {
             pixels.Length(w*h*4);
             std::memcpy(pixels.data(), bits, pixels.Length());
             for (std::uint32_t i = 3; i < pixels.Length(); i += 4) pixels.data()[i] = 255;
-            visual_tests::SavePng(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
+            visual_tests::SavePng(app_tests::RepositoryRoot()
                 / "build/tests/agent-chat" / name, w, h, pixels);
             }
         }
@@ -284,7 +285,7 @@ namespace {
                 expect(extras->Mentions(tab)) << "explicit tab mention grants access";
                 input.Text(L"@\"Project notes.md\"other");
                 expect(!extras->Mentions(tab));
-                auto path = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
+                auto path = app_tests::RepositoryRoot()
                     / "src/app-winui/Assets/Square44x44Logo.scale-200.png";
                 auto file = document_tests::Await(winrt::Windows::Storage::StorageFile::GetFileFromPathAsync(path.make_preferred().native()));
                 DataPackage data;
@@ -757,7 +758,7 @@ namespace {
             document_tests::Await(image.RenderAsync(chatPage));
             chatPage.Background(oldBackground);
             auto pixels = document_tests::Await(image.GetPixelsAsync());
-            visual_tests::SavePng(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
+            visual_tests::SavePng(app_tests::RepositoryRoot()
                 / "build/tests/agent-chat/composer.png", image.PixelWidth(), image.PixelHeight(), pixels);
 
             auto picker = Find<Button>(host, [](auto const& button) {
@@ -808,7 +809,7 @@ namespace {
                 auto accent = fill.Background().as<Media::SolidColorBrush>().Color();
                 const bool filled = std::abs(pixel[2]-int(accent.R)) + std::abs(pixel[1]-int(accent.G)) + std::abs(pixel[0]-int(accent.B)) < 9;
                 expect(filled == (level > 0)) << "slider paints the selected fraction after settling at " << level;
-                visual_tests::SavePng(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
+                visual_tests::SavePng(app_tests::RepositoryRoot()
                     / "build/tests/agent-chat" / filename, snapshot.PixelWidth(), snapshot.PixelHeight(), sliderPixels);
             }
             bool closed = false;
@@ -854,7 +855,7 @@ namespace {
                 Media::Imaging::RenderTargetBitmap bitmap;
                 document_tests::Await(bitmap.RenderAsync(node.as<MenuFlyoutPresenter>()));
                 auto pixels = document_tests::Await(bitmap.GetPixelsAsync());
-                visual_tests::SavePng(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
+                visual_tests::SavePng(app_tests::RepositoryRoot()
                     / "build/tests/agent-chat" / filename, bitmap.PixelWidth(), bitmap.PixelHeight(), pixels);
             };
             captureMenu(allowSearch, L"access.png");

@@ -44,7 +44,7 @@ namespace {
             EditorInlineImageRenderer images(resources, resourcesCache, sheet, normalizer,
                 svg, frame.baseDirectory, false);
             EditorDocumentPainter painter(resources, sheet, interaction, syntax, {}, false,
-                metrics.right, frame.selection, {}, frame.renderModel.editable_index);
+                metrics.right, frame.selection, frame.tableTextOwner, {}, frame.renderModel.editable_index);
             EditorDocumentBlockPreparer preparer(frame, resources, resourcesCache, sheet,
                 engine, images, painter, math, mermaid, normalizer, syntax,
                 frame.selection.active, metrics.width, true, true, false, 0, 0);

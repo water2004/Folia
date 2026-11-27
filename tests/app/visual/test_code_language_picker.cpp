@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "app/support/TestPaths.h"
 #include "support/folia_test.hpp"
 #include "../support/DocumentControllerFixture.h"
 #include "editor/interaction/EditorCodeLanguageController.h"
@@ -109,7 +110,7 @@ namespace {
                 }
                 expect(bitmap.PixelWidth() > 0 && bitmap.PixelHeight() > 0 && pixels.Length() > 0)
                     << "native picker content snapshot is empty";
-                if (pixels.Length() > 0) visual_tests::SavePng(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
+                if (pixels.Length() > 0) visual_tests::SavePng(app_tests::RepositoryRoot()
                     / "build/tests/inline-presentation/language-picker.png", bitmap.PixelWidth(), bitmap.PixelHeight(), pixels);
             }
             box.Text(L"python");

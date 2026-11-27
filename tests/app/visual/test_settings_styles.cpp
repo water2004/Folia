@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "app/support/TestPaths.h"
 #include "settings/storage/ModelCatalog.h"
 #include <wil/resource.h>
 #include "support/folia_test.hpp"
@@ -109,7 +110,7 @@ void SaveSettingsImage(Grid const& root, std::string_view name) {
     Media::Imaging::RenderTargetBitmap image;
     Await(image.RenderAsync(root));
     auto pixels = Await(image.GetPixelsAsync());
-    auto directory = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
+    auto directory = app_tests::RepositoryRoot()
         / "build/tests/settings-styles";
     visual_tests::SavePng(directory / name, image.PixelWidth(), image.PixelHeight(), pixels);
 }

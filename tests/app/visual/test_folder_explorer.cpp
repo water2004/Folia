@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "app/support/TestPaths.h"
 #include "support/folia_test.hpp"
 #include "../support/DocumentControllerFixture.h"
 #include "workspace/FolderExplorerController.h"
@@ -114,7 +115,7 @@ namespace {
             Media::Imaging::RenderTargetBitmap bitmap;
             Await(bitmap.RenderAsync(f.host));
             auto pixels = Await(bitmap.GetPixelsAsync());
-            auto artifacts = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path() / L"build/tests/workspace-explorer";
+            auto artifacts = app_tests::RepositoryRoot() / L"build/tests/workspace-explorer";
             visual_tests::SavePng(artifacts / L"files-native.png", bitmap.PixelWidth(), bitmap.PixelHeight(), pixels);
         } catch (winrt::hresult_error const& error) { throw std::runtime_error(winrt::to_string(error.message()) + " HRESULT " + std::to_string(error.code().value)); } };
 
@@ -152,7 +153,7 @@ namespace {
             Media::Imaging::RenderTargetBitmap bitmap;
             Await(bitmap.RenderAsync(f.host));
             auto pixels = Await(bitmap.GetPixelsAsync());
-            auto artifacts = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path() / L"build/tests/workspace-explorer";
+            auto artifacts = app_tests::RepositoryRoot() / L"build/tests/workspace-explorer";
             visual_tests::SavePng(artifacts / L"compact-deep-native.png", bitmap.PixelWidth(), bitmap.PixelHeight(), pixels);
         } catch (winrt::hresult_error const& error) { throw std::runtime_error(winrt::to_string(error.message()) + " HRESULT " + std::to_string(error.code().value)); } };
 
@@ -350,7 +351,7 @@ namespace {
             Media::Imaging::RenderTargetBitmap bitmap;
             Await(bitmap.RenderAsync(f.host));
             auto pixels = Await(bitmap.GetPixelsAsync());
-            auto artifacts = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path() / L"build/tests/workspace-explorer";
+            auto artifacts = app_tests::RepositoryRoot() / L"build/tests/workspace-explorer";
             visual_tests::SavePng(artifacts / L"hover-guides-native.png", bitmap.PixelWidth(), bitmap.PixelHeight(), pixels);
             winrt::Folia::UpdateFolderExplorerGuides(f.tree, nullptr, false);
         } catch (winrt::hresult_error const& error) { throw std::runtime_error(winrt::to_string(error.message()) + " HRESULT " + std::to_string(error.code().value)); } };

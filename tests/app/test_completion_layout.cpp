@@ -22,7 +22,7 @@ suite completion_layout_tests = [] {
         EditorSvgPainter svg(resources, cache);
         EditorInlineImageRenderer images(resources, cache, sheet, normalizer, svg, frame.baseDirectory);
         EditorDocumentPainter painter(resources, sheet, interaction, syntax, {}, false, 180,
-            frame.selection, {}, frame.renderModel.editable_index);
+            frame.selection, frame.tableTextOwner, {}, frame.renderModel.editable_index);
         folia::platform::editor::EditorScrollState scroll;
         std::unique_ptr<EditorPreparedDocument> document;
         auto prepare = [&] {
@@ -75,7 +75,7 @@ suite completion_layout_tests = [] {
                 EditorSvgPainter svg(resources, cache);
                 EditorInlineImageRenderer images(resources, cache, sheet, normalizer, svg, frame.baseDirectory);
                 EditorDocumentPainter painter(resources, sheet, interaction, syntax, {}, false, 180,
-                    selection, {}, frame.renderModel.editable_index);
+                    selection, frame.tableTextOwner, {}, frame.renderModel.editable_index);
                 EditorDocumentBlockPreparer preparer(frame, resources, cache, sheet, engine, images, painter,
                     math, mermaid, normalizer, syntax, caret, 180, true, true, theme == folia::Theme::Dark, 0, 0);
                 unsigned found = 0;

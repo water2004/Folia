@@ -61,7 +61,11 @@ $libraryArgs = @([regex]::Matches($libraryCommand, '(?i)(?:"[^"]+\.lib"|[^\s"]+\
 $compileRecords = @(Get-Content (Join-Path $objects 'Folia.tlog/CL.command.1.tlog'))
 $baseline = $null
 for ($i = 0; $i + 1 -lt $compileRecords.Count; ++$i) {
-    if ($compileRecords[$i] -match '\\EDITOR\\DOCUMENT\\EDITORDOCUMENTCONTROLLER\.CPP$') { $baseline = $compileRecords[$i + 1]; break }
+    if ($compileRecords[$i] -match '^\^.*\\EDITOR\\DOCUMENT\\EDITORDOCUMENTCONTROLLER\.CPP$') {
+        $baselineSource = $compileRecords[$i].Substring(1).Split('|')[-1]
+        $baseline = $compileRecords[$i + 1]
+        break
+    }
 }
 if (-not $baseline) { throw 'No controller compile command found; run build_app.ps1 first.' }
 $references = @()
@@ -78,10 +82,9 @@ if (-not $references.Count) { throw 'No application module references found.' }
 $flags = $baseline -replace '/reference\s+"[^"]+"', ''
 $flags = $flags -replace '/(?:sourceDependencies|scanDependencies)\s+"[^"]+"', ''
 $flags = $flags -replace '/Fo"[^"]+"', ''
-$flags = $flags -replace '/TP\s+.*$', ''
-# MSBuild can write /utf-8 after /TP in its tlog. Keep the production encoding
-# explicit after removing the source-file tail, including non-ASCII UI tests.
-$flags += ' /utf-8'
+# Keep switches after /TP, including the options used to create the production PCH.
+$flags = $flags -replace ('\s+"?' + [regex]::Escape($baselineSource) + '"?\s*$'), ''
+$flags += ' /FS'
 $flags += ' /I"{0}"' -f (Join-Path $root 'tests')
 
 function Compile([string]$Name, [string]$Source, [string]$Extra = '', [switch]$NoPch) {
@@ -143,6 +146,7 @@ Set-Content -LiteralPath $linkResponse -Encoding ascii -Value ((@(
 & link.exe "@$linkResponse"
 if ($LASTEXITCODE -ne 0) { throw 'WinUI test link failed.' }
 if ($Visual) { $env:FOLIA_VISUAL_TEST_RESULT = Join-Path $scratch ('result-' + [guid]::NewGuid().ToString('N') + '.txt') }
+$env:FOLIA_TEST_ROOT = $root
 $process = Start-Process -FilePath $executable -ArgumentList "`"$TestFilter`"" -WorkingDirectory $app -WindowStyle Hidden -PassThru `
     -RedirectStandardOutput (Join-Path $scratch 'stdout.log') -RedirectStandardError (Join-Path $scratch 'stderr.log')
 $null = $process.Handle

@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "app/support/TestPaths.h"
 #include "support/folia_test.hpp"
 #include "support/MathEditorExamples.h"
 #include "editor/rendering/media/EditorMathPreview.h"
@@ -160,7 +161,7 @@ namespace {
                 winrt::check_hresult(context->EndDraw());
                 context->SetTransform(D2D1::Matrix3x2F::Identity());
                 context->SetTarget(nullptr);
-                auto directory = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path() / L"build/tests/inline-math-preview";
+                auto directory = app_tests::RepositoryRoot() / L"build/tests/inline-math-preview";
                 std::filesystem::create_directories(directory);
                 auto name = std::string(tex).starts_with("0<") ? "long-chain" : std::string(tex) == "1111" ? "digits" : std::string(tex) == "g_j" ? "subscript"
                     : std::string(tex) == R"(\sqrt{x})" ? "root" : std::string(tex).starts_with("a+") ? "wrapped" : "fraction";
