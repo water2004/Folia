@@ -45,6 +45,33 @@ namespace {
             expect(steps == 2_i);
         };
 
+        "agent grants the configured output allowance to every request"_test = [] {
+            History history{{{MessageRole::User, "Read the sections"}}};
+            Options options{"fixture"};
+            options.outputTokens = 64'000;
+            unsigned calls = 0;
+            auto request = [&](ModelRequest const& wire, std::stop_token, Progress const&) {
+                expect(wire.maxOutputTokens == 64'000_u);
+                auto answer = Answer(++calls == 3 ? "Done" : "");
+                answer.usage.outputTokens = 62'000;
+                if (calls < 3) {
+                    answer.finish = FinishReason::ToolCalls;
+                    answer.message.toolCalls.push_back({std::to_string(calls), "read", "{}"});
+                }
+                return answer;
+            };
+            expect(Run(history, options, {}, request, {}, {}).markdown == "Done");
+            expect(calls == 3_u);
+            auto truncated = [](auto const&, auto, auto const&) {
+                auto answer = Answer("");
+                answer.message.reasoning.text = "Partial thought";
+                answer.finish = FinishReason::Truncated;
+                return answer;
+            };
+            auto partial = Run(history, options, {}, truncated, {}, {});
+            expect(partial.outputLimit && partial.markdown.empty() && !partial.reasoning.empty());
+        };
+
         "agent compacts prior history without changing the last question or its transcript"_test = [] {
             History history;
             for (int i = 0; i < 20; ++i) {
@@ -108,6 +135,69 @@ namespace {
             if (!result.citations.empty()) expect(result.citations.front().url == "https://example.test");
         };
 
+        "agent interleaves hosted searches and text once across streaming and the terminal snapshot"_test = [] {
+            History history{{{MessageRole::User, "Find a source"}}};
+            auto request = [](ModelRequest const&, std::stop_token, Progress const& show) {
+                show(ProgressKind::TextDelta, "Before");
+                show(ProgressKind::HostedSearch, R"({"id":"s1","target":"","done":false})");
+                show(ProgressKind::HostedSearch, R"({"id":"s1","target":"example","done":true})");
+                show(ProgressKind::TextDelta, "After");
+                auto result = Answer("BeforeAfter");
+                result.searches.push_back({"s1", "example", false});
+                return result;
+            };
+            auto reply = Run(history, Options{"fixture"}, {}, request, {}, {});
+            expect(reply.markdown == "BeforeAfter" && reply.activities.size() == 1_u);
+            expect(reply.activities.front().target == "example" && !reply.activities.front().pending);
+            expect(fatal(reply.steps.size() == 3_u));
+            expect(reply.steps[0].text == 6_u && reply.steps[0].tools == 0_u);
+            expect(reply.steps[1].text == 6_u && reply.steps[1].tools == 1_u);
+            expect(reply.steps[2].text == 11_u && reply.steps[2].tools == 1_u);
+        };
+
+        "agent only labels provider supplied summaries and requests no summarization"_test = [] {
+            auto turn = [](bool withSummary) {
+                History history{{{MessageRole::User, "Read"}}};
+                auto request = [&](ModelRequest const& wire, auto, Progress const& show) {
+                    expect(!wire.reasoning.summary);
+                    show(ProgressKind::ReasoningDelta, "detailed reasoning");
+                    if (withSummary) show(ProgressKind::SummaryDelta, "Upstream label");
+                    show(ProgressKind::TextDelta, "Answer");
+                    auto response = Answer("Answer");
+                    response.message.reasoning.text = "detailed reasoning";
+                    if (withSummary) response.message.reasoning.summary = "Upstream label";
+                    return response;
+                };
+                return Run(history, Options{"fixture"}, {}, request, {}, {});
+            };
+            auto raw = turn(false), labeled = turn(true);
+            expect(raw.reasoningSummaries.empty() && raw.reasoning == "detailed reasoning");
+            expect(fatal(labeled.reasoningSummaries.size() == 1_u));
+            expect(labeled.reasoningSummaries[0].offset == 0_u && labeled.reasoningSummaries[0].text == "Upstream label");
+            expect(labeled.reasoning == raw.reasoning);
+        };
+
+        "agent receives live hosted search lifecycle from Responses and Messages"_test = [] {
+            auto responses = CreateStreamDecoder(ApiProtocol::Responses);
+            auto added = responses->OnEvent({"response.output_item.added",
+                R"({"output_index":0,"item":{"id":"s","type":"web_search_call","status":"in_progress"}})"});
+            auto done = responses->OnEvent({"response.output_item.done",
+                R"({"output_index":0,"item":{"id":"s","type":"web_search_call","status":"completed","action":{"query":"reading"}}})"});
+            expect(fatal(added.size() == 1_u && done.size() == 1_u));
+            expect(added.front().kind == StreamEventKind::WebSearchStarted && added.front().callId == "s");
+            expect(done.front().kind == StreamEventKind::WebSearchCompleted && done.front().text == "reading");
+            auto messages = CreateStreamDecoder(ApiProtocol::AnthropicMessages);
+            messages->OnEvent({"message_start", R"({"message":{"id":"m","type":"message","role":"assistant"}})"});
+            auto started = messages->OnEvent({"content_block_start", R"({"index":0,"content_block":{
+                "id":"s","type":"server_tool_use","name":"web_search","input":{"query":"reading"}}})"});
+            messages->OnEvent({"content_block_stop", R"({"index":0})"});
+            auto failed = messages->OnEvent({"content_block_start", R"({"index":1,"content_block":{
+                "type":"web_search_tool_result","tool_use_id":"s","content":{"type":"web_search_tool_result_error"}}})"});
+            expect(fatal(started.size() == 1_u && failed.size() == 1_u));
+            expect(started.front().kind == StreamEventKind::WebSearchStarted && started.front().text == "reading");
+            expect(failed.front().kind == StreamEventKind::WebSearchFailed && failed.front().callId == "s");
+        };
+
         "agent preserves partial streamed text and tool steps after interruption"_test = [] {
             History history{{{MessageRole::User, "Read my note"}}};
             Entry partial{MessageRole::Assistant};
@@ -125,7 +215,7 @@ namespace {
             };
             expect(throws([&] { Run(history, Options{"fixture"}, {}, request, {}, {}, &partial); }));
             expect(partial.markdown == "First paragraph" && partial.reasoning == "Retrieved a source");
-            expect(partial.steps.size() == 1_u && partial.activities.size() == 1_u);
+            expect(!partial.steps.empty() && partial.steps.back().text == partial.markdown.size() && partial.activities.size() == 1_u);
         };
 
         "agent replays a hosted Anthropic search pause without dispatching a local function"_test = [] {

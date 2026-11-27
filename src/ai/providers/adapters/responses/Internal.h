@@ -19,6 +19,22 @@ std::string String(Json const& value, char const* key) {
     auto it = value.find(key);
     return it != value.end() && it->is_string() ? it->get<std::string>() : std::string{};
 }
+std::string SearchTarget(Json const& item) {
+    auto action = item.find("action");
+    std::string target;
+    if (action != item.end() && action->is_object()) {
+        target = String(*action, "query");
+        if (target.empty()) target = String(*action, "url");
+        if (target.empty() && action->contains("queries") && action->at("queries").is_array()) {
+            for (auto const& query : action->at("queries")) {
+                if (!query.is_string()) continue;
+                if (!target.empty()) target += " · ";
+                target += query.get<std::string>();
+            }
+        }
+    }
+    return target;
+}
 std::uint64_t Unsigned(Json const& value, char const* key) {
     auto it = value.find(key);
     if (it == value.end() || !it->is_number_integer())
@@ -107,20 +123,7 @@ void AddResponseOutput(ModelResult& result, Json const& response, bool incomplet
                             {ContentKind::Text, part["refusal"].get<std::string>(), {}, {}});
                 }
         } else if (type == "web_search_call" && result.searches.size() < 32) {
-            auto action = item.find("action");
-            std::string target;
-            if (action != item.end() && action->is_object()) {
-                target = String(*action, "query");
-                if (target.empty()) target = String(*action, "url");
-                if (target.empty() && action->contains("queries") && action->at("queries").is_array()) {
-                    for (auto const& query : action->at("queries")) {
-                        if (!query.is_string()) continue;
-                        if (!target.empty()) target += " · ";
-                        target += query.get<std::string>();
-                    }
-                }
-            }
-            result.searches.push_back({String(item, "id"), std::move(target), String(item, "status") == "failed"});
+            result.searches.push_back({String(item, "id"), SearchTarget(item), String(item, "status") == "failed"});
         } else if (type == "reasoning") {
             auto summary = item.find("summary");
             if (summary != item.end()) {

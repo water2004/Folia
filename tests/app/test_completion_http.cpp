@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "windows/ai/ModelHttpClient.h"
 #include "support/CompletionPromptSettings.h"
 #include "support/folia_test.hpp"
 #include "windows/completion/CompletionHttpTransport.h"
@@ -13,6 +14,32 @@ std::string const response = R"(data: {"choices":[{"index":0,"delta":{"content":
     R"(data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]})" "\n\n"
     "data: [DONE]\n\n";
 suite completion_http_tests = [] {
+    "agent HTTP retries transient failures before output and never replays a partial stream"_test = [] {
+        using namespace folia::ai;
+        using folia::platform::models::RequestChat;
+        ModelRequest wire; wire.model = "fixture";
+        wire.messages.push_back({MessageRole::User, {{ContentKind::Text, "hi"}}});
+        Server recover("", 503, false, "text/event-stream", {}, 4096, {response}, {200});
+        unsigned retries = 0;
+        auto answer = RequestChat(recover.baseUrl, ApiProtocol::ChatCompletions, wire, {}, {}, false, {}, [&](unsigned i) { retries = i; });
+        expect(retries == 1_u && recover.receivedRequests.load() == 2_i);
+        expect(PlainText(answer.message) == " hello");
+        auto partial = response.substr(0, response.find("\n\n") + 2);
+        Server interrupted(partial, 200, false, "text/event-stream", {}, 4096, {response});
+        std::string received;
+        expect(throws([&] { RequestChat(interrupted.baseUrl, ApiProtocol::ChatCompletions, wire, {}, {}, false,
+            [&](auto const& e) { if (e.kind == StreamEventKind::TextDelta) received += e.text; }); }));
+        expect(received == " hello" && interrupted.receivedRequests.load() == 1_i);
+        Server denied("{}", 401, false, "application/json");
+        expect(throws([&] { RequestChat(denied.baseUrl, ApiProtocol::ChatCompletions, wire, {}, {}, false, {}); }));
+        expect(denied.receivedRequests.load() == 1_i);
+        std::stop_source stop;
+        Server waiting("", 429);
+        expect(throws([&] { RequestChat(waiting.baseUrl, ApiProtocol::ChatCompletions, wire, {}, stop.get_token(), false, {},
+            [&](unsigned) { stop.request_stop(); }); }));
+        expect(waiting.receivedRequests.load() == 1_i);
+    };
+
     "all protocols send one chronological document message with exact literal source"_test = [] {
         auto settings = LoadCompletionPromptSettings();
         settings.examples = {{"call(", ")", ";", "<insert>value</insert>"}};

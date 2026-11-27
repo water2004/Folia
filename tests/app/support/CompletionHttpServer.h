@@ -10,7 +10,7 @@ struct Server {
     std::atomic<bool> received = false;
     std::atomic<int> receivedRequests = 0;
     Server(std::string body, int status = 200, bool hold = false, std::string contentType = "text/event-stream",
-        std::chrono::milliseconds fragmentDelay = {}, std::size_t fragmentBytes = 37, std::vector<std::string> followingPages = {}) {
+        std::chrono::milliseconds fragmentDelay = {}, std::size_t fragmentBytes = 37, std::vector<std::string> followingPages = {}, std::vector<int> followingStatuses = {}) {
         WSADATA data{};
         if (WSAStartup(MAKEWORD(2, 2), &data)) throw std::runtime_error("test socket init");
         listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -19,7 +19,8 @@ struct Server {
         int length = sizeof(address); getsockname(listener, reinterpret_cast<sockaddr*>(&address), &length);
         baseUrl = "http://127.0.0.1:" + std::to_string(ntohs(address.sin_port));
         followingPages.insert(followingPages.begin(), std::move(body));
-        thread = std::thread([this, pages = std::move(followingPages), status, hold, contentType = std::move(contentType), fragmentDelay, fragmentBytes] {
+        thread = std::thread([this, pages = std::move(followingPages), status, followingStatuses = std::move(followingStatuses), hold, contentType = std::move(contentType), fragmentDelay, fragmentBytes] {
+          std::size_t page = 0;
           for (auto const& body : pages) {
             auto socket = accept(listener, nullptr, nullptr); client = socket;
             if (socket == INVALID_SOCKET) return;
@@ -40,7 +41,9 @@ struct Server {
                 }
             }
             requests.push_back(request); received = true; ++receivedRequests;
-            const auto headers = "HTTP/1.1 " + std::to_string(status) + " OK\r\nContent-Type: " + contentType + "\r\nContent-Length: "
+            const int responseStatus = page && page <= followingStatuses.size() ? followingStatuses[page - 1] : status;
+            ++page;
+            const auto headers = "HTTP/1.1 " + std::to_string(responseStatus) + " OK\r\nContent-Type: " + contentType + "\r\nContent-Length: "
                 + std::to_string(hold ? 10000 : body.size()) + "\r\nConnection: close\r\n\r\n";
             auto sendAll = [&](std::string_view bytes) {
                 while (!bytes.empty()) {

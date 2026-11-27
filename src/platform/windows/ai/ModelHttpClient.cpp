@@ -70,7 +70,21 @@ void StoreKey(std::wstring const& target, std::wstring_view key) {
 }
 
 namespace {
-void check(BOOL ok) { if (!ok) throw std::runtime_error("Completion connection failed (" + std::to_string(GetLastError()) + ")"); }
+struct TransientNetworkError : std::runtime_error {
+    explicit TransientNetworkError(std::string message, unsigned delay = 0)
+        : std::runtime_error(std::move(message)), retryAfter(delay) {}
+    unsigned retryAfter;
+};
+[[noreturn]] void ConnectionError(DWORD code) {
+    const auto message = "Model connection failed (" + std::to_string(code) + ")";
+    switch (code) {
+    case ERROR_WINHTTP_TIMEOUT: case ERROR_WINHTTP_NAME_NOT_RESOLVED: case ERROR_WINHTTP_CANNOT_CONNECT:
+    case ERROR_WINHTTP_CONNECTION_ERROR: case ERROR_WINHTTP_RESEND_REQUEST:
+        throw TransientNetworkError(message);
+    default: throw std::runtime_error(message);
+    }
+}
+void check(BOOL ok) { if (!ok) ConnectionError(GetLastError()); }
 std::wstring wide(std::string_view text) { return std::wstring(winrt::to_hstring(text)); }
 struct HttpHandle {
     HINTERNET value{};
@@ -128,8 +142,9 @@ struct AsyncRequest {
     DWORD Wait(DWORD expected, std::chrono::milliseconds inactivity, std::stop_token stop) {
         std::unique_lock lock(mutex);
         if (!wake.wait_for(lock, inactivity, [&] { return status == expected || error || closing; }))
-            throw std::runtime_error("Completion timed out");
-        if (stop.stop_requested() || closing || error) throw std::runtime_error("Completion connection ended (" + std::to_string(error) + ")");
+            throw TransientNetworkError("Model connection timed out");
+        if (stop.stop_requested() || closing) throw std::runtime_error("Cancelled");
+        if (error) ConnectionError(error);
         return bytes;
     }
 };
@@ -230,7 +245,18 @@ bool Exchange(ai::ApiProtocol protocol, std::string const& urlText, wchar_t cons
         WINHTTP_HEADER_NAME_BY_INDEX, &status, &size, WINHTTP_NO_HEADER_INDEX); });
     if (status != 200) {
         auto details = status >= 400 ? ReadHttpErrorDetails(*state, inactivity, stop) : std::string{};
-        throw std::runtime_error("Completion service returned HTTP " + std::to_string(status) + details);
+        auto message = "Completion service returned HTTP " + std::to_string(status) + details;
+        if (status == 408 || status == 429 || status == 500 || status == 502 || status == 503 || status == 504) {
+            DWORD seconds = 0, length = sizeof(seconds);
+            // The optional header can be absent or an HTTP date instead of a delta.
+            state->Begin([&](auto handle) {
+                WinHttpQueryHeaders(handle, WINHTTP_QUERY_RETRY_AFTER | WINHTTP_QUERY_FLAG_NUMBER,
+                    WINHTTP_HEADER_NAME_BY_INDEX, &seconds, &length, WINHTTP_NO_HEADER_INDEX);
+                return TRUE;
+            });
+            throw TransientNetworkError(message, seconds);
+        }
+        throw std::runtime_error(message);
     }
     wchar_t contentType[256]{}; size = sizeof(contentType);
     state->Begin([&](auto handle) { return WinHttpQueryHeaders(handle, WINHTTP_QUERY_CONTENT_TYPE,
@@ -271,12 +297,38 @@ ai::ModelResult Request(std::string const& baseUrl, ai::ApiProtocol protocol, ai
             return decoder.Complete();
         }, inactivity);
     if (stop.stop_requested()) return {};
+    if ((streaming && !decoder.Complete()) || (!streaming && response.empty()))
+        throw TransientNetworkError("The connection closed before the model finished its response.");
     return streaming ? decoder.Finish() : ParseResponse(protocol, Json::parse(response));
 }
 
 ai::ModelResult Request(std::string const& baseUrl, ai::ApiProtocol protocol, ai::ModelRequest const& request,
                         std::wstring key, std::stop_token stop, TextDelta const& delta, bool fullUrl, StreamObserver const& observe) {
     return Request(baseUrl, protocol, ai::BuildRequest(protocol, request), std::move(key), stop, delta, std::chrono::seconds(90), fullUrl, observe);
+}
+
+ai::ModelResult RequestChat(std::string const& address, ai::ApiProtocol protocol, ai::ModelRequest const& wire,
+    std::wstring key, std::stop_token stop, bool fullUrl, StreamObserver const& observe, std::function<void(unsigned)> const& onRetry) {
+    auto prepared = ai::BuildRequest(protocol, wire);
+    for (unsigned attempt = 0; ; ++attempt) {
+        if (stop.stop_requested()) throw std::runtime_error("Cancelled");
+        bool started = false;
+        try {
+            return Request(address, protocol, prepared, key, stop, {}, std::chrono::seconds(90), fullUrl,
+                [&](ai::StreamEvent const& event) {
+                    if (event.kind != ai::StreamEventKind::UsageUpdated) started = true;
+                    if (observe) observe(event);
+                });
+        } catch (TransientNetworkError const& error) {
+            if (started || stop.stop_requested() || attempt >= 2 || error.retryAfter > 30) throw;
+            if (onRetry) onRetry(attempt + 1);
+            auto delay = error.retryAfter ? std::chrono::milliseconds(error.retryAfter * 1000) :
+                std::chrono::milliseconds(500u << attempt);
+            std::mutex mutex;
+            std::unique_lock lock(mutex);
+            std::condition_variable_any{}.wait_for(lock, stop, delay, [] { return false; });
+        }
+    }
 }
 
 std::string ReadCatalogPage(ai::ApiProtocol protocol, std::string const& endpoint, std::wstring key, std::stop_token stop) {

@@ -165,6 +165,9 @@ std::string EventKindName(StreamEventKind kind) {
         return "reasoning_delta";
     case StreamEventKind::ToolCallDelta:
         return "tool_call_delta";
+    case StreamEventKind::WebSearchStarted: return "web_search_started";
+    case StreamEventKind::WebSearchCompleted: return "web_search_completed";
+    case StreamEventKind::WebSearchFailed: return "web_search_failed";
     case StreamEventKind::UsageUpdated:
         return "usage_updated";
     }
@@ -178,6 +181,9 @@ StreamEventKind ReadEventKind(std::string const& kind) {
         return StreamEventKind::ReasoningDelta;
     if (kind == "tool_call_delta")
         return StreamEventKind::ToolCallDelta;
+    if (kind == "web_search_started") return StreamEventKind::WebSearchStarted;
+    if (kind == "web_search_completed") return StreamEventKind::WebSearchCompleted;
+    if (kind == "web_search_failed") return StreamEventKind::WebSearchFailed;
     if (kind == "usage_updated")
         return StreamEventKind::UsageUpdated;
     throw ProtocolError("Invalid stream event kind");
@@ -206,6 +212,15 @@ void ValidateStreamEvent(StreamEvent const& event) {
         if (!event.callId.empty() || !event.name.empty() || event.usage.inputTokens ||
             event.usage.outputTokens || event.usage.totalTokens || event.usage.cachedInputTokens)
             throw ProtocolError("Unexpected fields in text stream event");
+        return;
+    case StreamEventKind::WebSearchStarted:
+    case StreamEventKind::WebSearchCompleted:
+    case StreamEventKind::WebSearchFailed:
+        if (event.callId.empty() || !event.name.empty() || event.reasoningKind != ReasoningKind::ProviderText ||
+            event.usage.inputTokens || event.usage.outputTokens || event.usage.totalTokens || event.usage.cachedInputTokens)
+            throw ProtocolError("Invalid hosted search event fields");
+        ValidateEventText(event.callId, 256, "Invalid hosted search identity");
+        ValidateEventText(event.text, 1024u * 1024u, "Invalid hosted search target");
         return;
     case StreamEventKind::ToolCallDelta:
         if (event.reasoningKind != ReasoningKind::ProviderText)
@@ -343,6 +358,12 @@ Json ToJson(StreamEvent const& event) {
         value["text"] = event.text;
         value["reasoningKind"] = ReasoningKindName(event.reasoningKind);
         break;
+    case StreamEventKind::WebSearchStarted:
+    case StreamEventKind::WebSearchCompleted:
+    case StreamEventKind::WebSearchFailed:
+        value["callId"] = event.callId;
+        value["text"] = event.text;
+        break;
     case StreamEventKind::ToolCallDelta:
         value["callId"] = event.callId;
         value["name"] = event.name;
@@ -381,6 +402,14 @@ StreamEvent StreamEventFromJson(Json const& value) {
                 throw ProtocolError("Invalid reasoning stream event");
             if (value.contains("reasoningKind"))
                 event.reasoningKind = ReadReasoningKind(value["reasoningKind"]);
+            event.text = value["text"].get<std::string>();
+            break;
+        case StreamEventKind::WebSearchStarted:
+        case StreamEventKind::WebSearchCompleted:
+        case StreamEventKind::WebSearchFailed:
+            if (!HasOnlyFields(value, {"kind", "callId", "text"}) || !value["callId"].is_string() || !value["text"].is_string())
+                throw ProtocolError("Invalid hosted search stream event");
+            event.callId = value["callId"].get<std::string>();
             event.text = value["text"].get<std::string>();
             break;
         case StreamEventKind::ToolCallDelta:

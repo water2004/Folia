@@ -371,10 +371,18 @@ class Decoder final : public IResponseDecoder {
                     ProtocolFailure::DuplicateStreamEvent);
         }
         std::vector<StreamEvent> out;
-        if (type == "response.output_item.added" || type == "output_item.added")
-            HandleOutputItemAdded(data);
-        else if (type == "response.output_item.done" || type == "output_item.done")
-            HandleOutputItemDone(data);
+        if (type == "response.output_item.added" || type == "output_item.added" ||
+            type == "response.output_item.done" || type == "output_item.done") {
+            bool added = type.ends_with(".added");
+            if (added) HandleOutputItemAdded(data);
+            else HandleOutputItemDone(data);
+            auto const& item = data.at("item");
+            if (String(item, "type") == "web_search_call") {
+                auto kind = added ? StreamEventKind::WebSearchStarted : String(item, "status") == "failed" ?
+                    StreamEventKind::WebSearchFailed : StreamEventKind::WebSearchCompleted;
+                out.push_back({kind, SearchTarget(item), String(item, "id")});
+            }
+        }
         else if (type == "response.output_text.delta" || type == "output_text.delta")
             HandleOutputTextDelta(data, out);
         else if (type == "response.output_text.done" || type == "output_text.done")

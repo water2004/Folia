@@ -98,7 +98,7 @@ struct ModelResult {
     std::vector<Citation> citations;
     std::vector<HostedSearch> searches;
 };
-enum class StreamEventKind { TextDelta, ReasoningDelta, ToolCallDelta, UsageUpdated };
+enum class StreamEventKind { TextDelta, ReasoningDelta, ToolCallDelta, UsageUpdated, WebSearchStarted, WebSearchCompleted, WebSearchFailed };
 struct StreamEvent {
     StreamEventKind kind{StreamEventKind::TextDelta};
     std::string text;

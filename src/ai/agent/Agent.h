@@ -14,10 +14,22 @@ namespace folia::ai::agent {
         std::string target;
         bool failed = false;
         std::string detail;
+        bool pending = false;
     };
 
     struct StepEnd {
         std::size_t text = 0, reasoning = 0, tools = 0;
+        enum class Notice { None, Compaction, Retry };
+        Notice notice = Notice::None;
+        unsigned attempt = 0;
+    };
+    struct DocumentReference {
+        std::string tabKey, path, token;
+        bool operator==(DocumentReference const&) const = default;
+    };
+    struct ReasoningSummary {
+        std::size_t offset;
+        std::string text;
     };
     struct Entry {
         MessageRole role;
@@ -30,6 +42,10 @@ namespace folia::ai::agent {
         std::vector<StepEnd> steps;
         std::vector<std::string> images;
         bool interrupted = false;
+        std::string error;
+        bool outputLimit = false;
+        std::vector<DocumentReference> documents;
+        std::vector<ReasoningSummary> reasoningSummaries;
     };
 
     struct History {
@@ -42,6 +58,7 @@ namespace folia::ai::agent {
     struct Tool {
         ToolDefinition definition;
         std::function<Json(Json const&, std::stop_token)> invoke;
+        std::function<std::string(Json const&)> target;
     };
 
     struct Options {
@@ -51,10 +68,9 @@ namespace folia::ai::agent {
         std::size_t inputBytes = 96'000;
         std::uint32_t outputTokens = 4'096;
         std::function<ContentPart(std::string const&)> loadImage;
-        bool requestReasoningSummary = false;
     };
 
-    enum class ProgressKind { TextDelta, TextSnapshot, ReasoningDelta, ReasoningSnapshot, Reading, Compacting, InputUsage, StepStarted, ToolResult };
+    enum class ProgressKind { TextDelta, TextSnapshot, ReasoningDelta, ReasoningSnapshot, Reading, Compacting, InputUsage, StepStarted, ToolResult, Retrying, HostedSearch, SummaryDelta, ReasoningSummary };
     using Progress = std::function<void(ProgressKind, std::string_view)>;
     using Request = std::function<ModelResult(ModelRequest const&, std::stop_token, Progress const&)>;
 
