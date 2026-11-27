@@ -153,6 +153,9 @@
     <ClInclude Include="settings\views\ProviderModelForm.h">
       <Filter>Settings\Views</Filter>
     </ClInclude>
+    <ClInclude Include="agent\ChatEffortScale.h">
+      <Filter>Agent Chat</Filter>
+    </ClInclude>
     <ClInclude Include="agent\ChatModelPicker.h">
       <Filter>Agent Chat</Filter>
     </ClInclude>
@@ -328,6 +331,9 @@
       <Filter>Agent Chat</Filter>
     </ClCompile>
     <ClCompile Include="agent\ChatView.Run.cpp">
+      <Filter>Agent Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="agent\ChatEffortScale.cpp">
       <Filter>Agent Chat</Filter>
     </ClCompile>
     <ClCompile Include="agent\ChatModelPicker.cpp">

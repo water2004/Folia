@@ -6,7 +6,7 @@
 #include "agent/ChatPalette.h"
 #include <wil/resource.h>
 #include <winrt/Microsoft.UI.Xaml.Hosting.h>
-#include <winrt/Windows.UI.ViewManagement.h>
+#include <winrt/Windows.System.h>
 
 namespace winrt::Folia::chat {
     using namespace ui;
@@ -33,7 +33,7 @@ namespace winrt::Folia::chat {
     }
 
     ChatModelPicker::ChatModelPicker(std::function<void(int)> selectModel, std::function<void(std::string)> selectEffort,
-                                 std::function<void()> configureModels) {
+                                 std::function<void()> configureModels) : selectEffort_(std::move(selectEffort)) {
         chip_ = LoadTemplate<Button>(L"ChatModelChipTemplate");
         chipName_ = chip_.FindName(L"ModelName").as<TextBlock>();
         chipEffort_ = chip_.FindName(L"ModelEffort").as<TextBlock>();
@@ -43,19 +43,16 @@ namespace winrt::Folia::chat {
         missingModels_ = panel.FindName(L"MissingModels").as<StackPanel>();
         list_ = panel.FindName(L"ModelList").as<ListView>();
         efforts_ = panel.FindName(L"Efforts").as<Slider>();
-        track_ = panel.FindName(L"Track").as<Grid>();
         scale_ = panel.FindName(L"Scale").as<Grid>();
-        fill_ = panel.FindName(L"Fill").as<Border>();
-        knob_ = panel.FindName(L"Knob").as<Border>();
-        rail_ = panel.FindName(L"Rail").as<Border>();
-        ticks_ = panel.FindName(L"Ticks").as<Canvas>();
+        face_ = panel.FindName(L"ScaleFace").as<Grid>();
+        artwork_.Attach(face_);
         effortTitle_ = panel.FindName(L"EffortTitle").as<TextBlock>();
         auto outline = panel.FindName(L"FocusOutline").as<Border>();
         efforts_.GotFocus([outline](auto const& sender, auto const&) {
             outline.Visibility(sender.template as<Slider>().FocusState() == FocusState::Keyboard ? Visibility::Visible : Visibility::Collapsed);
         });
         efforts_.LostFocus([outline](auto const&, auto const&) { outline.Visibility(Visibility::Collapsed); });
-        trackSize_ = track_.SizeChanged(winrt::auto_revoke, [this](auto const&, auto const&) { DrawScale(); });
+        trackSize_ = face_.SizeChanged(winrt::auto_revoke, [this](auto const&, auto const&) { DrawScale(); });
         currentModel_ = panel.FindName(L"CurrentModel").as<TextBlock>();
         modelLink_ = panel.FindName(L"ChooseModel").as<Button>();
         back_ = panel.FindName(L"BackToReasoning").as<Button>();
@@ -81,13 +78,18 @@ namespace winrt::Folia::chat {
             ShowModels(false);
             modelLink_.Focus(FocusState::Programmatic);
         });
-        effortChanged_ = efforts_.ValueChanged(winrt::auto_revoke, [this, selectEffort = std::move(selectEffort)](auto const&, auto const&) {
-            auto index = static_cast<std::size_t>(std::llround(efforts_.Value()));
-            if (updating_ || index >= levels_.size()) return;
-            auto level = levels_.at(index);
-            PresentReasoning(level, true);
-            selectEffort(level);
+        effortChanged_ = efforts_.ValueChanged(winrt::auto_revoke, [this](auto const&, auto const&) { ChooseEffort(); });
+        // An untouched slider has no selected stop. Its first stop can be
+        // explicitly chosen even when the native numeric value is already zero.
+        tap_ = Input::TappedEventHandler([this](auto const&, auto const&) { if (!selectedEffort_) ChooseEffort(); });
+        key_ = Input::KeyEventHandler([this](auto const&, Input::KeyRoutedEventArgs const& args) {
+            using enum Windows::System::VirtualKey;
+            if (!selectedEffort_ && (args.Key() == Space || args.Key() == Enter || args.Key() == Home ||
+                args.Key() == End || args.Key() == Left || args.Key() == Right ||
+                args.Key() == Up || args.Key() == Down)) ChooseEffort();
         });
+        efforts_.AddHandler(UIElement::TappedEvent(), box_value(tap_), true);
+        efforts_.AddHandler(UIElement::KeyDownEvent(), box_value(key_), true);
         modelChanged_ = list_.SelectionChanged(winrt::auto_revoke, [this, selectModel = std::move(selectModel)](auto const&, auto const&) {
             if (updating_ || SelectedIndex() < 0) return;
             RefreshSelection();
@@ -101,6 +103,20 @@ namespace winrt::Folia::chat {
             flyout_.Hide();
             configureModels();
         });
+    }
+
+    ChatModelPicker::~ChatModelPicker() {
+        efforts_.RemoveHandler(UIElement::TappedEvent(), box_value(tap_));
+        efforts_.RemoveHandler(UIElement::KeyDownEvent(), box_value(key_));
+    }
+
+    void ChatModelPicker::ChooseEffort() {
+        if (updating_ || levels_.empty()) return;
+        auto index = static_cast<std::size_t>(std::llround(efforts_.Value()));
+        if (index >= levels_.size()) return;
+        auto level = levels_[index];
+        PresentReasoning(level, selectedEffort_.has_value());
+        selectEffort_(std::move(level));
     }
 
     int ChatModelPicker::SelectedIndex() const { return list_.SelectedIndex(); }
@@ -161,89 +177,27 @@ namespace winrt::Folia::chat {
         if (show && list_.SelectedItem()) list_.ScrollIntoView(list_.SelectedItem());
     }
 
-    void ChatModelPicker::SetReasoning(std::span<std::string const> choices, std::string_view defaultEffort,
-                                    std::string_view overrideEffort) {
+    void ChatModelPicker::SetReasoning(std::span<std::string const> choices, std::string_view effective) {
+        auto restore = wil::scope_exit([&, previous = std::exchange(updating_, true)] { updating_ = previous; });
         levels_.assign(choices.begin(), choices.end());
-        defaultEffort_ = defaultEffort;
-        if (!levels_.empty() && defaultEffort_.empty()) levels_.emplace(levels_.begin());
-        {
-            auto restore = wil::scope_exit([&, previous = std::exchange(updating_, true)] { updating_ = previous; });
-            efforts_.Maximum(levels_.size() > 1 ? static_cast<double>(levels_.size() - 1) : 1.);
-            scale_.Visibility(levels_.size() > 1 ? Visibility::Visible : Visibility::Collapsed);
-            ticks_.Children().Clear();
-            for (std::size_t i = 0; i < levels_.size(); ++i) {
-                Border tick;
-                tick.Width(3); tick.Height(3); tick.CornerRadius({2,2,2,2}); tick.Opacity(.42);
-                ticks_.Children().Append(tick);
-            }
-        }
-        PresentReasoning(overrideEffort);
+        efforts_.Maximum(levels_.empty() ? 0. : static_cast<double>(levels_.size() - 1));
+        scale_.Visibility(levels_.empty() ? Visibility::Collapsed : Visibility::Visible);
+        PresentReasoning(effective);
     }
 
-    void ChatModelPicker::SetPalette(ChatPalette const& palette) {
-        fill_.Background(palette.accent);
-        rail_.Background(palette.track);
-        rail_.BorderBrush(palette.border);
-        knob_.Background(palette.surface);
-        knob_.BorderBrush(palette.border);
-        onAccent_ = palette.onAccent;
-        muted_ = palette.muted;
-        DrawScale();
-    }
+    void ChatModelPicker::SetPalette(ChatPalette const& palette) { artwork_.SetPalette(palette); }
 
     void ChatModelPicker::DrawScale(bool animate) {
-        if (levels_.size() < 2 || !track_.ActualWidth()) return;
-        auto w = track_.ActualWidth();
-        constexpr double inset = 12;
-        auto step = (w - 2 * inset) / static_cast<double>(levels_.size() - 1);
-        auto value = efforts_.Value();
-        if (!scaleMotion_) {
-            auto visual = Hosting::ElementCompositionPreview::GetElementVisual(fill_);
-            auto compositor = visual.Compositor();
-            scaleMotion_ = compositor.CreatePropertySet();
-            scaleMotion_.InsertScalar(L"Position", 0.f);
-            scaleMotion_.InsertScalar(L"Travel", 0.f);
-            auto bind = [&](auto const& target, wchar_t const* property, wchar_t const* formula) {
-                auto expression = compositor.CreateExpressionAnimation(formula);
-                expression.SetReferenceParameter(L"slider", scaleMotion_);
-                target.StartAnimation(property, expression);
-            };
-            auto clip = compositor.CreateInsetClip();
-            visual.Clip(clip);
-            bind(clip, L"RightInset", L"slider.Position <= 0 ? slider.Travel + 24 : slider.Position >= 1 ? 0 : 12 + (1-slider.Position)*slider.Travel");
-            Hosting::ElementCompositionPreview::SetIsTranslationEnabled(knob_, true);
-            bind(Hosting::ElementCompositionPreview::GetElementVisual(knob_), L"Translation.X", L"slider.Position * slider.Travel");
-        }
-        Canvas::SetLeft(knob_, track_.Margin().Left);
-        scaleMotion_.InsertScalar(L"Travel", static_cast<float>((std::max)(0., w - 2 * inset)));
-        const auto position = static_cast<float>(value / efforts_.Maximum());
-        if (animate && Windows::UI::ViewManagement::UISettings().AnimationsEnabled()) {
-            auto compositor = scaleMotion_.Compositor();
-            auto motion = compositor.CreateScalarKeyFrameAnimation();
-            motion.InsertExpressionKeyFrame(0, L"this.StartingValue");
-            motion.InsertKeyFrame(1, position, compositor.CreateCubicBezierEasingFunction({.2f,.8f}, {.25f,1.f}));
-            motion.Duration(std::chrono::milliseconds(140));
-            scaleMotion_.StartAnimation(L"Position", motion);
-        } else {
-            scaleMotion_.StopAnimation(L"Position");
-            scaleMotion_.InsertScalar(L"Position", position);
-        }
-        for (unsigned i = 0; i < ticks_.Children().Size(); ++i) {
-            auto tick = ticks_.Children().GetAt(i).as<Border>();
-            tick.Background(i < value ? onAccent_ : muted_);
-            tick.Visibility(i == value ? Visibility::Collapsed : Visibility::Visible);
-            Canvas::SetLeft(tick, inset + step*i - 1.5);
-            Canvas::SetTop(tick, 8.5);
-        }
+        artwork_.Draw(face_, levels_.size(), selectedEffort_, animate);
     }
 
-    void ChatModelPicker::PresentReasoning(std::string_view overrideEffort, bool animate) {
+    void ChatModelPicker::PresentReasoning(std::string_view effective, bool animate) {
         auto restore = wil::scope_exit([&, previous = std::exchange(updating_, true)] { updating_ = previous; });
-        if (!std::ranges::contains(levels_, overrideEffort)) overrideEffort = {};
-        auto effective = overrideEffort.empty() ? std::string_view(defaultEffort_) : overrideEffort;
-        auto label = EffortLabel(effective);
         auto match = std::ranges::find(levels_, effective);
-        efforts_.Value(match == levels_.end() ? 0. : static_cast<double>(match - levels_.begin()));
+        selectedEffort_.reset();
+        if (match != levels_.end()) selectedEffort_ = static_cast<std::size_t>(match - levels_.begin());
+        auto label = EffortLabel(selectedEffort_ ? effective : std::string_view{});
+        efforts_.Value(static_cast<double>(selectedEffort_.value_or(0)));
         effortTitle_.Text(label);
         Automation::AutomationProperties::SetHelpText(efforts_, label);
         DrawScale(animate);

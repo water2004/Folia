@@ -178,6 +178,7 @@
     <ClInclude Include="settings\views\ProviderIdentity.h" />
     <ClInclude Include="settings\views\ModelEffortChoice.h" />
     <ClInclude Include="ui\ControlHelpers.h" />
+    <ClInclude Include="agent\ChatEffortScale.h" />
     <ClInclude Include="agent\ChatModelPicker.h" />
     <ClInclude Include="agent\ChatMotion.h" />
     <ClInclude Include="agent\ChatPalette.h" />
@@ -809,6 +810,7 @@
     <ClCompile Include="agent\ChatTools.cpp" />
     <ClCompile Include="agent\ChatView.cpp" />
     <ClCompile Include="agent\ChatView.Run.cpp" />
+    <ClCompile Include="agent\ChatEffortScale.cpp" />
     <ClCompile Include="agent\ChatModelPicker.cpp" />
     <ClCompile Include="agent\ChatReplySurface.cpp" />
     <ClCompile Include="agent\ChatActivityView.cpp" />

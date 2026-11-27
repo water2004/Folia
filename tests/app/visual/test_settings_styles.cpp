@@ -243,8 +243,9 @@ suite settings_style_tests = [] {
         expect(winrt::unbox_value<winrt::hstring>(choices.SelectedItem()) == L"Named Responses model");
         expect(Field<PasswordBox>(fixture.page, Localize(L"AIKey")) == nullptr);
         expect(!reasoning.IsEditable());
-        expect(reasoning.SelectedIndex() == 0_i);
-        expect(reasoning.Items().Size() == 3_u);
+        expect(reasoning.SelectedIndex() == -1);
+        expect(reasoning.PlaceholderText() == L"none");
+        expect(reasoning.Items().Size() == 2_u);
         auto modelCard = choices.Parent().as<Grid>();
         auto reasoningCard = reasoning.Parent().as<Grid>();
         auto modelRight = choices.TransformToVisual(fixture.root).TransformPoint(
@@ -253,7 +254,7 @@ suite settings_style_tests = [] {
             {static_cast<float>(reasoning.ActualWidth()), 0}).X;
         expect(modelCard != reasoningCard && std::abs(modelRight - reasoningRight) < 1.0f);
         SaveSettingsImage(fixture.root, "completion.png");
-        reasoning.SelectedIndex(2);
+        reasoning.SelectedIndex(1);
         expect(cache.Visibility() == Visibility::Visible);
         context.Text(L"10");
         cache.IsOn(true);
@@ -328,10 +329,12 @@ suite settings_style_tests = [] {
         expect(!none.IsChecked().GetBoolean() && !high.IsChecked().GetBoolean());
         expect(!level.IsEnabled());
         none.IsChecked(true);
-        Pump([&] { return level.Items().Size() == 2 && level.IsEnabled(); });
+        Pump([&] { return level.Items().Size() == 1 && level.IsEnabled(); });
         high.IsChecked(true);
-        Pump([&] { return level.Items().Size() == 3; });
-        level.SelectedIndex(1);
+        Pump([&] { return level.Items().Size() == 2; });
+        expect(level.SelectedIndex() == -1);
+        expect(std::wstring_view(level.PlaceholderText()).compare(Localize(L"AIReasoningDefault")) == 0);
+        level.SelectedIndex(0);
         SaveSettingsImage(fixture.root, "provider-model.png");
         InvokeAction(Action(fixture.page, Localize(L"ChatSaveModel")));
         Pump([&] { return Description(fixture.page, L"custom-model · none, high") != nullptr; });

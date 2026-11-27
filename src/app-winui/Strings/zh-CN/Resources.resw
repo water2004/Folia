@@ -546,7 +546,6 @@
   <data name="ChatEffortMax" xml:space="preserve"><value>最高</value></data>
   <data name="ChatAccess" xml:space="preserve"><value>权限</value></data>
   <data name="ChatWorkspace" xml:space="preserve"><value>工作区</value></data>
-  <data name="ChatModelDefaultEffort" xml:space="preserve"><value>模型默认</value></data>
   <data name="ChatNoProviders" xml:space="preserve"><value>添加供应商后，即可在折笺中使用它的模型。</value></data>
   <data name="ChatChooseProviderIcon" xml:space="preserve"><value>选择图标…</value></data>
   <data name="ChatResetProviderIcon" xml:space="preserve"><value>使用名称缩写</value></data>
@@ -573,7 +572,7 @@
   <data name="ChatModelDetails" xml:space="preserve"><value>模型信息</value></data>
   <data name="ChatModelContextLimit" xml:space="preserve"><value>上下文窗口（token）</value></data>
   <data name="ChatModelOutputLimit" xml:space="preserve"><value>最大输出（token）</value></data>
-  <data name="ChatModelEffortHint" xml:space="preserve"><value>勾选此模型支持的档位。全部不勾选时，使用服务默认值。</value></data>
+  <data name="ChatModelEffortHint" xml:space="preserve"><value>勾选聊天和补全可用的推理档位。</value></data>
   <data name="ChatModelCapabilities" xml:space="preserve"><value>模型能力</value></data>
   <data name="ChatModelVision" xml:space="preserve"><value>视觉输入</value></data>
   <data name="ChatToggleModel" xml:space="preserve"><value>启用 {0}</value></data>

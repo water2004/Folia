@@ -194,7 +194,7 @@ namespace winrt::Folia::settings_ui {
 
     void ProviderModelForm::RefreshDefault(std::string_view selection) {
         auto efforts = CheckedEfforts();
-        SetEffortChoices(defaultEffort_, efforts, selection, L"AIReasoningDefault");
+        SetEffortChoices(defaultEffort_, efforts, selection, Localize(L"AIReasoningDefault"));
         defaultEffort_.Visibility(Visibility::Visible);
         defaultEffort_.IsEnabled(!efforts.empty());
     }

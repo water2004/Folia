@@ -546,7 +546,6 @@
   <data name="ChatEffortMax" xml:space="preserve"><value>Maximum</value></data>
   <data name="ChatAccess" xml:space="preserve"><value>Access</value></data>
   <data name="ChatWorkspace" xml:space="preserve"><value>Workspace</value></data>
-  <data name="ChatModelDefaultEffort" xml:space="preserve"><value>Model default</value></data>
   <data name="ChatNoProviders" xml:space="preserve"><value>Add a provider to make its models available in Folia.</value></data>
   <data name="ChatChooseProviderIcon" xml:space="preserve"><value>Choose icon…</value></data>
   <data name="ChatResetProviderIcon" xml:space="preserve"><value>Use initials</value></data>
@@ -573,7 +572,7 @@
   <data name="ChatModelDetails" xml:space="preserve"><value>Model details</value></data>
   <data name="ChatModelContextLimit" xml:space="preserve"><value>Context window (tokens)</value></data>
   <data name="ChatModelOutputLimit" xml:space="preserve"><value>Maximum output (tokens)</value></data>
-  <data name="ChatModelEffortHint" xml:space="preserve"><value>Check the levels this model supports. Leave them unchecked to use the service default.</value></data>
+  <data name="ChatModelEffortHint" xml:space="preserve"><value>Choose the levels available in chat and completion.</value></data>
   <data name="ChatModelCapabilities" xml:space="preserve"><value>Capabilities</value></data>
   <data name="ChatModelVision" xml:space="preserve"><value>Image input</value></data>
   <data name="ChatToggleModel" xml:space="preserve"><value>Enable {0}</value></data>

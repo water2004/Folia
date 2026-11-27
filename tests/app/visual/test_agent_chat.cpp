@@ -450,6 +450,64 @@ namespace {
             transcript->Finish();
         };
 
+        "an untouched reasoning slider inherits without adding a selectable service stop"_test = [] {
+            auto window = visual_tests::Window();
+            auto shell = Access::Impl(window);
+            auto conversation = chat::NewConversation("Effort fixture");
+            Access::Open(shell, conversation.id);
+            auto host = Access::Host(shell);
+            Pump([&] { return host.Content() != nullptr; });
+            auto old = host.Content();
+            auto restore = wil::scope_exit([&]{ host.Content(old); Access::Close(shell); chat::DeleteConversation(conversation.id); });
+            std::vector<std::string> chosen;
+            chat::ChatModelPicker picker([](int){}, [&](std::string level){ chosen.push_back(std::move(level)); }, []{});
+            chat::ChatPalette palette;
+            palette.Apply(Access::Theme(shell).colors);
+            picker.SetPalette(palette);
+            std::array<winrt::hstring, 1> names{L"Model"};
+            std::array<std::string, 2> levels{"none", "high"};
+            picker.SetModels(names, 0);
+            picker.SetReasoning(levels, {});
+            host.Content(picker.Element());
+            Pump([&]{ return picker.Element().IsLoaded(); });
+            picker.Open();
+            auto flyout = picker.Element().Flyout().as<Flyout>();
+            auto panel = flyout.Content().as<Grid>();
+            auto title = panel.FindName(L"EffortTitle").as<TextBlock>();
+            auto slider = panel.FindName(L"Efforts").as<Slider>();
+            Pump([&]{ return slider.IsLoaded() && slider.ActualWidth() > 0; });
+            expect(std::wstring_view(title.Text()).compare(Localize(L"AIReasoningDefault")) == 0);
+            expect(chosen.empty());
+            expect(slider.Minimum() == 0. && slider.Maximum() == 1.);
+            auto presenter = window.AppWindow().Presenter().as<winrt::Microsoft::UI::Windowing::OverlappedPresenter>();
+            auto wasTopmost = presenter.IsAlwaysOnTop();
+            auto restoreTop = wil::scope_exit([&]{ presenter.IsAlwaysOnTop(wasTopmost); });
+            presenter.IsAlwaysOnTop(true);
+            POINT previous{};
+            ::GetCursorPos(&previous);
+            auto pointer = wil::scope_exit([&]{ ::SetCursorPos(previous.x, previous.y); });
+            auto local = slider.TransformToVisual(nullptr).TransformPoint({8, static_cast<float>(slider.ActualHeight() * .5)});
+            auto p = slider.XamlRoot().CoordinateConverter().ConvertLocalToScreen(local);
+            ::SetCursorPos(p.X, p.Y);
+            auto stable = std::chrono::steady_clock::now() + std::chrono::milliseconds(350);
+            Pump([&]{ return std::chrono::steady_clock::now() >= stable; });
+            INPUT clicks[2]{};
+            clicks[0].type = clicks[1].type = INPUT_MOUSE;
+            clicks[0].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+            clicks[1].mi.dwFlags = MOUSEEVENTF_LEFTUP;
+            winrt::check_bool(::SendInput(2, clicks, sizeof(INPUT)) == 2);
+            Pump([&]{ return !chosen.empty(); });
+            expect(chosen == std::vector<std::string>{"none"});
+            picker.SetReasoning(levels, "high");
+            expect(chosen.size() == 1_u && slider.Value() == 1.);
+            picker.SetReasoning(std::span(levels).first(1), {});
+            expect(slider.Maximum() == 0.);
+            expect(std::wstring_view(title.Text()).compare(Localize(L"AIReasoningDefault")) == 0);
+            picker.SetReasoning({}, {});
+            expect(chosen.size() == 1_u);
+            flyout.Hide();
+        };
+
         "agent activity stays between its text passages, live and after reopening"_test = [] {
             using enum folia::ai::agent::ProgressKind;
             auto window = visual_tests::Window();
@@ -721,6 +779,7 @@ namespace {
             auto window = visual_tests::Window();
             window.AppWindow().Resize({1960, 1200});
             auto shell = Access::Impl(window);
+            Access::KeepActive(shell);
             Access::ShowSidebar(shell);
             Access::Open(shell, conversation.id);
             auto host = Access::Host(shell);
@@ -773,7 +832,19 @@ namespace {
             flyout.ShowAt(picker);
             Pump([&] { return efforts.IsLoaded() && reasoning.Visibility() == Visibility::Visible; });
             expect(efforts.Maximum() == 4. && efforts.Value() == 0.);
-            auto fill = panel.FindName(L"Fill").as<Border>();
+            auto face = panel.FindName(L"ScaleFace").as<Grid>();
+            auto presenter = window.AppWindow().Presenter().as<winrt::Microsoft::UI::Windowing::OverlappedPresenter>();
+            auto wasTopmost = presenter.IsAlwaysOnTop();
+            presenter.IsAlwaysOnTop(true);
+            auto restoreTop = wil::scope_exit([&]{ presenter.IsAlwaysOnTop(wasTopmost); });
+            auto sample = [&](double x, double y) {
+                auto local = face.TransformToVisual(nullptr).TransformPoint({static_cast<float>(x), static_cast<float>(y)});
+                auto screen = face.XamlRoot().CoordinateConverter().ConvertLocalToScreen(local);
+                auto dc = ::GetDC(nullptr);
+                auto color = ::GetPixel(dc, screen.X, screen.Y);
+                ::ReleaseDC(nullptr, dc);
+                return color;
+            };
             auto originalTheme = Access::Theme(shell);
             for (auto const& [accent, filename] : std::array{std::pair{folia::Color{174,64,74}, "accent-rose.png"},
                     std::pair{folia::Color{32,142,115}, "accent-jade.png"}}) {
@@ -781,37 +852,31 @@ namespace {
                 themed.colors.shell_accent = accent;
                 Access::ChatTheme(shell, themed);
                 efforts.Value(2);
-                panel.UpdateLayout();
-                auto actual = fill.Background().as<Media::SolidColorBrush>().Color();
-                expect(actual.R == accent.r && actual.G == accent.g && actual.B == accent.b);
-                expect(send.Background().as<Media::SolidColorBrush>().Color() == actual);
                 Capture(window, filename);
+                auto actual = send.Background().as<Media::SolidColorBrush>().Color();
+                expect(actual.R == accent.r && actual.G == accent.g && actual.B == accent.b);
+                expect(sample(face.ActualWidth() * .28, 8) == RGB(accent.r, accent.g, accent.b)) << "themed track color";
             }
             Access::ChatTheme(shell, originalTheme);
-            auto knob = panel.FindName(L"Knob").as<Border>();
-            auto thumbLayer = panel.FindName(L"ThumbLayer").as<Canvas>();
             for (auto const& [level, filename] : std::array{std::pair{0., "effort-first.png"},
                     std::pair{2., "effort-middle.png"}, std::pair{4., "effort-last.png"}}) {
                 efforts.Value(level);
-                panel.UpdateLayout();
-                auto top = knob.TransformToVisual(thumbLayer).TransformPoint({0,0});
-                auto settled = std::chrono::steady_clock::now() + std::chrono::milliseconds(220);
-                Pump([&] { return std::chrono::steady_clock::now() >= settled; });
-                expect(top.X >= 0 && top.Y >= 1 && top.X + knob.ActualWidth() <= thumbLayer.ActualWidth() &&
-                       top.Y + knob.ActualHeight() < thumbLayer.ActualHeight()) << "entire thumb fits inside its own layer at every stop";
-                Media::Imaging::RenderTargetBitmap snapshot;
-                document_tests::Await(snapshot.RenderAsync(panel));
-                auto sliderPixels = document_tests::Await(snapshot.GetPixelsAsync());
-                const auto point = fill.TransformToVisual(panel).TransformPoint({static_cast<float>(fill.ActualWidth() * .28), 5});
-                const auto x = static_cast<int>(point.X * snapshot.PixelWidth() / panel.ActualWidth());
-                const auto y = static_cast<int>(point.Y * snapshot.PixelHeight() / panel.ActualHeight());
-                auto pixel = sliderPixels.data() + 4 * (y * snapshot.PixelWidth() + x);
-                auto accent = fill.Background().as<Media::SolidColorBrush>().Color();
-                const bool filled = std::abs(pixel[2]-int(accent.R)) + std::abs(pixel[1]-int(accent.G)) + std::abs(pixel[0]-int(accent.B)) < 9;
-                expect(filled == (level > 0)) << "slider paints the selected fraction after settling at " << level;
-                visual_tests::SavePng(app_tests::RepositoryRoot()
-                    / "build/tests/agent-chat" / filename, snapshot.PixelWidth(), snapshot.PixelHeight(), sliderPixels);
+                Capture(window, filename);
+                auto accent = originalTheme.colors.shell_accent;
+                auto painted = sample(face.ActualWidth() * .28, 8);
+                expect((painted == RGB(accent.r, accent.g, accent.b)) == (level > 0)) << "filled stop " << level;
+                const double center = 12 + (face.ActualWidth() - 24) * level / efforts.Maximum();
+                auto surface = originalTheme.colors.shell_layer_bg;
+                expect(sample(center, 13) == RGB(surface.r, surface.g, surface.b)) << "thumb color at stop " << level;
             }
+            // Half opacity reproduces the flyout's opening frame. Both halves
+            // of the handle must still have the same color over a filled track.
+            efforts.Value(2);
+            face.Opacity(.5);
+            Capture(window, "effort-fading.png");
+            auto center = face.ActualWidth() * .5;
+            expect(sample(center - 6, 13) == sample(center + 6, 13)) << "translucent slider keeps the handle opaque over the track";
+            face.Opacity(1);
             bool closed = false;
             auto closedEvent = flyout.Closed(winrt::auto_revoke, [&](auto const&, auto const&) { closed = true; });
             efforts.Value(2);

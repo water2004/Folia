@@ -149,7 +149,7 @@ namespace winrt::Folia::chat {
             ModelRequest wire;
             wire.model = model.upstream;
             wire.maxOutputTokens = (std::min)(model.maxOutputTokens.value_or(512u), 512u);
-            if (!model.efforts.empty()) wire.reasoning.effort = model.efforts.front();
+            wire.reasoning.effort = model.ResolveEffort({});
             if (prompt.size() > 1600) {
                 std::size_t end = 1600;
                 while ((static_cast<unsigned char>(prompt[end]) & 0xC0) == 0x80) --end;

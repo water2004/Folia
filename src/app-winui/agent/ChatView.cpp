@@ -41,6 +41,7 @@ namespace winrt::Folia::chat {
 
     void ChatView::SetTheme(folia::ThemeProfile const& theme) {
         palette_.Apply(theme.colors);
+        modelPicker_->SetPalette(palette_);
         transcript_->SetTheme(theme);
     }
 
@@ -295,8 +296,8 @@ namespace winrt::Folia::chat {
         web_.IsEnabled(hostedSearch && !busy_);
         extras_->SetVision(chosen && chosen->vision);
         web_.IsChecked(hostedSearch && conversation_.search);
-        if (chosen) modelPicker_->SetReasoning(chosen->efforts, chosen->effort, conversation_.effort);
-        else modelPicker_->SetReasoning({}, {}, {});
+        if (chosen) modelPicker_->SetReasoning(chosen->efforts, chosen->ResolveEffort(conversation_.effort));
+        else modelPicker_->SetReasoning({}, {});
         UpdateUsage();
     }
 

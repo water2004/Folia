@@ -138,16 +138,7 @@
                     </StackPanel>
                 </Button>
                 <Grid x:Name="Scale" Height="36" Margin="3,6,3,0">
-                    <Grid x:Name="Track" Margin="2,0" Height="20" VerticalAlignment="Center" IsHitTestVisible="False">
-                        <Border x:Name="Rail" CornerRadius="10"
-                                BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1"/>
-                        <Border x:Name="Fill" HorizontalAlignment="Stretch" CornerRadius="10"/>
-                        <Canvas x:Name="Ticks"/>
-                    </Grid>
-                    <Canvas x:Name="ThumbLayer" Height="26" VerticalAlignment="Center" IsHitTestVisible="False">
-                        <Border x:Name="Knob" Width="24" Height="24" Canvas.Top="1" CornerRadius="12"
-                                BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1"/>
-                    </Canvas>
+                    <Grid x:Name="ScaleFace" Margin="2,0" Height="26" VerticalAlignment="Center" IsHitTestVisible="False"/>
                     <Slider x:Name="Efforts" Opacity="0" Minimum="0" StepFrequency="1" SmallChange="1" LargeChange="1"
                             IsThumbToolTipEnabled="False" VerticalAlignment="Stretch"/>
                     <Border x:Name="FocusOutline" BorderBrush="{ThemeResource FocusStrokeColorOuterBrush}"

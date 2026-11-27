@@ -21,16 +21,11 @@ namespace winrt::Folia {
         auto model = Choice();
         cards::ChoiceStyle(model);
         model.PlaceholderText(Localize(L"ChatPickModel"));
-        auto choices = AvailableModels();
+        auto choices = std::make_shared<std::vector<ModelChoice> const>(AvailableModels());
         int selected = -1;
-        std::vector<bool> supportsCache;
-        std::vector<std::vector<std::string>> effortOptions;
-        for (auto const& choice : choices) {
+        for (auto const& choice : *choices) {
             model.Items().Append(box_value(to_hstring(choice.label)));
             if (choice.model.id == appliedSettings_.completionModelId) selected = model.Items().Size() - 1;
-            effortOptions.push_back(choice.model.efforts);
-            supportsCache.push_back(folia::ai::SupportsCacheBreakpoints(Preset(choice.provider.providerType).cache,
-                choice.provider.protocol, choice.model.upstream, true));
         }
         model.SelectedIndex(selected);
         connection.Children().Append(cards::Setting(
@@ -67,13 +62,17 @@ namespace winrt::Folia {
         auto cache = cards::Switch(appliedSettings_.completion.explicitPromptCache);
         auto cacheRow = cards::Setting(
             {Localize(L"AIExplicitCache"), Localize(L"AIExplicitCacheDescription"), cards::Icon(WorkspaceIcon::Cache)}, cache);
-        auto update = [cache, cacheRow, effort, effortRow, supportsCache = std::move(supportsCache),
-                       effortOptions = std::move(effortOptions)](int index, std::string_view selection) {
-            auto visible = index >= 0 && supportsCache.at(index) ? Visibility::Visible : Visibility::Collapsed;
+        auto update = [cache, cacheRow, effort, effortRow, choices](int index, std::string_view selection) {
+            auto route = index >= 0 ? &choices->at(index) : nullptr;
+            bool supportsCache = route && folia::ai::SupportsCacheBreakpoints(Preset(route->provider.providerType).cache,
+                route->provider.protocol, route->model.upstream, true);
+            auto visible = supportsCache ? Visibility::Visible : Visibility::Collapsed;
             cache.Visibility(visible);
             cacheRow.Visibility(visible);
-            auto options = index >= 0 ? std::span<std::string const>(effortOptions.at(index)) : std::span<std::string const>{};
-            SetEffortChoices(effort, options, selection);
+            auto configured = route ? &route->model : nullptr;
+            auto options = configured ? std::span<std::string const>(configured->efforts) : std::span<std::string const>{};
+            auto inherited = configured ? configured->ResolveEffort({}) : std::string{};
+            SetEffortChoices(effort, options, selection, inherited.empty() ? Localize(L"AIReasoningDefault") : to_hstring(inherited));
             effortRow.Visibility(effort.Visibility());
         };
         update(selected, appliedSettings_.completion.reasoningEffort);
@@ -93,7 +92,7 @@ namespace winrt::Folia {
         actions.Children().Append(status);
         panel.Children().Append(actions);
         panel.Children().Append(cards::Section(Localize(L"SettingsRelated"), related));
-        save.Click([weak = weak_from_this(), enabled, model, choices = std::move(choices), effort, eagerness, context, output, cache, status](auto const&, auto const&) {
+        save.Click([weak = weak_from_this(), enabled, model, choices, effort, eagerness, context, output, cache, status](auto const&, auto const&) {
             auto self = weak.lock();
             if (!self || self->detached_ || !self->applySettings_) return;
             auto proposed = self->appliedSettings_;
@@ -110,7 +109,7 @@ namespace winrt::Folia {
                 SetStatus(status, Localize(L"AIBudgetInvalid"), true);
                 return;
             }
-            proposed.completionModelId = index < 0 ? std::string{} : choices.at(index).model.id;
+            proposed.completionModelId = index < 0 ? std::string{} : choices->at(index).model.id;
             config.enabled = enabled.IsOn();
             config.reasoningEffort = SelectedEffort(effort);
             config.eagerness = static_cast<folia::completion::Eagerness>(eagerness.SelectedIndex());
