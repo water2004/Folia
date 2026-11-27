@@ -21,13 +21,28 @@ namespace winrt::Folia
     void EditorSurfaceRenderer::SetTheme(folia::ThemeProfile const& value)
     {
         themeProfile = value;
-        ++themeRevision;
-        styleSheet = CreateEditorStyleSheet(themeProfile);
-        renderCache.ClearTextLayouts();
         renderCache.ClearSvgDrawings();
-        resources.RebuildTextFormats(styleSheet);
         resources.ResetBrushes();
+        RefreshStyleSheet();
         ClearPreparedDocument();
+    }
+
+    bool EditorSurfaceRenderer::SetTextLayout(TextLayoutOptions const& value)
+    {
+        if (textLayout == value) return false;
+        textLayout = value;
+        // Retain the previous geometry until the preparation pass can anchor
+        // the first visible source line across the new stylesheet revision.
+        RefreshStyleSheet();
+        return true;
+    }
+
+    void EditorSurfaceRenderer::RefreshStyleSheet()
+    {
+        ++themeRevision;
+        styleSheet = CreateEditorStyleSheet(themeProfile, textLayout);
+        renderCache.ClearTextLayouts();
+        resources.RebuildTextFormats(styleSheet);
     }
 
     folia::ThemeProfile EditorSurfaceRenderer::Theme() const

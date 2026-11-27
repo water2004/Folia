@@ -19,6 +19,7 @@ namespace winrt::Folia
         };
         constexpr Category categories[] = {
             {Page::General, L"General", L"GeneralDescription", L"\xE713"},
+            {Page::TextLayout, L"TextLayout", L"TextLayoutDescription", nullptr},
             {Page::Themes, L"Themes", L"ThemesDescription", L"\xE790"},
             {Page::Shortcuts, L"Shortcuts", L"ShortcutsDescription", L"\xE765"},
             {Page::Latex, L"LatexCommands", L"LatexCommandsDescription", L"\xE943"},
@@ -36,14 +37,16 @@ namespace winrt::Folia
         std::shared_ptr<LatexCommandCatalog> latexCatalog,
         folia::Theme systemVariant,
         HWND owner,
-        ApplySettings applySettings)
+        ApplySettings applySettings,
+        ChangeTextLayout changeTextLayout)
         : settings_(std::move(settings)),
           appliedSettings_(settings_),
           catalog_(std::move(catalog)),
           latexCatalog_(std::move(latexCatalog)),
           systemVariant_(systemVariant),
           owner_(owner),
-          applySettings_(std::move(applySettings))
+          applySettings_(std::move(applySettings)),
+          changeTextLayout_(std::move(changeTextLayout))
     {
         auto root = Application::Current().Resources().Lookup(box_value(L"SettingsRootTemplate"))
             .as<DataTemplate>().LoadContent().as<Grid>();
@@ -68,7 +71,10 @@ namespace winrt::Folia
         using namespace settings_ui;
         auto categoriesList = cards::List();
         for (auto const& category : categories) {
-            auto card = cards::Link({Localize(category.title), Localize(category.description), cards::Icon(category.icon)});
+            auto icon = category.page == Page::TextLayout
+                ? cards::Icon(WorkspaceIcon::TextLayout).as<FrameworkElement>()
+                : cards::Icon(category.icon).as<FrameworkElement>();
+            auto card = cards::Link({Localize(category.title), Localize(category.description), std::move(icon)});
             card.Name(L"SettingsCategory" + hstring(category.title));
             navigationClicks_.push_back(card.Click(winrt::auto_revoke, [this, page = category.page](auto const&, auto const&) {
                 Navigate(page);
@@ -90,6 +96,10 @@ namespace winrt::Folia
         switch (page) {
         case Page::Home: pageHost_.Content(homePage_); break;
         case Page::General: pageHost_.Content(generalPage_); break;
+        case Page::TextLayout:
+            if (!textLayoutPage_) textLayoutPage_ = BuildTextLayoutPage();
+            pageHost_.Content(textLayoutPage_);
+            break;
         case Page::Themes: pageHost_.Content(themesPage_); break;
         case Page::Completion:
             completionPage_ = BuildCompletionPage();
@@ -157,6 +167,7 @@ namespace winrt::Folia
         latexSuggestionsToggle_.IsOn(settings_.latexSuggestionsEnabled);
         languageCombo_.SelectedIndex(LanguageIndex(settings_.languageId));
         UpdateWorkspaceAppearance(settings_.appearance);
+        UpdateTextLayouts(settings_.textLayouts);
         RefreshMediaControls();
         refreshing_ = false;
         if (shortcutsPage_) RefreshShortcutList();
@@ -183,6 +194,7 @@ namespace winrt::Folia
         shortcutRows_.revoke();
         latexRows_.revoke();
         applySettings_ = {};
+        changeTextLayout_ = {};
         owner_ = nullptr;
     }
 }

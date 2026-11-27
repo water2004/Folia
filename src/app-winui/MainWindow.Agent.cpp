@@ -194,6 +194,9 @@ namespace winrt::Folia::implementation {
         auto window = get_weak();
         chat::ViewHost host;
         host.window = WindowHandle();
+        host.changeTextLayout = [window](TextLayoutOptions const& value) {
+            if (auto main = window.get(); main && !main->windowClosed) main->ChangeTextLayout(TextLayoutTarget::Chat, value);
+        };
         host.tabs = [window] {
             std::vector<chat::OpenTab> snapshot;
             if (auto main = window.get()) {
@@ -287,6 +290,7 @@ namespace winrt::Folia::implementation {
         chat->Rehost(ChatHostFor(document));
         chat->SetTheme(themeProfile);
         chat->SetMediaDisplaySettings(appSettings.media);
+        chat->SetTextLayout(appSettings.textLayouts.chat);
         agentChatViews.insert(std::move(page));
     }
 
@@ -303,7 +307,8 @@ namespace winrt::Folia::implementation {
         auto getView = [&](std::shared_ptr<WorkspaceDocument> const& document) -> std::shared_ptr<chat::ChatView> {
             if (!document || document->kind != WorkspaceTabKind::Chat) return {};
             if (auto found = agentChatViews.find(document->id); found != agentChatViews.end()) return found->second;
-            auto result = chat::ChatView::Create(chat::LoadConversation(document->chatId), ChatHostFor(document), themeProfile, appSettings.media);
+            auto result = chat::ChatView::Create(chat::LoadConversation(document->chatId), ChatHostFor(document), themeProfile,
+                appSettings.media, appSettings.textLayouts.chat);
             agentChatViews.emplace(document->id, result);
             return result;
         };

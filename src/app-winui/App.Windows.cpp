@@ -13,6 +13,7 @@ namespace winrt::Folia::implementation {
     }
     Microsoft::UI::Xaml::Window App::CreateMainWindow(winrt::hstring const& path) {
         auto window = winrt::make<MainWindow>(path);
+        if (pendingTextLayouts) winrt::get_self<MainWindow>(window)->UpdateTextLayouts(*pendingTextLayouts);
         if (!tabMouseHook) {
             tabMouseHook.reset(::SetWindowsHookExW(WH_MOUSE, TabMouseHook, nullptr, ::GetCurrentThreadId()));
             winrt::check_bool(static_cast<bool>(tabMouseHook));
@@ -82,6 +83,7 @@ namespace winrt::Folia::implementation {
         }
         closingPreparedWindows = false;
         if (windows.empty()) {
+            FlushTextLayouts();
             tabMouseHook.reset();
             activationSubscription.revoke();
             if (activationInstance && activationInstance.IsCurrent()) activationInstance.UnregisterKey();
@@ -206,5 +208,36 @@ namespace winrt::Folia::implementation {
                 }
             }
         }
+    }
+
+    void App::ChangeTextLayouts(MainWindow& source, TextLayoutProfiles const& layouts) {
+        source.UpdateTextLayouts(layouts);
+        for (auto const& item : windows) {
+            auto window = winrt::get_self<MainWindow>(item.window.as<winrt::Folia::MainWindow>());
+            if (window != &source && !window->windowClosed) window->UpdateTextLayouts(layouts);
+        }
+        pendingTextLayouts = layouts;
+        textLayoutSaveSource = source.get_weak();
+        if (!textLayoutSaveTimer) {
+            textLayoutSaveTimer = source.DispatcherQueue().CreateTimer();
+            textLayoutSaveTimer.IsRepeating(false);
+            textLayoutSaveTimer.Interval(std::chrono::milliseconds(280));
+            textLayoutSaveTimer.Tick([weak = get_weak()](auto const&, auto const&) {
+                if (auto app = weak.get()) app->FlushTextLayouts();
+            });
+        }
+        textLayoutSaveTimer.Stop();
+        textLayoutSaveTimer.Start();
+    }
+
+    void App::FlushTextLayouts() {
+        if (!pendingTextLayouts) return;
+        textLayoutSaveTimer.Stop();
+        if (auto error = SaveTextLayouts(*pendingTextLayouts)) {
+            if (auto source = textLayoutSaveSource.get(); source && !source->windowClosed) source->ShowError(*error);
+            return;
+        }
+        pendingTextLayouts.reset();
+        textLayoutSaveSource = {};
     }
 }

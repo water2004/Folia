@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "agent/ChatMotion.h"
 #include "agent/ChatActivityView.h"
+#include "agent/ChatTextLayout.h"
 #include "ui/ControlHelpers.h"
 #include <winrt/Microsoft.UI.Xaml.Automation.h>
 #include "workspace/WorkspaceIcons.h"
@@ -54,11 +55,11 @@ namespace winrt::Folia::chat {
             return trimmed ? hstring(view) + L"…" : hstring(view);
         }
 
-        TextBlock Detail(hstring const& text) {
+        TextBlock Detail(hstring const& text, TextLayoutOptions const& layout) {
             TextBlock body;
             body.Style(ui::ResourceStyle(L"ChatModelPickerSecondaryLabelStyle"));
             body.Name(L"ChatActivityDetail");
-            body.FontSize(12);
+            ApplyChatTextLayout(body, 12, layout);
             body.TextWrapping(TextWrapping::Wrap);
             body.TextTrimming(TextTrimming::None);
             body.IsTextSelectionEnabled(true);
@@ -161,11 +162,16 @@ namespace winrt::Folia::chat {
             auto& item = items_[i];
             if (items_.size() > 1) details_.Children().Append(Header(i, complete_ ? item.finished : item.title, item.expanded));
             if ((items_.size() == 1 || item.expanded) && !item.detail.empty()) {
-                item.body = Detail(item.detail);
+                item.body = Detail(item.detail, textLayout_);
                 details_.Children().Append(item.body);
             }
         }
         root_.Children().Append(details_);
+    }
+    void ChatActivityView::SetTextLayout(TextLayoutOptions const& layout) {
+        if (textLayout_ == layout) return;
+        textLayout_ = layout;
+        for (auto const& item : items_) if (item.body) ApplyChatTextLayout(item.body, 12, layout);
     }
     void ChatActivityView::Reason(hstring const& value) {
         if (value.empty()) return;

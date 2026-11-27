@@ -14,7 +14,7 @@ namespace winrt::Folia
         ::Microsoft::WRL::ComPtr<ID2D1DeviceContext5> svgContext;
         if (resources.d2dContext) resources.d2dContext.As(&svgContext);
         return {themeProfile, themeRevision, resources.surfaceWidthDip, resources.surfaceHeightDip,
-            resources.Ready(), static_cast<bool>(svgContext), mediaSettings};
+            resources.Ready(), static_cast<bool>(svgContext), mediaSettings, {}, textLayout};
     }
 
     bool EditorSurfaceRenderer::MatchesMathPreparationContext(EditorMathPreparationContext const& context) const
@@ -30,9 +30,9 @@ namespace winrt::Folia
         if (stop.stop_requested()) throw winrt::hresult_canceled();
         auto result = std::make_unique<EditorMathPreparation>();
         result->context = context;
-        auto sheet = CreateEditorStyleSheet(context.theme);
+        auto sheet = CreateEditorStyleSheet(context.theme, context.textLayout);
         auto metrics = EditorDocumentLayoutMetrics(frame.renderModel, context.surfaceWidth,
-            sheet.horizontalPadding, sheet.code.size);
+            sheet.horizontalPadding, sheet.code.size, sheet.marginScale);
         auto width = metrics.width;
         auto batch = result->math.BeginBatch();
         auto formula = [&](std::u32string_view tex, bool display, float available, D2D1_COLOR_F foreground, float fontSize)

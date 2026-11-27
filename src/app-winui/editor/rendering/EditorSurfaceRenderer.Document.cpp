@@ -36,7 +36,7 @@ namespace winrt::Folia
         nonInteractiveRegions.clear();
         inlineMathPreviewBounds.reset();
         auto metrics = EditorDocumentLayoutMetrics(frame.renderModel, resources.surfaceWidthDip,
-            styleSheet.horizontalPadding, styleSheet.code.size);
+            styleSheet.horizontalPadding, styleSheet.code.size, styleSheet.marginScale);
         auto sourceGutterWidth = metrics.sourceGutterWidth;
         auto sourceGutterLeft = metrics.sourceGutterLeft;
         auto documentLeft = metrics.left;

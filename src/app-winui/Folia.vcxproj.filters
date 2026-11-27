@@ -141,6 +141,12 @@
     <ClInclude Include="ui\ControlHelpers.h">
       <Filter>Application Shell</Filter>
     </ClInclude>
+    <ClInclude Include="ui\TextLayoutControls.h">
+      <Filter>Application Shell</Filter>
+    </ClInclude>
+    <ClCompile Include="editor\text_layout_options.ixx">
+      <Filter>Editor</Filter>
+    </ClCompile>
     <ClInclude Include="settings\views\ModelEffortChoice.h">
       <Filter>Settings\Views</Filter>
     </ClInclude>
@@ -169,6 +175,9 @@
       <Filter>Agent Chat</Filter>
     </ClInclude>
     <ClInclude Include="agent\ChatPalette.h">
+      <Filter>Agent Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="agent\ChatTextLayout.h">
       <Filter>Agent Chat</Filter>
     </ClInclude>
     <ClInclude Include="agent\ChatReplySurface.h">
@@ -263,6 +272,12 @@
     </ClCompile>
     <ClCompile Include="settings\views\SettingsView.General.cpp">
       <Filter>Settings\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="settings\views\SettingsView.TextLayout.cpp">
+      <Filter>Settings\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\TextLayoutControls.cpp">
+      <Filter>Application Shell</Filter>
     </ClCompile>
     <ClCompile Include="settings\views\SettingsView.Shortcuts.cpp">
       <Filter>Settings\Views</Filter>
@@ -1336,6 +1351,9 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainWindow.xaml">
+      <Filter>Resources</Filter>
+    </Page>
+    <Page Include="ui\TextLayoutChrome.xaml">
       <Filter>Resources</Filter>
     </Page>
   </ItemGroup>

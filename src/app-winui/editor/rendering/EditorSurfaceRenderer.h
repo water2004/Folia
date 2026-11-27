@@ -63,6 +63,7 @@ namespace winrt::Folia
             detail::EditorRenderFrame const& frame);
         void CancelPdfExport();
         void SetTheme(folia::ThemeProfile const& value);
+        bool SetTextLayout(TextLayoutOptions const& value);
         folia::ThemeProfile Theme() const;
         void SetMediaDisplaySettings(MediaDisplaySettings const& value);
         MediaDisplaySettings const& MediaSettings() const noexcept { return mediaSettings; }
@@ -149,6 +150,7 @@ namespace winrt::Folia
         std::function<void()> EmbeddedCompletionCallback();
 
         void Invalidate();
+        void RefreshStyleSheet();
         void PresentPendingFrame();
 
         struct InvalidationState
@@ -175,6 +177,7 @@ namespace winrt::Folia
         TreeSitterHighlighter treeSitter;
         std::shared_ptr<InvalidationState> invalidationState = std::make_shared<InvalidationState>();
         folia::ThemeProfile themeProfile = folia::default_theme_profile();
+        TextLayoutOptions textLayout;
         std::uint64_t themeRevision = 1;
         EditorStyleSheet styleSheet = CreateEditorStyleSheet(themeProfile);
         MediaDisplaySettings mediaSettings;

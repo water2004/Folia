@@ -5,6 +5,7 @@
 #include "settings/views/LatexCommandSettingsComponents.h"
 #include "settings/views/SettingsBreadcrumb.h"
 #include "theme/ThemeCatalog.h"
+#include "ui/TextLayoutControls.h"
 
 import folia.platform.editor_shortcut_settings;
 
@@ -14,7 +15,8 @@ namespace winrt::Folia
     {
     public:
         using ApplySettings = std::function<std::optional<winrt::hstring>(AppSettings const&)>;
-        enum class Page { Home, General, Shortcuts, Latex, Completion, Providers, Themes, Licenses, About };
+        using ChangeTextLayout = std::function<void(TextLayoutTarget, TextLayoutOptions const&)>;
+        enum class Page { Home, General, TextLayout, Shortcuts, Latex, Completion, Providers, Themes, Licenses, About };
 
         SettingsView(
             Microsoft::UI::Xaml::Controls::ContentControl const& host,
@@ -23,7 +25,8 @@ namespace winrt::Folia
             std::shared_ptr<LatexCommandCatalog> latexCatalog,
             folia::Theme systemVariant,
             HWND owner,
-            ApplySettings applySettings);
+            ApplySettings applySettings,
+            ChangeTextLayout changeTextLayout = {});
 
         void Navigate(Page page);
         void Focus();
@@ -33,6 +36,7 @@ namespace winrt::Folia
         void CancelShortcutCapture();
         void UpdateWorkspaceAppearance(WorkspaceAppearance const& appearance);
         void UpdateMediaSettings(MediaDisplaySettings const& media);
+        void UpdateTextLayouts(TextLayoutProfiles const&);
         void UpdateAppliedTheme(std::string const& id);
         void UpdateFileOpening(bool newWindow);
         void Detach();
@@ -40,6 +44,7 @@ namespace winrt::Folia
     private:
         winrt::Microsoft::UI::Xaml::UIElement BuildHomePage();
         winrt::Microsoft::UI::Xaml::UIElement BuildGeneralPage();
+        winrt::Microsoft::UI::Xaml::UIElement BuildTextLayoutPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildCompletionPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildProvidersPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildShortcutsPage();
@@ -93,6 +98,7 @@ namespace winrt::Folia
         folia::Theme systemVariant_ = folia::Theme::Dark;
         HWND owner_ = nullptr;
         ApplySettings applySettings_;
+        ChangeTextLayout changeTextLayout_;
         winrt::Microsoft::UI::Xaml::Controls::ContentControl pageHost_{nullptr};
         settings_ui::SettingsBreadcrumb breadcrumb_;
         std::vector<std::pair<Page, winrt::Microsoft::UI::Xaml::Controls::Button>> categoryButtons_;
@@ -100,6 +106,8 @@ namespace winrt::Folia
         Page currentPage_ = Page::Home;
         winrt::Microsoft::UI::Xaml::UIElement homePage_{nullptr};
         winrt::Microsoft::UI::Xaml::UIElement generalPage_{ nullptr };
+        winrt::Microsoft::UI::Xaml::UIElement textLayoutPage_{nullptr};
+        std::unique_ptr<ui::TextLayoutControls> readingLayout_, chatLayout_;
         winrt::Microsoft::UI::Xaml::UIElement completionPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::UIElement shortcutsPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::UIElement latexPage_{ nullptr };

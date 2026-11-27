@@ -29,6 +29,7 @@ namespace winrt::Folia::implementation
         auto loadedSettings = winrt::Folia::LoadAppSettings();
         appSettings = std::move(loadedSettings.settings);
         editorRenderer.SetMediaDisplaySettings(appSettings.media);
+        editorRenderer.SetTextLayout(appSettings.textLayouts.reading);
         ExtendsContentIntoTitleBar(true);
         AppWindow().TitleBar().PreferredHeightOption(Microsoft::UI::Windowing::TitleBarHeightOption::Standard);
         RegisterCommandHandlers();

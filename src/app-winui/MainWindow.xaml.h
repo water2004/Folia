@@ -205,6 +205,11 @@ namespace winrt::Folia::implementation
         void SetDocumentCommandsVisible(bool visible);
         std::optional<winrt::hstring> ApplySettings(winrt::Folia::AppSettings const& settings);
         void UpdateMediaSettings(winrt::Folia::MediaDisplaySettings const& settings);
+        void ChangeTextLayout(TextLayoutTarget, TextLayoutOptions const&);
+        void UpdateTextLayouts(TextLayoutProfiles const&);
+        void RefreshTextLayout();
+        std::unique_ptr<ui::TextLayoutControls> BindReadingTextLayout(
+            Microsoft::UI::Xaml::Controls::Button const&, winrt::Folia::DocumentTools&);
         void ApplyMediaToViews();
         void RegisterCommandHandlers();
         void ToggleSourceMode();
@@ -280,6 +285,8 @@ namespace winrt::Folia::implementation
         winrt::Folia::EditorSidebarController sidebarController;
         winrt::Microsoft::UI::Xaml::Controls::Flyout footnoteFlyout{ nullptr };
         winrt::Folia::AppSettings appSettings;
+        std::unique_ptr<ui::TextLayoutControls> readingTextLayout, otherTextLayout;
+        bool textLayoutRefreshQueued = false;
         std::shared_ptr<winrt::Folia::InlineCompletionController> inlineCompletion;
         std::shared_ptr<winrt::Folia::ThemeCatalog> themeCatalog = std::make_shared<winrt::Folia::ThemeCatalog>();
         std::shared_ptr<winrt::Folia::LatexCommandCatalog> latexCommandCatalog =

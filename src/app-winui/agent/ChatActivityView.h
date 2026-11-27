@@ -1,5 +1,7 @@
 #pragma once
 
+import folia.app.text_layout_options;
+
 namespace winrt::Folia::chat {
     // One disclosure covers an uninterrupted run of activity between Markdown passages.
     class ChatActivityView : public std::enable_shared_from_this<ChatActivityView> {
@@ -14,6 +16,7 @@ namespace winrt::Folia::chat {
         void EndTool(std::string const&, bool failed, hstring const&);
         void Status(hstring const& live, hstring const& finished);
         void Complete();
+        void SetTextLayout(TextLayoutOptions const&);
     private:
         enum class Kind { Reasoning, Tool, Status };
         struct Item {
@@ -32,6 +35,7 @@ namespace winrt::Folia::chat {
         std::optional<std::size_t> currentReason_, currentTool_;
         Microsoft::UI::Xaml::Controls::TextBlock summary_{nullptr};
         Microsoft::UI::Xaml::Controls::Button summaryButton_{nullptr};
+        TextLayoutOptions textLayout_;
         bool expanded_ = false, complete_ = false;
     };
 }

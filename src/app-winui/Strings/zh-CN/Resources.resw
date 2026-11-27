@@ -642,4 +642,12 @@
   <data name="ChatActionPageNow" xml:space="preserve"><value>正在读取网页</value></data>
   <data name="ChatActionPageDone" xml:space="preserve"><value>已读取网页</value></data>
   <data name="ChatWebFormatAuto" xml:space="preserve"><value>自动</value></data>
+  <data name="TextLayout" xml:space="preserve"><value>排版</value></data>
+  <data name="TextLayoutDescription" xml:space="preserve"><value>分别调整文档阅读和聊天的字号、行距与页边距。</value></data>
+  <data name="TextLayoutReading" xml:space="preserve"><value>文档阅读</value></data>
+  <data name="TextLayoutChat" xml:space="preserve"><value>聊天</value></data>
+  <data name="TextLayoutFont" xml:space="preserve"><value>字号</value></data>
+  <data name="TextLayoutLineSpacing" xml:space="preserve"><value>行距</value></data>
+  <data name="TextLayoutMargin" xml:space="preserve"><value>页边距</value></data>
+  <data name="TextLayoutReset" xml:space="preserve"><value>恢复默认</value></data>
 </root>

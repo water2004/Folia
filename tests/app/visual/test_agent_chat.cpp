@@ -48,6 +48,11 @@ namespace winrt::Folia::implementation {
             shell->appSettings.themeId = "folia.dark";
             shell->UpdateTheme();
         }
+        static std::string ThemeId(MainWindow* shell) { return shell->appSettings.themeId; }
+        static void ThemeId(MainWindow* shell, std::string const& id) {
+            shell->appSettings.themeId = id;
+            shell->UpdateTheme();
+        }
         static void Close(MainWindow* shell) { shell->CloseDocumentAsync(Active(shell)->id); }
         static void CloseRightView(MainWindow* shell) {
             shell->CloseEditorViewAsync(shell->editorGroups.Selected(EditorGroup::Right));
@@ -66,6 +71,14 @@ namespace winrt::Folia::implementation {
         }
         static void CloseId(MainWindow* shell, std::uint64_t id) { shell->CloseDocumentAsync(id); }
         static void ShowSidebar(MainWindow* shell) { shell->SelectWorkspacePane(MainWindow::WorkspacePane::Chats); }
+        static auto Layouts(MainWindow* shell) { return shell->appSettings.textLayouts; }
+        static void ResetLayouts(MainWindow* shell, TextLayoutProfiles const& layouts) {
+            App::Current()->ChangeTextLayouts(*shell, layouts);
+        }
+        static auto ReadingLayout(MainWindow* shell) { return shell->editorRenderer.CaptureMathPreparationContext().textLayout; }
+        static auto SplitReadingLayout(MainWindow* shell) {
+            return shell->otherEditorRenderer ? shell->otherEditorRenderer->CaptureMathPreparationContext().textLayout : TextLayoutOptions{};
+        }
     };
 }
 
@@ -132,6 +145,145 @@ namespace {
     }
 
     suite agent_chat_tests = [] {
+        "toolbar and settings apply separate reading and chat text layouts"_test = [] {
+            auto window = visual_tests::Window();
+            auto shell = Access::Impl(window);
+            auto original = Access::Layouts(shell);
+            auto theme = Access::ThemeId(shell);
+            auto conversation = chat::NewConversation("Typography");
+            auto cleanup = wil::scope_exit([&] {
+                chat::DeleteConversation(conversation.id);
+                Access::ResetLayouts(shell, original);
+                if (theme != Access::ThemeId(shell)) Access::ThemeId(shell, theme);
+            });
+            Access::ResetLayouts(shell, {});
+            window.AppWindow().Resize({1500, 980});
+            auto root = window.Content().as<Grid>();
+            auto findSlider = [](DependencyObject const& page, std::wstring_view name) {
+                return Find<Slider>(page, [&](auto const& item) { return item.Name() == name; });
+            };
+            auto reader = root.FindName(L"ReadingTextLayoutButton").as<Button>();
+            Pump([&] { return reader.IsLoaded() && reader.ActualWidth() > 0; });
+            app_tests::MouseInput mouse(window);
+            auto flyout = reader.Flyout().as<Flyout>();
+            flyout.ShowAt(reader);
+            auto font = findSlider(flyout.Content(), L"TextLayoutFontSlider");
+            auto leading = findSlider(flyout.Content(), L"TextLayoutLineSpacingSlider");
+            auto margin = findSlider(flyout.Content(), L"TextLayoutMarginSlider");
+            Pump([&] { return flyout.IsOpen() && font.IsLoaded() && font.ActualWidth() >= 250; });
+            expect(font.Value() == 100.0 && leading.Value() == 100.0 && margin.Value() == 100.0);
+            auto thumb = Find<Primitives::Thumb>(font, [](auto const& item) { return item.Name() == L"HorizontalThumb"; });
+            if (!expect(static_cast<bool>(thumb))) return;
+            Capture(window, "text-layout-reading-default.png");
+            {
+                auto waitForInput = [] {
+                    auto ready = std::chrono::steady_clock::now() + std::chrono::milliseconds(60);
+                    Pump([&] { return std::chrono::steady_clock::now() >= ready; });
+                };
+                mouse.Move(thumb, {static_cast<float>(thumb.ActualWidth() / 2.0), static_cast<float>(thumb.ActualHeight() / 2.0)});
+                waitForInput();
+                mouse.Left(true);
+                waitForInput();
+                mouse.Move(font, {static_cast<float>(font.ActualWidth() - 4), static_cast<float>(font.ActualHeight() / 2.0)});
+                waitForInput();
+                mouse.Left(false);
+                Pump([&] { return font.Value() == 160.0; });
+            }
+            leading.Value(140);
+            margin.Value(150);
+            TextLayoutOptions const reading{160, 140, 150};
+            Pump([&] { return Access::ReadingLayout(shell) == reading; });
+            expect(Access::Layouts(shell).chat == TextLayoutOptions{});
+            Capture(window, "text-layout-reading.png");
+            flyout.Hide();
+            Pump([&] { return !flyout.IsOpen(); });
+
+            auto split = root.FindName(L"SplitEditorButton").as<Button>();
+            Invoke(split);
+            Pump([&] { return Access::Split(shell) && Access::SplitReadingLayout(shell) == reading; });
+            Access::CloseRightView(shell);
+            Pump([&] { return !Access::Split(shell); });
+
+            chat::AppendEntry(conversation.id, {folia::ai::MessageRole::User, "A readable question"});
+            chat::AppendEntry(conversation.id, {folia::ai::MessageRole::Assistant,
+                "## A readable reply\n\nThe typography controls adjust this Markdown reply and the question independently of the reading pane. "
+                "The same values are available in Settings. A longer paragraph makes the new line spacing easy to see."});
+            Access::Open(shell, conversation.id);
+            auto host = Access::Host(shell);
+            Button chatButton{nullptr};
+            StackPanel chatColumn{nullptr};
+            TextBlock question{nullptr};
+            Pump([&] {
+                chatButton = Find<Button>(host, [](auto const& item) { return item.Name() == L"ChatTextLayoutButton"; });
+                chatColumn = Find<StackPanel>(host, [](auto const& item) { return item.Name() == L"ChatTextColumn"; });
+                question = Find<TextBlock>(host, [](auto const& item) { return item.Text() == L"A readable question"; });
+                return chatButton && chatButton.IsLoaded() && question && chatColumn && chatColumn.ActualWidth() > 0;
+            });
+            auto chatFlyout = chatButton.Flyout().as<Flyout>();
+            chatFlyout.ShowAt(chatButton);
+            auto chatFont = findSlider(chatFlyout.Content(), L"TextLayoutFontSlider");
+            auto chatMargin = findSlider(chatFlyout.Content(), L"TextLayoutMarginSlider");
+            Pump([&] { return chatFlyout.IsOpen() && chatFont.IsLoaded(); });
+            expect(chatFont.Value() == 100.0);
+            chatFont.Value(140);
+            chatMargin.Value(125);
+            Pump([&] { return question.FontSize() == 21.0 && chatColumn.Padding().Left == 22.5; });
+            Capture(window, "text-layout-chat.png");
+            chatFlyout.Hide();
+            Pump([&] { return !chatFlyout.IsOpen(); });
+
+            Invoke(root.FindName(L"SettingsButton").as<Button>());
+            auto settingsHost = root.FindName(L"SettingsViewHost").as<ContentControl>();
+            Button category{nullptr};
+            Pump([&] {
+                category = Find<Button>(settingsHost, [](auto const& item) { return item.Name() == L"SettingsCategoryTextLayout"; });
+                return category && category.IsLoaded();
+            });
+            Invoke(category);
+            StackPanel settingsChat{nullptr}, settingsReading{nullptr};
+            Pump([&] {
+                auto findProfile = [&](wchar_t const* name) { return Find<StackPanel>(settingsHost, [&](auto const& item) { return item.Name() == name; }); };
+                settingsChat = findProfile(L"ChatTextLayout");
+                settingsReading = findProfile(L"ReadingTextLayout");
+                return settingsChat && settingsReading && settingsChat.IsLoaded();
+            });
+            expect(findSlider(settingsReading, L"TextLayoutFontSlider").Value() == 160.0);
+            expect(findSlider(settingsChat, L"TextLayoutFontSlider").Value() == 140.0);
+            findSlider(settingsChat, L"TextLayoutLineSpacingSlider").Value(155);
+            TextLayoutOptions const chatLayout{140, 155, 125};
+            Pump([&] { return LoadAppSettings().settings.textLayouts == TextLayoutProfiles{reading, chatLayout}; });
+            Capture(window, "text-layout-settings.png");
+            auto reopened = winrt::Folia::implementation::App::Current()->CreateMainWindow();
+            expect(Access::Layouts(Access::Impl(reopened)) == TextLayoutProfiles{reading, chatLayout});
+            reopened.Close();
+            Access::Open(shell, conversation.id);
+            Pump([&] { return chatButton.IsLoaded() && chatColumn.ActualWidth() > 0; });
+            Access::Dark(shell);
+            chatFlyout.ShowAt(chatButton);
+            FlyoutPresenter presenter{nullptr};
+            Pump([&] {
+                auto ancestor = chatFlyout.Content().as<DependencyObject>();
+                while (ancestor && !presenter) {
+                    presenter = ancestor.try_as<FlyoutPresenter>();
+                    ancestor = Media::VisualTreeHelper::GetParent(ancestor);
+                }
+                return chatFlyout.IsOpen() && presenter && presenter.IsLoaded();
+            });
+            expect(findSlider(chatFlyout.Content(), L"TextLayoutLineSpacingSlider").Value() == 155.0);
+            auto background = presenter.Background().try_as<Media::SolidColorBrush>();
+            auto const& dark = Access::Theme(shell).colors;
+            const winrt::Windows::UI::Color darkSurface{255, dark.shell_layer_bg.r, dark.shell_layer_bg.g, dark.shell_layer_bg.b};
+            expect(background && background.Color() == darkSurface);
+            auto title = Find<TextBlock>(chatFlyout.Content(), [](auto const& text) { return text.Text() == Localize(L"TextLayout"); });
+            auto ink = title ? title.Foreground().try_as<Media::SolidColorBrush>() : nullptr;
+            const winrt::Windows::UI::Color darkInk{255, dark.shell_fg.r, dark.shell_fg.g, dark.shell_fg.b};
+            expect(ink && ink.Color() == darkInk);
+            Capture(window, "text-layout-chat-dark.png");
+            chatFlyout.Hide();
+            Pump([&] { return !chatFlyout.IsOpen(); });
+            Access::Close(shell);
+        };
+
         "agent Mermaid uses the reading theme on open and repaints the existing reply on setting changes"_test = [] {
             auto window = visual_tests::Window();
             auto shell = Access::Impl(window);

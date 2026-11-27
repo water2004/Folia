@@ -6,6 +6,7 @@
 #include <dwrite.h>
 
 import folia.core.theme;
+import folia.app.text_layout_options;
 
 namespace winrt::Folia
 {
@@ -61,8 +62,11 @@ namespace winrt::Folia
         std::array<D2D1_COLOR_F, 11> syntaxColors{};
         float horizontalPadding = 48.0f;
         float verticalPadding = 40.0f;
+        float marginScale = 1.0f;
+        float fontScale = 1.0f;
+        float lineSpacingScale = 1.0f;
         float blockGap = 6.0f;
     };
 
-    EditorStyleSheet CreateEditorStyleSheet(folia::ThemeProfile const& theme);
+    EditorStyleSheet CreateEditorStyleSheet(folia::ThemeProfile const& theme, TextLayoutOptions const& options = {});
 }

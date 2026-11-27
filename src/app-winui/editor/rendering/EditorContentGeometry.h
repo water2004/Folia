@@ -14,18 +14,19 @@ namespace winrt::Folia
         float sourceGutterWidth = 0.0f;
     };
 
-    inline float EditorHorizontalInset(float surfaceWidth, float horizontalPadding)
+    inline float EditorHorizontalInset(float surfaceWidth, float horizontalPadding, float marginScale = 1.0f)
     {
-        return (std::min)(horizontalPadding, (std::max)(12.0f, surfaceWidth * 0.06f));
+        auto inset = (std::min)(horizontalPadding, (std::max)(12.0f, surfaceWidth * 0.06f));
+        return (std::min)(inset * marginScale, surfaceWidth * 0.25f);
     }
 
     // Background geometry and foreground painting must use identical width
     // constraints, including the source-mode line-number gutter.
     inline EditorDocumentMetrics EditorDocumentLayoutMetrics(
         folia::RenderModel const& model, float surfaceWidth,
-        float horizontalPadding, float codeFontSize)
+        float horizontalPadding, float codeFontSize, float marginScale = 1.0f)
     {
-        auto padding = EditorHorizontalInset(surfaceWidth, horizontalPadding);
+        auto padding = EditorHorizontalInset(surfaceWidth, horizontalPadding, marginScale);
         auto sourceDocument = !model.blocks.empty() && model.blocks.front().source_mode;
         auto lines = sourceDocument
             ? (std::max)(std::uint32_t{1}, model.blocks.back().source_line_number) : std::uint32_t{0};

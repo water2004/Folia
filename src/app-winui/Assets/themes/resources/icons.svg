@@ -30,6 +30,7 @@
     <path id="arrow-down" d="M12 4.5v15m-6-6 6 6 6-6"/>
     <path id="chevron-left" d="m14.5 5.5-6.5 6.5 6.5 6.5"/>
     <path id="chevron-right" d="m9.5 5.5 6.5 6.5-6.5 6.5"/>
+    <path id="text-layout" d="M3 18.5 8.5 5.5 14 18.5M5 14h7m3.5-5H21m-4 5h4m-2 4.5h2"/>
     <path id="table-row-grip" d="M9 7h.2m5.6 0h.2M9 12h.2m5.6 0h.2M9 17h.2m5.6 0h.2"/>
     <path id="table-column-grip" d="M7 9h.2m4.8 0h.2m4.8 0h.2M7 15h.2m4.8 0h.2m4.8 0h.2"/>
     <path id="table-resize" d="M12 4v16M3 12h6m-3-3-3 3 3 3m9-3h6m-3-3 3 3-3 3"/>

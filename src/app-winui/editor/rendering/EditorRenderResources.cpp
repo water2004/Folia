@@ -75,7 +75,9 @@ namespace winrt::Folia
                 font.family.c_str(), nullptr, font.weight, font.style, DWRITE_FONT_STRETCH_NORMAL,
                 font.size, L"en-us", target.GetAddressOf()));
             winrt::check_hresult(target->SetWordWrapping(DWRITE_WORD_WRAPPING_WRAP));
-            winrt::check_hresult(target->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM, font.lineHeight, font.size * 1.2f));
+            auto baseline = font.size * 1.2f
+                + (font.lineHeight - font.lineHeight / styleSheet.lineSpacingScale) * 0.5f;
+            winrt::check_hresult(target->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM, font.lineHeight, baseline));
         };
         createFormat(styleSheet.body, textFormat);
         createFormat(styleSheet.heading1, heading1Format);

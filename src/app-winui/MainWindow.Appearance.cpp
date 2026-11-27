@@ -67,6 +67,8 @@ namespace winrt::Folia::implementation
         UpdateBrushResource(resources, L"FoliaShellForegroundBrush", colors.shell_fg);
         UpdateBrushResource(resources, L"FoliaShellMutedForegroundBrush", colors.shell_muted_fg);
         UpdateBrushResource(resources, L"FoliaShellAccentBrush", colors.shell_accent);
+        if (readingTextLayout) readingTextLayout->SetTheme(themeProfile);
+        if (otherTextLayout) otherTextLayout->SetTheme(themeProfile);
         resources.Insert(winrt::box_value(L"FoliaUiFontFamily"), Font(themeProfile.typography.ui.family));
         resources.Insert(winrt::box_value(L"FoliaUiFontSize"), winrt::box_value(static_cast<double>(themeProfile.typography.ui.size)));
         resources.Insert(winrt::box_value(L"FoliaMonoFontFamily"), Font(themeProfile.typography.ui_monospace.family));

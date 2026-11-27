@@ -65,6 +65,7 @@ namespace winrt::Folia::implementation {
         sidebarMotion.ClipReading(ReadingMotionFrame());
         sidebarMotion.PinTrailing({ToolbarStatus(), EditorScrollBar(), WorkspaceNotifications()}, ToolbarFilename());
         documentTools.Attach(ReadingCard(), DocumentToolbar(), DocumentViewport());
+        readingTextLayout = BindReadingTextLayout(ReadingTextLayoutButton(), documentTools);
         for (auto const& flyout : {EncodingButton().Flyout(), DocumentActionsButton().Flyout()}) {
             flyout.Opening(WindowEvent([this](auto const&, auto const&) { documentTools.HoldOpen(true); }));
             flyout.Closed(WindowEvent([this](auto const&, auto const&) { documentTools.HoldOpen(false); }));

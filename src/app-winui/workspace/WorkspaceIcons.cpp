@@ -14,7 +14,7 @@ namespace winrt::Folia {
             L"refresh", L"collapse", L"new-file", L"new-folder", L"outline", L"settings", L"add", L"more", L"split-editor", L"agent-chat",
             L"send-message", L"stop-message", L"read-access", L"expand-choice", L"test-connection", L"provider-service",
             L"settings-model", L"settings-network", L"settings-reasoning",
-            L"settings-prediction", L"settings-cache", L"arrow-down", L"chevron-left", L"chevron-right"};
+            L"settings-prediction", L"settings-cache", L"arrow-down", L"chevron-left", L"chevron-right", L"text-layout"};
         const auto* glyph = FindThemeGlyph(keys[static_cast<std::size_t>(icon)]);
         if (!glyph) throw std::runtime_error("missing workspace glyph in theme assets");
         return LR"(<Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Width="16" Height="16" Stretch="Uniform">

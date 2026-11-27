@@ -7,6 +7,7 @@ namespace winrt::Folia::chat {
         void SetTheme(folia::ThemeProfile const&);
         folia::ThemeProfile theme;
         MediaDisplaySettings media;
+        TextLayoutOptions textLayout;
         std::uint64_t themeRevision = 0;
     };
 

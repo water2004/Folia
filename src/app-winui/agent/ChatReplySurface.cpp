@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "agent/ChatReplySurface.h"
+#include "agent/ChatTextLayout.h"
 #include <wil/resource.h>
 #include "localization/Localization.h"
 #include <winrt/Windows.ApplicationModel.DataTransfer.h>
@@ -187,7 +188,7 @@ namespace winrt::Folia::chat {
         theme.layout.document_horizontal_padding = 1;
         theme.layout.document_vertical_padding = 2;
         theme.layout.block_gap = 6;
-        auto scale = 15.f / (std::max)(1.f, theme.typography.body.size);
+        auto scale = static_cast<float>(chatBodyFontSize) / (std::max)(1.f, theme.typography.body.size);
         for (auto* font : {&theme.typography.body, &theme.typography.code, &theme.typography.heading1,
                            &theme.typography.heading2, &theme.typography.heading3}) {
             font->size *= scale;
@@ -217,6 +218,7 @@ namespace winrt::Folia::chat {
             appliedTheme_ = appearance_->themeRevision;
         }
         renderer_->SetMediaDisplaySettings(appearance_->media);
+        renderer_->SetTextLayout(appearance_->textLayout);
         if (firstFrame) {
             renderer_->Initialize(slice_);
             renderer_->SetInvalidateCallback([weak = weak_from_this()] { if (auto item = weak.lock()) item->Draw(true); });

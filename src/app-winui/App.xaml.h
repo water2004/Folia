@@ -4,6 +4,8 @@
 #include "workspace/WorkspaceLaunch.h"
 #include <wil/resource.h>
 
+import folia.app.text_layout_options;
+
 namespace winrt::Folia { struct AppSettings; }
 
 namespace winrt::Folia::implementation
@@ -23,6 +25,7 @@ namespace winrt::Folia::implementation
         MainWindow* FindReferencedDocument(std::string_view tabKey, std::filesystem::path const&, std::uint64_t& documentId) const;
         MainWindow* FindChatWindow(std::string_view id) const;
         void UpdateWindowViewSettings(MainWindow const* source, AppSettings const& settings);
+        void ChangeTextLayouts(MainWindow& source, TextLayoutProfiles const&);
 
     private:
         friend struct WorkspaceWindowTestAccess;
@@ -30,6 +33,7 @@ namespace winrt::Folia::implementation
         winrt::fire_and_forget LaunchAsync();
         void OpenWorkspaceWindows(winrt::Folia::WorkspaceLaunchRequest const& request);
         void OnWindowClosed(Microsoft::UI::WindowId id);
+        void FlushTextLayouts();
         static LRESULT CALLBACK TabMouseHook(int code, WPARAM message, LPARAM data) noexcept;
         static bool RouteTabMouse(WPARAM message, LPARAM data);
         Microsoft::Windows::AppLifecycle::AppInstance activationInstance{nullptr};
@@ -37,6 +41,9 @@ namespace winrt::Folia::implementation
         wil::unique_hhook tabMouseHook;
         struct WindowEntry { Microsoft::UI::WindowId id; Microsoft::UI::Xaml::Window window; };
         std::vector<WindowEntry> windows;
+        Microsoft::UI::Dispatching::DispatcherQueueTimer textLayoutSaveTimer{nullptr};
+        std::optional<TextLayoutProfiles> pendingTextLayouts;
+        winrt::weak_ref<MainWindow> textLayoutSaveSource;
         bool closingPreparedWindows = false;
     };
 }

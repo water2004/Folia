@@ -5,6 +5,8 @@
 #include "editor/session/EditorRenderFrame.h"
 #include "editor/rendering/layout/EditorPreparedDocument.h"
 
+import folia.app.text_layout_options;
+
 namespace winrt::Folia
 {
     struct EditorMathPreparationContext
@@ -17,6 +19,7 @@ namespace winrt::Folia
         bool svgSupported = true;
         MediaDisplaySettings media;
         std::optional<float> imageMaxHeight;
+        TextLayoutOptions textLayout;
     };
 
     // Completed math results and compact measured geometry leave background

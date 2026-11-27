@@ -46,6 +46,39 @@ namespace
             winrt::throw_last_error();
     }
 
+    constexpr wchar_t const* textLayoutKeys[]{L"fontPercent", L"lineSpacingPercent", L"marginPercent"};
+
+    winrt::Folia::TextLayoutOptions ReadTextLayout(JsonObject const& root, wchar_t const* key)
+    {
+        using namespace winrt::Folia;
+        TextLayoutOptions result;
+        auto profile = root.TryLookup(key);
+        if (!profile || profile.ValueType() != JsonValueType::Object) return result;
+        auto object = profile.GetObject();
+        for (std::size_t index = 0; index < textLayoutRanges.size(); ++index) {
+            auto value = object.TryLookup(textLayoutKeys[index]);
+            auto const& range = textLayoutRanges[index];
+            if (value && value.ValueType() == JsonValueType::Number)
+                result.*range.value = TextLayoutPercent(value.GetNumber(), range);
+        }
+        return result;
+    }
+
+    void WriteTextLayoutProfiles(JsonObject const& root, winrt::Folia::TextLayoutProfiles const& value)
+    {
+        using namespace winrt::Folia;
+        auto serialize = [](TextLayoutOptions const& options) {
+            JsonObject object;
+            for (std::size_t index = 0; index < textLayoutRanges.size(); ++index)
+                object.Insert(textLayoutKeys[index], JsonValue::CreateNumberValue(options.*textLayoutRanges[index].value));
+            return object;
+        };
+        JsonObject profiles;
+        profiles.Insert(L"reading", serialize(value.reading));
+        profiles.Insert(L"chat", serialize(value.chat));
+        root.Insert(L"textLayout", profiles);
+    }
+
     winrt::hstring MigrateCompletionModel(JsonObject const& root, std::filesystem::path const& path, winrt::Folia::AppSettings& settings)
     {
         using namespace winrt::Folia;
@@ -94,6 +127,10 @@ namespace winrt::Folia
                 && schemaVersion != 3.0 && schemaVersion != 4.0 && schemaVersion != 5.0 && schemaVersion != 6.0)
                 throw std::runtime_error("unsupported settings schema version");
             AppSettings settings;
+            if (auto layouts = root.TryLookup(L"textLayout"); layouts && layouts.ValueType() == JsonValueType::Object) {
+                auto profiles = layouts.GetObject();
+                settings.textLayouts = {ReadTextLayout(profiles, L"reading"), ReadTextLayout(profiles, L"chat")};
+            }
             if (schemaVersion >= 5.0) {
                 auto completion = root.GetNamedObject(L"completion");
                 settings.completion.enabled = completion.GetNamedBoolean(L"enabled", false);
@@ -153,12 +190,19 @@ namespace winrt::Folia
         }
     }
 
-    std::optional<winrt::hstring> SaveAppSettings(AppSettings const& settings)
+    static std::optional<winrt::hstring> StoreAppSettings(AppSettings const& settings, bool onlyTextLayout)
     {
         try
         {
-            if (!settings.completion.promptError.empty()) throw std::invalid_argument(settings.completion.promptError);
             SettingsLock lock;
+            auto path = AssetPath(L"settings.json");
+            if (onlyTextLayout && std::filesystem::exists(path)) {
+                auto root = JsonObject::Parse(to_hstring(ReadUtf8(path)));
+                WriteTextLayoutProfiles(root, settings.textLayouts);
+                WriteSettings(path, root);
+                return std::nullopt;
+            }
+            if (!settings.completion.promptError.empty()) throw std::invalid_argument(settings.completion.promptError);
             Windows::Data::Json::JsonObject root;
             root.Insert(L"schemaVersion", Windows::Data::Json::JsonValue::CreateNumberValue(6));
             Windows::Data::Json::JsonObject completion;
@@ -188,7 +232,8 @@ namespace winrt::Folia
             root.Insert(L"imageMaxWidthPercent", Windows::Data::Json::JsonValue::CreateNumberValue(settings.media.imageMaxWidthPercent));
             root.Insert(L"mermaidTheme", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.media.mermaidTheme)));
             root.Insert(L"shortcutBindings", SerializeShortcutSettings(settings.shortcutBindings));
-            WriteSettings(AssetPath(L"settings.json"), root);
+            WriteTextLayoutProfiles(root, settings.textLayouts);
+            WriteSettings(path, root);
             return std::nullopt;
         }
         catch (winrt::hresult_error const& error)
@@ -199,5 +244,17 @@ namespace winrt::Folia
         {
             return LocalizeFormat(L"UnableSaveSettings", { winrt::to_hstring(error.what()) });
         }
+    }
+
+    std::optional<winrt::hstring> SaveAppSettings(AppSettings const& settings)
+    {
+        return StoreAppSettings(settings, false);
+    }
+
+    std::optional<winrt::hstring> SaveTextLayouts(TextLayoutProfiles const& layouts)
+    {
+        AppSettings settings;
+        settings.textLayouts = layouts;
+        return StoreAppSettings(settings, true);
     }
 }

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "agent/ChatHints.h"
 #include "agent/ChatView.h"
+#include "agent/ChatTextLayout.h"
 #include "ui/ControlHelpers.h"
 #include "workspace/WorkspaceIcons.h"
 #include <shobjidl.h>
@@ -35,9 +36,10 @@ namespace winrt::Folia::chat {
         cancellation_.request_stop();
     }
 
-    std::shared_ptr<ChatView> ChatView::Create(Conversation conversation, ViewHost host, folia::ThemeProfile const& theme, MediaDisplaySettings const& media) {
+    std::shared_ptr<ChatView> ChatView::Create(Conversation conversation, ViewHost host, folia::ThemeProfile const& theme,
+        MediaDisplaySettings const& media, TextLayoutOptions const& layout) {
         auto view = std::shared_ptr<ChatView>(new ChatView(std::move(conversation), std::move(host)));
-        view->Build(theme, media);
+        view->Build(theme, media, layout);
         return view;
     }
 
@@ -45,15 +47,23 @@ namespace winrt::Folia::chat {
         palette_.Apply(theme.colors);
         modelPicker_->SetPalette(palette_);
         transcript_->SetTheme(theme);
+        if (textLayout_) textLayout_->SetTheme(theme);
     }
 
-    void ChatView::Build(folia::ThemeProfile const& theme, MediaDisplaySettings const& media) {
+    void ChatView::SetTextLayout(TextLayoutOptions const& layout) {
+        if (textLayout_) textLayout_->SetOptions(layout);
+        transcript_->SetTextLayout(layout);
+        input_.FontSize(14.0 * layout.font / 100.0);
+        composer_.MaxWidth(ChatColumnMaxWidth(layout) - 8.0);
+    }
+
+    void ChatView::Build(folia::ThemeProfile const& theme, MediaDisplaySettings const& media, TextLayoutOptions const& layout) {
         const auto weak = weak_from_this();
         auto click = [weak](auto member) {
             return [weak, member](auto const&, auto const&) { if (auto view = weak.lock()) ((*view).*member)(); };
         };
         palette_.Apply(theme.colors);
-        transcript_ = ChatTranscript::Create(conversation_.id, theme, media);
+        transcript_ = ChatTranscript::Create(conversation_.id, theme, media, layout);
         transcript_->SetTitle(to_hstring(conversation_.title));
         transcript_->openDocument = [weak](auto const& link, auto const& documents) {
             if (auto view = weak.lock(); view && view->host_.openDocument) view->host_.openDocument(link, documents);
@@ -66,7 +76,6 @@ namespace winrt::Folia::chat {
             cachedTokens_ = last->usage.cachedInputTokens;
         }
         composer_.Spacing(4);
-        composer_.MaxWidth(760);
         composer_.Margin({12, 0, 12, 10});
         empty_.Text(Localize(L"ChatEmpty"));
         empty_.FontSize(20);
@@ -202,7 +211,18 @@ namespace winrt::Folia::chat {
         Label(split_, L"SplitEditor");
         split_.Visibility(host_.split ? Visibility::Visible : Visibility::Collapsed);
         split_.Click([weak](auto const&, auto const&) { if (auto self = weak.lock(); self && self->host_.split) self->host_.split(); });
-        Put(transcript_->Header(), split_, 0, 4);
+        if (host_.changeTextLayout) {
+            Button typography;
+            typography.Name(L"ChatTextLayoutButton");
+            typography.Style(ui::ResourceStyle(L"ChatActionStyle"));
+            textLayout_ = ui::AttachTextLayoutFlyout(typography, layout, [weak](TextLayoutOptions const& value) {
+                if (auto view = weak.lock(); view && view->host_.changeTextLayout) view->host_.changeTextLayout(value);
+            });
+            textLayout_->SetTheme(theme);
+            Put(transcript_->Header(), typography, 0, 4);
+        }
+        Put(transcript_->Header(), split_, 0, 5);
+        SetTextLayout(layout);
         openTabs_.Text(Localize(L"ChatAllowOpenTabs"));
         for (auto const& [button, icon, key] : {std::tuple{stop_, WorkspaceIcon::Stop, L"ChatStop"},
             std::tuple{send_, WorkspaceIcon::Send, L"ChatSend"}}) {

@@ -91,6 +91,7 @@ namespace winrt::Folia::implementation {
         OtherEditorSurface().Loaded(WindowEvent([this](auto const&, auto const&) { QueueOtherGroupRender(); }));
         OtherEditorSurface().SizeChanged(WindowEvent([this](auto const&, auto const&) { QueueOtherGroupRender(); }));
         otherDocumentTools.Attach(OtherReadingCard(), OtherDocumentToolbar(), OtherDocumentViewport());
+        otherTextLayout = BindReadingTextLayout(OtherTextLayoutButton(), otherDocumentTools);
         OtherDocumentMenu().Click(WindowEvent([this](auto const&, auto const&) {
             if (FocusOtherGroup()) DocumentActionsButton().Flyout().ShowAt(DocumentActionsButton());
         }));
@@ -278,6 +279,7 @@ namespace winrt::Folia::implementation {
         OtherCharacterCount().Visibility(editorVisibility);
         OtherEncoding().Visibility(editorVisibility);
         OtherSourceMode().Visibility(editorVisibility);
+        OtherTextLayoutButton().Visibility(editorVisibility);
         OtherWorkspaceImage().Visibility(image ? Visibility::Visible : Visibility::Collapsed);
         if (image && document == workspaceDocuments.Active() && WorkspaceImage().Source()) {
             otherImageDocument = document->id;
@@ -307,6 +309,7 @@ namespace winrt::Folia::implementation {
                 otherEditorRenderer = std::make_unique<EditorSurfaceRenderer>();
                 otherEditorRenderer->SetTheme(themeProfile);
                 otherEditorRenderer->SetMediaDisplaySettings(appSettings.media);
+                otherEditorRenderer->SetTextLayout(appSettings.textLayouts.reading);
                 otherEditorRenderer->Initialize(surface);
                 auto weak = get_weak();
                 otherScrollController.Attach(*otherEditorRenderer, OtherEditorScrollBar(), [weak] {

@@ -260,6 +260,7 @@
                     </Button.Flyout>
                 </Button>
                 <ToggleButton x:Name="SourceModeButton" Style="{StaticResource WorkspacePaneToggleStyle}"/>
+                <Button x:Name="ReadingTextLayoutButton" Style="{StaticResource WorkspaceToolActionStyle}"/>
                 <Button x:Name="SplitEditorButton" Style="{StaticResource WorkspaceToolActionStyle}"/>
             </StackPanel>
         </Grid>
@@ -533,6 +534,7 @@
                         <Button x:Name="OtherEncoding" FontSize="12" MinHeight="22" Height="22" Padding="5,0" Style="{StaticResource SubtleButtonStyle}"
                                 Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
                         <ToggleButton x:Name="OtherSourceMode" Style="{StaticResource WorkspacePaneToggleStyle}"/>
+                        <Button x:Name="OtherTextLayoutButton" Style="{StaticResource WorkspaceToolActionStyle}"/>
                     </StackPanel>
                 </Grid>
                 <Grid x:Name="OtherDocumentViewport" Grid.Row="1" Background="Transparent" IsTabStop="True" AutomationProperties.AccessibilityView="Content">

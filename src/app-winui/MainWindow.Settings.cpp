@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "App.xaml.h"
 #include "MainWindow.xaml.h"
+#include "agent/ChatView.h"
 #include "localization/Localization.h"
 
 namespace winrt::Folia::implementation
@@ -23,8 +24,10 @@ namespace winrt::Folia::implementation
         FormatDocumentButton().Visibility(value);
     }
 
-    std::optional<winrt::hstring> MainWindow::ApplySettings(winrt::Folia::AppSettings const& settings)
+    std::optional<winrt::hstring> MainWindow::ApplySettings(winrt::Folia::AppSettings const& proposed)
     {
+        auto settings = proposed;
+        settings.textLayouts = appSettings.textLayouts;
         if (auto saveError = winrt::Folia::SaveAppSettings(settings))
         {
             ShowError(*saveError);
@@ -54,6 +57,52 @@ namespace winrt::Folia::implementation
         if (themeChanged || mediaChanged || appearanceChanged || openingChanged)
             App::Current()->UpdateWindowViewSettings(this, appSettings);
         return std::nullopt;
+    }
+
+    std::unique_ptr<ui::TextLayoutControls> MainWindow::BindReadingTextLayout(
+        Microsoft::UI::Xaml::Controls::Button const& button, winrt::Folia::DocumentTools& toolbar)
+    {
+        auto panel = ui::AttachTextLayoutFlyout(button, appSettings.textLayouts.reading,
+            [weak = get_weak()](TextLayoutOptions const& value) {
+                if (auto window = weak.get(); window && !window->windowClosed)
+                    window->ChangeTextLayout(TextLayoutTarget::Reading, value);
+            });
+        panel->SetTheme(themeProfile);
+        auto flyout = button.Flyout();
+        flyout.Opening(WindowEvent([&toolbar](auto const&, auto const&) { toolbar.HoldOpen(true); }));
+        flyout.Closed(WindowEvent([&toolbar](auto const&, auto const&) { toolbar.HoldOpen(false); }));
+        return panel;
+    }
+
+    void MainWindow::ChangeTextLayout(TextLayoutTarget target, TextLayoutOptions const& value)
+    {
+        auto profiles = appSettings.textLayouts;
+        (target == TextLayoutTarget::Reading ? profiles.reading : profiles.chat) = value;
+        if (profiles == appSettings.textLayouts) return;
+        App::Current()->ChangeTextLayouts(*this, profiles);
+    }
+
+    void MainWindow::UpdateTextLayouts(TextLayoutProfiles const& value)
+    {
+        if (appSettings.textLayouts == value) return;
+        appSettings.textLayouts = value;
+        if (readingTextLayout) readingTextLayout->SetOptions(value.reading);
+        if (otherTextLayout) otherTextLayout->SetOptions(value.reading);
+        if (settingsView) settingsView->UpdateTextLayouts(value);
+        if (textLayoutRefreshQueued) return;
+        textLayoutRefreshQueued = DispatcherQueue().TryEnqueue(
+            Microsoft::UI::Dispatching::DispatcherQueuePriority::Low, [weak = get_weak()] {
+                if (auto window = weak.get(); window && !window->windowClosed) window->RefreshTextLayout();
+            });
+    }
+
+    void MainWindow::RefreshTextLayout()
+    {
+        textLayoutRefreshQueued = false;
+        auto const& profiles = appSettings.textLayouts;
+        if (editorRenderer.SetTextLayout(profiles.reading)) animationController.RequestFrame();
+        if (otherEditorRenderer && otherEditorRenderer->SetTextLayout(profiles.reading)) QueueOtherGroupRender();
+        for (auto const& [_, chat] : agentChatViews) chat->SetTextLayout(profiles.chat);
     }
 
     void MainWindow::UpdateMediaSettings(winrt::Folia::MediaDisplaySettings const& settings)
@@ -105,7 +154,8 @@ namespace winrt::Folia::implementation
                     latexCommandCatalog,
                     CurrentThemeVariant(),
                     WindowHandle(),
-                    [this](winrt::Folia::AppSettings const& changed) { return ApplySettings(changed); });
+                    [this](winrt::Folia::AppSettings const& changed) { return ApplySettings(changed); },
+                    [this](TextLayoutTarget target, TextLayoutOptions const& value) { ChangeTextLayout(target, value); });
             }
             DocumentPages().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
             SettingsViewHost().Visibility(Microsoft::UI::Xaml::Visibility::Visible);

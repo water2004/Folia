@@ -31,14 +31,15 @@ namespace {
         EditorScrollState scroll;
         std::unique_ptr<EditorPreparedDocument> document;
 
-        explicit MeasurementFixture(float width = 600) {
+        explicit MeasurementFixture(float width = 600, TextLayoutOptions const& layout = {})
+            : sheet(CreateEditorStyleSheet(folia::default_theme_profile(), layout)) {
             resources.InitializeTextMeasurement(sheet, width, 400);
         }
 
         template <class Callback>
         void WithPreparer(winrt::Folia::detail::EditorRenderFrame const& frame, Callback callback) {
             auto metrics = EditorDocumentLayoutMetrics(frame.renderModel, resources.surfaceWidthDip,
-                sheet.horizontalPadding, sheet.code.size);
+                sheet.horizontalPadding, sheet.code.size, sheet.marginScale);
             EditorTextLayoutEngine engine(resources, sheet);
             EditorSvgPainter svg(resources, resourcesCache);
             EditorInlineImageRenderer images(resources, resourcesCache, sheet, normalizer,
@@ -171,6 +172,26 @@ namespace {
     }
 
     suite document_layout_retention_tests = [] {
+        "text layout scales real wrapped lines and document margins"_test = [] {
+            EditorSession session;
+            session.SetText(L"Text layout changes the line height across several lines of wrapped text in a narrow split pane.");
+            auto frame = session.RenderFrame();
+            MeasurementFixture baseline(255), widerMargin(255, {100, 100, 175}), looser(255, {100, 150, 100}), larger(255, {135, 100, 100});
+            auto measure = [&](auto& fixture) {
+                std::pair<float, float> measured;
+                fixture.WithPreparer(frame, [&](auto& preparer, auto&, float width) {
+                    auto prepared = preparer.Prepare(frame.renderModel.blocks.front(), false, false);
+                    measured = {prepared.height, width};
+                });
+                return measured;
+            };
+            auto [height, width] = measure(baseline);
+            auto [looserHeight, looserWidth] = measure(looser);
+            expect(height > 0.0f && looserHeight > height * 1.35f && width == looserWidth);
+            expect(measure(larger).first > height);
+            expect(measure(widerMargin).second < width - 20.0f);
+            expect(widerMargin.sheet.verticalPadding > baseline.sheet.verticalPadding);
+        };
         "markdown image uses the available width and configured limit at its intrinsic ratio"_test = [] {
             MeasurementFixture fixture;
             std::wstring baseDirectory;

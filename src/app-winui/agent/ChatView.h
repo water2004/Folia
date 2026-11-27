@@ -9,6 +9,7 @@
 #include "agent/ChatComposerExtras.h"
 #include "agent/ChatTranscript.h"
 #include "agent/ChatPalette.h"
+#include "ui/TextLayoutControls.h"
 
 namespace winrt::Folia::chat {
     using models::ConfiguredModel;
@@ -21,11 +22,13 @@ namespace winrt::Folia::chat {
         std::function<void()> newChat, rename, split, keep;
         std::function<void(std::string const&, ChatTranscript::Documents const&)> openDocument;
         std::function<void(Conversation const&)> changed;
+        ui::TextLayoutControls::Change changeTextLayout;
     };
 
     class ChatView : public std::enable_shared_from_this<ChatView> {
     public:
-        static std::shared_ptr<ChatView> Create(Conversation, ViewHost, folia::ThemeProfile const&, MediaDisplaySettings const&);
+        static std::shared_ptr<ChatView> Create(Conversation, ViewHost, folia::ThemeProfile const&, MediaDisplaySettings const&,
+            TextLayoutOptions const& = {});
         ~ChatView();
         Microsoft::UI::Xaml::FrameworkElement Element() const { return root_; }
         void Activate();
@@ -33,12 +36,13 @@ namespace winrt::Folia::chat {
         void SetTitle(std::string title);
         void ShowSplit(bool available) { split_.Visibility(available && host_.split ? Microsoft::UI::Xaml::Visibility::Visible : Microsoft::UI::Xaml::Visibility::Collapsed); }
         void SetTheme(folia::ThemeProfile const&);
+        void SetTextLayout(TextLayoutOptions const&);
         void SetMediaDisplaySettings(MediaDisplaySettings const& media) { transcript_->SetMediaDisplaySettings(media); }
 
     private:
         static constexpr std::size_t maxQuestionBytes = 16'000;
         ChatView(Conversation, ViewHost);
-        void Build(folia::ThemeProfile const&, MediaDisplaySettings const&);
+        void Build(folia::ThemeProfile const&, MediaDisplaySettings const&, TextLayoutOptions const&);
         void RefreshAccessLabel();
         void SelectModel(int index);
         void RefreshProfiles();
@@ -79,6 +83,7 @@ namespace winrt::Folia::chat {
         Microsoft::UI::Xaml::Controls::Grid root_, bar_;
         Microsoft::UI::Xaml::Controls::StackPanel composer_;
         std::unique_ptr<ChatModelPicker> modelPicker_;
+        std::unique_ptr<ui::TextLayoutControls> textLayout_;
         Microsoft::UI::Xaml::Controls::TextBox input_;
         Microsoft::UI::Xaml::Controls::StackPanel contextMeter_;
         Microsoft::UI::Xaml::Controls::ProgressRing contextRing_;

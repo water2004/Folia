@@ -7,10 +7,12 @@ import folia.platform.editor_scroll_state;
 namespace winrt::Folia::chat {
     class ChatTranscript : public std::enable_shared_from_this<ChatTranscript> {
     public:
-        static std::shared_ptr<ChatTranscript> Create(std::string, folia::ThemeProfile const&, MediaDisplaySettings const&);
+        static std::shared_ptr<ChatTranscript> Create(std::string, folia::ThemeProfile const&, MediaDisplaySettings const&,
+            TextLayoutOptions const& = {});
         Microsoft::UI::Xaml::Controls::Grid Element() const { return root_; }
         void SetTheme(folia::ThemeProfile const&);
         void SetMediaDisplaySettings(MediaDisplaySettings const&);
+        void SetTextLayout(TextLayoutOptions const&);
         void SetInset(double);
         void Refresh(bool latest);
         void Begin();
@@ -35,12 +37,14 @@ namespace winrt::Folia::chat {
         void Wheel(Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args);
         void Append(Entry const&, bool latest);
         void UpdateNavigation();
+        void ArrangeColumn(double viewportWidth);
         std::string id_;
         void RefreshAppearance();
         std::shared_ptr<ChatMarkdownAppearance> appearance_ = std::make_shared<ChatMarkdownAppearance>();
         HistoryPage page_;
         std::vector<std::uintmax_t> boundaries_;
         std::vector<std::shared_ptr<ChatTurnView>> turns_;
+        std::vector<Microsoft::UI::Xaml::Controls::TextBlock> userMessages_;
         std::shared_ptr<ChatTurnView> MakeTurn();
         Microsoft::UI::Xaml::Controls::Grid root_, header_;
         Microsoft::UI::Xaml::Controls::ScrollViewer scroll_;
@@ -51,6 +55,7 @@ namespace winrt::Folia::chat {
         bool finishing_ = false;
         bool following_ = true, posted_ = false, busy_ = false;
         double offset_ = 0;
+        double composerInset_ = 124.0;
         folia::platform::editor::EditorScrollState wheel_;
         EditorFrameScheduler wheelFrames_;
     };

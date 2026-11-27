@@ -173,6 +173,11 @@
     <ClInclude Include="settings\views\SettingsView.h" />
     <ClInclude Include="settings\views\SettingsViewSupport.h" />
     <ClInclude Include="settings\views\SettingsCards.h" />
+    <ClCompile Include="editor\text_layout_options.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClInclude Include="agent\ChatTextLayout.h" />
+    <ClInclude Include="ui\TextLayoutControls.h" />
     <ClInclude Include="settings\views\ProviderConnectionPicker.h" />
     <ClInclude Include="settings\views\ProviderModelForm.h" />
     <ClInclude Include="settings\views\ProviderIdentity.h" />
@@ -286,6 +291,7 @@
     <Page Include="agent\ChatChrome.xaml" />
     <Page Include="workspace\FolderExplorer.xaml"><SubType>Designer</SubType></Page>
     <Page Include="workspace\WorkspaceChrome.xaml" />
+    <Page Include="ui\TextLayoutChrome.xaml" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\markdown\markdown.ixx">
@@ -716,6 +722,8 @@
     <ClCompile Include="settings\views\SettingsBreadcrumb.cpp" />
     <ClCompile Include="settings\views\SettingsView.cpp" />
     <ClCompile Include="settings\views\SettingsView.General.cpp" />
+    <ClCompile Include="settings\views\SettingsView.TextLayout.cpp" />
+    <ClCompile Include="ui\TextLayoutControls.cpp" />
     <ClCompile Include="settings\views\SettingsView.Shortcuts.cpp" />
     <ClCompile Include="settings\views\SettingsView.Latex.cpp" />
     <ClCompile Include="settings\views\SettingsView.Themes.cpp" />

@@ -642,4 +642,12 @@
   <data name="ChatActionPageNow" xml:space="preserve"><value>Reading webpage</value></data>
   <data name="ChatActionPageDone" xml:space="preserve"><value>Read webpage</value></data>
   <data name="ChatWebFormatAuto" xml:space="preserve"><value>Automatic</value></data>
+  <data name="TextLayout" xml:space="preserve"><value>Text layout</value></data>
+  <data name="TextLayoutDescription" xml:space="preserve"><value>Font size, line spacing and page margins for documents and chat.</value></data>
+  <data name="TextLayoutReading" xml:space="preserve"><value>Document reading</value></data>
+  <data name="TextLayoutChat" xml:space="preserve"><value>Chat</value></data>
+  <data name="TextLayoutFont" xml:space="preserve"><value>Font size</value></data>
+  <data name="TextLayoutLineSpacing" xml:space="preserve"><value>Line spacing</value></data>
+  <data name="TextLayoutMargin" xml:space="preserve"><value>Page margins</value></data>
+  <data name="TextLayoutReset" xml:space="preserve"><value>Restore defaults</value></data>
 </root>

@@ -8,6 +8,7 @@ import folia.markdown.utf;
 #include "editor/rendering/layout/EditorContentPreparation.h"
 #include "editor/rendering/layout/EditorTextLayoutEngine.h"
 #include <dwrite_1.h>
+#include <dwrite_3.h>
 
 namespace winrt::Folia
 {
@@ -306,26 +307,27 @@ namespace winrt::Folia
         float width,
         std::function<void(IDWriteTextLayout*, DisplayInlineText const&)> const& configure) const
     {
-        auto build = [&](DisplayInlineText const& value)
+        auto build = [&](DisplayInlineText const& value, float availableWidth)
         {
-            auto layout = Create(ToWide(value.text), format, width);
+            auto layout = Create(ToWide(value.text), format, availableWidth);
             ApplyStyles(layout.Get(), value.ranges);
             ApplyMathInlineObjects(layout.Get(), value.mathOverlays);
             ApplyBlockSpacingInlineObjects(layout.Get(), value);
             ApplyIndentInlineObjects(layout.Get(), value.indentOverlays);
             ApplyTaskCheckboxInlineObjects(layout.Get(), value.taskCheckboxOverlays);
             if (configure) configure(layout.Get(), value);
+            ApplyNaturalLineSpacing(layout.Get());
             return layout;
         };
 
         if (!display.displayToSource.contains_kind(EditorDisplayPositionKind::BoundaryDecoration))
-            return build(display);
+            return build(display, width);
         const auto baseText = ToWide(display.text);
         auto indents = FindLogicalIndents(display, baseText);
-        if (indents.empty()) return build(display);
+        if (indents.empty()) return build(display, width);
 
         const auto base = display;
-        auto initial = build(base);
+        auto initial = build(base, width);
         if (!initial) return initial;
         for (auto& indent : indents)
         {
@@ -357,12 +359,7 @@ namespace winrt::Folia
         {
             auto const& indent = indents[indentIndex];
             auto content = SliceDisplay(base, indent.contentStart, indent.lineEnd);
-            auto contentLayout = Create(ToWide(content.text), format, (std::max)(1.0f, width - indent.width));
-            ApplyStyles(contentLayout.Get(), content.ranges);
-            ApplyMathInlineObjects(contentLayout.Get(), content.mathOverlays);
-            ApplyBlockSpacingInlineObjects(contentLayout.Get(), content);
-            ApplyTaskCheckboxInlineObjects(contentLayout.Get(), content.taskCheckboxOverlays);
-            if (configure) configure(contentLayout.Get(), content);
+            auto contentLayout = build(content, (std::max)(1.0f, width - indent.width));
             if (!contentLayout) continue;
             UINT32 lineCount = 0;
             if (contentLayout->GetLineMetrics(nullptr, 0, &lineCount) != E_NOT_SUFFICIENT_BUFFER || lineCount <= 1) continue;
@@ -377,7 +374,7 @@ namespace winrt::Folia
                 lineStart += metrics[line].length;
             }
         }
-        if (breaks.empty()) return build(display);
+        if (breaks.empty()) return build(display, width);
         std::ranges::sort(breaks, {}, &std::pair<UINT32, float>::first);
         breaks.erase(std::unique(breaks.begin(), breaks.end(), [](auto const& left, auto const& right) {
             return left.first == right.first;
@@ -389,7 +386,7 @@ namespace winrt::Folia
             ++inserted;
         }
         std::ranges::sort(display.indentOverlays, {}, &DisplayInlineText::IndentOverlay::displayStart);
-        return build(display);
+        return build(display, width);
     }
 
     IDWriteTextFormat* EditorTextLayoutEngine::FormatFor(bool code, std::vector<InlineStyleRange> const& ranges) const
@@ -542,8 +539,9 @@ namespace winrt::Folia
                             : DWRITE_FONT_STYLE_NORMAL,
                         textRange);
                 }
-                const auto fontSize = presentation->absolute_font_size.value_or(
-                    BaseFontSize(range.style, styleSheet) * presentation->relative_font_scale);
+                const auto fontSize = presentation->absolute_font_size
+                    ? *presentation->absolute_font_size * styleSheet.fontScale
+                    : BaseFontSize(range.style, styleSheet) * presentation->relative_font_scale;
                 if (presentation->absolute_font_size
                     || std::abs(presentation->relative_font_scale - 1.0f) > 0.001f)
                 {
@@ -580,6 +578,22 @@ namespace winrt::Folia
         if (requiresDefaultLineSpacing)
             layout->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_DEFAULT, 0.0f, 0.0f);
         ApplyCodeSpanSpacing(layout, ranges);
+    }
+
+    void EditorTextLayoutEngine::ApplyNaturalLineSpacing(IDWriteTextLayout* layout) const
+    {
+        // Inline objects and oversized spans need at least their natural height.
+        if (!layout || styleSheet.lineSpacingScale <= 1.0f) return;
+        DWRITE_LINE_SPACING_METHOD method{};
+        float height = 0, baseline = 0;
+        if (FAILED(layout->GetLineSpacing(&method, &height, &baseline))
+            || method != DWRITE_LINE_SPACING_METHOD_DEFAULT) return;
+        ::Microsoft::WRL::ComPtr<IDWriteTextLayout3> extended;
+        if (SUCCEEDED(layout->QueryInterface(IID_PPV_ARGS(extended.GetAddressOf())))) {
+            DWRITE_LINE_SPACING spacing{DWRITE_LINE_SPACING_METHOD_PROPORTIONAL, styleSheet.lineSpacingScale,
+                1.0f, 0.5f, DWRITE_FONT_LINE_GAP_USAGE_DEFAULT};
+            winrt::check_hresult(extended->SetLineSpacing(&spacing));
+        }
     }
 
     float EditorTextLayoutEngine::MeasureHeight(IDWriteTextLayout* layout, float fallbackHeight,

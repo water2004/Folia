@@ -16,12 +16,12 @@ namespace
         return { value.c_str(), value.size() };
     }
 
-    winrt::Folia::EditorFontStyle ConvertFont(folia::ThemeFont const& font)
+    winrt::Folia::EditorFontStyle ConvertFont(folia::ThemeFont const& font, float fontScale, float lineSpacingScale)
     {
         return {
             ToWide(font.family),
-            font.size,
-            font.line_height,
+            font.size * fontScale,
+            font.line_height * fontScale * lineSpacingScale,
             static_cast<DWRITE_FONT_WEIGHT>(font.weight),
             font.italic ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL,
         };
@@ -30,17 +30,22 @@ namespace
 
 namespace winrt::Folia
 {
-    EditorStyleSheet CreateEditorStyleSheet(folia::ThemeProfile const& theme)
+    EditorStyleSheet CreateEditorStyleSheet(folia::ThemeProfile const& theme, TextLayoutOptions const& options)
     {
         EditorStyleSheet sheet;
         sheet.markerAssets = theme.syntax_markers ? theme.syntax_markers : DefaultSyntaxMarkerTheme();
         sheet.marker.sizeEm = sheet.markerAssets->size_em;
         sheet.marker.gapEm = sheet.markerAssets->gap_em;
-        sheet.body = ConvertFont(theme.typography.body);
-        sheet.heading1 = ConvertFont(theme.typography.heading1);
-        sheet.heading2 = ConvertFont(theme.typography.heading2);
-        sheet.heading3 = ConvertFont(theme.typography.heading3);
-        sheet.code = ConvertFont(theme.typography.code);
+        sheet.fontScale = options.font / 100.0f;
+        sheet.lineSpacingScale = options.lineSpacing / 100.0f;
+        auto font = [&](folia::ThemeFont const& value) {
+            return ConvertFont(value, sheet.fontScale, sheet.lineSpacingScale);
+        };
+        sheet.body = font(theme.typography.body);
+        sheet.heading1 = font(theme.typography.heading1);
+        sheet.heading2 = font(theme.typography.heading2);
+        sheet.heading3 = font(theme.typography.heading3);
+        sheet.code = font(theme.typography.code);
 
         auto const& colors = theme.colors;
         sheet.canvasColor = ToD2D(colors.bg);
@@ -78,7 +83,8 @@ namespace winrt::Folia
             sheet.syntaxColors[index] = ToD2D(colors.syntax[index]);
 
         sheet.horizontalPadding = theme.layout.document_horizontal_padding;
-        sheet.verticalPadding = theme.layout.document_vertical_padding;
+        sheet.marginScale = options.margin / 100.0f;
+        sheet.verticalPadding = theme.layout.document_vertical_padding * sheet.marginScale;
         sheet.blockGap = theme.layout.block_gap;
         return sheet;
     }

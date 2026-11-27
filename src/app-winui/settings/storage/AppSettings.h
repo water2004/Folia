@@ -8,6 +8,7 @@
 #include "workspace/WorkspaceAppearance.h"
 
 import folia.platform.editor_shortcuts;
+import folia.app.text_layout_options;
 
 namespace winrt::Folia
 {
@@ -20,6 +21,7 @@ namespace winrt::Folia
         std::string themeId = "system";
         std::string languageId = "system";
         MediaDisplaySettings media;
+        TextLayoutProfiles textLayouts;
         WorkspaceAppearance appearance;
         std::vector<folia::platform::editor::EditorShortcutBinding> shortcutBindings =
             folia::platform::editor::default_editor_shortcuts();
@@ -36,4 +38,5 @@ namespace winrt::Folia
 
     SettingsLoadResult LoadAppSettings();
     std::optional<winrt::hstring> SaveAppSettings(AppSettings const& settings);
+    std::optional<winrt::hstring> SaveTextLayouts(TextLayoutProfiles const&);
 }

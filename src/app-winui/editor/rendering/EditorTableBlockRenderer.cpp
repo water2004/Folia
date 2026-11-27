@@ -290,6 +290,7 @@ namespace winrt::Folia
                     if (header) layout->SetFontWeight(DWRITE_FONT_WEIGHT_SEMI_BOLD, textRange);
                     textLayoutEngine.ApplyStyles(layout.Get(), display.ranges);
                     ApplyMathInlineObjects(layout.Get(), display.mathOverlays);
+                    textLayoutEngine.ApplyNaturalLineSpacing(layout.Get());
                     auto alignment = column < special.table_aligns.size() ? special.table_aligns[column] : folia::TableAlignment::None;
                     if (alignment == folia::TableAlignment::Center) layout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
                     else if (alignment == folia::TableAlignment::Right) layout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);

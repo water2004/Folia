@@ -14,6 +14,7 @@ namespace winrt::Folia::chat {
     }
     void ChatTurnView::RefreshAppearance() {
         for (auto const& surface : surfaces_) surface->RefreshAppearance();
+        for (auto const& activity : activities_) activity->SetTextLayout(appearance_->textLayout);
     }
     void ChatTurnView::SealText() {
         if (surface_) surface_->Seal();
@@ -28,6 +29,7 @@ namespace winrt::Folia::chat {
         SealText();
         if (!activity_) {
             activity_ = ChatActivityView::Create();
+            activity_->SetTextLayout(appearance_->textLayout);
             activities_.push_back(activity_);
             root_.Children().Append(activity_->Element());
         }

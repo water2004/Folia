@@ -2,6 +2,7 @@
 #include "agent/ChatHints.h"
 #include "agent/ChatMotion.h"
 #include "agent/ChatTranscript.h"
+#include "agent/ChatTextLayout.h"
 #include "ui/ControlHelpers.h"
 #include <winrt/Microsoft.UI.Xaml.Automation.h>
 #include "workspace/WorkspaceIcons.h"
@@ -50,11 +51,13 @@ namespace winrt::Folia::chat {
         }
     }
 
-    std::shared_ptr<ChatTranscript> ChatTranscript::Create(std::string id, folia::ThemeProfile const& theme, MediaDisplaySettings const& media) {
+    std::shared_ptr<ChatTranscript> ChatTranscript::Create(std::string id, folia::ThemeProfile const& theme,
+        MediaDisplaySettings const& media, TextLayoutOptions const& layout) {
         auto view = std::make_shared<ChatTranscript>();
         view->id_ = std::move(id);
         view->appearance_->SetTheme(theme);
         view->appearance_->media = media;
+        view->appearance_->textLayout = layout;
         view->Build();
         view->Refresh(true);
         return view;
@@ -63,7 +66,7 @@ namespace winrt::Folia::chat {
     void ChatTranscript::Build() {
         auto weak = weak_from_this();
         Rows(root_, {false,true});
-        Columns(header_, {true,false,false,false,false});
+        Columns(header_, {true,false,false,false,false,false});
         header_.MinHeight(32);
         header_.Padding({12,0,8,0});
         header_.ColumnSpacing(6);
@@ -97,8 +100,8 @@ namespace winrt::Folia::chat {
         scroll_.VerticalScrollBarVisibility(ScrollBarVisibility::Auto);
         scroll_.HorizontalContentAlignment(HorizontalAlignment::Left);
         scroll_.ZoomMode(ZoomMode::Disabled);
-        column_.MaxWidth(768);
-        column_.Padding({18, 18, 18, 140});
+        column_.Name(L"ChatTextColumn");
+        ArrangeColumn(0);
         column_.Spacing(10);
         messages_.Spacing(16);
         live_.Spacing(4);
@@ -114,10 +117,10 @@ namespace winrt::Folia::chat {
         column_.HorizontalAlignment(HorizontalAlignment::Center);
         page.Children().Append(column_);
         scroll_.Content(page);
-        scroll_.SizeChanged([page, column = column_](auto const&, SizeChangedEventArgs const& args) {
+        scroll_.SizeChanged([page, weak](auto const&, SizeChangedEventArgs const& args) {
             auto width = args.NewSize().Width;
             page.Width(width);
-            column.Width((std::min)(static_cast<double>(width), column.MaxWidth()));
+            if (auto view = weak.lock()) view->ArrangeColumn(width);
         });
         Put(root_, scroll_, 1);
         SmallButton(latest_, MakeWorkspaceIcon(WorkspaceIcon::ArrowDown), L"ChatLatest");
@@ -152,15 +155,30 @@ namespace winrt::Folia::chat {
         appearance_->media = media;
         RefreshAppearance();
     }
+    void ChatTranscript::SetTextLayout(TextLayoutOptions const& layout) {
+        if (appearance_->textLayout == layout) return;
+        appearance_->textLayout = layout;
+        ArrangeColumn(scroll_.ActualWidth());
+        for (auto const& message : userMessages_) ApplyChatTextLayout(message, chatBodyFontSize, layout);
+        RefreshAppearance();
+        Follow();
+    }
     void ChatTranscript::RefreshAppearance() {
         if (liveTurn_) liveTurn_->RefreshAppearance();
         for (auto const& turn : turns_) turn->RefreshAppearance();
     }
     void ChatTranscript::SetInset(double inset) {
-        auto padding = column_.Padding();
-        padding.Bottom = inset + 16;
-        column_.Padding(padding);
+        composerInset_ = inset;
+        ArrangeColumn(scroll_.ActualWidth());
         latest_.Margin({0, 0, 0, inset + 3});
+    }
+    void ChatTranscript::ArrangeColumn(double viewportWidth) {
+        auto const& layout = appearance_->textLayout;
+        auto margin = layout.margin / 100.0;
+        auto width = ChatColumnMaxWidth(layout);
+        column_.MaxWidth(width);
+        if (viewportWidth > 0) column_.Width((std::min)(viewportWidth, width));
+        column_.Padding({18 * margin, 18 * margin, 18 * margin, composerInset_ + 16 * margin});
     }
     void ChatTranscript::Refresh(bool latest) {
         if (latest) { wheelFrames_.Stop(); boundaries_.clear(); following_ = true; }
@@ -188,7 +206,7 @@ namespace winrt::Folia::chat {
             retryButton_.Visibility(Visibility::Collapsed);
             retryButton_ = nullptr;
         }
-        if (!append) { messages_.Children().Clear(); turns_.clear(); }
+        if (!append) { messages_.Children().Clear(); turns_.clear(); userMessages_.clear(); }
         page_ = std::move(page);
         for (auto i = start; i <= page_.entries.size(); ++i) {
             if ((!append || i > start) && std::ranges::contains(page_.compactions, i))
@@ -222,7 +240,12 @@ namespace winrt::Folia::chat {
                 body.Children().Append(image);
                 Thumbnail(image, AttachmentPath(id_, id));
             }
-            if (!entry.markdown.empty()) body.Children().Append(Text(to_hstring(entry.markdown)));
+            if (!entry.markdown.empty()) {
+                auto message = Text(to_hstring(entry.markdown));
+                ApplyChatTextLayout(message, chatBodyFontSize, appearance_->textLayout);
+                body.Children().Append(message);
+                userMessages_.push_back(std::move(message));
+            }
             bubble.Child(body);
             row.Children().Append(bubble);
         } else {
