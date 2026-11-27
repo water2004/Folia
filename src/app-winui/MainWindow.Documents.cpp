@@ -231,7 +231,7 @@ namespace winrt::Folia::implementation {
         try {
             if (closePending || closingDocument || windowClosed || relocatingFiles) co_return;
             if (!location && winrt::Folia::ClassifyWorkspaceFile(path) == winrt::Folia::WorkspaceFileKind::Other) {
-                if (mode == winrt::Folia::WorkspaceOpenMode::Keep) {
+                if (mode != winrt::Folia::WorkspaceOpenMode::Preview) {
                     auto lifetime = get_strong();
                     auto file = co_await Windows::Storage::StorageFile::GetFileFromPathAsync(path.native());
                     if (co_await Windows::System::Launcher::LaunchFileAsync(file))

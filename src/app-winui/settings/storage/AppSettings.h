@@ -14,6 +14,7 @@ namespace winrt::Folia
     struct AppSettings
     {
         bool latexSuggestionsEnabled = true;
+        bool openFilesInNewWindow = false;
         folia::platform::completion::CompletionConfig completion;
         std::string completionModelId;
         std::string themeId = "system";

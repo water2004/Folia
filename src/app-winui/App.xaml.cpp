@@ -60,6 +60,9 @@ namespace winrt::Folia::implementation
                 activationInstance = Microsoft::Windows::AppLifecycle::AppInstance::FindOrRegisterForKey(
                     WorkspaceInstanceKey(std::wstring(executable.data(), length)));
                 if (!activationInstance.IsCurrent()) {
+                    // Explorer granted foreground activation to this launcher.
+                    // Transfer it to the owning process before redirecting the file.
+                    ::AllowSetForegroundWindow(activationInstance.ProcessId());
                     co_await activationInstance.RedirectActivationToAsync(MakeWorkspaceActivation(request));
                     Exit();
                     co_return;

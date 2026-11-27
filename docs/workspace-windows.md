@@ -5,11 +5,15 @@ window or into another Folia window, retaining its original document session,
 data item, unsaved state, selection, undo history and reading position.
 Single-click preview tabs and edit/double-click pinning continue to apply.
 
-Normal launches create a new window in the existing process for that executable
-location. Launch requests carry absolute paths by value, including paths that
-were relative to the launching process. Different installed/candidate executable
-locations remain independent. `--new-instance` explicitly starts an isolated
-process; startup tests use it so they never redirect into a user's running app.
+Launching Folia without a file opens a new window. Opening a file from Explorer
+brings its existing tab and window to the foreground, including a minimized
+window. By default a new file opens as a pinned tab in the last active window
+and editor group. The General setting to open files in new windows gives each
+new file its own window. The first file starts the workspace on a cold launch.
+
+Launch requests carry absolute paths, including paths that were relative to the
+launching process. Each executable location registers its own activation key.
+`--new-instance` starts an isolated process for startup tests.
 
 ## Text input focus
 
@@ -33,7 +37,7 @@ substitute for manually checking Shift conversion with an installed IME.
 
 | Source | Responsibility |
 | --- | --- |
-| `App.Windows.cpp` | Own live windows and release them on `Closed`. |
+| `App.Windows.cpp` | Own live windows, route external file opens and restore the selected window. |
 | `App.xaml.cpp` | Register/redirect App SDK activation and dispatch launches on the UI thread. |
 | `workspace/WorkspaceLaunch.*` | Parse launch requests, normalize paths and marshal their values. |
 | `workspace/WorkspaceDocuments.*` | Own document sessions; transfer an inactive session between workspaces. |

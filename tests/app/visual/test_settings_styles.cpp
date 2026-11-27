@@ -209,6 +209,12 @@ suite settings_style_tests = [] {
         theme.SelectedIndex(0);
         Pump([&] { return applied && applied->media.mermaidTheme.empty(); });
         expect(applied->media.imageMaxWidthPercent == 50);
+        auto opening = Field<ToggleSwitch>(page, winrt::Folia::Localize(L"OpenFilesInNewWindow"));
+        expect(fatal(opening != nullptr));
+        expect(!opening.IsOn());
+        opening.IsOn(true);
+        Pump([&] { return applied->openFilesInNewWindow; });
+        expect(applied->media.imageMaxWidthPercent == 50);
     };
 
     "completion saves the chosen model and independent input prediction budgets"_test = [] {

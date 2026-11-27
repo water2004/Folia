@@ -4,6 +4,21 @@ import std;
 #include "storage/RecordId.h"
 
 namespace winrt::Folia {
+    namespace {
+        std::filesystem::path WorkspacePath(std::filesystem::path path) {
+            path = path.lexically_normal();
+            if (path.native().find(L'~') == std::wstring::npos) return path;
+            // Shell activation can supply a DOS short name. StorageFile returns the long name on load.
+            auto size = ::GetLongPathNameW(path.c_str(), nullptr, 0);
+            if (!size) return path;
+            std::wstring name(size, L'\0');
+            auto written = ::GetLongPathNameW(path.c_str(), name.data(), size);
+            if (!written || written >= size) return path;
+            name.resize(written);
+            return name;
+        }
+    }
+
     WorkspaceDocument::WorkspaceDocument(std::uint64_t value, WorkspaceTabKind type)
         : id(value), kind(type), editor(type == WorkspaceTabKind::Editor ? std::make_unique<WorkspaceEditorDocument>() : nullptr),
           referenceKey(type == WorkspaceTabKind::Editor ? records::NewId() : std::string{}) {}
@@ -33,14 +48,14 @@ namespace winrt::Folia {
     }
 
     std::shared_ptr<WorkspaceDocument> WorkspaceDocuments::Find(std::filesystem::path const& path) const {
-        auto normalized = path.lexically_normal();
+        auto normalized = WorkspacePath(path);
         auto found = std::ranges::find_if(documents_, [&](auto const& document) { return SamePath(document->path, normalized); });
         return found == documents_.end() ? nullptr : *found;
     }
 
     std::shared_ptr<WorkspaceDocument> WorkspaceDocuments::New(WorkspaceOpenMode mode) {
         auto document = std::make_shared<WorkspaceDocument>(AllocateWorkspaceItemId());
-        document->kept = mode == WorkspaceOpenMode::Keep;
+        document->kept = mode != WorkspaceOpenMode::Preview;
         document->editor->loaded = true;
         documents_.push_back(document);
         return document;
@@ -68,7 +83,7 @@ namespace winrt::Folia {
 
     WorkspaceOpenResult WorkspaceDocuments::OpenChat(std::string id, std::string title, WorkspaceOpenMode mode, PreviewFilter const& filter) {
         if (auto existing = FindChat(id)) {
-            if (mode == WorkspaceOpenMode::Keep) existing->kept = true;
+            if (mode != WorkspaceOpenMode::Preview) existing->kept = true;
             return {std::move(existing), {}, false};
         }
         auto chat = std::make_shared<WorkspaceDocument>(AllocateWorkspaceItemId(), WorkspaceTabKind::Chat);
@@ -79,9 +94,9 @@ namespace winrt::Folia {
 
     WorkspaceOpenResult WorkspaceDocuments::Open(std::filesystem::path path, WorkspaceOpenMode mode, PreviewFilter const& filter) {
         if (path.empty() || !path.is_absolute()) throw std::invalid_argument("Workspace file paths must be absolute");
-        path = path.lexically_normal();
+        path = WorkspacePath(std::move(path));
         if (auto existing = Find(path)) {
-            if (mode == WorkspaceOpenMode::Keep || existing->IsModified()) existing->kept = true;
+            if (mode != WorkspaceOpenMode::Preview || existing->IsModified()) existing->kept = true;
             return {std::move(existing), {}, false};
         }
         auto kind = IsWorkspaceImage(ClassifyWorkspaceFile(path)) ? WorkspaceTabKind::Image : WorkspaceTabKind::Editor;
@@ -92,10 +107,11 @@ namespace winrt::Folia {
 
     WorkspaceOpenResult WorkspaceDocuments::Place(std::shared_ptr<WorkspaceDocument> document, WorkspaceOpenMode mode,
         PreviewFilter const& canReplacePreview) {
-        document->kept = mode == WorkspaceOpenMode::Keep;
+        document->kept = mode != WorkspaceOpenMode::Preview;
         for (auto& candidate : documents_) {
             if (candidate->IsModified()) candidate->kept = true;
             if (candidate->kept || (canReplacePreview && !canReplacePreview(candidate->id))) continue;
+            if (mode == WorkspaceOpenMode::NewTab && (candidate->kind != WorkspaceTabKind::Editor || !candidate->path.empty())) continue;
             auto replaced = candidate->id;
             candidate = document;
             return {std::move(document), replaced, true};

@@ -11,10 +11,18 @@ New-Item -ItemType Directory -Path $run -Force | Out-Null
 # name. A dedicated directory gives this run an independent AppInstance key.
 $candidate=Join-Path $run 'candidate'
 New-Item -ItemType Directory -Path $candidate | Out-Null
+$oldLocal=$env:LOCALAPPDATA
+$profileRoot=Join-Path $run 'profile'
+$assets=Join-Path $profileRoot 'Folia/Assets'
+New-Item -ItemType Directory -Path (Split-Path -Parent $assets) -Force | Out-Null
+Copy-Item -LiteralPath (Join-Path $testScriptDirectory '../../src/app-winui/Assets') -Destination $assets -Recurse
+$workingAssets=New-Item -ItemType Junction -Path (Join-Path $run 'Assets') -Target $assets
+$env:LOCALAPPDATA=$profileRoot
 $links=@()
 foreach($entry in Get-ChildItem -LiteralPath (Split-Path -Parent $exe)) {
  $path=Join-Path $candidate $entry.Name
- if($entry.PSIsContainer) { New-Item -ItemType Junction -Path $path -Target $entry.FullName | Out-Null }
+ if($entry.Name -eq 'Assets') { New-Item -ItemType Junction -Path $path -Target $assets | Out-Null }
+ elseif($entry.PSIsContainer) { New-Item -ItemType Junction -Path $path -Target $entry.FullName | Out-Null }
  else { New-Item -ItemType HardLink -Path $path -Target $entry.FullName | Out-Null }
  $links+=$path
 }
@@ -31,6 +39,9 @@ public static class FoliaActivationWindows {
  [DllImport("user32.dll",CharSet=CharSet.Unicode)] static extern int GetClassNameW(IntPtr h,StringBuilder text,int size);
  [DllImport("user32.dll",CharSet=CharSet.Unicode)] static extern int GetWindowTextW(IntPtr h,StringBuilder text,int size);
  [DllImport("user32.dll")] static extern bool PostMessageW(IntPtr h,uint message,IntPtr w,IntPtr l);
+ [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+ [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h,int command);
+ [DllImport("user32.dll")] public static extern bool IsIconic(IntPtr h);
  public static IntPtr[] Windows(uint process) {
   var result=new List<IntPtr>();
   EnumWindows(delegate(IntPtr h,IntPtr data) {
@@ -61,38 +72,66 @@ function Start-Owned([string]$Arguments='') {
  $owned.Add($process)
  return $process
 }
+function Redirect([string]$argument) {
+ $secondary=Start-Owned $argument
+ Wait-For { $secondary.Refresh(); $secondary.HasExited } 'redirecting launcher exit'
+ $secondary.WaitForExit()
+ if($secondary.ExitCode -ne 0) { throw "Redirect exit: $($secondary.ExitCode)" }
+}
+function Window-ForFile($process,[string]$name) {
+ $found=@([FoliaActivationWindows]::Windows($process.Id) | Where-Object { [FoliaActivationWindows]::Title($_).Contains($name) })
+ if($found.Count) { return $found[0] }
+}
+function Close-Owned($process) {
+ [FoliaActivationWindows]::Close($process.Id)
+ Wait-For { $process.Refresh(); $process.HasExited } 'normal window close'
+ $process.WaitForExit()
+ if($process.ExitCode -ne 0) { throw "Window cleanup exit code: $($process.ExitCode)" }
+}
 try {
- $primary=Start-Owned
- Wait-For { -not $primary.HasExited -and [FoliaActivationWindows]::Windows($primary.Id).Count -eq 1 } 'first isolated window'
- $paths=@((Join-Path $run '中文 空格.md'),(Join-Path $run 'relative.md'))
- foreach($path in $paths) { [IO.File]::WriteAllText($path,"# Activation test`n`nUnchanged document.`n",[Text.UTF8Encoding]::new($false)) }
- $expected=1
- foreach($argument in @(('"'+$paths[0]+'"'),'relative.md','')) {
-  $secondary=Start-Owned $argument
-  Wait-For { $secondary.Refresh(); $secondary.HasExited } 'redirecting launcher exit'
-  $secondary.WaitForExit()
-  if($secondary.ExitCode -ne 0) { throw "Redirect exit: $($secondary.ExitCode)" }
-  ++$expected
-  Wait-For { [FoliaActivationWindows]::Windows($primary.Id).Count -eq $expected } 'new window in original process'
- }
- foreach($path in $paths) {
-  $name=[IO.Path]::GetFileName($path)
-  Wait-For { @([FoliaActivationWindows]::Windows($primary.Id) | Where-Object { [FoliaActivationWindows]::Title($_).Contains($name) }).Count -gt 0 } "opened $name"
- }
+ $names=@('中文 空格.md','relative.md','third.md')
+ $paths=@($names | ForEach-Object { Join-Path $run $_ })
+ foreach($path in $paths) { [IO.File]::WriteAllText($path,"# Activation test`n",[Text.UTF8Encoding]::new($false)) }
+ $primary=Start-Owned ('"'+$paths[0]+'"')
+ Wait-For { Window-ForFile $primary $names[0] } 'cold launch with Unicode file'
+ $first=Window-ForFile $primary $names[0]
+ Redirect $names[1]
+ Wait-For { [FoliaActivationWindows]::Title($first).Contains($names[1]) } 'default tab reuse'
+ if([FoliaActivationWindows]::Windows($primary.Id).Count -ne 1) { throw 'File opened an extra window' }
+ Redirect ''
+ Wait-For { [FoliaActivationWindows]::Windows($primary.Id).Count -eq 2 } 'second workspace window'
+ Redirect $names[2]
+ Wait-For { Window-ForFile $primary $names[2] } 'new file in most recently active window'
+ $second=Window-ForFile $primary $names[2]
+ if($first -eq $second) { throw 'New file opened in the older window' }
+ [void][FoliaActivationWindows]::ShowWindow($first,6)
+ Wait-For { [FoliaActivationWindows]::IsIconic($first) } 'older window minimized'
+ Redirect ('"'+$paths[0]+'"')
+ Wait-For { -not [FoliaActivationWindows]::IsIconic($first) -and [FoliaActivationWindows]::Title($first).Contains($names[0]) } 'existing tab restored from minimize'
+ Wait-For { [FoliaActivationWindows]::GetForegroundWindow() -eq $first } 'redirected file window in foreground'
+ if([FoliaActivationWindows]::Windows($primary.Id).Count -ne 2) { throw 'Already open file was duplicated' }
  $isolated=Start-Owned '--new-instance'
  Wait-For { -not $isolated.HasExited -and [FoliaActivationWindows]::Windows($isolated.Id).Count -eq 1 } 'explicit separate process'
- if([FoliaActivationWindows]::Windows($primary.Id).Count -ne 4) { throw 'An isolated launch modified the registered process' }
- [FoliaActivationWindows]::Close($isolated.Id)
- Wait-For { $isolated.Refresh(); $isolated.HasExited } 'isolated window normal close'
- $isolated.WaitForExit()
- [FoliaActivationWindows]::Close($primary.Id)
- Wait-For { $primary.Refresh(); $primary.HasExited } 'all original windows normal close'
- $primary.WaitForExit()
- if($primary.ExitCode -ne 0 -or $isolated.ExitCode -ne 0) { throw "Window cleanup exit codes: primary=$($primary.ExitCode), isolated=$($isolated.ExitCode)" }
- @{success=$true;primaryPid=$primary.Id;windows=4;launchers=@($owned | ForEach-Object { @{pid=$_.Id;exitCode=$_.ExitCode} })} |
+ if([FoliaActivationWindows]::Windows($primary.Id).Count -ne 2) { throw 'An isolated launch modified the registered process' }
+ Close-Owned $isolated
+ Close-Owned $primary
+
+ $config=@{schemaVersion=6;themeId='system';languageId='system';shortcutBindings=@();completion=@{};openFilesInNewWindow=$true}
+ [IO.File]::WriteAllText((Join-Path $assets 'settings.json'),($config | ConvertTo-Json),[Text.UTF8Encoding]::new($false))
+ $primary=Start-Owned ('"'+$paths[0]+'"')
+ Wait-For { Window-ForFile $primary $names[0] } 'new window preference on cold launch'
+ if([FoliaActivationWindows]::Windows($primary.Id).Count -ne 1) { throw 'Extra empty window on cold launch' }
+ Redirect ($names[1]+' '+$names[2])
+ Wait-For { [FoliaActivationWindows]::Windows($primary.Id).Count -eq 3 -and (Window-ForFile $primary $names[1]) -and (Window-ForFile $primary $names[2]) } 'multiple files in their own windows'
+ Redirect ('"'+$paths[0]+'"')
+ Wait-For { [FoliaActivationWindows]::GetForegroundWindow() -eq (Window-ForFile $primary $names[0]) } 'reuse already-open file in new window mode'
+ if([FoliaActivationWindows]::Windows($primary.Id).Count -ne 3) { throw 'File was duplicated in new window mode' }
+ Close-Owned $primary
+ @{success=$true;launchers=@($owned | ForEach-Object { @{pid=$_.Id;exitCode=$_.ExitCode} })} |
   ConvertTo-Json -Depth 4 | Set-Content (Join-Path $run 'result.json') -Encoding utf8
- Write-Output "Activation integration passed: Unicode/relative paths, four shared windows, isolated instance, normal close. Report: $run"
+ Write-Output "Activation passed: Unicode/relative paths, both opening modes, foreground restore, multiple windows, existing files and isolated instance. Report: $run"
 } finally {
+ $env:LOCALAPPDATA=$oldLocal
  @{documents=$paths;processes=@($owned | ForEach-Object {
   $_.Refresh()
   @{pid=$_.Id;exited=$_.HasExited;exitCode=$(if($_.HasExited){$_.WaitForExit();$_.ExitCode});titles=@([FoliaActivationWindows]::Windows($_.Id) | ForEach-Object { [FoliaActivationWindows]::Title($_) })}
@@ -111,4 +150,5 @@ try {
   else { Remove-Item -LiteralPath $path -Force }
  }
  [IO.Directory]::Delete($candidate)
+ $workingAssets.Delete()
 }

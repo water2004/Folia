@@ -404,7 +404,9 @@ namespace winrt::Folia::implementation {
     void MainWindow::UpdateChromeMetrics() {
         auto root = Root().XamlRoot();
         const double scale = root ? root.RasterizationScale() : static_cast<double>(::GetDpiForWindow(WindowHandle())) / 96.0;
-        CaptionInset().Width(AppWindow().TitleBar().RightInset() / (std::max)(1.0, scale));
+        // The native title bar can report a negative inset while a window is minimized.
+        auto inset = (std::max)(0, AppWindow().TitleBar().RightInset());
+        CaptionInset().Width(inset / (std::max)(1.0, scale));
     }
 
 }

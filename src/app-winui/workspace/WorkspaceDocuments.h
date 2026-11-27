@@ -7,7 +7,7 @@
 #include "editor/session/EditorSourceLocation.h"
 
 namespace winrt::Folia {
-    enum class WorkspaceOpenMode { Preview, Keep };
+    enum class WorkspaceOpenMode { Preview, Keep, NewTab };
     enum class WorkspaceTabKind { Editor, Image, Settings, Chat };
 
     std::uint64_t AllocateWorkspaceItemId();

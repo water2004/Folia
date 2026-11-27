@@ -34,6 +34,7 @@ namespace winrt::Folia
         void UpdateWorkspaceAppearance(WorkspaceAppearance const& appearance);
         void UpdateMediaSettings(MediaDisplaySettings const& media);
         void UpdateAppliedTheme(std::string const& id);
+        void UpdateFileOpening(bool newWindow);
         void Detach();
 
     private:
@@ -107,6 +108,7 @@ namespace winrt::Folia
         winrt::Microsoft::UI::Xaml::UIElement aboutPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::Controls::ToggleSwitch latexSuggestionsToggle_;
         winrt::Microsoft::UI::Xaml::Controls::ToggleSwitch autoHideTools_;
+        winrt::Microsoft::UI::Xaml::Controls::ToggleSwitch newWindowToggle_{nullptr};
         winrt::Microsoft::UI::Xaml::Controls::ComboBox materialCombo_{nullptr}, readingMaterialCombo_{nullptr};
         winrt::Microsoft::UI::Xaml::Controls::ComboBox languageCombo_;
         winrt::Microsoft::UI::Xaml::Controls::ComboBox imageWidthCombo_{nullptr};

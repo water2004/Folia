@@ -77,8 +77,45 @@ namespace winrt::Folia::implementation {
         }
     }
     void App::OpenWorkspaceWindows(winrt::Folia::WorkspaceLaunchRequest const& request) {
-        if (request.documents.empty()) CreateMainWindow().Activate();
-        else for (auto const& path : request.documents) CreateMainWindow(winrt::hstring(path.native())).Activate();
+        auto foreground = [](MainWindow* target) {
+            auto handle = target->WindowHandle();
+            if (::IsIconic(handle)) ::ShowWindow(handle, SW_RESTORE);
+            target->Activate();
+            ::SetForegroundWindow(handle);
+        };
+        auto recent = [&](std::filesystem::path const& path) {
+            MainWindow* best = nullptr;
+            for (auto const& item : windows) {
+                auto w = winrt::get_self<MainWindow>(item.window.as<winrt::Folia::MainWindow>());
+                if (w->preparedTabWindow || w->closePending || w->closingDocument || w->windowClosed || w->relocatingFiles) continue;
+                if (!path.empty() && !w->workspaceDocuments.Find(path)) continue;
+                if (!best || w->lastActivated >= best->lastActivated) best = w;
+            }
+            return best;
+        };
+        auto create = [&] {
+            return winrt::get_self<MainWindow>(CreateMainWindow().as<winrt::Folia::MainWindow>());
+        };
+        if (request.documents.empty()) foreground(create());
+        else {
+            auto target = recent({});
+            bool emptyWindow = !target;
+            if (emptyWindow) target = create();
+            const bool newWindows = target->appSettings.openFilesInNewWindow;
+            for (auto const& path : request.documents) {
+                if (auto owner = recent(path)) {
+                    auto doc = owner->workspaceDocuments.Find(path);
+                    foreground(owner);
+                    if (owner->workspaceDocuments.Keep(doc->id)) owner->UpdateDocumentTab(doc->id);
+                    owner->ActivateView(owner->FindDocumentView(doc->id));
+                } else {
+                    if (newWindows && !emptyWindow) target = create();
+                    foreground(target);
+                    target->OpenWorkspaceFile(path, WorkspaceOpenMode::NewTab);
+                    emptyWindow = false;
+                }
+            }
+        }
         ::OutputDebugStringW(L"Folia.StartupComplete\n");
     }
     MainWindow* App::FindMainWindow(Microsoft::UI::WindowId id) const {
@@ -146,6 +183,10 @@ namespace winrt::Folia::implementation {
             if (window != source && !window->windowClosed) {
                 window->UpdateMediaSettings(settings.media);
                 window->UpdateWorkspaceAppearance(settings.appearance);
+                if (window->appSettings.openFilesInNewWindow != settings.openFilesInNewWindow) {
+                    window->appSettings.openFilesInNewWindow = settings.openFilesInNewWindow;
+                    if (window->settingsView) window->settingsView->UpdateFileOpening(settings.openFilesInNewWindow);
+                }
                 if (window->appSettings.themeId != settings.themeId) {
                     window->appSettings.themeId = settings.themeId;
                     window->UpdateTheme();

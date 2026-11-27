@@ -37,6 +37,22 @@ namespace winrt::Folia
             {Localize(L"ApplicationLanguage"), Localize(L"LanguageRestartDescription"), cards::Icon(L"\xE8C1")},
             languageCombo_, cards::Placement::Wrap));
 
+        newWindowToggle_ = cards::Switch(appliedSettings_.openFilesInNewWindow);
+        newWindowToggle_.Toggled([this](auto const&, auto const&) {
+            if (refreshing_ || detached_ || !applySettings_) return;
+            auto proposed = appliedSettings_;
+            proposed.openFilesInNewWindow = newWindowToggle_.IsOn();
+            if (auto error = applySettings_(proposed)) {
+                UpdateFileOpening(appliedSettings_.openFilesInNewWindow);
+                SetGeneralStatus(*error, true);
+            } else {
+                UpdateFileOpening(proposed.openFilesInNewWindow);
+                SetGeneralStatus({});
+            }
+        });
+        panel.Children().Append(cards::Setting({Localize(L"OpenFilesInNewWindow"), Localize(L"OpenFilesInNewWindowDescription"),
+            cards::Icon(WorkspaceIcon::Document)}, newWindowToggle_));
+
         auto appearance = cards::List();
         auto materialChoice = [&](wchar_t const* label, wchar_t const* glyph, bool allowInherit) {
             auto combo = settings_ui::Choice();
@@ -102,6 +118,14 @@ namespace winrt::Folia
         generalStatus_.TextWrapping(TextWrapping::Wrap);
         panel.Children().Append(generalStatus_);
         return settings_ui::PageScroll(panel);
+    }
+
+    void SettingsView::UpdateFileOpening(bool newWindow)
+    {
+        settings_.openFilesInNewWindow = appliedSettings_.openFilesInNewWindow = newWindow;
+        auto wasRefreshing = std::exchange(refreshing_, true);
+        if (newWindowToggle_) newWindowToggle_.IsOn(newWindow);
+        refreshing_ = wasRefreshing;
     }
 
     void SettingsView::UpdateWorkspaceAppearance(WorkspaceAppearance const& appearance)

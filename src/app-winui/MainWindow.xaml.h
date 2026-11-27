@@ -230,6 +230,7 @@ namespace winrt::Folia::implementation
             bool cancellable = false);
         HWND WindowHandle();
 
+        std::chrono::steady_clock::time_point lastActivated{};
         winrt::Folia::WorkspaceDocuments workspaceDocuments;
         WorkspaceEditorGroups editorGroups;
         std::uint64_t presentedEditorView = 0;

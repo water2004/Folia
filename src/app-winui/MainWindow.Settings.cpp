@@ -33,6 +33,7 @@ namespace winrt::Folia::implementation
         auto themeChanged = appSettings.themeId != settings.themeId;
         auto appearanceChanged = appSettings.appearance != settings.appearance;
         auto mediaChanged = appSettings.media != settings.media;
+        auto openingChanged = appSettings.openFilesInNewWindow != settings.openFilesInNewWindow;
         auto shortcutsChanged = appSettings.shortcutBindings != settings.shortcutBindings;
         auto latexSuggestionsChanged =
             appSettings.latexSuggestionsEnabled != settings.latexSuggestionsEnabled;
@@ -50,7 +51,7 @@ namespace winrt::Folia::implementation
             ApplyBarLayout();
             if (!themeChanged) ApplyWorkspaceMaterial();
         }
-        if (themeChanged || mediaChanged || appearanceChanged)
+        if (themeChanged || mediaChanged || appearanceChanged || openingChanged)
             App::Current()->UpdateWindowViewSettings(this, appSettings);
         return std::nullopt;
     }

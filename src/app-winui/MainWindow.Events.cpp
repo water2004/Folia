@@ -90,6 +90,7 @@ namespace winrt::Folia::implementation
             // native window focus. XAML focus can remain on the editor without
             // raising GotFocus again when a window is reactivated.
             if (args.WindowActivationState() != Microsoft::UI::Xaml::WindowActivationState::Deactivated) {
+                lastActivated = std::chrono::steady_clock::now();
                 DispatcherQueue().TryEnqueue([weak = get_weak()] {
                     auto window = weak.get();
                     if (!window || window->windowClosed || ::GetActiveWindow() != window->WindowHandle()) return;

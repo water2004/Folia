@@ -401,6 +401,8 @@
   <data name="ToggleSidebar" xml:space="preserve"><value>Toggle sidebar</value></data>
   <data name="NoOutline" xml:space="preserve"><value>No headings in this document.</value></data>
   <data name="WindowAppearance" xml:space="preserve"><value>Window appearance</value></data>
+  <data name="OpenFilesInNewWindow" xml:space="preserve"><value>Open external files in a new window</value></data>
+  <data name="OpenFilesInNewWindowDescription" xml:space="preserve"><value>When off, files open as tabs in the most recently used window.</value></data>
   <data name="WindowMaterial" xml:space="preserve"><value>Window material</value></data>
   <data name="MaterialMicaAlt" xml:space="preserve"><value>Mica Alt</value></data>
   <data name="MaterialMica" xml:space="preserve"><value>Mica</value></data>
