@@ -167,6 +167,10 @@ namespace winrt::Folia::implementation {
         UpdateSelectedTabBackdrop();
     }
 
+    void MainWindow::DocumentTabSizeChanged(Windows::Foundation::IInspectable const&, SizeChangedEventArgs const&) {
+        UpdateSelectedTabBackdrop();
+    }
+
     void MainWindow::DocumentTabPrepared(FrameworkElement const& sender, DataContextChangedEventArgs const&) {
         if (windowClosed) return;
         auto tab = sender.as<TabViewItem>();

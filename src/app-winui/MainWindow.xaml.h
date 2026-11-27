@@ -39,6 +39,7 @@ namespace winrt::Folia::implementation
         explicit MainWindow(winrt::hstring const& initialDocumentPath);
         void DocumentTabLoaded(Windows::Foundation::IInspectable const& sender,
             Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void DocumentTabSizeChanged(Windows::Foundation::IInspectable const&, Microsoft::UI::Xaml::SizeChangedEventArgs const&);
         void ChatRowPrepared(Microsoft::UI::Xaml::FrameworkElement const& sender,
             Microsoft::UI::Xaml::DataContextChangedEventArgs const& args);
         void DocumentTabPrepared(Microsoft::UI::Xaml::FrameworkElement const& sender,
@@ -296,7 +297,7 @@ namespace winrt::Folia::implementation
         WorkspaceSidebarMotion sidebarMotion;
         std::optional<WindowMaterial> appliedMaterial;
         std::optional<WindowMaterial> appliedReadingMaterial;
-        bool selectedTabBackdropUpdatePending = false;
+        Microsoft::UI::Xaml::Media::CompositionTarget::Rendering_revoker tabBackdropFrame;
         WorkspacePane workspacePane = WorkspacePane::Files;
         std::unordered_map<std::string, int> chatListIndex;
         std::unordered_map<std::uint64_t, std::shared_ptr<chat::ChatView>> agentChatViews;

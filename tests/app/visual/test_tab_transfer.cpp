@@ -70,6 +70,7 @@ namespace winrt::Folia::implementation {
             window.Content().as<Microsoft::UI::Xaml::FrameworkElement>().UpdateLayout();
             return impl->SettingsViewHost();
         }
+        static void NewChat(Microsoft::UI::Xaml::Window const& window) { Impl(window)->OpenAgentChat(); }
         static void ReturnToDocumentTab(Microsoft::UI::Xaml::Window const& window) { Impl(window)->ReturnToDocumentTab(); }
         static auto ThemeSettings(Microsoft::UI::Xaml::Window const& window) {
             auto impl = Impl(window);
@@ -1158,6 +1159,70 @@ namespace {
             expect(fatal(Access::Groups(window).IsSplit()));
             verify();
         };
+        "persisted reading material joins the first selected tab at startup"_test = [] {
+            using namespace winrt::Folia;
+            using winrt::Windows::Foundation::Point;
+            auto original = LoadAppSettings().settings;
+            auto restore = wil::scope_exit([&] { SaveAppSettings(original); });
+            std::ofstream report(app_tests::RepositoryRoot() / "build/tests/reading-material-startup.txt");
+            for (auto material : {WindowMaterial::Mica, WindowMaterial::Acrylic, WindowMaterial::Solid}) {
+                auto startup = original;
+                startup.appearance.material = WindowMaterial::Mica;
+                startup.appearance.readingMaterial = material;
+                expect(fatal(!SaveAppSettings(startup)));
+                auto window = App()->CreateMainWindow();
+                auto close = wil::scope_exit([&] { Access::Close(window); });
+                window.AppWindow().Presenter().as<winrt::Microsoft::UI::Windowing::OverlappedPresenter>().IsAlwaysOnTop(true);
+                window.Activate();
+                auto root = window.Content().as<FrameworkElement>();
+                auto read = [&] {
+                    auto tabs = Access::GroupTabs(window, EditorGroup::Left);
+                    FrameworkElement tab{nullptr};
+                    Pump([&] {
+                        root.UpdateLayout();
+                        tab = tabs.ContainerFromItem(tabs.SelectedItem()).try_as<FrameworkElement>();
+                        return tab && tab.IsLoaded() && tab.ActualWidth() > 0;
+                    });
+                    auto card = root.FindName(L"ReadingCard").as<FrameworkElement>();
+                    auto selected = root.FindName(L"SelectedTabBackdropFrame").as<FrameworkElement>();
+                    auto tint = root.FindName(L"SelectedTabTint").as<Controls::Border>();
+                    auto paper = root.FindName(L"ReadingTint").as<Controls::Border>();
+                    auto until = std::chrono::steady_clock::now() + std::chrono::milliseconds(350);
+                    Pump([&] { return std::chrono::steady_clock::now() >= until; });
+                    auto at = card.TransformToVisual(root).TransformPoint({0,0});
+                    auto position = tab.TransformToVisual(root).TransformPoint({static_cast<float>(tab.ActualWidth() * .72), 0});
+                    auto edge = root.XamlRoot().CoordinateConverter().ConvertLocalToScreen(Point{position.X, at.Y});
+                    std::vector<ScreenPoint> points;
+                    for (int dy = -6; dy <= 6; ++dy) points.push_back({edge.X, edge.Y + dy});
+                    auto colors = CaptureColors(window, points);
+                    report << std::format("reading={} selectedVisible={} sharedTint={} colors={}\n", static_cast<int>(material),
+                        selected.Visibility() == Visibility::Visible, tint.Background() == paper.Background(), colors);
+                    expect(tint.Background() == paper.Background()) << "selected tab and reading card share the live brush";
+                    expect(selected.Visibility() == Visibility::Visible) << "first tab is materialized without changing settings";
+                    auto origin = root.FindName(L"TabBackdropLayer").as<FrameworkElement>();
+                    auto clip = Hosting::ElementCompositionPreview::GetElementVisual(selected).Clip()
+                        .as<winrt::Microsoft::UI::Composition::RectangleClip>();
+                    auto rightEdge = tab.TransformToVisual(origin).TransformPoint({static_cast<float>(tab.ActualWidth()), 0});
+                    expect(std::abs(clip.Right() - rightEdge.X) < .51f);
+                    expect(std::abs(clip.Bottom() - origin.ActualHeight()) < .01f);
+                    for (auto const& pixel : colors) for (unsigned channel = 0; channel < 3; ++channel) {
+                        expect(std::abs(pixel[channel] - colors.front()[channel]) <= 5)
+                            << std::format("seam at startup: {}", colors);
+                    }
+                };
+                read();
+                auto first = FirstTab(window, EditorGroup::Left);
+                first.MaxWidth(89);
+                read();
+                Access::NewChat(window);
+                read();
+                auto changed = startup.appearance;
+                changed.readingMaterial = material == WindowMaterial::Solid ? WindowMaterial::Mica : WindowMaterial::Solid;
+                Access::Bars(window, changed);
+                Access::Bars(window, startup.appearance);
+                read();
+            }
+        };
         "the selected tab toolbar and editor present one reading surface"_test = [] {
             using winrt::Folia::WindowMaterial;
             using winrt::Windows::Foundation::Point;
@@ -1235,6 +1300,7 @@ namespace {
             };
             for (auto theme : {"folia.dark", "folia.light"}) {
                 Access::Theme(window, theme);
+                verifySurface(WindowMaterial::Mica, WindowMaterial::Mica);
                 verifySurface(WindowMaterial::Solid, WindowMaterial::Solid);
                 verifySurface(WindowMaterial::Acrylic, WindowMaterial::Acrylic);
                 verifySurface(WindowMaterial::Mica, WindowMaterial::Acrylic);

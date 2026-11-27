@@ -115,11 +115,12 @@ namespace winrt::Folia::implementation
         auto reading = supported(appearance.readingMaterial.value_or(appearance.material));
         const bool sharesBase = reading == material;
         const bool changedLayer = (appliedReadingMaterial == appliedMaterial) != sharesBase;
-        if (appliedMaterial != material) {
+        const bool connected = Root().IsLoaded();
+        if (connected && appliedMaterial != material) {
             SystemBackdrop(backdrop(material));
             appliedMaterial = material;
         }
-        if (appliedReadingMaterial != reading || changedLayer) {
+        if (connected && (appliedReadingMaterial != reading || changedLayer)) {
             auto paperBackdrop = sharesBase ? nullptr : backdrop(reading);
             ReadingBackdrop().SystemBackdrop(paperBackdrop);
             SelectedTabBackdrop().SystemBackdrop(paperBackdrop);
@@ -151,7 +152,6 @@ namespace winrt::Folia::implementation
         auto paper = resources.Lookup(box_value(L"FoliaReadingSurfaceBrush")).as<media::SolidColorBrush>();
         paper.Opacity(reading == WindowMaterial::Solid ? 1. : metric(reading == WindowMaterial::Acrylic
             ? L"FoliaAcrylicReadingOpacity" : sharesBase ? L"FoliaSharedReadingMaterialOpacity" : L"FoliaReadingMaterialOpacity"));
-        ReadingTint().Background(paper);
     }
 
     void MainWindow::UpdateTheme()
@@ -168,7 +168,6 @@ namespace winrt::Folia::implementation
         auto systemVariant = CurrentThemeVariant();
         auto loaded = themeCatalog->Resolve(appSettings.themeId, systemVariant);
         themeProfile = std::move(loaded.profile);
-        ApplyShellTheme();
         using Microsoft::UI::Xaml::ElementTheme;
         if (appSettings.themeId == "system" || themeProfile.variant == folia::Theme::HighContrast)
             Root().RequestedTheme(ElementTheme::Default);
@@ -176,6 +175,7 @@ namespace winrt::Folia::implementation
             Root().RequestedTheme(themeProfile.variant == folia::Theme::Dark
                 ? ElementTheme::Dark
                 : ElementTheme::Light);
+        ApplyShellTheme();
         ++workspaceThemeRevision;
         if (auto const& editor = workspaceDocuments.Active()->editor) {
             editor->session.SetTheme(themeProfile);
@@ -210,11 +210,13 @@ namespace winrt::Folia::implementation
         using Microsoft::UI::Xaml::Controls::TabViewItem;
         using Microsoft::UI::Xaml::Hosting::ElementCompositionPreview;
         using Windows::Foundation::Numerics::float2;
-        if (selectedTabBackdropUpdatePending || windowClosed) return;
-        selectedTabBackdropUpdatePending = DispatcherQueue().TryEnqueue([weak = get_weak()] {
+        if (tabBackdropFrame || windowClosed || !Root().IsLoaded()) return;
+        // TabView can resize realized items in a later measure pass. Read their
+        // final bounds in XAML's render callback, once per invalidated frame.
+        tabBackdropFrame = Media::CompositionTarget::Rendering(auto_revoke, [weak = get_weak()](auto const&, auto const&) {
             auto window = weak.get();
             if (!window) return;
-            window->selectedTabBackdropUpdatePending = false;
+            window->tabBackdropFrame.revoke();
             if (window->windowClosed) return;
             auto origin = window->TabBackdropLayer();
             auto bounds = [&](FrameworkElement const& element) {
@@ -237,7 +239,7 @@ namespace winrt::Folia::implementation
                 auto left = (std::max)(item.X, visible.X);
                 auto right = (std::min)(item.X + item.Width, visible.X + visible.Width);
                 auto top = (std::max)(0.f, item.Y);
-                auto bottom = (std::min)(item.Y + item.Height, static_cast<float>(origin.ActualHeight()));
+                auto bottom = static_cast<float>(origin.ActualHeight());
                 if (right <= left || bottom <= top) {
                     frame.Visibility(Visibility::Collapsed);
                     continue;

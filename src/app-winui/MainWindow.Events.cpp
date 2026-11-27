@@ -168,7 +168,12 @@ namespace winrt::Folia::implementation
         SaveEncodingItem().Click(WindowEvent([this](auto const&, auto const&) { ShowEncodingPicker(true); }));
 
         RegisterWorkspaceLayout();
-        Root().Loaded(WindowEvent([this](auto const&, auto const&) { UpdateChromeMetrics(); RefreshTabCaptionRegion(); }));
+        Root().Loaded(WindowEvent([this](auto const&, auto const&) {
+            ApplyWorkspaceMaterial();
+            UpdateChromeMetrics();
+            RefreshTabCaptionRegion();
+            UpdateSelectedTabBackdrop();
+        }));
         Root().SizeChanged(WindowEvent([this](auto const&, auto const&) {
             UpdateChromeMetrics();
             UpdateWorkspaceLayout();

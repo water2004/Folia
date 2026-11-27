@@ -49,7 +49,7 @@
             <DataTemplate x:Key="WorkspaceTabTemplate">
                 <TabViewItem Tag="{Binding}" Height="{StaticResource WorkspaceTabHeight}" Margin="0"
                              HorizontalContentAlignment="Stretch" DoubleTapped="DocumentTabDoubleTapped"
-                             DataContextChanged="DocumentTabPrepared" Loaded="DocumentTabLoaded">
+                             DataContextChanged="DocumentTabPrepared" Loaded="DocumentTabLoaded" SizeChanged="DocumentTabSizeChanged">
                     <TabViewItem.Header>
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6" VerticalAlignment="Center" UseLayoutRounding="True">
                             <ContentControl Width="16" VerticalAlignment="Center" IsTabStop="False"/>
@@ -219,7 +219,7 @@
         <Grid x:Name="ReadingMotionFrame" Grid.Row="1" ColumnDefinitions="*,0,0">
         <Grid x:Name="ReadingCard" CornerRadius="9">
         <SystemBackdropElement x:Name="ReadingBackdrop" IsHitTestVisible="False" CornerRadius="9" Visibility="Collapsed"/>
-        <Border x:Name="ReadingTint" CornerRadius="9" IsHitTestVisible="False"/>
+        <Border x:Name="ReadingTint" CornerRadius="9" Background="{StaticResource FoliaReadingSurfaceBrush}" IsHitTestVisible="False"/>
         <Grid x:Name="ReadingLayout" RowDefinitions="Auto,*">
         <Grid x:Name="DocumentToolbar" MinHeight="30" VerticalAlignment="Top" Canvas.ZIndex="2"
               Background="Transparent" Padding="5,0,6,0" ColumnDefinitions="Auto,*,Auto">
@@ -520,7 +520,7 @@
         </Grid>
         <Grid x:Name="OtherReadingCard" Grid.Column="2" CornerRadius="9" Visibility="Collapsed">
             <SystemBackdropElement x:Name="OtherReadingBackdrop" IsHitTestVisible="False" CornerRadius="9" Visibility="Collapsed"/>
-            <Border x:Name="OtherReadingTint" CornerRadius="9" Background="{ThemeResource FoliaReadingSurfaceBrush}" IsHitTestVisible="False"/>
+            <Border x:Name="OtherReadingTint" CornerRadius="9" Background="{StaticResource FoliaReadingSurfaceBrush}" IsHitTestVisible="False"/>
             <Grid RowDefinitions="Auto,*">
                 <Grid x:Name="OtherDocumentToolbar" MinHeight="30" VerticalAlignment="Top" Canvas.ZIndex="2"
                       Background="Transparent" Padding="5,0,6,0" ColumnDefinitions="Auto,*,Auto">
