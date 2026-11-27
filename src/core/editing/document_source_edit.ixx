@@ -871,11 +871,8 @@ inline std::optional<DocumentTransaction> document_delete_backward(EditorDocumen
         target.source_offset = block_source_clamp_editable_offset(
             selected_block->block_source,
             target.source_offset, target.affinity);
-        if (!block_source_has_math_delimiters(selected_block->block_source)
-            && selected_block->block_source.tree().content.empty()) {
-            auto removed = document_edit_detail::remove_empty_raw_block(
-                after, target.container_id, allocator);
-            if (!removed) return std::nullopt;
+        if (auto removed = document_edit_detail::remove_empty_raw_block_at_caret(
+                after, *selected_block, target, allocator)) {
             target = removed->target;
             operations = std::move(removed->operations);
         } else {
@@ -968,11 +965,8 @@ inline std::optional<DocumentTransaction> document_delete_forward(EditorDocument
         target.source_offset = block_source_clamp_editable_offset(
             selected_block->block_source,
             target.source_offset, target.affinity);
-        if (!block_source_has_math_delimiters(selected_block->block_source)
-            && selected_block->block_source.tree().content.empty()) {
-            auto removed = document_edit_detail::remove_empty_raw_block(
-                after, target.container_id, allocator);
-            if (!removed) return std::nullopt;
+        if (auto removed = document_edit_detail::remove_empty_raw_block_at_caret(
+                after, *selected_block, target, allocator)) {
             target = removed->target;
             operations = std::move(removed->operations);
         } else {

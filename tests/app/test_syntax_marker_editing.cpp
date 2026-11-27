@@ -217,6 +217,37 @@ namespace
             }
         };
 
+        "Backspace from a clicked empty math line leaves a writable quote row"_test = [] {
+            auto xaml = winrt::Microsoft::UI::Xaml::Hosting::WindowsXamlManager::InitializeForCurrentThread();
+            winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel panel;
+            EditorSession session;
+            session.SetText(L"> \\[\n>\n> \\]\n> later\n");
+            const auto source = session.TextUtf8();
+            const auto body = session.Selection().active;
+            EditorSurfaceRenderer renderer;
+            renderer.Initialize(panel);
+            renderer.Resize(panel, 500, 400);
+            renderer.Render(session.RenderFrame());
+            const auto bounds = renderer.CaretBounds(body);
+            if (!expect(bounds.has_value())) return;
+            auto hit = renderer.HitTest(bounds->left + 1.f, (bounds->top + bounds->bottom) * .5f);
+            if (!expect(hit && hit->container_id == body.container_id && hit->source_offset == body.source_offset)) return;
+            const auto before = folia::TextSelection::caret(*hit);
+            session.SetSelection(before);
+            expect(session.ExecuteCommand({.kind = folia::CommandKind::DeleteBackward}));
+            expect(session.TextUtf8() == "> \n> later\n");
+            const auto blank = session.Selection().active;
+            expect(blank.container_id == body.container_id && blank.source_offset == 0u);
+            renderer.Render(session.RenderFrame());
+            expect(renderer.CaretBounds(blank).has_value());
+            expect(session.ExecuteCommand(folia::Command::InsertText(U"text")));
+            expect(session.TextUtf8() == "> text\n> later\n");
+            expect(session.ExecuteCommand({.kind = folia::CommandKind::Undo}));
+            expect(session.ExecuteCommand({.kind = folia::CommandKind::Undo}));
+            expect(session.TextUtf8() == source);
+            expect(session.Selection() == before);
+        };
+
         "blank quote rows can be clicked and edited in their original flow"_test = [] {
             auto xaml = winrt::Microsoft::UI::Xaml::Hosting::WindowsXamlManager::InitializeForCurrentThread();
             const std::array fixtures{

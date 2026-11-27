@@ -319,4 +319,111 @@ suite editing_raw_blocks_enter_exit_tests = [] {
     }
 };
 
+"empty display math deletion leaves an editable paragraph in the same slot"_test = [] {
+    const std::array fixtures{
+        std::pair{"\\[\n\n\\]", ""},
+        std::pair{"$$\r\n\t \r\n\r\n$$\r\n", "\r\n"},
+        std::pair{"before\n\n$$\n\n$$\nafter", "before\n\n\nafter"},
+        std::pair{"> - >\\[\r\n>   >  \r\n>   >\\]\r\n>   > later\r\n",
+            "> - >\r\n>   > later\r\n"},
+        std::pair{"> [!NOTE] Title\n>$$\n>\n>$$\n> tail\n", "> [!NOTE] Title\n>\n> tail\n"},
+        std::pair{"[^n]: Initial\n\n    \\[\n\n    \\]\n    tail\n\nUse [^n].\n",
+            "[^n]: Initial\n\n\n    tail\n\nUse [^n].\n"},
+    };
+    for (const auto& [source, expected] : fixtures)
+    for (const auto command : {CommandKind::DeleteBackward, CommandKind::DeleteForward}) {
+        Editor editor(source);
+        expect(editor.markdown_utf8() == source) << source;
+        const BlockNode* math = nullptr;
+        walk_blocks(editor.document().root, [&](const BlockNode& block) {
+            if (!math && block.kind == BlockKind::MathBlock) math = &block;
+        });
+        expect(fatal(math != nullptr)) << source;
+        if (!math) continue;
+        const auto owner = math->id;
+        const auto before = TextSelection::caret({owner, block_source_content_range(math->block_source).start});
+        editor.set_selection(before);
+        const auto path = document_block_path(editor.document(), owner);
+        reset_core_operation_counters();
+        expect(editor.execute_command({.kind = command})) << source;
+        const auto counters = read_core_operation_counters();
+        expect(counters.full_document_parses == 0_u && counters.full_document_serializations == 0_u) << source;
+        expect(counters.full_document_block_index_scans == 0_u) << source << counters.full_document_block_index_scans;
+        const auto paragraph = find_document_block(editor.document(), owner);
+        expect(paragraph && paragraph->kind == BlockKind::Paragraph && paragraph->inline_content().source.empty()) << source;
+        expect(document_block_path(editor.document(), owner) == path) << source;
+        const auto after = TextSelection::caret({owner, 0});
+        expect(editor.selection() == after) << source;
+        expect(editor.markdown_utf8() == expected) << source << editor.markdown_utf8();
+        expect(validate_document(editor.document()).empty()) << source << "validation";
+        const auto reloaded = Editor(expected).markdown_utf8();
+        expect(reloaded == expected) << source << "reload" << reloaded;
+        expect(editor.undo() && editor.markdown_utf8() == source && editor.selection() == before)
+            << source << "undo" << editor.markdown_utf8();
+        expect(editor.redo() && editor.markdown_utf8() == expected && editor.selection() == after)
+            << source << "redo" << editor.markdown_utf8();
+    }
+};
+
+"display math Backspace on a blank line keeps later TeX and an unclosed opener"_test = [] {
+    for (const auto& [source, expected] : std::array{
+            std::pair{"$$\n\n% retained\n$$", "$$\n% retained\n$$"},
+            std::pair{"\\[\n\n", "\\[\n"}}) {
+        Editor editor(source);
+        const auto owner = editor.selection().active.container_id;
+        expect(editor.execute_command({.kind = CommandKind::DeleteBackward}));
+        expect(editor.markdown_utf8() == expected) << editor.markdown_utf8();
+        const auto* math = find_document_block(editor.document(), owner);
+        expect(math && math->kind == BlockKind::MathBlock);
+    }
+};
+
+"display math double Enter finishes a nonempty formula within its own flow"_test = [] {
+    for (const auto& [source, expected] : std::array{
+            std::pair{"$$\nx\n$$\ntail", "$$\nx\n$$\n\ntail"},
+            std::pair{"> - > \\[\r\n>   > \\begin{cases} a & b \\end{cases}\r\n>   >\\]\r\n>   > tail\r\n",
+                "> - > \\[\r\n>   > \\begin{cases} a & b \\end{cases}\r\n>   >\\]\r\n>   >\r\n>   > tail\r\n"}}) {
+        Editor editor(source);
+        const auto owner = editor.selection().active.container_id;
+        const auto* math = find_document_block(editor.document(), owner);
+        expect(fatal(math && math->kind == BlockKind::MathBlock));
+        if (!math || math->kind != BlockKind::MathBlock) continue;
+        const auto raw = math->block_source.source();
+        const auto before = TextSelection::caret({owner, block_source_content_range(math->block_source).end});
+        editor.set_selection(before);
+        const Command enter{.kind = CommandKind::InsertNewline};
+        expect(editor.execute_command(enter));
+        const auto blank_source = editor.markdown_utf8();
+        const auto blank_selection = editor.selection();
+        expect(blank_selection.active.container_id == owner);
+        expect(blank_source != source);
+        expect(editor.execute_command(enter));
+        const auto after = editor.selection();
+        const auto* paragraph = find_document_block(editor.document(), after.active.container_id);
+        expect(paragraph && paragraph->kind == BlockKind::Paragraph && paragraph->inline_content().source.empty());
+        math = find_document_block(editor.document(), owner);
+        expect(math && math->block_source.source() == raw);
+        expect(editor.markdown_utf8() == expected) << editor.markdown_utf8();
+        expect(editor.undo() && editor.markdown_utf8() == blank_source && editor.selection() == blank_selection);
+        expect(editor.undo() && editor.markdown_utf8() == source && editor.selection() == before);
+        expect(editor.redo() && editor.redo() && editor.markdown_utf8() == expected && editor.selection() == after);
+    }
+
+    Editor empty("$$\n\n\n$$");
+    const auto& math = empty.document().root.children.front();
+    const auto owner = math.id;
+    empty.set_caret({owner, block_source_content_range(math.block_source).end});
+    expect(empty.execute_command({.kind = CommandKind::InsertNewline}));
+    expect(empty.selection().active.container_id == owner);
+    expect(empty.markdown_utf8() == "$$\n\n\n\n$$");
+
+    Editor soft_break("$$\nx\n\n$$");
+    const auto& formula = soft_break.document().root.children.front();
+    const auto formula_owner = formula.id;
+    soft_break.set_caret({formula_owner, block_source_content_range(formula.block_source).end});
+    expect(soft_break.execute_command({.kind = CommandKind::InsertSoftBreak}));
+    expect(soft_break.selection().active.container_id == formula_owner);
+    expect(soft_break.markdown_utf8() == "$$\nx\n\n\n$$");
+};
+
 };

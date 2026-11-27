@@ -386,7 +386,13 @@ inline std::optional<InsertResult> insert_raw_line_break(
     return InsertResult{target, TextAffinity::Downstream, std::move(edit)};
 }
 
-inline std::optional<RecordedBlockEdit> enter_at_math_delimiter_exterior(
+inline bool display_math_body_is_blank(const BlockSourceDocument& source) {
+    return std::ranges::all_of(source.tree().content, [](char32_t character) {
+        return character == U' ' || character == U'\t' || character == U'\r' || character == U'\n';
+    });
+}
+
+inline std::optional<RecordedBlockEdit> enter_at_display_math_boundary(
     EditorDocument& document, TextPosition position, const BlockPath& path, BlockNode& block,
     NodeAllocator& allocator) {
     const auto& source = block.block_source;
@@ -394,7 +400,16 @@ inline std::optional<RecordedBlockEdit> enter_at_math_delimiter_exterior(
     const auto opening = block_source_marker_range(source, BlockSourceTokenKind::OpeningMarker);
     const auto closing = block_source_marker_range(source, BlockSourceTokenKind::ClosingMarker);
     const bool before_opening = opening && position.source_offset <= opening->start;
-    if (!before_opening && !(closing && position.source_offset >= closing->end)) return std::nullopt;
+    const bool after_closing = closing && position.source_offset >= closing->end;
+    std::optional<SourceRange> trailing_break;
+    if (!before_opening && !after_closing) {
+        // The last empty body line is distinct from the start of the closer.
+        // A second Enter there finishes a formula that already has content.
+        if (!closing || position.source_offset >= closing->start
+            || position.source_offset != block_source_content_range(source).end) return std::nullopt;
+        trailing_break = block_source_trailing_line_break(source);
+        if (!trailing_break || display_math_body_is_blank(source)) return std::nullopt;
+    }
 
     auto parent_path = path;
     const auto index = parent_path.back();
@@ -404,6 +419,11 @@ inline std::optional<RecordedBlockEdit> enter_at_math_delimiter_exterior(
 
     const auto ending = display_math_line_ending(document, source);
     RecordedBlockEdit result;
+    if (trailing_break) {
+        auto edit = edit_block_source(document, block, *trailing_break, {}, allocator);
+        if (!edit) return std::nullopt;
+        append_source_operation(result.operations, std::move(*edit));
+    }
     auto update_separator = [&](BlockNode& owner) {
         DocumentTreeEdit update;
         update.kind = DocumentTreeEditKind::UpdatePayload;
@@ -456,7 +476,7 @@ inline std::optional<RecordedBlockEdit> enter_at_raw_block_boundary(
     auto* block = block_at_path(document.root, *path);
     if (!block || !editable_raw_block_source(*block)) return std::nullopt;
     if (block_source_has_math_delimiters(block->block_source))
-        return enter_at_math_delimiter_exterior(document, position, *path, *block, allocator);
+        return enter_at_display_math_boundary(document, position, *path, *block, allocator);
     if (!block->block_source.tree().complete_closing) return std::nullopt;
 
     const auto editable = block_source_editable_range(block->block_source);
@@ -885,17 +905,47 @@ inline std::optional<RecordedBlockEdit> remove_atomic(
     return remove_direct_block(document, id, allocator);
 }
 
-inline std::optional<RecordedBlockEdit> remove_empty_raw_block(
-    EditorDocument& document,
-    NodeId id,
-    NodeAllocator& allocator) {
-    const auto* block = find_document_block(document, id);
-    if (!block
-        || (block->kind != BlockKind::CodeBlock && block->kind != BlockKind::MathBlock)
-        || !block->block_source.tree().content.empty()) {
-        return std::nullopt;
-    }
-    return remove_direct_block(document, id, allocator);
+inline std::optional<RecordedBlockEdit> remove_empty_display_math(
+    EditorDocument& document, const BlockNode& block, TextPosition position, NodeAllocator& allocator) {
+    const auto& source = block.block_source;
+    const auto opening = block_source_marker_range(source, BlockSourceTokenKind::OpeningMarker);
+    const auto closing = block_source_marker_range(source, BlockSourceTokenKind::ClosingMarker);
+    if (!opening || !closing || closing->end != source.source().size()
+        || position.source_offset <= opening->end || position.source_offset >= closing->start
+        || !display_math_body_is_blank(source)) return std::nullopt;
+
+    auto path = document_block_path(document, block.id);
+    if (!path || path->empty()) return std::nullopt;
+    const auto index = path->back();
+    path->pop_back();
+    auto* parent = block_at_path(document.root, *path);
+    if (!parent || index >= parent->children.size()) return std::nullopt;
+
+    BlockNode paragraph;
+    paragraph.id = block.id;
+    paragraph.kind = BlockKind::Paragraph;
+    paragraph.separator_before = block.separator_before;
+    paragraph.edit_inline_content() = make_inline({}, document, allocator);
+    RecordedBlockEdit result;
+    result.target = {paragraph.id, 0, TextAffinity::Downstream};
+    // The empty paragraph keeps the original slot and its first-line prefix.
+    // The remaining source anchors belonged to the deleted math lines.
+    result.operations = document_container_source::apply_source_edit_to_ancestors(
+        document, {block.id, {0, source.source().size()}, {}});
+    result.operations.emplace_back(DocumentTreeEdit{
+        .kind = DocumentTreeEditKind::Remove, .parent_id = parent->id, .index = index, .before = block});
+    result.operations.emplace_back(DocumentTreeEdit{
+        .kind = DocumentTreeEditKind::Insert, .parent_id = parent->id, .index = index, .after = paragraph});
+    parent->children[index] = std::move(paragraph);
+    return result;
+}
+
+inline std::optional<RecordedBlockEdit> remove_empty_raw_block_at_caret(
+    EditorDocument& document, const BlockNode& block, TextPosition position, NodeAllocator& allocator) {
+    if (block_source_has_math_delimiters(block.block_source))
+        return remove_empty_display_math(document, block, position, allocator);
+    if (!block.block_source.tree().content.empty()) return std::nullopt;
+    return remove_direct_block(document, block.id, allocator);
 }
 
 inline std::optional<RecordedBlockEdit> unwrap_fenced_math_marker(

@@ -52,6 +52,7 @@ namespace { suite semantic_marker_tests = [] {
     const std::array sources{
         "$$\nabc\n$$\n", "\\[\r\nabc\r\n\\]\r\n", ">$$\n> abc\n>$$\n",
         "> [!NOTE]\n>$$\n> abc\n>$$\n", ">$$\n> abc\n>$$",
+        "$$\n\n$$", "\\[\r\n\r\n\\]",
         "> - > \\[\n>   > \\begin{cases} a & b \\end{cases}\n>   > \\]\n", "$$$$", "\\[\\]"};
     for (std::string source : sources)
     for (bool closing : {false, true})
