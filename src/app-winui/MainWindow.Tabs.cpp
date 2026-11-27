@@ -290,7 +290,11 @@ namespace winrt::Folia::implementation {
         tabs.SelectionChanged(WindowEvent([this, group](auto const&, auto const&) {
             RefreshTabCaptionRegion();
             if (updatingTabs || windowClosed) return;
-            if (auto item = GroupTabs(group).SelectedItem()) ActivateView(winrt::unbox_value<std::uint64_t>(item));
+            if (auto item = GroupTabs(group).SelectedItem()) {
+                const auto view = winrt::unbox_value<std::uint64_t>(item);
+                // Realizing a passive strip can re-announce its existing selection.
+                if (editorGroups.Selected(group) != view) ActivateView(view);
+            }
         }));
         tabs.TabCloseRequested(WindowEvent([this](auto const&, TabViewTabCloseRequestedEventArgs const& args) {
             CloseEditorViewAsync(winrt::unbox_value<std::uint64_t>(args.Item()));
