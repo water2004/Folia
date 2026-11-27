@@ -144,12 +144,10 @@ namespace winrt::Folia::implementation
             blend(colors.shell_bg.r, colors.shell_fg.r), blend(colors.shell_bg.g, colors.shell_fg.g),
             blend(colors.shell_bg.b, colors.shell_fg.b)};
         UpdateBrushResource(resources, L"FoliaWorkspaceBaseBrush", shellTone);
-        media::Brush shellBackground{nullptr};
-        if (material == WindowMaterial::Solid || material == WindowMaterial::Acrylic) {
-            auto key = material == WindowMaterial::Acrylic ? L"FoliaAcrylicBaseShadeBrush" : L"FoliaWorkspaceBaseBrush";
-            shellBackground = resources.Lookup(box_value(key)).as<media::Brush>();
-        }
-        Root().Background(shellBackground);
+        // Even a fully transparent backdrop needs a hit surface for files dragged over empty space.
+        auto shellBrush = material == WindowMaterial::Acrylic ? L"FoliaAcrylicBaseShadeBrush" :
+            material == WindowMaterial::Solid ? L"FoliaWorkspaceBaseBrush" : L"FoliaClearBaseBrush";
+        Root().Background(resources.Lookup(box_value(shellBrush)).as<media::Brush>());
 
         UpdateBrushResource(resources, L"FoliaReadingSurfaceBrush", colors.bg);
         auto paper = resources.Lookup(box_value(L"FoliaReadingSurfaceBrush")).as<media::SolidColorBrush>();

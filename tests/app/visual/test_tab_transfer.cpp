@@ -35,6 +35,14 @@ namespace winrt::Folia::implementation {
         }
         static auto& Documents(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->workspaceDocuments; }
         static auto& Groups(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->editorGroups; }
+        static auto DropItems(Microsoft::UI::Xaml::Window const& window, Windows::Foundation::Point point,
+                              Windows::ApplicationModel::DataTransfer::DataPackageView data) {
+            auto owner = Impl(window);
+            return owner->OpenDroppedItemsAsync(data, owner->GroupAtWorkspacePoint(point));
+        }
+        static void ExternalFile(std::filesystem::path const& path) {
+            App::Current()->OpenWorkspaceWindows({false, {path}});
+        }
         static auto GroupTabs(Microsoft::UI::Xaml::Window const& window, EditorGroup group) { return Impl(window)->GroupTabs(group); }
         static auto OtherRenderer(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->otherEditorRenderer.get(); }
         static void ResizeGroups(Microsoft::UI::Xaml::Window const& window, double delta) { Impl(window)->ResizeEditorGroups(delta); }
@@ -580,6 +588,67 @@ namespace {
             expect(!groups.IsSplit());
             check(left, L"left after closing split");
         };
+        "dropped storage files open in the hit editor group and stay pinned"_test = [] {
+            using winrt::Folia::EditorGroup;
+            using namespace winrt::Windows::Storage;
+            using namespace winrt::Windows::ApplicationModel::DataTransfer;
+            TestDirectory files;
+            auto folder = Await(StorageFolder::GetFolderFromPathAsync(files.path.native()));
+            std::filesystem::path base(folder.Path().c_str());
+            OwnedWindow workspace(App()->CreateMainWindow());
+            auto window = workspace.window;
+            auto root = window.Content().as<FrameworkElement>();
+            expect(root.AllowDrop());
+            auto& documents = Access::Documents(window);
+            auto& groups = Access::Groups(window);
+            auto drop = [&](float x, std::initializer_list<wchar_t const*> names) {
+                std::vector<IStorageItem> items;
+                for (auto name : names) {
+                    auto path = base / name;
+                    if (!std::filesystem::exists(path)) std::ofstream(path) << "A document";
+                    items.push_back(Await(StorageFile::GetFileFromPathAsync(path.native())));
+                }
+                DataPackage package;
+                package.SetStorageItems(winrt::single_threaded_vector<IStorageItem>(std::move(items)));
+                Await(Access::DropItems(window, {x, 100.f}, package.GetView()));
+            };
+            drop(100, {L"first.md"});
+            auto first = documents.Active();
+            expect(fatal(first->kept && first->path == base / L"first.md"));
+            expect(documents.Find(files.path / L"first.md") == first);
+            auto button = root.FindName(L"SplitEditorButton").as<Controls::Button>();
+            Automation::Peers::ButtonAutomationPeer(button).as<Automation::Provider::IInvokeProvider>().Invoke();
+            Pump([&] { return groups.IsSplit(); });
+            Access::ResizeGroups(window, 70.);
+            root.UpdateLayout();
+            auto divider = root.FindName(L"EditorGroupSplitter").as<FrameworkElement>();
+            const auto edge = divider.TransformToVisual(root).TransformPoint({0, 0}).X;
+            drop(edge - 12, {L"left.md", L"ignored.bin", L"second.txt"});
+            auto left = documents.Active();
+            expect(left->kept && groups.ActiveGroup() == EditorGroup::Left);
+            expect(fatal(left->path == base / L"second.txt"));
+            expect(documents.Find(base / L"ignored.bin") == nullptr);
+            drop(edge + 12, {L"right.md", L"left.md", L"left.md"});
+            auto both = documents.Active();
+            expect(fatal(both->kept && both->path == base / L"left.md"));
+            expect(groups.ActiveGroup() == EditorGroup::Right);
+            expect(groups.ViewCount(both->id) == 2_u);
+            expect(groups.ViewFor(EditorGroup::Left, left->id) != 0_u);
+            auto right = documents.Find(base / L"right.md");
+            expect(fatal(right != nullptr));
+            expect(groups.ViewFor(EditorGroup::Right, right->id) != 0_u);
+            auto previewPath = base / L"preview.md";
+            std::ofstream(previewPath) << "Preview";
+            Access::Open(window, previewPath, winrt::Folia::WorkspaceOpenMode::Preview);
+            auto externalPath = base / L"external.md";
+            std::ofstream(externalPath) << "External";
+            Access::ExternalFile(externalPath);
+            expect(documents.Active()->path == externalPath && documents.Active()->kept);
+            expect(groups.ActiveGroup() == EditorGroup::Right && documents.Find(previewPath) != nullptr);
+            Access::ExternalFile(left->path);
+            expect(groups.ActiveGroup() == EditorGroup::Left && documents.Active() == left);
+        };
+
         "split groups move tab identity and collapse either empty group"_test = [] {
             using winrt::Folia::EditorGroup;
             OwnedWindow workspace(App()->CreateMainWindow());

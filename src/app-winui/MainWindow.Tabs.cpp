@@ -361,6 +361,7 @@ namespace winrt::Folia::implementation {
     void MainWindow::RegisterWorkspaceHandlers() {
         OutlineList().Items().VectorChanged(WindowEvent([this](auto const&, auto const&) { UpdateWorkspaceLayout(); }));
         RegisterEditorGroups();
+        RegisterFileDrops();
         RegisterGroupTabs(EditorGroup::Left);
         RegisterGroupTabs(EditorGroup::Right);
         RegisterTabTransferHandlers();

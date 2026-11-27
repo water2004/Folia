@@ -942,6 +942,9 @@
     <ClCompile Include="MainWindow.GroupDrag.cpp">
       <Filter>Application Shell</Filter>
     </ClCompile>
+    <ClCompile Include="MainWindow.FileDrop.cpp">
+      <Filter>Application Shell</Filter>
+    </ClCompile>
     <ClCompile Include="localization\Localization.cpp">
       <Filter>Localization</Filter>
     </ClCompile>

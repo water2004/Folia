@@ -68,6 +68,7 @@ namespace winrt::Folia::implementation
         };
         void RegisterTabTransferHandlers();
         struct GroupDropTarget { EditorGroup group; std::size_t index; float indicatorX; bool onStrip; };
+        EditorGroup GroupAtWorkspacePoint(Windows::Foundation::Point point);
         std::optional<GroupDropTarget> GroupDropAt(Windows::Foundation::Point point, std::uint64_t view);
         void SetTabDropIndicator(std::optional<GroupDropTarget> const& drop);
         void StartNativeTabDrag(Microsoft::UI::Input::EnteringMoveSizeEventArgs const&);
@@ -175,6 +176,9 @@ namespace winrt::Folia::implementation
         winrt::fire_and_forget CloseDocumentAsync(std::uint64_t id);
         winrt::fire_and_forget CloseEditorViewAsync(std::uint64_t view);
         void RegisterWindowHandlers();
+        void RegisterFileDrops();
+        winrt::fire_and_forget DropWorkspaceFiles(Microsoft::UI::Xaml::DragEventArgs args, EditorGroup group);
+        Windows::Foundation::IAsyncAction OpenDroppedItemsAsync(Windows::ApplicationModel::DataTransfer::DataPackageView data, EditorGroup group);
         winrt::fire_and_forget ConfirmWindowCloseAsync();
         winrt::Windows::Foundation::IAsyncOperation<winrt::Microsoft::UI::Xaml::Controls::ContentDialogResult> ConfirmUnsavedChangesAsync(std::uint64_t id);
         void InitializeEditorSurface();

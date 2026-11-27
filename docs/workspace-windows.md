@@ -11,6 +11,10 @@ window. By default a new file opens as a pinned tab in the last active window
 and editor group. The General setting to open files in new windows gives each
 new file its own window. The first file starts the workspace on a cold launch.
 
+Dropping supported documents or images onto the reading area opens them as
+pinned tabs in the group under the pointer. Dropping onto a workspace folder
+in the file tree uses that folder's file-transfer controls.
+
 Launch requests carry absolute paths, including paths that were relative to the
 launching process. Each executable location registers its own activation key.
 `--new-instance` starts an isolated process for startup tests.
@@ -42,6 +46,7 @@ substitute for manually checking Shift conversion with an installed IME.
 | `workspace/WorkspaceLaunch.*` | Parse launch requests, normalize paths and marshal their values. |
 | `workspace/WorkspaceDocuments.*` | Own document sessions; transfer an inactive session between workspaces. |
 | `MainWindow.Tabs.cpp` | Tab presentation, preview/pinning, selection and close commands. |
+| `MainWindow.FileDrop.cpp` | Accept external storage items and open them in the receiving editor group. |
 | `MainWindow.TabTransfer.cpp` | Native tear-out events, container ownership and tab ordering. |
 | `EditorDocumentController::Presentation` | Bind a session's UI callbacks to its current window. |
 
