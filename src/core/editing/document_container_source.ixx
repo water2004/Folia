@@ -116,10 +116,10 @@ inline ContainerSource transform_source_anchors(
     return result;
 }
 
-inline std::vector<DocumentTreeEdit> apply_source_edit_to_ancestors(
+inline std::vector<DocumentOperation> apply_source_edit_to_ancestors(
     EditorDocument& document,
     const TextEdit& edit) {
-    std::vector<DocumentTreeEdit> updates;
+    std::vector<DocumentOperation> updates;
     auto path = document_block_path(document, edit.container_id);
     if (!path) return updates;
     auto* node = &document.root;
@@ -142,6 +142,24 @@ inline std::vector<DocumentTreeEdit> apply_source_edit_to_ancestors(
         node = &node->children[index];
     }
     return updates;
+}
+
+inline bool source_end_is_document_tail(const EditorDocument& document, NodeId owner, std::size_t offset) {
+    // A retained container prefix can still follow a leaf's final newline.
+    const auto path = cached_document_block_path(document, owner);
+    if (!path) return false;
+    const auto* node = &document.root;
+    for (auto index : *path) {
+        if (index + 1 != node->children.size()) return false;
+        bool has_suffix = false;
+        node->container_source().visit_owner(owner, [&](const auto& line) {
+            has_suffix |= line.anchor.part == ContainerAnchorPart::Source
+                && line.anchor.offset == offset && !line.text.empty();
+        });
+        if (has_suffix) return false;
+        node = &node->children[index];
+    }
+    return node->id == owner;
 }
 
 inline std::vector<DocumentTreeEdit> rebind_source_anchors(
@@ -251,6 +269,39 @@ inline std::vector<DocumentTreeEdit> transfer_split_anchors(
         updates.push_back(std::move(update));
     }
     return updates;
+}
+
+inline void transfer_leading_anchors(
+    EditorDocument& document, const BlockPath& owner_path, NodeId from, NodeId to,
+    std::vector<DocumentOperation>& operations) {
+    const auto precedes_source = [](const ContainerLinePrefix& line) {
+        return line.anchor.part == ContainerAnchorPart::Separator
+            || (line.anchor.part == ContainerAnchorPart::Source && line.anchor.offset == 0
+                && line.role == ContainerPrefixRole::ItemOpening);
+    };
+    auto* node = &document.root;
+    for (auto index : owner_path) {
+        if (node->has_container_source()) {
+            bool has_leading_prefix = false;
+            node->container_source().visit_owner(from, [&](const auto& line) {
+                has_leading_prefix |= precedes_source(line);
+            });
+            if (has_leading_prefix) {
+                DocumentTreeEdit update;
+                update.kind = DocumentTreeEditKind::UpdatePayload;
+                update.before = document_transaction_detail::payload_shell(*node);
+                auto& source = node->ensure_container_source();
+                for (auto& line : source.lines) {
+                    if (line.anchor.owner_id == from && precedes_source(line))
+                        line.anchor.owner_id = to;
+                }
+                source.invalidate_owner_lookup();
+                update.after = document_transaction_detail::payload_shell(*node);
+                operations.emplace_back(std::move(update));
+            }
+        }
+        node = &node->children[index];
+    }
 }
 
 // A lossless fragment reparse changes owners but leaves the physical lines

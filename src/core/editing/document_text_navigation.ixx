@@ -1,5 +1,5 @@
-// Word/paragraph intent over the authoritative editable owner order. Raw
-// blocks navigate their rendered body and map back to block-local source.
+// Word/paragraph intent over the authoritative editable owner order. Code
+// navigates the projected body and display math navigates its source lines.
 export module folia.core.document_text_navigation;
 import std;
 import folia.markdown.ids;
@@ -20,15 +20,23 @@ export namespace folia {
 
 enum class DocumentTextMove { WordLeft, WordRight, ParagraphStart, ParagraphEnd };
 
-// Pointer word selection uses the same visible body as keyboard word motion.
-// Raw source also owns hidden fences/HTML tags and indentation prefixes, which
-// must never become selected merely because they border a whitespace run.
+// Pointer word selection uses the same editable surface as keyboard motion.
 inline std::optional<TextSelection> document_word_selection_at(
     const EditorDocument& document, TextPosition position) {
     const auto* block = find_document_block(document, position.container_id);
     if (!block) return std::nullopt;
     std::optional<SourceRange> selected;
-    if (editable_raw_block_source(*block)) {
+    if (block_source_has_math_delimiters(block->block_source)) {
+        const auto& source = block->block_source;
+        for (auto kind : {BlockSourceTokenKind::OpeningMarker, BlockSourceTokenKind::ClosingMarker}) {
+            auto delimiter = block_source_marker_range(source, kind);
+            if (delimiter && delimiter->contains(position.source_offset)) {
+                selected = *delimiter;
+                break;
+            }
+        }
+        if (!selected) selected = text_word_selection_range(source.source(), position.source_offset);
+    } else if (editable_raw_block_source(*block)) {
         const auto& body = block->block_source.tree();
         const auto source = clamp_editable_block_source_offset(*block, position.source_offset);
         const auto mapped = body.content_to_source.lower_bound(source);
@@ -40,8 +48,9 @@ inline std::optional<TextSelection> document_word_selection_at(
         selected = text_word_selection_range(inlines->source, position.source_offset);
     }
     if (!selected) return std::nullopt;
-    return TextSelection{{position.container_id, selected->start, TextAffinity::Downstream},
-        {position.container_id, selected->end, TextAffinity::Upstream}};
+    return snap_display_math_selection(document, TextSelection{
+        {position.container_id, selected->start, TextAffinity::Downstream},
+        {position.container_id, selected->end, TextAffinity::Upstream}});
 }
 
 inline std::optional<TextSelection> document_move_text_selection(
@@ -61,7 +70,7 @@ inline std::optional<TextSelection> document_move_text_selection(
     const auto source = editable_block_text_view(*block);
     if (!range || !source) return std::nullopt;
     auto target = selection.active;
-    target.source_offset = clamp_editable_block_source_offset(*block, target.source_offset);
+    target.source_offset = clamp_editable_block_source_offset(*block, target.source_offset, target.affinity);
     const auto edge = backward ? range->start : range->end;
     if (target.source_offset == edge || document_edit_detail::atomic_block(block->kind)) {
         auto moved = document_move_selection(document, TextSelection::caret(target),
@@ -77,7 +86,7 @@ inline std::optional<TextSelection> document_move_text_selection(
         }
     } else if (!word) {
         target.source_offset = edge;
-    } else if (editable_raw_block_source(*block)) {
+    } else if (editable_raw_block_source(*block) && block_source_editable_projection(block->block_source)) {
         const auto& body = block->block_source.tree();
         const auto mapped = body.content_to_source.lower_bound(target.source_offset);
         const auto offset = mapped == body.content_to_source.end() ? body.content.size()
@@ -92,7 +101,8 @@ inline std::optional<TextSelection> document_move_text_selection(
             target.source_offset = inline_format_marker_boundary(*owner, target.source_offset, !backward);
     }
     target.affinity = backward ? TextAffinity::Upstream : TextAffinity::Downstream;
-    return extend ? TextSelection{selection.anchor, target} : TextSelection::caret(target);
+    return snap_display_math_selection(document,
+        extend ? TextSelection{selection.anchor, target} : TextSelection::caret(target));
 }
 
 inline std::optional<DocumentTransaction> document_delete_word(

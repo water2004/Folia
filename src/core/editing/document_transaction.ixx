@@ -58,12 +58,6 @@ struct DocumentTreeDelta {
     std::optional<BlockNode> after_payload;
 };
 
-struct DocumentSourceEdit : AppliedSourceEdit {
-    std::vector<DocumentTreeEdit> metadata_edits;
-    std::optional<std::vector<BlockLineIndentation>> indentation_before;
-    std::optional<std::vector<BlockLineIndentation>> indentation_after;
-};
-
 struct DocumentEndingEdit {
     std::u32string before;
     std::u32string after;
@@ -75,6 +69,12 @@ struct DocumentMetadataEdit {
 };
 
 using DocumentOperation = std::variant<DocumentTextOperation,DocumentTreeEdit,DocumentEndingEdit,DocumentMetadataEdit>;
+
+struct DocumentSourceEdit : AppliedSourceEdit {
+    std::vector<DocumentOperation> metadata_edits;
+    std::optional<std::vector<BlockLineIndentation>> indentation_before;
+    std::optional<std::vector<BlockLineIndentation>> indentation_after;
+};
 
 struct DocumentTransaction {
     std::vector<DocumentOperation> operations;

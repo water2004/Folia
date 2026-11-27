@@ -113,7 +113,7 @@ suite editing_raw_blocks_marker_boundaries_tests = [] {
 "rendered_raw_marker_ranges_are_inert_and_never_reclassify_the_block"_test = [] {
     for (const auto& markdown : std::vector<std::string>{
             "```cpp\nvalue\n```",
-            "$$\nvalue\n$$",
+            "```math\nvalue\n```",
         }) {
         Editor editor(markdown);
         const auto owner_id = editor.document().root.children.front().id;

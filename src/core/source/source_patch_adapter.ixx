@@ -99,13 +99,6 @@ inline bool same_semantics(const BlockNode& before,const BlockNode& after) {
     return true;
 }
 
-inline std::u32string ending(std::u32string_view source) {
-    if (source.ends_with(U"\r\n")) return U"\r\n";
-    if (source.ends_with(U"\n")) return U"\n";
-    if (source.ends_with(U"\r")) return U"\r";
-    return {};
-}
-
 inline std::u32string before_region(std::u32string_view after,const SourcePatch& patch,
     const SourceProjectionRegion& region) {
     const auto end=static_cast<std::size_t>(static_cast<std::ptrdiff_t>(region.end)+source_patch_delta(patch));
@@ -346,7 +339,6 @@ inline std::optional<SourceDocumentPatch> apply_source_document_patch(
             may_need_destination=false;
         }
     }
-    const auto trailing=ending(after_source);
     if (metadata_source!=next_metadata_source) {
         auto metadata=next_metadata_source
             ? from_frontmatter(next_metadata_source->first,next_metadata_source->second)
@@ -354,8 +346,8 @@ inline std::optional<SourceDocumentPatch> apply_source_document_patch(
         operations.emplace_back(DocumentMetadataEdit{document.metadata,std::move(metadata)});
         if (!apply_document_operation(document,operations.back(),true)) std::terminate();
     }
-    if (trailing!=document.trailing_line_ending) {
-        operations.emplace_back(DocumentEndingEdit{document.trailing_line_ending,trailing});
+    if (last==projection.blocks().size() && parsed.trailing_line_ending!=document.trailing_line_ending) {
+        operations.emplace_back(DocumentEndingEdit{document.trailing_line_ending,std::move(parsed.trailing_line_ending)});
         if (!apply_document_operation(document,operations.back(),true)) std::terminate();
     }
     if (may_need_destination) {

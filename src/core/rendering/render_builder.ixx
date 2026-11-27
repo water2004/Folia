@@ -1351,16 +1351,15 @@ struct Builder {
                 special.tex = block_source_content(b.block_source);
                 special.math_delim = b.atomic_special().math_delim;
                 auto const& sourceTree = b.block_source.tree();
+                const auto explicit_delimiters = block_source_has_math_delimiters(b.block_source);
                 for (auto const& token : sourceTree.tokens) {
                     auto opening = token.kind == BlockSourceTokenKind::OpeningMarker;
                     auto closing = token.kind == BlockSourceTokenKind::ClosingMarker;
                     if (!opening && !closing) continue;
                     auto range = token.source_range;
                     auto icon = SyntaxMarker::None;
-                    if (sourceTree.complete_opening && sourceTree.complete_closing) {
-                        // The block parser includes indentation in the opening
-                        // token; both math delimiter spellings have two codepoints.
-                        if (opening) range.start = range.end - 2;
+                    if (explicit_delimiters || (sourceTree.complete_opening && sourceTree.complete_closing)) {
+                        if (!explicit_delimiters && opening) range.start = range.end - 2;
                         icon = special.math_delim == MathDelimiter::BlockDollar ? SyntaxMarker::DoubleDollar
                             : opening ? SyntaxMarker::MathBracketOpen : SyntaxMarker::MathBracketClose;
                     }

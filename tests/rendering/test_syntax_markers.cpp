@@ -74,8 +74,8 @@ namespace { suite syntax_marker_tests = [] {
         expect(markers.size() == (complete ? 2u : 1u));
         for (auto const& marker : markers) {
             expect(marker.range.end <= block.special().raw_source.size());
-            expect((marker.icon != SyntaxMarker::None) == complete);
-            if (complete) expect(marker.range.length() == 2_u);
+            expect(marker.icon != SyntaxMarker::None);
+            expect(marker.range.length() == 2_u);
         }
     }
 };

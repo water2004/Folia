@@ -158,7 +158,7 @@ public:
         const auto active_length = document_edit_detail::editable_length(document_, selection.active.container_id);
         if (!anchor_length || !active_length || selection.anchor.source_offset > *anchor_length
             || selection.active.source_offset > *active_length) throw std::out_of_range("selection is outside editable source");
-        rendered_selection_.value() = std::move(selection);
+        rendered_selection_.value() = snap_display_math_selection(document_, std::move(selection));
     }
     MarkdownDialect const& dialect() const { return dialect_; }
     void set_dialect(MarkdownDialect dialect) {
@@ -519,7 +519,7 @@ public:
             source_view_->index.position(document_,selected.anchor,selected.anchor_affinity),
             source_view_->index.position(document_,selected.active,selected.active_affinity)};
         source_view_.reset();
-        rendered_selection_=restored;
+        rendered_selection_=snap_display_math_selection(document_, restored);
         last_document_change_.reset();
         return true;
     }

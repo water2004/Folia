@@ -1,8 +1,12 @@
 #include "support/folia_test.hpp"
 import folia.markdown.selection;
 import folia.markdown.text_edit;
+import folia.markdown.ast;
+import folia.markdown.block_source;
+import folia.markdown.block_tree;
 import folia.core.editor;
 import folia.core.command;
+import folia.core.document_edit;
 import folia.markdown.document;
 import folia.markdown.document_text;
 import folia.markdown.inline_document;
@@ -44,37 +48,70 @@ namespace { suite semantic_marker_tests = [] {
     }
 };
 
-"display math marker deletion unwraps a single block with exact source history"_test = [] {
-    for (auto source : {"$$\nabc\n$$\n", "\\[\nabc\n\\]\n", "> $$\n> abc\n> $$\n", "- $$\n  abc\n  $$\n"})
-    for (bool backward : {false, true}) {
+"display math deletion removes exactly one whole delimiter with exact source history"_test = [] {
+    const std::array sources{
+        "$$\nabc\n$$\n", "\\[\r\nabc\r\n\\]\r\n", ">$$\n> abc\n>$$\n",
+        "> [!NOTE]\n>$$\n> abc\n>$$\n", ">$$\n> abc\n>$$",
+        "> - > \\[\n>   > \\begin{cases} a & b \\end{cases}\n>   > \\]\n", "$$$$", "\\[\\]"};
+    for (std::string source : sources)
+    for (bool closing : {false, true})
+    for (auto command : {CommandKind::DeleteBackward, CommandKind::DeleteForward, CommandKind::DeleteSelection}) {
         Editor editor(source);
-        auto selection = editor.selection();
-        auto owner = selection.active.container_id;
-        auto* block = find_document_block(editor.document(), owner);
-        expect(block != nullptr);
-        if (!block) continue;
-        auto range = editable_block_source_range(*block);
-        expect(range.has_value());
-        if (!range) continue;
-        selection = TextSelection::caret({owner, backward ? range->start : range->end, TextAffinity::Downstream});
-        editor.set_selection(selection);
-        auto before = editor.markdown_utf8();
+        const BlockNode* math = nullptr;
+        walk_blocks(editor.document().root, [&](const BlockNode& block) {
+            if (!math && block.kind == BlockKind::MathBlock) math = &block;
+        });
+        expect(fatal(math != nullptr)) << source;
+        if (!math) continue;
+        const auto id = math->id;
+        const auto bracket = math->block_source.tree().kind == BlockSourceKind::BracketMath;
+        const auto marker = block_source_marker_range(math->block_source,
+            closing ? BlockSourceTokenKind::ClosingMarker : BlockSourceTokenKind::OpeningMarker);
+        expect(fatal(marker.has_value()));
+        if (!marker) continue;
+        const auto before = command == CommandKind::DeleteSelection
+            ? TextSelection{{id, marker->start}, {id, marker->end}}
+            : TextSelection::caret({id, command == CommandKind::DeleteBackward ? marker->end : marker->start});
+        editor.set_selection(before);
+
+        auto expected = source;
+        const auto physical = closing ? expected.rfind(bracket ? "\\]" : "$$")
+            : expected.find(bracket ? "\\[" : "$$");
+        expected.erase(physical, marker->length());
         reset_core_operation_counters();
-        Command command;
-        command.kind = backward ? CommandKind::DeleteBackward : CommandKind::DeleteForward;
-        expect(editor.execute_command(command)) << source;
-        auto counters = read_core_operation_counters();
-        expect(counters.full_document_parses == 0_u);
-        expect(counters.full_document_serializations == 0_u);
-        expect(editor.editable_source(owner) == std::optional<std::u32string>{U"abc"}) << source;
-        auto after = editor.markdown_utf8();
-        auto afterSelection = editor.selection();
-        expect(editor.undo());
-        expect(static_cast<bool>(editor.markdown_utf8() == before));
-        expect(editor.selection() == selection);
-        expect(editor.redo());
-        expect(static_cast<bool>(editor.markdown_utf8() == after));
-        expect(editor.selection() == afterSelection);
+        expect(editor.execute_command({.kind = command}));
+        const auto counters = read_core_operation_counters();
+        expect(counters.full_document_parses == 0_u && counters.full_document_serializations == 0_u);
+        expect(editor.markdown_utf8() == expected) << source << expected << editor.markdown_utf8();
+        const auto after = editor.selection();
+        expect(validate_document(editor.document()).empty());
+        expect(editor.undo() && editor.markdown_utf8() == source && editor.selection() == before);
+        expect(editor.redo() && editor.markdown_utf8() == expected && editor.selection() == after);
+        const auto reloaded = Editor(expected).markdown_utf8();
+        expect(reloaded == expected) << expected << reloaded;
+    }
+};
+
+"math caret motion visits both sides of delimiters and skips their interiors"_test = [] {
+    for (auto source : {"$$\r\nx\r\n$$", "\\[\r\nx\r\n\\]"}) {
+        Editor editor(source);
+        const auto id = editor.selection().active.container_id;
+        editor.set_caret({id, 0});
+        for (std::size_t stop : {2, 4, 5, 7, 9}) {
+            expect(editor.execute_command(Command::MoveRight(false)));
+            expect(editor.selection().active.source_offset == stop);
+        }
+        for (std::size_t stop : {7, 5, 4, 2, 0}) {
+            expect(editor.execute_command(Command::MoveLeft(false)));
+            expect(editor.selection().active.source_offset == stop);
+        }
+        editor.set_caret({id, 1, TextAffinity::Upstream});
+        expect(editor.selection().active.source_offset == 0_u);
+        editor.set_caret({id, 1, TextAffinity::Downstream});
+        expect(editor.selection().active.source_offset == 2_u);
+        editor.set_caret({id, 5, TextAffinity::Upstream});
+        expect(editor.execute_command({.kind = CommandKind::MoveDown}));
+        expect(editor.selection().active.source_offset == 7_u);
     }
 };
 

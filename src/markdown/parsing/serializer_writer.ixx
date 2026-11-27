@@ -87,7 +87,6 @@ struct SerializerPrefixPolicy {
     std::u32string marker;
     std::u32string nonempty_prefix;
     std::u32string empty_prefix;
-    bool terminal_newline = false;
     bool explicit_empty_paragraph = false;
     bool fixed_prefix_on_first_line = false;
     bool fixed_prefix_on_empty_line = false;
@@ -275,10 +274,9 @@ inline std::u32string choose_serializer_prefix(
         return explicit_record->text;
     }
 
+    if (terminal_line && facts.empty && !policy.explicit_empty_paragraph) return {};
     switch (policy.rule) {
         case SerializerPrefixRule::BlockQuote:
-            if (policy.terminal_newline && terminal_line && facts.empty
-                && !policy.explicit_empty_paragraph) return {};
             return facts.empty ? U">" : U"> ";
         case SerializerPrefixRule::ListItem:
             if (first_line) return policy.marker;
@@ -1012,8 +1010,6 @@ private:
         const bool terminal_newline = child_lines.size() > 1
             && plan_.line(child_lines.back()).facts.empty
             && plan_.line(child_lines[child_lines.size() - 2]).terminal;
-        auto policy = scope.policy;
-        policy.terminal_newline = terminal_newline;
         const auto terminal_line = child_lines.empty() ? std::size_t{} : child_lines.size() - 1;
         std::vector<SerializerLineRecordId> prefixed_lines;
         for (std::size_t index = 0; index < child_lines.size(); ++index) {
@@ -1023,7 +1019,7 @@ private:
             // Suppress only a generated prefix for a synthetic empty body;
             // explicit blank quote lines remain part of the original source.
             auto prefix = suppress_empty && !explicit_prefix ? std::u32string{}
-                : choose_serializer_prefix(policy, explicit_prefix,
+                : choose_serializer_prefix(scope.policy, explicit_prefix,
                     input.facts, index == 0,
                     terminal_newline && index == terminal_line);
             auto pieces = plan_.prepend_prefix(child_lines[index], input, std::move(prefix));

@@ -105,6 +105,7 @@ struct BlockFragmentSourceRange {
 struct ParsedBlockFragment {
     BlockVec blocks;
     std::vector<BlockFragmentSourceRange> source_ranges;
+    std::u32string trailing_line_ending;
 };
 
 // ---------------------------------------------------------------------------
@@ -698,6 +699,16 @@ BlockVec parse_blocks(std::function<bool(const std::u32string&)> stop=nullptr,
     bind_completed_prefixes(completed);
     active_container_frames.clear();
     return std::move(completed.children);
+}
+
+std::u32string detached_line_ending() const {
+    // A raw leaf can own the final physical ending. Store only the ending
+    // outside the tree so subsequent edits can add a distinct break to that leaf.
+    if (container_frames.front().preceding_child_end == cps.size()) return {};
+    if (cps.ends_with(U"\r\n")) return U"\r\n";
+    if (cps.ends_with(U"\n")) return U"\n";
+    if (cps.ends_with(U"\r")) return U"\r";
+    return {};
 }
 
 
@@ -2320,17 +2331,15 @@ void close_innermost_frame() {
     }
     auto tail=frame.children_completion;
     if (auto* quote=std::get_if<QuoteFrameState>(&frame.state)) {
-        // A quoted blank boundary has a source-editable empty owner unless an
-        // unclosed fence actually owns that accepted blank ending.
+        // Blank lines consumed by a child already have a source owner.
         if (quote->last_line_empty && !frame.node.children.empty()) {
-            auto& last=frame.node.children.back();
-            const bool fence_owns_blank=last.kind==BlockKind::CodeBlock
-                && last.block_source.tree().kind==BlockSourceKind::FencedCode
-                && !last.block_source.tree().complete_closing;
-            if (!fence_owns_blank && !(last.kind==BlockKind::Paragraph && last.inline_content().source.empty()))
+            const auto& last=frame.node.children.back();
+            const bool child_owns_blank=frame.preceding_child_end
+                && *frame.preceding_child_end>=frame.content.end;
+            if (!child_owns_blank && !(last.kind==BlockKind::Paragraph && last.inline_content().source.empty()))
                 append_empty_frame_body(frame,frame.content.end);
         }
-        if (quote->callout || (!frame.node.children.empty()
+        if (tail==Completion::Empty || (!frame.node.children.empty()
             && frame.node.children.back().kind==BlockKind::Paragraph
             && frame.node.children.back().inline_content().source.empty())) tail=Completion::Other;
     } else if (std::holds_alternative<ListFrameState>(frame.state) && tail==Completion::Empty)
@@ -3828,13 +3837,7 @@ inline ParseOutput parse(const ParseInput& input) {
         doc.next_node_id = p.node_counter;
         doc.dialect = input.dialect;
         doc.revision = input.revision;
-        if (!p.cps.empty() && p.cps.back() == U'\n') {
-            doc.trailing_line_ending = p.cps.size() >= 2 && p.cps[p.cps.size() - 2] == U'\r'
-                ? U"\r\n"
-                : U"\n";
-        } else if (!p.cps.empty() && p.cps.back() == U'\r') {
-            doc.trailing_line_ending = U"\r";
-        }
+        doc.trailing_line_ending = p.detached_line_ending();
 
         // Metadata can still inspect the root source while the parser owns it.
         bool has_fm = false;
@@ -3882,6 +3885,7 @@ inline std::optional<ParsedBlockFragment> plan_block_fragment(
         return accepted;
     });
     if (!accepted) return std::nullopt;
+    result.trailing_line_ending = parser.detached_line_ending();
     result.source_ranges.reserve(parser.source_ranges.size());
     for (const auto& range : parser.source_ranges) {
         result.source_ranges.push_back({

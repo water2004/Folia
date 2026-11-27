@@ -108,12 +108,39 @@ inline std::optional<SourceRange> editable_block_source_range(const BlockNode& b
 
 inline std::size_t clamp_editable_block_source_offset(
     const BlockNode& block,
-    std::size_t source_offset) {
+    std::size_t source_offset,
+    TextAffinity affinity = TextAffinity::Downstream) {
     if (editable_raw_block_source(block)) {
-        return block_source_clamp_editable_offset(block.block_source, source_offset);
+        return block_source_clamp_editable_offset(block.block_source, source_offset, affinity);
     }
     const auto range = editable_block_source_range(block).value_or(SourceRange{});
     return (std::clamp)(source_offset, range.start, range.end);
+}
+
+inline TextSelection snap_display_math_selection(const EditorDocument& document, TextSelection selection) {
+    if (selection.selects_cells()) return selection;
+    const auto* active = find_document_block(document, selection.active.container_id);
+    const auto* anchor = selection.anchor.container_id == selection.active.container_id
+        ? active : find_document_block(document, selection.anchor.container_id);
+    const auto uses_math_delimiters = [](const BlockNode* block) {
+        return block && block_source_has_math_delimiters(block->block_source);
+    };
+    if (!uses_math_delimiters(anchor) && !uses_math_delimiters(active)) return selection;
+    const auto snap = [&](TextPosition& position, const BlockNode* block, TextAffinity affinity) {
+        if (uses_math_delimiters(block))
+            position.source_offset = block_source_clamp_editable_offset(block->block_source, position.source_offset, affinity);
+    };
+    if (selection.is_caret()) {
+        snap(selection.active, active, selection.active.affinity);
+        selection.anchor.source_offset = selection.active.source_offset;
+    } else {
+        const bool forward = anchor == active ? selection.anchor.source_offset < selection.active.source_offset
+            : document_editable_order_position(document, selection.anchor.container_id)
+                < document_editable_order_position(document, selection.active.container_id);
+        snap(selection.anchor, anchor, forward ? TextAffinity::Upstream : TextAffinity::Downstream);
+        snap(selection.active, active, forward ? TextAffinity::Downstream : TextAffinity::Upstream);
+    }
+    return selection;
 }
 
 inline std::optional<std::u32string> editable_block_text(const BlockNode& block) {
@@ -125,7 +152,11 @@ inline std::optional<TextPosition> first_document_text_position(
     const EditorDocument& document) {
     auto find = [&](auto& self, const BlockNode& block) -> std::optional<TextPosition> {
         if (block.kind != BlockKind::Document && editable_block_text_view(block)) {
-            const auto range = editable_block_source_range(block).value_or(SourceRange{});
+            // Opening a document initially focuses the body of a raw block.
+            // Navigation still exposes the complete range of its visible source.
+            const auto range = editable_raw_block_source(block)
+                ? block_source_content_range(block.block_source)
+                : editable_block_source_range(block).value_or(SourceRange{});
             return TextPosition{block.id, range.start, TextAffinity::Downstream};
         }
         for (const auto& child : block.children) {

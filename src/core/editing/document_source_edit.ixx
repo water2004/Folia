@@ -66,7 +66,7 @@ inline std::optional<DocumentTransaction> document_delete_marker(
     if (auto inline_edit = document_delete_inline_marker(document, selection, backward, tracked)) return inline_edit;
     const auto revision = document.revision;
     document_edit_detail::NodeAllocator allocator(document);
-    auto block_edit = document_edit_detail::unwrap_math_marker(document, selection, backward, allocator, tracked);
+    auto block_edit = document_edit_detail::unwrap_fenced_math_marker(document, selection, backward, allocator, tracked);
     if (!block_edit) return std::nullopt;
     ++document.revision;
     return make_recorded_document_transaction(std::move(block_edit->operations), selection,
@@ -85,6 +85,25 @@ inline void track_source_operations(TextPosition* tracked, std::span<const Docum
     for (const auto& operation : operations)
         if (const auto* edit = std::get_if<DocumentTextOperation>(&operation))
             track_source_edit(tracked, edit->forward);
+}
+
+inline bool math_without_opener(const BlockNode& block) {
+    return block_source_has_math_delimiters(block.block_source)
+        && !block.block_source.tree().complete_opening;
+}
+
+inline void reclassify_math_without_opener(
+    EditorDocument& document, std::span<const NodeId> owners, NodeAllocator& allocator,
+    TextPosition& target, TextPosition* tracked, std::vector<DocumentOperation>& operations) {
+    // Later replacements cannot invalidate the cached paths of earlier owners.
+    for (auto id : std::views::reverse(owners)) {
+        const auto position = target.container_id == id ? target : TextPosition{id, 0};
+        auto edit = reparse_edited_direct_block(document, position, allocator, nullptr, tracked);
+        if (!edit) continue;
+        if (target.container_id == id) target = edit->target;
+        operations.insert(operations.end(), std::make_move_iterator(edit->operations.begin()),
+            std::make_move_iterator(edit->operations.end()));
+    }
 }
 
 } // namespace document_edit_detail
@@ -240,7 +259,7 @@ inline std::optional<DocumentTransaction> document_enter(EditorDocument& documen
             operations.end(),
             std::make_move_iterator(exited->operations.begin()),
             std::make_move_iterator(exited->operations.end()));
-    } else if (auto exited_raw = document_edit_detail::exit_complete_raw_block_at_end(
+    } else if (auto exited_raw = document_edit_detail::enter_at_raw_block_boundary(
                    after, current.active, allocator)) {
         target = exited_raw->target;
         operations.insert(
@@ -261,7 +280,7 @@ inline std::optional<DocumentTransaction> document_enter(EditorDocument& documen
             std::make_move_iterator(handled->operations.end()));
     } else if (auto* block = find_document_block(after, current.active.container_id);
                block && (block->kind == BlockKind::CodeBlock || block->kind == BlockKind::MathBlock)) {
-        auto inserted = document_edit_detail::insert_text(after, current.active, U"\n", allocator);
+        auto inserted = document_edit_detail::insert_raw_line_break(after, *block, current.active, allocator);
         if (!inserted) return std::nullopt;
         source_edit = std::move(inserted->source_edit);
         target = current.active;
@@ -851,8 +870,9 @@ inline std::optional<DocumentTransaction> document_delete_backward(EditorDocumen
             || selected_block->kind == BlockKind::MathBlock)) {
         target.source_offset = block_source_clamp_editable_offset(
             selected_block->block_source,
-            target.source_offset);
-        if (selected_block->block_source.tree().content.empty()) {
+            target.source_offset, target.affinity);
+        if (!block_source_has_math_delimiters(selected_block->block_source)
+            && selected_block->block_source.tree().content.empty()) {
             auto removed = document_edit_detail::remove_empty_raw_block(
                 after, target.container_id, allocator);
             if (!removed) return std::nullopt;
@@ -947,8 +967,9 @@ inline std::optional<DocumentTransaction> document_delete_forward(EditorDocument
             || selected_block->kind == BlockKind::MathBlock)) {
         target.source_offset = block_source_clamp_editable_offset(
             selected_block->block_source,
-            target.source_offset);
-        if (selected_block->block_source.tree().content.empty()) {
+            target.source_offset, target.affinity);
+        if (!block_source_has_math_delimiters(selected_block->block_source)
+            && selected_block->block_source.tree().content.empty()) {
             auto removed = document_edit_detail::remove_empty_raw_block(
                 after, target.container_id, allocator);
             if (!removed) return std::nullopt;
@@ -1020,7 +1041,8 @@ inline std::optional<DocumentTransaction> document_delete_forward(EditorDocument
 }
 
 inline std::optional<DocumentTransaction> document_delete_selection(
-    EditorDocument& document, const TextSelection& selection, TextPosition* tracked) {
+    EditorDocument& document, const TextSelection& requested, TextPosition* tracked) {
+    const auto selection = snap_display_math_selection(document, requested);
     if (selection.is_caret()) return std::nullopt;
     if (selection.selects_cells()) {
         const auto grid = document_table_cell_selection(document, selection);
@@ -1092,6 +1114,7 @@ inline std::optional<DocumentTransaction> document_delete_selection(
         document_edit_detail::MutationRollback rollback(
             after, operations, revision_before);
         std::vector<NodeId> removed_ids;
+        std::vector<NodeId> math_without_openers;
         std::optional<TextPosition> target;
         for (auto const& slice : *slices) {
             const auto* block = find_document_block(after, slice.container_id);
@@ -1110,18 +1133,21 @@ inline std::optional<DocumentTransaction> document_delete_selection(
                 after, slice.container_id, slice.source_range, allocator);
             if (!source_edit) return std::nullopt;
             document_edit_detail::append_source_operation(operations, std::move(*source_edit));
+            if (document_edit_detail::math_without_opener(*block)) math_without_openers.push_back(block->id);
         }
         // Every table contributes at least one surviving cell. Select it (or
         // an earlier surviving owner) before removing nodes and invalidating
         // their cached paths.
         if (!target) return std::nullopt;
+        document_edit_detail::track_source_operations(tracked, operations);
+        document_edit_detail::reclassify_math_without_opener(
+            after, math_without_openers, allocator, *target, tracked, operations);
         for (auto id = removed_ids.rbegin(); id != removed_ids.rend(); ++id) {
             if (!document_edit_detail::remove_node_recorded(after, *id, operations)) return std::nullopt;
         }
         if (!removed_ids.empty()) {
             document_edit_detail::prune_empty_containers_recorded(after.root, operations, after);
         }
-        document_edit_detail::track_source_operations(tracked, operations);
         if (!operations.empty()) ++after.revision;
         rollback.commit();
         return make_recorded_document_transaction(
@@ -1163,6 +1189,7 @@ inline std::optional<DocumentTransaction> document_delete_selection(
         document_edit_detail::MutationRollback rollback(
             after, operations, revision_before);
         std::vector<NodeId> remove_ids;
+        std::vector<NodeId> math_without_openers;
         for (std::size_t index = *anchor_index + 1; index < *active_index; ++index) {
             remove_ids.push_back(order[index]);
         }
@@ -1197,6 +1224,7 @@ inline std::optional<DocumentTransaction> document_delete_selection(
             if (!edit) return std::nullopt;
             document_edit_detail::append_source_operation(
                 operations, std::move(*edit));
+            if (document_edit_detail::math_without_opener(*first_block)) math_without_openers.push_back(first.container_id);
         }
 
         if (structure_boundary(last_block) && last.source_offset == last_range->end) {
@@ -1211,6 +1239,7 @@ inline std::optional<DocumentTransaction> document_delete_selection(
             if (!edit) return std::nullopt;
             document_edit_detail::append_source_operation(
                 operations, std::move(*edit));
+            if (document_edit_detail::math_without_opener(*last_block)) math_without_openers.push_back(last.container_id);
         }
 
         std::ranges::sort(remove_ids, [&](NodeId left, NodeId right) {
@@ -1218,6 +1247,12 @@ inline std::optional<DocumentTransaction> document_delete_selection(
                 > document_editable_order_position(after, right).value_or(0);
         });
         remove_ids.erase(std::unique(remove_ids.begin(), remove_ids.end()), remove_ids.end());
+        TextPosition target;
+        if (keep_first) target = first;
+        else if (keep_last) target = {last.container_id, last_range->start, TextAffinity::Downstream};
+        document_edit_detail::track_source_operations(tracked, operations);
+        document_edit_detail::reclassify_math_without_opener(
+            after, math_without_openers, allocator, target, tracked, operations);
         for (const auto id : remove_ids) {
             if (!document_edit_detail::remove_node_recorded(after, id, operations)) return std::nullopt;
         }
@@ -1242,26 +1277,12 @@ inline std::optional<DocumentTransaction> document_delete_selection(
             after.root.children.push_back(std::move(paragraph));
         }
 
-        TextPosition target;
-        if (keep_first) {
-            target = first;
-        } else if (keep_last) {
-            // The surviving boundary owner was validated before structural
-            // removal. Its source prefix was erased in place, so its visible
-            // start remains the previously computed range start. Re-looking
-            // it up here would consult stale child indices after an earlier
-            // sibling was removed and force a full-tree locator repair.
-            target = {
-                last.container_id,
-                last_range->start,
-                TextAffinity::Downstream};
-        } else {
+        if (target.container_id.v == 0) {
             auto first_position = first_document_text_position(after);
             if (!first_position) first_position = append_document_editable_destination(after, &operations);
             if (!first_position) return std::nullopt;
             target = *first_position;
         }
-        document_edit_detail::track_source_operations(tracked, operations);
         ++after.revision;
         rollback.commit();
         return make_recorded_document_transaction(
@@ -1382,7 +1403,7 @@ inline std::optional<TextSelection> document_move_selection(const EditorDocument
     const auto* active_block = block_at(*index);
     if (!text || !range || !active_block) return std::nullopt;
     auto target = selection.active;
-    target.source_offset = clamp_editable_block_source_offset(*active_block, target.source_offset);
+    target.source_offset = clamp_editable_block_source_offset(*active_block, target.source_offset, target.affinity);
     if (!extend && !selection.is_caret()
         && (movement == DocumentMove::Left || movement == DocumentMove::Right)) {
         const auto anchor_index = document_editable_order_position(
@@ -1400,52 +1421,27 @@ inline std::optional<TextSelection> document_move_selection(const EditorDocument
         auto last_range = range_at(order.size() - 1); if (!last_range) return std::nullopt;
         target = {order.back(), last_range->end, TextAffinity::Downstream};
     }
-    else if (movement == DocumentMove::Left) {
+    else if (movement == DocumentMove::Left || movement == DocumentMove::Right) {
+        const bool backward = movement == DocumentMove::Left;
+        const auto direction = backward ? TextAffinity::Upstream : TextAffinity::Downstream;
+        std::optional<std::size_t> adjacent;
         if (editable_raw_block_source(*active_block)) {
-            auto const& mapping = active_block->block_source.tree().content_to_source;
-            auto current = mapping.lower_bound(target.source_offset);
-            if (current != mapping.end() && *current == target.source_offset && current != mapping.begin()) {
-                const auto offset = static_cast<std::size_t>(current - mapping.begin());
-                target.source_offset = mapping[prev_grapheme_boundary_char(active_block->block_source.tree().content, offset)];
-            } else if (target.source_offset > range->start) {
-                target.source_offset = range->start;
-            } else if (*index > 0) {
-                auto previous = range_at(*index - 1); if (!previous) return std::nullopt;
-                target = {order[*index - 1], previous->end, TextAffinity::Upstream};
-            }
+            adjacent = block_source_adjacent_caret_offset(active_block->block_source, target.source_offset, direction);
+        } else if (backward ? target.source_offset > range->start : target.source_offset < range->end) {
+            adjacent = backward ? prev_grapheme_boundary_char(*text, target.source_offset)
+                : next_grapheme_boundary_char(*text, target.source_offset);
         }
-        else if (target.source_offset > range->start)
-            target.source_offset = (std::max)(range->start, prev_grapheme_boundary_char(*text, target.source_offset));
-        else if (*index > 0) {
-            auto previous = range_at(*index - 1); if (!previous) return std::nullopt;
-            target = {order[*index - 1], previous->end, TextAffinity::Upstream};
-        }
-    } else if (movement == DocumentMove::Right) {
-        if (editable_raw_block_source(*active_block)) {
-            auto const& mapping = active_block->block_source.tree().content_to_source;
-            auto current = mapping.lower_bound(target.source_offset);
-            if (current != mapping.end() && *current == target.source_offset
-                && std::next(current) != mapping.end()) {
-                const auto offset = static_cast<std::size_t>(current - mapping.begin());
-                target.source_offset = mapping[next_grapheme_boundary_char(active_block->block_source.tree().content, offset)];
-            } else if (target.source_offset < range->end) {
-                target.source_offset = range->end;
-            } else if (*index + 1 < order.size()) {
-                auto next = range_at(*index + 1); if (!next) return std::nullopt;
-                target = {order[*index + 1], next->start, TextAffinity::Downstream};
-            }
-        }
-        else if (target.source_offset < range->end)
-            target.source_offset = (std::min)(range->end, next_grapheme_boundary_char(*text, target.source_offset));
-        else if (*index + 1 < order.size()) {
-            auto next = range_at(*index + 1); if (!next) return std::nullopt;
-            target = {order[*index + 1], next->start, TextAffinity::Downstream};
+        if (adjacent) target.source_offset = (std::clamp)(*adjacent, range->start, range->end);
+        else if (backward ? *index > 0 : *index + 1 < order.size()) {
+            const auto neighbor = backward ? *index - 1 : *index + 1;
+            auto edge = range_at(neighbor); if (!edge) return std::nullopt;
+            target = {order[neighbor], backward ? edge->end : edge->start, direction};
         }
     } else {
         auto navigation_text = *text;
         auto navigation_offset = target.source_offset;
         auto raw_mapping = editable_raw_block_source(*active_block)
-            ? &active_block->block_source.tree().content_to_source
+            ? block_source_editable_projection(active_block->block_source)
             : nullptr;
         if (raw_mapping) {
             navigation_text = active_block->block_source.tree().content;
@@ -1481,7 +1477,7 @@ inline std::optional<TextSelection> document_move_selection(const EditorDocument
                 const auto neighbor_text = neighbor ? editable_block_text_view(*neighbor) : std::nullopt;
                 if (!neighbor_text) return std::nullopt;
                 raw_mapping = editable_raw_block_source(*neighbor)
-                    ? &neighbor->block_source.tree().content_to_source : nullptr;
+                    ? block_source_editable_projection(neighbor->block_source) : nullptr;
                 navigation_text = raw_mapping ? std::u32string_view{neighbor->block_source.tree().content}
                     : *neighbor_text;
                 target.container_id = neighbor->id;
@@ -1510,7 +1506,8 @@ inline std::optional<TextSelection> document_move_selection(const EditorDocument
             || movement == DocumentMove::LineEnd || movement == DocumentMove::DocumentEnd;
         target.source_offset = inline_format_marker_boundary(*owner, target.source_offset, forward);
     }
-    const auto result = extend ? TextSelection{selection.anchor, target} : TextSelection::caret(target);
+    const auto result = snap_display_math_selection(document,
+        extend ? TextSelection{selection.anchor, target} : TextSelection::caret(target));
     if (result == selection) return std::nullopt;
     return result;
 }

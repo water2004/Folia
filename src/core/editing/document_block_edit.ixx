@@ -366,18 +366,98 @@ inline std::optional<RecordedBlockEdit> exit_empty_indented_code(
     return result;
 }
 
-inline std::optional<RecordedBlockEdit> exit_complete_raw_block_at_end(
+inline std::u32string display_math_line_ending(
+    const EditorDocument& document, const BlockSourceDocument& source) {
+    const auto fallback = document.trailing_line_ending.empty() ? std::u32string_view{U"\n"}
+        : std::u32string_view{document.trailing_line_ending};
+    return block_source_line_ending(source, fallback);
+}
+
+inline std::optional<InsertResult> insert_raw_line_break(
+    EditorDocument& document, BlockNode& block, TextPosition position, NodeAllocator& allocator) {
+    const auto& source = block.block_source;
+    if (!block_source_has_math_delimiters(source))
+        return insert_text(document, position, U"\n", allocator);
+    const auto offset = block_source_clamp_editable_offset(source, position.source_offset, position.affinity);
+    auto ending = display_math_line_ending(document, source);
+    const auto target = offset + ending.size();
+    auto edit = edit_block_source(document, block, {offset, offset}, std::move(ending), allocator);
+    if (!edit) return std::nullopt;
+    return InsertResult{target, TextAffinity::Downstream, std::move(edit)};
+}
+
+inline std::optional<RecordedBlockEdit> enter_at_math_delimiter_exterior(
+    EditorDocument& document, TextPosition position, const BlockPath& path, BlockNode& block,
+    NodeAllocator& allocator) {
+    const auto& source = block.block_source;
+    position.source_offset = block_source_clamp_editable_offset(source, position.source_offset, position.affinity);
+    const auto opening = block_source_marker_range(source, BlockSourceTokenKind::OpeningMarker);
+    const auto closing = block_source_marker_range(source, BlockSourceTokenKind::ClosingMarker);
+    const bool before_opening = opening && position.source_offset <= opening->start;
+    if (!before_opening && !(closing && position.source_offset >= closing->end)) return std::nullopt;
+
+    auto parent_path = path;
+    const auto index = parent_path.back();
+    parent_path.pop_back();
+    auto* parent = block_at_path(document.root, parent_path);
+    if (!parent) return std::nullopt;
+
+    const auto ending = display_math_line_ending(document, source);
+    RecordedBlockEdit result;
+    auto update_separator = [&](BlockNode& owner) {
+        DocumentTreeEdit update;
+        update.kind = DocumentTreeEditKind::UpdatePayload;
+        update.before = document_transaction_detail::payload_shell(owner);
+        owner.separator_before = ending;
+        update.after = document_transaction_detail::payload_shell(owner);
+        result.operations.emplace_back(std::move(update));
+    };
+    // A same-line suffix already has a text owner. Enter moves it to the next
+    // line and lands at its start, exactly as splitting an ordinary line does.
+    if (!before_opening && index + 1 < parent->children.size()) {
+        auto& following = parent->children[index + 1];
+        if (following.separator_before && (*following.separator_before).empty()) {
+            if (auto target = first_editable_position(following)) {
+                update_separator(following);
+                result.target = *target;
+                return result;
+            }
+        }
+    }
+
+    auto paragraph = empty_paragraph(allocator, document);
+    if (before_opening) {
+        paragraph.separator_before = block.separator_before;
+        document_container_source::transfer_leading_anchors(
+            document, path, block.id, paragraph.id, result.operations);
+        update_separator(block);
+        result.target = position;
+    } else {
+        paragraph.separator_before = ending;
+        result.target = {paragraph.id, 0, TextAffinity::Downstream};
+    }
+    DocumentTreeEdit insert;
+    insert.kind = DocumentTreeEditKind::Insert;
+    insert.parent_id = parent->id;
+    insert.index = before_opening ? index : index + 1;
+    insert.after = paragraph;
+    const auto insertion = insert.index;
+    result.operations.emplace_back(std::move(insert));
+    insert_block(*parent, insertion, std::move(paragraph));
+    return result;
+}
+
+inline std::optional<RecordedBlockEdit> enter_at_raw_block_boundary(
     EditorDocument& document,
     TextPosition position,
     NodeAllocator& allocator) {
     auto path = document_block_path(document, position.container_id);
     if (!path || path->empty()) return std::nullopt;
     auto* block = block_at_path(document.root, *path);
-    if (!block || (block->kind != BlockKind::CodeBlock
-            && block->kind != BlockKind::MathBlock)
-        || !block->block_source.tree().complete_closing) {
-        return std::nullopt;
-    }
+    if (!block || !editable_raw_block_source(*block)) return std::nullopt;
+    if (block_source_has_math_delimiters(block->block_source))
+        return enter_at_math_delimiter_exterior(document, position, *path, *block, allocator);
+    if (!block->block_source.tree().complete_closing) return std::nullopt;
 
     const auto editable = block_source_editable_range(block->block_source);
     const auto after_closing = position.source_offset == block->block_source.source().size();
@@ -818,14 +898,15 @@ inline std::optional<RecordedBlockEdit> remove_empty_raw_block(
     return remove_direct_block(document, id, allocator);
 }
 
-inline std::optional<RecordedBlockEdit> unwrap_math_marker(
+inline std::optional<RecordedBlockEdit> unwrap_fenced_math_marker(
     EditorDocument& document, const TextSelection& selection, bool backward,
     NodeAllocator& allocator, TextPosition* tracked = nullptr) {
     if (selection.anchor.container_id != selection.active.container_id) return std::nullopt;
     auto path = document_block_path(document, selection.active.container_id);
     if (!path || path->empty()) return std::nullopt;
     auto* block = block_at_path(document.root, *path);
-    if (!block || block->kind != BlockKind::MathBlock) return std::nullopt;
+    if (!block || block->kind != BlockKind::MathBlock
+        || block->block_source.tree().kind != BlockSourceKind::FencedMath) return std::nullopt;
     const auto& tree = block->block_source.tree();
     if (!tree.complete_opening || !tree.complete_closing) return std::nullopt;
     auto start = (std::min)(selection.anchor.source_offset, selection.active.source_offset);

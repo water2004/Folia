@@ -1,3 +1,4 @@
+#include <array>
 #include <cstddef>
 #include <random>
 #include <stdexcept>
@@ -38,7 +39,7 @@ suite editing_raw_blocks_enter_exit_tests = [] {
             "```\n```",
             "```cpp\n```",
             "~~~\n~~~",
-            "$$\n$$",
+            "```math\n```",
         }) {
         for (const auto delete_backward : {false, true}) {
             Editor editor(markdown);
@@ -68,7 +69,7 @@ suite editing_raw_blocks_enter_exit_tests = [] {
 "enter_on_trailing_empty_raw_line_exits_and_removes_that_line"_test = [] {
     for (auto const& test_case : std::vector<std::pair<std::string, std::string>>{
             {"```cpp\nvalue\n\n```", "```cpp\nvalue\n```"},
-            {"$$\nx + y\n\n$$", "$$\nx + y\n$$"},
+            {"```math\nx + y\n\n```", "```math\nx + y\n```"},
         }) {
         Editor editor(test_case.first);
         const auto raw_id = editor.document().root.children.front().id;
@@ -93,7 +94,7 @@ suite editing_raw_blocks_enter_exit_tests = [] {
 "enter_on_an_empty_raw_frame_exits_without_exposing_a_delimiter"_test = [] {
     for (auto const& markdown : std::vector<std::string>{
             "```cpp\n```",
-            "$$\n$$",
+            "```math\n```",
         }) {
         Editor editor(markdown);
         const auto& raw = editor.document().root.children.front();
@@ -183,6 +184,139 @@ suite editing_raw_blocks_enter_exit_tests = [] {
     expect(fatal(bool(list_item->children.size() == 2u)));
     expect(fatal(bool(list_item->children.front().kind == BlockKind::CodeBlock)));
     expect(fatal(bool(list_item->children.back().id == editor.selection().active.container_id)));
+};
+
+"display math Enter keeps each side of both delimiters distinct"_test = [] {
+    for (const auto& [opening, closing] : std::array<std::pair<std::string, std::string>, 2>{{
+             {"$$", "$$"}, {"\\[", "\\]"}}})
+    for (std::string ending : {"\n", "\r\n"})
+    for (std::string content : {"x + y", ""}) {
+        const auto raw = opening + ending + content + ending + closing;
+        const auto source = raw + ending + "Following paragraph";
+        const std::array offsets{std::size_t{0}, opening.size(), raw.size() - closing.size(), raw.size()};
+        for (std::size_t side = 0; side < offsets.size(); ++side) {
+            Editor editor(source);
+            const auto owner = editor.selection().active.container_id;
+            const auto at = offsets[side];
+            const auto before = TextSelection::caret({owner, at});
+            editor.set_selection(before);
+            reset_core_operation_counters();
+            expect(editor.execute_command({.kind = CommandKind::InsertNewline}));
+            const auto change = read_core_operation_counters();
+            expect(change.full_document_parses == 0_u && change.full_document_serializations == 0_u);
+            auto expected = source;
+            expected.insert(at, ending);
+            expect(editor.markdown_utf8() == expected) << side << editor.markdown_utf8();
+            const auto after = editor.selection();
+            const auto* math = find_document_block(editor.document(), owner);
+            expect(fatal(math && math->kind == BlockKind::MathBlock));
+            if (!math) continue;
+            expect(flatten_block_source_tokens(math->block_source) == math->block_source.source());
+            if (side == 3) {
+                const auto* blank = find_document_block(editor.document(), after.active.container_id);
+                expect(blank && blank->kind == BlockKind::Paragraph && blank->inline_content().source.empty());
+                expect(after.active.source_offset == 0_u);
+            } else {
+                expect(after.active.container_id == owner);
+                expect(after.active.source_offset == (side == 0 ? at : at + ending.size()));
+            }
+            expect(validate_document(editor.document()).empty());
+            expect(editor.undo() && editor.markdown_utf8() == source && editor.selection() == before);
+            expect(editor.redo() && editor.markdown_utf8() == expected && editor.selection() == after);
+            expect(Editor(expected).markdown_utf8() == expected);
+        }
+    }
+};
+
+"display math Enter uses its direct flow in nested quotes lists callouts and footnotes"_test = [] {
+    struct Case { std::string source, before, after; };
+    const std::array cases{
+        Case{"> - > \\[\n>   > x\n>   > \\]\n>   > tail\n",
+             "> - >\n>   > \\[\n>   > x\n>   > \\]\n>   > tail\n",
+             "> - > \\[\n>   > x\n>   > \\]\n>   >\n>   > tail\n"},
+        Case{"> [!NOTE]\n> earlier\n>\n>$$\n> x\n>$$\n> tail\n",
+             "> [!NOTE]\n> earlier\n>\n>\n>$$\n> x\n>$$\n> tail\n",
+             "> [!NOTE]\n> earlier\n>\n>$$\n> x\n>$$\n>\n> tail\n"},
+        Case{"-\n  $$\n  x\n  $$\n  tail\n",
+             "-\n  \n  $$\n  x\n  $$\n  tail\n",
+             "-\n  $$\n  x\n  $$\n\n  tail\n"},
+        Case{"[^n]: Earlier\n\n    $$\n    x\n    $$\n    tail\n\nUse [^n].\n",
+             "[^n]: Earlier\n\n\n    $$\n    x\n    $$\n    tail\n\nUse [^n].\n",
+             "[^n]: Earlier\n\n    $$\n    x\n    $$\n\n    tail\n\nUse [^n].\n"},
+    };
+    for (const auto& fixture : cases)
+    for (bool before_opening : {true, false}) {
+        Editor editor(fixture.source);
+        const BlockNode* math = nullptr;
+        walk_blocks(editor.document().root, [&](const BlockNode& block) {
+            if (!math && block.kind == BlockKind::MathBlock) math = &block;
+        });
+        expect(fatal(math != nullptr)) << fixture.source;
+        if (!math) continue;
+        const auto id = math->id;
+        const auto raw = math->block_source.source();
+        const auto before = TextSelection::caret({id, before_opening ? 0u : raw.size()});
+        editor.set_selection(before);
+        auto owner_path = document_block_path(editor.document(), id).value();
+        owner_path.pop_back();
+        const auto parent = block_at_path(editor.document().root, owner_path)->id;
+        expect(editor.execute_command({.kind = CommandKind::InsertNewline}));
+        const auto& expected = before_opening ? fixture.before : fixture.after;
+        expect(editor.markdown_utf8() == expected) << editor.markdown_utf8();
+        const auto after = editor.selection();
+        math = find_document_block(editor.document(), id);
+        expect(math && math->block_source.source() == raw);
+        auto after_path = document_block_path(editor.document(), after.active.container_id).value();
+        after_path.pop_back();
+        expect(block_at_path(editor.document().root, after_path)->id == parent);
+        expect(validate_document(editor.document()).empty());
+        expect(editor.undo() && editor.markdown_utf8() == fixture.source && editor.selection() == before);
+        expect(editor.redo() && editor.markdown_utf8() == expected && editor.selection() == after);
+    }
+};
+
+"display math Enter handles a compact closer and an unclosed opener"_test = [] {
+    Editor compact("$$x$$tail\n");
+    compact.set_caret({compact.selection().active.container_id, 5});
+    expect(compact.execute_command({.kind = CommandKind::InsertNewline}));
+    expect(compact.markdown_utf8() == "$$x$$\ntail\n");
+    expect(compact.selection().active.source_offset == 0_u);
+    expect(compact.editable_source(compact.selection().active.container_id) == std::optional<std::u32string>{U"tail"});
+    Editor incomplete("\\[");
+    const auto id = incomplete.selection().active.container_id;
+    incomplete.set_caret({id, 2});
+    expect(incomplete.execute_command({.kind = CommandKind::InsertNewline}));
+    expect(incomplete.markdown_utf8() == "\\[\n");
+    expect(incomplete.selection().active == TextPosition{id, 3});
+};
+
+"display math Enter keeps both interior edges in nested source"_test = [] {
+    const std::string source = "> - > \\[\r\n>   > \\begin{matrix} a & b \\end{matrix}\r\n>   > \\]\r\n>   > tail\r\n";
+    for (bool at_closer : {false, true}) {
+        Editor editor(source);
+        const auto owner = editor.selection().active.container_id;
+        const auto* math = find_document_block(editor.document(), owner);
+        expect(fatal(math && math->kind == BlockKind::MathBlock));
+        if (!math || math->kind != BlockKind::MathBlock) continue;
+        const auto& raw = math->block_source;
+        const auto marker = block_source_marker_range(raw, at_closer
+            ? BlockSourceTokenKind::ClosingMarker : BlockSourceTokenKind::OpeningMarker);
+        expect(fatal(marker.has_value()));
+        if (!marker) continue;
+        const auto offset = at_closer ? marker->start : marker->end;
+        const auto before = TextSelection::caret({owner, offset});
+        editor.set_selection(before);
+        expect(editor.execute_command({.kind = CommandKind::InsertNewline}));
+        auto expected = source;
+        const auto physical = at_closer ? source.find("\\]") : source.find("\\[") + 2;
+        expected.insert(physical, "\r\n>   > ");
+        const auto after = editor.selection();
+        expect(after.active == TextPosition{owner, offset + 2});
+        expect(editor.markdown_utf8() == expected) << expected << editor.markdown_utf8();
+        expect(Editor(expected).markdown_utf8() == expected);
+        expect(editor.undo() && editor.markdown_utf8() == source && editor.selection() == before);
+        expect(editor.redo() && editor.markdown_utf8() == expected && editor.selection() == after);
+    }
 };
 
 };

@@ -62,7 +62,7 @@ suite editor_raw_history_tests = [] {
 };
 
 "adjacent_hidden_math_markers_do_not_form_a_rendered_selection"_test = [] {
-    Editor editor("$$\na\n$$\n$$\nb\n$$");
+    Editor editor("~~~math\na\n~~~\n~~~math\nb\n~~~");
     expect(fatal(bool(editor.document().root.children.size() == 2u)));
     if (editor.document().root.children.size() != 2u) return;
     auto const& first = editor.document().root.children[0];
@@ -71,13 +71,13 @@ suite editor_raw_history_tests = [] {
     expect(fatal(bool(second.kind == BlockKind::MathBlock)));
     auto first_id = first.id;
     auto second_id = second.id;
-    auto closing = first.block_source.source().rfind(U"$$");
+    auto closing = first.block_source.source().rfind(U"~~~");
     expect(fatal(bool(closing != std::u32string::npos)));
     if (closing == std::u32string::npos) return;
     auto before = editor.markdown_utf8();
     auto before_selection = TextSelection{
         {first_id, closing, TextAffinity::Downstream},
-        {second_id, 2, TextAffinity::Downstream},
+        {second_id, 3, TextAffinity::Downstream},
     };
     editor.set_selection(before_selection);
     expect(fatal(!editor.execute_document_delete_selection(editor.selection()).has_value()));
@@ -137,6 +137,7 @@ suite editor_raw_history_tests = [] {
         if (test_case.reverse_selection) std::swap(boundary.anchor, boundary.active);
         const auto before_markdown = editor.markdown_utf8();
         editor.set_selection(boundary);
+        const auto before_selection = editor.selection();
 
         reset_core_operation_counters();
         expect(fatal(bool(editor.execute_document_delete_selection(editor.selection()).has_value())))
@@ -158,7 +159,7 @@ suite editor_raw_history_tests = [] {
         for (int cycle = 0; cycle < 3; ++cycle) {
             expect(fatal(bool(editor.undo()))) << test_case.markdown;
             expect(fatal(bool(editor.markdown_utf8() == before_markdown))) << test_case.markdown;
-            expect(fatal(bool(editor.selection() == boundary))) << test_case.markdown;
+            expect(fatal(bool(editor.selection() == before_selection))) << test_case.markdown;
             expect(fatal(bool(validate_document(editor.document()).empty()))) << test_case.markdown;
             auto restored_model = build_render_model(
                 editor.document(), editor.outline(), editor.symbols(), default_theme_profile());
@@ -271,7 +272,7 @@ suite editor_raw_history_tests = [] {
 "incomplete_raw_content_edits_restore_exact_source_and_selection"_test = [] {
     const std::vector<std::string> documents{
         "```cpp\nvalue",
-        "$$\nx + y",
+        "~~~math\nx + y",
     };
 
     for (const auto& markdown : documents) {

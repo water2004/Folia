@@ -5262,6 +5262,7 @@
     },
     {
       "name": "display math delimiter icons stay indivisible and deletion unwraps their TeX",
+      "replaced_by": "display math delimiter tiles hit both sides and deleting one keeps the other",
       "count": 1,
       "original_files": [
         "tests/app/test_syntax_marker_editing.cpp"
@@ -5276,6 +5277,7 @@
     },
     {
       "name": "display math marker deletion unwraps a single block with exact source history",
+      "replaced_by": "display math deletion removes exactly one whole delimiter with exact source history",
       "count": 1,
       "original_files": [
         "tests/editing/test_semantic_markers.cpp"

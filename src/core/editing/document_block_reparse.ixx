@@ -287,7 +287,8 @@ inline std::optional<BlockReparsePlan> plan_adjacent_display_math(
         || plan->blocks.front().atomic_special().math_delim != *delimiter
         || !plan->blocks.front().block_source.tree().complete_closing) return std::nullopt;
     plan->replaced_siblings = 2;
-    plan->target_offset = block_source_clamp_editable_offset(plan->blocks.front().block_source, plan->target_offset);
+    const auto body = block_source_content_range(plan->blocks.front().block_source);
+    plan->target_offset = (std::clamp)(plan->target_offset, body.start, body.end);
     return plan;
 }
 
@@ -302,7 +303,9 @@ inline std::optional<BlockReparsePlan> plan_edited_direct_block(
         // A closer inside an existing raw block ends the block at that point.
         // The raw lexer preserves the suffix as an error token; the block
         // parser must now give that source its own editable owners.
-        if (block_reparse_detail::has_source_after_raw_closer(*current)) {
+        if (block_reparse_detail::has_source_after_raw_closer(*current)
+            || (block_source_has_math_delimiters(current->block_source)
+                && !current->block_source.tree().complete_opening)) {
             scope = BlockReparseScope::Fragment;
         } else if (source_edit && !block_reparse_detail::edit_touches_raw_structure(*current, *source_edit)) {
             return std::nullopt;

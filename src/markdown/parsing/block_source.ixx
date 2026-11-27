@@ -4,6 +4,7 @@
 export module folia.markdown.block_source;
 import std;
 import folia.markdown.text_edit;
+import folia.markdown.selection;
 import folia.markdown.source_offset_map;
 import folia.markdown.utf;
 import folia.markdown.html_entities;
@@ -216,17 +217,12 @@ private:
 };
 
 inline std::u32string block_source_line_ending(
-    const BlockSourceDocument& document) {
+    const BlockSourceDocument& document, std::u32string_view fallback = U"\n") {
     const auto& source = document.source();
-    for (const auto& token : document.tree().tokens) {
-        if (token.kind != BlockSourceTokenKind::LineBreak) continue;
-        if (token.source_range.end <= source.size()) {
-            return source.substr(
-                token.source_range.start,
-                token.source_range.length());
-        }
-    }
-    return U"\n";
+    const auto eol = source.find_first_of(U"\r\n");
+    if (eol == source.npos) return std::u32string(fallback);
+    return source.substr(eol, source[eol] == U'\r' && eol + 1 < source.size()
+        && source[eol + 1] == U'\n' ? 2u : 1u);
 }
 
 namespace block_source_detail {
@@ -447,9 +443,11 @@ inline BlockSourceTree parse_math(std::u32string_view source, BlockSourceKind ki
         tree.content = std::u32string(source);
         return tree;
     }
+    push_token(tree, BlockSourceTokenKind::Indentation, 0, cursor);
+    const auto marker_start = cursor;
     cursor += opening.size();
     tree.complete_opening = true;
-    push_token(tree, BlockSourceTokenKind::OpeningMarker, 0, cursor);
+    push_token(tree, BlockSourceTokenKind::OpeningMarker, marker_start, cursor);
     auto content_start = cursor;
     const auto opening_line_ending_length = line_ending_length(source, cursor);
     if (opening_line_ending_length != 0) {
@@ -701,63 +699,117 @@ inline std::size_t block_source_offset_for_content(
     return document.tree().content_to_source[index];
 }
 
-// Rendered editing keeps the original source coordinate.  These helpers only
-// describe which source boundaries are reachable through the projected block
-// content; they do not introduce a second coordinate system.
-inline SourceRange block_source_editable_range(
+inline SourceRange block_source_content_range(
     const BlockSourceDocument& document) {
     const auto& mapping = document.tree().content_to_source;
     if (mapping.empty()) return {0, 0};
     return {mapping.front(), mapping.back()};
 }
 
+inline bool block_source_has_math_delimiters(const BlockSourceDocument& document) {
+    const auto kind = document.tree().kind;
+    return kind == BlockSourceKind::DollarMath || kind == BlockSourceKind::BracketMath;
+}
+
+inline std::optional<SourceRange> block_source_marker_range(
+    const BlockSourceDocument& document, BlockSourceTokenKind kind) {
+    const auto& tokens = document.tree().tokens;
+    auto marker = std::ranges::find(tokens, kind, &BlockSourceToken::kind);
+    if (marker == tokens.end()) return std::nullopt;
+    return marker->source_range;
+}
+
+// Code exposes its projected body. Display math also exposes its original
+// marker lines, so its caret stops are in the block source itself.
+inline const SourceOffsetMap* block_source_editable_projection(const BlockSourceDocument& document) {
+    return block_source_has_math_delimiters(document) ? nullptr : &document.tree().content_to_source;
+}
+
+inline SourceRange block_source_editable_range(const BlockSourceDocument& document) {
+    return block_source_editable_projection(document)
+        ? block_source_content_range(document) : SourceRange{0, document.source().size()};
+}
+
 inline std::size_t block_source_clamp_editable_offset(
     const BlockSourceDocument& document,
-    std::size_t source_offset) {
-    const auto& mapping = document.tree().content_to_source;
-    if (mapping.empty()) return 0;
-    if (source_offset <= mapping.front()) return mapping.front();
-    if (source_offset >= mapping.back()) return mapping.back();
-    const auto next = mapping.lower_bound(source_offset);
-    if (next == mapping.end()) return mapping.back();
-    if (*next == source_offset || next == mapping.begin()) return *next;
+    std::size_t source_offset,
+    TextAffinity affinity = TextAffinity::Downstream) {
+    const auto* mapping = block_source_editable_projection(document);
+    if (!mapping) {
+        const auto& source = document.source();
+        const auto offset = (std::min)(source_offset, source.size());
+        const bool forward = affinity == TextAffinity::Downstream;
+        for (auto kind : {BlockSourceTokenKind::OpeningMarker, BlockSourceTokenKind::ClosingMarker}) {
+            const auto marker = block_source_marker_range(document, kind);
+            if (marker && marker->start < offset && offset < marker->end)
+                return forward ? marker->end : marker->start;
+        }
+        if (offset > 0 && offset < source.size() && source[offset - 1] == U'\r' && source[offset] == U'\n')
+            return forward ? offset + 1 : offset - 1;
+        return offset;
+    }
+    if (mapping->empty()) return 0;
+    if (source_offset <= mapping->front()) return mapping->front();
+    if (source_offset >= mapping->back()) return mapping->back();
+    const auto next = mapping->lower_bound(source_offset);
+    if (next == mapping->end()) return mapping->back();
+    if (*next == source_offset || next == mapping->begin()) return *next;
     const auto previous = *std::prev(next);
     return source_offset - previous <= *next - source_offset ? previous : *next;
 }
 
-inline std::optional<SourceRange> block_source_backward_delete_range(
+inline std::optional<std::size_t> block_source_adjacent_caret_offset(
     const BlockSourceDocument& document,
-    std::size_t source_offset) {
-    const auto& mapping = document.tree().content_to_source;
-    if (mapping.size() < 2) return std::nullopt;
+    std::size_t source_offset,
+    TextAffinity direction) {
     const auto offset = block_source_clamp_editable_offset(document, source_offset);
-    const auto current = mapping.lower_bound(offset);
-    if (current == mapping.end() || *current != offset || current == mapping.begin()) {
-        return std::nullopt;
+    const bool backward = direction == TextAffinity::Upstream;
+    const auto* mapping = block_source_editable_projection(document);
+    if (!mapping) {
+        const auto& source = document.source();
+        if (backward ? offset == 0 : offset == source.size()) return std::nullopt;
+        auto next = backward ? prev_grapheme_boundary_char(source, offset)
+            : next_grapheme_boundary_char(source, offset);
+        for (auto kind : {BlockSourceTokenKind::OpeningMarker, BlockSourceTokenKind::ClosingMarker}) {
+            const auto marker = block_source_marker_range(document, kind);
+            if (!marker) continue;
+            if (backward) {
+                if (offset == marker->end) return marker->start;
+                if (offset > marker->end) next = (std::max)(next, marker->end);
+            } else {
+                if (offset == marker->start) return marker->end;
+                if (offset < marker->start) next = (std::min)(next, marker->start);
+            }
+        }
+        return next;
     }
-    const auto content_offset = static_cast<std::size_t>(current - mapping.begin());
-    const auto previous = prev_grapheme_boundary_char(document.tree().content, content_offset);
-    return SourceRange{mapping[previous], *current};
+    if (mapping->size() < 2) return std::nullopt;
+    const auto current = mapping->lower_bound(offset);
+    if (current == mapping->end() || (backward ? current == mapping->begin() : std::next(current) == mapping->end()))
+        return std::nullopt;
+    const auto content_offset = static_cast<std::size_t>(current - mapping->begin());
+    const auto& content = document.tree().content;
+    return (*mapping)[backward ? prev_grapheme_boundary_char(content, content_offset)
+        : next_grapheme_boundary_char(content, content_offset)];
+}
+
+inline std::optional<SourceRange> block_source_backward_delete_range(
+    const BlockSourceDocument& document, std::size_t source_offset) {
+    const auto offset = block_source_clamp_editable_offset(document, source_offset);
+    auto previous = block_source_adjacent_caret_offset(document, offset, TextAffinity::Upstream);
+    return previous ? std::optional{SourceRange{*previous, offset}} : std::nullopt;
 }
 
 inline std::optional<SourceRange> block_source_forward_delete_range(
-    const BlockSourceDocument& document,
-    std::size_t source_offset) {
-    const auto& mapping = document.tree().content_to_source;
-    if (mapping.size() < 2) return std::nullopt;
+    const BlockSourceDocument& document, std::size_t source_offset) {
     const auto offset = block_source_clamp_editable_offset(document, source_offset);
-    const auto current = mapping.lower_bound(offset);
-    if (current == mapping.end() || *current != offset || std::next(current) == mapping.end()) {
-        return std::nullopt;
-    }
-    const auto content_offset = static_cast<std::size_t>(current - mapping.begin());
-    const auto next = next_grapheme_boundary_char(document.tree().content, content_offset);
-    return SourceRange{*current, mapping[next]};
+    auto next = block_source_adjacent_caret_offset(document, offset, TextAffinity::Downstream);
+    return next ? std::optional{SourceRange{offset, *next}} : std::nullopt;
 }
 
 inline std::optional<SourceRange> block_source_trailing_line_break(
     const BlockSourceDocument& document) {
-    const auto range = block_source_editable_range(document);
+    const auto range = block_source_content_range(document);
     if (range.empty() || range.end > document.source().size()) return std::nullopt;
     if (range.end >= 2
         && document.source()[range.end - 2] == U'\r'

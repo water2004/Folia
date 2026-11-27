@@ -118,9 +118,10 @@ namespace
             }
         };
 
-        "display math delimiter icons stay indivisible and deletion unwraps their TeX"_test = [] {
+        "display math delimiter tiles hit both sides and deleting one keeps the other"_test = [] {
             auto xaml = winrt::Microsoft::UI::Xaml::Hosting::WindowsXamlManager::InitializeForCurrentThread();
-            for (auto source : {L"$$\nx+1\n$$\n", L"\\[\nx+1\n\\]\n"}) {
+            for (auto source : {L"$$\nx+1\n$$\n", L"\\[\nx+1\n\\]\n",
+                    L"> - > \\[\r\n>   > x+1\r\n>   > \\]\r\n"}) {
                 winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel panel;
                 EditorSession session;
                 session.SetText(source);
@@ -135,11 +136,33 @@ namespace
                 session.SetSelection(folia::TextSelection::caret({owner, 3, folia::TextAffinity::Downstream}));
                 auto frame = session.RenderFrame();
                 if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
-                auto markers = frame.renderModel.blocks.front().special().source_markers;
+                auto findOwner = [owner](auto const& self, folia::RenderBlock const& block)
+                    -> folia::RenderBlock const* {
+                    if (block.id == owner) return &block;
+                    for (auto const& child : block.child_blocks)
+                        if (auto match = self(self, child)) return match;
+                    return nullptr;
+                };
+                auto math = findOwner(findOwner, frame.renderModel.blocks.front());
+                if (!expect(math != nullptr)) continue;
+                auto markers = math->special().source_markers;
                 expect(markers.size() == 2_u);
                 renderer.Render(session.RenderFrame());
+                for (const auto& marker : markers) {
+                    const auto left = renderer.CaretBounds({owner, marker.range.start, folia::TextAffinity::Downstream});
+                    const auto right = renderer.CaretBounds({owner, marker.range.end, folia::TextAffinity::Upstream});
+                    if (!expect(left.has_value() && right.has_value())) continue;
+                    expect(right->left > left->left);
+                    expect(std::abs(left->top - right->top) < 1.f);
+                    const auto width = right->left - left->left;
+                    const auto y = (left->top + left->bottom) * .5f;
+                    auto onLeft = renderer.HitTest(left->left + width * .15f, y);
+                    auto onRight = renderer.HitTest(right->left - width * .15f, y);
+                    expect(onLeft && onLeft->container_id == owner && onLeft->source_offset == marker.range.start);
+                    expect(onRight && onRight->container_id == owner && onRight->source_offset == marker.range.end);
+                }
                 for (std::size_t offset = 0; offset < raw->size(); ++offset) {
-                    if ((*raw)[offset] == U'\n') continue; // line-end affinity has two valid visual edges
+                    if ((*raw)[offset] == U'\n' || (*raw)[offset] == U'\r') continue;
                     if (std::ranges::any_of(markers, [&](auto const& marker) {
                         return offset > marker.range.start && offset < marker.range.end;
                     })) continue; // a semantic marker has no internal caret
@@ -160,8 +183,8 @@ namespace
                 folia::Command erase;
                 erase.kind = folia::CommandKind::DeleteSelection;
                 expect(session.ExecuteCommand(erase));
-                expect(EditingIcons(session).empty());
-                expect(session.EditableSource(owner) == std::optional<std::u32string>{U"x+1"});
+                expect(EditingIcons(session).size() == 1_u);
+                expect(session.EditableSource(owner) == std::optional<std::u32string>{raw->substr(0, end - 2)});
                 folia::Command undo;
                 undo.kind = folia::CommandKind::Undo;
                 expect(session.ExecuteCommand(undo));
@@ -183,9 +206,12 @@ namespace
                 for (std::size_t offset = 0; offset <= raw->size(); ++offset) {
                     session.SetSelection(folia::TextSelection::caret({owner, offset, folia::TextAffinity::Downstream}));
                     auto icons = EditingIcons(session);
-                    expect(icons.size() == (std::wstring_view{source}.ends_with(L"\n") ? 2u : 0u));
+                    const auto closed = std::wstring_view{source}.ends_with(L"\n");
+                    expect(icons.size() == (closed ? 2u : 1u));
+                    const auto snapped = offset == 1 ? 2u
+                        : closed && offset + 1 == raw->size() ? raw->size() : offset;
                     auto acp = session.TextInputAcpOffset(session.Selection().active);
-                    expect(session.TextInputPositionFromAcp(owner, acp).source_offset == offset);
+                    expect(session.TextInputPositionFromAcp(owner, acp).source_offset == snapped);
                 }
                 expect(session.Text() == original);
             }

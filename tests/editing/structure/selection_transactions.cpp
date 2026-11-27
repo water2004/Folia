@@ -181,6 +181,12 @@ suite editing_structure_selection_transactions_tests = [] {
             {code_id, code_start, TextAffinity::Downstream},
             {paragraph_id, 2, TextAffinity::Downstream}},
         "raw source boundary");
+
+    Editor math("alpha\n\nintermediate\n\n$$\nx\n$$\n");
+    exercise(math, TextSelection{
+        {math.document().root.children.front().id, 2, TextAffinity::Downstream},
+        {math.document().root.children.back().id, 2, TextAffinity::Downstream}},
+        "selection removes a display math opener");
 };
 
 "selection_replacement_composes_delete_and_insert_source_edits"_test = [] {

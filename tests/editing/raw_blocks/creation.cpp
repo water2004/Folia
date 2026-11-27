@@ -237,9 +237,15 @@ suite editing_raw_blocks_creation_tests = [] {
         expect(fatal(bool(block && block->block_source.source() == U"$$\n\n$$")));
         expect(fatal(bool(math.selection().active.source_offset == 3u)));
         expect(fatal(bool(math.execute_document_enter(math.selection()).has_value())));
+        expect(fatal(bool(math.document().root.children.size() == 1u)));
+        const auto& extended = math.document().root.children.front();
+        expect(extended.block_source.source() == U"$$\n\n\n$$");
+        expect(math.selection().active.source_offset == 4_u);
+        math.set_caret({extended.id, extended.block_source.source().size()});
+        expect(fatal(bool(math.execute_document_enter(math.selection()).has_value())));
         expect(fatal(bool(math.document().root.children.size() == 2u)));
         expect(fatal(bool(math.document().root.children.front().block_source.source()
-            == U"$$\n\n$$")));
+            == U"$$\n\n\n$$")));
         expect(fatal(bool(math.document().root.children.back().kind == BlockKind::Paragraph)));
     }
 
@@ -259,11 +265,10 @@ suite editing_raw_blocks_creation_tests = [] {
     expect(fatal(bool(editor.selection().active.source_offset == 3u)));
     expect(fatal(bool(editor.execute_document_enter(editor.selection()).has_value())));
     block = find_block(editor.document().root, editor.selection().active.container_id);
-    expect(fatal(bool(editor.document().root.children.size() == 2u)));
-    expect(fatal(bool(block && block->kind == BlockKind::Paragraph)));
-    expect(fatal(bool(editor.document().root.children.front().block_source.source()
-        == U"$$\n\n$$")));
-    expect(fatal(bool(editor.selection().active.source_offset == 0u)));
+    expect(fatal(bool(editor.document().root.children.size() == 1u)));
+    expect(fatal(bool(block && block->kind == BlockKind::MathBlock)));
+    expect(fatal(bool(block && block->block_source.source() == U"$$\n\n\n$$")));
+    expect(fatal(bool(editor.selection().active.source_offset == 4u)));
 };
 
 };

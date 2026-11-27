@@ -508,7 +508,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> open_raw_block(
     document_edit_detail::append_source_operation(result.operations, std::move(*block_source_edit));
     block = find_document_block(document, position.container_id);
     if (!block) return std::nullopt;
-    result.target.source_offset = block_source_editable_range(block->block_source).start;
+    result.target.source_offset = block_source_content_range(block->block_source).start;
     rollback.commit();
     return result;
 }

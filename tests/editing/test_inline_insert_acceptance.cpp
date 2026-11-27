@@ -112,6 +112,7 @@ suite inline_insert_acceptance_tests = [] {
     const std::vector<Case> cases{
         {"```cpp", "```cpp\n", ""},
         {"```cpp\n", "```cpp\n", "\n"},
+        {"> ```cpp\r\n", "> ```cpp\r\n> ", "\r\n"},
         {"```cpp\n```", "```cpp\n", "\n```"},
         {"$$", "$$", ""},
         {"$$\n$$", "$$\n", "\n$$"},
@@ -123,8 +124,8 @@ suite inline_insert_acceptance_tests = [] {
         const auto* block = find_document_block(editor.document(), id);
         expect(fatal(block != nullptr && editable_raw_block_source(*block) != nullptr)) << entry.before;
         if (!block || !editable_raw_block_source(*block)) continue;
-        const auto visible = *editable_block_source_range(*block);
-        const auto selected = TextSelection::caret({id, visible.start});
+        const auto body = block_source_content_range(block->block_source);
+        const auto selected = TextSelection::caret({id, body.start});
         editor.set_selection(selected);
         const auto before = editor.markdown_utf8();
         reset_core_operation_counters();

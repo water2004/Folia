@@ -20,8 +20,10 @@ namespace winrt::Folia
             const auto indent = std::u32string(continuationIndentColumns, U' ');
             auto append = [&](folia::SourceRange range, SyntaxIcon icon, bool marker) {
                 while (range.start < range.end) {
-                    auto newline = source.find(U'\n', range.start);
-                    auto end = newline == source.npos ? range.end : (std::min)(range.end, newline + 1);
+                    auto newline = source.find_first_of(U"\r\n", range.start);
+                    const bool has_ending = newline < range.end;
+                    auto end = has_ending ? newline + 1 : range.end;
+                    if (has_ending && source[newline] == U'\r' && end < range.end && source[end] == U'\n') ++end;
                     auto before = display.ranges.size();
                     AppendSourceText(display, source.substr(range.start, end - range.start),
                         {block.id, {range.start, end}}, {}, marker);
@@ -29,7 +31,7 @@ namespace winrt::Folia
                         display.ranges.back().icon = icon;
                         display.ranges.back().iconPlacement = SyntaxIconPlacement::Block;
                     }
-                    if (end > range.start && source[end - 1] == U'\n' && end < source.size() && !indent.empty())
+                    if (has_ending && end < source.size() && !indent.empty())
                         AppendGeneratedText(display, indent, {block.id, end, folia::TextAffinity::Downstream},
                             {}, EditorDisplayPositionKind::BoundaryDecoration);
                     range.start = end;

@@ -633,6 +633,7 @@ private:
                     policy.fixed_prefix_on_first_line = true;
                     policy.fixed_prefix_on_empty_line = true;
                     policy.suppress_if_empty_body = true;
+                    policy.explicit_empty_paragraph = serializer_empty_paragraph(block.children.back());
                     policy.nonempty_prefix = U"> ";
                     policy.empty_prefix = U">";
                     writer_.begin_prefix_scope(block.id, block.container_source(), std::move(policy));
@@ -725,14 +726,7 @@ inline SerializerEmission serialize_blocks(BlockVec const& blocks, std::size_t b
 }
 
 inline void append_document_ending(SerializerEmission& result,const EditorDocument& document) {
-    const bool trailing_empty_paragraph = !document.root.children.empty()
-        && serializer_empty_paragraph(document.root.children.back());
-    if (!document.trailing_line_ending.empty()
-        && (result.text.empty()
-            || (result.text.back() != U'\n' && result.text.back() != U'\r')
-            || trailing_empty_paragraph)) {
-        result.text.append(document.trailing_line_ending);
-    }
+    result.text.append(document.trailing_line_ending);
 }
 
 inline SerializerEmission serialize_document(EditorDocument const& document, bool source_mappings=true) {

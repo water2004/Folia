@@ -323,7 +323,7 @@ inline std::optional<InsertResult> insert_text(
     if (!inline_document && !raw_source) return std::nullopt;
     const auto length = inline_document ? inline_document->source.size() : raw_source->size();
     const auto offset = raw_source
-        ? block_source_clamp_editable_offset(block->block_source, position.source_offset)
+        ? block_source_clamp_editable_offset(block->block_source, position.source_offset, position.affinity)
         : (std::min)(position.source_offset, length);
     auto replacement = block->kind == BlockKind::TableCell && inline_document
             && inline_document->syntax_mode != InlineSyntaxMode::HtmlText
@@ -350,6 +350,14 @@ inline std::optional<InsertResult> insert_text(
         // already contain a real empty line, which must remain a single line.
         replacement += block_source_line_ending(block->block_source);
     }
+    std::u32string terminal_ending;
+    if (raw_source && offset == length && document.trailing_line_ending.empty()
+        && !replacement.empty() && !replacement.ends_with(U'\n') && !replacement.ends_with(U'\r')
+        && (raw_source->ends_with(U'\n') || raw_source->ends_with(U'\r'))
+        && document_container_source::source_end_is_document_tail(document, block->id, length)) {
+        const auto ending_size = raw_source->ends_with(U"\r\n") ? 2u : 1u;
+        terminal_ending = raw_source->substr(length - ending_size);
+    }
     auto applied = edit_block_source(
         document,
         *block,
@@ -357,6 +365,12 @@ inline std::optional<InsertResult> insert_text(
         std::move(replacement),
         allocator);
     if (!applied) return std::nullopt;
+    if (!terminal_ending.empty()) {
+        // Typing on the final empty line keeps the document newline after
+        // the new text. The previous ending now separates two source lines.
+        applied->metadata_edits.emplace_back(DocumentEndingEdit{document.trailing_line_ending, terminal_ending});
+        document.trailing_line_ending = std::move(terminal_ending);
+    }
     return InsertResult{content_start + inserted_length, TextAffinity::Downstream, std::move(applied)};
 }
 
