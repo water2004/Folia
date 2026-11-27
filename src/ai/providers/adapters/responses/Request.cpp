@@ -60,6 +60,7 @@ Json BuildResponsesRequest(ModelRequest const& request, ProviderRequestOptions o
                          {"parameters", tool.inputSchema}});
     if (request.webSearch)
         tools.push_back(HostedSearchTool(ApiProtocol::Responses, options.search));
+    if (SeparatePageTool(request.pages)) tools.push_back(PageTool(ApiProtocol::Responses, request.pages));
     Json body = {{"model", request.model},
                  {"input", std::move(input)},
                  {"tools", std::move(tools)},
@@ -70,7 +71,7 @@ Json BuildResponsesRequest(ModelRequest const& request, ProviderRequestOptions o
         body["reasoning"]["effort"] = request.reasoning.effort;
     if (request.reasoning.summary)
         body["reasoning"]["summary"] = "auto";
-    if (request.webSearch || !request.tools.empty())
+    if (request.webSearch || !request.tools.empty() || SeparatePageTool(request.pages))
         body["include"] = Json::array({"reasoning.encrypted_content"});
     return body;
 }

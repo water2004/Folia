@@ -43,19 +43,22 @@ std::string RoleName(MessageRole r) {
 Json TextBlock(std::string const& text) {
     return Json{{"type", "text"}, {"text", text}};
 }
-bool IsWebSearch(Json const& block) {
+bool IsHostedWebTool(Json const& block) {
     auto name = String(block, "name");
-    return name == "web_search" || name == "deepseek_web_search";
+    return name == "web_search" || name == "deepseek_web_search" || name == "web_fetch" || name == "deepseek_read_url";
 }
 void AddHostedSearches(ModelResult& result, Json const& content) {
     for (auto const& b : content) {
         if (!IsString(b, "type")) continue;
-        if (b["type"] == "server_tool_use" && IsWebSearch(b) && IsString(b, "id") && result.searches.size() < 32) {
-            result.searches.push_back({String(b, "id"), SearchTarget(b, "input")});
-        } else if (b["type"] == "web_search_tool_result" && IsString(b, "tool_use_id") &&
-                   b.contains("content") && IsString(b["content"], "type") && b["content"]["type"] == "web_search_tool_result_error") {
+        if (b["type"] == "server_tool_use" && IsHostedWebTool(b) && IsString(b, "id") && result.searches.size() < 32) {
+            result.searches.push_back({String(b, "id"), SearchTarget(b, "input"), false, WebOperation(b, "input")});
+        } else if ((b["type"] == "web_search_tool_result" || b["type"] == "web_fetch_tool_result") && IsString(b, "tool_use_id") &&
+                   b.contains("content") && IsString(b["content"], "type")) {
             auto search = std::ranges::find(result.searches, String(b, "tool_use_id"), &HostedSearch::id);
-            if (search != result.searches.end()) search->failed = true;
+            if (search == result.searches.end()) continue;
+            auto const& payload = b["content"];
+            search->failed = payload["type"] == "web_search_tool_result_error" || payload["type"] == "web_fetch_tool_result_error";
+            if (!search->failed && b["type"] == "web_fetch_tool_result") AddPageSource(result, payload);
         }
     }
 }

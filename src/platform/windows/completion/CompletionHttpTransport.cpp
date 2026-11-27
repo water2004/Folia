@@ -104,6 +104,11 @@ CompletionModelPage ParseCompletionModels(std::string_view json, int protocol, a
                 bool standard = supported(*tools, "web_search");
                 bool deepseek = supported(*tools, "deepseek_web_search");
                 model.webSearch = standard || deepseek;
+                const bool nativeFetch = supported(*tools, "web_fetch");
+                const bool deepSeekFetch = supported(*tools, "deepseek_read_url");
+                model.webFetch = nativeFetch || deepSeekFetch;
+                standard |= nativeFetch;
+                deepseek |= deepSeekFetch;
                 if (standard != deepseek)
                     model.searchFormat = standard ? ai::WebSearchDialect::Standard : ai::WebSearchDialect::DeepSeek;
             }

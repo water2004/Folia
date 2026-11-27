@@ -108,7 +108,8 @@ void AddResponseOutput(ModelResult& result, Json const& response, bool incomplet
                             {ContentKind::Text, part["refusal"].get<std::string>(), {}, {}});
                 }
         } else if (type == "web_search_call" && result.searches.size() < 32) {
-            result.searches.push_back({String(item, "id"), SearchTarget(item, "action"), String(item, "status") == "failed"});
+            result.searches.push_back({String(item, "id"), SearchTarget(item, "action"), String(item, "status") == "failed", WebOperation(item, "action")});
+            if (!result.searches.back().failed && item.contains("page")) AddPageSource(result, item["page"]);
         } else if (type == "reasoning") {
             auto summary = item.find("summary");
             if (summary != item.end()) {

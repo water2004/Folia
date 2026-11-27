@@ -1,5 +1,6 @@
 #include "agent/Agent.h"
 #include "providers/ModelAdapter.h"
+#include "providers/ModelCodec.h"
 #include "providers/StreamResponse.h"
 #include "support/folia_test.hpp"
 
@@ -98,6 +99,34 @@ namespace {
             expect(steps == 2_i);
         };
 
+        "manual compaction keeps the transcript and checkpoints only complete turns"_test = [] {
+            History history{{{MessageRole::User, "Remember page seven"}, {MessageRole::Assistant, "Recorded"},
+                             {MessageRole::User, "Next question"}}};
+            int requests = 0;
+            auto summarize = [&](ModelRequest const& wire, std::stop_token, Progress const&) {
+                ++requests;
+                expect(wire.tools.empty() && !wire.webSearch);
+                expect(PlainText(wire.messages.back()).find("page seven") != std::string::npos);
+                expect(PlainText(wire.messages.back()).find("Next question") == std::string::npos);
+                return Answer("Page seven");
+            };
+            expect(Compact(history, Options{"fixture"}, summarize, {}));
+            expect(history.summarized == 2_u && history.entries.size() == 3_u);
+            expect(!Compact(history, Options{"fixture"}, summarize, {}));
+            expect(requests == 1_i);
+            auto next = [](ModelRequest const& wire, std::stop_token, Progress const&) {
+                expect(PlainText(wire.messages[1]).find("Page seven") != std::string::npos);
+                expect(PlainText(wire.messages.back()) == "Next question");
+                return Answer("Done");
+            };
+            expect(Run(history, Options{"fixture"}, {}, next, {}, {}).markdown == "Done");
+            history.entries.push_back({MessageRole::Assistant, "Done"});
+            std::stop_source cancel;
+            auto stopped = [&](auto const&, auto, auto const&) { cancel.request_stop(); return Answer("discard"); };
+            expect(throws([&] { Compact(history, Options{"fixture"}, stopped, cancel.get_token()); }));
+            expect(history.summary == "Page seven" && history.summarized == 2_u);
+        };
+
         "agent enforces tool repetition limits before dispatching repeated calls"_test = [] {
             History history{{{MessageRole::User, "Work"}}};
             int called = 0;
@@ -152,6 +181,71 @@ namespace {
             expect(result.searches.size() == 1_u && result.searches.front().target == "document format");
             expect(result.citations.size() == 1_u);
             if (!result.citations.empty()) expect(result.citations.front().url == "https://example.test");
+        };
+
+        "agent encodes independent URL tools and replays page activity through the model transport"_test = [] {
+            ModelRequest wire;
+            wire.model = "configured-alias";
+            wire.messages.emplace_back().content.push_back({ContentKind::Text, "Read a URL"});
+            wire.pages = PageAccess::WithSearch;
+            wire.webSearch = true;
+            auto bundled = BuildRequest(ApiProtocol::Responses, wire);
+            expect(bundled["tools"].size() == 1_u && bundled["tools"][0]["type"] == "web_search");
+            wire.webSearch = false;
+            for (auto protocol : {ApiProtocol::Responses, ApiProtocol::ChatCompletions, ApiProtocol::AnthropicMessages}) {
+                wire.pages = PageAccess::DeepSeek;
+                auto payload = BuildRequest(protocol, RequestFromJson(ToJson(wire)));
+                expect(payload["tools"].size() == 1_u && payload["tools"][0]["type"] == "deepseek_read_url");
+                if (protocol == ApiProtocol::AnthropicMessages) expect(payload["tools"][0]["name"] == "deepseek_read_url");
+            }
+            wire.pages = PageAccess::Anthropic;
+            expect(BuildRequest(ApiProtocol::AnthropicMessages, wire)["tools"][0]["type"] == "web_fetch_20250910");
+            wire.pages = PageAccess::OpenRouter;
+            for (auto protocol : {ApiProtocol::Responses, ApiProtocol::ChatCompletions})
+                expect(BuildRequest(protocol, wire)["tools"][0]["type"] == "openrouter:web_fetch");
+            auto result = ParseResponse(ApiProtocol::Responses, Json::parse(R"({
+                "id":"r","status":"completed","output":[{"type":"web_search_call","id":"page","status":"completed",
+                "action":{"type":"open_page","url":"https://example.org/"},"page":{"url":"https://example.org/","title":"Example"}},
+                {"type":"message","role":"assistant","content":[{"type":"output_text","text":"Example"}]}]})"));
+            auto copy = ResultFromJson(ToJson(result));
+            expect(copy.searches.size() == 1_u && copy.searches.front().operation == "web_fetch" && copy.citations.size() == 1_u);
+            StreamEvent notice{StreamEventKind::WebSearchCompleted, "https://example.org/", "page", "web_fetch"};
+            expect(StreamEventFromJson(ToJson(notice)).name == "web_fetch");
+            auto denied = ParseResponse(ApiProtocol::AnthropicMessages, Json::parse(R"({"type":"message","id":"r","role":"assistant",
+                "stop_reason":"end_turn","usage":{},"content":[{"type":"server_tool_use","id":"f","name":"web_fetch","input":{"url":"https://example.org/"}},
+                {"type":"web_fetch_tool_result","tool_use_id":"f","content":{"type":"web_fetch_tool_result_error","error_code":"url_not_allowed"}},
+                {"type":"text","text":"Unable to read"}]})"));
+            expect(denied.searches.size() == 1_u && denied.searches[0].failed && denied.searches[0].operation == "web_fetch");
+        };
+
+        "agent can read a URL without granting search or sharing local context in the isolated request"_test = [] {
+            Tool local{{"list_open_tabs","List tabs",{{"type","object"}}}, [](auto const&, auto) { return Json::array(); }};
+            Options options{"alias", "none"};
+            options.pages = PageAccess::DeepSeek;
+            History history{{{MessageRole::User, "private draft"}, {MessageRole::Assistant, "Reviewed"}, {MessageRole::User, "Read https://example.org/"}}};
+            unsigned requests = 0;
+            auto send = [&](ModelRequest const& wire, auto, Progress const&) {
+                ++requests;
+                expect(!wire.webSearch);
+                if (wire.pages != PageAccess::None) {
+                    expect(wire.tools.empty() && wire.messages.size() == 2_u && PlainText(wire.messages.back()) == "https://example.org/");
+                    auto fetched = Answer("Example");
+                    fetched.searches.push_back({"f","https://example.org/",false,"web_fetch"});
+                    fetched.citations.push_back({"Example", "https://example.org/"});
+                    return fetched;
+                }
+                expect(wire.tools.size() == 2_u && wire.tools.back().name == "web_fetch");
+                if (requests == 1) {
+                    auto call = Answer("");
+                    call.finish = FinishReason::ToolCalls;
+                    call.message.toolCalls.push_back({"call","web_fetch",R"({"url":"https://example.org/"})"});
+                    return call;
+                }
+                return Answer("An example page.");
+            };
+            auto answer = Run(history, options, std::span(&local,1), send, {}, {});
+            expect(requests == 3_u && answer.activities.size() == 1_u && answer.activities.front().name == "web_fetch");
+            expect(answer.sources.size() == 1_u && answer.sources.front().url == "https://example.org/");
         };
 
         "agent interleaves hosted searches and text once across streaming and the terminal snapshot"_test = [] {

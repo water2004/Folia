@@ -1,33 +1,41 @@
 #include "agent/HostedSearch.h"
+#include "providers/HostedSearch.h"
 
 namespace folia::ai::agent {
-    bool NeedsSeparateSearch(Options const& options, std::span<Tool const> localTools) {
-        // The DeepSeek hosted format accepts client functions alongside search only in thinking mode.
-        return !localTools.empty() && options.webSearch == WebSearchDialect::DeepSeek &&
-               (options.effort.empty() || options.effort == "none");
+    bool NeedsIsolatedWebRequest(Options const& options, std::span<Tool const> localTools) {
+        return !localTools.empty() && MustIsolateWebTools(options.webSearch, options.pages, options.effort);
     }
 
-    Tool PublicSearchTool(Options const& options, Request const& send, std::vector<Source>& sources) {
+    Tool PublicWebTool(WebTask task, Options const& options, Request const& send, std::vector<Source>& sources) {
         Tool tool;
-        tool.definition = {"web_search", "Search the public web for a factual question. Supply public search terms only and cite returned source URLs.",
-            {{"type", "object"}, {"properties", {{"query", {{"type", "string"}, {"maxLength", 512}}}}},
-             {"required", {"query"}}, {"additionalProperties", false}}};
-        tool.invoke = [&options, &send, &sources](Json const& args, std::stop_token stop) -> Json {
-            auto query = args.value("query", "");
+        const bool read = task == WebTask::ReadPage;
+        const auto field = read ? "url" : "query";
+        tool.definition = {read ? "web_fetch" : "web_search", read ?
+            "Read a public HTTP(S) URL supplied by the user or a search result." :
+            "Search the public web using public search terms. Cite returned URLs.",
+            {{"type", "object"}, {"properties", {{field, {{"type", "string"}, {"maxLength", read ? 2048 : 512}}}}},
+             {"required", {field}}, {"additionalProperties", false}}};
+        tool.target = [field](Json const& args) { return args.value(field, ""); };
+        tool.invoke = [read, field, &options, &send, &sources](Json const& args, std::stop_token stop) -> Json {
+            auto query = args.value(field, "");
             if (query.empty() || query.size() > 2048 || query.find_first_not_of(" \t\r\n") == query.npos)
-                return {{"error", "Supply a short public search query"}};
+                return {{"error", "Supply a short public query or URL"}};
+            if (read && !query.starts_with("https://") && !query.starts_with("http://"))
+                return {{"error", "Supply an HTTP(S) URL"}};
             ModelRequest wire;
             wire.model = options.model;
             wire.reasoning.effort = options.effort;
-            wire.webSearch = true;
+            wire.webSearch = !read;
+            if (read) wire.pages = options.pages;
             wire.maxOutputTokens = (std::min)(options.outputTokens, 768u);
             wire.messages.push_back({MessageRole::System, {{ContentKind::Text,
+                read ? "Use the hosted URL reading tool on the supplied URL. Summarize the page and cite its URL." :
                 "Use hosted web search for the public query. Return a concise factual answer with cited sources."}}});
             wire.messages.push_back({MessageRole::User, {{ContentKind::Text, std::move(query)}}});
             auto result = send(wire, stop, {});
-            if (stop.stop_requested()) throw std::runtime_error("Search cancelled");
+            if (stop.stop_requested()) throw std::runtime_error("Web request cancelled");
             if (result.citations.empty() && std::ranges::none_of(result.searches, [](auto const& item) { return !item.failed; }))
-                return {{"error", "The provider returned no completed web search or cited sources"}};
+                return {{"error", "The provider returned no completed web operation or sources"}};
 
             Json cited = Json::array();
             std::size_t bytes = 0;

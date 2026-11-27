@@ -1,3 +1,4 @@
+#include "HostedSearch.h"
 #include "ModelCodec.h"
 
 #include "ModelValidation.h"
@@ -216,7 +217,7 @@ void ValidateStreamEvent(StreamEvent const& event) {
     case StreamEventKind::WebSearchStarted:
     case StreamEventKind::WebSearchCompleted:
     case StreamEventKind::WebSearchFailed:
-        if (event.callId.empty() || !event.name.empty() || event.reasoningKind != ReasoningKind::ProviderText ||
+        if (event.callId.empty() || (!event.name.empty() && event.name != "web_search" && event.name != "web_fetch") || event.reasoningKind != ReasoningKind::ProviderText ||
             event.usage.inputTokens || event.usage.outputTokens || event.usage.totalTokens || event.usage.cachedInputTokens)
             throw ProtocolError("Invalid hosted search event fields");
         ValidateEventText(event.callId, 256, "Invalid hosted search identity");
@@ -271,6 +272,9 @@ Json ToJson(ModelRequest const& request) {
     if (!request.reasoning.effort.empty() || request.reasoning.summary)
         value["reasoning"] = {{"effort", request.reasoning.effort},
                               {"summary", request.reasoning.summary}};
+    if (request.pages != PageAccess::None) {
+        for (auto [mode, name] : pageFormats) if (mode == request.pages) value["pages"] = name;
+    }
     if (request.webSearch) value["webSearch"] = true;
     for (auto const& message : request.messages)
         value["messages"].push_back(MessageJson(message, false));
@@ -287,6 +291,7 @@ ModelRequest RequestFromJson(Json const& value) {
         request.model = value.at("model").get<std::string>();
         request.maxOutputTokens = ReadPositiveUint32(value.at("maxOutputTokens"));
         request.stream = value.at("stream").get<bool>();
+        request.pages = ParsePageAccess(value.value("pages", "none"));
         request.webSearch = value.value("webSearch", false);
         if (value.contains("reasoning")) {
             auto const& reasoning = value["reasoning"];
@@ -317,6 +322,11 @@ Json ToJson(ModelResult const& result) {
                {"usage", UsageJson(result.usage)},
                {"finish", static_cast<int>(result.finish)},
                {"responseId", result.responseId}};
+    if (!result.searches.empty()) {
+        value["webActivity"] = Json::array();
+        for (auto const& action : result.searches)
+            value["webActivity"].push_back({{"id", action.id}, {"target", action.target}, {"failed", action.failed}, {"operation", action.operation}});
+    }
     if (!result.citations.empty()) {
         value["citations"] = Json::array();
         for (auto const& citation : result.citations)
@@ -335,6 +345,15 @@ ModelResult ResultFromJson(Json const& value) {
             throw ProtocolError("Invalid finish reason");
         result.finish = static_cast<FinishReason>(finish);
         result.responseId = value.at("responseId").get<std::string>();
+        if (auto activities = value.find("webActivity"); activities != value.end()) {
+            if (!activities->is_array() || activities->size() > 32) throw ProtocolError("Invalid web activity");
+            for (auto const& item : *activities) {
+                auto operation = item.at("operation").get<std::string>();
+                if (operation != "web_search" && operation != "web_fetch") throw ProtocolError("Unknown web operation");
+                result.searches.push_back({item.at("id").get<std::string>(), item.at("target").get<std::string>(),
+                    item.at("failed").get<bool>(), std::move(operation)});
+            }
+        }
         if (auto citations = value.find("citations"); citations != value.end()) {
             if (!citations->is_array() || citations->size() > 64) throw ProtocolError("Invalid citations");
             for (auto const& citation : *citations)
@@ -361,6 +380,7 @@ Json ToJson(StreamEvent const& event) {
     case StreamEventKind::WebSearchStarted:
     case StreamEventKind::WebSearchCompleted:
     case StreamEventKind::WebSearchFailed:
+        if (!event.name.empty()) value["operation"] = event.name;
         value["callId"] = event.callId;
         value["text"] = event.text;
         break;
@@ -407,8 +427,10 @@ StreamEvent StreamEventFromJson(Json const& value) {
         case StreamEventKind::WebSearchStarted:
         case StreamEventKind::WebSearchCompleted:
         case StreamEventKind::WebSearchFailed:
-            if (!HasOnlyFields(value, {"kind", "callId", "text"}) || !value["callId"].is_string() || !value["text"].is_string())
+            if ((!HasOnlyFields(value, {"kind", "callId", "text"}) && !HasOnlyFields(value, {"kind", "callId", "text", "operation"})) ||
+                !value["callId"].is_string() || !value["text"].is_string())
                 throw ProtocolError("Invalid hosted search stream event");
+            event.name = value.value("operation", "");
             event.callId = value["callId"].get<std::string>();
             event.text = value["text"].get<std::string>();
             break;

@@ -19,7 +19,7 @@ inline void ReadAnnotations(Json const& message, ModelResult& result) {
 }
 
 inline bool IsSearchCall(Json const& call) {
-    return call.is_object() && call.value("type", "") == "deepseek_web_search";
+    return call.is_object() && (call.value("type", "") == "deepseek_web_search" || call.value("type", "") == "deepseek_read_url");
 }
 
 inline void ReadSteps(Json const& message, ModelResult& result) {
@@ -37,7 +37,8 @@ inline void ReadSteps(Json const& message, ModelResult& result) {
             auto id = call.value("id", "");
             if (id.empty() || result.searches.size() == 32 ||
                 std::ranges::find(result.searches, id, &HostedSearch::id) != result.searches.end()) continue;
-            result.searches.push_back({std::move(id), SearchTarget(call, "action"), call.value("status", "") != "completed"});
+            result.searches.push_back({std::move(id), SearchTarget(call, "action"), call.value("status", "") != "completed", WebOperation(call, "action")});
+            if (!result.searches.back().failed && call.contains("page")) AddPageSource(result, call["page"]);
         }
     }
 }
@@ -54,6 +55,6 @@ inline void ReadEvent(Json const& choice, std::vector<StreamEvent>& events) {
     auto kind = StreamEventKind::WebSearchStarted;
     if (type == "call_completed")
         kind = call->value("status", "") == "completed" ? StreamEventKind::WebSearchCompleted : StreamEventKind::WebSearchFailed;
-    events.push_back({kind, SearchTarget(*call, "action"), std::move(id)});
+    events.push_back({kind, SearchTarget(*call, "action"), std::move(id), WebOperation(*call, "action")});
 }
 }

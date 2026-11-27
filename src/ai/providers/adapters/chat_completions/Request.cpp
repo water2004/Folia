@@ -56,7 +56,7 @@ Json BuildChatCompletionsRequest(ModelRequest const& request, ProviderRequestOpt
                  {"messages", std::move(messages)},
                  {"max_tokens", request.maxOutputTokens},
                  {"stream", request.stream}};
-    if (!request.tools.empty() || request.webSearch) {
+    if (!request.tools.empty() || request.webSearch || SeparatePageTool(request.pages)) {
         Json tools = Json::array();
         std::set<std::string> names;
         for (auto const& t : request.tools) {
@@ -70,6 +70,7 @@ Json BuildChatCompletionsRequest(ModelRequest const& request, ProviderRequestOpt
                                {"parameters", t.inputSchema}}}});
         }
         if (request.webSearch) tools.push_back(HostedSearchTool(ApiProtocol::ChatCompletions, options.search));
+        if (SeparatePageTool(request.pages)) tools.push_back(PageTool(ApiProtocol::ChatCompletions, request.pages));
         body["tools"] = std::move(tools);
         body["tool_choice"] = "auto";
     }

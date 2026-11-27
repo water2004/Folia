@@ -61,12 +61,13 @@ Json BuildAnthropicRequest(ModelRequest const& request, ProviderRequestOptions o
     if (!system.empty())
         out["system"] = std::move(system);
     out["messages"] = std::move(messages);
-    if (!request.tools.empty() || request.webSearch) {
+    if (!request.tools.empty() || request.webSearch || SeparatePageTool(request.pages)) {
         out["tools"] = Json::array();
         for (auto const& t : request.tools)
             out["tools"].push_back(Json{
                 {"name", t.name}, {"description", t.description}, {"input_schema", t.inputSchema}});
         if (request.webSearch) out["tools"].push_back(HostedSearchTool(ApiProtocol::AnthropicMessages, options.search));
+        if (SeparatePageTool(request.pages)) out["tools"].push_back(PageTool(ApiProtocol::AnthropicMessages, request.pages));
     }
     if (!request.reasoning.effort.empty()) {
         const bool thinking = request.reasoning.effort != "none";

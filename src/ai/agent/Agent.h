@@ -68,6 +68,7 @@ namespace folia::ai::agent {
         std::size_t inputBytes = 96'000;
         std::uint32_t outputTokens = 4'096;
         std::function<ContentPart(std::string const&)> loadImage;
+        PageAccess pages = PageAccess::None;
     };
 
     enum class ProgressKind { TextDelta, TextSnapshot, ReasoningDelta, ReasoningSnapshot, Reading, Compacting, InputUsage, StepStarted, ToolResult, Retrying, HostedSearch, SummaryDelta, ReasoningSummary };
@@ -76,5 +77,6 @@ namespace folia::ai::agent {
 
     // The caller owns persistence and access decisions. Protocol replay and raw
     // tool results live only within a run, and are discarded at its boundary.
+    bool Compact(History&, Options const&, Request const&, std::stop_token);
     Entry Run(History&, Options const&, std::span<Tool const>, Request const&, Progress const&, std::stop_token, Entry* partial = nullptr);
 }

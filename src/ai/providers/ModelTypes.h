@@ -72,6 +72,8 @@ struct ProviderRequestOptions {
     bool explicitThinkingToggle = false;
 };
 
+enum class PageAccess { None, WithSearch, DeepSeek, Anthropic, OpenRouter };
+
 struct ModelRequest {
     std::string model;
     std::vector<Message> messages;
@@ -80,6 +82,7 @@ struct ModelRequest {
     bool stream{true};
     ReasoningOptions reasoning;
     bool webSearch = false;
+    PageAccess pages = PageAccess::None;
 };
 struct Usage {
     std::optional<std::uint64_t> inputTokens;
@@ -95,6 +98,7 @@ struct Citation {
 struct HostedSearch {
     std::string id, target;
     bool failed = false;
+    std::string operation = "web_search";
 };
 struct ModelResult {
     Message message{MessageRole::Assistant, {}, {}, {}, Json::object()};

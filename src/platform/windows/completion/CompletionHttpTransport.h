@@ -13,6 +13,7 @@ struct CompletionModel {
     bool vision = false;
     bool webSearch = false;
     std::optional<ai::WebSearchDialect> searchFormat;
+    bool webFetch = false;
 };
 struct CompletionModelPage {
     std::vector<CompletionModel> models;
