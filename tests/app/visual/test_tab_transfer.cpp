@@ -26,6 +26,11 @@ namespace winrt::Folia {
     struct EditorRendererTestAccess {
         static bool Ready(EditorSurfaceRenderer const& renderer) { return renderer.resources.drawingSurface != nullptr; }
         static auto& Resources(EditorSurfaceRenderer& renderer) { return renderer.resources; }
+        static std::optional<D2D1_RECT_F> Rule(EditorSurfaceRenderer const& renderer) {
+            for (auto const& block : renderer.interactionMap.blocks)
+                if (block.thematicBreak) return block.rect;
+            return {};
+        }
         static bool PresentPending(EditorSurfaceRenderer const& renderer) { return renderer.presentPending; }
     };
 }
@@ -1039,6 +1044,47 @@ namespace {
             });
             expect(presenter.Background() == surface) << "document-menu background";
             menu.Hide();
+        };
+        "the reading page keeps equal margins when scrolling and splitting"_test = [] {
+            using RendererAccess = winrt::Folia::EditorRendererTestAccess;
+            TestDirectory directory;
+            OwnedWindow current(App()->CreateMainWindow());
+            auto window = current.window;
+            auto root = window.Content().as<FrameworkElement>();
+            Access::SetRecentHistory(window, directory.path / L"recent.json");
+            auto check = [&](auto const& renderer, wchar_t const* cardName, wchar_t const* surfaceName,
+                             wchar_t const* barName, bool scrolls) {
+                auto card = root.FindName(cardName).as<FrameworkElement>();
+                auto surface = root.FindName(surfaceName).as<FrameworkElement>();
+                auto bar = root.FindName(barName).as<FrameworkElement>();
+                Pump([&] {
+                    root.UpdateLayout();
+                    return RendererAccess::Rule(renderer) && (bar.Visibility() == Visibility::Visible) == scrolls;
+                });
+                auto rule = *RendererAccess::Rule(renderer);
+                auto x = surface.TransformToVisual(card).TransformPoint({0, 0}).X;
+                auto left = x + rule.left;
+                auto right = card.ActualWidth() - x - rule.right;
+                expect(std::abs(left - right) <= 1. / root.XamlRoot().RasterizationScale())
+                    << std::format("rule margins left={} right={} DIP", left, right);
+            };
+            for (bool scrolls : {false, true}) {
+                auto file = directory.path / (scrolls ? L"long.md" : L"short.md");
+                {
+                    std::ofstream stream(file);
+                    stream << "# Margins\n\n---\n\n";
+                    for (int n = 0; n < (scrolls ? 200 : 1); ++n) stream << "One paragraph.\n\n";
+                }
+                Access::Open(window, file);
+                auto doc = Access::Documents(window).Active();
+                Pump([&] { return doc->editor->loaded && !doc->editor->opening; });
+                check(Access::Renderer(window), L"ReadingCard", L"EditorSurface", L"EditorScrollBar", scrolls);
+            }
+            auto split = root.FindName(L"SplitEditorButton").as<Controls::Button>();
+            Automation::Peers::ButtonAutomationPeer(split).as<Automation::Provider::IInvokeProvider>().Invoke();
+            Pump([&] { return Access::OtherRenderer(window) != nullptr; });
+            check(Access::Renderer(window), L"ReadingCard", L"EditorSurface", L"EditorScrollBar", true);
+            check(*Access::OtherRenderer(window), L"OtherReadingCard", L"OtherEditorSurface", L"OtherEditorScrollBar", true);
         };
         "the document renderer presents individual device pixels at native resolution"_test = [] {
             OwnedWindow owned(App()->CreateMainWindow());

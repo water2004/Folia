@@ -175,7 +175,7 @@
             </Grid>
             </Grid>
         <Grid x:Name="DocumentLayoutSlot" Grid.Column="1">
-        <Grid x:Name="DocumentColumn" RowDefinitions="Auto,*" Margin="4,0,0,0" MinWidth="0">
+        <Grid x:Name="DocumentColumn" RowDefinitions="Auto,*" Margin="6,0,6,6" MinWidth="0">
         <Grid x:Name="TabMotionFrame">
             <Grid x:Name="TabBackdropLayer" IsHitTestVisible="False">
                 <Grid x:Name="SelectedTabBackdropFrame" Visibility="Collapsed">
@@ -216,7 +216,7 @@
                 <Border x:Name="CaptionInset" Grid.Column="1" Width="138"/>
             </Grid>
         </Grid>
-        <Grid x:Name="ReadingMotionFrame" Grid.Row="1" Margin="0,0,6,6" ColumnDefinitions="*,0,0">
+        <Grid x:Name="ReadingMotionFrame" Grid.Row="1" ColumnDefinitions="*,0,0">
         <Grid x:Name="ReadingCard" CornerRadius="9">
         <SystemBackdropElement x:Name="ReadingBackdrop" IsHitTestVisible="False" CornerRadius="9" Visibility="Collapsed"/>
         <Border x:Name="ReadingTint" CornerRadius="9" IsHitTestVisible="False"/>
@@ -330,11 +330,7 @@
                 <Grid x:Name="EditorPane">
 
                   <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition x:Name="EditorScrollBarColumn" Width="16"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid x:Name="EditorSurface" Grid.Column="0" Background="Transparent" KeyboardAcceleratorPlacementMode="Hidden">
+                    <Grid x:Name="EditorSurface" Background="Transparent" KeyboardAcceleratorPlacementMode="Hidden">
                         <FlyoutBase.AttachedFlyout>
                             <Flyout x:Name="CodeLanguageFlyout" Placement="BottomEdgeAlignedLeft"
                                     FlyoutPresenterStyle="{StaticResource CodeLanguagePickerPresenterStyle}"/>
@@ -394,9 +390,8 @@
                     </Grid>
                     <ScrollBar
                         x:Name="EditorScrollBar"
-                        Grid.Column="1"
                         Width="16"
-                        HorizontalAlignment="Stretch"
+                        HorizontalAlignment="Right"
                         VerticalAlignment="Stretch"
                         Background="Transparent"
                         IndicatorMode="MouseIndicator"
@@ -543,12 +538,8 @@
                     <ContentControl x:Name="OtherAgentChatHost" Visibility="Collapsed"
                                     HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
                     <Grid x:Name="OtherEditorPane">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition x:Name="OtherEditorScrollBarColumn" Width="0"/>
-                        </Grid.ColumnDefinitions>
                         <Grid x:Name="OtherEditorSurface" Background="Transparent"/>
-                        <ScrollBar x:Name="OtherEditorScrollBar" Grid.Column="1" Background="Transparent" Visibility="Collapsed"
+                        <ScrollBar x:Name="OtherEditorScrollBar" HorizontalAlignment="Right" Background="Transparent" Visibility="Collapsed"
                                    IndicatorMode="MouseIndicator" IsTabStop="False" Minimum="0" Orientation="Vertical"
                                    SmallChange="48" UseLayoutRounding="False"/>
                     </Grid>

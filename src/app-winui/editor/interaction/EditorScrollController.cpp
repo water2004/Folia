@@ -11,13 +11,12 @@ namespace winrt::Folia
     void EditorScrollController::Attach(
         EditorSurfaceRenderer& value,
         winrt::Microsoft::UI::Xaml::Controls::Primitives::ScrollBar const& bar,
-        winrt::Microsoft::UI::Xaml::Controls::ColumnDefinition const& valueColumn,
         std::function<void()> requestFrameCallback)
     {
         Detach();
         renderer = &value;
         scrollBar = bar;
-        column = valueColumn;
+        bar.Width(width);
         requestFrame = std::move(requestFrameCallback);
         valueChangedToken = scrollBar.ValueChanged([this](auto const&, winrt::Microsoft::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const& args)
         {
@@ -54,13 +53,12 @@ namespace winrt::Folia
         attached = false;
         renderer = nullptr;
         scrollBar = nullptr;
-        column = nullptr;
         requestFrame = {};
     }
 
     void EditorScrollController::Sync()
     {
-        if (!renderer || !scrollBar || !column) return;
+        if (!renderer || !scrollBar) return;
         synchronizing = true;
         struct ResetFlag { bool& value; ~ResetFlag() { value = false; } } resetFlag{ synchronizing };
         auto maximum = static_cast<double>(renderer->MaximumScrollOffset());
@@ -73,22 +71,13 @@ namespace winrt::Folia
         if (std::fabs(scrollBar.Value() - value) > 0.1) scrollBar.Value(value);
         auto visible = maximum > 0.5;
         auto visibility = visible ? winrt::Microsoft::UI::Xaml::Visibility::Visible : winrt::Microsoft::UI::Xaml::Visibility::Collapsed;
-        if (scrollBar.Visibility() != visibility)
-        {
-            scrollBar.Visibility(visibility);
-            column.Width(winrt::Microsoft::UI::Xaml::GridLengthHelper::FromPixels(visible ? width : 0.0f));
-        }
+        if (scrollBar.Visibility() != visibility) scrollBar.Visibility(visibility);
     }
 
     void EditorScrollController::SetWidth(float value)
     {
         width = (std::max)(0.0f, value);
         if (scrollBar) scrollBar.Width(width);
-        if (column)
-        {
-            const auto visible = scrollBar && scrollBar.Visibility() == winrt::Microsoft::UI::Xaml::Visibility::Visible;
-            column.Width(winrt::Microsoft::UI::Xaml::GridLengthHelper::FromPixels(visible ? width : 0.0f));
-        }
     }
 
     void EditorScrollController::QueueScrollBy(float delta)

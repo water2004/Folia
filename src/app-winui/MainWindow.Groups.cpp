@@ -194,8 +194,7 @@ namespace winrt::Folia::implementation {
         const auto visible = split ? Visibility::Visible : Visibility::Collapsed;
         const bool activeRight = split && editorGroups.ActiveGroup() == EditorGroup::Right;
         auto gap = split ? unbox_value<double>(Root().Resources().Lookup(box_value(L"WorkspaceSplitHandleWidth"))) : 0.;
-        const auto margin = ReadingMotionFrame().Margin();
-        const auto width = (std::max)(0., DocumentColumn().ActualWidth() - margin.Left - margin.Right - gap);
+        const auto width = (std::max)(0., DocumentColumn().ActualWidth() - gap);
         const auto left = GroupWidth(width, splitFraction);
         // The title and reading grids share their origin and divider tracks.
         SetColumns(ReadingMotionFrame(), left, gap, split);
@@ -310,7 +309,7 @@ namespace winrt::Folia::implementation {
                 otherEditorRenderer->SetMediaDisplaySettings(appSettings.media);
                 otherEditorRenderer->Initialize(surface);
                 auto weak = get_weak();
-                otherScrollController.Attach(*otherEditorRenderer, OtherEditorScrollBar(), OtherEditorScrollBarColumn(), [weak] {
+                otherScrollController.Attach(*otherEditorRenderer, OtherEditorScrollBar(), [weak] {
                     if (auto window = weak.get(); window && !window->windowClosed) window->otherAnimationController.RequestFrame();
                 });
                 otherScrollController.SetWidth(themeProfile.layout.scrollbar_width);

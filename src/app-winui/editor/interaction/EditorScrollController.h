@@ -10,7 +10,6 @@ namespace winrt::Folia
         void Attach(
             EditorSurfaceRenderer& renderer,
             winrt::Microsoft::UI::Xaml::Controls::Primitives::ScrollBar const& scrollBar,
-            winrt::Microsoft::UI::Xaml::Controls::ColumnDefinition const& column,
             std::function<void()> requestFrame);
         void Detach();
         void Sync();
@@ -27,7 +26,6 @@ namespace winrt::Folia
 
         EditorSurfaceRenderer* renderer = nullptr;
         winrt::Microsoft::UI::Xaml::Controls::Primitives::ScrollBar scrollBar{ nullptr };
-        winrt::Microsoft::UI::Xaml::Controls::ColumnDefinition column{ nullptr };
         std::function<void()> requestFrame;
         winrt::event_token valueChangedToken{};
         winrt::event_token scrollToken{};

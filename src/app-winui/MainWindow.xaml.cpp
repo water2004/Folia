@@ -453,7 +453,7 @@ namespace winrt::Folia::implementation
         auto render = [weak = get_weak()] {
             if (auto owner = weak.get(); owner && !owner->windowClosed) owner->RenderEditorSurface();
         };
-        scrollController.Attach(editorRenderer, EditorScrollBar(), EditorScrollBarColumn(), [weak = get_weak()] {
+        scrollController.Attach(editorRenderer, EditorScrollBar(), [weak = get_weak()] {
             if (auto owner = weak.get(); owner && !owner->windowClosed) owner->animationController.RequestFrame();
         });
         animationController.Attach(editorRenderer, scrollController, DispatcherQueue(), render);

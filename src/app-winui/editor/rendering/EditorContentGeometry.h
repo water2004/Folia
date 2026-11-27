@@ -14,32 +14,37 @@ namespace winrt::Folia
         float sourceGutterWidth = 0.0f;
     };
 
+    inline float EditorHorizontalInset(float surfaceWidth, float horizontalPadding)
+    {
+        return (std::min)(horizontalPadding, (std::max)(12.0f, surfaceWidth * 0.06f));
+    }
+
     // Background geometry and foreground painting must use identical width
     // constraints, including the source-mode line-number gutter.
     inline EditorDocumentMetrics EditorDocumentLayoutMetrics(
         folia::RenderModel const& model, float surfaceWidth,
         float horizontalPadding, float codeFontSize)
     {
-        auto padding = (std::min)(horizontalPadding, (std::max)(12.0f, surfaceWidth * 0.06f));
+        auto padding = EditorHorizontalInset(surfaceWidth, horizontalPadding);
         auto sourceDocument = !model.blocks.empty() && model.blocks.front().source_mode;
         auto lines = sourceDocument
             ? (std::max)(std::uint32_t{1}, model.blocks.back().source_line_number) : std::uint32_t{0};
         auto digits = sourceDocument ? std::to_wstring(lines).size() : std::size_t{0};
         auto desiredGutter = sourceDocument
             ? (std::max)(24.0f, codeFontSize * 0.64f * static_cast<float>(digits) + 12.0f) : 0.0f;
-        auto availableGutter = (std::max)(0.0f, surfaceWidth - padding - 14.0f - 80.0f - 8.0f);
+        auto availableGutter = (std::max)(0.0f, surfaceWidth - padding - 80.0f - 8.0f);
         auto gutter = (std::min)(desiredGutter, availableGutter);
         if (gutter < 20.0f) gutter = 0.0f;
         auto left = gutter > 0.0f ? gutter + 8.0f : padding;
-        auto right = (std::max)(left + 1.0f, surfaceWidth - padding - 14.0f);
+        auto right = (std::max)(left + 1.0f, surfaceWidth - padding);
         return {left, right, right - left, 4.0f, gutter};
     }
 
     // Rich-text document and formula preparation use identical width inputs.
     inline float EditorDocumentContentWidth(float surfaceWidth, float horizontalPadding)
     {
-        auto padding = (std::min)(horizontalPadding, (std::max)(12.0f, surfaceWidth * 0.06f));
-        return (std::max)(padding + 1.0f, surfaceWidth - padding - 14.0f) - padding;
+        auto padding = EditorHorizontalInset(surfaceWidth, horizontalPadding);
+        return (std::max)(1.0f, surfaceWidth - 2.0f * padding);
     }
 
     inline float EditorBlockContentWidth(folia::RenderBlock const& block, float documentWidth)

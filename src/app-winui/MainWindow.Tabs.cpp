@@ -407,7 +407,7 @@ namespace winrt::Folia::implementation {
         const double scale = root ? root.RasterizationScale() : static_cast<double>(::GetDpiForWindow(WindowHandle())) / 96.0;
         // The native title bar can report a negative inset while a window is minimized.
         auto inset = (std::max)(0, AppWindow().TitleBar().RightInset());
-        CaptionInset().Width(inset / (std::max)(1.0, scale));
+        CaptionInset().Width((std::max)(0., inset / (std::max)(1.0, scale) - DocumentColumn().Margin().Right));
     }
 
 }

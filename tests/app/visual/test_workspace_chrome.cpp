@@ -244,7 +244,10 @@ namespace {
                 << "the activity buttons begin below the title row";
             expect(rightAt.X > leftAt.X && rightAt.Y >= top.ActualHeight())
                 << std::format("source mode origin ({}, {}), title strip height {}", rightAt.X, rightAt.Y, top.ActualHeight());
-            expect(card.CornerRadius().TopLeft > 0. && card.Margin().Right > 0.);
+            auto slot = f.Find<Grid>(L"DocumentLayoutSlot");
+            auto leftGap = card.TransformToVisual(slot).TransformPoint({0, 0}).X;
+            auto rightGap = slot.ActualWidth() - leftGap - card.ActualWidth();
+            expect(card.CornerRadius().TopLeft > 0. && leftGap > 0 && std::abs(leftGap - rightGap) < .5);
             expect(!f.root.FindName(L"StatusBar"));
             Capture native(f.root, raster);
             auto artifacts = app_tests::RepositoryRoot() / L"build/tests/workspace-chrome";

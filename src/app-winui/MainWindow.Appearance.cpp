@@ -87,8 +87,6 @@ namespace winrt::Folia::implementation
         titleBar.ButtonInactiveForegroundColor(ColorReference(colors.shell_muted_fg));
 
         UpdateWorkspaceLayout();
-        EditorScrollBar().Width(themeProfile.layout.scrollbar_width);
-        EditorScrollBarColumn().Width(Microsoft::UI::Xaml::GridLengthHelper::FromPixels(themeProfile.layout.scrollbar_width));
         scrollController.SetWidth(themeProfile.layout.scrollbar_width);
         otherScrollController.SetWidth(themeProfile.layout.scrollbar_width);
         DocumentToolbar().MinHeight((std::max)(30.f, themeProfile.layout.status_bar_min_height));
