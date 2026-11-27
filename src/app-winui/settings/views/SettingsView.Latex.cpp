@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "settings/views/SettingsView.h"
-#include "settings/views/SettingsViewSupport.h"
+#include "settings/views/SettingsCards.h"
 #include "localization/Localization.h"
 
 import folia.core.snippet_template;
@@ -10,71 +10,39 @@ namespace winrt::Folia
 {
     using namespace Microsoft::UI::Xaml;
     using namespace Microsoft::UI::Xaml::Controls;
-    using settings_ui::Brush;
-    using settings_ui::PageHeading;
-    using settings_ui::Text;
 
     UIElement SettingsView::BuildLatexPage()
     {
-        StackPanel page = settings_ui::PagePanel();
+        using namespace settings_ui;
+        auto page = PagePanel();
 
         page.Children().Append(settings_ui::PageHeader(Localize(L"LatexCommands"), Localize(L"LatexCommandsDescription")));
 
-        Grid overview;
-        overview.ColumnDefinitions().Append(ColumnDefinition{});
-        ColumnDefinition actionColumn;
-        actionColumn.Width(GridLengthHelper::Auto());
-        overview.ColumnDefinitions().Append(actionColumn);
-        StackPanel togglePanel;
-        togglePanel.Spacing(4);
-        latexSuggestionsToggle_.Header(box_value(Localize(L"LatexSuggestionsToggle")));
-        latexSuggestionsToggle_.OnContent(box_value(Localize(L"Enabled")));
-        latexSuggestionsToggle_.OffContent(box_value(Localize(L"Disabled")));
-        latexSuggestionsToggle_.IsOn(settings_.latexSuggestionsEnabled);
+        latexSuggestionsToggle_ = cards::Switch(settings_.latexSuggestionsEnabled);
         latexSuggestionsToggle_.Toggled([this](auto const&, auto const&)
         {
             if (refreshing_) return;
             settings_.latexSuggestionsEnabled = latexSuggestionsToggle_.IsOn();
             ApplyLatexSetting();
         });
-        togglePanel.Children().Append(latexSuggestionsToggle_);
-        togglePanel.Children().Append(settings_ui::Hint(Localize(L"LatexRankingDescription")));
-        overview.Children().Append(togglePanel);
-        Button overviewMenu;
-        FontIcon overviewIcon;
-        overviewIcon.Glyph(L"\xE712");
-        overviewMenu.Content(overviewIcon);
-        overviewMenu.Padding(Thickness{8, 4, 8, 4});
-        overviewMenu.VerticalAlignment(VerticalAlignment::Center);
-        ToolTipService::SetToolTip(
-            overviewMenu, box_value(Localize(L"MoreActions")));
+        page.Children().Append(cards::Setting(
+            {Localize(L"LatexSuggestionsToggle"), Localize(L"LatexRankingDescription"), cards::Icon(L"\xE943")},
+            latexSuggestionsToggle_, cards::Placement::Wrap));
+
         MenuFlyout overviewFlyout;
         MenuFlyoutItem resetUsage;
         resetUsage.Text(Localize(L"ResetLatexUsage"));
         resetUsage.Click([this](auto const&, auto const&) { ResetLatexUsage(); });
         overviewFlyout.Items().Append(resetUsage);
-        overviewMenu.Flyout(overviewFlyout);
-        Grid::SetColumn(overviewMenu, 1);
-        overview.Children().Append(overviewMenu);
-        page.Children().Append(overview);
-
-        Grid listHeader;
-        listHeader.ColumnDefinitions().Append(ColumnDefinition{});
-        ColumnDefinition addColumn;
-        addColumn.Width(GridLengthHelper::Auto());
-        listHeader.ColumnDefinitions().Append(addColumn);
-        auto listTitle = settings_ui::SectionHeading(Localize(L"LatexCommandList"));
-        listTitle.VerticalAlignment(VerticalAlignment::Center);
-        listHeader.Children().Append(listTitle);
-        Button addCommand;
-        addCommand.Content(box_value(Localize(L"AddCommand")));
+        auto addCommand = SecondaryAction(Localize(L"AddCommand"));
         addCommand.Click([this](auto const&, auto const&)
         {
             ShowLatexCommandEditorAsync(std::nullopt);
         });
-        Grid::SetColumn(addCommand, 1);
-        listHeader.Children().Append(addCommand);
-        page.Children().Append(listHeader);
+        auto actions = ButtonRow();
+        actions.Children().Append(addCommand);
+        actions.Children().Append(cards::MoreActions(Localize(L"MoreActions"), overviewFlyout));
+        page.Children().Append(cards::SectionHeader(Localize(L"LatexCommandList"), actions));
 
         latexRows_ = latexCommandList_.ContainerContentChanging(winrt::auto_revoke,
             [this](auto const&, ContainerContentChangingEventArgs const& args)
@@ -134,18 +102,17 @@ namespace winrt::Folia
         dialog.CloseButtonText(Localize(L"Cancel"));
         dialog.DefaultButton(ContentDialogButton::Primary);
 
-        StackPanel fields;
-        fields.Spacing(10);
+        auto fields = settings_ui::SectionPanel();
         fields.MinWidth(560);
         fields.Children().Append(settings_ui::Hint(Localize(L"LatexTemplateHelp")));
         TextBox trigger;
-        trigger.Header(box_value(Localize(L"LatexCommand")));
+        settings_ui::TextField(trigger, Localize(L"LatexCommand"));
         trigger.PlaceholderText(L"begin{matrix}");
         if (command)
             trigger.Text(winrt::to_hstring(folia::cps_to_utf8(command->trigger)));
         fields.Children().Append(trigger);
         TextBox snippet;
-        snippet.Header(box_value(Localize(L"InsertionTemplate")));
+        settings_ui::TextField(snippet, Localize(L"InsertionTemplate"));
         snippet.PlaceholderText(LR"(\\frac{${1}}{${2}}$0)");
         snippet.AcceptsReturn(false);
         snippet.TextWrapping(TextWrapping::NoWrap);
@@ -156,7 +123,7 @@ namespace winrt::Folia
         }
         fields.Children().Append(snippet);
         TextBox description;
-        description.Header(box_value(Localize(L"Description")));
+        settings_ui::TextField(description, Localize(L"Description"));
         description.PlaceholderText(Localize(L"LatexDescriptionExample"));
         if (command) description.Text(winrt::to_hstring(command->description));
         fields.Children().Append(description);

@@ -13,7 +13,7 @@ namespace winrt::Folia
     {
     public:
         using ApplySettings = std::function<std::optional<winrt::hstring>(AppSettings const&)>;
-        enum class Page { Home, General, Shortcuts, Latex, Completion, Themes, Licenses, About };
+        enum class Page { Home, General, Shortcuts, Latex, Completion, Providers, Themes, Licenses, About };
 
         SettingsView(
             Microsoft::UI::Xaml::Controls::ContentControl const& host,
@@ -38,11 +38,14 @@ namespace winrt::Folia
         winrt::Microsoft::UI::Xaml::UIElement BuildHomePage();
         winrt::Microsoft::UI::Xaml::UIElement BuildGeneralPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildCompletionPage();
+        winrt::Microsoft::UI::Xaml::UIElement BuildProvidersPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildShortcutsPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildLatexPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildThemesPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildLicensesPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildAboutPage();
+        void SetSubpage(winrt::hstring const& title = {}, std::function<void()> back = {},
+            winrt::hstring const& child = {}, std::function<void()> parent = {});
         void LoadSelectedLicense();
         void RefreshThemeList();
         void UpdateThemePreview();
@@ -91,6 +94,14 @@ namespace winrt::Folia
         winrt::Microsoft::UI::Xaml::Controls::ContentControl pageHost_{nullptr};
         winrt::Microsoft::UI::Xaml::Controls::Button homeButton_;
         winrt::Microsoft::UI::Xaml::Controls::TextBlock pageCrumb_;
+        winrt::Microsoft::UI::Xaml::Controls::Button categoryCrumb_;
+        winrt::Microsoft::UI::Xaml::Controls::StackPanel subpageCrumbs_;
+        winrt::Microsoft::UI::Xaml::Controls::TextBlock subpageTitle_;
+        winrt::Microsoft::UI::Xaml::Controls::Button parentCrumb_;
+        winrt::Microsoft::UI::Xaml::Controls::StackPanel childCrumbs_;
+        winrt::Microsoft::UI::Xaml::Controls::TextBlock childTitle_;
+        std::function<void()> subpageBack_;
+        std::function<void()> parentBack_;
         winrt::Microsoft::UI::Xaml::FrameworkElement pageNavigation_{nullptr};
         std::vector<std::pair<Page, winrt::Microsoft::UI::Xaml::Controls::Button>> categoryButtons_;
         std::vector<winrt::Microsoft::UI::Xaml::Controls::Button::Click_revoker> navigationClicks_;

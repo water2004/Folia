@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "settings/views/LatexCommandSettingsComponents.h"
-#include "settings/views/SettingsViewSupport.h"
+#include "settings/views/SettingsCards.h"
 #include "localization/Localization.h"
 
 import folia.markdown.utf;
@@ -82,12 +82,6 @@ namespace winrt::Folia
 
         if (!command.built_in)
         {
-            Button more;
-            FontIcon icon;
-            icon.Glyph(L"\xE712");
-            more.Content(icon);
-            more.Padding(Thickness{8, 4, 8, 4});
-            ToolTipService::SetToolTip(more, box_value(Localize(L"MoreActions")));
             MenuFlyout menu;
             MenuFlyoutItem editItem;
             editItem.Text(Localize(L"Edit"));
@@ -103,16 +97,11 @@ namespace winrt::Folia
                 if (remove) remove(id);
             });
             menu.Items().Append(removeItem);
-            more.Flyout(menu);
-            more.HorizontalAlignment(HorizontalAlignment::Right);
-            more.VerticalAlignment(VerticalAlignment::Center);
+            auto more = settings_ui::cards::MoreActions(Localize(L"MoreActions"), menu);
             Grid::SetColumn(more, 3);
             row.Children().Append(more);
         }
 
-        Border separator;
-        separator.Style(settings_ui::ResourceStyle(L"SettingsListSeparatorStyle"));
-        separator.Child(row);
-        return separator;
+        return settings_ui::ListRow(row);
     }
 }

@@ -15,6 +15,7 @@ namespace winrt::Folia
     {
         bool latexSuggestionsEnabled = true;
         folia::platform::completion::CompletionConfig completion;
+        std::string completionModelId;
         std::string themeId = "system";
         std::string languageId = "system";
         MediaDisplaySettings media;

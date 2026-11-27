@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "settings/views/SettingsView.h"
 #include "settings/views/ShortcutSettingsComponents.h"
-#include "settings/views/SettingsViewSupport.h"
+#include "settings/views/SettingsCards.h"
 #include "localization/Localization.h"
 
 import folia.markdown.utf;
@@ -24,27 +24,17 @@ namespace winrt::Folia
 
     UIElement SettingsView::BuildShortcutsPage()
     {
-        StackPanel page = settings_ui::PagePanel();
+        using namespace settings_ui;
+        auto page = PagePanel();
 
         page.Children().Append(settings_ui::PageHeader(Localize(L"Shortcuts"), Localize(L"ShortcutsDescription")));
 
-        Grid listHeader;
-        listHeader.ColumnDefinitions().Append(ColumnDefinition{});
-        ColumnDefinition addColumn;
-        addColumn.Width(GridLengthHelper::Auto());
-        listHeader.ColumnDefinitions().Append(addColumn);
-        auto listTitle = settings_ui::SectionHeading(Localize(L"ShortcutBindings"));
-        listTitle.VerticalAlignment(VerticalAlignment::Center);
-        listHeader.Children().Append(listTitle);
-        Button addAction;
-        addAction.Content(box_value(Localize(L"AddInsertionAction")));
+        auto addAction = SecondaryAction(Localize(L"AddInsertionAction"));
         addAction.Click([this](auto const&, auto const&)
         {
             ShowSnippetEditorAsync(std::nullopt);
         });
-        Grid::SetColumn(addAction, 1);
-        listHeader.Children().Append(addAction);
-        page.Children().Append(listHeader);
+        page.Children().Append(cards::SectionHeader(Localize(L"ShortcutBindings"), addAction));
 
         Grid tableHeader;
         tableHeader.ColumnSpacing(12);
@@ -152,10 +142,9 @@ namespace winrt::Folia
         Grid::SetColumn(scope, 1);
         row.Children().Append(scope);
 
-        Button capture;
+        auto capture = settings_ui::SecondaryAction(ShortcutGestureLabel(binding.gesture));
         capture.HorizontalAlignment(HorizontalAlignment::Stretch);
         capture.HorizontalContentAlignment(HorizontalAlignment::Center);
-        capture.Content(box_value(ShortcutGestureLabel(binding.gesture)));
         capture.Click([this, index](auto const& sender, auto const&) { BeginShortcutCapture(index, sender.template as<Button>()); });
         capture.KeyDown([this, index](
             auto const& sender, Input::KeyRoutedEventArgs const& args)
@@ -165,14 +154,6 @@ namespace winrt::Folia
         Grid::SetColumn(capture, 2);
         row.Children().Append(capture);
 
-        Button more;
-        FontIcon moreIcon;
-        moreIcon.Glyph(L"\xE712");
-        more.Content(moreIcon);
-        more.Padding(Thickness{8, 4, 8, 4});
-        more.HorizontalAlignment(HorizontalAlignment::Right);
-        more.VerticalAlignment(VerticalAlignment::Center);
-        ToolTipService::SetToolTip(more, box_value(Localize(L"MoreActions")));
         MenuFlyout menu;
         MenuFlyoutItem clear;
         clear.Text(Localize(L"Clear"));
@@ -200,14 +181,11 @@ namespace winrt::Folia
             resetDefault.Click([this, index](auto const&, auto const&) { ResetShortcut(index); });
             menu.Items().Append(resetDefault);
         }
-        more.Flyout(menu);
+        auto more = settings_ui::cards::MoreActions(Localize(L"MoreActions"), menu);
         Grid::SetColumn(more, 3);
         row.Children().Append(more);
 
-        Border separator;
-        separator.Style(settings_ui::ResourceStyle(L"SettingsListSeparatorStyle"));
-        separator.Child(row);
-        return separator;
+        return settings_ui::ListRow(row);
     }
 
     void SettingsView::CancelShortcutCapture()
@@ -380,17 +358,16 @@ namespace winrt::Folia
         dialog.CloseButtonText(Localize(L"Cancel"));
         dialog.DefaultButton(ContentDialogButton::Primary);
 
-        StackPanel fields;
-        fields.Spacing(10);
+        auto fields = settings_ui::SectionPanel();
         fields.MinWidth(560);
         fields.Children().Append(settings_ui::Hint(Localize(L"SnippetPlaceholderDescription")));
         TextBox name;
-        name.Header(box_value(Localize(L"ActionName")));
+        settings_ui::TextField(name, Localize(L"ActionName"));
         name.PlaceholderText(Localize(L"ActionNameExample"));
         if (existing) name.Text(winrt::to_hstring(existing->custom_name));
         fields.Children().Append(name);
         TextBox snippet;
-        snippet.Header(box_value(Localize(L"InsertionTemplate")));
+        settings_ui::TextField(snippet, Localize(L"InsertionTemplate"));
         snippet.PlaceholderText(LR"(\\frac{${1}}{${2}}$0)");
         snippet.AcceptsReturn(false);
         snippet.TextWrapping(TextWrapping::NoWrap);

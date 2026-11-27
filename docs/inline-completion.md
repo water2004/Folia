@@ -2,55 +2,56 @@
 
 ## Contract
 
-Folia builds, configures and runs independently. Reused protocol adapter source
-is vendored with its license and source revision; no Fairy installation, process,
-configuration, key store or absolute source path is a dependency.
+Inline completion and [agent chat](agent-chat.md) share the protocol adapters
+under `src/ai/providers` and the Windows HTTP transport under
+`src/platform/windows/ai`. Both choose models from the same provider catalog.
 
-The user configures a protocol, base URL, model and key in Folia. The transport
+Input prediction selects a model from Folia's AI model catalog. The provider
+record supplies the protocol, base URL and key. The transport
 adds `/chat/completions`, `/responses` or `/messages` to that base path; a host-only
 base uses `/v1`. Trailing slashes are normalized and query parameters are retained.
 Path resolution and authentication depend only on the selected API protocol
 and configured base URL. No provider domains or mounts are remapped.
-The settings field is `completion.baseUrl`; there is no legacy endpoint migration.
-Completion is opt-in. Keys use the Windows credential store, separate from portable settings.
+Full request URL mode uses the configured generation URL directly. Discovery
+can use a distinct model list URL.
+Input prediction stores the selection as `completion.modelId`. Its trigger and
+request budget settings are independent of chat. Keys use the Windows
+credential store, separate from portable settings.
 Only bounded context from the active document is sent to the configured service.
 
 Settings expose context size (1–64 KB, 1000 UTF-8 bytes per KB), maximum output
 tokens (16–4096), suggestion frequency and reasoning effort. Defaults are 7 KB,
-128 tokens, Balanced frequency and service-default effort. Conservative,
+128 tokens, Balanced frequency and the selected model's default effort. Conservative,
 Balanced and Proactive select stable instruction variants; they do not change
 the model's reasoning parameter or guarantee a suggestion.
 
-The model field is a text box with a separate model picker. Users can fetch and
-select a model or type an ID directly, including IDs absent from the list. **Fetch models**
-reads `GET /models` under the configured base URL without a prior model selection
-and without document content. Chat Completions and Responses use Bearer headers;
-Messages uses the protocol's API-key/version headers. Custom base paths and query
-parameters are retained for every host. No generation requests detect capabilities.
+From **AI providers**, open the provider and add or edit one of its models.
+**Fetch models**
+reads `GET /models` under the configured base URL without document content.
+Chat Completions and Responses use Bearer headers. Messages uses the protocol's
+API-key/version headers. Custom base paths and query parameters are retained
+for every host. Select a result to fill the available model metadata.
 
-The reasoning field is a text box with a separate menu for advertised levels and
-the service default. Choosing a level fills the field, and choosing the default
-clears it. A model refresh updates the menu while preserving the text. Users can
-enter any supported effort value when metadata is missing or incomplete.
+In input prediction settings, select a saved model, then choose one of its
+configured reasoning levels or leave **Model default** selected. Any override
+is saved for input prediction only. When advertised metadata is incomplete,
+check the supported preset levels in the model editor under its provider.
 
 The OpenAI Models schema supplies model IDs but no reasoning-level discovery
-field. Messages reads the standard `capabilities.effort` object: both the feature
-and each offered level must explicitly declare support. Private
-`effort.supported_levels` fields are not consumed. No model-name rules, provider
-tables, or preset effort lists populate the picker. Missing capabilities show an
-explicit message inviting manual entry; they are not reported as model-level
-lack of support. Manual effort values use the selected protocol's standard field:
-`reasoning_effort`, `reasoning.effort`, or `output_config.effort`. The adapter checks
+field. Messages reads `max_input_tokens`, `max_tokens`,
+`capabilities.image_input`, and the standard `capabilities.effort` object. Both the
+feature and each offered level must explicitly declare support. The model
+editor checks advertised levels and offers additional unchecked protocol presets.
+Effort values use the selected protocol's `reasoning_effort`, `reasoning.effort`,
+or `output_config.effort` field. The adapter checks
 only token syntax (up to 32 ASCII letters, digits, underscores or hyphens), leaving
 the vocabulary to the service. Blank or the service-default item omits the field.
 
-Selecting a model updates capabilities locally. Refresh preserves its text,
-including manually entered IDs, without selecting a different model. Discovery
-is bounded to 1 MB per page, 16 pages and 4096 unique model IDs. Messages follows
+Discovery is bounded to 1 MB per page, 16 pages and 4096 unique model IDs. Messages follows
 its standard `has_more`/`last_id` pagination using encoded `after_id` cursors and
 rejects repeated cursors. OpenAI's standard Models response is a single list.
-Changing the base/protocol clears stale choices; leaving the page or actually
-changing credentials cancels pending work and late results are ignored.
+Changes to the connection fields and leaving the provider editor cancel any
+pending discovery request. Imported models become available after saving.
 
 See the [OpenAI Models schema](https://developers.openai.com/api/reference/resources/models/methods/list)
 and [Anthropic Models schema](https://platform.claude.com/docs/en/api/models/list).

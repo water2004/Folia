@@ -1,13 +1,44 @@
 #include "pch.h"
+#include "settings/storage/ModelCatalog.h"
 #include "MainWindow.xaml.h"
 #include "localization/Localization.h"
+#include "windows/completion/CompletionHttpTransport.h"
 
 namespace winrt::Folia::implementation {
+namespace {
+    void ApplyModelRoute(folia::platform::completion::CompletionConfig& config,
+        models::ConfiguredModel const& model, models::ModelProfile const& provider, std::string_view effort) {
+        config.baseUrl = provider.baseUrl;
+        config.model = model.upstream;
+        config.protocol = static_cast<int>(provider.protocol);
+        config.fullUrl = provider.fullUrl;
+        config.reasoningEffort = model.ResolveEffort(effort);
+        config.modelOutputLimit = model.maxOutputTokens;
+    }
+}
+
 void MainWindow::ConfigureInlineCompletion(folia::platform::completion::CompletionService::Transport transport) {
     inlineCompletion.reset();
     UpdateCompletionStatus(winrt::Folia::CompletionState::Idle);
     if (!HasActiveEditor() || !appSettings.completion.enabled) return;
-    inlineCompletion = std::make_shared<winrt::Folia::InlineCompletionController>(editorSession(), appSettings.completion,
+    auto config = appSettings.completion;
+    if (!transport) {
+        try {
+            auto [model, provider] = models::Resolve(appSettings.completionModelId);
+            ApplyModelRoute(config, model, provider, appSettings.completion.reasoningEffort);
+            transport = [id = appSettings.completionModelId, effort = appSettings.completion.reasoningEffort]
+                (auto const& initial, auto const& prompt, std::stop_token stop) {
+                auto [currentModel, currentProvider] = models::Resolve(id);
+                auto request = initial;
+                ApplyModelRoute(request, currentModel, currentProvider, effort);
+                return folia::platform::completion::RequestCompletionHttp(request, prompt, stop, models::ProfileKey(currentProvider));
+            };
+        } catch (std::exception const& error) {
+            UpdateCompletionStatus(CompletionState::Failed, error.what());
+            return;
+        }
+    }
+    inlineCompletion = std::make_shared<winrt::Folia::InlineCompletionController>(editorSession(), config,
         DispatcherQueue(), [this](auto const& command) {
             if (command.paste_range) keyboardController.PrepareSourceEdit(*command.paste_range);
             return ExecuteEditorCommand(command);

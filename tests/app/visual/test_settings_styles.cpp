@@ -1,4 +1,6 @@
 #include "pch.h"
+#include "settings/storage/ModelCatalog.h"
+#include <wil/resource.h>
 #include "support/folia_test.hpp"
 #include "../support/DocumentControllerFixture.h"
 #include "visual_window.h"
@@ -36,6 +38,7 @@ template<class T> T Field(DependencyObject const& parent, winrt::hstring const& 
 }
 Button Action(DependencyObject const& parent, winrt::hstring const& label) {
     if (auto button = parent.try_as<Button>(); button != nullptr) {
+        if (Automation::AutomationProperties::GetName(button) == label) return button;
         auto value = button.Content().try_as<winrt::Windows::Foundation::IPropertyValue>();
         if (value != nullptr && value.Type() == winrt::Windows::Foundation::PropertyType::String)
             if (value.GetString() == label) return button;
@@ -44,65 +47,62 @@ Button Action(DependencyObject const& parent, winrt::hstring const& label) {
         if (auto found = Action(Media::VisualTreeHelper::GetChild(parent, i), label)) return found;
     return nullptr;
 }
+CheckBox Effort(DependencyObject const& parent, winrt::hstring const& label) {
+    if (auto choices = First<VariableSizedWrapGrid>(parent))
+        for (auto const& child : choices.Children())
+            if (auto check = child.try_as<CheckBox>(); check && winrt::unbox_value<winrt::hstring>(check.Content()) == label)
+                return check;
+    return nullptr;
+}
 void InvokeAction(Button const& button) {
     auto peer = Automation::Peers::FrameworkElementAutomationPeer::CreatePeerForElement(button);
     peer.GetPattern(Automation::Peers::PatternInterface::Invoke).as<Automation::Provider::IInvokeProvider>().Invoke();
 }
-void FetchModels(Button const& button, completion_tests::Server& server) {
-    auto previous = server.receivedRequests.load();
-    button.StartBringIntoView();
-    Pump([&] { button.UpdateLayout(); return button.ActualWidth() > 0; });
-    bool ready = false;
-    button.DispatcherQueue().TryEnqueue([&] { ready = true; });
-    Pump([&] { return ready; });
-    bool clicked = false;
-    auto click = button.Click(winrt::auto_revoke, [&](auto const&, auto const&) { clicked = true; });
-    InvokeAction(button);
-    try { Pump([&] { return clicked; }); }
-    catch (std::exception const&) { throw std::runtime_error("Model fetch did not receive its native Button.Click event."); }
-    try { Pump([&] { return server.receivedRequests.load() > previous; }); }
-    catch (std::exception const&) { throw std::runtime_error("Model fetch " + std::to_string(previous + 1)
-        + " did not reach the local HTTP fixture; enabled=" + std::to_string(button.IsEnabled())
-        + ", label=" + winrt::to_string(winrt::unbox_value<winrt::hstring>(button.Content()))
-        + ", status=" + winrt::to_string(button.Parent().as<Grid>().Parent().as<StackPanel>().Children().GetAt(
-            button.Parent().as<Grid>().Parent().as<StackPanel>().Children().Size() - 1).as<TextBlock>().Text())); }
-    try { Pump([&] { return button.IsEnabled(); }); }
-    catch (std::exception const&) { throw std::runtime_error("Model fetch did not return its UI completion."); }
-}
-struct CompletionPage {
+struct ModelSettingsPage {
     Window window;
     Grid root;
     std::shared_ptr<winrt::Folia::SettingsView> view;
     FrameworkElement page{nullptr};
     std::optional<winrt::Folia::AppSettings> applied;
-    CompletionPage(std::string base, std::string model = {}, std::string effort = {}, int protocol = 0) {
-        winrt::Folia::AppSettings initial;
-        initial.completion = {true, std::move(base), std::move(model), protocol, std::move(effort)};
-        ContentControl pageHost;
-        view = std::make_shared<winrt::Folia::SettingsView>(pageHost, initial,
+    ModelSettingsPage(winrt::Folia::SettingsView::Page kind, winrt::Folia::AppSettings initial = {}) {
+        ContentControl host;
+        view = std::make_shared<winrt::Folia::SettingsView>(host, initial,
             std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
             folia::Theme::Light, nullptr, [this](auto const& settings) -> std::optional<winrt::hstring> {
-                applied = settings;
-                return {};
+                applied = settings; return {};
             });
-        window.Content(root); root.Children().Append(pageHost); window.AppWindow().Resize({1120, 900}); window.Activate();
+        window.Content(root);
+        root.RequestedTheme(ElementTheme::Light);
+        root.Background(Media::SolidColorBrush({255, 247, 248, 250}));
+        root.Children().Append(host);
+        Resize(1024, 740);
+        window.Activate();
         Pump([&] { return root.IsLoaded() && root.ActualWidth() > 100; });
-        view->Navigate(winrt::Folia::SettingsView::Page::Completion);
-        root.UpdateLayout(); page = view->PageContent().as<FrameworkElement>();
-        Pump([&] { root.UpdateLayout(); return First<TextBlock>(page).ActualWidth() > 0; });
-        Field<PasswordBox>(page, winrt::Folia::Localize(L"AIKey")).Password(L"fixture-key");
+        view->Navigate(kind);
+        root.UpdateLayout();
+        page = view->PageContent().as<FrameworkElement>();
     }
-    ~CompletionPage() { view->Detach(); window.Close(); }
+    void Resize(int width, int height) {
+        HWND handle{};
+        winrt::check_hresult(window.as<::IWindowNative>()->get_WindowHandle(&handle));
+        auto scale = double(GetDpiForWindow(handle)) / 96.;
+        window.AppWindow().Resize({static_cast<int>(width * scale), static_cast<int>(height * scale)});
+    }
+    ~ModelSettingsPage() { view->Detach(); window.Close(); }
 };
-DropDownButton ChoiceButton(TextBox const& field) {
-    return First<DropDownButton>(field.Parent().as<Grid>());
+
+void SaveSettingsImage(Grid const& root, std::string_view name) {
+    auto settled = std::chrono::steady_clock::now() + std::chrono::milliseconds(350);
+    Pump([&] { return std::chrono::steady_clock::now() >= settled; });
+    root.UpdateLayout();
+    Media::Imaging::RenderTargetBitmap image;
+    Await(image.RenderAsync(root));
+    auto pixels = Await(image.GetPixelsAsync());
+    auto directory = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
+        / "build/tests/settings-styles";
+    visual_tests::SavePng(directory / name, image.PixelWidth(), image.PixelHeight(), pixels);
 }
-MenuFlyout ReasoningOptions(FrameworkElement const& page) {
-    return ChoiceButton(Field<TextBox>(page, winrt::Folia::Localize(L"AIReasoning"))).Flyout().as<MenuFlyout>();
-}
-ListView ModelOptions(TextBox const& field) {
-    return ChoiceButton(field).Flyout().as<Flyout>().Content().as<ListView>();
-}
+
 suite settings_style_tests = [] {
     "document media settings select a Mermaid theme independently of Folia"_test = [] {
         Window window;
@@ -124,6 +124,9 @@ suite settings_style_tests = [] {
         view->Navigate(winrt::Folia::SettingsView::Page::General);
         root.UpdateLayout();
         auto page = view->PageContent().as<FrameworkElement>();
+        expect(First<Expander>(page) == nullptr);
+        expect(Description(page, winrt::Folia::Localize(L"WindowAppearance")) != nullptr);
+        expect(Description(page, winrt::Folia::Localize(L"DocumentMedia")) != nullptr);
         auto width = Field<ComboBox>(page, winrt::Folia::Localize(L"ImageMaximumWidth"));
         auto theme = Field<ComboBox>(page, winrt::Folia::Localize(L"MermaidTheme"));
         expect(fatal(width && theme));
@@ -141,220 +144,262 @@ suite settings_style_tests = [] {
         expect(applied->media.imageMaxWidthPercent == 50);
     };
 
-    "explicit prompt cache is opt-in and available only for Responses"_test = [] {
-        CompletionPage fixture("https://fixture.invalid/v1", "fixture", {}, 1);
-        auto cache = Field<ToggleSwitch>(fixture.page, winrt::Folia::Localize(L"AIExplicitCache"));
-        auto protocol = Field<ComboBox>(fixture.page, winrt::Folia::Localize(L"AIProtocol"));
-        expect(cache.Visibility() == Visibility::Visible && !cache.IsOn());
-        cache.IsOn(true);
-        Field<PasswordBox>(fixture.page, winrt::Folia::Localize(L"AIKey")).Password(L"");
-        InvokeAction(Action(fixture.page, winrt::Folia::Localize(L"Save")));
-        Pump([&] { return fixture.applied.has_value(); });
-        expect(fixture.applied->completion.explicitPromptCache);
-        protocol.SelectedIndex(0);
-        expect(cache.Visibility() == Visibility::Collapsed);
-        protocol.SelectedIndex(1);
-        auto base = Field<TextBox>(fixture.page, winrt::Folia::Localize(L"AIBaseUrl"));
-        base.Text(L"https://other.invalid/v1");
-        Pump([&] { return !cache.IsOn(); });
+    "completion saves the chosen model and independent input prediction budgets"_test = [] {
+        using namespace winrt::Folia;
+        models::ModelProfile draft{{}, "Responses settings fixture", "https://fixture.invalid/v1"};
+        draft.models.push_back({{}, "Named Responses model", {}, "fixture", "none", false, {"none", "high"}});
+        auto provider = models::SaveProfile(std::move(draft), std::nullopt);
+        auto const& model = provider.models.front();
+        auto cleanup = wil::scope_exit([&] { models::DeleteProfile(provider.id); });
+        AppSettings initial;
+        initial.completionModelId = model.id;
+        initial.completion.enabled = true;
+        ModelSettingsPage fixture(SettingsView::Page::Completion, initial);
+        auto choices = Field<ComboBox>(fixture.page, Localize(L"AIModel"));
+        auto reasoning = Field<ComboBox>(fixture.page, Localize(L"AIReasoning"));
+        auto cache = Field<ToggleSwitch>(fixture.page, Localize(L"AIExplicitCache"));
+        auto context = Field<TextBox>(fixture.page, Localize(L"AIContextKB"));
+        auto output = Field<TextBox>(fixture.page, Localize(L"AIOutputTokens"));
+        if (!expect(choices && reasoning && cache && context && output)) return;
+        auto fields = context.Parent().try_as<StackPanel>();
+        expect(fields && output.Parent() == fields);
+        if (fields) expect(std::abs(context.ActualWidth() - fields.ActualWidth()) < 1.);
+        expect(winrt::unbox_value<winrt::hstring>(choices.SelectedItem()) == L"Named Responses model");
+        expect(Field<PasswordBox>(fixture.page, Localize(L"AIKey")) == nullptr);
+        expect(!reasoning.IsEditable());
+        expect(reasoning.SelectedIndex() == 0_i);
+        expect(reasoning.Items().Size() == 3_u);
+        auto modelCard = choices.Parent().as<Grid>();
+        auto reasoningCard = reasoning.Parent().as<Grid>();
+        auto modelRight = choices.TransformToVisual(fixture.root).TransformPoint(
+            {static_cast<float>(choices.ActualWidth()), 0}).X;
+        auto reasoningRight = reasoning.TransformToVisual(fixture.root).TransformPoint(
+            {static_cast<float>(reasoning.ActualWidth()), 0}).X;
+        expect(modelCard != reasoningCard && std::abs(modelRight - reasoningRight) < 1.0f);
+        SaveSettingsImage(fixture.root, "completion.png");
+        reasoning.SelectedIndex(2);
         expect(cache.Visibility() == Visibility::Visible);
+        context.Text(L"10");
+        cache.IsOn(true);
+        InvokeAction(Action(fixture.page, Localize(L"Save")));
+        Pump([&] { return fixture.applied.has_value(); });
+        expect(fixture.applied->completionModelId == model.id);
+        expect(fixture.applied->completion.contextKB == 10_u);
+        expect(fixture.applied->completion.explicitPromptCache);
+        expect(fixture.applied->completion.reasoningEffort == "high");
     };
-    "manual reasoning effort survives moving focus away and saves"_test = [] {
-        CompletionPage fixture("https://fixture.invalid/v1", "fixture", {}, 1);
-        auto reasoning = Field<TextBox>(fixture.page, winrt::Folia::Localize(L"AIReasoning"));
-        auto model = Field<TextBox>(fixture.page, winrt::Folia::Localize(L"AIModel"));
-        auto next = Field<TextBox>(fixture.page, winrt::Folia::Localize(L"AIBaseUrl"));
-        auto key = Field<PasswordBox>(fixture.page, winrt::Folia::Localize(L"AIKey"));
-        key.Password(L"");
-        reasoning.StartBringIntoView();
-        expect(!reasoning.AcceptsReturn() && !model.AcceptsReturn());
-        expect(model.Focus(FocusState::Programmatic));
-        model.Text(L"manually-entered-model");
-        expect(reasoning.Focus(FocusState::Programmatic));
-        reasoning.Text(L"none");
-        expect(next.Focus(FocusState::Programmatic));
-        bool focusSettled = false;
-        next.DispatcherQueue().TryEnqueue([&] { focusSettled = true; });
-        try { Pump([&] { return focusSettled; }); }
-        catch (std::runtime_error const&) { throw std::runtime_error("Settings focus dispatcher did not settle"); }
-        expect(Input::FocusManager::GetFocusedElement(next.XamlRoot()) == next);
-        expect(reasoning.Text() == L"none") << winrt::to_string(reasoning.Text());
-        InvokeAction(Action(fixture.page, winrt::Folia::Localize(L"Save")));
-        try { Pump([&] { return fixture.applied.has_value(); }); }
-        catch (std::runtime_error const&) { throw std::runtime_error("Manual reasoning effort was not applied by Save"); }
-        expect(fixture.applied->completion.reasoningEffort == "none");
-        expect(fixture.applied->completion.model == "manually-entered-model");
-    };
-    "models without advertised capabilities show an explicit message without inventing list entries"_test = [] {
-        for (int protocol : {0, 1, 2}) {
-            completion_tests::Server server(R"({"data":[{"id":"reasoning-high-model"}]})", 200, false, "application/json");
-            CompletionPage fixture(server.baseUrl, "reasoning-high-model", "high", protocol);
-            auto reasoning = Field<TextBox>(fixture.page, winrt::Folia::Localize(L"AIReasoning"));
-            expect(ReasoningOptions(fixture.page).Items().Size() == 1_u);
-            FetchModels(Action(fixture.page, winrt::Folia::Localize(L"AIFetchModels")), server);
-            expect(ReasoningOptions(fixture.page).Items().Size() == 1_u && reasoning.Text() == L"high") << "effort=" << winrt::to_string(reasoning.Text());
-            expect(!reasoning.IsReadOnly());
-            expect(Description(fixture.page, winrt::Folia::Localize(L"AIReasoningMissingMetadata")) != nullptr);
+
+    "provider settings stage a model and its reasoning configuration until the provider is saved"_test = [] {
+        using namespace winrt::Folia;
+        auto provider = models::SaveProfile({{}, "Model settings fixture", "https://fixture.invalid/v1"}, std::nullopt);
+        auto cleanup = wil::scope_exit([&] { models::DeleteProfile(provider.id); });
+        ModelSettingsPage fixture(SettingsView::Page::Providers);
+        auto card = Action(fixture.page, L"Model settings fixture");
+        if (!expect(card != nullptr)) return;
+        expect(Description(card, L"fixture.invalid") != nullptr);
+        expect(Description(card, L"MS") != nullptr);
+        expect(Field<TextBox>(fixture.page, Localize(L"AIBaseUrl")) == nullptr);
+        InvokeAction(card);
+        Pump([&] { return Action(fixture.page, Localize(L"ChatAddModel")) != nullptr; });
+        auto back = Action(fixture.root, Localize(L"ChatProviders"));
+        auto providerName = Field<TextBox>(fixture.page, Localize(L"ChatProviderName"));
+        auto providerProtocol = Field<ComboBox>(fixture.page, Localize(L"AIProtocol"));
+        if (!expect(back && providerName && providerProtocol)) return;
+        auto connection = providerName.Parent().as<Grid>().Parent().as<StackPanel>();
+        auto protocolCard = providerProtocol.Parent().as<Grid>().Parent().as<Border>();
+        expect(protocolCard.Parent() == connection);
+        fixture.root.UpdateLayout();
+        Pump([&] { return connection.ActualWidth() > 600; });
+        expect(Grid::GetColumn(providerProtocol) == 2_i && Grid::GetRow(providerProtocol) == 0_i);
+        auto base = Field<TextBox>(fixture.page, Localize(L"AIBaseUrl"));
+        if (!expect(base != nullptr)) return;
+        auto key = Field<PasswordBox>(fixture.page, Localize(L"AIKey"));
+        expect(key && key.Parent().try_as<StackPanel>() && base.Parent().as<Grid>().Parent() == key.Parent());
+        expect(std::abs(base.ActualWidth() - connection.ActualWidth()) < 1.) << "endpoint fills the plain form";
+        auto fullUrl = Field<ToggleSwitch>(fixture.page, Localize(L"ChatUseFullUrl"));
+        auto catalogUrl = Field<TextBox>(fixture.page, Localize(L"ChatCatalogUrl"));
+        if (!expect(fullUrl && catalogUrl)) return;
+        auto connectionFields = connection.Children();
+        expect(connectionFields.GetAt(connectionFields.Size() - 2) == base.Parent());
+        expect(connectionFields.GetAt(connectionFields.Size() - 1) == catalogUrl);
+        expect(catalogUrl.Visibility() == Visibility::Visible && !catalogUrl.IsEnabled());
+        expect(Description(fixture.page, Localize(L"ChatConnectionOptions")) != nullptr);
+        expect(First<Expander>(fixture.page) == nullptr);
+        fullUrl.IsOn(true);
+        Pump([&] { return catalogUrl.IsEnabled(); });
+        catalogUrl.Text(L"https://fixture.invalid/catalog");
+        fullUrl.IsOn(false);
+        Pump([&] { return !catalogUrl.IsEnabled(); });
+        expect(catalogUrl.Visibility() == Visibility::Visible && catalogUrl.Text() == L"https://fixture.invalid/catalog");
+        fixture.Resize(510, 740);
+        Pump([&] { return connection.ActualWidth() < 490; });
+        expect(Grid::GetColumn(providerProtocol) == 2_i && Grid::GetRow(providerProtocol) == 0_i);
+        expect(std::abs(protocolCard.ActualWidth() - connection.ActualWidth()) < 1.);
+        fixture.Resize(1024, 740);
+        Pump([&] { return connection.ActualWidth() > 600; });
+        InvokeAction(Action(fixture.page, Localize(L"ChatAddModel")));
+        Pump([&] { return Field<TextBox>(fixture.page, Localize(L"ChatModelName")) != nullptr; });
+        auto name = Field<TextBox>(fixture.page, Localize(L"ChatModelName"));
+        auto upstream = Field<TextBox>(fixture.page, Localize(L"ChatUpstreamModel"));
+        auto level = Field<ComboBox>(fixture.page, Localize(L"ChatDefaultEffort"));
+        auto none = Effort(fixture.page, L"none");
+        auto high = Effort(fixture.page, L"high");
+        if (!expect(name && upstream && none && high && level)) return;
+        expect(Field<TextBox>(fixture.page, Localize(L"AIBaseUrl")) == nullptr);
+        expect(Action(fixture.root, L"Model settings fixture") != nullptr);
+        name.Text(L"Manual model");
+        upstream.Text(L"custom-model");
+        expect(!none.IsChecked().GetBoolean() && !high.IsChecked().GetBoolean());
+        expect(!level.IsEnabled());
+        none.IsChecked(true);
+        Pump([&] { return level.Items().Size() == 2 && level.IsEnabled(); });
+        high.IsChecked(true);
+        Pump([&] { return level.Items().Size() == 3; });
+        level.SelectedIndex(1);
+        SaveSettingsImage(fixture.root, "provider-model.png");
+        InvokeAction(Action(fixture.page, Localize(L"ChatApplyModel")));
+        Pump([&] { return Description(fixture.page, L"custom-model · none, high") != nullptr; });
+        expect(std::ranges::none_of(models::Models(), [&](auto const& model) { return model.provider == provider.id; }));
+        InvokeAction(Action(fixture.page, Localize(L"ChatSaveProvider")));
+        Pump([&] { return std::ranges::any_of(models::Models(), [&](auto const& model) { return model.provider == provider.id; }); });
+        auto configured = models::Models();
+        auto found = std::ranges::find(configured, provider.id, &models::ConfiguredModel::provider);
+        expect(found->upstream == "custom-model");
+        expect(found->effort == "none");
+        expect(found->ResolveEffort("high") == "high");
+        expect(found->ResolveEffort("unsupported") == "none");
+        Pump([&] { return Action(fixture.page, L"Model settings fixture") != nullptr; });
+        auto reopened = Action(fixture.page, L"Model settings fixture");
+        SaveSettingsImage(fixture.root, "provider-list.png");
+        InvokeAction(reopened);
+        Pump([&] { return Action(fixture.page, L"Manual model") != nullptr; });
+        fixture.root.UpdateLayout();
+        SaveSettingsImage(fixture.root, "provider-detail.png");
+        auto toggle = Field<ToggleSwitch>(fixture.page, LocalizeFormat(L"ChatToggleModel", {L"Manual model"}));
+        if (!expect(toggle && toggle.IsOn())) return;
+        auto modelLink = Action(fixture.page, L"Manual model");
+        expect(modelLink && modelLink.Parent() == toggle.Parent());
+        if (!modelLink) return;
+        auto modelRow = modelLink.Parent().as<Grid>();
+        expect(Grid::GetColumnSpan(modelLink) == 4_i);
+        expect(modelRow.Children().GetAt(modelRow.Children().Size() - 1) == toggle);
+        expect(modelLink.IsTabStop() && toggle.IsTabStop());
+        InvokeAction(modelLink);
+        Pump([&] { return Field<TextBox>(fixture.page, Localize(L"ChatModelName")) != nullptr; });
+        InvokeAction(Action(fixture.page, Localize(L"Cancel")));
+        Pump([&] { return Action(fixture.page, L"Manual model") != nullptr; });
+        toggle = Field<ToggleSwitch>(fixture.page, LocalizeFormat(L"ChatToggleModel", {L"Manual model"}));
+        if (!expect(toggle && toggle.IsOn())) return;
+        toggle.IsOn(false);
+        expect(models::Resolve(found->id).first.enabled);
+        InvokeAction(Action(fixture.page, Localize(L"ChatSaveProvider")));
+        Pump([&] { return Action(fixture.page, L"Model settings fixture") != nullptr; });
+        expect(throws([&] { (void)models::Resolve(found->id); }));
+        auto allProviders = models::Profiles();
+        auto stored = std::ranges::find(allProviders, provider.id, &models::ModelProfile::id);
+        if (expect(stored != allProviders.end()) && expect(stored->models.size() == 1_u)) {
+            expect(!stored->models.front().enabled);
+            expect(stored->models.front().effort == "none");
         }
     };
-    "model refresh preserves selected and manually entered model IDs"_test = [] {
-        completion_tests::Server server(R"({"data":[{"id":"fixture","capabilities":{"effort":{"supported":true,"low":{"supported":true},"high":{"supported":true}}}},{"id":"other"}]})",
-            200, false, "application/json", {}, 37, {R"({"data":[{"id":"other"}]})"});
-        CompletionPage fixture(server.baseUrl, "fixture", "high", 2);
-        auto model = Field<TextBox>(fixture.page, winrt::Folia::Localize(L"AIModel"));
-        auto reasoning = Field<TextBox>(fixture.page, winrt::Folia::Localize(L"AIReasoning"));
-        auto fetch = Action(fixture.page, winrt::Folia::Localize(L"AIFetchModels"));
-        auto choices = ModelOptions(model);
-        expect(!ChoiceButton(model).IsEnabled() && model.Text() == L"fixture");
-        FetchModels(fetch, server);
-        expect(choices.Items().Size() == 2_u && model.Text() == L"fixture");
-        expect(ReasoningOptions(fixture.page).Items().Size() == 3_u && reasoning.Text() == L"high");
-        FetchModels(fetch, server);
-        auto service = fetch.Parent().as<Grid>().Parent().as<StackPanel>();
-        auto fetchStatus = service.Children().GetAt(service.Children().Size() - 1).as<TextBlock>();
-        expect(choices.Items().Size() == 1_u && choices.SelectedIndex() == -1_i) << winrt::to_string(fetchStatus.Text());
-        expect(model.Text() == L"fixture") << "model=" << winrt::to_string(model.Text());
-        expect(Description(fixture.page, winrt::Folia::Localize(L"AIReasoningMissingMetadata")) != nullptr);
-        expect(ReasoningOptions(fixture.page).Items().Size() == 1_u && reasoning.Text() == L"high") << "effort=" << winrt::to_string(reasoning.Text());
+
+    "model settings fill only metadata from the upstream model explicitly chosen by the user"_test = [] {
+        using namespace winrt::Folia;
+        const auto body = R"({"data":[
+            {"id":"fixture-one","display_name":"First fixture","max_input_tokens":100000,"max_tokens":4096,
+             "capabilities":{"image_input":{"supported":true},"server_tools":{"web_search":{"supported":true}},
+             "effort":{"supported":true,"low":{"supported":true},"high":{"supported":true}}}},
+            {"id":"fixture-two"}],"has_more":false})";
+        completion_tests::Server server(body, 200, false, "application/json", {}, 512, {body});
+        models::ModelProfile profile{{}, "Discovery settings fixture", server.baseUrl + "/custom/generate",
+            folia::ai::ApiProtocol::AnthropicMessages};
+        profile.fullUrl = true;
+        profile.catalogUrl = server.baseUrl + "/custom/catalog";
+        profile.allowWebSearch = true;
+        auto provider = models::SaveProfile(std::move(profile), std::nullopt);
+        auto cleanup = wil::scope_exit([&] { models::DeleteProfile(provider.id); });
+        ModelSettingsPage fixture(SettingsView::Page::Providers);
+        auto card = Action(fixture.page, L"Discovery settings fixture");
+        if (!expect(card != nullptr)) return;
+        InvokeAction(card);
+        Pump([&] { return Action(fixture.page, Localize(L"ChatTestConnection")) != nullptr; });
+        auto catalogUrl = Field<TextBox>(fixture.page, Localize(L"ChatCatalogUrl"));
+        expect(catalogUrl && catalogUrl.IsEnabled() && catalogUrl.Visibility() == Visibility::Visible);
+        SaveSettingsImage(fixture.root, "provider-advanced.png");
+        auto test = Action(fixture.page, Localize(L"ChatTestConnection"));
+        InvokeAction(test);
+        Pump([&] { return server.receivedRequests.load() == 1 && test.IsEnabled(); });
+        InvokeAction(Action(fixture.page, Localize(L"ChatAddModel")));
+        Pump([&] { return Action(fixture.page, Localize(L"AIFetchModels")) != nullptr; });
+        auto fetch = Action(fixture.page, Localize(L"AIFetchModels"));
+        auto upstream = Field<TextBox>(fixture.page, Localize(L"ChatUpstreamModel"));
+        auto name = Field<TextBox>(fixture.page, Localize(L"ChatModelName"));
+        auto context = Field<TextBox>(fixture.page, Localize(L"ChatModelContextLimit"));
+        auto output = Field<TextBox>(fixture.page, Localize(L"ChatModelOutputLimit"));
+        auto vision = Field<ToggleSwitch>(fixture.page, Localize(L"ChatModelVision"));
+        auto search = Field<ToggleSwitch>(fixture.page, Localize(L"ChatModelWebSearch"));
+        auto catalog = Field<ComboBox>(fixture.page, Localize(L"ChatChooseUpstream"));
+        if (!expect(upstream && name && context && output && vision && search && catalog)) return;
+        auto fields = name.Parent().try_as<StackPanel>();
+        expect(fields && upstream.Parent() == fields && context.Parent() == fields && output.Parent() == fields);
+        InvokeAction(fetch);
+        Pump([&] { return catalog.Items().Size() == 2; });
+        expect(server.requests.size() == 2_u);
+        for (auto const& request : server.requests) expect(request.starts_with("GET /custom/catalog HTTP/1.1"));
+        expect(upstream.Text().empty());
+        catalog.SelectedIndex(0);
+        Pump([&] { return upstream.Text() == L"fixture-one"; });
+        expect(name.Text() == L"First fixture");
+        expect(context.Text() == L"100000");
+        expect(output.Text() == L"4096");
+        expect(vision.IsOn());
+        expect(search.IsOn());
+        expect(Effort(fixture.page, L"high").IsChecked().GetBoolean());
+        expect(!Effort(fixture.page, L"max").IsChecked().GetBoolean());
+        catalog.SelectedIndex(1);
+        Pump([&] { return upstream.Text() == L"fixture-two"; });
+        expect(name.Text().empty() && context.Text().empty() && output.Text().empty());
+        expect(!vision.IsOn());
+        expect(!search.IsOn());
+        expect(!Effort(fixture.page, L"high").IsChecked().GetBoolean());
+        catalog.SelectedIndex(0);
+        InvokeAction(Action(fixture.page, Localize(L"ChatApplyModel")));
+        Pump([&] { return Action(fixture.page, L"First fixture") != nullptr; });
+        expect(Action(fixture.page, L"fixture-two") == nullptr);
+        InvokeAction(Action(fixture.page, Localize(L"ChatSaveProvider")));
+        Pump([&] { return Action(fixture.page, L"Discovery settings fixture") != nullptr; });
+        auto providers = models::Profiles();
+        auto saved = std::ranges::find(providers, provider.id, &models::ModelProfile::id);
+        if (!expect(saved != providers.end()) || !expect(saved->models.size() == 1_u)) return;
+        expect(saved->models.front().upstream == "fixture-one");
+        expect(saved->models.front().efforts.size() == 2_u);
+        expect(saved->models.front().maxInputTokens.value_or(0) == 100000_u);
+        expect(saved->models.front().vision);
+        expect(saved->models.front().webSearch);
+        expect(saved->fullUrl && saved->allowWebSearch);
     };
-    "model discovery empty and failed responses remain selectable only by explicit available choices"_test = [] {
-        for (auto status : {200, 503}) {
-            completion_tests::Server server(R"({"data":[]})", status, false, "application/json");
-            CompletionPage fixture(server.baseUrl);
-            auto model = Field<TextBox>(fixture.page, winrt::Folia::Localize(L"AIModel"));
-            auto fetch = Action(fixture.page, winrt::Folia::Localize(L"AIFetchModels"));
-            FetchModels(fetch, server);
-            expect(server.received.load()); expect(ModelOptions(model).Items().Size() == 0_u);
-            expect(!ChoiceButton(model).IsEnabled() && model.Text().empty());
-            expect(ReasoningOptions(fixture.page).Items().Size() == 1_u);
-        }
-    };
-    "leaving completion settings cancels pending model discovery"_test = [] {
+
+    "provider connection check cancels when the configured credentials change"_test = [] {
+        using namespace winrt::Folia;
         completion_tests::Server server({}, 200, true, "application/json");
-        CompletionPage fixture(server.baseUrl);
-        auto fetch = Action(fixture.page, winrt::Folia::Localize(L"AIFetchModels"));
-        InvokeAction(fetch); Pump([&] { return server.received.load(); });
+        ModelSettingsPage fixture(SettingsView::Page::Providers);
+        InvokeAction(Action(fixture.page, Localize(L"ChatAddProvider")));
+        Pump([&] { return Field<TextBox>(fixture.page, Localize(L"AIBaseUrl")) != nullptr; });
+        Field<TextBox>(fixture.page, Localize(L"AIBaseUrl")).Text(winrt::to_hstring(server.baseUrl));
+        Field<PasswordBox>(fixture.page, Localize(L"AIKey")).Password(L"fixture-key");
+        auto fetch = Action(fixture.page, Localize(L"ChatTestConnection"));
+        InvokeAction(fetch);
+        Pump([&] { return server.received.load(); });
         expect(!fetch.IsEnabled());
-        fixture.view->Navigate(winrt::Folia::SettingsView::Page::Home);
+        Field<PasswordBox>(fixture.page, Localize(L"AIKey")).Password(L"changed-key");
         Pump([&] { return server.client.load() == INVALID_SOCKET; });
         expect(fetch.IsEnabled());
     };
-    "actual credential edits cancel pending model discovery"_test = [] {
-        for (bool clear : {false, true}) {
-            completion_tests::Server server({}, 200, true, "application/json");
-            CompletionPage fixture(server.baseUrl);
-            auto fetch = Action(fixture.page, winrt::Folia::Localize(L"AIFetchModels"));
-            InvokeAction(fetch); Pump([&] { return server.received.load(); });
-            expect(!fetch.IsEnabled());
-            if (clear) First<CheckBox>(fixture.page).IsChecked(true);
-            else Field<PasswordBox>(fixture.page, winrt::Folia::Localize(L"AIKey")).Password(L"changed-fixture-key");
-            Pump([&] { return server.client.load() == INVALID_SOCKET; });
-            expect(fetch.IsEnabled());
-        }
-    };
-    "completion metadata requests retire when settings service changes"_test = [] {
-        completion_tests::Server server({}, 200, true, "application/json");
-        Window window; Grid root; window.Content(root);
-        winrt::Folia::AppSettings initial; initial.completion.baseUrl = server.baseUrl; initial.completion.model = "fixture";
-        ContentControl pageHost;
-        auto view = std::make_shared<winrt::Folia::SettingsView>(pageHost, initial,
-            std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
-            folia::Theme::Light, nullptr, [](auto const&) -> std::optional<winrt::hstring> { return {}; });
-        struct Cleanup { Window window; std::shared_ptr<winrt::Folia::SettingsView> view;
-            ~Cleanup() { view->Detach(); window.Close(); } } cleanup{window, view};
-        root.Children().Append(pageHost); window.Activate(); Pump([&] { return root.IsLoaded(); });
-        view->Navigate(winrt::Folia::SettingsView::Page::Completion);
-        root.UpdateLayout(); auto page = view->PageContent().as<FrameworkElement>();
-        Field<PasswordBox>(page, winrt::Folia::Localize(L"AIKey")).Password(L"fixture-key");
-        auto fetch = Action(page, winrt::Folia::Localize(L"AIFetchModels")); InvokeAction(fetch);
-        Pump([&] { return server.received.load(); }); expect(!fetch.IsEnabled());
-        Field<TextBox>(page, winrt::Folia::Localize(L"AIBaseUrl")).Text(L"https://another.example/v1");
-        Pump([&] { return fetch.IsEnabled(); });
-        Pump([&] { return server.client.load() == INVALID_SOCKET; });
-        expect(ReasoningOptions(page).Items().Size() == 1_u);
-    };
-    "completion settings save independent budgets eagerness and protocol reasoning choices"_test = [] {
-        completion_tests::Server server(R"({"data":[{"id":"fixture","capabilities":{"effort":{"supported":true,"low":{"supported":true},"high":{"supported":true},"max":{"supported":true}}},"display_name":"Fixture Model"},{"id":"plain"}]})", 200, false, "application/json");
-        Window window; Grid root; window.Content(root);
-        std::optional<winrt::Folia::AppSettings> applied;
-        winrt::Folia::AppSettings initial;
-        initial.completion.baseUrl = server.baseUrl; initial.completion.model = "fixture";
-        ContentControl pageHost;
-        auto view = std::make_shared<winrt::Folia::SettingsView>(pageHost, initial,
-            std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
-            folia::Theme::Light, nullptr, [&](auto const& settings) -> std::optional<winrt::hstring> { applied = settings; return {}; });
-        struct Cleanup { Window window; std::shared_ptr<winrt::Folia::SettingsView> view;
-            ~Cleanup() { view->Detach(); window.Close(); } } cleanup{window, view};
-        root.Children().Append(pageHost); window.Activate(); Pump([&] { return root.IsLoaded(); });
-        view->Navigate(winrt::Folia::SettingsView::Page::Completion);
-        root.UpdateLayout(); auto page = view->PageContent().as<FrameworkElement>();
-        auto protocol = Field<ComboBox>(page, winrt::Folia::Localize(L"AIProtocol"));
-        auto reasoning = Field<TextBox>(page, winrt::Folia::Localize(L"AIReasoning"));
-        auto eagerness = Field<ComboBox>(page, winrt::Folia::Localize(L"AIEagerness"));
-        auto context = Field<TextBox>(page, winrt::Folia::Localize(L"AIContextKB"));
-        auto output = Field<TextBox>(page, winrt::Folia::Localize(L"AIOutputTokens"));
-        expect(protocol != nullptr && reasoning != nullptr && eagerness != nullptr && context != nullptr && output != nullptr);
-        expect(context.Text() == L"7" && output.Text() == L"128");
-        expect(eagerness.SelectedIndex() == 1_i);
-        auto options = ReasoningOptions(page);
-        expect(options.Items().Size() == 1_u) << "there must be no preset reasoning levels";
-        protocol.SelectedIndex(2); expect(reasoning.Text().empty()); expect(options.Items().Size() == 1_u);
-        auto key = Field<PasswordBox>(page, winrt::Folia::Localize(L"AIKey")); key.Password(L"fixture-key");
-        auto fetch = Action(page, winrt::Folia::Localize(L"AIFetchModels")); expect(fetch != nullptr);
-        FetchModels(fetch, server);
-        auto model = Field<TextBox>(page, winrt::Folia::Localize(L"AIModel"));
-        auto choices = ModelOptions(model);
-        expect(!model.IsReadOnly()); expect(choices.Items().Size() == 2_u);
-        expect(model.Text().empty()) << "fetch must not silently select a new model";
-        choices.SelectedIndex(0); Pump([&] { return options.Items().Size() == 4; });
-        expect(model.Text() == L"fixture");
-        choices.SelectedIndex(1); Pump([&] { return options.Items().Size() == 1; });
-        expect(model.Text() == L"plain");
-        expect(Description(page, winrt::Folia::Localize(L"AIReasoningMissingMetadata")) != nullptr);
-        model.Text(L"fixture"); Pump([&] { return options.Items().Size() == 4; });
-        expect(fetch.IsEnabled()); expect(server.request.starts_with("GET /v1/models HTTP/1.1\r\n"));
-        options.ShowAt(ChoiceButton(reasoning));
-        for (auto entry : options.Items()) {
-            auto item = entry.as<MenuFlyoutItem>();
-            if (item.Text() == L"high") {
-                Automation::Peers::MenuFlyoutItemAutomationPeer peer(item);
-                peer.GetPattern(Automation::Peers::PatternInterface::Invoke)
-                    .as<Automation::Provider::IInvokeProvider>().Invoke();
-                break;
-            }
-        }
-        Pump([&] { return reasoning.Text() == L"high"; });
-        key.Password(L""); // Do not persist fixture credentials when applying settings.
-        eagerness.SelectedIndex(2); context.Text(L"16"); output.Text(L"512");
-        auto save = Action(page, winrt::Folia::Localize(L"Save")); expect(save != nullptr);
-        InvokeAction(save);
-        Pump([&] { return applied.has_value(); });
-        expect(applied->completion.contextKB == 16_u && applied->completion.outputTokens == 512_u);
-        expect(applied->completion.reasoningEffort == "high") << "saved effort=" << applied->completion.reasoningEffort;
-        expect(applied->completion.model == "fixture") << "save uses model ID, not its display name";
-        expect(applied->completion.eagerness == folia::completion::Eagerness::Proactive);
-        view->Reset(*applied, folia::Theme::Light);
-        root.UpdateLayout(); page = view->PageContent().as<FrameworkElement>();
-        expect(Field<TextBox>(page, winrt::Folia::Localize(L"AIContextKB")).Text() == L"16");
-        model = Field<TextBox>(page, winrt::Folia::Localize(L"AIModel"));
-        expect(model.Text() == L"fixture");
-        model.Text(L"custom-model-not-in-list"); applied.reset();
-        expect(model.Text() == L"custom-model-not-in-list");
-        InvokeAction(Action(page, winrt::Folia::Localize(L"Save")));
-        Pump([&] { return applied.has_value(); });
-        expect(applied->completion.model == "custom-model-not-in-list");
-        expect(applied->completion.reasoningEffort == "high") << "saved effort=" << applied->completion.reasoningEffort;
-        reasoning = Field<TextBox>(page, winrt::Folia::Localize(L"AIReasoning"));
-        reasoning.Text(L"custom_effort-2"); applied.reset();
-        InvokeAction(Action(page, winrt::Folia::Localize(L"Save")));
-        Pump([&] { return applied.has_value(); });
-        expect(applied->completion.reasoningEffort == "custom_effort-2");
-        reasoning.Text(L""); applied.reset();
-        InvokeAction(Action(page, winrt::Folia::Localize(L"Save")));
-        Pump([&] { return applied.has_value(); });
-        expect(applied->completion.reasoningEffort.empty());
-    };
+
     "settings pages share typography and render AI forms without enclosing borders"_test = [] {
+        auto provider = winrt::Folia::models::SaveProfile(
+            {{}, "Theme settings fixture", "https://fixture.invalid/v1"}, std::nullopt);
+        auto removeProvider = wil::scope_exit([&] { winrt::Folia::models::DeleteProfile(provider.id); });
         Window window; Grid root; window.Content(root); window.Title(L"Folia settings style test");
         ContentControl pageHost;
         auto view = std::make_shared<winrt::Folia::SettingsView>(pageHost, winrt::Folia::AppSettings{},
@@ -365,7 +410,7 @@ suite settings_style_tests = [] {
         root.Children().Append(pageHost); window.Activate();
         Pump([&] { return root.IsLoaded(); });
         using Page = winrt::Folia::SettingsView::Page;
-        for (auto category : {Page::Home, Page::General, Page::Themes, Page::Shortcuts, Page::Latex, Page::Completion, Page::Licenses, Page::About}) {
+        for (auto category : {Page::Home, Page::General, Page::Themes, Page::Shortcuts, Page::Latex, Page::Completion, Page::Providers, Page::Licenses, Page::About}) {
             view->Navigate(category); root.UpdateLayout();
             auto page = view->PageContent().as<FrameworkElement>();
             auto heading = First<TextBlock>(page); expect(heading != nullptr);
@@ -389,7 +434,7 @@ suite settings_style_tests = [] {
             root.Background(Media::SolidColorBrush({colors.shell_bg.a, colors.shell_bg.r, colors.shell_bg.g, colors.shell_bg.b}));
             root.RequestedTheme(theme);
             Pump([&] { return root.ActualTheme() == theme; }); root.UpdateLayout();
-            view->Navigate(Page::Completion);
+            view->Navigate(Page::Providers);
             for (int width : {1120, 720}) {
                 HWND handle{}; winrt::check_hresult(window.as<::IWindowNative>()->get_WindowHandle(&handle));
                 auto scale = double(GetDpiForWindow(handle)) / 96.;
@@ -398,32 +443,25 @@ suite settings_style_tests = [] {
                 auto scroll = view->PageContent().as<ScrollViewer>();
                 auto panel = First<StackPanel>(scroll.Content().as<UIElement>());
                 for (auto child : panel.Children()) expect(!child.try_as<Border>()) << "AI sections must not use a page-sized frame";
-                auto description = Description(panel, winrt::Folia::Localize(L"AICompletionDescription"));
+                auto description = Description(panel, winrt::Folia::Localize(L"ChatProvidersDescription"));
                 expect(description != nullptr);
                 if (description) {
                     auto expected = root.Resources().Lookup(winrt::box_value(L"FoliaShellMutedForegroundBrush")).as<Media::SolidColorBrush>();
                     expect(description.Foreground().as<Media::SolidColorBrush>().Color() == expected.Color()) << "description theme brush";
                 }
-                auto endpoint = Field<TextBox>(panel, winrt::Folia::Localize(L"AIBaseUrl"));
-                auto key = Field<PasswordBox>(panel, winrt::Folia::Localize(L"AIKey"));
-                expect(endpoint != nullptr && key != nullptr);
-                if (endpoint && key) {
-                    expect(endpoint.ActualWidth() > 100.0) << "endpoint visible width " << endpoint.ActualWidth();
-                    expect(std::abs(endpoint.ActualWidth() - key.ActualWidth()) < 1.0) << "aligned field widths";
-                    auto a = endpoint.TransformToVisual(panel).TransformPoint({0, 0});
-                    auto b = key.TransformToVisual(panel).TransformPoint({0, 0});
-                    expect(std::abs(a.X - b.X) < 1.0);
-                    expect(a.X + endpoint.ActualWidth() <= panel.ActualWidth() + 1.0);
+                auto add = Action(panel, winrt::Folia::Localize(L"ChatAddProvider"));
+                expect(add && add.HorizontalAlignment() == HorizontalAlignment::Right);
+                if (add) {
+                    auto label = Description(add, winrt::Folia::Localize(L"ChatAddProvider"));
+                    auto icon = First<Shapes::Path>(add);
+                    if (expect(label && icon))
+                        expect(label.Foreground().as<Media::SolidColorBrush>().Color() ==
+                            icon.Stroke().as<Media::SolidColorBrush>().Color());
                 }
-                // Settle list selection and theme animations for
-                // the artifact; functional layout assertions above are immediate.
-                auto settled = std::chrono::steady_clock::now() + std::chrono::milliseconds(350);
-                Pump([&] { return std::chrono::steady_clock::now() >= settled; });
-                Media::Imaging::RenderTargetBitmap image; Await(image.RenderAsync(root));
-                auto pixels = Await(image.GetPixelsAsync());
+                expect(Action(panel, L"Theme settings fixture") != nullptr);
+                expect(Field<TextBox>(panel, winrt::Folia::Localize(L"AIBaseUrl")) == nullptr);
                 auto name = std::string(theme == ElementTheme::Light ? "light-" : "dark-") + std::to_string(width) + ".png";
-                visual_tests::SavePng(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
-                    / "build/tests/settings-styles" / name, image.PixelWidth(), image.PixelHeight(), pixels);
+                SaveSettingsImage(root, name);
             }
         }
     };

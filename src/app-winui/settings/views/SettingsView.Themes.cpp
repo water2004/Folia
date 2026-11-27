@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "settings/views/SettingsView.h"
-#include "settings/views/SettingsViewSupport.h"
+#include "settings/views/SettingsCards.h"
 #include "localization/Localization.h"
 
 namespace winrt::Folia
@@ -9,11 +9,12 @@ namespace winrt::Folia
     using namespace Microsoft::UI::Xaml::Controls;
     UIElement SettingsView::BuildThemesPage()
     {
+        using namespace settings_ui;
         auto page = settings_ui::PagePanel();
         page.Children().Append(settings_ui::PageHeader(Localize(L"Themes"), Localize(L"ThemesDescription")));
         auto controls = settings_ui::SectionPanel();
         themePicker_ = settings_ui::Choice();
-        themePicker_.Style(settings_ui::ResourceStyle(L"SettingsComboBoxStyle"));
+        cards::ChoiceStyle(themePicker_);
         themePicker_.SelectionChanged([this](auto const&, SelectionChangedEventArgs const&)
         {
             auto index = themePicker_.SelectedIndex();
@@ -22,18 +23,15 @@ namespace winrt::Folia
             settings_.themeId = themeIds_[static_cast<std::size_t>(index)];
             UpdateThemePreview();
         });
-        controls.Children().Append(settings_ui::OptionRow(Localize(L"PreviewTheme"), themePicker_));
+        controls.Children().Append(cards::Setting(
+            {Localize(L"PreviewTheme"), {}, cards::Icon(L"\xE790")}, themePicker_, cards::Placement::Wrap));
 
-        StackPanel buttons;
-        buttons.Orientation(Orientation::Horizontal);
+        auto buttons = ButtonRow();
         buttons.HorizontalAlignment(HorizontalAlignment::Right);
-        buttons.Spacing(8);
         applyThemeButton_.Content(box_value(Localize(L"Apply")));
         applyThemeButton_.Click([this](auto const&, auto const&) { ApplyPendingTheme(); });
         applyThemeButton_.Style(settings_ui::ResourceStyle(L"SettingsPrimaryButtonStyle"));
-        Button importButton;
-        importButton.Style(settings_ui::ResourceStyle(L"SettingsSecondaryButtonStyle"));
-        importButton.Content(box_value(Localize(L"Import")));
+        auto importButton = SecondaryAction(Localize(L"Import"));
         importButton.Click([this](auto const&, auto const&) { ImportThemeAsync(); });
         removeThemeButton_.Content(box_value(Localize(L"Remove")));
         removeThemeButton_.Style(settings_ui::ResourceStyle(L"SettingsSecondaryButtonStyle"));
@@ -43,7 +41,7 @@ namespace winrt::Folia
         buttons.Children().Append(removeThemeButton_);
         controls.Children().Append(buttons);
         controls.Children().Append(themeStatus_);
-        page.Children().Append(settings_ui::SectionCard(controls));
+        page.Children().Append(controls);
 
         Border preview;
         preview.Style(settings_ui::ResourceStyle(L"SettingsThemePreviewStyle"));

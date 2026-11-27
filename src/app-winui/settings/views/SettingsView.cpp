@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "settings/views/SettingsView.h"
-#include "settings/views/SettingsViewSupport.h"
+#include "settings/views/SettingsCards.h"
 #include "localization/Localization.h"
 
 namespace winrt::Folia
@@ -23,6 +23,7 @@ namespace winrt::Folia
             {Page::Shortcuts, L"Shortcuts", L"ShortcutsDescription", L"\xE765"},
             {Page::Latex, L"LatexCommands", L"LatexCommandsDescription", L"\xE943"},
             {Page::Completion, L"AICompletion", L"AICompletionDescription", L"\xE8D4"},
+            {Page::Providers, L"ChatProviders", L"ChatProvidersDescription", L"\xE774"},
             {Page::Licenses, L"Licenses", L"LicensesDescription", L"\xE8A5"},
             {Page::About, L"About", L"AppDescription", L"\xE946"},
         };
@@ -73,9 +74,40 @@ namespace winrt::Folia
         separator.Glyph(L"\xE76C");
         separator.Style(settings_ui::ResourceStyle(L"SettingsNavigationArrowStyle"));
         crumbs.Children().Append(separator);
-        pageCrumb_.Style(settings_ui::ResourceStyle(L"SettingsCategoryTitleStyle"));
+        pageCrumb_.Style(settings_ui::ResourceStyle(L"SettingsCardTitleStyle"));
         pageCrumb_.VerticalAlignment(VerticalAlignment::Center);
         crumbs.Children().Append(pageCrumb_);
+        subpageCrumbs_.Orientation(Orientation::Horizontal);
+        subpageCrumbs_.Style(settings_ui::ResourceStyle(L"SettingsSubpageBreadcrumbStyle"));
+        categoryCrumb_.Style(settings_ui::ResourceStyle(L"SettingsHomeButtonStyle"));
+        navigationClicks_.push_back(categoryCrumb_.Click(winrt::auto_revoke, [this](auto const&, auto const&) {
+            auto back = subpageBack_;
+            if (back) back();
+        }));
+        subpageCrumbs_.Children().Append(categoryCrumb_);
+        FontIcon next;
+        next.Glyph(L"\xE76C");
+        next.Style(settings_ui::ResourceStyle(L"SettingsNavigationArrowStyle"));
+        subpageCrumbs_.Children().Append(next);
+        subpageTitle_.Style(settings_ui::ResourceStyle(L"SettingsSubpageTitleStyle"));
+        subpageCrumbs_.Children().Append(subpageTitle_);
+        childCrumbs_.Orientation(Orientation::Horizontal);
+        childCrumbs_.Style(settings_ui::ResourceStyle(L"SettingsSubpageBreadcrumbStyle"));
+        parentCrumb_.Style(settings_ui::ResourceStyle(L"SettingsHomeButtonStyle"));
+        navigationClicks_.push_back(parentCrumb_.Click(winrt::auto_revoke, [this](auto const&, auto const&) {
+            auto back = parentBack_;
+            if (back) back();
+        }));
+        childCrumbs_.Children().Append(parentCrumb_);
+        FontIcon childSeparator;
+        childSeparator.Glyph(L"\xE76C");
+        childSeparator.Style(settings_ui::ResourceStyle(L"SettingsNavigationArrowStyle"));
+        childCrumbs_.Children().Append(childSeparator);
+        childTitle_.Style(settings_ui::ResourceStyle(L"SettingsSubpageTitleStyle"));
+        childCrumbs_.Children().Append(childTitle_);
+        subpageCrumbs_.Children().Append(childCrumbs_);
+        crumbs.Children().Append(subpageCrumbs_);
+        SetSubpage();
         pageNavigation_ = settings_ui::PageViewport(crumbs);
         root.Children().InsertAt(0, pageNavigation_);
 
@@ -94,56 +126,26 @@ namespace winrt::Folia
     {
         auto panel = settings_ui::PagePanel();
         panel.Children().Append(settings_ui::PageHeading(Localize(L"Settings")));
-        StackPanel cards;
-        cards.Style(settings_ui::ResourceStyle(L"SettingsCategoryListStyle"));
+        using namespace settings_ui;
+        auto categoriesList = cards::List();
         for (auto const& category : categories) {
-            Button card;
+            auto card = cards::Link({Localize(category.title), Localize(category.description), cards::Icon(category.icon)});
             card.Name(L"SettingsCategory" + hstring(category.title));
-            card.Style(settings_ui::ResourceStyle(L"SettingsCategoryButtonStyle"));
-            Grid row;
-            row.Style(settings_ui::ResourceStyle(L"SettingsCategoryRowStyle"));
-            ColumnDefinition iconColumn, labelColumn, arrowColumn;
-            iconColumn.Width(GridLengthHelper::Auto());
-            arrowColumn.Width(GridLengthHelper::Auto());
-            row.ColumnDefinitions().Append(iconColumn);
-            row.ColumnDefinitions().Append(labelColumn);
-            row.ColumnDefinitions().Append(arrowColumn);
-
-            FontIcon icon, arrow;
-            icon.Glyph(category.icon);
-            icon.Style(settings_ui::ResourceStyle(L"SettingsCategoryIconStyle"));
-            arrow.Glyph(L"\xE76C");
-            arrow.Style(settings_ui::ResourceStyle(L"SettingsNavigationArrowStyle"));
-            auto label = Localize(category.title);
-            auto description = Localize(category.description);
-            StackPanel copy;
-            copy.Spacing(3);
-            auto title = settings_ui::Text(label);
-            title.Style(settings_ui::ResourceStyle(L"SettingsCategoryTitleStyle"));
-            copy.Children().Append(title);
-            copy.Children().Append(settings_ui::Hint(description));
-            Grid::SetColumn(copy, 1);
-            Grid::SetColumn(arrow, 2);
-            row.Children().Append(icon);
-            row.Children().Append(copy);
-            row.Children().Append(arrow);
-            card.Content(row);
-            Automation::AutomationProperties::SetName(card, label);
-            Automation::AutomationProperties::SetHelpText(card, description);
             navigationClicks_.push_back(card.Click(winrt::auto_revoke, [this, page = category.page](auto const&, auto const&) {
                 Navigate(page);
                 Focus();
             }));
             categoryButtons_.emplace_back(category.page, card);
-            cards.Children().Append(card);
+            categoriesList.Children().Append(card);
         }
-        panel.Children().Append(cards);
+        panel.Children().Append(categoriesList);
         return settings_ui::PageScroll(panel);
     }
 
     void SettingsView::Navigate(Page page)
     {
         if (pageHost_.Content() && page == currentPage_) return;
+        SetSubpage();
         if (page != Page::Shortcuts) CancelShortcutCapture();
         switch (page) {
         case Page::Home: pageHost_.Content(homePage_); break;
@@ -152,6 +154,9 @@ namespace winrt::Folia
         case Page::Completion:
             completionPage_ = BuildCompletionPage();
             pageHost_.Content(completionPage_);
+            break;
+        case Page::Providers:
+            pageHost_.Content(BuildProvidersPage());
             break;
         case Page::Latex:
             if (!latexPage_) latexPage_ = BuildLatexPage();
@@ -177,6 +182,28 @@ namespace winrt::Folia
         pageNavigation_.Visibility(page == Page::Home ? Visibility::Collapsed : Visibility::Visible);
         if (auto category = std::ranges::find(categories, page, &Category::page); category != std::end(categories))
             pageCrumb_.Text(Localize(category->title));
+    }
+
+    void SettingsView::SetSubpage(hstring const& title, std::function<void()> back,
+        hstring const& child, std::function<void()> parent)
+    {
+        subpageBack_ = std::move(back);
+        auto expanded = static_cast<bool>(subpageBack_);
+        pageCrumb_.Visibility(expanded ? Visibility::Collapsed : Visibility::Visible);
+        subpageCrumbs_.Visibility(expanded ? Visibility::Visible : Visibility::Collapsed);
+        parentBack_ = std::move(parent);
+        auto nested = static_cast<bool>(parentBack_);
+        subpageTitle_.Visibility(nested ? Visibility::Collapsed : Visibility::Visible);
+        subpageTitle_.Text(title);
+        childCrumbs_.Visibility(nested ? Visibility::Visible : Visibility::Collapsed);
+        childTitle_.Text(child);
+        if (nested) {
+            auto label = settings_ui::Text(title);
+            label.Style(settings_ui::ResourceStyle(L"SettingsSubpageTitleStyle"));
+            parentCrumb_.Content(label);
+            Automation::AutomationProperties::SetName(parentCrumb_, title);
+        }
+        if (expanded) categoryCrumb_.Content(box_value(pageCrumb_.Text()));
     }
 
     void SettingsView::Focus()

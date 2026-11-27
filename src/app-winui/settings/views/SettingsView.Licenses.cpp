@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "settings/views/SettingsView.h"
-#include "settings/views/SettingsViewSupport.h"
+#include "settings/views/SettingsCards.h"
 #include "localization/Localization.h"
 #include "storage/AssetPaths.h"
 #include <winrt/Microsoft.UI.Text.h>
@@ -18,6 +18,7 @@ namespace winrt::Folia
 
     UIElement SettingsView::BuildLicensesPage()
     {
+        using namespace settings_ui;
         Grid page;
         page.Style(settings_ui::ResourceStyle(L"SettingsGridPageStyle"));
 
@@ -34,8 +35,7 @@ namespace winrt::Folia
         page.Children().Append(header);
 
         licenseSelector_ = settings_ui::Choice();
-        licenseSelector_.Header(box_value(Localize(L"LicenseDocument")));
-        licenseSelector_.Style(settings_ui::ResourceStyle(L"SettingsComboBoxStyle"));
+        cards::ChoiceStyle(licenseSelector_);
         licenseSelector_.Items().Append(box_value(Localize(L"FoliaLicense")));
         licenseSelector_.Items().Append(box_value(Localize(L"ThirdPartyNotices")));
         licenseSelector_.SelectedIndex(0);
@@ -43,8 +43,10 @@ namespace winrt::Folia
         {
             LoadSelectedLicense();
         });
-        Grid::SetRow(licenseSelector_, 1);
-        page.Children().Append(licenseSelector_);
+        auto selector = cards::Setting(
+            {Localize(L"LicenseDocument"), {}, cards::Icon(WorkspaceIcon::Document)}, licenseSelector_, cards::Placement::Wrap);
+        Grid::SetRow(selector, 1);
+        page.Children().Append(selector);
 
         // Present the notice as a document in both XAML and UI Automation.
         licenseText_.Document().UndoLimit(0);
@@ -60,6 +62,7 @@ namespace winrt::Folia
 
     UIElement SettingsView::BuildAboutPage()
     {
+        using namespace settings_ui;
         auto panel = PagePanel();
         panel.Children().Append(PageHeading(Localize(L"AboutApp")));
 
@@ -91,38 +94,13 @@ namespace winrt::Folia
         identity.Children().Append(copy);
         panel.Children().Append(identity);
 
-        Grid openSource;
-        openSource.ColumnSpacing(16);
-        ColumnDefinition openSourceCopyColumn;
-        openSourceCopyColumn.Width(GridLengthHelper::FromValueAndType(
-            1, GridUnitType::Star));
-        ColumnDefinition openSourceLinkColumn;
-        openSourceLinkColumn.Width(GridLengthHelper::Auto());
-        openSource.ColumnDefinitions().Append(openSourceCopyColumn);
-        openSource.ColumnDefinitions().Append(openSourceLinkColumn);
-
-        StackPanel openSourceCopy;
-        openSourceCopy.Spacing(5);
-        auto openSourceHeading = settings_ui::SectionHeading(Localize(L"OpenSourceProject"));
-        openSourceCopy.Children().Append(openSourceHeading);
-        openSourceCopy.Children().Append(settings_ui::Hint(Localize(L"OpenSourceDescription")));
-        openSource.Children().Append(openSourceCopy);
-
         HyperlinkButton repository;
         repository.Content(box_value(L"water2004/Folia  ↗"));
         repository.NavigateUri(
             winrt::Windows::Foundation::Uri(L"https://github.com/water2004/Folia"));
-        repository.VerticalAlignment(VerticalAlignment::Center);
-        Grid::SetColumn(repository, 1);
-        openSource.Children().Append(repository);
-        panel.Children().Append(openSource);
-
-        StackPanel technology;
-        technology.Spacing(8);
-        auto heading = settings_ui::SectionHeading(Localize(L"BuiltForWindows"));
-        technology.Children().Append(heading);
-        technology.Children().Append(settings_ui::Hint(Localize(L"TechnologyDescription")));
-        panel.Children().Append(technology);
+        panel.Children().Append(cards::Setting(
+            {Localize(L"OpenSourceProject"), Localize(L"OpenSourceDescription"), cards::Icon(L"\xE774")},
+            repository, cards::Placement::Wrap));
 
         return settings_ui::PageScroll(panel);
     }

@@ -16,7 +16,6 @@ namespace winrt::Folia::settings_ui
             if (IsDropDownOpen()) Controls::ComboBoxT<ChoiceBox>::OnPointerWheelChanged(args);
         }
     };
-    inline Controls::ComboBox Choice() { return winrt::make<ChoiceBox>().as<Controls::ComboBox>(); }
 
     inline constexpr std::array<std::string_view, 3> LanguageIds{
         "system", "en-US", "zh-CN"};
@@ -45,9 +44,37 @@ namespace winrt::Folia::settings_ui
         return Xaml::Application::Current().Resources().Lookup(winrt::box_value(key)).as<Xaml::Style>();
     }
 
+    inline Controls::ComboBox Choice()
+    {
+        auto control = winrt::make<ChoiceBox>().as<Controls::ComboBox>();
+        control.Style(ResourceStyle(L"SettingsComboBoxStyle"));
+        return control;
+    }
+
     inline double Metric(wchar_t const* key)
     {
         return winrt::unbox_value<double>(Xaml::Application::Current().Resources().Lookup(winrt::box_value(key)));
+    }
+
+    enum class TextInput { Text, Number };
+
+    inline void TextField(Controls::TextBox const& field, hstring const& label, TextInput input = TextInput::Text)
+    {
+        field.Style(ResourceStyle(L"SettingsTextBoxStyle"));
+        if (!label.empty()) field.Header(box_value(label));
+        if (input == TextInput::Number) {
+            Xaml::Input::InputScope scope;
+            Xaml::Input::InputScopeName name;
+            name.NameValue(Xaml::Input::InputScopeNameValue::Number);
+            scope.Names().Append(name);
+            field.InputScope(scope);
+        }
+    }
+
+    inline void TextField(Controls::PasswordBox const& field, hstring const& label)
+    {
+        field.Style(ResourceStyle(L"SettingsPasswordBoxStyle"));
+        field.Header(box_value(label));
     }
 
     inline Controls::TextBlock Text(winrt::hstring const& value, double size = 0.0)
@@ -85,6 +112,29 @@ namespace winrt::Folia::settings_ui
         Controls::StackPanel panel;
         panel.Style(ResourceStyle(L"SettingsSectionPanelStyle"));
         return panel;
+    }
+
+    inline Controls::StackPanel ButtonRow()
+    {
+        Controls::StackPanel panel;
+        panel.Style(ResourceStyle(L"SettingsButtonRowStyle"));
+        return panel;
+    }
+
+    inline Controls::Button SecondaryAction(hstring const& label)
+    {
+        Controls::Button button;
+        button.Style(ResourceStyle(L"SettingsSecondaryButtonStyle"));
+        button.Content(box_value(label));
+        return button;
+    }
+
+    inline Controls::Border ListRow(Xaml::UIElement const& content)
+    {
+        Controls::Border row;
+        row.Style(ResourceStyle(L"SettingsListSeparatorStyle"));
+        row.Child(content);
+        return row;
     }
 
     inline Controls::StackPanel PageHeader(winrt::hstring const& title, winrt::hstring const& description = {})
@@ -164,51 +214,11 @@ namespace winrt::Folia::settings_ui
     }
 
 
-    inline Controls::Border SectionCard(Xaml::UIElement const& child)
-    {
-        Controls::Border card;
-        card.Style(ResourceStyle(L"SettingsSectionCardStyle"));
-        card.Child(child);
-        return card;
-    }
-
-    inline Controls::Grid OptionRow(winrt::hstring const& title, Xaml::FrameworkElement const& control,
-        winrt::hstring const& description = {})
-    {
-        Controls::Grid row;
-        row.Style(ResourceStyle(L"SettingsOptionRowStyle"));
-        Controls::ColumnDefinition labels, value;
-        labels.Width(Xaml::GridLengthHelper::FromValueAndType(3, Xaml::GridUnitType::Star));
-        value.Width(Xaml::GridLengthHelper::FromValueAndType(2, Xaml::GridUnitType::Star));
-        value.MaxWidth(Metric(L"SettingsOptionControlWidth"));
-        row.ColumnDefinitions().Append(labels);
-        row.ColumnDefinitions().Append(value);
-        Controls::StackPanel copy;
-        copy.VerticalAlignment(Xaml::VerticalAlignment::Center);
-        copy.Children().Append(Text(title));
-        if (!description.empty()) copy.Children().Append(Hint(description));
-        row.Children().Append(copy);
-        Controls::Grid::SetColumn(control, 1);
-        control.VerticalAlignment(Xaml::VerticalAlignment::Center);
-        Xaml::Automation::AutomationProperties::SetName(control, title);
-        row.Children().Append(control);
-        return row;
-    }
-
-    inline Controls::Expander OptionGroup(winrt::hstring const& title, Xaml::UIElement const& options)
-    {
-        Controls::Expander group;
-        group.Style(ResourceStyle(L"SettingsOptionGroupStyle"));
-        group.Header(Text(title));
-        group.Content(options);
-        group.IsExpanded(true);
-        return group;
-    }
-
     inline Controls::StackPanel PagePanel()
     {
         Controls::StackPanel panel;
         panel.Style(ResourceStyle(L"SettingsPageStyle"));
         return panel;
     }
+
 }

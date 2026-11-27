@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "settings/views/SettingsView.h"
-#include "settings/views/SettingsViewSupport.h"
+#include "settings/views/SettingsCards.h"
 #include "localization/Localization.h"
 #include "windows/media/mermaid/MermaidRenderer.h"
 
@@ -8,21 +8,19 @@ namespace winrt::Folia
 {
     using namespace Microsoft::UI::Xaml;
     using namespace Microsoft::UI::Xaml::Controls;
-    using settings_ui::Brush;
     using settings_ui::LanguageIds;
     using settings_ui::LanguageIndex;
-    using settings_ui::PageHeading;
     using settings_ui::PagePanel;
-    using settings_ui::Text;
 
     UIElement SettingsView::BuildGeneralPage()
     {
+        using namespace settings_ui;
         auto panel = PagePanel();
         panel.Style(settings_ui::ResourceStyle(L"SettingsOptionPageStyle"));
         panel.Children().Append(settings_ui::PageHeader(Localize(L"General"), Localize(L"GeneralDescription")));
 
         languageCombo_ = settings_ui::Choice();
-        languageCombo_.Style(settings_ui::ResourceStyle(L"SettingsComboBoxStyle"));
+        cards::ChoiceStyle(languageCombo_);
         languageCombo_.Items().Append(box_value(Localize(L"FollowWindowsLanguage")));
         languageCombo_.Items().Append(box_value(Localize(L"EnglishLanguage")));
         languageCombo_.Items().Append(box_value(Localize(L"SimplifiedChineseLanguage")));
@@ -35,45 +33,49 @@ namespace winrt::Folia
             settings_.languageId = LanguageIds[static_cast<std::size_t>(index)];
             ApplyLanguageSetting();
         });
-        panel.Children().Append(settings_ui::SectionCard(settings_ui::OptionRow(Localize(L"ApplicationLanguage"),
-            languageCombo_, Localize(L"LanguageRestartDescription"))));
+        panel.Children().Append(cards::Setting(
+            {Localize(L"ApplicationLanguage"), Localize(L"LanguageRestartDescription"), cards::Icon(L"\xE8C1")},
+            languageCombo_, cards::Placement::Wrap));
 
-        StackPanel appearance;
-        auto materialChoice = [&](wchar_t const* label, bool allowInherit) {
+        auto appearance = cards::List();
+        auto materialChoice = [&](wchar_t const* label, wchar_t const* glyph, bool allowInherit) {
             auto combo = settings_ui::Choice();
-            combo.Style(settings_ui::ResourceStyle(L"SettingsComboBoxStyle"));
+            cards::ChoiceStyle(combo);
             if (allowInherit) combo.Items().Append(box_value(Localize(L"MaterialFollowWindow")));
             for (auto const& choice : windowMaterials) combo.Items().Append(box_value(Localize(choice.label)));
-            appearance.Children().Append(settings_ui::OptionRow(Localize(label), combo));
+            appearance.Children().Append(cards::Setting({Localize(label), {}, cards::Icon(glyph)}, combo, cards::Placement::Wrap));
             return combo;
         };
-        materialCombo_ = materialChoice(L"WindowMaterial", false);
-        readingMaterialCombo_ = materialChoice(L"ReadingMaterial", true);
-        autoHideTools_.HorizontalAlignment(HorizontalAlignment::Right);
-        appearance.Children().Append(settings_ui::OptionRow(Localize(L"AutoHideDocumentTools"), autoHideTools_));
+        materialCombo_ = materialChoice(L"WindowMaterial", L"\xE737", false);
+        readingMaterialCombo_ = materialChoice(L"ReadingMaterial", L"\xE8A5", true);
+        autoHideTools_ = cards::Switch();
+        appearance.Children().Append(cards::Setting(
+            {Localize(L"AutoHideDocumentTools"), {}, cards::Icon(L"\xE712")}, autoHideTools_));
         UpdateWorkspaceAppearance(settings_.appearance);
         autoHideTools_.Toggled([this](auto const&, auto const&) { ApplyAppearanceSetting(); });
         auto changed = [this](auto const&, auto const&) { ApplyAppearanceSetting(); };
         materialCombo_.SelectionChanged(changed);
         readingMaterialCombo_.SelectionChanged(changed);
-        panel.Children().Append(settings_ui::OptionGroup(Localize(L"WindowAppearance"), appearance));
+        panel.Children().Append(cards::Section(Localize(L"WindowAppearance"), appearance));
 
-        StackPanel mediaSection;
+        auto mediaSection = cards::List();
         imageWidthCombo_ = settings_ui::Choice();
-        imageWidthCombo_.Style(settings_ui::ResourceStyle(L"SettingsComboBoxStyle"));
+        cards::ChoiceStyle(imageWidthCombo_);
         for (auto width : MediaDisplaySettings::imageWidths)
             imageWidthCombo_.Items().Append(box_value(hstring(std::to_wstring(width) + L"%")));
-        mediaSection.Children().Append(settings_ui::OptionRow(Localize(L"ImageMaximumWidth"), imageWidthCombo_,
-            Localize(L"ImageMaximumWidthDescription")));
+        mediaSection.Children().Append(cards::Setting(
+            {Localize(L"ImageMaximumWidth"), Localize(L"ImageMaximumWidthDescription"), cards::Icon(WorkspaceIcon::Image)},
+            imageWidthCombo_, cards::Placement::Wrap));
 
         mermaidThemeCombo_ = settings_ui::Choice();
-        mermaidThemeCombo_.Style(settings_ui::ResourceStyle(L"SettingsComboBoxStyle"));
+        cards::ChoiceStyle(mermaidThemeCombo_);
         mermaidThemeCombo_.Items().Append(box_value(Localize(L"MermaidFollowFolia")));
         for (auto const& name : folia::platform::MermaidRenderer::ThemeNames())
             mermaidThemeCombo_.Items().Append(box_value(winrt::to_hstring(name)));
-        mediaSection.Children().Append(settings_ui::OptionRow(Localize(L"MermaidTheme"), mermaidThemeCombo_,
-            Localize(L"MermaidThemeDescription")));
-        panel.Children().Append(settings_ui::OptionGroup(Localize(L"DocumentMedia"), mediaSection));
+        mediaSection.Children().Append(cards::Setting(
+            {Localize(L"MermaidTheme"), Localize(L"MermaidThemeDescription"), cards::Icon(L"\xE9D9")},
+            mermaidThemeCombo_, cards::Placement::Wrap));
+        panel.Children().Append(cards::Section(Localize(L"DocumentMedia"), mediaSection));
 
         RefreshMediaControls();
         imageWidthCombo_.SelectionChanged([this](auto const&, SelectionChangedEventArgs const&)

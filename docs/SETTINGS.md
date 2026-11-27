@@ -26,29 +26,49 @@ LaTeX command suggestions have an independent setting.
 
 ## AI input prediction
 
-The AI page configures an independent base URL, protocol, model and Windows-stored
-API key. It also exposes context size in KB, output tokens, prompt eagerness and
-reasoning effort. Fetch models populates the model picker, and users can also
-type a model ID directly. Reasoning candidates come only from capabilities advertised
-by the selected protocol; absent capabilities show an explicit message, with no
-preset or inferred levels. The effort field also accepts a manually entered value
-when metadata is absent or incomplete. Blank means service default. Discovery follows the configured base URL without
-provider-specific routing. See [inline completion](inline-completion.md)
-for request budgets, status indicators, cancellation, caching and acceptance.
+**AI providers** lists saved providers by name and domain. Select a provider to
+edit its connection and models, or add a provider. A provider can use a local PNG
+icon or a monogram derived from its name.
+
+In the provider editor, **Test connection** checks access to the model list
+and reports the elapsed time. The **Connection options** section controls hosted
+search and full request URL mode. Enable full request URL mode to edit the
+optional model list URL below the service address and give a custom endpoint
+a separate discovery route.
+The API key is stored in Windows Credential Manager.
+
+When upgrading from settings that stored a connection and model under input
+prediction, Folia imports that selection into **AI providers** on startup.
+It keeps the configured protocol and reasoning level and copies any saved key
+within Windows Credential Manager. If the same connection and model are
+already present, Folia links to that model and keeps its configuration.
+
+Adding or opening a model goes to its settings page. Fetch the upstream list
+there and select a model to fill the fields the upstream explicitly supplies.
+The request ID, display name, input and output token limits, and image input
+support can also be set directly. The image input switch starts off unless the
+selected upstream model explicitly advertises support. Select supported reasoning levels using
+the protocol's preset checkboxes. The model's hosted search
+capability is independent of the provider's permission to use it. Applying
+changes returns to the provider draft. **Save provider** commits its connection
+and models together. The switch beside each model controls whether it is
+available in chat and input prediction. A disabled model remains editable.
+
+**AI input prediction** selects a saved model and, when available, one of that
+model's reasoning levels. Context size, output tokens, suggestion frequency,
+and explicit caching are independent prediction settings. See
+[inline completion](inline-completion.md) and [agent chat](agent-chat.md).
 
 ## Persistence
 
-Settings use schema version 5 and are saved atomically to `Assets/settings.json`:
+Settings use schema version 6 and are saved atomically to `Assets/settings.json`.
 
 ```json
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "completion": {
     "enabled": false,
-    "baseUrl": "",
-    "model": "",
-    "protocol": 0,
-    "reasoningEffort": "",
+    "modelId": "",
     "eagerness": 1,
     "contextKB": 7,
     "outputTokens": 128
