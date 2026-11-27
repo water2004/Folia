@@ -150,7 +150,9 @@
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="app.manifest" />
-    <ResourceCompile Include="Folia.rc" />
+    <ResourceCompile Include="Folia.rc">
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -715,7 +717,9 @@
     <ClCompile Include="settings\views\SettingsView.Shortcuts.cpp" />
     <ClCompile Include="settings\views\SettingsView.Latex.cpp" />
     <ClCompile Include="settings\views\SettingsView.Themes.cpp" />
-    <ClCompile Include="settings\views\SettingsView.Licenses.cpp" />
+    <ClCompile Include="settings\views\SettingsView.Licenses.cpp">
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="storage\AssetPaths.cpp">
       <PreprocessorDefinitions>FOLIA_ASSETS_DIRECTORY=LR&quot;FOLIA($(FoliaAssetsDirectory))FOLIA&quot;;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -1038,6 +1042,17 @@
     <ClCompile Include="editor\rendering\EditorCompletionPreview.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Target Name="GenerateFoliaVersionHeader" BeforeTargets="ClCompile;ResourceCompile">
+    <XmlPeek XmlInputPath="$(ProjectDir)Package.appxmanifest" Query="/*[local-name()='Package']/*[local-name()='Identity']/@Version">
+      <Output TaskParameter="Result" PropertyName="FoliaFileVersion" />
+    </XmlPeek>
+    <PropertyGroup>
+      <FoliaProductVersion>$([System.Version]::Parse('$(FoliaFileVersion)').ToString(3))</FoliaProductVersion>
+    </PropertyGroup>
+    <MakeDir Directories="$(IntDir)" />
+    <WriteLinesToFile File="$(IntDir)FoliaVersion.g.h" Overwrite="true" WriteOnlyWhenDifferent="true"
+                      Lines="#define FOLIA_VERSION_TUPLE $(FoliaFileVersion.Replace('.', ','));#define FOLIA_FILE_VERSION &quot;$(FoliaFileVersion)&quot;;#define FOLIA_PRODUCT_VERSION &quot;$(FoliaProductVersion)&quot;" />
+  </Target>
   <Target Name="CopyConfiguredFoliaAssets" AfterTargets="Build" Condition="'$(FoliaAssetsDirectory)'!='' and '$(FoliaDeployAssets)'=='true'">
     <ItemGroup>
       <FoliaDeployableAsset Include="$(ProjectDir)Assets\**\*"

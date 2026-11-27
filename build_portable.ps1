@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [ValidatePattern('^\d+\.\d+\.\d+$')]
-    [string]$Version = '0.8.1',
+    [string]$Version = (& (Join-Path $PSScriptRoot 'tools/Get-FoliaVersion.ps1')),
 
     [ValidateSet('x64')]
     [string]$Platform = 'x64',
@@ -74,4 +74,5 @@ finally {
     if (Test-Path -LiteralPath $Partial) { Remove-Item -LiteralPath $Partial -Force }
 }
 
+& (Join-Path $PSScriptRoot 'tools/Write-ReleaseChecksum.ps1') -Path $Archive
 Write-Host "Folia portable ZIP: $Archive"

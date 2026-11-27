@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [ValidatePattern('^\d+\.\d+\.\d+$')]
-    [string]$Version = '0.8.1',
+    [string]$Version = (& (Join-Path $PSScriptRoot 'tools/Get-FoliaVersion.ps1')),
 
     [ValidateSet('x64')]
     [string]$Platform = 'x64',
@@ -113,4 +113,5 @@ if (-not (Test-Path -LiteralPath $ExpectedMsi -PathType Leaf)) {
 }
 
 $size = (Get-Item -LiteralPath $ExpectedMsi).Length
+& (Join-Path $Root 'tools/Write-ReleaseChecksum.ps1') -Path $ExpectedMsi
 Write-Host "Folia MSI: $ExpectedMsi ($([Math]::Round($size / 1MB, 1)) MiB)"

@@ -13,8 +13,12 @@ set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "451f2fe2-a8a2-47c3-bc32-94786d8fc91b")
 
 cmake_minimum_required(VERSION 4.3)
 
+set(_manifest "${CMAKE_CURRENT_SOURCE_DIR}/src/app-winui/Package.appxmanifest")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_manifest}")
+file(STRINGS "${_manifest}" _identity_version REGEX "^[ \t]+Version=\"[0-9]+\\.[0-9]+\\.[0-9]+\\.0\"")
+string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" _product_version "${_identity_version}")
 project(folia
-    VERSION 0.8.1
+    VERSION "${_product_version}"
     LANGUAGES C CXX
     DESCRIPTION "Folia: native self-rendered WYSIWYG Markdown editor (C++)")
 
