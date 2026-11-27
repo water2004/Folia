@@ -13,14 +13,13 @@ namespace winrt::Folia::chat {
 
     private:
         using Geometry = Microsoft::UI::Composition::CompositionRoundedRectangleGeometry;
-        using Shape = Microsoft::UI::Composition::CompositionSpriteShape;
         using Paint = Microsoft::UI::Composition::CompositionColorBrush;
-        Microsoft::UI::Composition::ShapeVisual face_{nullptr};
+        Microsoft::UI::Composition::ContainerVisual face_{nullptr};
+        Microsoft::UI::Composition::ShapeVisual filledLayer_{nullptr}, thumbLayer_{nullptr};
         Microsoft::UI::Composition::CompositionVisualSurface artwork_{nullptr};
         Microsoft::UI::Composition::CompositionPropertySet motion_{nullptr};
-        Geometry rail_{nullptr}, fill_{nullptr};
-        Shape active_{nullptr}, thumb_{nullptr};
-        Microsoft::UI::Composition::CompositionContainerShape ticks_{nullptr};
+        Geometry rail_{nullptr}, filledRail_{nullptr};
+        Microsoft::UI::Composition::CompositionContainerShape ticks_{nullptr}, filledTicks_{nullptr};
         Paint accent_{nullptr}, surface_{nullptr}, border_{nullptr}, track_{nullptr}, muted_{nullptr}, onAccent_{nullptr};
     };
 }

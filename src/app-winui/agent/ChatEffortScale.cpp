@@ -8,9 +8,15 @@ namespace winrt::Folia::chat {
     using namespace Microsoft::UI::Composition;
     using Microsoft::UI::Xaml::Hosting::ElementCompositionPreview;
 
+    namespace {
+        constexpr float ThumbRadius = 12.f;
+        constexpr float TrackRadius = 10.f;
+        constexpr float CenterY = 13.f;
+    }
+
     void ChatEffortScale::Attach(Microsoft::UI::Xaml::FrameworkElement const& host) {
         auto compositor = ElementCompositionPreview::GetElementVisual(host).Compositor();
-        face_ = compositor.CreateShapeVisual();
+        face_ = compositor.CreateContainerVisual();
         // Flatten the vector artwork before the XAML flyout applies its opening opacity.
         auto drawing = compositor.CreateContainerVisual();
         drawing.Children().InsertAtTop(face_);
@@ -28,41 +34,58 @@ namespace winrt::Folia::chat {
         track_ = compositor.CreateColorBrush();
         muted_ = compositor.CreateColorBrush();
         onAccent_ = compositor.CreateColorBrush();
-        auto bar = [&](Geometry& geometry, Paint const& paint) {
+        auto addLayer = [&] {
+            auto layer = compositor.CreateShapeVisual();
+            layer.RelativeSizeAdjustment({1, 1});
+            face_.Children().InsertAtTop(layer);
+            return layer;
+        };
+        auto addTrack = [&](ShapeVisual const& layer, Geometry& geometry, Paint const& paint, float inset) {
             geometry = compositor.CreateRoundedRectangleGeometry();
-            geometry.CornerRadius({10, 10});
+            const auto radius = TrackRadius - inset;
+            geometry.CornerRadius({radius, radius});
+            geometry.Offset({inset, CenterY - radius});
             auto shape = compositor.CreateSpriteShape(geometry);
             shape.FillBrush(paint);
-            face_.Shapes().Append(shape);
+            layer.Shapes().Append(shape);
             return shape;
         };
-        auto base = bar(rail_, track_);
-        rail_.Offset({.5f, 3.5f});
-        base.StrokeBrush(border_);
-        base.StrokeThickness(1);
-        active_ = bar(fill_, accent_);
-        fill_.Offset({0, 3});
+        auto base = addLayer();
+        auto outline = addTrack(base, rail_, track_, .5f);
+        outline.StrokeBrush(border_);
+        outline.StrokeThickness(1);
         ticks_ = compositor.CreateContainerShape();
-        face_.Shapes().Append(ticks_);
-        auto circle = compositor.CreateEllipseGeometry();
-        circle.Center({12, 13});
-        circle.Radius({11.5f, 11.5f});
-        thumb_ = compositor.CreateSpriteShape(circle);
-        thumb_.FillBrush(surface_);
-        thumb_.StrokeBrush(border_);
-        thumb_.StrokeThickness(1);
-        face_.Shapes().Append(thumb_);
+        base.Shapes().Append(ticks_);
 
+        filledLayer_ = addLayer();
+        addTrack(filledLayer_, filledRail_, accent_, 0);
+        filledTicks_ = compositor.CreateContainerShape();
+        filledLayer_.Shapes().Append(filledTicks_);
+        auto fillClip = compositor.CreateInsetClip();
+        filledLayer_.Clip(fillClip);
+
+        thumbLayer_ = addLayer();
+        auto circle = compositor.CreateEllipseGeometry();
+        circle.Center({0, CenterY});
+        circle.Radius({ThumbRadius - .5f, ThumbRadius - .5f});
+        auto thumb = compositor.CreateSpriteShape(circle);
+        thumb.FillBrush(surface_);
+        thumb.StrokeBrush(border_);
+        thumb.StrokeThickness(1);
+        thumbLayer_.Shapes().Append(thumb);
+
+        // Cut the full rounded track at the thumb center. The moving edge stays
+        // under the thumb, even at low stops where a rounded moving cap would show.
         motion_ = compositor.CreatePropertySet();
-        motion_.InsertScalar(L"Position", 0);
-        motion_.InsertScalar(L"Travel", 0);
+        motion_.InsertScalar(L"ThumbCenter", ThumbRadius);
+        motion_.InsertScalar(L"TrackWidth", 2 * ThumbRadius);
         auto bind = [&](auto const& object, wchar_t const* property, wchar_t const* formula) {
             auto expression = compositor.CreateExpressionAnimation(formula);
             expression.SetReferenceParameter(L"scale", motion_);
             object.StartAnimation(property, expression);
         };
-        bind(thumb_, L"Offset", L"Vector2(scale.Position * scale.Travel, 0)");
-        bind(fill_, L"Size", L"Vector2(scale.Position * (scale.Travel + 24), 20)");
+        bind(thumb, L"Offset", L"Vector2(scale.ThumbCenter, 0)");
+        bind(fillClip, L"RightInset", L"scale.TrackWidth - scale.ThumbCenter");
     }
 
     void ChatEffortScale::SetPalette(ChatPalette const& palette) {
@@ -82,7 +105,7 @@ namespace winrt::Folia::chat {
         const auto width = static_cast<float>(host.ActualWidth());
         const auto height = static_cast<float>(host.ActualHeight());
         auto root = host.XamlRoot();
-        if (!root || width < 24 || height <= 0 || !stops) return;
+        if (!root || width < 2 * ThumbRadius || height <= 0 || !stops) return;
         const auto density = static_cast<float>(root.RasterizationScale());
         const Windows::Foundation::Numerics::float2 pixels{std::ceil(width * density), std::ceil(height * density)};
         face_.Size({width, height});
@@ -90,36 +113,48 @@ namespace winrt::Folia::chat {
         artwork_.SourceVisual().Size(pixels);
         artwork_.SourceSize(pixels);
         auto compositor = face_.Compositor();
-        const auto travel = static_cast<float>(width - 24);
-        rail_.Size({static_cast<float>(width) - 1, 19});
-        const float position = stops == 1 ? .5f : static_cast<float>(selected.value_or(0)) / static_cast<float>(stops - 1);
-        motion_.InsertScalar(L"Travel", travel);
+        const auto travel = width - 2 * ThumbRadius;
+        const auto stopCenter = [&](std::size_t stop) {
+            const auto fraction = stops == 1 ? .5f : static_cast<float>(stop) / static_cast<float>(stops - 1);
+            return ThumbRadius + travel * fraction;
+        };
+
+        rail_.Size({width - 1, 2 * TrackRadius - 1});
+        filledRail_.Size({width, 2 * TrackRadius});
+        motion_.InsertScalar(L"TrackWidth", width);
+        const auto center = stopCenter(selected.value_or(0));
         if (animate && selected && Windows::UI::ViewManagement::UISettings().AnimationsEnabled()) {
             auto motion = compositor.CreateScalarKeyFrameAnimation();
             motion.InsertExpressionKeyFrame(0, L"this.StartingValue");
-            motion.InsertKeyFrame(1, position, compositor.CreateCubicBezierEasingFunction({.2f,.8f}, {.25f,1.f}));
+            motion.InsertKeyFrame(1, center, compositor.CreateCubicBezierEasingFunction({.2f, .8f}, {.25f, 1.f}));
             motion.Duration(std::chrono::milliseconds(140));
-            motion_.StartAnimation(L"Position", motion);
+            motion_.StartAnimation(L"ThumbCenter", motion);
         } else {
-            motion_.StopAnimation(L"Position");
-            motion_.InsertScalar(L"Position", position);
+            motion_.StopAnimation(L"ThumbCenter");
+            motion_.InsertScalar(L"ThumbCenter", center);
         }
-        thumb_.Scale(selected ? Windows::Foundation::Numerics::float2{1,1} : Windows::Foundation::Numerics::float2{0,0});
-        active_.FillBrush(selected ? accent_ : nullptr);
+        thumbLayer_.IsVisible(selected.has_value());
+        filledLayer_.IsVisible(selected.has_value());
+
         auto marks = ticks_.Shapes();
         if (marks.Size() != stops) {
             marks.Clear();
+            auto filledMarks = filledTicks_.Shapes();
+            filledMarks.Clear();
             for (std::size_t i = 0; i < stops; ++i) {
                 auto dot = compositor.CreateEllipseGeometry();
                 dot.Radius({1.5f, 1.5f});
-                marks.Append(compositor.CreateSpriteShape(dot));
+                auto mark = compositor.CreateSpriteShape(dot);
+                mark.FillBrush(muted_);
+                marks.Append(mark);
+                auto filledMark = compositor.CreateSpriteShape(dot);
+                filledMark.FillBrush(onAccent_);
+                filledMarks.Append(filledMark);
             }
         }
-        for (unsigned i = 0; i < stops; ++i) {
-            auto mark = marks.GetAt(i).as<CompositionSpriteShape>();
-            auto fraction = stops == 1 ? .5f : static_cast<float>(i) / static_cast<float>(stops - 1);
-            mark.Offset({12 + travel * fraction, 13});
-            mark.FillBrush(selected && i < *selected ? onAccent_ : muted_);
+        for (std::uint32_t i = 0; i < marks.Size(); ++i) {
+            auto dot = marks.GetAt(i).as<CompositionSpriteShape>().Geometry().as<CompositionEllipseGeometry>();
+            dot.Center({stopCenter(i), CenterY});
         }
     }
 }

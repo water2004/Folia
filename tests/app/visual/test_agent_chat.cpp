@@ -1008,16 +1008,22 @@ namespace {
                 expect(sample(face.ActualWidth() * .28, 8) == RGB(accent.r, accent.g, accent.b)) << "themed track color";
             }
             Access::ChatTheme(shell, originalTheme);
-            for (auto const& [level, filename] : std::array{std::pair{0., "effort-first.png"},
-                    std::pair{2., "effort-middle.png"}, std::pair{4., "effort-last.png"}}) {
+            for (auto const& [level, filename] : std::array{std::pair{0., "effort-first.png"}, std::pair{1., ""},
+                    std::pair{2., "effort-middle.png"}, std::pair{3., ""}, std::pair{4., "effort-last.png"}}) {
                 efforts.Value(level);
                 Capture(window, filename);
                 auto accent = originalTheme.colors.shell_accent;
-                auto painted = sample(face.ActualWidth() * .28, 8);
-                expect((painted == RGB(accent.r, accent.g, accent.b)) == (level > 0)) << "filled stop " << level;
                 const double center = 12 + (face.ActualWidth() - 24) * level / efforts.Maximum();
+                const auto trackX = level == 0 ? face.ActualWidth() * .28 : (center - 12) * .5;
+                auto painted = sample(trackX, 8);
+                expect((painted == RGB(accent.r, accent.g, accent.b)) == (level > 0)) << "filled stop " << level;
                 auto surface = originalTheme.colors.shell_layer_bg;
                 expect(sample(center, 13) == RGB(surface.r, surface.g, surface.b)) << "thumb color at stop " << level;
+                if (level > 0 && level < efforts.Maximum()) {
+                    auto fill = RGB(accent.r, accent.g, accent.b);
+                    expect(sample(center - 10, 4) == fill) << "fill reaches the leading edge of the thumb at stop " << level;
+                    expect(sample(center + 10, 4) != fill) << "fill stays behind the thumb at stop " << level;
+                }
             }
             // Half opacity reproduces the flyout's opening frame. Both halves
             // of the handle must still have the same color over a filled track.
