@@ -332,15 +332,16 @@ suite settings_style_tests = [] {
         SaveSettingsImage(fixture.root, "provider-model.png");
         InvokeAction(Action(fixture.page, Localize(L"ChatApplyModel")));
         Pump([&] { return Description(fixture.page, L"custom-model · none, high") != nullptr; });
-        expect(std::ranges::none_of(models::Models(), [&](auto const& model) { return model.provider == provider.id; }));
+        expect(std::ranges::none_of(models::AvailableModels(), [&](auto const& model) { return model.provider.id == provider.id; }));
         InvokeAction(Action(fixture.page, Localize(L"ChatSaveProvider")));
-        Pump([&] { return std::ranges::any_of(models::Models(), [&](auto const& model) { return model.provider == provider.id; }); });
-        auto configured = models::Models();
-        auto found = std::ranges::find(configured, provider.id, &models::ConfiguredModel::provider);
-        expect(found->upstream == "custom-model");
-        expect(found->effort == "none");
-        expect(found->ResolveEffort("high") == "high");
-        expect(found->ResolveEffort("unsupported") == "none");
+        Pump([&] { return std::ranges::any_of(models::AvailableModels(), [&](auto const& model) { return model.provider.id == provider.id; }); });
+        auto configured = models::AvailableModels();
+        auto found = std::ranges::find_if(configured, [&](auto const& choice) { return choice.provider.id == provider.id; });
+        if (!expect(found != configured.end())) return;
+        expect(found->model.upstream == "custom-model");
+        expect(found->model.effort == "none");
+        expect(found->model.ResolveEffort("high") == "high");
+        expect(found->model.ResolveEffort("unsupported") == "none");
         Pump([&] { return Action(fixture.page, L"Model settings fixture") != nullptr; });
         auto reopened = Action(fixture.page, L"Model settings fixture");
         SaveSettingsImage(fixture.root, "provider-list.png");
@@ -364,10 +365,10 @@ suite settings_style_tests = [] {
         toggle = Field<ToggleSwitch>(fixture.page, LocalizeFormat(L"ChatToggleModel", {L"Manual model"}));
         if (!expect(toggle && toggle.IsOn())) return;
         toggle.IsOn(false);
-        expect(models::Resolve(found->id).first.enabled);
+        expect(models::Resolve(found->model.id).model.enabled);
         InvokeAction(Action(fixture.page, Localize(L"ChatSaveProvider")));
         Pump([&] { return Action(fixture.page, L"Model settings fixture") != nullptr; });
-        expect(throws([&] { (void)models::Resolve(found->id); }));
+        expect(throws([&] { (void)models::Resolve(found->model.id); }));
         auto allProviders = models::Profiles();
         auto stored = std::ranges::find(allProviders, provider.id, &models::ModelProfile::id);
         if (expect(stored != allProviders.end()) && expect(stored->models.size() == 1_u)) {
@@ -509,8 +510,8 @@ suite settings_style_tests = [] {
         if (!expect(saved != configured.end())) return;
         auto cleanup = wil::scope_exit([&] { models::DeleteProfile(saved->id); });
         expect(saved->providerType == "deepseek" && saved->protocol == models::ApiProtocol::Responses);
-        expect(saved->models.size() == 1_u && models::HostedSearchFormat(saved->models.front(), *saved) == folia::ai::WebSearchDialect::DeepSeek);
-        expect(models::HostedPageAccess(saved->models.front(), *saved) == folia::ai::PageAccess::DeepSeek);
+        expect(saved->models.size() == 1_u && models::ResolveHostedTools(saved->models.front(), *saved).search == folia::ai::WebSearchDialect::DeepSeek);
+        expect(models::ResolveHostedTools(saved->models.front(), *saved).pages == folia::ai::PageAccess::DeepSeek);
     };
 
     "provider connection check cancels when the configured credentials change"_test = [] {

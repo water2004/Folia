@@ -20,63 +20,36 @@ namespace winrt::Folia::models {
         }
 
         ConfiguredModel DecodeModel(Json const& data, std::string const& provider, std::string id) {
-            auto effort = data.value("effort", "");
-            auto levels = data.value("efforts", std::vector<std::string>{});
-            if (!data.contains("efforts") && !effort.empty()) levels.push_back(effort);
             ConfiguredModel model{std::move(id), data.at("name").get<std::string>(), provider, data.at("upstream").get<std::string>(),
-                std::move(effort), data.value("webSearch", false), std::move(levels)};
+                data.at("effort").get<std::string>(), data.at("webSearch").get<bool>(), data.at("efforts").get<std::vector<std::string>>()};
             if (auto size = data.value("maxInputTokens", 0u)) model.maxInputTokens = size;
             if (auto size = data.value("maxOutputTokens", 0u)) model.maxOutputTokens = size;
             if (auto mode = data.find("searchFormat"); mode != data.end())
                 model.searchFormat = folia::ai::ParseSearchDialect(mode->get_ref<std::string const&>());
-            model.webFetch = data.value("webFetch", false);
-            model.vision = data.value("vision", false);
-            model.enabled = data.value("enabled", true);
+            model.webFetch = data.at("webFetch").get<bool>();
+            model.vision = data.at("vision").get<bool>();
+            model.enabled = data.at("enabled").get<bool>();
             return model;
         }
 
-        struct StoredProvider {
-            ModelProfile profile;
-            bool hasModels = false;
-        };
-
-        StoredProvider DecodeProfile(Json const& data, std::string id) {
+        ModelProfile DecodeProfile(Json const& data, std::string id) {
+            if (data.at("schemaVersion") != 1) throw std::invalid_argument("Unsupported provider record version");
             ModelProfile profile{std::move(id), data.at("name").get<std::string>(), data.at("baseUrl").get<std::string>(),
                 folia::ai::ParseProtocol(data.at("protocol").get<std::string>())};
-            profile.providerType = data.value("providerType", "custom");
+            profile.providerType = data.at("providerType").get<std::string>();
             profile.iconPng = data.value("iconPng", "");
-            profile.fullUrl = data.value("fullUrl", false);
+            profile.fullUrl = data.at("fullUrl").get<bool>();
             profile.catalogUrl = data.value("catalogUrl", "");
-            profile.allowWebFetch = data.value("allowWebFetch", false);
+            profile.allowWebFetch = data.at("allowWebFetch").get<bool>();
             if (data.contains("webFormat")) profile.webFormat = folia::ai::ParseSearchDialect(data.at("webFormat").get<std::string>());
-            profile.allowWebSearch = data.value("allowWebSearch", true);
-            auto models = data.find("configuredModels");
-            if (models != data.end())
-                for (auto const& value : *models)
-                    profile.models.push_back(DecodeModel(value, profile.id, value.at("id").get<std::string>()));
-            return {std::move(profile), models != data.end()};
-        }
-
-        std::vector<ModelProfile> ReadCatalog() {
-            auto saved = List<StoredProvider>(ProvidersFolder(), DecodeProfile);
-            if (std::ranges::any_of(saved, [](auto const& item) { return !item.hasModels; })) {
-                // Earlier builds kept each configured model in a separate record.
-                // Import those IDs into the provider draft until it is saved as a unit.
-                auto previous = List<ConfiguredModel>(AssetPath(L"ai-models") / L"models",
-                    [](Json const& data, std::string id) { return DecodeModel(data, data.at("provider").get<std::string>(), std::move(id)); });
-                for (auto& model : previous)
-                    if (auto owner = std::ranges::find_if(saved, [&](auto const& item) {
-                            return !item.hasModels && item.profile.id == model.provider;
-                        }); owner != saved.end())
-                        owner->profile.models.push_back(std::move(model));
-            }
-            std::vector<ModelProfile> result;
-            for (auto& item : saved) result.push_back(std::move(item.profile));
-            return result;
+            profile.allowWebSearch = data.at("allowWebSearch").get<bool>();
+            for (auto const& value : data.at("models").get_ref<Json::array_t const&>())
+                profile.models.push_back(DecodeModel(value, profile.id, value.at("id").get<std::string>()));
+            return profile;
         }
 
         std::vector<ModelProfile>& Catalog() {
-            static auto catalog = ReadCatalog();
+            static auto catalog = List<ModelProfile>(ProvidersFolder(), DecodeProfile);
             return catalog;
         }
 
@@ -111,21 +84,19 @@ namespace winrt::Folia::models {
         return !effort.empty() && allowed(effort) ? effort : std::string{};
     }
 
-    folia::ai::PageAccess HostedPageAccess(ConfiguredModel const& model, ModelProfile const& profile) {
+    HostedTools ResolveHostedTools(ConfiguredModel const& model, ProviderConnection const& profile) {
         using folia::ai::PageAccess;
         auto route = Preset(profile.providerType).Find(profile.protocol);
-        auto mode = route ? route->Pages(profile.webFormat ? profile.webFormat : model.searchFormat) : PageAccess::None;
-        if (mode == PageAccess::WithSearch) return HostedSearchFormat(model, profile) ? mode : PageAccess::None;
-        return model.webFetch && profile.allowWebFetch ? mode : PageAccess::None;
-    }
-
-    std::optional<folia::ai::WebSearchDialect> HostedSearchFormat(ConfiguredModel const& model, ModelProfile const& profile) {
-        if (!model.webSearch || !profile.allowWebSearch) return {};
-        auto route = Preset(profile.providerType).Find(profile.protocol);
-        if (!route || route->search.empty()) return {};
+        if (!route) return {};
         auto format = profile.webFormat ? profile.webFormat : model.searchFormat;
-        if (!format) return route->requiresSearchFormat ? std::nullopt : std::optional(route->search.front());
-        return std::ranges::contains(route->search, *format) ? format : std::nullopt;
+        if (!format && !route->requiresSearchFormat && !route->search.empty()) format = route->search.front();
+        HostedTools tools;
+        if (model.webSearch && profile.allowWebSearch && format && std::ranges::contains(route->search, *format))
+            tools.search = format;
+        auto pages = route->Pages(format);
+        if (pages == PageAccess::WithSearch ? tools.search.has_value() : model.webFetch && profile.allowWebFetch)
+            tools.pages = pages;
+        return tools;
     }
 
     std::vector<ModelProfile> Profiles() {
@@ -158,8 +129,8 @@ namespace winrt::Folia::models {
         if (index == catalog.size()) catalog.reserve(catalog.size() + 1);
         if (key) folia::platform::models::StoreKey(target, *key);
         try {
-            Json data{{"name", profile.name}, {"baseUrl", profile.baseUrl},
-                {"protocol", folia::ai::ProtocolName(profile.protocol)}, {"configuredModels", std::move(models)},
+            Json data{{"schemaVersion", 1}, {"name", profile.name}, {"baseUrl", profile.baseUrl},
+                {"protocol", folia::ai::ProtocolName(profile.protocol)}, {"models", std::move(models)},
                 {"fullUrl", profile.fullUrl}, {"allowWebSearch", profile.allowWebSearch}, {"allowWebFetch", profile.allowWebFetch}, {"providerType", profile.providerType}};
             if (profile.webFormat) data["webFormat"] = folia::ai::SearchDialectId(*profile.webFormat);
             if (!profile.catalogUrl.empty()) data["catalogUrl"] = profile.catalogUrl;
@@ -183,7 +154,6 @@ namespace winrt::Folia::models {
                                        std::wstring const& credentialTarget) {
         namespace transport = folia::platform::models;
         auto endpoint = folia::platform::completion::ResolveCompletionEndpoint(legacy);
-        if (!legacy.catalogUrl.empty()) transport::ValidateUrl(legacy.catalogUrl);
         auto protocol = static_cast<ApiProtocol>(legacy.protocol);
         if (!folia::ai::SupportsReasoningOptions(protocol, {legacy.reasoningEffort}))
             throw std::invalid_argument("Invalid legacy reasoning effort.");
@@ -203,8 +173,6 @@ namespace winrt::Folia::models {
 
         auto host = Windows::Foundation::Uri(to_hstring(legacy.baseUrl)).Host();
         ModelProfile profile{{}, to_string(host), legacy.baseUrl, protocol};
-        profile.fullUrl = legacy.fullUrl;
-        profile.catalogUrl = legacy.catalogUrl;
         ConfiguredModel model{{}, legacy.model, {}, legacy.model, legacy.reasoningEffort};
         if (!model.effort.empty()) model.efforts.push_back(model.effort);
         profile.models.push_back(std::move(model));
@@ -228,7 +196,7 @@ namespace winrt::Folia::models {
         std::erase_if(catalog, [&](auto const& profile) { return profile.id == id; });
     }
 
-    std::wstring ProfileKey(ModelProfile const& connection) {
+    std::wstring ProfileKey(ProviderConnection const& connection) {
         std::lock_guard lock(files);
         auto current = Read(Path(ProvidersFolder(), connection.id, L".json"));
         if (current.at("baseUrl") != connection.baseUrl || current.at("protocol") != folia::ai::ProtocolName(connection.protocol) ||
@@ -237,21 +205,28 @@ namespace winrt::Folia::models {
         return folia::platform::models::LoadKey(KeyTarget(connection.id));
     }
 
-    std::vector<ConfiguredModel> Models() {
+    std::vector<ModelChoice> AvailableModels() {
         std::lock_guard lock(files);
-        std::vector<ConfiguredModel> models;
-        for (auto const& provider : Catalog())
-            models.append_range(provider.models | std::views::filter(&ConfiguredModel::enabled));
-        return models;
+        std::vector<ModelChoice> choices;
+        std::unordered_map<std::string, std::size_t> names;
+        for (auto const& profile : Catalog()) {
+            for (auto const& model : profile.models) {
+                if (!model.enabled) continue;
+                ++names[model.Label()];
+                choices.push_back({{model, profile}, model.Label()});
+            }
+        }
+        for (auto& choice : choices)
+            if (names.at(choice.label) > 1) choice.label += " · " + choice.provider.name;
+        return choices;
     }
 
-    std::pair<ConfiguredModel, ModelProfile> Resolve(std::string const& id) {
+    ResolvedModel Resolve(std::string const& id) {
         std::lock_guard lock(files);
         for (auto const& profile : Catalog()) {
             auto model = std::ranges::find(profile.models, id, &ConfiguredModel::id);
             if (model != profile.models.end() && model->enabled)
-                return {*model, {profile.id, profile.name, profile.baseUrl, profile.protocol, {}, {},
-                    profile.fullUrl, profile.catalogUrl, profile.allowWebSearch, profile.providerType, profile.allowWebFetch, profile.webFormat}};
+                return {*model, profile};
         }
         throw std::runtime_error("The selected AI model is unavailable.");
     }

@@ -21,21 +21,16 @@ namespace winrt::Folia {
         auto model = Choice();
         cards::ChoiceStyle(model);
         model.PlaceholderText(Localize(L"ChatPickModel"));
-        auto models = Models();
-        auto providers = Profiles();
+        auto choices = AvailableModels();
         int selected = -1;
         std::vector<bool> supportsCache;
         std::vector<std::vector<std::string>> effortOptions;
-        for (auto const& item : models) {
-            auto provider = std::ranges::find(providers, item.provider, &ModelProfile::id);
-            auto label = item.Label();
-            if (provider != providers.end() && std::ranges::count(models, label, &ConfiguredModel::Label) > 1)
-                label += " · " + provider->name;
-            model.Items().Append(box_value(to_hstring(label)));
-            if (item.id == appliedSettings_.completionModelId) selected = model.Items().Size() - 1;
-            effortOptions.push_back(item.efforts);
-            supportsCache.push_back(provider != providers.end() &&
-                folia::ai::SupportsCacheBreakpoints(Preset(provider->providerType).cache, provider->protocol, item.upstream, true));
+        for (auto const& choice : choices) {
+            model.Items().Append(box_value(to_hstring(choice.label)));
+            if (choice.model.id == appliedSettings_.completionModelId) selected = model.Items().Size() - 1;
+            effortOptions.push_back(choice.model.efforts);
+            supportsCache.push_back(folia::ai::SupportsCacheBreakpoints(Preset(choice.provider.providerType).cache,
+                choice.provider.protocol, choice.model.upstream, true));
         }
         model.SelectedIndex(selected);
         connection.Children().Append(cards::Setting(
@@ -98,7 +93,7 @@ namespace winrt::Folia {
         actions.Children().Append(status);
         panel.Children().Append(actions);
         panel.Children().Append(cards::Section(Localize(L"SettingsRelated"), related));
-        save.Click([weak = weak_from_this(), enabled, model, models = std::move(models), effort, eagerness, context, output, cache, status](auto const&, auto const&) {
+        save.Click([weak = weak_from_this(), enabled, model, choices = std::move(choices), effort, eagerness, context, output, cache, status](auto const&, auto const&) {
             auto self = weak.lock();
             if (!self || self->detached_ || !self->applySettings_) return;
             auto proposed = self->appliedSettings_;
@@ -115,7 +110,7 @@ namespace winrt::Folia {
                 SetStatus(status, Localize(L"AIBudgetInvalid"), true);
                 return;
             }
-            proposed.completionModelId = index < 0 ? std::string{} : models.at(index).id;
+            proposed.completionModelId = index < 0 ? std::string{} : choices.at(index).model.id;
             config.enabled = enabled.IsOn();
             config.reasoningEffort = SelectedEffort(effort);
             config.eagerness = static_cast<folia::completion::Eagerness>(eagerness.SelectedIndex());

@@ -22,17 +22,25 @@ namespace winrt::Folia::models {
         std::string ResolveEffort(std::string_view selection) const;
     };
 
-    struct ModelProfile {
+    struct ProviderConnection {
         std::string id, name, baseUrl;
         ApiProtocol protocol = ApiProtocol::Responses;
-        std::vector<ConfiguredModel> models;
-        std::string iconPng;
         bool fullUrl = false;
         std::string catalogUrl;
         bool allowWebSearch = false;
         std::string providerType = "custom";
         bool allowWebFetch = false;
         std::optional<folia::ai::WebSearchDialect> webFormat;
+
+        ProviderConnection() = default;
+        ProviderConnection(std::string id, std::string name, std::string baseUrl, ApiProtocol protocol = ApiProtocol::Responses)
+            : id(std::move(id)), name(std::move(name)), baseUrl(std::move(baseUrl)), protocol(protocol) {}
+    };
+
+    struct ModelProfile : ProviderConnection {
+        using ProviderConnection::ProviderConnection;
+        std::vector<ConfiguredModel> models;
+        std::string iconPng;
     };
 
     std::vector<ModelProfile> Profiles();
@@ -40,9 +48,20 @@ namespace winrt::Folia::models {
     std::string ImportLegacyCompletion(folia::platform::completion::CompletionConfig const&,
                                       std::wstring const& credentialTarget);
     void DeleteProfile(std::string const& id);
-    std::wstring ProfileKey(ModelProfile const& connection);
-    std::vector<ConfiguredModel> Models();
-    std::pair<ConfiguredModel, ModelProfile> Resolve(std::string const& modelId);
-    folia::ai::PageAccess HostedPageAccess(ConfiguredModel const&, ModelProfile const&);
-    std::optional<folia::ai::WebSearchDialect> HostedSearchFormat(ConfiguredModel const&, ModelProfile const&);
+    std::wstring ProfileKey(ProviderConnection const& connection);
+    struct ResolvedModel {
+        ConfiguredModel model;
+        ProviderConnection provider;
+    };
+    struct ModelChoice : ResolvedModel {
+        std::string label;
+    };
+    std::vector<ModelChoice> AvailableModels();
+    ResolvedModel Resolve(std::string const& modelId);
+
+    struct HostedTools {
+        std::optional<folia::ai::WebSearchDialect> search;
+        folia::ai::PageAccess pages = folia::ai::PageAccess::None;
+    };
+    HostedTools ResolveHostedTools(ConfiguredModel const&, ProviderConnection const&);
 }

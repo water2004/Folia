@@ -2,7 +2,7 @@
 
 WinUI 3/C++/WinRT application shell for Folia.
 
-This layer owns the native title bar and document tabs, main menu, animated file/outline sidebars, settings navigation, status/progress surfaces, file dialogs, and one shared `SwapChainPanel` host. It must not implement Markdown mutations directly; UI actions are translated to core `Command` values and applied through core document transactions.
+This layer owns the native title bar, editor groups, document and chat tabs, sidebar, settings, file dialogs and Direct2D hosts. UI actions that edit Markdown are translated to core commands and applied through document transactions.
 
 Source ownership:
 
@@ -37,6 +37,13 @@ Source ownership:
   analysis comes from `folia::highlight`.
 - `completion/` connects editor state and suggestions to the Windows
   completion backend.
+- `agent/` owns the chat tab, transcript, workspace read tools and the connection
+  to the model transport. Conversation options and attachments live in the store.
+  The append-only journal provides paged messages and compaction checkpoints.
+  The provider-neutral agent loop and wire protocols live in `src/ai/`.
+- `ui/` provides XAML helpers shared by chat and settings. Both surfaces select
+  enabled models from the catalog in `settings/storage/`. Connection details
+  and credentials are resolved when a model is used.
 - `settings/views/` owns the settings pages and controls. `settings/storage/`
   owns persisted application settings, feature schemas and atomic replacement.
   `settings/latex/` coordinates the editable command catalog and usage history.

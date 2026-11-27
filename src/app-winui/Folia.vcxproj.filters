@@ -129,6 +129,9 @@
     <ClInclude Include="agent\ChatFiles.h">
       <Filter>Agent Chat</Filter>
     </ClInclude>
+    <ClInclude Include="agent\ChatModelTransport.h">
+      <Filter>Agent Chat</Filter>
+    </ClInclude>
     <ClInclude Include="ui\ControlHelpers.h">
       <Filter>Application Shell</Filter>
     </ClInclude>
@@ -301,6 +304,9 @@
       <Filter>Application Shell</Filter>
     </ClCompile>
     <ClCompile Include="agent\ChatJournal.cpp">
+      <Filter>Agent Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="agent\ChatModelTransport.cpp">
       <Filter>Agent Chat</Filter>
     </ClCompile>
     <ClCompile Include="settings\views\ProviderIdentity.cpp">

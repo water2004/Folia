@@ -29,7 +29,7 @@ suite completion_http_tests = [] {
         request.messages.push_back({MessageRole::User, {{ContentKind::Text, "Find a public source"}}});
         request.tools.push_back({"list_open_tabs", "List tabs", Json{{"type","object"},{"properties",Json::object()}}});
         auto tools = [&] {
-            auto format = HostedSearchFormat(model, profile);
+            auto format = ResolveHostedTools(model, profile).search;
             request.webSearch = format.has_value();
             return BuildRequest(profile.protocol, request, {format.value_or(WebSearchDialect::Standard)}).at("tools");
         };
@@ -67,25 +67,25 @@ suite completion_http_tests = [] {
         profile.providerType = "deepseek";
         ConfiguredModel model;
         model.webFetch = true;
-        expect(HostedPageAccess(model, profile) == PageAccess::None);
+        expect(ResolveHostedTools(model, profile).pages == PageAccess::None);
         profile.allowWebFetch = true;
-        expect(HostedPageAccess(model, profile) == PageAccess::DeepSeek && !HostedSearchFormat(model, profile));
+        expect(ResolveHostedTools(model, profile).pages == PageAccess::DeepSeek && !ResolveHostedTools(model, profile).search);
         model.webFetch = false;
-        expect(HostedPageAccess(model, profile) == PageAccess::None);
+        expect(ResolveHostedTools(model, profile).pages == PageAccess::None);
 
         // Standard Responses opens pages as part of search. The connection selection also
         // resolves ambiguous gateway metadata for all of its models.
         model.searchFormat = WebSearchDialect::DeepSeek;
         profile.webFormat = WebSearchDialect::Standard;
         profile.allowWebSearch = model.webSearch = true;
-        expect(HostedSearchFormat(model, profile) == WebSearchDialect::Standard);
-        expect(HostedPageAccess(model, profile) == PageAccess::WithSearch);
+        expect(ResolveHostedTools(model, profile).search == WebSearchDialect::Standard);
+        expect(ResolveHostedTools(model, profile).pages == PageAccess::WithSearch);
         model.webSearch = false;
-        expect(HostedPageAccess(model, profile) == PageAccess::None);
+        expect(ResolveHostedTools(model, profile).pages == PageAccess::None);
         profile.providerType = "google-gemini";
         profile.protocol = ApiProtocol::ChatCompletions;
         model.webFetch = model.webSearch = true;
-        expect(!HostedSearchFormat(model, profile) && HostedPageAccess(model, profile) == PageAccess::None);
+        expect(!ResolveHostedTools(model, profile).search && ResolveHostedTools(model, profile).pages == PageAccess::None);
     };
     "model discovery uses the selected catalog schema for an aliased OpenRouter model"_test = [] {
         auto payload = R"({"data":[{"id":"alias","name":"Alias via gateway","context_length":64000,

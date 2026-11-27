@@ -54,16 +54,18 @@ namespace
             auto legacy = settings.completion;
             legacy.baseUrl = winrt::to_string(completion.GetNamedString(L"baseUrl", L""));
             legacy.model = winrt::to_string(completion.GetNamedString(L"model", L""));
-            if (legacy.baseUrl.empty() || legacy.model.empty()) return {};
-            auto protocol = completion.GetNamedNumber(L"protocol", 0);
-            if (protocol != 0 && protocol != 1 && protocol != 2)
-                throw std::invalid_argument("Invalid legacy AI protocol.");
-            legacy.protocol = static_cast<int>(protocol);
-            legacy.fullUrl = completion.GetNamedBoolean(L"fullUrl", false);
-            legacy.catalogUrl = winrt::to_string(completion.GetNamedString(L"catalogUrl", L""));
-
-            auto modelId = models::ImportLegacyCompletion(legacy, L"Folia/InlineCompletion/APIKey");
+            std::string modelId;
+            if (!legacy.baseUrl.empty() && !legacy.model.empty()) {
+                auto protocol = completion.GetNamedNumber(L"protocol", 0);
+                if (protocol != 0 && protocol != 1 && protocol != 2)
+                    throw std::invalid_argument("Invalid legacy AI protocol.");
+                legacy.protocol = static_cast<int>(protocol);
+                modelId = models::ImportLegacyCompletion(legacy, L"Folia/InlineCompletion/APIKey");
+            }
+            for (auto key : {L"baseUrl", L"model", L"protocol"})
+                if (completion.HasKey(key)) completion.Remove(key);
             completion.Insert(L"modelId", JsonValue::CreateStringValue(winrt::to_hstring(modelId)));
+            root.Insert(L"schemaVersion", JsonValue::CreateNumberValue(6));
             WriteSettings(path, root);
             settings.completionModelId = std::move(modelId);
             return {};
@@ -136,7 +138,7 @@ namespace winrt::Folia
             if (settings.themeId.empty()) throw std::runtime_error("themeId cannot be empty");
             if (!IsSupportedLanguage(settings.languageId))
                 throw std::runtime_error("unsupported languageId");
-            auto diagnostic = schemaVersion == 5.0 && settings.completionModelId.empty()
+            auto diagnostic = schemaVersion == 5.0
                 ? MigrateCompletionModel(root, path, settings) : hstring{};
             if (settings.completionModelId.empty()) settings.completion.enabled = false;
             return { std::move(settings), true, std::move(diagnostic) };

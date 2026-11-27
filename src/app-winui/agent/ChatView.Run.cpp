@@ -1,9 +1,8 @@
 #include "pch.h"
-#include "settings/storage/ProviderPresets.h"
+#include "agent/ChatModelTransport.h"
 #include "agent/ChatView.h"
 #include "ui/ControlHelpers.h"
 #include "providers/ModelValidation.h"
-#include "windows/ai/ModelHttpClient.h"
 #include <wil/resource.h>
 
 namespace winrt::Folia::chat {
@@ -51,10 +50,7 @@ namespace winrt::Folia::chat {
             Options options{model.upstream};
             if (model.maxInputTokens) options.contextTokens = *model.maxInputTokens;
             if (model.maxOutputTokens) options.outputTokens = *model.maxOutputTokens;
-            changed = folia::ai::agent::Compact(history, options, [&](auto const& wire, auto token, auto const&) {
-                return folia::platform::models::RequestChat(profile.baseUrl, profile.protocol, wire, ProfileKey(profile), token,
-                    profile.fullUrl, {.explicitThinkingToggle = Preset(profile.providerType).explicitThinkingToggle}, {});
-            }, stop);
+            changed = folia::ai::agent::Compact(history, options, MakeChatRequest(std::move(profile)), stop);
             if (changed) AppendCompaction(id, history);
         } catch (std::exception const& error) { status = to_hstring(error.what()); }
         catch (hresult_error const& error) { status = error.message(); }
@@ -144,7 +140,7 @@ namespace winrt::Folia::chat {
         catch (hresult_error const& error) { SetBusy(false); Report(error.message()); }
     }
 
-    fire_and_forget ChatView::GenerateTitle(std::weak_ptr<ChatView> weak, std::string id, ModelProfile profile,
+    fire_and_forget ChatView::GenerateTitle(std::weak_ptr<ChatView> weak, std::string id, ProviderConnection profile,
         ConfiguredModel model, std::string prompt, Microsoft::UI::Dispatching::DispatcherQueue queue) {
         co_await resume_background();
         try {
@@ -166,8 +162,8 @@ namespace winrt::Folia::chat {
             question.role = MessageRole::User;
             question.content.push_back({ContentKind::Text, std::move(prompt)});
             wire.messages = {std::move(instruction), std::move(question)};
-            auto result = folia::platform::models::RequestChat(profile.baseUrl, profile.protocol, wire, ProfileKey(profile), {},
-                profile.fullUrl, {.explicitThinkingToggle = Preset(profile.providerType).explicitThinkingToggle}, {});
+            auto request = MakeChatRequest(std::move(profile));
+            auto result = request(wire, {}, {});
             if (result.finish != FinishReason::Completed) co_return;
             auto text = PlainText(result.message);
             auto start = text.find_first_not_of(" \t\r\n\"");
@@ -188,7 +184,7 @@ namespace winrt::Folia::chat {
         } catch (std::exception const&) {} catch (hresult_error const&) {}
     }
 
-    fire_and_forget ChatView::Execute(std::weak_ptr<ChatView> weak, Conversation conversation, ModelProfile profile, ConfiguredModel model,
+    fire_and_forget ChatView::Execute(std::weak_ptr<ChatView> weak, Conversation conversation, ProviderConnection profile, ConfiguredModel model,
         std::optional<std::vector<OpenTab>> tabs, bool retry, std::stop_token stop,
         Microsoft::UI::Dispatching::DispatcherQueue queue) {
         auto release = wil::scope_exit([&] { std::lock_guard lock(runningMutex); running.erase(conversation.id); });
@@ -213,11 +209,10 @@ namespace winrt::Folia::chat {
                 partial.documents.push_back(ref);
                 queue.TryEnqueue([weak, ref] { if (auto view = weak.lock(); view && view->busy_) view->transcript_->AddReference(ref); });
             });
-            auto search = HostedSearchFormat(model, profile);
+            auto [search, pages] = ResolveHostedTools(model, profile);
             tools.insert(tools.begin(), ConversationHistoryTool(conversation.id));
             Options options{model.upstream, model.ResolveEffort(conversation.effort), conversation.search ? search : std::nullopt};
             options.cacheSession = conversation.id;
-            const auto pages = HostedPageAccess(model, profile);
             if (pages == folia::ai::PageAccess::WithSearch ? options.webSearch.has_value() : conversation.readPages)
                 options.pages = pages;
             if (model.maxInputTokens) options.contextTokens = *model.maxInputTokens;
@@ -263,21 +258,7 @@ namespace winrt::Folia::chat {
                     dispatch(kind, text);
                 }
             };
-            auto const& preset = Preset(profile.providerType);
-            folia::ai::ProviderRequestOptions adapter{search.value_or(folia::ai::WebSearchDialect::Standard), preset.explicitThinkingToggle, preset.cache};
-            auto request = [&](auto const& wire, auto token, folia::ai::agent::Progress const& progress) {
-                return folia::platform::models::RequestChat(profile.baseUrl, profile.protocol, wire, ProfileKey(profile), token,
-                    profile.fullUrl, adapter, [&](folia::ai::StreamEvent const& event) {
-                        if (!progress) return;
-                        if (event.kind == folia::ai::StreamEventKind::TextDelta) progress(ProgressKind::TextDelta, event.text);
-                        if (event.kind == folia::ai::StreamEventKind::ReasoningDelta)
-                            progress(event.reasoningKind == folia::ai::ReasoningKind::Summary ? ProgressKind::SummaryDelta : ProgressKind::ReasoningDelta, event.text);
-                        using enum folia::ai::StreamEventKind;
-                        if (event.kind == WebSearchStarted || event.kind == WebSearchCompleted || event.kind == WebSearchFailed)
-                            progress(ProgressKind::HostedSearch, folia::ai::Json{{"id", event.callId}, {"target", event.text}, {"operation", event.name},
-                                {"done", event.kind != WebSearchStarted}, {"failed", event.kind == WebSearchFailed}}.dump());
-                    }, [&](unsigned attempt) { if (progress) progress(ProgressKind::Retrying, std::to_string(attempt)); });
-            };
+            auto request = MakeChatRequest(profile, search);
             answer = folia::ai::agent::Run(history, options, tools, request, publish, stop, &partial);
             answer->modelId = model.id;
             writing = true;

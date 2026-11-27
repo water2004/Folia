@@ -263,23 +263,14 @@ namespace winrt::Folia::chat {
     }
 
     void ChatView::RefreshProfiles() {
-        auto providers = Profiles();
         routes_.clear();
         std::vector<hstring> choices;
         int active = -1;
-        auto models = Models();
-        std::unordered_map<std::string, std::size_t> nameCount;
-        for (auto const& model : models) ++nameCount[model.Label()];
-        for (auto& model : models) {
-            auto profile = std::ranges::find(providers, model.provider, &ModelProfile::id);
-            if (profile == providers.end()) continue;
-            auto label = model.Label();
-            if (nameCount.at(label) > 1) label += " · " + profile->name;
-            choices.push_back(to_hstring(label));
-            if (model.id == conversation_.model) active = static_cast<int>(routes_.size());
-            const bool hostedSearch = HostedSearchFormat(model, *profile).has_value();
-            auto pages = HostedPageAccess(model, *profile);
-            routes_.push_back({std::move(model), hostedSearch, pages});
+        for (auto& choice : AvailableModels()) {
+            choices.push_back(to_hstring(choice.label));
+            if (choice.model.id == conversation_.model) active = static_cast<int>(routes_.size());
+            auto tools = ResolveHostedTools(choice.model, choice.provider);
+            routes_.push_back({std::move(choice.model), tools.search.has_value(), tools.pages});
         }
         if (active < 0 && conversation_.model.empty() && !routes_.empty()) active = 0;
         modelPicker_->SetModels(choices, active);

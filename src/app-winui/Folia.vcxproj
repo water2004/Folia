@@ -795,6 +795,8 @@
     <ClCompile Include="MainWindow.Agent.cpp" />
     <ClCompile Include="agent\ChatStore.cpp" />
     <ClCompile Include="agent\ChatJournal.cpp" />
+    <ClCompile Include="agent\ChatModelTransport.cpp" />
+    <ClInclude Include="agent\ChatModelTransport.h" />
     <ClInclude Include="agent\ChatFiles.h" />
     <ClCompile Include="settings\storage\ProviderPresets.cpp" />
     <ClCompile Include="settings\storage\ModelCatalog.cpp" />

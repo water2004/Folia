@@ -8,7 +8,7 @@
 namespace winrt::Folia::implementation {
 namespace {
     void ApplyModelRoute(folia::platform::completion::CompletionConfig& config,
-        models::ConfiguredModel const& model, models::ModelProfile const& provider, std::string_view effort) {
+        models::ConfiguredModel const& model, models::ProviderConnection const& provider, std::string_view effort) {
         config.baseUrl = provider.baseUrl;
         config.model = model.upstream;
         config.protocol = static_cast<int>(provider.protocol);

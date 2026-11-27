@@ -12,7 +12,7 @@
 
 namespace winrt::Folia::chat {
     using models::ConfiguredModel;
-    using models::ModelProfile;
+    using models::ProviderConnection;
     struct ViewHost {
         HWND window{};
         std::function<std::vector<OpenTab>()> tabs;
@@ -55,9 +55,9 @@ namespace winrt::Folia::chat {
         void Report(hstring const&);
         fire_and_forget PickFolder();
         void SetFolder(std::filesystem::path);
-        static fire_and_forget GenerateTitle(std::weak_ptr<ChatView>, std::string, ModelProfile, ConfiguredModel,
+        static fire_and_forget GenerateTitle(std::weak_ptr<ChatView>, std::string, ProviderConnection, ConfiguredModel,
             std::string, Microsoft::UI::Dispatching::DispatcherQueue);
-        static fire_and_forget Execute(std::weak_ptr<ChatView>, Conversation, ModelProfile, ConfiguredModel,
+        static fire_and_forget Execute(std::weak_ptr<ChatView>, Conversation, ProviderConnection, ConfiguredModel,
             std::optional<std::vector<OpenTab>>, bool retry, std::stop_token, Microsoft::UI::Dispatching::DispatcherQueue);
 
         Conversation conversation_;

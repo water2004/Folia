@@ -18,9 +18,7 @@ namespace {
             auto eraseLegacy = wil::scope_exit([&] { keys::StoreKey(legacyTarget, L""); });
             auto count = models::Profiles().size();
             folia::platform::completion::CompletionConfig legacy;
-            legacy.baseUrl = "https://migration-test.invalid/custom/responses";
-            legacy.catalogUrl = "https://migration-test.invalid/catalog";
-            legacy.fullUrl = true;
+            legacy.baseUrl = "https://migration-test.invalid/v1";
             legacy.protocol = static_cast<int>(models::ApiProtocol::Responses);
             legacy.model = "migration-test";
             legacy.reasoningEffort = "none";
@@ -29,7 +27,7 @@ namespace {
             auto [model, profile] = models::Resolve(id);
             auto eraseProfile = wil::scope_exit([&] { models::DeleteProfile(profile.id); });
             expect(models::Profiles().size() == count + 1);
-            expect(profile.fullUrl && profile.catalogUrl == legacy.catalogUrl);
+            expect(!profile.fullUrl && profile.catalogUrl.empty());
             expect(model.upstream == legacy.model);
             expect(model.efforts == std::vector<std::string>{"none"});
             expect(!model.webSearch && !profile.allowWebSearch);
@@ -78,6 +76,9 @@ namespace {
             expect(loaded.settings.completion.outputTokens == 96_u);
             expect(loaded.settings.completionModelId == profile.models.front().id);
             expect(raw.value("futureSetting", std::string{}) == "preserved");
+            expect(raw.at("schemaVersion") == 6);
+            expect(!raw.at("completion").contains("baseUrl") && !raw.at("completion").contains("model") &&
+                   !raw.at("completion").contains("protocol"));
             expect(raw.at("completion").value("modelId", std::string{}) == profile.models.front().id);
             expect(static_cast<bool>(LoadAppSettings().settings == loaded.settings));
             expect(models::Profiles().size() == count);
