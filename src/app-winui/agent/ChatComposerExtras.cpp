@@ -14,6 +14,10 @@ namespace winrt::Folia::chat {
     namespace imaging = Windows::Graphics::Imaging;
 
     namespace {
+        constexpr std::pair<std::string_view, wchar_t const*> commands[] = {
+            {"/new", L"ChatNew"}, {"/model", L"ChatPickModel"}, {"/access", L"ChatAccess"}, {"/latest", L"ChatLatest"}
+        };
+
         bool CanStartMention(wchar_t previous) {
             // Allow mentions beside CJK text and punctuation, while leaving ordinary email addresses alone.
             return previous > 127 || (!iswalnum(previous) && std::wstring_view(L"._+-@").find(previous) == std::wstring_view::npos);
@@ -81,8 +85,23 @@ namespace winrt::Folia::chat {
     void ChatComposerExtras::Update() {
         if (accepting_) return;
         auto text = input_.Text();
+        if (!dismissed_.empty() && text == dismissed_) return;
+        dismissed_ = {};
         auto pos = input_.SelectionStart();
         std::wstring_view before(text.c_str(), (std::min)(static_cast<std::size_t>(pos), std::wstring_view(text).size()));
+        if (command && before.starts_with(L"/") && before.size() == text.size() &&
+            before.find_first_of(L" \t\r\n", 1) == before.npos && !input_.SelectionLength()) {
+            lookup_.request_stop();
+            choices_.clear();
+            tokenStart_ = 0;
+            caret_ = pos;
+            auto prefix = to_string(hstring(before));
+            for (auto [name, label] : commands) {
+                if (std::string_view(name).starts_with(prefix)) choices_.push_back({std::string(name), 0, label});
+            }
+            PaintChoices();
+            return;
+        }
         auto at = before.find_last_of(L"\r\n");
         auto lineStart = at == before.npos ? 0 : at + 1;
         at = before.npos;
@@ -138,7 +157,7 @@ namespace winrt::Folia::chat {
         auto selected = keepSelection ? list_.SelectedIndex() : 0;
         list_.Items().Clear();
         for (auto const& choice : choices_) {
-            auto item = to_hstring(choice.title) + L"   ·   " + Localize(choice.tab ? L"ChatOpenTab" : L"ChatWorkspace");
+            auto item = to_hstring(choice.title) + L"   ·   " + Localize(choice.commandLabel ? choice.commandLabel : choice.tab ? L"ChatOpenTab" : L"ChatWorkspace");
             list_.Items().Append(box_value(item));
         }
         list_.SelectedIndex(choices_.empty() ? -1 : (std::clamp)(selected, 0, static_cast<int>(choices_.size()) - 1));
@@ -147,6 +166,12 @@ namespace winrt::Folia::chat {
     void ChatComposerExtras::Accept(int index) {
         if (index < 0 || !std::cmp_less(index, choices_.size()) || tokenStart_ < 0) return;
         auto choice = choices_.at(index);
+        if (choice.commandLabel) {
+            input_.Text({});
+            list_.Visibility(Visibility::Collapsed);
+            command(choice.title);
+            return;
+        }
         bool folder = !choice.tab && choice.title.ends_with('/');
         auto token = MentionToken(choice.title, folder);
         if (!folder) token = token + L" ";
@@ -175,9 +200,22 @@ namespace winrt::Folia::chat {
             return false;
         });
     }
+    bool ChatComposerExtras::RunTypedCommand() {
+        if (!command) return false;
+        auto value = to_string(input_.Text());
+        auto match = std::ranges::find(commands, value, &std::pair<std::string_view, wchar_t const*>::first);
+        if (match == std::end(commands)) return false;
+        input_.Text({});
+        list_.Visibility(Visibility::Collapsed);
+        command(value);
+        return true;
+    }
     bool ChatComposerExtras::HandleKey(VirtualKey key) {
+        if (key == VirtualKey::Enter && RunTypedCommand()) return true;
+        if ((key == VirtualKey::Enter || key == VirtualKey::Tab) && list_.Visibility() == Visibility::Collapsed)
+            Update();
         if (list_.Visibility() != Visibility::Visible) return false;
-        if (key == VirtualKey::Escape) { lookup_.request_stop(); list_.Visibility(Visibility::Collapsed); return true; }
+        if (key == VirtualKey::Escape) { dismissed_ = input_.Text(); lookup_.request_stop(); list_.Visibility(Visibility::Collapsed); return true; }
         if (key == VirtualKey::Tab || key == VirtualKey::Enter) { Accept(list_.SelectedIndex()); return true; }
         if (key != VirtualKey::Down && key != VirtualKey::Up) return false;
         auto index = (std::clamp)(list_.SelectedIndex() + (key == VirtualKey::Down ? 1 : -1), 0, static_cast<int>(choices_.size()) - 1);

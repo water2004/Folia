@@ -25,6 +25,9 @@ namespace winrt::Folia::implementation {
         static auto Impl(Microsoft::UI::Xaml::Window const& window) {
             return get_self<MainWindow>(window.as<winrt::Folia::MainWindow>());
         }
+        static void ChatTheme(MainWindow* shell, folia::ThemeProfile const& theme) {
+            shell->agentChatViews.at(Active(shell)->id)->SetTheme(theme);
+        }
         static auto const& Theme(MainWindow* shell) { return shell->themeProfile; }
         static auto Host(MainWindow* shell) { return shell->AgentChatHost(); }
         static auto Sidebar(MainWindow* shell) { return shell->ChatList(); }
@@ -35,6 +38,19 @@ namespace winrt::Folia::implementation {
             shell->UpdateTheme();
         }
         static void Close(MainWindow* shell) { shell->CloseDocumentAsync(Active(shell)->id); }
+        static void CloseRightView(MainWindow* shell) {
+            shell->CloseEditorViewAsync(shell->editorGroups.Selected(EditorGroup::Right));
+        }
+        static bool Split(MainWindow* shell) { return shell->editorGroups.IsSplit(); }
+        static std::uint64_t Companion(MainWindow* shell) {
+            auto& groups = shell->editorGroups;
+            auto view = groups.Find(groups.Selected(OtherEditorGroup(groups.ActiveGroup())));
+            return view ? view->document : 0;
+        }
+        static void OpenReference(MainWindow* shell, std::uint64_t source, std::string_view key, std::filesystem::path const& path, std::size_t line) {
+            shell->OpenChatDocument(source, key, path, {EditorSourceLocation::Kind::Line, line});
+        }
+        static void CloseId(MainWindow* shell, std::uint64_t id) { shell->CloseDocumentAsync(id); }
         static void ShowSidebar(MainWindow* shell) { shell->SelectWorkspacePane(MainWindow::WorkspacePane::Chats); }
     };
 }
@@ -100,8 +116,9 @@ namespace {
             auto file = folder / "test.md";
             auto cleanup = wil::scope_exit([&] { DeleteFileW(file.c_str()); RemoveDirectoryW(folder.c_str()); });
             std::ofstream(file, std::ios::binary) << std::string(2999, 'a') << "你好";
-            auto tools = chat::MakeTools(std::nullopt, folder);
-            expect(tools.size() == 3_u);
+            chat::ChatTranscript::Documents docs;
+            auto tools = chat::MakeTools(std::nullopt, folder, [&](auto const& ref) { docs.push_back(ref); });
+            expect(tools.size() == 4_u);
             auto directory = tools[0].invoke(Json::object(), {});
             expect(directory["entries"][0]["name"] == "test.md");
             auto page = tools[1].invoke(Json{{"path", "test.md"}}, {});
@@ -110,6 +127,19 @@ namespace {
             expect(next["text"] == "你好");
             auto hits = tools[2].invoke(Json{{"path", "test.md"}, {"query", "你好"}}, {});
             expect(hits["matches"].at(0)["offset"].get<std::size_t>() == 2999_u);
+            auto uri = page.at("link").get<std::string>();
+            auto target = chat::ResolveDocumentLink(hits.at("matches")[0].at("link").get<std::string>(), docs);
+            expect(docs.size() == 1_u && target.has_value());
+            if (target) {
+                expect(target->location.kind == EditorSourceLocation::Kind::Utf8Byte && target->location.value == 2999_u);
+                expect(target->document.path == winrt::to_string(winrt::hstring(file.native())));
+            }
+            auto linked = tools[3].invoke(Json{{"path", "test.md"}, {"line", 3}}, {});
+            expect(linked.at("link") == uri + "#L3");
+            auto line = chat::ResolveDocumentLink(linked.at("link").get<std::string>(), docs);
+            expect(line.has_value() && line->location.value == 3_u);
+            expect(!chat::ResolveDocumentLink(uri + "#L0", docs) && !chat::ResolveDocumentLink(uri + "#B-4", docs));
+            expect(!chat::ResolveDocumentLink(uri, {}) && !chat::ResolveDocumentLink("file:///D:/notes.md", docs));
             auto matches = chat::FindWorkspaceMentions(folder, "Te", {});
             expect(matches.size() == 1_u && matches.front() == "test.md");
             constexpr std::size_t searchPage = 8 * 1024 * 1024;
@@ -145,6 +175,36 @@ namespace {
             expect(snapshots == 1_i);
         };
 
+        "agent streams native Markdown through unstable tails and preserves selection"_test = [] {
+            EditorSession session;
+            auto stream = session.BeginMarkdownStream();
+            auto append = [&](std::string_view part) { session.AppendMarkdown(stream, part); };
+            append("中文 **bold**\r\n\r\n");
+            auto selection = session.Selection().active;
+            selection.source_offset = 3;
+            auto end = selection; end.source_offset = 11;
+            session.SetSelection(selection, end);
+            auto original = session.SelectedDisplayText();
+            expect(!original.empty());
+            std::string expected = "中文 **bold**\r\n\r\n";
+            for (std::string_view part : {"## Ke", "ep\n\n", "| Name |", " Value |\n|---|---|", "\n| a | 2 |\n\n",
+                    "$\nx^", "2\n$\n\n", "```cpp\na", "uto a=1;\n```\n"}) {
+                append(part);
+                expected += part;
+                expect(session.SelectedDisplayText() == original);
+            }
+            expect(stream.accepted == stream.source.size());
+            expect(session.TextUtf8() == expected);
+            EditorSession reference;
+            reference.SetText(winrt::to_hstring(expected));
+            expect(session.RenderModel().blocks.size() == reference.RenderModel().blocks.size());
+            session.JumpToSourceLocation({EditorSourceLocation::Kind::Line, 3});
+            expect(session.Selection().active.container_id != selection.container_id);
+            session.EnterSourceMode();
+            session.JumpToSourceLocation({EditorSourceLocation::Kind::Utf8Byte, 6});
+            expect(session.CaptureReloadViewState().active == 2_u);
+        };
+
         "agent composer pastes a real bitmap and grants only selected mentions"_test = [] {
             try {
                 using namespace winrt::Windows::ApplicationModel::DataTransfer;
@@ -166,10 +226,15 @@ namespace {
                 auto extras = chat::ChatComposerExtras::Create(input, [&] { return std::vector{tab}; },
                     [] { return std::filesystem::path{}; }, [&](auto const& message) { notice = message; });
                 composer.Children().Append(extras->Element());
+                std::string command;
+                extras->command = [&](std::string const& value) { command = value; };
+                input.Text(L"/mod"); input.Select(4, 0);
+                expect(extras->HandleKey(VirtualKey::Enter)) << "slash accepts prefix";
+                expect(command == "/model" && input.Text().empty()) << "slash clears input and chooses model";
                 extras->BeginMention();
-                expect(extras->HandleKey(VirtualKey::Tab));
-                expect(std::wstring_view(input.Text()).starts_with(L"@\"Project notes.md\""));
-                expect(extras->Mentions(tab));
+                expect(extras->HandleKey(VirtualKey::Tab)) << "mention accepts via Tab";
+                expect(std::wstring_view(input.Text()).starts_with(L"@\"Project notes.md\"")) << winrt::to_string(input.Text());
+                expect(extras->Mentions(tab)) << "explicit tab mention grants access";
                 input.Text(L"@\"Project notes.md\"other");
                 expect(!extras->Mentions(tab));
                 auto path = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
@@ -319,6 +384,185 @@ namespace {
             transcript->Finish();
         };
 
+        "agent activity stays between its text passages, live and after reopening"_test = [] {
+            using enum folia::ai::agent::ProgressKind;
+            auto window = visual_tests::Window();
+            auto shell = Access::Impl(window);
+            auto conversation = chat::NewConversation("Activity sequence");
+            Access::Open(shell, conversation.id);
+            auto host = Access::Host(shell);
+            auto old = host.Content();
+            auto cleanup = wil::scope_exit([&] { host.Content(old); Access::Close(shell); chat::DeleteConversation(conversation.id); });
+            auto view = chat::ChatTranscript::Create(conversation.id, Access::Theme(shell));
+            host.Content(view->Element());
+            view->Begin();
+            view->Progress(StepStarted, {});
+            view->Progress(TextDelta, L"先查看笔记里对收敛性的说明。");
+            view->Progress(Reading, L"read_workspace_file notes.md");
+            auto root = Find<StackPanel>(host, [](auto const& e) { return e.Name() == L"ChatTurn"; });
+            auto caption = [](DependencyObject const& element) {
+                return Find<Button>(element, [](auto const& b) { return b.Name() == L"ChatActivitySummary"; });
+            };
+            Pump([&] {
+                root = Find<StackPanel>(host, [](auto const& e) { return e.Name() == L"ChatTurn"; });
+                return root && root.Children().Size() == 2 && caption(root);
+            });
+            expect(std::wstring_view(Automation::AutomationProperties::GetName(caption(root))).contains(L"notes.md"));
+            Capture(window, "activity-running.png");
+            view->Progress(ToolResult, L"{\"action\":\"read_workspace_file notes.md\",\"detail\":\"3. Convergence\"}");
+            view->Progress(StepStarted, {});
+            view->Progress(ReasoningSnapshot, L"核对笔记中的边界条件");
+            view->Progress(TextDelta, L"## 结论\n\n这里需要有界性。");
+            view->Progress(Reading, L"search_open_tab theorem.md · 有界性");
+            view->Progress(ToolResult, L"{\"action\":\"search_open_tab theorem.md · 有界性\",\"detail\":\"line 17\"}");
+            view->Progress(StepStarted, {});
+            view->Progress(TextDelta, L"见文档第十七行。");
+            chat::Entry reply{folia::ai::MessageRole::Assistant};
+            auto first = winrt::to_string(L"先查看笔记里对收敛性的说明。");
+            auto second = first + "\n\n" + winrt::to_string(L"## 结论\n\n这里需要有界性。");
+            reply.markdown = second + "\n\n" + winrt::to_string(L"见文档第十七行。");
+            reply.reasoning = winrt::to_string(L"核对笔记中的边界条件");
+            reply.activities = {{"read_workspace_file", "notes.md", false, "3. Convergence"},
+                {"search_open_tab", winrt::to_string(L"theorem.md · 有界性"), false, "line 17"}};
+            auto n = reply.reasoning.size();
+            reply.steps = {{first.size(),0,0},{first.size(),0,1},{first.size(),n,1},{second.size(),n,1},
+                {second.size(),n,2},{reply.markdown.size(),n,2}};
+            chat::AppendEntry(conversation.id, reply);
+            view->Finish();
+            auto check = [&](StackPanel const& turn) {
+                auto children = turn.Children();
+                if (!expect(children.Size() == 5_u)) return;
+                expect(children.GetAt(0).try_as<Canvas>() && children.GetAt(2).try_as<Canvas>() && children.GetAt(4).try_as<Canvas>());
+                auto firstTrace = children.GetAt(1);
+                auto summary = caption(firstTrace);
+                expect(std::wstring_view(Automation::AutomationProperties::GetName(summary)).contains(L"notes.md"));
+                Invoke(summary);
+                expect(Find<Button>(firstTrace, [](auto const& b) { return b.Name() == L"ChatActivityItem"; }) != nullptr);
+                auto thought = Find<Button>(firstTrace, [](auto const& b) {
+                    return b.Name() == L"ChatActivityItem" && Automation::AutomationProperties::GetName(b) == Localize(L"ChatThought");
+                });
+                if (expect(thought != nullptr)) {
+                    Invoke(thought);
+                    expect(Find<TextBlock>(firstTrace, [](auto const& t) {
+                        return t.Name() == L"ChatActivityDetail" && t.Text() == L"核对笔记中的边界条件";
+                    }) != nullptr);
+                }
+                auto lastTrace = children.GetAt(3);
+                Invoke(caption(lastTrace));
+                expect(Find<Button>(lastTrace, [](auto const& b) { return b.Name() == L"ChatActivityItem"; }) == nullptr);
+                expect(Find<TextBlock>(lastTrace, [](auto const& t) { return t.Text() == L"line 17"; }) != nullptr);
+            };
+            host.UpdateLayout();
+            check(root);
+            auto reopened = chat::ChatTranscript::Create(conversation.id, Access::Theme(shell));
+            host.Content(reopened->Element());
+            Pump([&] { root = Find<StackPanel>(host, [](auto const& e) { return e.Name() == L"ChatTurn"; }); return root && root.IsLoaded(); });
+            check(root);
+            Capture(window, "activity-timeline.png");
+        };
+
+        "agent split toolbar opens and revisits the cited line beside the chat"_test = [] {
+            auto window = visual_tests::Window();
+            auto shell = Access::Impl(window);
+            auto conversation = chat::NewConversation("Split reference");
+            Access::Open(shell, conversation.id);
+            auto chatTab = Access::Active(shell)->id;
+            auto fixture = std::filesystem::temp_directory_path() / ("folia-citation-" + records::NewId() + ".md");
+            { std::ofstream file(fixture); file << "First\n\nSecond\n\nThird"; }
+            auto cleanup = wil::scope_exit([&] {
+                Access::CloseId(shell, chatTab);
+                chat::DeleteConversation(conversation.id);
+                DeleteFileW(fixture.c_str());
+            });
+            auto chatHost = Access::Host(shell);
+            Pump([&] { chatHost.UpdateLayout(); return chatHost.IsLoaded() && chatHost.Content() && chatHost.ActualWidth() > 0; });
+            auto split = Find<Button>(chatHost, [](auto const& button) {
+                return button.Visibility() == Visibility::Visible && Automation::AutomationProperties::GetName(button) == Localize(L"SplitEditor");
+            });
+            if (!expect(split != nullptr)) return;
+            Invoke(split);
+            Pump([&] { return Access::Split(shell) && Access::Companion(shell) == chatTab; });
+            Access::OpenReference(shell, chatTab, {}, fixture, 3);
+            try {
+                Pump([&] {
+                    auto doc = Access::Active(shell);
+                    std::error_code ec;
+                    return doc->editor.get() != nullptr && std::filesystem::equivalent(doc->path, fixture, ec) &&
+                        doc->editor->loaded && !doc->editor->pendingLocation;
+                });
+            } catch (std::exception const&) {
+                auto doc = Access::Active(shell);
+                throw std::runtime_error(std::format("Citation load: expected {}, actual {}, loaded {}, opening {}, pending {}",
+                    fixture.string(), doc->path.string(), static_cast<bool>(doc->editor) && doc->editor->loaded,
+                    static_cast<bool>(doc->editor) && doc->editor->opening, static_cast<bool>(doc->editor) && doc->editor->pendingLocation.has_value()));
+            }
+            auto doc = Access::Active(shell);
+            auto& session = doc->editor->session;
+            expect(!doc->referenceKey.empty()) << "Newly opened editors can be cited immediately";
+            expect(session.EditableSource(session.Selection().active.container_id) == U"Second") << "Open at line three";
+            expect(Access::Companion(shell) == chatTab);
+            auto id = doc->id;
+            Access::OpenReference(shell, chatTab, doc->referenceKey, {}, 5);
+            expect(Access::Active(shell)->id == id && Access::Companion(shell) == chatTab);
+            expect(session.EditableSource(session.Selection().active.container_id) == U"Third") << "Revisit the displayed editor at line five";
+            Capture(window, "split-reference.png");
+            Access::CloseId(shell, id);
+            if (Access::Split(shell)) Access::CloseRightView(shell);
+            Pump([&] { return !Access::Split(shell); });
+        };
+
+        "agent keeps a dropped reply inline, streams the retry and preserves a manual title"_test = [] {
+            std::string part = R"(data: {"choices":[{"index":0,"delta":{"content":"### First streamed heading\\n\\n"},"finish_reason":null}]})" "\n\n";
+            std::string more = R"(data: {"choices":[{"index":0,"delta":{"content":"**Second part**"},"finish_reason":null}]})" "\n\n";
+            std::string done = R"(data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]})" "\n\ndata: [DONE]\n\n";
+            completion_tests::Server server(part, 200, false, "text/event-stream", std::chrono::milliseconds(250), part.size(),
+                {"", part + more + done}, {503, 200});
+            models::ModelProfile draft{{}, "Streaming test", server.baseUrl};
+            draft.protocol = folia::ai::ApiProtocol::ChatCompletions;
+            draft.models.push_back({{}, "Test stream", {}, "streaming-model"});
+            draft.models.front().maxOutputTokens = 62000;
+            auto profile = models::SaveProfile(std::move(draft), std::nullopt);
+            auto conversation = chat::NewConversation("New");
+            conversation.model = profile.models.front().id;
+            chat::SaveConversationOptions(conversation);
+            conversation = chat::RenameConversation(conversation.id, "Pinned title");
+            auto window = visual_tests::Window();
+            auto shell = Access::Impl(window);
+            Access::Open(shell, conversation.id);
+            auto cleanup = wil::scope_exit([&] { Access::Close(shell); chat::DeleteConversation(conversation.id); models::DeleteProfile(profile.id); });
+            auto host = Access::Host(shell);
+            Pump([&] { host.UpdateLayout(); return host.IsLoaded() && host.Content() && host.ActualWidth() > 0; });
+            auto input = Find<TextBox>(host, [](auto const& e) { return e.PlaceholderText() == Localize(L"ChatPrompt"); });
+            auto action = [&](auto name) { return Find<Button>(host, [&](auto const& e) {
+                return e.Visibility() == Visibility::Visible && Automation::AutomationProperties::GetName(e) == Localize(name);
+            }); };
+            if (!expect(input != nullptr && action(L"ChatSend") != nullptr)) return;
+            input.Text(L"Stream a heading");
+            Invoke(action(L"ChatSend"));
+            Pump([&] { return action(L"ChatRetry") != nullptr; });
+            auto failed = chat::LoadHistory(conversation.id);
+            expect(failed.entries.size() == 2_u);
+            expect(!failed.entries.back().error.empty() && failed.entries.back().markdown.find("heading") != std::string::npos);
+            auto note = Find<TextBlock>(host, [&](auto const& e) { return winrt::to_string(e.Text()) == failed.entries.back().error; });
+            expect(note != nullptr);
+            Capture(window, "interrupted.png");
+            Invoke(action(L"ChatRetry"));
+            Pump([&] { return server.receivedRequests == 3 && action(L"ChatStop") != nullptr; });
+            auto live = [&] { return Find<Canvas>(host, [](auto const& c) {
+                return c.Name() == L"ChatMarkdownReply" && Automation::AutomationProperties::GetName(c).empty() && c.ActualHeight() > 10;
+            }); };
+            Pump([&] { return live() != nullptr && chat::LoadHistory(conversation.id).entries.size() == 2; });
+            auto original = live();
+            Capture(window, "streaming.png");
+            Pump([&] { return action(L"ChatStop") == nullptr && chat::LoadHistory(conversation.id).entries.size() == 3; });
+            expect(std::wstring_view(Automation::AutomationProperties::GetName(original)).contains(L"Second part"));
+            const auto result = chat::LoadHistory(conversation.id);
+            expect(result.entries.back().error.empty() && result.entries.back().markdown.find("Second part") != std::string::npos);
+            expect(chat::LoadConversation(conversation.id).title == "Pinned title");
+            expect(server.receivedRequests.load() == 3);
+            expect(server.requests.back().find("62000") != std::string::npos);
+        };
+
         "agent chat opens a tab, calls the configured model, and reopens the saved conversation"_test = [] {
             completion_tests::Server server(R"({"id":"first","status":"completed","output":[{"type":"function_call",
                 "call_id":"read-1","name":"list_open_tabs","arguments":"{}"}]})",
@@ -326,11 +570,11 @@ namespace {
                 "usage":{"input_tokens":1864,"output_tokens":103},"output":[{"type":"reasoning","id":"r1",
                 "summary":[{"type":"summary_text","text":"先查看打开的文档，再核对两种推导。"}]},
                 {"type":"message","role":"assistant","content":[{"type":"output_text",
-                "text":"### 等差数列的和\n\n把首尾两项配对，每一组都等于 **101**。一共有 50 组。\n\n$$\nS = 50 \\times 101 = 5050\n$$\n\n同样的思路也适用于任意等差数列。"}]}]})"});
+                "text":"### 等差数列的和\n\n把首尾两项配对，每一组都等于 **101**。一共有 50 组。\n\n$$\nS = 50 \\times 101 = 5050\n$$\n\n同样的思路也适用于任意等差数列。"}]}]})", R"({"id":"title","status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"首尾配对求和"}]}]})"});
             models::ModelProfile draft{{}, "Loopback agent test", server.baseUrl + "/custom/complete"};
             draft.fullUrl = true;
             draft.allowWebSearch = true;
-            draft.models.push_back({{}, "Notes", {}, "fixture", "low", true, {"low", "high"}});
+            draft.models.push_back({{}, "Notes", {}, "fixture", "low", true, {"low", "medium", "high", "xhigh", "max"}});
             draft.models.front().maxInputTokens = 128000;
             draft.models.push_back({{}, "Loopback plain model", {}, "fixture-plain"});
             auto profile = models::SaveProfile(std::move(draft), std::nullopt);
@@ -395,16 +639,46 @@ namespace {
             auto panel = flyout.Content().as<Grid>();
             auto reasoning = panel.FindName(L"ReasoningPanel").as<StackPanel>();
             auto modelsPanel = panel.FindName(L"ModelsPanel").as<StackPanel>();
-            auto efforts = panel.FindName(L"Efforts").as<ListView>();
+            auto efforts = panel.FindName(L"Efforts").as<Slider>();
             flyout.ShowAt(picker);
             Pump([&] { return efforts.IsLoaded() && reasoning.Visibility() == Visibility::Visible; });
-            expect(efforts.Items().Size() == 2_u && efforts.SelectedIndex() == 0);
+            expect(efforts.Maximum() == 4. && efforts.Value() == 0.);
+            auto fill = panel.FindName(L"Fill").as<Border>();
+            auto originalTheme = Access::Theme(shell);
+            for (auto const& [accent, filename] : std::array{std::pair{folia::Color{174,64,74}, "accent-rose.png"},
+                    std::pair{folia::Color{32,142,115}, "accent-jade.png"}}) {
+                auto themed = originalTheme;
+                themed.colors.shell_accent = accent;
+                Access::ChatTheme(shell, themed);
+                efforts.Value(2);
+                panel.UpdateLayout();
+                auto actual = fill.Background().as<Media::SolidColorBrush>().Color();
+                expect(actual.R == accent.r && actual.G == accent.g && actual.B == accent.b);
+                expect(send.Background().as<Media::SolidColorBrush>().Color() == actual);
+                Capture(window, filename);
+            }
+            Access::ChatTheme(shell, originalTheme);
+            auto knob = panel.FindName(L"Knob").as<Border>();
+            auto thumbLayer = panel.FindName(L"ThumbLayer").as<Canvas>();
+            for (auto const& [level, filename] : std::array{std::pair{0., "effort-first.png"},
+                    std::pair{2., "effort-middle.png"}, std::pair{4., "effort-last.png"}}) {
+                efforts.Value(level);
+                panel.UpdateLayout();
+                auto top = knob.TransformToVisual(thumbLayer).TransformPoint({0,0});
+                if (level == 0) expect(fill.ActualWidth() == 0.) << "first stop has no colored fill at its left edge";
+                expect(top.X >= 0 && top.Y >= 1 && top.X + knob.ActualWidth() <= thumbLayer.ActualWidth() &&
+                       top.Y + knob.ActualHeight() < thumbLayer.ActualHeight()) << "entire thumb fits inside its own layer at every stop";
+                Media::Imaging::RenderTargetBitmap snapshot;
+                document_tests::Await(snapshot.RenderAsync(panel));
+                auto sliderPixels = document_tests::Await(snapshot.GetPixelsAsync());
+                visual_tests::SavePng(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path()
+                    / "build/tests/agent-chat" / filename, snapshot.PixelWidth(), snapshot.PixelHeight(), sliderPixels);
+            }
             bool closed = false;
             auto closedEvent = flyout.Closed(winrt::auto_revoke, [&](auto const&, auto const&) { closed = true; });
-            efforts.SelectedIndex(1);
-            Pump([&] { return chat::LoadConversation(conversation.id).effort == "high" && closed; });
-            flyout.ShowAt(picker);
-            Pump([&] { return flyout.IsOpen(); });
+            efforts.Value(2);
+            Pump([&] { return chat::LoadConversation(conversation.id).effort == "high" && flyout.IsOpen(); });
+            expect(!closed);
             Invoke(panel.FindName(L"ChooseModel").as<Button>());
             Pump([&] { return modelsPanel.Visibility() == Visibility::Visible; });
             auto modelList = panel.FindName(L"ModelList").as<ListView>();
@@ -419,6 +693,7 @@ namespace {
                 return Automation::AutomationProperties::GetName(button) == Localize(L"ChatAccess");
             });
             if (!expect(access != nullptr)) return;
+            expect(static_cast<bool>(access.Content().try_as<TextBlock>())) << "permissions chip displays just its text label";
             auto accessMenu = access.Flyout().as<MenuFlyout>();
             auto allowSearch = accessMenu.Items().GetAt(2).as<ToggleMenuFlyoutItem>();
             if (!expect(plainIndex >= 0 && allowSearch)) return;
@@ -427,6 +702,7 @@ namespace {
             expect(chat::LoadConversation(conversation.id).search);
             modelList.SelectedIndex(selected);
             expect(allowSearch.IsEnabled() && allowSearch.IsChecked());
+            efforts.Value(2);
             Capture(window, "model-picker.png");
             expect(reasoning.Visibility() == Visibility::Visible);
             closed = false;
@@ -449,9 +725,11 @@ namespace {
             accessMenu.Hide();
             Pump([&] { return accessClosed; });
             auto mention = Find<Button>(host, [](auto const& item) {
-                return Automation::AutomationProperties::GetName(item) == Localize(L"ChatMention");
+                return Automation::AutomationProperties::GetName(item) == Localize(L"ChatAddContent");
             });
-            Invoke(mention);
+            auto attachments = mention.Flyout().as<MenuFlyout>();
+            expect(attachments.Items().Size() == 2_u);
+            input.Text(L"@"); input.Select(1, 0);
             auto suggestions = Find<ListView>(host, [](auto const& item) { return item.Name() == L"ChatMentionList"; });
             Pump([&] { return suggestions && suggestions.Visibility() == Visibility::Visible && suggestions.Items().Size(); });
             Capture(window, "mentions.png");
@@ -489,10 +767,14 @@ namespace {
             }); };
             Pump([&] { host.UpdateLayout(); return surface() && surface().Height() > 40; });
             auto thinking = Find<Button>(host, [](auto const& button) {
-                return Automation::AutomationProperties::GetName(button) == Localize(L"ChatThinking");
+                return button.Name() == L"ChatActivitySummary";
             });
             if (expect(thinking != nullptr)) {
                 Invoke(thinking);
+                Capture(window, "activity-list.png");
+                auto nested = Find<Button>(host, [&](auto const& button) { return button.Name() == L"ChatActivityItem" &&
+                    std::wstring_view(Automation::AutomationProperties::GetName(button)).contains(L"核对"); });
+                if (expect(nested != nullptr)) Invoke(nested);
                 auto details = Find<TextBlock>(host, [](auto const& text) { return std::wstring_view(text.Text()).contains(L"先查看"); });
                 Pump([&] { return details && details.Visibility() == Visibility::Visible; });
             }
@@ -516,15 +798,16 @@ namespace {
                 Pump([&] { return std::wstring_view(input.Text()).find_first_of(L"\r\n") != std::wstring_view::npos; });
                 expect(chat::LoadHistory(conversation.id).entries.size() == 2_u);
             }
-            expect(server.receivedRequests.load() == 2_i);
+            Pump([&] { return chat::LoadConversation(conversation.id).title == "首尾配对求和"; });
+            expect(server.receivedRequests.load() == 3_i);
             expect(server.request.starts_with("POST /custom/complete HTTP/1.1"));
-            expect(server.request.find("\"type\":\"web_search\"") != std::string::npos);
+            expect(server.requests.at(0).find("\"type\":\"web_search\"") != std::string::npos);
             Access::Close(shell);
             Pump([&] { return Access::Active(shell)->kind == WorkspaceTabKind::Editor; });
             Access::Open(shell, conversation.id);
             Pump([&] { return host.Content() != nullptr; });
             expect(Access::Active(shell)->chatId == conversation.id);
-            expect(chat::LoadConversation(conversation.id).title == "请用首尾配对解释从 1 加到 100 的结果。");
+            expect(chat::LoadConversation(conversation.id).title == "首尾配对求和");
             Access::Close(shell);
         };
     };

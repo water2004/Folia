@@ -8,6 +8,31 @@ namespace winrt::Folia::implementation {
     using namespace Microsoft::UI::Xaml;
     using namespace Microsoft::UI::Xaml::Controls;
 
+    void MainWindow::OpenChatDocument(std::uint64_t chatDocument, std::string_view key, std::filesystem::path const& path, EditorSourceLocation location) {
+        auto destination = editorGroups.ActiveGroup();
+        if (editorGroups.IsSplit()) {
+            for (auto group : {EditorGroup::Left, EditorGroup::Right}) {
+                auto view = editorGroups.Find(editorGroups.Selected(group));
+                if (view && view->document == chatDocument) destination = OtherEditorGroup(group);
+            }
+        }
+        std::uint64_t id{};
+        if (auto owner = App::Current()->FindReferencedDocument(key, path, id)) {
+            auto doc = owner->workspaceDocuments.Find(id);
+            if (doc->editor) doc->editor->pendingLocation = location;
+            if (owner == this && editorGroups.IsSplit()) {
+                auto view = editorGroups.ViewFor(destination, id);
+                ActivateView(view ? view : editorGroups.Add(destination, id));
+                RefreshDocumentTabs();
+            } else owner->ActivateDocument(id);
+            owner->Activate();
+            owner->ApplyDocumentLocation();
+        } else if (path.is_absolute()) {
+            if (destination != editorGroups.ActiveGroup()) FocusOtherGroup();
+            OpenWorkspaceFile(path, WorkspaceOpenMode::Keep, location);
+        } else ShowError(Localize(L"ChatMissingReference"));
+    }
+
     void MainWindow::RegisterAgentChats() {
         ChatSidebarTitle().Text(Localize(L"ChatSessions"));
         NewChatButton().Click(WindowEvent([this](auto const&, auto const&) { OpenAgentChat(); }));
@@ -109,6 +134,8 @@ namespace winrt::Folia::implementation {
                 if (auto existing = App::Current()->FindChatWindow(id)) {
                     auto tab = existing->workspaceDocuments.FindChat(id);
                     tab->chatTitle = conversation.title;
+                    if (auto found = existing->agentChatViews.find(tab->id); found != existing->agentChatViews.end())
+                        found->second->SetTitle(conversation.title);
                     existing->UpdateDocumentTab(tab->id);
                     if (existing->IsActiveDocument(tab->id)) existing->UpdateDocumentInfo();
                 }
@@ -141,6 +168,8 @@ namespace winrt::Folia::implementation {
                         if (!tab->editor) continue;
                         chat::OpenTab data;
                         data.documentId = tab->id;
+
+                        data.document = {tab->referenceKey, to_string(hstring(tab->path.native()))};
                         data.title = to_string(tab->path.empty() ? Localize(L"UntitledMarkdown") : hstring(tab->path.filename().native()));
                         if (tab->editor->loaded) {
                             auto revision = tab->editor->session.ContentState();
@@ -179,6 +208,17 @@ namespace winrt::Folia::implementation {
                 if (auto main = window.get()) return main->folderExplorer.RootPath();
                 return std::filesystem::path{};
             };
+            host.openDocument = [window, chatId = document->id](auto const& link, auto const& docs) {
+                if (auto main = window.get()) {
+                    auto target = chat::ResolveDocumentLink(link, docs);
+                    if (!target) { main->ShowError(Localize(L"ChatMissingReference")); return; }
+                    auto const& [ref, location] = *target;
+                    main->OpenChatDocument(chatId, ref.tabKey, std::wstring(to_hstring(ref.path)), location);
+                }
+            };
+            host.split = [window] { if (auto main = window.get()) main->SplitEditor(); };
+            host.newChat = [window] { if (auto main = window.get()) main->OpenAgentChat(); };
+            host.rename = [window, id = document->chatId] { if (auto main = window.get()) main->ManageAgentChat(id, false); };
             host.settings = [window] {
                 if (auto main = window.get()) {
                     main->OpenSettingsTab();
@@ -202,6 +242,8 @@ namespace winrt::Folia::implementation {
         try {
             auto activePage = getView(active);
             auto passivePage = getView(passive);
+            if (activePage) activePage->ShowSplit(!editorGroups.IsSplit());
+            if (passivePage) passivePage->ShowSplit(false);
             auto front = AgentChatHost();
             auto back = OtherAgentChatHost();
             const bool entering = activePage && front.Content() != activePage->Element();

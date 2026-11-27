@@ -155,6 +155,8 @@
     <ClInclude Include="..\platform\windows\completion\CompletionHttpTransport.h" />
     <ClInclude Include="..\platform\windows\completion\CompletionService.h" />
     <ClInclude Include="storage\AssetPaths.h" />
+    <ClInclude Include="storage\JsonRecords.h" />
+    <ClInclude Include="storage\RecordId.h" />
     <ClCompile Include="..\encoding\document_encoding.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -168,7 +170,10 @@
     <ClInclude Include="settings\views\SettingsCards.h" />
     <ClInclude Include="settings\views\ProviderModelForm.h" />
     <ClInclude Include="agent\ChatModelPicker.h" />
+    <ClInclude Include="agent\ChatPalette.h" />
     <ClInclude Include="agent\ChatReplySurface.h" />
+    <ClInclude Include="agent\ChatActivityView.h" />
+    <ClInclude Include="agent\ChatTurnView.h" />
     <ClInclude Include="agent\ChatTranscript.h" />
     <ClInclude Include="agent\ChatComposerExtras.h" />
     <ClInclude Include="settings\storage\ModelCatalog.h" />
@@ -182,6 +187,7 @@
     <ClInclude Include="theme\ThemeCatalog.h" />
     <ClInclude Include="editor\session\EditorSession.h" />
     <ClInclude Include="editor\session\EditorRenderFrame.h" />
+    <ClInclude Include="editor\session\EditorSourceLocation.h" />
     <ClInclude Include="editor\rendering\EditorStyleSheet.h" />
     <ClInclude Include="editor\rendering\layout\EditorContentPreparation.h" />
     <ClInclude Include="editor\rendering\layout\EditorDocumentBlockPreparer.h" />
@@ -783,8 +789,11 @@
     <ClCompile Include="settings\storage\ModelCatalog.cpp" />
     <ClCompile Include="agent\ChatTools.cpp" />
     <ClCompile Include="agent\ChatView.cpp" />
+    <ClCompile Include="agent\ChatView.Run.cpp" />
     <ClCompile Include="agent\ChatModelPicker.cpp" />
     <ClCompile Include="agent\ChatReplySurface.cpp" />
+    <ClCompile Include="agent\ChatActivityView.cpp" />
+    <ClCompile Include="agent\ChatTurnView.cpp" />
     <ClCompile Include="agent\ChatTranscript.cpp" />
     <ClCompile Include="agent\ChatComposerExtras.cpp" />
     <ClCompile Include="editor\document\EditorDocumentController.Relocation.cpp" />

@@ -590,25 +590,16 @@
   <data name="ChatManageProviders" xml:space="preserve"><value>Manage providers</value></data>
   <data name="ChatModelSource" xml:space="preserve"><value>Model source</value></data>
   <data name="SettingsRelated" xml:space="preserve"><value>Related settings</value></data>
-  <data name="ChatThinking" xml:space="preserve"><value>Thinking</value></data>
   <data name="ChatNewerMessages" xml:space="preserve"><value>Newer exchanges</value></data>
   <data name="ChatLatest" xml:space="preserve"><value>Go to latest message</value></data>
   <data name="ChatRecent" xml:space="preserve"><value>Latest exchanges</value></data>
   <data name="ChatEarlierPage" xml:space="preserve"><value>{0} pages back</value></data>
-  <data name="ChatToolTabs" xml:space="preserve"><value>Listed open documents</value></data>
-  <data name="ChatToolReadTab" xml:space="preserve"><value>Read document</value></data>
-  <data name="ChatToolOutline" xml:space="preserve"><value>Inspected outline</value></data>
-  <data name="ChatToolSearchTab" xml:space="preserve"><value>Searched document</value></data>
-  <data name="ChatToolDirectory" xml:space="preserve"><value>Listed folder</value></data>
-  <data name="ChatToolReadFile" xml:space="preserve"><value>Read file</value></data>
-  <data name="ChatToolFindFile" xml:space="preserve"><value>Searched file</value></data>
   <data name="ChatToolFailed" xml:space="preserve"><value>Failed</value></data>
   <data name="ChatOpenTab" xml:space="preserve"><value>Open document</value></data>
   <data name="ChatOpenTabs" xml:space="preserve"><value>Open documents</value></data>
   <data name="ChatRemoveImage" xml:space="preserve"><value>Remove image</value></data>
   <data name="ChatNeedsVision" xml:space="preserve"><value>Choose a model with image input to send an image.</value></data>
   <data name="ChatImageLimit" xml:space="preserve"><value>Attach up to four images per message.</value></data>
-  <data name="ChatToolWebSearch" xml:space="preserve"><value>Web search</value></data>
   <data name="ChatInterrupted" xml:space="preserve"><value>Reply interrupted</value></data>
   <data name="ChatPreparingImage" xml:space="preserve"><value>Preparing the image. Try again in a moment.</value></data>
   <data name="ChatSendKeys" xml:space="preserve"><value>Send (Enter), new line (Shift+Enter)</value></data>
@@ -617,4 +608,31 @@
   <data name="ChatNotReported" xml:space="preserve"><value>unreported</value></data>
   <data name="ChatNotConfigured" xml:space="preserve"><value>unspecified</value></data>
   <data name="ChatImageMessage" xml:space="preserve"><value>Image</value></data>
+  <data name="ChatRetry" xml:space="preserve"><value>Retry</value></data>
+  <data name="ChatRetrying" xml:space="preserve"><value>Connection interrupted. Reconnecting ({0}/2)…</value></data>
+  <data name="ChatOutputLimit" xml:space="preserve"><value>This request reached the model’s output limit. Send a follow-up to continue.</value></data>
+  <data name="ChatAddContent" xml:space="preserve"><value>Add files or images</value></data>
+  <data name="ChatAddImage" xml:space="preserve"><value>Attach an image…</value></data>
+  <data name="ChatMissingReference" xml:space="preserve"><value>This document is no longer available.</value></data>
+  <data name="ChatThinkingNow" xml:space="preserve"><value>Thinking</value></data>
+  <data name="ChatThought" xml:space="preserve"><value>Thought</value></data>
+  <data name="ChatRetried" xml:space="preserve"><value>Retried connection</value></data>
+  <data name="ChatCompacted" xml:space="preserve"><value>Compacted earlier messages</value></data>
+  <data name="ChatUnfinished" xml:space="preserve"><value>Unfinished</value></data>
+  <data name="ChatActionTabsNow" xml:space="preserve"><value>Listing open documents</value></data>
+  <data name="ChatActionTabsDone" xml:space="preserve"><value>Listed open documents</value></data>
+  <data name="ChatActionReadNow" xml:space="preserve"><value>Reading document</value></data>
+  <data name="ChatActionReadDone" xml:space="preserve"><value>Read document</value></data>
+  <data name="ChatActionOutlineNow" xml:space="preserve"><value>Reading outline</value></data>
+  <data name="ChatActionOutlineDone" xml:space="preserve"><value>Read outline</value></data>
+  <data name="ChatActionFindNow" xml:space="preserve"><value>Searching document</value></data>
+  <data name="ChatActionFindDone" xml:space="preserve"><value>Searched document</value></data>
+  <data name="ChatActionFolderNow" xml:space="preserve"><value>Browsing folder</value></data>
+  <data name="ChatActionFolderDone" xml:space="preserve"><value>Browsed folder</value></data>
+  <data name="ChatActionLocateNow" xml:space="preserve"><value>Locating file</value></data>
+  <data name="ChatActionLocateDone" xml:space="preserve"><value>Located file</value></data>
+  <data name="ChatActionWebNow" xml:space="preserve"><value>Searching the web</value></data>
+  <data name="ChatActionWebDone" xml:space="preserve"><value>Searched the web</value></data>
+  <data name="ChatActionToolNow" xml:space="preserve"><value>Running tool</value></data>
+  <data name="ChatActionToolDone" xml:space="preserve"><value>Ran tool</value></data>
 </root>

@@ -9,6 +9,9 @@ namespace winrt::Folia::chat {
     public:
         static std::shared_ptr<ChatReplySurface> Create(std::string const&, folia::ThemeProfile const&);
         Microsoft::UI::Xaml::Controls::Canvas Element() const { return paper_; }
+        void AppendMarkdown(std::string_view);
+        void Seal();
+        std::function<void(std::string const&)> openDocument;
         void SetTheme(folia::ThemeProfile const&);
     private:
         void Draw(bool dirty);
@@ -17,6 +20,8 @@ namespace winrt::Folia::chat {
         Microsoft::UI::Xaml::Controls::Canvas paper_;
         Microsoft::UI::Xaml::Controls::Grid slice_;
         EditorSession session_;
+        std::optional<folia::MarkdownStream> stream_;
+        std::string markdown_;
         std::unique_ptr<EditorSurfaceRenderer> renderer_;
         folia::ThemeProfile theme_;
         float top_ = 0, bottom_ = 0;

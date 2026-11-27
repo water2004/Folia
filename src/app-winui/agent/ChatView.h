@@ -8,6 +8,7 @@
 #include <winrt/Windows.System.h>
 #include "agent/ChatComposerExtras.h"
 #include "agent/ChatTranscript.h"
+#include "agent/ChatPalette.h"
 
 namespace winrt::Folia::chat {
     using models::ConfiguredModel;
@@ -17,6 +18,8 @@ namespace winrt::Folia::chat {
         std::function<std::vector<OpenTab>()> tabs;
         std::function<std::filesystem::path()> currentFolder;
         std::function<void()> settings;
+        std::function<void()> newChat, rename, split;
+        std::function<void(std::string const&, ChatTranscript::Documents const&)> openDocument;
         std::function<void(Conversation const&)> changed;
     };
 
@@ -26,9 +29,12 @@ namespace winrt::Folia::chat {
         ~ChatView();
         Microsoft::UI::Xaml::FrameworkElement Element() const { return root_; }
         void Activate();
+        void SetTitle(std::string title);
+        void ShowSplit(bool available) { split_.Visibility(available && host_.split ? Microsoft::UI::Xaml::Visibility::Visible : Microsoft::UI::Xaml::Visibility::Collapsed); }
         void SetTheme(folia::ThemeProfile const&);
 
     private:
+        static constexpr std::size_t maxQuestionBytes = 16'000;
         ChatView(Conversation, ViewHost);
         void Build();
         void RefreshAccessLabel();
@@ -37,19 +43,25 @@ namespace winrt::Folia::chat {
         void UpdateUsage();
         void ArrangeComposer();
         void Send();
+        void StartTurn(bool retry);
+        void Command(std::string const&);
+        fire_and_forget PickImages();
         void SetBusy(bool);
         void SaveOptions();
         void Report(hstring const&);
         fire_and_forget PickFolder();
         void SetFolder(std::filesystem::path);
+        static fire_and_forget GenerateTitle(std::weak_ptr<ChatView>, std::string, ModelProfile, ConfiguredModel,
+            std::string, Microsoft::UI::Dispatching::DispatcherQueue);
         static fire_and_forget Execute(std::weak_ptr<ChatView>, Conversation, ModelProfile, ConfiguredModel,
-            std::optional<std::vector<OpenTab>>, std::stop_token, Microsoft::UI::Dispatching::DispatcherQueue);
+            std::optional<std::vector<OpenTab>>, bool retry, std::stop_token, Microsoft::UI::Dispatching::DispatcherQueue);
 
         Conversation conversation_;
         folia::ThemeProfile theme_;
         std::optional<std::uint64_t> usedTokens_;
         std::string usageModel_;
         ViewHost host_;
+        ChatPalette palette_;
         struct Route {
             ConfiguredModel model;
             bool hostedSearch = false;
@@ -66,7 +78,7 @@ namespace winrt::Folia::chat {
         Microsoft::UI::Xaml::Controls::StackPanel contextMeter_;
         Microsoft::UI::Xaml::Controls::ProgressRing contextRing_;
         Microsoft::UI::Xaml::Controls::TextBlock status_, empty_, accessLabel_, usage_;
-        Microsoft::UI::Xaml::Controls::Button accessChip_, send_, stop_, mention_;
+        Microsoft::UI::Xaml::Controls::Button accessChip_, send_, stop_, mention_, split_;
         Microsoft::UI::Xaml::Controls::ToggleMenuFlyoutItem openTabs_, web_;
     };
 }

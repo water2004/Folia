@@ -23,6 +23,12 @@ namespace winrt::Folia {
             + glyph->strokeWidth + LR"(" Data=")" + glyph->path + LR"("/></Canvas></Viewbox>)";
     }
 
+    Microsoft::UI::Xaml::Controls::Viewbox MakeWorkspaceIcon(WorkspaceIcon icon, Microsoft::UI::Xaml::Media::Brush const& stroke) {
+        auto view = MakeWorkspaceIcon(icon);
+        view.Child().as<Microsoft::UI::Xaml::Controls::Canvas>().Children().GetAt(0).as<Microsoft::UI::Xaml::Shapes::Path>().Stroke(stroke);
+        return view;
+    }
+
     Microsoft::UI::Xaml::Controls::Viewbox MakeWorkspaceIcon(WorkspaceIcon icon, std::wstring_view stroke) {
         return Microsoft::UI::Xaml::Markup::XamlReader::Load(WorkspaceIconXaml(icon, stroke)).as<Microsoft::UI::Xaml::Controls::Viewbox>();
     }

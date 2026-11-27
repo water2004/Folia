@@ -1,9 +1,7 @@
 #include "pch.h"
 #include "agent/ChatView.h"
 #include "agent/ChatControls.h"
-#include "providers/ModelValidation.h"
 #include "workspace/WorkspaceIcons.h"
-#include "windows/ai/ModelHttpClient.h"
 #include <shobjidl.h>
 #include <winrt/Windows.ApplicationModel.DataTransfer.h>
 #include <winrt/Windows.Storage.Pickers.h>
@@ -14,47 +12,16 @@
 
 namespace winrt::Folia::chat {
     using namespace models;
-    using folia::ai::MessageRole;
-    using folia::ai::agent::Options;
-    using folia::ai::agent::ProgressKind;
     using namespace Microsoft::UI::Xaml;
     using namespace Microsoft::UI::Xaml::Controls;
 
     namespace {
-        constexpr std::size_t maxQuestion = 16'000;
-        std::mutex runningMutex;
-        std::set<std::string> running;
-
         void Label(Button const& button, wchar_t const* key) {
             auto name = Localize(key);
             Automation::AutomationProperties::SetName(button, name);
             ToolTipService::SetToolTip(button, box_value(name));
         }
 
-        void Chip(Button const& button, TextBlock const& text, WorkspaceIcon icon) {
-            button.Style(settings_ui::ResourceStyle(L"ChatActionStyle"));
-            StackPanel row;
-            row.Orientation(Orientation::Horizontal);
-            row.Spacing(5);
-            auto glyph = MakeWorkspaceIcon(icon);
-            glyph.Width(14); glyph.Height(14);
-            row.Children().Append(glyph);
-            text.FontSize(12);
-            text.VerticalAlignment(VerticalAlignment::Center);
-            text.TextTrimming(TextTrimming::CharacterEllipsis);
-            row.Children().Append(text);
-            auto arrow = MakeWorkspaceIcon(WorkspaceIcon::Chevron);
-            arrow.Width(11); arrow.Height(11);
-            row.Children().Append(arrow);
-            button.Content(row);
-        }
-
-        std::string TitleFrom(std::string_view text) {
-            auto line = text.substr(0, text.find_first_of("\r\n"));
-            auto end = std::min<std::size_t>(line.size(), 80);
-            while (end < line.size() && end && (static_cast<unsigned char>(line[end]) & 0xc0) == 0x80) --end;
-            return std::string(line.substr(0, end));
-        }
     }
 
     ChatView::ChatView(Conversation conversation, ViewHost host)
@@ -73,6 +40,7 @@ namespace winrt::Folia::chat {
 
     void ChatView::SetTheme(folia::ThemeProfile const& theme) {
         theme_ = theme;
+        palette_.Apply(theme.colors);
         if (transcript_) transcript_->SetTheme(theme);
     }
 
@@ -82,6 +50,9 @@ namespace winrt::Folia::chat {
             return [weak, member](auto const&, auto const&) { if (auto view = weak.lock()) ((*view).*member)(); };
         };
         transcript_ = ChatTranscript::Create(conversation_.id, theme_);
+        transcript_->SetTitle(to_hstring(conversation_.title));
+        transcript_->openDocument = host_.openDocument;
+        transcript_->retry = [weak] { if (auto self = weak.lock()) self->StartTurn(true); };
         Put(root_, transcript_->Element(), 0);
         if (auto last = transcript_->LastReply()) {
             usageModel_ = last->modelId;
@@ -113,10 +84,11 @@ namespace winrt::Folia::chat {
         input_.MinHeight(42);
         input_.MaxHeight(162);
         input_.PlaceholderText(Localize(L"ChatPrompt"));
-        input_.MaxLength(maxQuestion);
+        input_.MaxLength(maxQuestionBytes);
         extras_ = ChatComposerExtras::Create(input_, host_.tabs,
             [weak] { if (auto view = weak.lock()) return view->conversation_.folder; return std::filesystem::path{}; },
             [weak](hstring const& message) { if (auto view = weak.lock()) view->Report(message); });
+        extras_->command = [weak](auto const& name) { if (auto self = weak.lock()) self->Command(name); };
         editor.Children().Append(extras_->Element());
         editor.Children().Append(input_);
         input_.TextCompositionStarted([weak](auto const&, auto const&) { if (auto view = weak.lock()) view->composing_ = true; });
@@ -138,11 +110,28 @@ namespace winrt::Folia::chat {
         Columns(bar_, {false, false, true, false, false});
         bar_.ColumnSpacing(3);
         mention_.Style(settings_ui::ResourceStyle(L"ChatActionStyle"));
-        mention_.Content(box_value(L"@"));
-        Label(mention_, L"ChatMention");
-        mention_.Click([weak](auto const&, auto const&) { if (auto view = weak.lock()) view->extras_->BeginMention(); });
+        mention_.Content(MakeWorkspaceIcon(WorkspaceIcon::Add));
+        Label(mention_, L"ChatAddContent");
+        MenuFlyout attachments;
+        MenuFlyoutItem mention, image;
+        mention.Text(Localize(L"ChatMention")); mention.KeyboardAcceleratorTextOverride(L"@");
+        image.Text(Localize(L"ChatAddImage"));
+        mention.Click([weak](auto const&, auto const&) { if (auto self = weak.lock()) self->extras_->BeginMention(); });
+        image.Click([weak](auto const&, auto const&) { if (auto self = weak.lock()) self->PickImages(); });
+        attachments.Items().Append(mention); attachments.Items().Append(image);
+        attachments.Opening([weak, image](auto const&, auto const&) {
+            if (auto self = weak.lock()) {
+                auto i = self->modelPicker_->SelectedIndex();
+                image.IsEnabled(i >= 0 && self->routes_.at(i).model.vision);
+            }
+        });
+        mention_.Flyout(attachments);
         Put(bar_, mention_, 0);
-        Chip(accessChip_, accessLabel_, WorkspaceIcon::Shield);
+        accessChip_.Style(settings_ui::ResourceStyle(L"ChatActionStyle"));
+        accessLabel_.Style(settings_ui::ResourceStyle(L"ChatModelPickerSecondaryLabelStyle"));
+        accessLabel_.FontSize(12);
+        accessLabel_.TextTrimming(TextTrimming::CharacterEllipsis);
+        accessChip_.Content(accessLabel_);
         Label(accessChip_, L"ChatAccess");
         Put(bar_, accessChip_, 0, 1);
         usage_.Name(L"ChatContextUsage");
@@ -162,7 +151,17 @@ namespace winrt::Folia::chat {
         Put(meter, contextRing_, 0);
         contextMeter_.Children().Append(meter);
         contextMeter_.Children().Append(usage_);
-        Put(bar_, contextMeter_, 0, 2);
+        Put(transcript_->Header(), contextMeter_, 0, 2);
+        if (host_.rename) {
+            Button rename;
+            rename.Style(settings_ui::ResourceStyle(L"ChatActionStyle"));
+            FontIcon pencil;
+            pencil.Glyph(L"\uE70F"); pencil.FontSize(13);
+            rename.Content(pencil);
+            Label(rename, L"ChatRename");
+            rename.Click([weak](auto const&, auto const&) { if (auto self = weak.lock()) self->host_.rename(); });
+            Put(transcript_->Header(), rename, 0, 3);
+        }
         modelPicker_ = std::make_unique<ChatModelPicker>(
             [weak](int index) {
                 if (auto view = weak.lock(); view && !view->busy_) {
@@ -177,13 +176,24 @@ namespace winrt::Folia::chat {
                 }
             },
             [weak] { if (auto view = weak.lock()) view->host_.settings(); });
+        modelPicker_->SetPalette(palette_);
         Put(bar_, modelPicker_->Element(), 0, 3);
+        split_.Style(settings_ui::ResourceStyle(L"ChatActionStyle"));
+        auto splitIcon = MakeWorkspaceIcon(WorkspaceIcon::SplitEditor);
+        splitIcon.Width(15); splitIcon.Height(15);
+        split_.Content(splitIcon);
+        Label(split_, L"SplitEditor");
+        split_.Visibility(host_.split ? Visibility::Visible : Visibility::Collapsed);
+        split_.Click([weak](auto const&, auto const&) { if (auto self = weak.lock(); self && self->host_.split) self->host_.split(); });
+        Put(transcript_->Header(), split_, 0, 4);
         openTabs_.Text(Localize(L"ChatAllowOpenTabs"));
         web_.Text(Localize(L"ChatAllowSearch"));
         for (auto const& [button, icon, key] : {std::tuple{stop_, WorkspaceIcon::Stop, L"ChatStop"},
             std::tuple{send_, WorkspaceIcon::Send, L"ChatSend"}}) {
             button.Style(settings_ui::ResourceStyle(L"ChatSendStyle"));
-            button.Content(MakeWorkspaceIcon(icon, L"TextOnAccentFillColorPrimaryBrush"));
+            button.Background(palette_.accent);
+            button.Foreground(palette_.onAccent);
+            button.Content(MakeWorkspaceIcon(icon, palette_.onAccent));
             Label(button, key);
         }
         ToolTipService::SetToolTip(send_, box_value(Localize(L"ChatSendKeys")));
@@ -198,8 +208,7 @@ namespace winrt::Folia::chat {
                 view->transcript_->SetInset(args.NewSize().Height + 10);
                 bool narrow = args.NewSize().Width < 450;
                 view->usage_.Visibility(narrow ? Visibility::Collapsed : Visibility::Visible);
-                view->accessLabel_.Visibility(narrow ? Visibility::Collapsed : Visibility::Visible);
-                view->accessLabel_.MaxWidth(150);
+                view->accessLabel_.MaxWidth(narrow ? (std::max)(48., args.NewSize().Width * .22) : 150.);
                 view->modelPicker_->Element().MaxWidth((std::max)(60., (std::min)(230., args.NewSize().Width * 0.44)));
             }
         });
@@ -221,6 +230,11 @@ namespace winrt::Folia::chat {
         RefreshAccessLabel();
         SetBusy(false);
         ArrangeComposer();
+    }
+
+    void ChatView::SetTitle(std::string title) {
+        conversation_.title = std::move(title);
+        transcript_->SetTitle(to_hstring(conversation_.title));
     }
 
     void ChatView::Activate() {
@@ -372,134 +386,27 @@ namespace winrt::Folia::chat {
         stop_.Visibility(busy ? Visibility::Visible : Visibility::Collapsed);
     }
 
-    void ChatView::Send() {
-        if (busy_) return;
-        if (extras_->Pasting()) { Report(Localize(L"ChatPreparingImage")); return; }
-        try {
-            auto question = FieldText(input_);
-            if (question.empty() && extras_->Images().empty()) return;
-            auto active = modelPicker_->SelectedIndex();
-            if (active < 0) { Report(Localize(L"ChatNeedsProvider")); return; }
-            auto [model, profile] = Resolve(routes_.at(active).model.id);
-            if (!model.vision && !extras_->Images().empty()) { Report(Localize(L"ChatNeedsVision")); return; }
-            if (question.size() > maxQuestion) {
-                Report(Localize(L"ChatInvalidPrompt"));
-                return;
-            }
-            {
-                std::lock_guard lock(runningMutex);
-                if (!running.insert(conversation_.id).second) {
-                    Report(Localize(L"ChatAlreadyRunning"));
-                    return;
-                }
-            }
-            auto release = wil::scope_exit([&] { std::lock_guard lock(runningMutex); running.erase(conversation_.id); });
-            std::optional<std::vector<OpenTab>> tabs;
-            auto available = host_.tabs();
-            if (!openTabs_.IsChecked()) std::erase_if(available, [&](auto const& tab) { return !extras_->Mentions(tab); });
-            if (openTabs_.IsChecked() || !available.empty()) tabs = std::move(available);
-            SaveConversationOptions(conversation_);
-            if (transcript_->Empty()) conversation_ = RenameConversation(conversation_.id,
-                question.empty() ? to_string(Localize(L"ChatImageMessage")) : TitleFrom(question), true);
-            Entry entry{MessageRole::User, std::move(question)};
-            auto rollback = wil::scope_exit([&] {
-                for (auto const& image : entry.images) DeleteFileW(AttachmentPath(conversation_.id, image).c_str());
-            });
-            for (auto const& image : extras_->Images()) entry.images.push_back(StoreImage(conversation_.id, image.png));
-            AppendEntry(conversation_.id, entry);
-            rollback.release();
-            extras_->Clear();
-            input_.Text({});
-            transcript_->Refresh(true);
-            transcript_->Begin();
-            ArrangeComposer();
-            host_.changed(conversation_);
-            cancellation_ = {};
-            SetBusy(true);
-            Report({});
-            Execute(weak_from_this(), conversation_, std::move(profile), std::move(model), std::move(tabs),
-                cancellation_.get_token(), root_.DispatcherQueue());
-            release.release();
-        } catch (std::exception const& error) { SetBusy(false); Report(to_hstring(error.what())); }
-        catch (hresult_error const& error) { SetBusy(false); Report(error.message()); }
+    void ChatView::Command(std::string const& name) {
+        if (name == "/new" && host_.newChat) host_.newChat();
+        else if (name == "/model" && !busy_) modelPicker_->Open();
+        else if (name == "/access" && !busy_) accessChip_.Flyout().ShowAt(accessChip_);
+        else if (name == "/latest") transcript_->Latest();
     }
 
-    fire_and_forget ChatView::Execute(std::weak_ptr<ChatView> weak, Conversation conversation, ModelProfile profile, ConfiguredModel model,
-        std::optional<std::vector<OpenTab>> tabs, std::stop_token stop,
-        Microsoft::UI::Dispatching::DispatcherQueue queue) {
-        auto release = wil::scope_exit([&] { std::lock_guard lock(runningMutex); running.erase(conversation.id); });
-        co_await resume_background();
-        std::wstring error;
-        std::optional<Entry> answer;
-        Entry partial{MessageRole::Assistant};
-        bool started = false;
+    fire_and_forget ChatView::PickImages() {
+        auto weak = weak_from_this();
         try {
-            auto history = LoadHistory(conversation.id);
-            auto tools = MakeTools(std::move(tabs), conversation.folder);
-            Options options{model.upstream, model.ResolveEffort(conversation.effort),
-                            conversation.search && CanUseHostedSearch(model, profile)};
-            options.requestReasoningSummary = profile.protocol == folia::ai::ApiProtocol::Responses;
-            // A UTF-8 byte budget conservatively bounds text tokens without guessing the upstream tokenizer.
-            if (model.maxInputTokens) options.inputBytes = *model.maxInputTokens;
-            if (model.maxOutputTokens) options.outputTokens = (std::min)(options.outputTokens, *model.maxOutputTokens);
-            if (model.vision) options.loadImage = [&](std::string const& image) { return LoadImage(conversation.id, image); };
-            std::string preview, reasoning;
-            auto nextPaint = std::chrono::steady_clock::time_point{};
-            auto publish = [&](ProgressKind kind, std::string_view text) {
-                bool delta = kind == ProgressKind::TextDelta || kind == ProgressKind::ReasoningDelta;
-                if (kind == ProgressKind::StepStarted) { preview.clear(); reasoning.clear(); nextPaint = {}; }
-                if (delta) {
-                    auto& part = kind == ProgressKind::TextDelta ? preview : reasoning;
-                    part.append(text);
-                    auto now = std::chrono::steady_clock::now();
-                    if (now < nextPaint) return;
-                    nextPaint = now + std::chrono::milliseconds(45);
-                    text = part;
-                    kind = kind == ProgressKind::TextDelta ? ProgressKind::TextSnapshot : ProgressKind::ReasoningSnapshot;
-                }
-                auto value = to_hstring(text);
-                queue.TryEnqueue([weak, kind, value] {
-                    if (auto view = weak.lock(); view && view->busy_) {
-                        if (kind == ProgressKind::InputUsage) {
-                            view->usedTokens_ = std::stoull(value.c_str());
-                            view->usageModel_ = view->conversation_.model;
-                            view->UpdateUsage();
-                        } else view->transcript_->Progress(kind, value);
-                    }
-                });
-            };
-            auto request = [&](auto const& wire, auto token, folia::ai::agent::Progress const& progress) {
-                return folia::platform::models::Request(profile.baseUrl, profile.protocol, wire, ProfileKey(profile), token, {},
-                    profile.fullUrl, [&](folia::ai::StreamEvent const& event) {
-                        if (!progress) return;
-                        if (event.kind == folia::ai::StreamEventKind::TextDelta) progress(ProgressKind::TextDelta, event.text);
-                        if (event.kind == folia::ai::StreamEventKind::ReasoningDelta) progress(ProgressKind::ReasoningDelta, event.text);
-                    });
-            };
-            started = true;
-            answer = folia::ai::agent::Run(history, options, tools, request, publish, stop, &partial);
-            answer->modelId = model.id;
-            started = false;
-            AppendEntry(conversation.id, *answer, &history);
-        } catch (std::exception const& exception) { answer.reset(); error = to_hstring(exception.what()); }
-        catch (hresult_error const& exception) { answer.reset(); error = exception.message(); }
-        if (!answer && started) {
-            partial.modelId = model.id;
-            partial.interrupted = true;
-            try { AppendEntry(conversation.id, partial); }
-            catch (std::exception const& exception) { error = to_hstring(exception.what()); }
-        }
-        queue.TryEnqueue([weak, answer = std::move(answer), error = std::move(error), cancelled = stop.stop_requested()]() mutable {
-            auto view = weak.lock();
-            if (!view) return;
-            view->SetBusy(false);
-            if (answer) {
-                view->usageModel_ = answer->modelId;
-                view->usedTokens_ = answer->usage.inputTokens;
-                view->UpdateUsage();
+            Windows::Storage::Pickers::FileOpenPicker picker;
+            picker.as<IInitializeWithWindow>()->Initialize(host_.window);
+            for (auto ext : {L".png", L".jpg", L".jpeg", L".webp", L".bmp"}) picker.FileTypeFilter().Append(ext);
+            auto files = co_await picker.PickMultipleFilesAsync();
+            if (auto view = weak.lock(); view && files.Size()) {
+                auto items = single_threaded_vector<Windows::Storage::IStorageItem>();
+                for (auto file : files) items.Append(file.as<Windows::Storage::IStorageItem>());
+                Windows::ApplicationModel::DataTransfer::DataPackage data;
+                data.SetStorageItems(items);
+                view->extras_->PasteImages(data.GetView());
             }
-            view->transcript_->Finish();
-            view->Report(cancelled ? Localize(L"ChatStopped") : hstring(error));
-        });
+        } catch (hresult_error const& error) { if (auto view = weak.lock()) view->Report(error.message()); }
     }
 }

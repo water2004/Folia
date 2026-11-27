@@ -104,7 +104,11 @@ namespace winrt::Folia::implementation
         void ActivateView(std::uint64_t view);
         void NewDocumentInGroup(EditorGroup group);
         void NewDocument();
-        winrt::fire_and_forget OpenWorkspaceFile(std::filesystem::path path, winrt::Folia::WorkspaceOpenMode mode);
+        winrt::fire_and_forget OpenWorkspaceFile(std::filesystem::path path, winrt::Folia::WorkspaceOpenMode mode,
+            std::optional<winrt::Folia::EditorSourceLocation> location = {});
+        void ApplyDocumentLocation();
+        void OpenChatDocument(std::uint64_t chatDocument, std::string_view tabKey, std::filesystem::path const&, EditorSourceLocation);
+        std::uint64_t lastEditorDocument = 0;
         winrt::fire_and_forget LoadWorkspaceDocument(std::shared_ptr<winrt::Folia::WorkspaceDocument> document);
         void UpdateWorkspaceContent();
         void ClearImagePreview();

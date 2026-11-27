@@ -116,6 +116,7 @@ namespace winrt::Folia::implementation {
             }
             ClearImagePreview();
         }
+        if (previous->editor) lastEditorDocument = previous->id;
         const bool enteringSettings = document->kind == WorkspaceTabKind::Settings;
         const bool leavingSettings = previous->kind == WorkspaceTabKind::Settings;
         if (enteringSettings) previousDocumentTab = previous->id;
@@ -183,10 +184,11 @@ namespace winrt::Folia::implementation {
             LocalizeFormat(kind == RecentWorkspaceKind::Folder ? L"StatusFolderFailed" : L"StatusOpenFailed", {error.message()});
     }
 
-    winrt::fire_and_forget MainWindow::OpenWorkspaceFile(std::filesystem::path path, winrt::Folia::WorkspaceOpenMode mode) {
+    winrt::fire_and_forget MainWindow::OpenWorkspaceFile(std::filesystem::path path, winrt::Folia::WorkspaceOpenMode mode,
+        std::optional<winrt::Folia::EditorSourceLocation> location) {
         try {
             if (closePending || closingDocument || windowClosed || relocatingFiles) co_return;
-            if (winrt::Folia::ClassifyWorkspaceFile(path) == winrt::Folia::WorkspaceFileKind::Other) {
+            if (!location && winrt::Folia::ClassifyWorkspaceFile(path) == winrt::Folia::WorkspaceFileKind::Other) {
                 if (mode == winrt::Folia::WorkspaceOpenMode::Keep) {
                     auto lifetime = get_strong();
                     auto file = co_await Windows::Storage::StorageFile::GetFileFromPathAsync(path.native());
@@ -201,11 +203,13 @@ namespace winrt::Folia::implementation {
             auto result = workspaceDocuments.Open(path, mode, [this, group](auto candidate) {
                 return editorGroups.ViewFor(group, candidate) && editorGroups.ViewCount(candidate) == 1;
             });
+            if (location && result.document->editor) result.document->editor->pendingLocation = location;
             auto id = result.document->id;
             auto view = editorGroups.Add(group, id);
             if (editorGroups.ViewCount(id) > 1) workspaceDocuments.Keep(id);
             ActivateView(view);
             RefreshDocumentTabs();
+            if (location) ApplyDocumentLocation();
             if (result.document->editor && result.document->editor->loaded)
                 recentWorkspace.Remember(RecentWorkspaceKind::File, result.document->path);
             if (result.replaced) {
@@ -247,6 +251,18 @@ namespace winrt::Folia::implementation {
         UpdateLoadingState();
         UpdateDocumentInfo();
         RenderEditorSurface();
+        if (editor.loaded) ApplyDocumentLocation();
+    }
+
+    void MainWindow::ApplyDocumentLocation() {
+        auto doc = workspaceDocuments.Active();
+        if (!doc->editor || !doc->editor->loaded || !doc->editor->pendingLocation) return;
+        auto location = *std::exchange(doc->editor->pendingLocation, std::nullopt);
+        if (location.kind == EditorSourceLocation::Kind::Document) return;
+        doc->editor->session.JumpToSourceLocation(location);
+        RenderEditorSurface();
+        if (editorRenderer.ScrollToPosition(doc->editor->session.Selection().active, EditorScrollAlignment::Start)) RenderEditorSurface();
+        EditorSurface().Focus(Microsoft::UI::Xaml::FocusState::Programmatic);
     }
 
     void MainWindow::UpdateLoadingState() {
@@ -263,7 +279,7 @@ namespace winrt::Folia::implementation {
         SaveAsButton().IsEnabled(editor && !loading);
         SourceModeButton().IsEnabled(editor && !loading);
         EncodingButton().IsEnabled(editor && !loading && editor->session.HasFile());
-        SplitEditorButton().IsEnabled(movable && !editorGroups.IsSplit() && !loading && workspaceDocuments.Active()->kind != WorkspaceTabKind::Chat && !SettingsActive());
+        SplitEditorButton().IsEnabled(movable && !editorGroups.IsSplit() && !loading && !SettingsActive());
         QueueOtherGroupRender();
     }
 }

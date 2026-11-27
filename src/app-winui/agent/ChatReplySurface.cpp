@@ -13,10 +13,12 @@ namespace winrt::Folia::chat {
 
     std::shared_ptr<ChatReplySurface> ChatReplySurface::Create(std::string const& markdown, folia::ThemeProfile const& theme) {
         auto self = std::make_shared<ChatReplySurface>();
+        self->markdown_ = markdown;
         auto text = to_hstring(markdown);
         self->session_.SetText(text);
         self->SetTheme(theme);
         Automation::AutomationProperties::SetName(self->paper_, text);
+        self->paper_.Name(L"ChatMarkdownReply");
         self->paper_.Height(32);
         self->paper_.Background(Media::SolidColorBrush(Microsoft::UI::Colors::Transparent()));
         self->slice_.Height(1);
@@ -40,11 +42,26 @@ namespace winrt::Folia::chat {
         return self;
     }
 
+    void ChatReplySurface::AppendMarkdown(std::string_view addition) {
+        if (addition.empty()) return;
+        if (!stream_) stream_ = session_.BeginMarkdownStream();
+        markdown_.append(addition);
+        session_.AppendMarkdown(*stream_, addition);
+        Draw(true);
+    }
+
+    void ChatReplySurface::Seal() {
+        if (stream_ && stream_->accepted != stream_->source.size()) session_.SetText(to_hstring(markdown_));
+        stream_.reset();
+        Automation::AutomationProperties::SetName(paper_, to_hstring(markdown_));
+        Draw(true);
+    }
+
     bool ChatReplySurface::CopySelection() {
         if (!session_.HasSelection()) return false;
         using namespace Windows::ApplicationModel::DataTransfer;
         DataPackage data;
-        data.SetText(to_hstring(session_.SelectedTextUtf8()));
+        data.SetText(to_hstring(session_.SelectedDisplayText()));
         Clipboard::SetContent(data);
         return true;
     }
@@ -89,6 +106,10 @@ namespace winrt::Folia::chat {
             e.Handled(true);
             if (!click) co_return;
             auto action = self->session_.InteractionAt(*hit);
+            if (action && action->link && action->link->starts_with("folia-doc:") && self->openDocument) {
+                self->openDocument(*action->link);
+                co_return;
+            }
             if (action && action->link && (action->link->starts_with("https://") || action->link->starts_with("http://"))) {
                 try { co_await Windows::System::Launcher::LaunchUriAsync(Windows::Foundation::Uri(to_hstring(*action->link))); }
                 catch (hresult_error const&) {}
@@ -110,7 +131,7 @@ namespace winrt::Folia::chat {
             if (auto self = weak.lock(); self && !self->CopySelection()) {
                 using namespace Windows::ApplicationModel::DataTransfer;
                 DataPackage data;
-                data.SetText(Automation::AutomationProperties::GetName(self->paper_));
+                data.SetText(to_hstring(self->markdown_));
                 Clipboard::SetContent(data);
             }
         });
@@ -161,6 +182,7 @@ namespace winrt::Folia::chat {
         auto frame = session_.RenderFrame();
         if (!session_.HasSelection()) frame.selection = {};
         frame.allowImageResources = false;
+        frame.readOnlyPresentation = true;
         renderer_->Render(frame);
         auto measured = (std::max)(1., std::ceil(static_cast<double>(renderer_->DocumentHeight())));
         if (height != measured) paper_.Height(measured);

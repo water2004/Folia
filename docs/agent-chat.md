@@ -16,7 +16,7 @@ the model name to switch to another enabled model. The context indicator shows
 the input tokens reported for the latest request to that model and its configured
 window. Hover over the indicator for exact counts.
 
-Press Enter to send or Shift+Enter for a new line. Type `@` to select an open
+Press Enter to send or Shift+Enter for a new line. The + menu attaches images or inserts a reference. Type `@` to select an open
 Markdown document or a path inside the selected workspace. Use the arrow keys
 to choose a suggestion and Tab or Enter to insert it. Selecting an open tab grants
 access to that specific tab for this turn. Paste a screenshot or copied image
@@ -31,10 +31,24 @@ Folia verifies the resolved path using the handle used for the read.
 
 The conversation opens on the four most recent turns. The page controls retrieve
 earlier turns from disk. While a reply is streaming, scrolling up holds your
-place. Select the down arrow to return to the latest output. Expand a thinking
-or tool row to inspect what the provider returned or what the tool read.
-Right-click a message to copy it. Stopping a reply preserves the output received
-so far.
+place. Select the down arrow to return to the latest output. The toolbar
+can open a document alongside the conversation. Selecting a document citation
+opens or focuses that document at the cited location.
+
+Markdown is rendered as the response arrives. Between text passages, one line
+shows the current activity and then summarizes that group. Expand it for the
+individual actions and their details. A single action opens its details directly.
+A reasoning caption uses an explicit provider summary when available. Other
+thinking text stays in the disclosure. Folia does not request an extra summary
+for the activity line. The effort track and the send and stop buttons follow `colors.shellAccent` in the active theme.
+Right-click a message to copy it. A connection failure appears below the affected
+reply. Transient failures before output can retry automatically. After partial
+output, Retry starts a new attempt and preserves the interrupted reply.
+The configured maximum output applies independently to each model request.
+
+Type `/` for conversation commands, including model selection and access settings.
+After the first successful reply, Folia requests a short title from the configured
+model. Renaming the conversation takes precedence over the generated title.
 
 Hosted web search requires permission on the provider connection, a model that
 supports it, and opt-in in the conversation. Responses uses the hosted

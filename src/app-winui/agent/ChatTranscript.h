@@ -1,6 +1,6 @@
 #pragma once
 #include "agent/ChatStore.h"
-#include "agent/ChatReplySurface.h"
+#include "agent/ChatTurnView.h"
 
 namespace winrt::Folia::chat {
     class ChatTranscript : public std::enable_shared_from_this<ChatTranscript> {
@@ -13,27 +13,35 @@ namespace winrt::Folia::chat {
         void Begin();
         void Progress(folia::ai::agent::ProgressKind, hstring const&);
         void Finish();
+        void Latest();
+        auto Header() const { return header_; }
+        void SetTitle(hstring const& text) { title_.Text(text); }
+        using Documents = std::vector<folia::ai::agent::DocumentReference>;
+        std::function<void(std::string const&, Documents const&)> openDocument;
+        std::function<void()> retry;
+        void AddReference(folia::ai::agent::DocumentReference ref) { if (liveTurn_) liveTurn_->AddReference(std::move(ref)); }
         bool Empty() const { return page_.entries.empty(); }
         Entry const* LastReply() const;
+        Entry const* LastQuestion() const;
     private:
         void Build();
         void Show(bool navigate);
         void Follow();
-        void Latest();
-        void Append(Entry const&);
+        void Append(Entry const&, bool latest);
         void UpdateNavigation();
         std::string id_;
         folia::ThemeProfile theme_;
         HistoryPage page_;
         std::vector<std::uintmax_t> boundaries_;
-        std::vector<std::shared_ptr<ChatReplySurface>> surfaces_;
-        Microsoft::UI::Xaml::Controls::Grid root_;
+        std::vector<std::shared_ptr<ChatTurnView>> turns_;
+        std::shared_ptr<ChatTurnView> MakeTurn();
+        Microsoft::UI::Xaml::Controls::Grid root_, header_;
         Microsoft::UI::Xaml::Controls::ScrollViewer scroll_;
         Microsoft::UI::Xaml::Controls::StackPanel column_, messages_, live_, nav_;
-        Microsoft::UI::Xaml::Controls::Button older_, newer_, latest_;
-        Microsoft::UI::Xaml::Controls::TextBlock pageLabel_, working_, liveText_{nullptr}, thinking_{nullptr};
-        Microsoft::UI::Xaml::Controls::StackPanel liveTool_{nullptr};
-        Microsoft::UI::Xaml::FrameworkElement thinkingRow_{nullptr};
+        Microsoft::UI::Xaml::Controls::Button older_, newer_, latest_, retryButton_{nullptr};
+        Microsoft::UI::Xaml::Controls::TextBlock pageLabel_, working_, title_;
+        std::shared_ptr<ChatTurnView> liveTurn_;
+        bool finishing_ = false;
         bool following_ = true, posted_ = false, busy_ = false;
         double offset_ = 0;
     };

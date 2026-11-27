@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "agent/ChatModelPicker.h"
 #include "agent/ChatControls.h"
+#include "agent/ChatPalette.h"
 #include <wil/resource.h>
 
 namespace winrt::Folia::chat {
@@ -36,8 +37,20 @@ namespace winrt::Folia::chat {
         models_ = panel.FindName(L"ModelsPanel").as<StackPanel>();
         missingModels_ = panel.FindName(L"MissingModels").as<StackPanel>();
         list_ = panel.FindName(L"ModelList").as<ListView>();
-        efforts_ = panel.FindName(L"Efforts").as<ListView>();
-        panel.FindName(L"EffortTitle").as<TextBlock>().Text(Localize(L"AIReasoning"));
+        efforts_ = panel.FindName(L"Efforts").as<Slider>();
+        track_ = panel.FindName(L"Track").as<Grid>();
+        scale_ = panel.FindName(L"Scale").as<Grid>();
+        fill_ = panel.FindName(L"Fill").as<Border>();
+        knob_ = panel.FindName(L"Knob").as<Border>();
+        rail_ = panel.FindName(L"Rail").as<Border>();
+        ticks_ = panel.FindName(L"Ticks").as<Canvas>();
+        effortTitle_ = panel.FindName(L"EffortTitle").as<TextBlock>();
+        auto outline = panel.FindName(L"FocusOutline").as<Border>();
+        efforts_.GotFocus([outline](auto const& sender, auto const&) {
+            outline.Visibility(sender.template as<Slider>().FocusState() == FocusState::Keyboard ? Visibility::Visible : Visibility::Collapsed);
+        });
+        efforts_.LostFocus([outline](auto const&, auto const&) { outline.Visibility(Visibility::Collapsed); });
+        trackSize_ = track_.SizeChanged(winrt::auto_revoke, [this](auto const&, auto const&) { DrawScale(); });
         currentModel_ = panel.FindName(L"CurrentModel").as<TextBlock>();
         modelLink_ = panel.FindName(L"ChooseModel").as<Button>();
         back_ = panel.FindName(L"BackToReasoning").as<Button>();
@@ -63,13 +76,12 @@ namespace winrt::Folia::chat {
             ShowModels(false);
             modelLink_.Focus(FocusState::Programmatic);
         });
-        effortChanged_ = efforts_.SelectionChanged(winrt::auto_revoke, [this, selectEffort = std::move(selectEffort)](auto const&, auto const&) {
-            auto index = efforts_.SelectedIndex();
-            if (updating_ || index < 0) return;
+        effortChanged_ = efforts_.ValueChanged(winrt::auto_revoke, [this, selectEffort = std::move(selectEffort)](auto const&, auto const&) {
+            auto index = static_cast<std::size_t>(std::llround(efforts_.Value()));
+            if (updating_ || index >= levels_.size()) return;
             auto level = levels_.at(index);
             PresentReasoning(level);
             selectEffort(level);
-            flyout_.Hide();
         });
         modelChanged_ = list_.SelectionChanged(winrt::auto_revoke, [this, selectModel = std::move(selectModel)](auto const&, auto const&) {
             if (updating_ || SelectedIndex() < 0) return;
@@ -149,10 +161,45 @@ namespace winrt::Folia::chat {
         if (!levels_.empty() && defaultEffort_.empty()) levels_.emplace(levels_.begin());
         {
             auto restore = wil::scope_exit([&, previous = std::exchange(updating_, true)] { updating_ = previous; });
-            efforts_.Items().Clear();
-            for (auto const& level : levels_) efforts_.Items().Append(box_value(EffortLabel(level)));
+            efforts_.Maximum(levels_.size() > 1 ? static_cast<double>(levels_.size() - 1) : 1.);
+            scale_.Visibility(levels_.size() > 1 ? Visibility::Visible : Visibility::Collapsed);
+            ticks_.Children().Clear();
+            for (std::size_t i = 0; i < levels_.size(); ++i) {
+                Border tick;
+                tick.Width(3); tick.Height(3); tick.CornerRadius({2,2,2,2}); tick.Opacity(.42);
+                ticks_.Children().Append(tick);
+            }
         }
         PresentReasoning(overrideEffort);
+    }
+
+    void ChatModelPicker::SetPalette(ChatPalette const& palette) {
+        fill_.Background(palette.accent);
+        rail_.Background(palette.track);
+        rail_.BorderBrush(palette.border);
+        knob_.Background(palette.surface);
+        knob_.BorderBrush(palette.border);
+        onAccent_ = palette.onAccent;
+        muted_ = palette.muted;
+        DrawScale();
+    }
+
+    void ChatModelPicker::DrawScale() {
+        if (levels_.size() < 2 || !track_.ActualWidth()) return;
+        auto w = track_.ActualWidth();
+        constexpr double inset = 12;
+        auto step = (w - 2 * inset) / static_cast<double>(levels_.size() - 1);
+        auto center = inset + efforts_.Value() * step;
+        auto value = efforts_.Value();
+        fill_.Width(value == 0 ? 0. : value == efforts_.Maximum() ? w : center);
+        Canvas::SetLeft(knob_, track_.Margin().Left + center - knob_.Width() / 2);
+        for (unsigned i = 0; i < ticks_.Children().Size(); ++i) {
+            auto tick = ticks_.Children().GetAt(i).as<Border>();
+            tick.Background(i < value ? onAccent_ : muted_);
+            tick.Visibility(i == value ? Visibility::Collapsed : Visibility::Visible);
+            Canvas::SetLeft(tick, inset + step*i - 1.5);
+            Canvas::SetTop(tick, 8.5);
+        }
     }
 
     void ChatModelPicker::PresentReasoning(std::string_view overrideEffort) {
@@ -161,7 +208,10 @@ namespace winrt::Folia::chat {
         auto effective = overrideEffort.empty() ? std::string_view(defaultEffort_) : overrideEffort;
         auto label = EffortLabel(effective);
         auto match = std::ranges::find(levels_, effective);
-        efforts_.SelectedIndex(match == levels_.end() ? -1 : static_cast<int>(match - levels_.begin()));
+        efforts_.Value(match == levels_.end() ? 0. : static_cast<double>(match - levels_.begin()));
+        effortTitle_.Text(label);
+        Automation::AutomationProperties::SetHelpText(efforts_, label);
+        DrawScale();
         chipEffort_.Text(label);
         chipEffort_.Visibility(levels_.empty() ? Visibility::Collapsed : Visibility::Visible);
         auto summary = chipName_.Text();

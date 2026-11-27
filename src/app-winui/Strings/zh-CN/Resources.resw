@@ -590,25 +590,16 @@
   <data name="ChatManageProviders" xml:space="preserve"><value>管理供应商</value></data>
   <data name="ChatModelSource" xml:space="preserve"><value>模型来源</value></data>
   <data name="SettingsRelated" xml:space="preserve"><value>相关设置</value></data>
-  <data name="ChatThinking" xml:space="preserve"><value>思考</value></data>
   <data name="ChatNewerMessages" xml:space="preserve"><value>较新的对话</value></data>
   <data name="ChatLatest" xml:space="preserve"><value>回到最新消息</value></data>
   <data name="ChatRecent" xml:space="preserve"><value>最近的对话</value></data>
   <data name="ChatEarlierPage" xml:space="preserve"><value>往前 {0} 页</value></data>
-  <data name="ChatToolTabs" xml:space="preserve"><value>查看打开的文档</value></data>
-  <data name="ChatToolReadTab" xml:space="preserve"><value>读取文档</value></data>
-  <data name="ChatToolOutline" xml:space="preserve"><value>查看大纲</value></data>
-  <data name="ChatToolSearchTab" xml:space="preserve"><value>搜索文档</value></data>
-  <data name="ChatToolDirectory" xml:space="preserve"><value>浏览文件夹</value></data>
-  <data name="ChatToolReadFile" xml:space="preserve"><value>读取文件</value></data>
-  <data name="ChatToolFindFile" xml:space="preserve"><value>搜索文件</value></data>
   <data name="ChatToolFailed" xml:space="preserve"><value>失败</value></data>
   <data name="ChatOpenTab" xml:space="preserve"><value>已打开的文档</value></data>
   <data name="ChatOpenTabs" xml:space="preserve"><value>打开的文档</value></data>
   <data name="ChatRemoveImage" xml:space="preserve"><value>移除图片</value></data>
   <data name="ChatNeedsVision" xml:space="preserve"><value>请选择支持视觉输入的模型以发送图片。</value></data>
   <data name="ChatImageLimit" xml:space="preserve"><value>每条消息最多附加四张图片。</value></data>
-  <data name="ChatToolWebSearch" xml:space="preserve"><value>联网搜索</value></data>
   <data name="ChatInterrupted" xml:space="preserve"><value>回复已中断</value></data>
   <data name="ChatPreparingImage" xml:space="preserve"><value>正在准备图片，请稍候。</value></data>
   <data name="ChatSendKeys" xml:space="preserve"><value>发送 (Enter)，换行 (Shift+Enter)</value></data>
@@ -617,4 +608,31 @@
   <data name="ChatNotReported" xml:space="preserve"><value>未报告</value></data>
   <data name="ChatNotConfigured" xml:space="preserve"><value>未设置</value></data>
   <data name="ChatImageMessage" xml:space="preserve"><value>图片</value></data>
+  <data name="ChatRetry" xml:space="preserve"><value>重试</value></data>
+  <data name="ChatRetrying" xml:space="preserve"><value>连接中断，正在重试（{0}/2）…</value></data>
+  <data name="ChatOutputLimit" xml:space="preserve"><value>本次请求已达到模型的输出上限。可以继续提问，让它接着回答。</value></data>
+  <data name="ChatAddContent" xml:space="preserve"><value>添加文件或图片</value></data>
+  <data name="ChatAddImage" xml:space="preserve"><value>添加图片…</value></data>
+  <data name="ChatMissingReference" xml:space="preserve"><value>此文档已无法打开。</value></data>
+  <data name="ChatThinkingNow" xml:space="preserve"><value>正在思考</value></data>
+  <data name="ChatThought" xml:space="preserve"><value>已思考</value></data>
+  <data name="ChatRetried" xml:space="preserve"><value>已重试连接</value></data>
+  <data name="ChatCompacted" xml:space="preserve"><value>已整理较早的对话</value></data>
+  <data name="ChatUnfinished" xml:space="preserve"><value>未完成</value></data>
+  <data name="ChatActionTabsNow" xml:space="preserve"><value>正在查看打开的文档</value></data>
+  <data name="ChatActionTabsDone" xml:space="preserve"><value>已查看打开的文档</value></data>
+  <data name="ChatActionReadNow" xml:space="preserve"><value>正在读取</value></data>
+  <data name="ChatActionReadDone" xml:space="preserve"><value>已读取文档</value></data>
+  <data name="ChatActionOutlineNow" xml:space="preserve"><value>正在查看大纲</value></data>
+  <data name="ChatActionOutlineDone" xml:space="preserve"><value>已查看大纲</value></data>
+  <data name="ChatActionFindNow" xml:space="preserve"><value>正在搜索文档</value></data>
+  <data name="ChatActionFindDone" xml:space="preserve"><value>已搜索文档</value></data>
+  <data name="ChatActionFolderNow" xml:space="preserve"><value>正在浏览文件夹</value></data>
+  <data name="ChatActionFolderDone" xml:space="preserve"><value>已浏览文件夹</value></data>
+  <data name="ChatActionLocateNow" xml:space="preserve"><value>正在定位文件</value></data>
+  <data name="ChatActionLocateDone" xml:space="preserve"><value>已定位文件</value></data>
+  <data name="ChatActionWebNow" xml:space="preserve"><value>正在搜索网页</value></data>
+  <data name="ChatActionWebDone" xml:space="preserve"><value>已搜索网页</value></data>
+  <data name="ChatActionToolNow" xml:space="preserve"><value>正在调用工具</value></data>
+  <data name="ChatActionToolDone" xml:space="preserve"><value>已调用工具</value></data>
 </root>

@@ -12,10 +12,12 @@ namespace winrt::Folia::chat {
             std::function<std::filesystem::path()>, std::function<void(hstring const&)>);
         ~ChatComposerExtras() { lookup_.request_stop(); }
         Microsoft::UI::Xaml::Controls::StackPanel Element() const { return panel_; }
+        bool RunTypedCommand();
         bool HandleKey(Windows::System::VirtualKey);
         bool Mentions(OpenTab const&) const;
         bool Pasting() const { return pasting_; }
         void Clear();
+        std::function<void(std::string const&)> command;
         void BeginMention();
         fire_and_forget PasteImages(Windows::ApplicationModel::DataTransfer::DataPackageView);
         void SetVision(bool);
@@ -27,7 +29,7 @@ namespace winrt::Folia::chat {
         void PaintChoices(bool keepSelection = false);
         void PaintImages();
         fire_and_forget FindFiles(std::filesystem::path, std::string, std::stop_token);
-        struct Choice { std::string title; std::uint64_t tab = 0; };
+        struct Choice { std::string title; std::uint64_t tab = 0; wchar_t const* commandLabel = nullptr; };
         Microsoft::UI::Xaml::Controls::TextBox input_{nullptr};
         Microsoft::UI::Xaml::Controls::StackPanel panel_, thumbnails_;
         Microsoft::UI::Xaml::Controls::ListView list_;
@@ -38,6 +40,7 @@ namespace winrt::Folia::chat {
         std::vector<Microsoft::UI::Xaml::Media::Imaging::BitmapImage> previews_;
         std::vector<Choice> choices_, mentions_;
         std::stop_source lookup_;
+        hstring dismissed_;
         int tokenStart_ = -1, caret_ = -1;
         bool accepting_ = false, vision_ = false, sending_ = false, pasting_ = false;
     };

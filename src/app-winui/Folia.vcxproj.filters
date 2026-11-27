@@ -138,7 +138,16 @@
     <ClInclude Include="agent\ChatModelPicker.h">
       <Filter>Agent Chat</Filter>
     </ClInclude>
+    <ClInclude Include="agent\ChatPalette.h">
+      <Filter>Agent Chat</Filter>
+    </ClInclude>
     <ClInclude Include="agent\ChatReplySurface.h">
+      <Filter>Agent Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="agent\ChatActivityView.h">
+      <Filter>Agent Chat</Filter>
+    </ClInclude>
+    <ClInclude Include="agent\ChatTurnView.h">
       <Filter>Agent Chat</Filter>
     </ClInclude>
     <ClInclude Include="agent\ChatTranscript.h">
@@ -282,10 +291,19 @@
     <ClCompile Include="agent\ChatView.cpp">
       <Filter>Agent Chat</Filter>
     </ClCompile>
+    <ClCompile Include="agent\ChatView.Run.cpp">
+      <Filter>Agent Chat</Filter>
+    </ClCompile>
     <ClCompile Include="agent\ChatModelPicker.cpp">
       <Filter>Agent Chat</Filter>
     </ClCompile>
     <ClCompile Include="agent\ChatReplySurface.cpp">
+      <Filter>Agent Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="agent\ChatActivityView.cpp">
+      <Filter>Agent Chat</Filter>
+    </ClCompile>
+    <ClCompile Include="agent\ChatTurnView.cpp">
       <Filter>Agent Chat</Filter>
     </ClCompile>
     <ClCompile Include="agent\ChatTranscript.cpp">
@@ -941,6 +959,12 @@
     <ClInclude Include="settings\views\SettingsView.h">
       <Filter>Settings\Views</Filter>
     </ClInclude>
+    <ClInclude Include="storage\JsonRecords.h">
+      <Filter>Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="storage\RecordId.h">
+      <Filter>Storage</Filter>
+    </ClInclude>
     <ClInclude Include="storage\AssetPaths.h">
       <Filter>Storage</Filter>
     </ClInclude>
@@ -951,6 +975,9 @@
       <Filter>Editor\Session</Filter>
     </ClInclude>
     <ClInclude Include="editor\session\EditorRenderFrame.h">
+      <Filter>Editor\Session</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\session\EditorSourceLocation.h">
       <Filter>Editor\Session</Filter>
     </ClInclude>
     <ClInclude Include="editor\rendering\EditorStyleSheet.h">

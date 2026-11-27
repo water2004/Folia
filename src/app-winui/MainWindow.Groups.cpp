@@ -130,9 +130,18 @@ namespace winrt::Folia::implementation {
 
     void MainWindow::SplitEditor() {
         if (closePending || closingDocument || relocatingFiles || SettingsActive() || editorGroups.IsSplit()) return;
-        if (workspaceDocuments.Active()->kind == WorkspaceTabKind::Chat) return;
         SaveEditorView(presentedEditorView);
-        auto view = editorGroups.Split();
+        std::uint64_t view{};
+        if (workspaceDocuments.Active()->kind == WorkspaceTabKind::Chat) {
+            auto companion = workspaceDocuments.Find(lastEditorDocument);
+            if (!companion || !companion->editor) {
+                for (auto const& doc : workspaceDocuments.Items() | std::views::reverse)
+                    if (doc->editor) { companion = doc; break; }
+            }
+            if (!companion || !companion->editor) companion = workspaceDocuments.New();
+            workspaceDocuments.Keep(companion->id);
+            view = editorGroups.Add(EditorGroup::Right, companion->id);
+        } else view = editorGroups.Split();
         if (!view) return;
         workspaceDocuments.Keep(workspaceDocuments.Active()->id);
         splitFraction = .5;
