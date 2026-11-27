@@ -29,23 +29,32 @@ function Get-DeploymentFiles {
     $assetPrefix = [System.IO.Path]::Combine($resolvedRoot, 'Assets') + [System.IO.Path]::DirectorySeparatorChar
     $buildOnlyExtensions = @('.exp', '.ilk', '.iobj', '.ipdb', '.lib', '.pdb')
 
+    $files = if ($Kind -eq 'Asset') {
+        $manifest = [xml](Get-Content -LiteralPath (Join-Path $PSScriptRoot '../src/app-winui/DeploymentAssets.props') -Raw)
+        foreach ($group in $manifest.Project.ItemGroup.ChildNodes) {
+            foreach ($pattern in $group.Include.Split(';')) {
+                $relativePattern = $pattern.Substring('Assets\'.Length)
+                $directory = Join-Path $resolvedRoot ([IO.Path]::GetDirectoryName($relativePattern))
+                $matchingFiles = @(Get-ChildItem -LiteralPath $directory -File -Filter ([IO.Path]::GetFileName($relativePattern)) -ErrorAction Stop)
+                if (!$matchingFiles.Count) { throw "Missing deployment asset: $relativePattern" }
+                $matchingFiles
+            }
+        }
+    } else {
+        Get-ChildItem -LiteralPath $resolvedRoot -Recurse -File
+    }
     return @(
-        Get-ChildItem -LiteralPath $resolvedRoot -Recurse -File | ForEach-Object {
+        $files | ForEach-Object {
             $relative = $_.FullName.Substring($rootPrefix.Length).Replace('\', '/')
 
             if ($Kind -eq 'Program') {
                 if ($_.FullName.StartsWith($assetPrefix, [System.StringComparison]::OrdinalIgnoreCase)) { return }
+                if ($relative.StartsWith('build/', [System.StringComparison]::OrdinalIgnoreCase)) { return }
                 if ($buildOnlyExtensions -contains $_.Extension.ToLowerInvariant()) { return }
                 if ($relative -in @('FoliaMathWorkerProbe.exe', 'FoliaMathLayoutProbe.exe')) { return }
                 $topDirectory = $relative.Split('/')[0]
                 if ($relative.Contains('/') -and (Test-CultureDirectory -Name $topDirectory) -and
                     -not $programLanguageLookup.Contains($topDirectory)) { return }
-            }
-            else {
-                if ($relative -ieq 'settings.json' -or $relative -ieq 'settings.json.tmp') { return }
-                if ($relative -ieq 'recent-workspace.json' -or $relative -ieq 'recent-workspace.json.tmp') { return }
-                if ($relative -ieq 'latex/commands.user.json' -or $relative -ieq 'latex/commands.user.json.tmp') { return }
-                if ($relative.StartsWith('themes/custom/', [System.StringComparison]::OrdinalIgnoreCase)) { return }
             }
 
             $directory = [System.IO.Path]::GetDirectoryName($relative)

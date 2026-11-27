@@ -149,7 +149,12 @@ function Assert-Location([string]$Directory) {
 
 New-Item -ItemType Directory -Force -Path $program, $assets | Out-Null
 Set-Content -LiteralPath "$program/Folia.exe" -Value 'isolated install directory fixture'
-Set-Content -LiteralPath "$assets/fixture.txt" -Value 'isolated assets'
+. (Join-Path $root 'tools/Get-DeploymentFiles.ps1')
+foreach ($asset in (Get-DeploymentFiles -Root (Join-Path $root 'src/app-winui/Assets') -Kind Asset)) {
+    $target = Join-Path $assets $asset.Relative
+    [void][IO.Directory]::CreateDirectory((Split-Path -Parent $target))
+    Copy-Item -LiteralPath $asset.Source -Destination $target
+}
 & (Join-Path $root 'tools/build-installer-actions.ps1')
 try {
     $first = Build-Package 'first'

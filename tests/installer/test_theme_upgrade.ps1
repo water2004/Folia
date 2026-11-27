@@ -13,8 +13,11 @@ $upgradeCode = [guid]::NewGuid().ToString()
 $cleanupGuid = [guid]::NewGuid().ToString()
 $componentGuids = @{}
 $products = @()
+$privateRecords = @('ai-models/providers/local.json', 'agent-chat/conversations/local.jsonl')
 $builtInThemes = @(Get-ChildItem (Join-Path $root 'src/app-winui/Assets/themes') -File |
     Where-Object { $_.Extension -in '.json', '.png' })
+. (Join-Path $root 'tools/Get-DeploymentFiles.ps1')
+$releaseAssets = @(Get-DeploymentFiles -Root (Join-Path $root 'src/app-winui/Assets') -Kind Asset)
 
 function Assert([bool]$Condition, [string]$Message) {
     if (-not $Condition) { throw $Message }
@@ -34,6 +37,13 @@ function Build-Package([string]$Name, [bool]$OldSchema) {
     $assets = Join-Path $directory 'assets'
     $program = Join-Path $directory 'program'
     New-Item -ItemType Directory -Force -Path $program, "$assets/themes/custom", "$assets/latex" | Out-Null
+    foreach ($asset in $releaseAssets) {
+        $target = Join-Path $assets $asset.Relative
+        [void][IO.Directory]::CreateDirectory((Split-Path -Parent $target))
+        Copy-Item -LiteralPath $asset.Source -Destination $target
+    }
+    [void][IO.Directory]::CreateDirectory("$program/build/tests")
+    Set-Content -LiteralPath "$program/build/tests/screenshot.png" -Value 'test output'
     Set-Content -LiteralPath "$program/fixture.txt" -Value 'isolated installer test'
     foreach ($theme in $builtInThemes) {
         if ($OldSchema -and $theme.Extension -eq '.json') {
@@ -54,13 +64,20 @@ function Build-Package([string]$Name, [bool]$OldSchema) {
         Copy-Item -LiteralPath "$root/src/app-winui/Assets/latex/commands.json" -Destination "$assets/latex/commands.json"
     }
     Set-Content -LiteralPath "$assets/latex/commands.user.json" -Value 'must not be packaged'
+    foreach ($private in $privateRecords) {
+        $target = Join-Path $assets $private
+        [void][IO.Directory]::CreateDirectory((Split-Path -Parent $target))
+        Set-Content -LiteralPath $target -Value 'must not be packaged'
+    }
     $payload = Join-Path $directory 'Payload.wxs'
     & (Join-Path $root 'tools/Generate-WixPayload.ps1') -ProgramRoot $program -AssetsRoot $assets -OutputPath $payload
     [xml]$xml = Get-Content -LiteralPath $payload -Raw
     $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
     $ns.AddNamespace('w', 'http://wixtoolset.org/schemas/v4/wxs')
-    Assert ($xml.SelectNodes('//w:File', $ns).Count -eq ($builtInThemes.Count + 2)) 'Only built-in themes, catalog and test program may be packaged'
-    Assert ($xml.SelectNodes('//w:RemoveFile[@On="install"]', $ns).Count -eq ($builtInThemes.Count + 1)) 'Every built-in profile and preview needs an install replacement rule'
+    $expectedFiles = @($releaseAssets.Source | ForEach-Object { [IO.Path]::GetFileName($_) }) + @('fixture.txt')
+    $packagedFiles = @($xml.SelectNodes('//w:File', $ns) | ForEach-Object { [IO.Path]::GetFileName($_.GetAttribute('Source')) })
+    Assert (-not (Compare-Object $expectedFiles $packagedFiles)) 'The payload must contain exactly the shipped resources and test program'
+    Assert ($xml.SelectNodes('//w:RemoveFile[@On="install"]', $ns).Count -eq ($builtInThemes.Count + 3)) 'Built-in themes and catalogs must be replaced on upgrade'
     foreach ($component in $xml.SelectNodes('//w:Component', $ns)) {
         $id = $component.GetAttribute('Id')
         if (-not $componentGuids.ContainsKey($id)) { $componentGuids[$id] = [guid]::NewGuid().ToString() }
@@ -116,6 +133,11 @@ try {
     [IO.File]::WriteAllBytes("$themeDirectory/custom/reader.png", $custom)
     [IO.File]::WriteAllBytes("$installed/Assets/settings.json", $settings)
     [IO.File]::WriteAllBytes("$installed/Assets/latex/commands.user.json", $settings)
+    foreach ($relative in $privateRecords) {
+        $target = Join-Path "$installed/Assets" $relative
+        [void][IO.Directory]::CreateDirectory((Split-Path -Parent $target))
+        [IO.File]::WriteAllBytes($target, $settings)
+    }
     Add-Content -LiteralPath "$installed/Assets/latex/commands.json" -Value 'modified old built-in catalog'
     (Get-Item -LiteralPath "$installed/Assets/latex/commands.json").CreationTimeUtc = [DateTime]::UtcNow.AddDays(-1)
     foreach ($theme in Get-ChildItem -LiteralPath $themeDirectory -File) {
@@ -134,6 +156,10 @@ try {
             (Get-Item -LiteralPath "$installed/Assets/latex/commands.json").CreationTimeUtc = [DateTime]::UtcNow.AddDays(-1)
             Run-Msi @('/i', "`"$new`"", 'REINSTALL=ALL', 'REINSTALLMODE=omus', "TESTROOT=`"$installed`"") 'repair.log'
         }
+        foreach ($relative in $privateRecords) {
+            $actual = [IO.File]::ReadAllBytes((Join-Path "$installed/Assets" $relative))
+            Assert ([Convert]::ToBase64String($actual) -ceq [Convert]::ToBase64String($settings)) "$phase changed $relative"
+        }
         foreach ($theme in $builtInThemes) {
             Assert ((Get-FileHash $theme.FullName).Hash -eq (Get-FileHash "$themeDirectory/$($theme.Name)").Hash) "$phase did not replace $($theme.Name)"
         }
@@ -143,7 +169,7 @@ try {
         Assert ((Get-FileHash "$root/src/app-winui/Assets/latex/commands.json").Hash -eq (Get-FileHash "$installed/Assets/latex/commands.json").Hash) "$phase did not replace the built-in catalog"
         Assert ([Convert]::ToBase64String([IO.File]::ReadAllBytes("$installed/Assets/latex/commands.user.json")) -ceq [Convert]::ToBase64String($settings)) "$phase changed user commands or usage"
     }
-    Write-Host 'PASS: upgrade and repair replace built-in themes and math catalog; custom themes, settings, commands and usage are unchanged.'
+    Write-Host 'PASS: upgrade and repair replace built-in themes and math catalog; custom themes, settings, commands, AI models and chats are preserved.'
 } finally {
     # Remove only products created by this run; keep logs/fixtures under build.
     foreach ($product in $products) {

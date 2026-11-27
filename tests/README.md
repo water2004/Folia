@@ -230,6 +230,12 @@ Application tests require the existing `setup.ps1` and app build workflow. Their
 runners use the real UI dispatcher and production objects; this portable test
 refactor does not claim Windows SDK or application/UI validation.
 
+After building both Windows distributions, run
+`python tests/installer/test_release_payload.py <msi> <portable-zip>` to compare
+their payloads, verify their SHA-256 sidecars, and check the extracted files
+for embedded workspace and user-profile paths. `--forbid-path <directory>`
+also checks a separate dependency or build directory.
+
 ## Native test conventions
 
 Every test includes `support/folia_test.hpp`, which imports the repository's

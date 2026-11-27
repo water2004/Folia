@@ -939,6 +939,7 @@
     <PRIResource Include="Strings\en-US\Resources.resw" />
     <PRIResource Include="Strings\zh-CN\Resources.resw" />
   </ItemGroup>
+  <Import Project="DeploymentAssets.props" />
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="..\..\LICENSE">
@@ -946,34 +947,7 @@
       <TargetPath>LICENSE.txt</TargetPath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Assets\licenses\LICENSE.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\licenses\THIRD-PARTY-NOTICES.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\branding\Folia.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\branding\Folia.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\branding\Folia.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\themes\*.json;Assets\themes\*.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\themes\resources\icons.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\provider-presets.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\latex\commands.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Assets\completion.json">
+    <None Include="@(FoliaResource)">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\platform\windows\media\svg\usvg-normalizer\Cargo.toml" />
@@ -984,13 +958,7 @@
     <None Include="$(FoliaBuildRoot)..\dependencies\usvg-normalizer\release\folia_svg_normalizer.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Assets\LockScreenLogo.scale-200.png" />
-    <Image Include="Assets\SplashScreen.scale-200.png" />
-    <Image Include="Assets\Square150x150Logo.scale-200.png" />
-    <Image Include="Assets\Square44x44Logo.scale-200.png" />
-    <Image Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Image Include="Assets\StoreLogo.png" />
-    <Image Include="Assets\Wide310x150Logo.scale-200.png" />
+    <Image Include="@(FoliaPackageImage)" />
   </ItemGroup>
   <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <ProjectCapability Include="Msix" />
@@ -1055,12 +1023,13 @@
   </Target>
   <Target Name="CopyConfiguredFoliaAssets" AfterTargets="Build" Condition="'$(FoliaAssetsDirectory)'!='' and '$(FoliaDeployAssets)'=='true'">
     <ItemGroup>
-      <FoliaDeployableAsset Include="$(ProjectDir)Assets\**\*"
-        Exclude="$(ProjectDir)Assets\settings.json;$(ProjectDir)Assets\recent-workspace.json;$(ProjectDir)Assets\recent-workspace.json.tmp;$(ProjectDir)Assets\themes\custom\**\*" />
+      <FoliaDeployableAsset Include="@(FoliaResource);@(FoliaPackageImage)">
+        <AssetRelative>$([MSBuild]::MakeRelative('$(ProjectDir)Assets', '%(FullPath)'))</AssetRelative>
+      </FoliaDeployableAsset>
     </ItemGroup>
     <Copy
       SourceFiles="@(FoliaDeployableAsset)"
-      DestinationFiles="@(FoliaDeployableAsset-&gt;'$(FoliaResolvedAssetsDirectory)\%(RecursiveDir)%(Filename)%(Extension)')"
+      DestinationFiles="@(FoliaDeployableAsset-&gt;'$(FoliaResolvedAssetsDirectory)\%(AssetRelative)')"
       SkipUnchangedFiles="true" />
   </Target>
   <ImportGroup Label="ExtensionTargets">

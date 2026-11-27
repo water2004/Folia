@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Paths are relative to the application project for MSBuild and both release packages. -->
+  <ItemGroup>
+    <FoliaResource Include="Assets\completion.json;Assets\provider-presets.json" />
+    <FoliaResource Include="Assets\branding\Folia.ico;Assets\branding\Folia.png;Assets\branding\Folia.svg" />
+    <FoliaResource Include="Assets\latex\commands.json" />
+    <FoliaResource Include="Assets\licenses\LICENSE.txt;Assets\licenses\THIRD-PARTY-NOTICES.txt" />
+    <FoliaResource Include="Assets\themes\*.json;Assets\themes\*.png;Assets\themes\resources\icons.svg" />
+    <FoliaPackageImage Include="Assets\LockScreenLogo.scale-200.png;Assets\SplashScreen.scale-200.png;Assets\StoreLogo.png" />
+    <FoliaPackageImage Include="Assets\Square150x150Logo.scale-200.png;Assets\Square44x44Logo.scale-200.png" />
+    <FoliaPackageImage Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png;Assets\Wide310x150Logo.scale-200.png" />
+  </ItemGroup>
+</Project>
