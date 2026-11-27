@@ -4,7 +4,7 @@
 
 namespace {
 using namespace boost::ut;
-using namespace fairy::providers;
+using namespace folia::ai;
 std::string text(ModelResult const& result) {
     std::string out;
     for (auto const& part : result.message.content) if (part.kind == ContentKind::Text) out += part.text;

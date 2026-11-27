@@ -1,0 +1,169 @@
+{
+  "license": "MIT",
+  "files": [
+    {
+      "path": "providers/JsonParsing.cpp",
+      "sha256": "e2d6187f92d1bd0b10573a60801384a50757b15df40f7cafa31acfad832453b9",
+      "upstream_sha256": "ac0adb03d53a2856def3b88c5f5f16a9ecbcb3bab2b5cce8d2e40e1a840f5436",
+      "local_change": "Use the Folia AI namespace."
+    },
+    {
+      "path": "providers/JsonParsing.h",
+      "sha256": "4396b6072f5da37cca50444ff57ab3b1fa6580bf920e4c61f25cf1b638255013",
+      "upstream_sha256": "2f5fe02c300e78de77bd5e03c9ff586d454cca964adcd5774a0ed30b7a5497c9",
+      "local_change": "Use the Folia AI namespace."
+    },
+    {
+      "path": "providers/ModelAdapter.cpp",
+      "sha256": "1027f6cc8ced799208c120b178bb98963d8b1885d57f5ead661cab3f9de20c3f",
+      "upstream_sha256": "5881b0097c307aa3b2280e4baba6bc60ecfebb103af9084d3e9a27f92be79c7a",
+      "local_change": "Use the Folia AI namespace."
+    },
+    {
+      "path": "providers/ModelAdapter.h",
+      "sha256": "c88d1c2fefcff5c77093861f83ebcec62cc00bf635a0f3207a0a35e87df16021",
+      "upstream_sha256": "06995e93144f628d852d383c5036ab1e331c74993c586ded9579ac74a61f5cf4",
+      "local_change": "Use the Folia AI namespace. Expose parsed stream termination so the client need not wait for connection EOF."
+    },
+    {
+      "path": "providers/ModelCodec.cpp",
+      "sha256": "5e8386f332340a392dee70d520d8a9f2d4e27021d2391f609db754bbf5c3d9e2",
+      "upstream_sha256": "fbb071251bd12d777f00f5f11b7bf233d445fda3f8f89ed0043756152635446d",
+      "local_change": "Use the Folia AI namespace. Round-trip hosted search, citations and server-side continuation in the model envelopes."
+    },
+    {
+      "path": "providers/ModelCodec.h",
+      "sha256": "0848e5116167fda88e45408136f85b426a0f73cbf8cdc23f82b1e42b5661daf0",
+      "upstream_sha256": "0d2e4294f4f243b0c7e471cfedeba3a749efc382422c072ee23dc323ba601434",
+      "local_change": "Use the Folia AI namespace."
+    },
+    {
+      "path": "providers/ModelTypes.cpp",
+      "sha256": "496bb891dfc7b47902f3bc28ef0fabafe0c4bf6fb02ed906a3b99cff58db739b",
+      "upstream_sha256": "f0bee1653788a9d618e9fbae8ab30067b4fe486d25d68c06b0c006122929b69d",
+      "local_change": "Use the Folia AI namespace."
+    },
+    {
+      "path": "providers/ModelTypes.h",
+      "sha256": "d2447fd3b5cf6224f9c15a436c81b7da4589a2142e3eed214599fa9bc984a7e2",
+      "upstream_sha256": "6236864b4748f811abb8c05375466d78de19990bfddadab2c86e1c8fbe49fb1e",
+      "local_change": "Use the Folia AI namespace. Add hosted search, citations and server-side continuation to the shared protocol model."
+    },
+    {
+      "path": "providers/ModelValidation.cpp",
+      "sha256": "ca41ae06cd5d91e1d82696961c55782c01e892d5dd4134eeb01e1bca68df574b",
+      "upstream_sha256": "3ee2ea687a326cb08bb455e1a013a633e53f95e5dbff58dc35f16de9a24c9069",
+      "local_change": "Use the Folia AI namespace. Validate effort token syntax without a model/provider vocabulary; explicitly entered and advertised values pass through the selected protocol field."
+    },
+    {
+      "path": "providers/ModelValidation.h",
+      "sha256": "deacb226d7ed4a4becd1a1b0a26c7a8a476a315429531d7bbfdb17f3fa38998c",
+      "upstream_sha256": "67d5ec3f7337468c406ad5a0be99e1cbbd228ba43384650f6e72d626d9dc4a88",
+      "local_change": "Use the Folia AI namespace."
+    },
+    {
+      "path": "providers/SseParser.cpp",
+      "sha256": "e843f9d4b2d04abf0df0ce8a23a0f69143108dbd3fa483f3e7471f071dcc476a",
+      "upstream_sha256": "b9fea3012adb500b1c1420e852de90207e73aeb6fd4ea8f939e27b3e22f7a448",
+      "local_change": "Use the Folia AI namespace."
+    },
+    {
+      "path": "providers/SseParser.h",
+      "sha256": "f3f8bf3e923c3c9a28046e4f9078cabb1b891cf722d7f1f6ffb2d55f0b7c723b",
+      "upstream_sha256": "21d2e2d00b3872ac4997be33064d62e9a013f998f7909beb89b71234b3feae20",
+      "local_change": "Use the Folia AI namespace."
+    },
+    {
+      "path": "providers/StreamResponse.cpp",
+      "sha256": "3299d7ef35f0eed87230b2a6665c3b53921b961a0812abebd87b1db6b9164580",
+      "upstream_sha256": "88fc84008599ea4833dd609bc9a2a045ce293b5ec3c2809f899c1ab8714aae25",
+      "local_change": "Use the Folia AI namespace."
+    },
+    {
+      "path": "providers/StreamResponse.h",
+      "sha256": "bdcc58a4b9ecc04f7945fbbc8cd74e7da5ad80b786a7d4711188e3f8988300b7",
+      "upstream_sha256": "f0346ae9e70a06f4936d2d7fe5840d71efb197330c1cdba8d299cc8ff636967b",
+      "local_change": "Use the Folia AI namespace. Expose parsed stream termination so the client need not wait for connection EOF."
+    },
+    {
+      "path": "providers/adapters/Adapters.h",
+      "sha256": "beb6c54d0269ecb1e684a812713aab424daf85ef82a7dc7b227f3ddf540f002d",
+      "upstream_sha256": "20086539d0f97fb5767d5ae87f1e8778f424e151f60df8809565ce5ccb1a54bf",
+      "local_change": "Use the Folia AI namespace."
+    },
+    {
+      "path": "providers/adapters/anthropic/Internal.h",
+      "sha256": "41378515f875ab9a90abaa4acb47f5d439e11b0c19149e6b5deed7c5533010bf",
+      "upstream_sha256": "2c9a054f70ce2241360be8ebf85dbd3fa3b98080f25097c1056289323962138b",
+      "local_change": "Use the Folia AI namespace. Extract URL citations from native text blocks."
+    },
+    {
+      "path": "providers/adapters/anthropic/Request.cpp",
+      "sha256": "f78381e89a52d3c587cf1a2d249b701191237da446ee58ac30e6e3991d743b40",
+      "upstream_sha256": "b0ced57aedafe7c987f69f81c4465d7ce9c95ebf40969569fea04674a1ee93c6",
+      "local_change": "Use the Folia AI namespace. Group tool receipts and advertise the native search tool when requested."
+    },
+    {
+      "path": "providers/adapters/anthropic/Response.cpp",
+      "sha256": "39e9eba0d63042614351b648e25f4eb84bf09a60bdd9b4166a64df5551e5e896",
+      "upstream_sha256": "673a302b68214007d065834ab38f3124d3062cc9135765222ba48f3e6675d990",
+      "local_change": "Use the Folia AI namespace. Decode native citations and server-side pause_turn."
+    },
+    {
+      "path": "providers/adapters/anthropic/StreamDecoder.cpp",
+      "sha256": "f5ce96774ef093bcee2de13bb8a3ece0da649329cffaf5bbaf2370603fb056a5",
+      "upstream_sha256": "96d407050fbc3e12fdb4be7429373e542a09844b251905431d6a07746f4acd1e",
+      "local_change": "Use the Folia AI namespace. Expose parsed stream termination so the client need not wait for connection EOF. Reassemble hosted web-search and citation blocks and handle server-side continuation."
+    },
+    {
+      "path": "providers/adapters/chat_completions/Internal.h",
+      "sha256": "9d6520aac051fbd44db8f52ca24142d2aa2a3af48c447cc9940323d36a917de9",
+      "upstream_sha256": "7c07e09edb1dcaa023a99b8f188ed47294d1d87506a7ac9037b197022be31f04",
+      "local_change": "Use the Folia AI namespace."
+    },
+    {
+      "path": "providers/adapters/chat_completions/Request.cpp",
+      "sha256": "5016a6914ea51898e99c80256c8444dbbb8be1e92266921f75e71360f013be9e",
+      "upstream_sha256": "b0fee3c4c8fc7f4d59e658627977d101b0eb1042a3d0b691a506d9b5477ecc46",
+      "local_change": "Use the Folia AI namespace."
+    },
+    {
+      "path": "providers/adapters/chat_completions/Response.cpp",
+      "sha256": "6dedfaea68aca188438d56ee9030cb137042ed2e8627802d8481c0581cf96886",
+      "upstream_sha256": "76b0b40c9dfc245127a414cba9caeb1e9ee7bed62da0695bb02c227582bb8e86",
+      "local_change": "Use the Folia AI namespace."
+    },
+    {
+      "path": "providers/adapters/chat_completions/StreamDecoder.cpp",
+      "sha256": "886ba9406fb0bbaa55020ad4593e7266e368cc31edba7cdc4cb394c1d04336cb",
+      "upstream_sha256": "5cf38ac6454c4130aa7c3ae61f9986a25fd32179a11fd565c4b87afb25081044",
+      "local_change": "Use the Folia AI namespace. Expose parsed stream termination so the client need not wait for connection EOF."
+    },
+    {
+      "path": "providers/adapters/responses/Internal.h",
+      "sha256": "baf20a93691459fff2b799ed25e5a81382be32db543c1edb129e232ec0458cfe",
+      "upstream_sha256": "a4639dce3da04a21efbef95a22428d06523e8658cf5f63f2ecb9328e214fc2d2",
+      "local_change": "Use the Folia AI namespace. Decode hosted search citations without losing response replay state."
+    },
+    {
+      "path": "providers/adapters/responses/Request.cpp",
+      "sha256": "087828fc90fba8f5f26f7d5bb260d509db8df2525afe34449aea7fe349221126",
+      "upstream_sha256": "5307c549245d7abb3b8a6844d376ee1dee27534a3af737af0543e5cd8a73e0b9",
+      "local_change": "Use the Folia AI namespace. Encode text-only assistant history using the Responses plain-text message form. Request hosted search and encrypted reasoning replay for tool turns."
+    },
+    {
+      "path": "providers/adapters/responses/Response.cpp",
+      "sha256": "6dfe5e5e2b2df66b8ffab1d4afa13246313eb85d5c22d2f8748a4dfcd35cd438",
+      "upstream_sha256": "aebcb1573c4b76bb30ce134d290cdaf16aa169f1e01fa11673011808b3ca0af5",
+      "local_change": "Use the Folia AI namespace."
+    },
+    {
+      "path": "providers/adapters/responses/StreamDecoder.cpp",
+      "sha256": "07608830f42721e74f69c0ad400805670efcf55433c684fafbce994adeda42c3",
+      "upstream_sha256": "0cae0bcac15e25ade9c53cf2bbd06844bb8ce1511f2800d8211ff5a4ecabf169",
+      "local_change": "Use the Folia AI namespace. Expose parsed stream termination so the client need not wait for connection EOF."
+    }
+  ],
+  "source": "Fairy src/providers",
+  "revision": "ef60077797ddadc82ee934d2e9d80ce05cf67830"
+}

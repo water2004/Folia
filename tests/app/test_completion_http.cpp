@@ -155,12 +155,29 @@ suite completion_http_tests = [] {
                     expect(ResolveCompletionEndpoint({true, base, "", protocol}) == resolvedBase + std::string(paths[protocol]) + "?rev=2");
                 }
     };
+    "provider full request URL is preserved and discovery has an independent route"_test = [] {
+        CompletionConfig config{true, "https://provider.example/custom/stream/?route=2", "fixture", 1};
+        config.fullUrl = true;
+        expect(ResolveCompletionEndpoint(config) == config.baseUrl);
+        expect(throws([&] { (void)ResolveCompletionModelsEndpoint(config); }));
+        config.catalogUrl = "https://provider.example/custom/models?route=2";
+        expect(ResolveCompletionModelsEndpoint(config) == config.catalogUrl);
+        config.catalogUrl.clear();
+        config.baseUrl = "https://provider.example/api/responses?route=2";
+        expect(ResolveCompletionModelsEndpoint(config) == "https://provider.example/api/models?route=2");
+    };
     "Anthropic model discovery reads only explicitly supported capabilities"_test = [] {
-        auto page = ParseCompletionModels(R"({"data":[{"id":"fixture","display_name":"Fixture Claude","capabilities":{
+        auto page = ParseCompletionModels(R"({"data":[{"id":"fixture","display_name":"Fixture Claude",
+            "max_input_tokens":128000,"max_tokens":8192,"capabilities":{"image_input":{"supported":false},
             "effort":{"supported":true,"low":{"supported":true},"medium":{"supported":false},"max":{"supported":true}}}}],
             "has_more":true,"last_id":"model/a+b"})", 2);
         expect(page.next == "model/a+b"); expect(page.models[0].name == "Fixture Claude");
         expect(page.models[0].reasoningEfforts == std::vector<std::string>{"low", "max"});
+        expect(page.models[0].maxInputTokens.value_or(0) == 128000_u);
+        expect(page.models[0].maxOutputTokens.value_or(0) == 8192_u);
+        expect(page.models[0].vision == false);
+        auto unspecified = ParseCompletionModels(R"({"data":[{"id":"fixture","max_tokens":null}]})", 2).models.front();
+        expect(unspecified.name.empty() && !unspecified.vision && !unspecified.maxInputTokens && !unspecified.maxOutputTokens);
         expect(ParseCompletionModels(R"({"data":[{"id":"a"},{"id":"a"}]})", 0).models.size() == 1_u);
         for (auto json : {R"({"data":[{}]})", R"({"data":[{"id":42}]})", R"({"data":{}})",
              R"({"data":[],"has_more":true})", R"({"data":[{"id":"a"}],"has_more":true})"})

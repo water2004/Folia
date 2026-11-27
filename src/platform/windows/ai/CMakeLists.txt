@@ -1,0 +1,5 @@
+add_library(folia_windows_models STATIC ModelHttpClient.cpp)
+target_compile_features(folia_windows_models PUBLIC cxx_std_23)
+set_target_properties(folia_windows_models PROPERTIES CXX_MODULE_STD ON)
+target_include_directories(folia_windows_models PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+target_link_libraries(folia_windows_models PUBLIC folia_model_providers PRIVATE winhttp advapi32)

@@ -57,7 +57,7 @@ add_subdirectory(src/markdown)
 add_subdirectory(src/math/editor)
 add_subdirectory(src/highlight)
 add_subdirectory(src/completion)
-add_subdirectory(third_party/model-providers)
+add_subdirectory(src/ai)
 
 set(FOLIA_SOURCE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 include(cmake/FoliaCore.cmake)
@@ -82,7 +82,7 @@ if(WIN32)
     list(FILTER FOLIA_PLATFORM_MODULE EXCLUDE REGEX "/src/platform/text/mermaid_[^/]+\\.ixx$")
     file(GLOB_RECURSE FOLIA_PLATFORM_SRC CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/src/platform/*.cpp)
-    list(FILTER FOLIA_PLATFORM_SRC EXCLUDE REGEX "/src/platform/windows/(media|completion)/")
+    list(FILTER FOLIA_PLATFORM_SRC EXCLUDE REGEX "/src/platform/windows/(media|completion|ai)/")
 
     if(FOLIA_PLATFORM_MODULE OR FOLIA_PLATFORM_SRC)
         add_library(folia_platform STATIC)
@@ -106,6 +106,7 @@ if(WIN32)
             ole32 oleaut32 uuid user32 gdi32 comctl32
             shell32 advapi32 imm32 propsys runtimeobject winspool)
 
+        add_subdirectory(src/platform/windows/ai)
         add_subdirectory(src/platform/windows/completion)
         add_subdirectory(src/platform/windows/media)
     endif()

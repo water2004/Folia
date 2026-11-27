@@ -7,6 +7,9 @@ CompletionResult RequestCompletionHttp(CompletionConfig const&, folia::completio
 struct CompletionModel {
     std::string id, name;
     std::vector<std::string> reasoningEfforts;
+    std::optional<std::uint32_t> maxInputTokens, maxOutputTokens;
+    bool vision = false;
+    bool webSearch = false;
 };
 struct CompletionModelPage {
     std::vector<CompletionModel> models;
