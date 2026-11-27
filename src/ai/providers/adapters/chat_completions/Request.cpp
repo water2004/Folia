@@ -11,13 +11,13 @@ Json BuildChatCompletionsRequest(ModelRequest const& request, ProviderRequestOpt
     if (!SupportsReasoningOptions(ApiProtocol::ChatCompletions, request.reasoning))
         throw ProtocolError("Reasoning options are unsupported for Chat Completions.");
     if (request.model.empty() || request.model.size() > 256 || request.messages.empty() ||
-        request.messages.size() > MaxMessages || request.maxOutputTokens == 0 ||
+        request.messages.size() > maxRequestMessages || request.maxOutputTokens == 0 ||
         request.tools.size() > MaxToolCount)
         Invalid();
     Json messages = Json::array();
     const bool mark = UsesCacheBoundaries(request, options, ApiProtocol::ChatCompletions);
     for (auto const& m : request.messages) {
-        Json out = {{"role", Role(m.role)}};
+        Json out = {{"role", mark && m.role == MessageRole::System ? "developer" : Role(m.role)}};
         if (m.role == MessageRole::Tool) {
             if (m.toolCallId.empty() || m.toolCallId.size() > 256 || !m.toolCalls.empty())
                 Invalid();

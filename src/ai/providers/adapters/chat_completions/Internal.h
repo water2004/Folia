@@ -11,7 +11,6 @@
 
 namespace folia::ai {
 namespace {
-constexpr std::size_t MaxMessages = 512;
 constexpr std::size_t MaxTextBytes = 4 * 1024 * 1024;
 constexpr std::size_t MaxImageBytes = 20 * 1024 * 1024;
 constexpr std::size_t MaxToolCount = 128;

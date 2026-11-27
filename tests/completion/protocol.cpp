@@ -23,6 +23,7 @@ suite completion_protocol_tests = [] {
             request.model = "gpt-5.6";
             auto body = BuildRequest(protocol, request, {.cache = CacheDialect::OpenAI});
             expect(body["prompt_cache_options"]["mode"] == "implicit" && body["prompt_cache_key"] == request.cacheSession);
+            expect(body[history][0]["role"] == "developer");
             expect(body[history][0]["content"][0].contains("prompt_cache_breakpoint"));
             expect(!body[history][1].dump().contains("prompt_cache_breakpoint"));
             request.model = "gpt-5.5";
