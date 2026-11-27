@@ -60,6 +60,18 @@ namespace winrt::Folia
         RebuildCore();
     }
 
+    folia::MarkdownStream EditorSession::BeginMarkdownStream() const { return core_->editor.begin_markdown_stream(); }
+
+    void EditorSession::AppendMarkdown(folia::MarkdownStream& stream, std::string_view delta)
+    {
+        if (auto change = core_->editor.append_markdown(stream, folia::utf8_to_cps(delta))) {
+            ++revision_;
+            RebuildRenderModel(&*change);
+        }
+    }
+
+    std::string EditorSession::SelectedDisplayText() const { return folia::cps_to_utf8(core_->editor.selected_text_cps()); }
+
     void EditorSession::SetTheme(folia::ThemeProfile const& theme)
     {
         core_->theme = theme;

@@ -1,4 +1,5 @@
 #pragma once
+#include "editor/session/EditorSourceLocation.h"
 
 #include "editor/session/EditorRenderFrame.h"
 import folia.encoding;
@@ -89,6 +90,9 @@ namespace winrt::Folia
             bool encodingExplicit = false);
         void SaveAs(winrt::Windows::Storage::StorageFile const& file);
         void SetText(winrt::hstring const& text);
+        folia::MarkdownStream BeginMarkdownStream() const;
+        void AppendMarkdown(folia::MarkdownStream&, std::string_view);
+        std::string SelectedDisplayText() const;
         void SetTheme(folia::ThemeProfile const& theme);
         bool IsSourceMode() const;
         bool EnterSourceMode();
@@ -124,6 +128,7 @@ namespace winrt::Folia
         void SetEncoding(folia::encoding::DocumentEncoding encoding);
         bool EncodingWasExplicit() const;
         EditorReloadViewState CaptureReloadViewState() const;
+        void JumpToSourceLocation(EditorSourceLocation);
         void RestoreReloadViewState(EditorReloadViewState const& state);
         winrt::hstring DisplayName() const;
         winrt::hstring Path() const;

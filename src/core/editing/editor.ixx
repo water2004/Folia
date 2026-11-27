@@ -113,6 +113,13 @@ inline EditorDocumentChange summarize_document_change(
     return change;
 }
 
+// The source projection exists only while ingesting an external Markdown stream.
+struct MarkdownStream {
+    SourceProjectionIndex index;
+    std::u32string source;
+    std::size_t accepted = 0;
+};
+
 class Editor {
 public:
     Editor() { rebuild_document_full_({}); }
@@ -453,6 +460,39 @@ public:
     void set_source_selection(SourceSelection selection) {
         if (!source_view_) throw std::logic_error("source view is not active");
         source_view_->editor.set_selection(selection);
+    }
+
+    MarkdownStream begin_markdown_stream() const {
+        auto projection = serialize_markdown_projection(document_);
+        MarkdownStream stream;
+        stream.index.reset(document_, projection);
+        stream.accepted = projection.text.size();
+        stream.source = std::move(projection.text);
+        return stream;
+    }
+
+    std::optional<EditorDocumentChange> append_markdown(MarkdownStream& stream, std::u32string_view delta) {
+        stream.source.append(delta);
+        if (stream.accepted == stream.source.size()) return {};
+        const auto before = selection();
+        const auto anchor = stream.index.offset(before.anchor).value_or(0);
+        const auto active = stream.index.offset(before.active).value_or(0);
+        SourcePatch patch;
+        patch.edits.push_back({{stream.accepted, stream.accepted}, stream.source.substr(stream.accepted), {}});
+        auto applied = apply_source_document_patch(document_, stream.index, stream.source, patch);
+        if (!applied) return {};
+        const auto [first, last] = stream.index.current_region(document_, applied->region);
+        auto projection = serialize_markdown_region_projection(document_, first, last);
+        stream.index.replace(applied->region, document_, projection, first, last);
+        stream.accepted = stream.source.size();
+        auto const& tx = applied->transaction;
+        auto change = summarize_document_change(tx.operations, true, tx.revision_before, tx.revision_after);
+        refresh_derived_from_document_(change, tx.operations);
+        editable_fallback_ = document_editable_fallback(document_);
+        rendered_selection_ = TextSelection{
+            stream.index.position(document_, anchor, before.anchor.affinity),
+            stream.index.position(document_, active, before.active.affinity)};
+        return change;
     }
 
     bool enter_source_mode() {

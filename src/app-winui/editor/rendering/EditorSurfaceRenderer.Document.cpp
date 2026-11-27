@@ -49,7 +49,14 @@ namespace winrt::Folia
         auto scrollOffset = sourceTopOverride.value_or(scrollState.Offset());
         auto y = styleSheet.verticalPadding - scrollOffset;
         auto selection = printMode ? folia::TextSelection{} : frame.selection;
-        auto caret = selection.active;
+        // Read-only surfaces keep range highlights and hit testing while laying out
+        // every block exactly as it appears without an editing caret.
+        if (frame.readOnlyPresentation) {
+            frame.selection = {};
+            frame.tableTextOwner = {};
+        }
+        auto presentation = frame.readOnlyPresentation ? folia::TextSelection{} : selection;
+        auto caret = presentation.active;
 
         EditorSvgPainter svgPainter(resources, renderCache);
         auto svgSupported = svgPainter.Supported();
@@ -146,7 +153,7 @@ namespace winrt::Folia
             mermaid,
             svgNormalizer,
             treeSitter,
-            EditorPresentationCaret(selection),
+            EditorPresentationCaret(presentation),
             documentWidth,
             mathSvgSupported,
             svgSupported,
@@ -161,7 +168,7 @@ namespace winrt::Folia
             blockPreparer,
             scrollState,
             preparedDocument,
-            selection,
+            presentation,
             documentWidth,
             themeRevision,
             embeddedGeneration,

@@ -2,6 +2,8 @@
 #include "editor/session/EditorSession.h"
 
 import folia.markdown.serializer;
+import folia.core.source_projection;
+import folia.core.source_patch;
 import folia.markdown.block_source;
 import folia.markdown.inline_cst;
 
@@ -87,6 +89,40 @@ namespace winrt::Folia
         state.anchorAffinity = selection.anchor.affinity;
         state.activeAffinity = selection.active.affinity;
         return state;
+    }
+
+    void EditorSession::JumpToSourceLocation(EditorSourceLocation location)
+    {
+        if (location.kind == EditorSourceLocation::Kind::Document) return;
+        auto offset = [location](std::u32string_view text) {
+            std::size_t i = 0;
+            if (location.kind == EditorSourceLocation::Kind::Line) {
+                for (std::size_t line = 1; i < text.size() && line < location.value; ++i) {
+                    if (text[i] == U'\r') {
+                        if (i + 1 < text.size() && text[i + 1] == U'\n') ++i;
+                        ++line;
+                    } else if (text[i] == U'\n') ++line;
+                }
+            } else {
+                std::size_t bytes = 0;
+                while (i < text.size()) {
+                    auto cp = text[i];
+                    auto width = cp < 0x80 ? 1u : cp < 0x800 ? 2u : cp < 0x10000 ? 3u : 4u;
+                    if (width > location.value - bytes) break;
+                    bytes += width;
+                    ++i;
+                }
+            }
+            return i;
+        };
+        if (auto source = core_->editor.source_editor()) {
+            core_->editor.set_source_selection(folia::SourceSelection::caret(offset(source->source())));
+        } else {
+            auto projected = folia::serialize_markdown_projection(core_->editor.document());
+            folia::SourceProjectionIndex index;
+            index.reset(core_->editor.document(), projected);
+            core_->editor.set_caret(index.position(core_->editor.document(), offset(projected.text), folia::TextAffinity::Downstream));
+        }
     }
 
     void EditorSession::RestoreReloadViewState(EditorReloadViewState const& state)
