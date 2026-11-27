@@ -122,12 +122,13 @@ namespace winrt::Folia::implementation
         }
         if (connected && (appliedReadingMaterial != reading || changedLayer)) {
             auto paperBackdrop = sharesBase ? nullptr : backdrop(reading);
-            ReadingBackdrop().SystemBackdrop(paperBackdrop);
-            SelectedTabBackdrop().SystemBackdrop(paperBackdrop);
-            OtherReadingBackdrop().SystemBackdrop(paperBackdrop);
-            RightTabBackdrop().SystemBackdrop(paperBackdrop);
-            ReadingBackdrop().Visibility(paperBackdrop ? Microsoft::UI::Xaml::Visibility::Visible : Microsoft::UI::Xaml::Visibility::Collapsed);
-            OtherReadingBackdrop().Visibility(ReadingBackdrop().Visibility());
+            using Microsoft::UI::Xaml::Visibility;
+            // A visible SystemBackdropElement inserts a compositor placement visual even
+            // with a null backdrop. Only expose these hosts when they supply a material.
+            for (auto const& host : {ReadingBackdrop(), SelectedTabBackdrop(), OtherReadingBackdrop(), RightTabBackdrop()}) {
+                host.SystemBackdrop(paperBackdrop);
+                host.Visibility(paperBackdrop ? Visibility::Visible : Visibility::Collapsed);
+            }
             appliedReadingMaterial = reading;
             UpdateSelectedTabBackdrop();
         }

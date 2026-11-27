@@ -179,11 +179,11 @@
         <Grid x:Name="TabMotionFrame">
             <Grid x:Name="TabBackdropLayer" IsHitTestVisible="False">
                 <Grid x:Name="SelectedTabBackdropFrame" Visibility="Collapsed">
-                    <SystemBackdropElement x:Name="SelectedTabBackdrop"/>
+                    <SystemBackdropElement x:Name="SelectedTabBackdrop" Visibility="Collapsed"/>
                     <Border x:Name="SelectedTabTint" Background="{StaticResource FoliaReadingSurfaceBrush}"/>
                 </Grid>
                 <Grid x:Name="RightTabBackdropFrame" Visibility="Collapsed">
-                    <SystemBackdropElement x:Name="RightTabBackdrop"/>
+                    <SystemBackdropElement x:Name="RightTabBackdrop" Visibility="Collapsed"/>
                     <Border x:Name="RightTabTint" Background="{StaticResource FoliaReadingSurfaceBrush}"/>
                 </Grid>
             </Grid>

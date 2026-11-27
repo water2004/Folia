@@ -1164,29 +1164,32 @@ namespace {
             using winrt::Windows::Foundation::Point;
             auto original = LoadAppSettings().settings;
             auto restore = wil::scope_exit([&] { SaveAppSettings(original); });
-            std::ofstream report(app_tests::RepositoryRoot() / "build/tests/reading-material-startup.txt");
-            for (auto material : {WindowMaterial::Mica, WindowMaterial::Acrylic, WindowMaterial::Solid}) {
+            using enum WindowMaterial;
+            for (const WorkspaceAppearance appearance : {
+                    WorkspaceAppearance{false, Mica, Mica}, {false, Mica, Acrylic}, {false, Mica, Solid},
+                    {false, Acrylic, Acrylic}, {false, Acrylic, std::nullopt}}) {
                 auto startup = original;
-                startup.appearance.material = WindowMaterial::Mica;
-                startup.appearance.readingMaterial = material;
+                startup.appearance = appearance;
                 expect(fatal(!SaveAppSettings(startup)));
                 auto window = App()->CreateMainWindow();
                 auto close = wil::scope_exit([&] { Access::Close(window); });
                 window.AppWindow().Presenter().as<winrt::Microsoft::UI::Windowing::OverlappedPresenter>().IsAlwaysOnTop(true);
                 window.Activate();
                 auto root = window.Content().as<FrameworkElement>();
-                auto read = [&] {
-                    auto tabs = Access::GroupTabs(window, EditorGroup::Left);
+                auto read = [&](EditorGroup group = EditorGroup::Left, int tolerance = 5) {
+                    auto tabs = Access::GroupTabs(window, group);
                     FrameworkElement tab{nullptr};
                     Pump([&] {
                         root.UpdateLayout();
                         tab = tabs.ContainerFromItem(tabs.SelectedItem()).try_as<FrameworkElement>();
                         return tab && tab.IsLoaded() && tab.ActualWidth() > 0;
                     });
-                    auto card = root.FindName(L"ReadingCard").as<FrameworkElement>();
-                    auto selected = root.FindName(L"SelectedTabBackdropFrame").as<FrameworkElement>();
-                    auto tint = root.FindName(L"SelectedTabTint").as<Controls::Border>();
-                    auto paper = root.FindName(L"ReadingTint").as<Controls::Border>();
+                    const bool left = group == EditorGroup::Left;
+                    const bool active = group == Access::Groups(window).ActiveGroup();
+                    auto card = root.FindName(active ? L"ReadingCard" : L"OtherReadingCard").as<FrameworkElement>();
+                    auto selected = root.FindName(left ? L"SelectedTabBackdropFrame" : L"RightTabBackdropFrame").as<FrameworkElement>();
+                    auto tint = root.FindName(left ? L"SelectedTabTint" : L"RightTabTint").as<Controls::Border>();
+                    auto paper = root.FindName(active ? L"ReadingTint" : L"OtherReadingTint").as<Controls::Border>();
                     auto until = std::chrono::steady_clock::now() + std::chrono::milliseconds(350);
                     Pump([&] { return std::chrono::steady_clock::now() >= until; });
                     auto at = card.TransformToVisual(root).TransformPoint({0,0});
@@ -1195,8 +1198,6 @@ namespace {
                     std::vector<ScreenPoint> points;
                     for (int dy = -6; dy <= 6; ++dy) points.push_back({edge.X, edge.Y + dy});
                     auto colors = CaptureColors(window, points);
-                    report << std::format("reading={} selectedVisible={} sharedTint={} colors={}\n", static_cast<int>(material),
-                        selected.Visibility() == Visibility::Visible, tint.Background() == paper.Background(), colors);
                     expect(tint.Background() == paper.Background()) << "selected tab and reading card share the live brush";
                     expect(selected.Visibility() == Visibility::Visible) << "first tab is materialized without changing settings";
                     auto origin = root.FindName(L"TabBackdropLayer").as<FrameworkElement>();
@@ -1206,21 +1207,50 @@ namespace {
                     expect(std::abs(clip.Right() - rightEdge.X) < .51f);
                     expect(std::abs(clip.Bottom() - origin.ActualHeight()) < .01f);
                     for (auto const& pixel : colors) for (unsigned channel = 0; channel < 3; ++channel) {
-                        expect(std::abs(pixel[channel] - colors.front()[channel]) <= 5)
-                            << std::format("seam at startup: {}", colors);
+                        expect(std::abs(pixel[channel] - colors.front()[channel]) <= tolerance)
+                            << std::format("seam at startup (window {}, reading {}): {}", static_cast<int>(appearance.material),
+                                static_cast<int>(appearance.readingMaterial.value_or(appearance.material)), colors);
                     }
+                    return colors.front();
+                };
+                auto checkBaseTransmission = [&](EditorGroup group) {
+                    // An opaque test substrate makes a visual that bypasses the shell
+                    // detectable regardless of the desktop behind the window.
+                    auto shade = root.as<Controls::Grid>().Background().as<Media::SolidColorBrush>();
+                    const auto savedColor = shade.Color();
+                    auto restoreShade = wil::scope_exit([&] { shade.Color(savedColor); });
+                    shade.Color({255, 32, 64, 192});
+                    auto cool = read(group, 1);
+                    shade.Color({255, 192, 64, 32});
+                    auto warm = read(group, 1);
+                    expect(warm[0] - cool[0] > 32 && cool[2] - warm[2] > 32)
+                        << "the selected tab and paper transmit the shared base";
                 };
                 read();
+                const bool sharedAcrylic = appearance.material == Acrylic &&
+                    winrt::Microsoft::UI::Composition::SystemBackdrops::DesktopAcrylicController::IsSupported() &&
+                    !winrt::Windows::UI::ViewManagement::AccessibilitySettings().HighContrast();
+                if (sharedAcrylic) {
+                    expect(fatal(window.SystemBackdrop().try_as<Media::DesktopAcrylicBackdrop>() != nullptr));
+                    checkBaseTransmission(EditorGroup::Left);
+                }
                 auto first = FirstTab(window, EditorGroup::Left);
                 first.MaxWidth(89);
                 read();
                 Access::NewChat(window);
                 read();
                 auto changed = startup.appearance;
-                changed.readingMaterial = material == WindowMaterial::Solid ? WindowMaterial::Mica : WindowMaterial::Solid;
+                changed.readingMaterial = appearance.readingMaterial == Solid ? Mica : Solid;
                 Access::Bars(window, changed);
                 Access::Bars(window, startup.appearance);
                 read();
+
+                if (sharedAcrylic) {
+                    auto split = root.FindName(L"SplitEditorButton").as<Controls::Button>();
+                    Automation::Peers::ButtonAutomationPeer(split).as<Automation::Provider::IInvokeProvider>().Invoke();
+                    Pump([&] { return Access::Groups(window).IsSplit(); });
+                    checkBaseTransmission(EditorGroup::Right);
+                }
             }
         };
         "the selected tab toolbar and editor present one reading surface"_test = [] {
@@ -1350,8 +1380,8 @@ namespace {
             using namespace winrt::Microsoft::UI::Composition::SystemBackdrops;
             using winrt::Folia::WindowMaterial;
             auto window = App()->CreateMainWindow();
-            expect(Access::MaterialsReady(window)) << "both materials are resolved before the window is activated";
             OwnedWindow owned(window);
+            expect(Access::MaterialsReady(window)) << "both materials are attached once the root is loaded";
             auto root = window.Content().as<FrameworkElement>();
             auto readingBackdrop = root.FindName(L"ReadingBackdrop").as<Controls::SystemBackdropElement>();
             auto selectedBackdrop = root.FindName(L"SelectedTabBackdrop").as<Controls::SystemBackdropElement>();
