@@ -80,14 +80,13 @@ void SetUsage(Usage& u, Json const& j) {
             Bad();
         return j[key].get<std::uint64_t>();
     };
-    u.inputTokens = read("input_tokens");
-    u.outputTokens = read("output_tokens");
+    if (auto input = read("input_tokens"))
+        u.inputTokens = *input + read("cache_creation_input_tokens").value_or(0) + read("cache_read_input_tokens").value_or(0);
+    if (auto output = read("output_tokens")) u.outputTokens = output;
     if (u.inputTokens && u.outputTokens)
         u.totalTokens = *u.inputTokens + *u.outputTokens;
     if (j.contains("cache_read_input_tokens"))
         u.cachedInputTokens = read("cache_read_input_tokens");
-    else if (j.contains("cache_creation_input_tokens"))
-        u.cachedInputTokens = read("cache_creation_input_tokens");
 }
 void ReadToolUse(ModelResult& result, Json const& b) {
     if (!IsString(b, "id") || !IsString(b, "name") || !b.contains("input") ||

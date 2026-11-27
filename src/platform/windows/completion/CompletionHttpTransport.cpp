@@ -23,21 +23,15 @@ CompletionResult RequestCompletionHttp(CompletionConfig const& config, folia::co
         add(MessageRole::User, source); add(MessageRole::Assistant, response);
     }
     auto protocol = static_cast<ApiProtocol>(config.protocol);
-    const auto explicitCache = config.explicitPromptCache && SupportsExplicitCompletionCache(config.protocol);
-    const auto hasBreakpoint = explicitCache && !prompt.context.empty();
-    if (hasBreakpoint) {
+    model.stablePrefixOnly = config.explicitPromptCache && SupportsCacheBreakpoints(config.cacheDialect, protocol, config.model, true);
+    if (model.stablePrefixOnly && !prompt.context.empty()) {
         add(MessageRole::User, prompt.context);
+        model.messages.back().content.front().cacheBoundary = true;
         model.messages.back().content.push_back({ContentKind::Text, prompt.cursor});
     } else {
         add(MessageRole::User, prompt.context + prompt.cursor);
     }
-    auto request = BuildRequest(protocol, model, {.explicitThinkingToggle = config.explicitThinkingToggle});
-    if (hasBreakpoint) {
-        // The Responses adapter maps user content parts in order. Mark only
-        // the stable part of the document message assembled above.
-        request.at("input").back().at("content").front()["prompt_cache_breakpoint"] = {{"mode", "explicit"}};
-    }
-    if (explicitCache) request["prompt_cache_options"] = {{"mode", "explicit"}};
+    auto request = BuildRequest(protocol, model, {.explicitThinkingToggle = config.explicitThinkingToggle, .cache = config.cacheDialect});
     auto result = models::Request(config.baseUrl, protocol, request, std::move(key), stop, {}, inactivityTimeout, config.fullUrl);
     if (stop.stop_requested()) return {};
     CompletionResult output;

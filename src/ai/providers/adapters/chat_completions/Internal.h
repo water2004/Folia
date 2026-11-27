@@ -60,6 +60,7 @@ Usage ReadUsage(Json const& v) {
             Invalid();
         u.cachedInputTokens = ReadCount(d, "cached_tokens");
     }
+    if (!u.cachedInputTokens) u.cachedInputTokens = ReadCount(v, "prompt_cache_hit_tokens");
     return u;
 }
 std::string Role(MessageRole role) {

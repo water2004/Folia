@@ -11,6 +11,7 @@ Json BuildResponsesRequest(ModelRequest const& request, ProviderRequestOptions o
     if (!SupportsReasoningOptions(ApiProtocol::Responses, request.reasoning))
         throw ProtocolError("Reasoning options are unsupported for Responses.");
     Json input = Json::array();
+    const bool mark = UsesCacheBoundaries(request, options, ApiProtocol::Responses);
     for (auto const& message : request.messages) {
         if (message.role == MessageRole::Tool) {
             input.push_back({{"type", "function_call_output"},
@@ -36,7 +37,12 @@ Json BuildResponsesRequest(ModelRequest const& request, ProviderRequestOptions o
             std::ranges::all_of(message.content, [](auto const& part) { return part.kind == ContentKind::Text; })) {
             input.push_back({{"type", "message"}, {"role", role}, {"content", PlainText(message)}});
         } else {
-            input.push_back({{"type", "message"}, {"role", role}, {"content", InputContent(message)}});
+            auto content = InputContent(message);
+            if (mark) {
+                MarkCacheBoundaries(content, message, "input_text");
+                if (message.role == MessageRole::System) role = "developer";
+            }
+            input.push_back({{"type", "message"}, {"role", role}, {"content", std::move(content)}});
         }
         if (message.role == MessageRole::Assistant)
             for (auto const& call : message.toolCalls) {

@@ -65,10 +65,11 @@ namespace folia::ai::agent {
         std::string model;
         std::string effort;
         std::optional<WebSearchDialect> webSearch;
-        std::size_t inputBytes = 96'000;
+        std::size_t contextTokens = 96'000;
         std::uint32_t outputTokens = 4'096;
         std::function<ContentPart(std::string const&)> loadImage;
         PageAccess pages = PageAccess::None;
+        std::string cacheSession;
     };
 
     enum class ProgressKind { TextDelta, TextSnapshot, ReasoningDelta, ReasoningSnapshot, Reading, Compacting, InputUsage, StepStarted, ToolResult, Retrying, HostedSearch, SummaryDelta, ReasoningSummary };

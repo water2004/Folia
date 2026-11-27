@@ -327,6 +327,9 @@
     <ClCompile Include="..\ai\agent\Agent.cpp">
       <Filter>Agent Chat</Filter>
     </ClCompile>
+    <ClCompile Include="..\ai\agent\Context.cpp">
+      <Filter>Agent Chat</Filter>
+    </ClCompile>
     <ClCompile Include="..\ai\agent\HostedSearch.cpp">
       <Filter>Agent Chat</Filter>
     </ClCompile>

@@ -11,6 +11,37 @@ std::string text(ModelResult const& result) {
     return out;
 }
 suite completion_protocol_tests = [] {
+    "conversation cache boundaries follow the provider and the model in both OpenAI formats"_test = [] {
+        ModelRequest request;
+        request.model = "gpt-5.6";
+        request.cacheSession = "opaque-chat-123";
+        request.messages = {{MessageRole::System, {{ContentKind::Text, "stable"}}},
+                            {MessageRole::User, {{ContentKind::Text, "current question"}}}};
+        request.messages.front().content.front().cacheBoundary = true;
+        for (auto protocol : {ApiProtocol::Responses, ApiProtocol::ChatCompletions}) {
+            const char* history = protocol == ApiProtocol::Responses ? "input" : "messages";
+            request.model = "gpt-5.6";
+            auto body = BuildRequest(protocol, request, {.cache = CacheDialect::OpenAI});
+            expect(body["prompt_cache_options"]["mode"] == "implicit" && body["prompt_cache_key"] == request.cacheSession);
+            expect(body[history][0]["content"][0].contains("prompt_cache_breakpoint"));
+            expect(!body[history][1].dump().contains("prompt_cache_breakpoint"));
+            request.model = "gpt-5.5";
+            body = BuildRequest(protocol, request, {.cache = CacheDialect::OpenAI});
+            expect(body.contains("prompt_cache_key") && !body.dump().contains("prompt_cache_breakpoint") && !body.contains("prompt_cache_options"));
+            for (auto route : {CacheDialect::Automatic, CacheDialect::Custom}) {
+                auto implicit = BuildRequest(protocol, request, {.cache = route});
+                expect(!implicit.dump().contains("prompt_cache") && !implicit.contains("cache_control"));
+            }
+            expect(BuildRequest(protocol, request, {.cache = CacheDialect::RoutingKey})["prompt_cache_key"] == request.cacheSession);
+            request.model = "anthropic/claude-test";
+            auto router = BuildRequest(protocol, request, {.cache = CacheDialect::OpenRouter});
+            expect(router["session_id"] == request.cacheSession && router["cache_control"]["type"] == "ephemeral");
+        }
+        auto claude = BuildRequest(ApiProtocol::AnthropicMessages, request, {.cache = CacheDialect::Anthropic});
+        expect(claude["cache_control"]["type"] == "ephemeral");
+        request.cacheSession.clear();
+        expect(!BuildRequest(ApiProtocol::AnthropicMessages, request, {.cache = CacheDialect::Anthropic}).contains("cache_control"));
+    };
     "completion protocol requests contain no tools and enforce output budgets"_test = [] {
         ModelRequest request; request.model = "fixture"; request.maxOutputTokens = 128;
         Message message; message.content.push_back({ContentKind::Text, "before cursor"});
@@ -48,7 +79,7 @@ data: {"type":"response.completed","response":{"id":"r","status":"completed","ou
         expect(!result.usage.cachedInputTokens.has_value());
     };
     "completion protocol consumes Anthropic streaming text and terminal usage"_test = [] {
-        std::string stream = R"(data: {"type":"message_start","message":{"id":"m","type":"message","role":"assistant","usage":{"input_tokens":10}}}
+        std::string stream = R"(data: {"type":"message_start","message":{"id":"m","type":"message","role":"assistant","usage":{"input_tokens":10,"cache_creation_input_tokens":40,"cache_read_input_tokens":80}}}
 
 data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
 
@@ -67,6 +98,7 @@ data: {"type":"message_stop"}
         expect(decoder.Complete());
         auto result = decoder.Finish(); expect(text(result) == " hello");
         expect(result.usage.outputTokens.value() == 1_u);
+        expect(result.usage.inputTokens.value() == 130_u && result.usage.cachedInputTokens.value() == 80_u && result.usage.totalTokens.value() == 131_u);
     };
     "completion protocol rejects truncated streams instead of accepting a partial response"_test = [] {
         for (auto protocol : {ApiProtocol::ChatCompletions, ApiProtocol::Responses, ApiProtocol::AnthropicMessages}) {

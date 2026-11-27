@@ -24,6 +24,13 @@ namespace winrt::Folia::models {
             for (auto const& item : records::Read(AssetPath(L"provider-presets.json"))) {
                 ProviderPreset preset{item.at("id").get<std::string>(), item.at("name").get<std::string>()};
                 preset.explicitThinkingToggle = item.value("explicitThinkingToggle", false);
+                if (auto cache = item.find("cache"); cache != item.end()) {
+                    using enum folia::ai::CacheDialect;
+                    static const std::map<std::string, folia::ai::CacheDialect> formats{
+                        {"openai", OpenAI}, {"anthropic", Anthropic}, {"openrouter", OpenRouter},
+                        {"routing-key", RoutingKey}, {"custom", Custom}};
+                    preset.cache = formats.at(cache->get_ref<std::string const&>());
+                }
                 if (auto schema = item.find("catalog"); schema != item.end()) {
                     if (*schema != "openrouter") throw std::runtime_error("Unknown model catalog schema");
                     preset.catalog = folia::ai::ModelCatalogSchema::OpenRouter;

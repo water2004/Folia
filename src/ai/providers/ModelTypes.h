@@ -1,4 +1,5 @@
 #pragma once
+#include "PromptCache.h"
 #include <cstdint>
 #include <nlohmann/json.hpp>
 #include <optional>
@@ -8,8 +9,9 @@
 #include <vector>
 
 namespace folia::ai {
+inline constexpr std::size_t maxRequestMessages = 512;
+struct ContextWindowExceeded : std::runtime_error { using std::runtime_error::runtime_error; };
 using Json = nlohmann::json;
-enum class ApiProtocol { ChatCompletions, Responses, AnthropicMessages };
 enum class ProtocolFailure {
     InvalidData,
     InvalidStreamEvent,
@@ -37,6 +39,7 @@ struct ContentPart {
     std::string text;
     std::string mediaType;
     std::string base64;
+    bool cacheBoundary = false;
 };
 struct ToolCall {
     std::string id;
@@ -70,6 +73,7 @@ enum class WebSearchDialect { Standard, DeepSeek, OpenRouter };
 struct ProviderRequestOptions {
     WebSearchDialect search = WebSearchDialect::Standard;
     bool explicitThinkingToggle = false;
+    CacheDialect cache = CacheDialect::Automatic;
 };
 
 enum class PageAccess { None, WithSearch, DeepSeek, Anthropic, OpenRouter };
@@ -83,6 +87,10 @@ struct ModelRequest {
     ReasoningOptions reasoning;
     bool webSearch = false;
     PageAccess pages = PageAccess::None;
+    // Conversation requests allow a rolling cache boundary; inline prediction
+    // can opt into writing only its stable document prefix.
+    std::string cacheSession;
+    bool stablePrefixOnly = false;
 };
 struct Usage {
     std::optional<std::uint64_t> inputTokens;

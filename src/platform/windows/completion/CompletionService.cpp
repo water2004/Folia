@@ -40,9 +40,6 @@ std::string ValidateCompletionConfig(CompletionConfig const& config) {
         return "Completion context must be 1–64 KB and output must be 16–4096 tokens.";
     return {};
 }
-bool SupportsExplicitCompletionCache(int protocol) noexcept {
-    return protocol == static_cast<int>(folia::ai::ApiProtocol::Responses);
-}
 struct CompletionService::State {
     struct Job { CompletionConfig config; folia::completion::Prompt prompt; Deliver deliver; std::stop_source stop; };
     std::mutex mutex;

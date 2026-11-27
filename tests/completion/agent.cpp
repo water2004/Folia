@@ -77,26 +77,87 @@ namespace {
             History history;
             for (int i = 0; i < 20; ++i) {
                 history.entries.push_back({MessageRole::User, "Question " + std::to_string(i)});
-                history.entries.push_back({MessageRole::Assistant, "Answer " + std::to_string(i)});
+                history.entries.push_back({MessageRole::Assistant, std::string(140, 'a') + std::to_string(i)});
             }
             history.entries.push_back({MessageRole::User, "Latest question"});
             int steps = 0;
             auto request = [&](ModelRequest const& wire, std::stop_token, Progress const&) {
-                if (++steps == 1) {
+                ++steps;
+                if (wire.cacheSession.empty()) {
                     expect(wire.tools.empty());
                     expect(!wire.webSearch);
                     const auto input = Json::parse(PlainText(wire.messages.back()));
-                    expect(input.at("transcript").size() > 20_u);
+                    expect(!input.at("transcript").empty());
                     return Answer("Summary");
                 }
                 expect(PlainText(wire.messages.back()) == "Latest question");
                 expect(PlainText(wire.messages[1]).ends_with("Summary"));
                 return Answer("New answer");
             };
-            expect(Run(history, Options{"fixture"}, {}, request, {}, {}).markdown == "New answer");
+            Options options{"fixture"};
+            options.contextTokens = 1500;
+            options.cacheSession = "session";
+            expect(Run(history, options, {}, request, {}, {}).markdown == "New answer");
             expect(history.entries.size() == 41_u);
             expect(history.summarized > 20_u);
-            expect(steps == 2_i);
+            expect(steps > 1_i);
+        };
+
+        "short turns keep their cache prefix when web access changes"_test = [] {
+            History history;
+            for (unsigned i = 0; i < 100; ++i) {
+                history.entries.push_back({MessageRole::User, std::to_string(i)});
+                history.entries.push_back({MessageRole::Assistant, "OK"});
+            }
+            history.entries.push_back({MessageRole::User, "Continue"});
+            Options options{"fixture"};
+            options.cacheSession = "same-conversation";
+            std::vector<std::string> prefix;
+            auto reply = [&](ModelRequest const& wire, auto, auto const&) {
+                expect(wire.cacheSession == options.cacheSession);
+                expect(wire.messages.size() == 202_u && wire.messages.front().content.front().cacheBoundary);
+                auto texts = wire.messages | std::views::transform([](auto const& m) { return PlainText(m); })
+                    | std::ranges::to<std::vector<std::string>>();
+                if (prefix.empty()) prefix = texts;
+                else expect(texts == prefix);
+                return Answer("OK");
+            };
+            Run(history, options, {}, reply, {}, {});
+            options.webSearch = WebSearchDialect::Standard;
+            Run(history, options, {}, reply, {}, {});
+            expect(history.summarized == 0_u);
+        };
+
+        "an upstream context rejection reduces history and preserves the pending tool pair"_test = [] {
+            History history{{{MessageRole::User, "Prior"}, {MessageRole::Assistant, "Decision"}, {MessageRole::User, "Current"}}};
+            Options options{"fixture"};
+            options.cacheSession = "same-session";
+            unsigned invocations = 0, requests = 0, summaries = 0;
+            Tool tool{{"read", "Read a range", Json::object()}, [&](Json const&, auto) {
+                ++invocations;
+                return Json{{"result", "the active range"}};
+            }};
+            auto request = [&](ModelRequest const& wire, auto, auto const&) {
+                if (wire.cacheSession.empty()) {
+                    ++summaries;
+                    return Answer("Prior decision");
+                }
+                ++requests;
+                if (requests == 1) {
+                    auto answer = Answer("");
+                    answer.finish = FinishReason::ToolCalls;
+                    answer.message.toolCalls = {{"read-1", "read", "{}"}};
+                    return answer;
+                }
+                if (requests == 2) throw ContextWindowExceeded("context_length_exceeded");
+                expect(wire.messages.back().toolCallId == "read-1");
+                expect(wire.messages[wire.messages.size() - 2].toolCalls.front().id == "read-1");
+                expect(PlainText(wire.messages[1]).ends_with("Prior decision"));
+                expect(PlainText(wire.messages[2]) == "Current");
+                return Answer("Done");
+            };
+            expect(Run(history, options, std::span(&tool, 1), request, {}, {}).markdown == "Done");
+            expect(invocations == 1_u && requests == 3_u && summaries == 1_u);
         };
 
         "manual compaction keeps the transcript and checkpoints only complete turns"_test = [] {

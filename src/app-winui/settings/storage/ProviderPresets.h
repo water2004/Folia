@@ -20,6 +20,7 @@ namespace winrt::Folia::models {
         std::vector<ProviderRoute> routes;
         bool explicitThinkingToggle = false;
         folia::ai::ModelCatalogSchema catalog = folia::ai::ModelCatalogSchema::Protocol;
+        folia::ai::CacheDialect cache = folia::ai::CacheDialect::Automatic;
         ProviderRoute const* Find(folia::ai::ApiProtocol protocol) const;
     };
     std::span<ProviderPreset const> ProviderPresets();

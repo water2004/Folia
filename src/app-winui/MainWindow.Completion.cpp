@@ -16,6 +16,7 @@ namespace {
         config.reasoningEffort = model.ResolveEffort(effort);
         config.modelOutputLimit = model.maxOutputTokens;
         config.explicitThinkingToggle = models::Preset(provider.providerType).explicitThinkingToggle;
+        config.cacheDialect = models::Preset(provider.providerType).cache;
     }
 }
 

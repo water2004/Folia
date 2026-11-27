@@ -1,4 +1,5 @@
 #pragma once
+#include "providers/PromptCache.h"
 import std;
 import folia.completion;
 
@@ -17,6 +18,7 @@ struct CompletionConfig {
     std::string catalogUrl;
     std::optional<std::uint32_t> modelOutputLimit;
     bool explicitThinkingToggle = false;
+    ai::CacheDialect cacheDialect = ai::CacheDialect::Custom;
     bool operator==(CompletionConfig const&) const = default;
 };
 struct CompletionResult {
@@ -30,7 +32,6 @@ std::string ResolveCompletionEndpoint(CompletionConfig const&);
 std::string ResolveCompletionModelsEndpoint(CompletionConfig const&);
 std::string ValidateCompletionService(CompletionConfig const&);
 std::string ValidateCompletionConfig(CompletionConfig const&);
-bool SupportsExplicitCompletionCache(int protocol) noexcept;
 class CompletionService {
 public:
     using Deliver = std::function<void(CompletionResult)>;

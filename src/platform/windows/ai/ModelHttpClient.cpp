@@ -152,11 +152,19 @@ struct RequestOwner {
     std::shared_ptr<AsyncRequest> state;
     ~RequestOwner() { state->Close(); }
 };
-std::string HttpErrorDetails(std::string_view body) {
+std::string HttpErrorDetails(std::string_view body, bool& contextExceeded) {
     auto json = folia::ai::Json::parse(body, nullptr, false);
     if (!json.is_object()) return {};
     auto error = json.find("error");
     if (error == json.end() || !error->is_object()) return {};
+    for (auto key : {"code", "type", "message"}) {
+        auto it = error->find(key);
+        if (it == error->end() || !it->is_string()) continue;
+        auto const& value = it->get_ref<std::string const&>();
+        if (value == "context_length_exceeded" || value == "max_context_length_exceeded" ||
+            value.starts_with("prompt is too long:") || value.starts_with("This model's maximum context length is "))
+            contextExceeded = true;
+    }
     // Only show short identifiers. A service's free-form message can echo
     // credentials or document text from the request.
     std::string details;
@@ -174,7 +182,7 @@ std::string HttpErrorDetails(std::string_view body) {
     if (!details.empty()) details += ')';
     return details;
 }
-std::string ReadHttpErrorDetails(AsyncRequest& state, std::chrono::milliseconds timeout, std::stop_token stop) {
+std::string ReadHttpErrorDetails(AsyncRequest& state, std::chrono::milliseconds timeout, std::stop_token stop, bool& contextExceeded) {
     constexpr std::size_t maxBytes = 8192;
     const auto deadline = std::chrono::steady_clock::now() + (std::min)(timeout, std::chrono::milliseconds(1000));
     std::string body;
@@ -185,7 +193,7 @@ std::string ReadHttpErrorDetails(AsyncRequest& state, std::chrono::milliseconds 
             auto capacity = (std::min)(state.buffer.size(), maxBytes + 1 - body.size());
             state.Begin([&](auto handle) { return WinHttpReadData(handle, state.buffer.data(), static_cast<DWORD>(capacity), nullptr); });
             auto count = state.Wait(WINHTTP_CALLBACK_STATUS_READ_COMPLETE, remaining, stop);
-            if (!count) return HttpErrorDetails(body);
+            if (!count) return HttpErrorDetails(body, contextExceeded);
             body.append(state.buffer.data(), count);
         }
     } catch (std::runtime_error const&) {
@@ -244,8 +252,10 @@ bool Exchange(ai::ApiProtocol protocol, std::string const& urlText, wchar_t cons
     state->Begin([&](auto handle) { return WinHttpQueryHeaders(handle, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
         WINHTTP_HEADER_NAME_BY_INDEX, &status, &size, WINHTTP_NO_HEADER_INDEX); });
     if (status != 200) {
-        auto details = status >= 400 ? ReadHttpErrorDetails(*state, inactivity, stop) : std::string{};
+        bool contextExceeded = false;
+        auto details = status >= 400 ? ReadHttpErrorDetails(*state, inactivity, stop, contextExceeded) : std::string{};
         auto message = "Completion service returned HTTP " + std::to_string(status) + details;
+        if (status == 400 && contextExceeded) throw ai::ContextWindowExceeded(message);
         if (status == 408 || status == 429 || status == 500 || status == 502 || status == 503 || status == 504) {
             DWORD seconds = 0, length = sizeof(seconds);
             // The optional header can be absent or an HTTP date instead of a delta.

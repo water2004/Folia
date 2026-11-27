@@ -181,10 +181,7 @@ class AnthropicDecoder final : public IResponseDecoder {
                 }
             }
             if (d.contains("usage")) {
-                auto previousIn = result_.usage.inputTokens;
                 SetUsage(result_.usage, d["usage"]);
-                if (previousIn && !result_.usage.inputTokens)
-                    result_.usage.inputTokens = previousIn;
             }
             out.push_back({StreamEventKind::UsageUpdated, {}, {}, {}, result_.usage});
         } else if (type == "message_stop") {

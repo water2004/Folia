@@ -14,15 +14,18 @@ RequestHeaders BuildHeaders(ApiProtocol protocol, std::string_view apiKey) {
 }
 Json BuildRequest(ApiProtocol protocol, ModelRequest const& request, ProviderRequestOptions options) {
     // Each protocol entry point owns validation; dispatch does not traverse the request again.
+    Json body;
     switch (protocol) {
     case ApiProtocol::ChatCompletions:
-        return BuildChatCompletionsRequest(request, options);
+        body = BuildChatCompletionsRequest(request, options); break;
     case ApiProtocol::Responses:
-        return BuildResponsesRequest(request, options);
+        body = BuildResponsesRequest(request, options); break;
     case ApiProtocol::AnthropicMessages:
-        return BuildAnthropicRequest(request, options);
+        body = BuildAnthropicRequest(request, options); break;
+    default: throw ProtocolError("Unsupported API protocol");
     }
-    throw ProtocolError("Unsupported API protocol");
+    ApplyPromptCache(body, request, options, protocol);
+    return body;
 }
 ModelResult ParseResponse(ApiProtocol protocol, Json const& response) {
     try {

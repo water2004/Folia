@@ -59,7 +59,7 @@ bool SupportsReasoningOptions(ApiProtocol protocol, ReasoningOptions const& opti
 void ValidateRequest(ModelRequest const& request) {
     if (request.model.empty() || request.model.size() > 128 ||
         request.model.find_first_of("\r\n") != std::string::npos || request.messages.empty() ||
-        request.messages.size() > 128 || request.tools.size() > 32 || request.maxOutputTokens == 0)
+        request.messages.size() > maxRequestMessages || request.tools.size() > 32 || request.maxOutputTokens == 0)
         throw ProtocolError("Invalid request limits");
     if (!ValidEffort(request.reasoning.effort))
         throw ProtocolError("Invalid reasoning effort");

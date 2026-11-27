@@ -15,6 +15,7 @@ Json BuildChatCompletionsRequest(ModelRequest const& request, ProviderRequestOpt
         request.tools.size() > MaxToolCount)
         Invalid();
     Json messages = Json::array();
+    const bool mark = UsesCacheBoundaries(request, options, ApiProtocol::ChatCompletions);
     for (auto const& m : request.messages) {
         Json out = {{"role", Role(m.role)}};
         if (m.role == MessageRole::Tool) {
@@ -26,6 +27,8 @@ Json BuildChatCompletionsRequest(ModelRequest const& request, ProviderRequestOpt
             out["content"] = m.content[0].text;
         } else {
             out["content"] = MessageContent(m);
+            if (mark && (m.role == MessageRole::System || m.role == MessageRole::User))
+                MarkCacheBoundaries(out["content"], m, "text");
             if (m.role == MessageRole::Assistant && !m.toolCalls.empty())
                 out["tool_calls"] = MakeToolCalls(m.toolCalls);
             else if (!m.toolCalls.empty())

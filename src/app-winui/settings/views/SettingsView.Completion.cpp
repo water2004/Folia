@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "settings/storage/ProviderPresets.h"
 #include "agent/ChatControls.h"
 #include "settings/views/SettingsCards.h"
 #include "settings/views/SettingsView.h"
@@ -32,7 +33,7 @@ namespace winrt::Folia {
             if (item.id == appliedSettings_.completionModelId) selected = model.Items().Size() - 1;
             effortOptions.push_back(item.efforts);
             supportsCache.push_back(provider != providers.end() &&
-                folia::platform::completion::SupportsExplicitCompletionCache(static_cast<int>(provider->protocol)));
+                folia::ai::SupportsCacheBreakpoints(Preset(provider->providerType).cache, provider->protocol, item.upstream, true));
         }
         model.SelectedIndex(selected);
         connection.Children().Append(cards::Setting(

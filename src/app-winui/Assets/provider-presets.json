@@ -1,6 +1,6 @@
 [
   {
-    "id": "custom", "name": "",
+    "id": "custom", "name": "", "cache": "custom",
     "routes": [
       {"protocol": "responses", "address": "", "search": ["standard", "deepseek", "openrouter"], "pages": {"standard": "with-search", "deepseek": "deepseek", "openrouter": "openrouter"}},
       {"protocol": "chat-completions", "address": "", "search": ["deepseek", "openrouter"], "selectSearchFormat": true, "pages": {"deepseek": "deepseek", "openrouter": "openrouter"}},
@@ -8,14 +8,14 @@
     ]
   },
   {
-    "id": "openai", "name": "OpenAI",
+    "id": "openai", "name": "OpenAI", "cache": "openai",
     "routes": [
       {"protocol": "responses", "address": "https://api.openai.com/v1", "search": ["standard"], "pages": {"standard": "with-search"}},
       {"protocol": "chat-completions", "address": "https://api.openai.com/v1", "search": []}
     ]
   },
   {
-    "id": "anthropic", "name": "Anthropic",
+    "id": "anthropic", "name": "Anthropic", "cache": "anthropic",
     "routes": [
       {"protocol": "anthropic-messages", "address": "https://api.anthropic.com/v1", "search": ["standard"], "pages": {"standard": "anthropic"}}
     ]
@@ -30,7 +30,7 @@
     ]
   },
   {
-    "id": "openrouter", "name": "OpenRouter", "catalog": "openrouter",
+    "id": "openrouter", "name": "OpenRouter", "catalog": "openrouter", "cache": "openrouter",
     "routes": [
       {"protocol": "chat-completions", "address": "https://openrouter.ai/api/v1", "search": ["openrouter"], "pages": {"openrouter": "openrouter"}},
       {"protocol": "responses", "address": "https://openrouter.ai/api/v1", "search": ["openrouter"], "pages": {"openrouter": "openrouter"}}
@@ -43,7 +43,7 @@
     ]
   },
   {
-    "id": "xai", "name": "xAI",
+    "id": "xai", "name": "xAI", "cache": "routing-key",
     "routes": [
       {"protocol": "responses", "address": "https://api.x.ai/v1", "search": ["standard"], "pages": {"standard": "with-search"}},
       {"protocol": "chat-completions", "address": "https://api.x.ai/v1", "search": []}
