@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "app/support/TestPaths.h"
+#include "agent/ChatHints.h"
 #include "agent/ChatStore.h"
 #include "settings/storage/ModelCatalog.h"
 #include "storage/JsonRecords.h"
@@ -507,6 +508,97 @@ namespace {
             picker.SetReasoning({}, {});
             expect(chosen.size() == 1_u);
             flyout.Hide();
+        };
+
+        "reply cursor and click agree on text, links, and the blank end of a line"_test = [] {
+            using Shape = winrt::Microsoft::UI::Input::InputSystemCursorShape;
+            auto window = visual_tests::Window();
+            auto shell = Access::Impl(window);
+            auto conversation = chat::NewConversation("Pointer fixture");
+            Access::Open(shell, conversation.id);
+            auto host = Access::Host(shell);
+            Pump([&] { return host.Content() != nullptr; });
+            auto old = host.Content();
+            auto restore = wil::scope_exit([&] { host.Content(old); Access::Close(shell); chat::DeleteConversation(conversation.id); });
+            app_tests::MouseInput mouse(window);
+            auto appearance = std::make_shared<chat::ChatMarkdownAppearance>();
+            appearance->SetTheme(Access::Theme(shell));
+            auto reply = chat::ChatReplySurface::Create("Plain text\n\n[Open the note](folia-doc:note)\n\nLast line", appearance);
+            int opens = 0;
+            reply->openDocument = [&](auto const& url) { if (url == "folia-doc:note") ++opens; };
+            Grid page;
+            Button hintOwner;
+            hintOwner.Content(winrt::box_value(L"Document"));
+            hintOwner.HorizontalAlignment(HorizontalAlignment::Left);
+            hintOwner.VerticalAlignment(VerticalAlignment::Top);
+            chat::SetHint(hintOwner, L"Full document name");
+            page.Children().Append(hintOwner);
+            auto paper = reply->Element();
+            paper.Width(360);
+            paper.VerticalAlignment(VerticalAlignment::Center);
+            page.Children().Append(paper);
+            host.Content(page);
+            Pump([&] { return paper.IsLoaded() && paper.ActualHeight() > 48; });
+            auto settled = std::chrono::steady_clock::now() + std::chrono::milliseconds(450);
+            Pump([&] { return std::chrono::steady_clock::now() >= settled; });
+            // Find a painted glyph on each line, independent of font metrics and DPI.
+            const int height = static_cast<int>(paper.ActualHeight());
+            auto origin = app_tests::MouseInput::ScreenPoint(paper, {0, 0});
+            const double dpi = paper.XamlRoot().RasterizationScale();
+            auto desktop = ::GetDC(nullptr);
+            auto dc = ::CreateCompatibleDC(desktop);
+            auto w = static_cast<int>(std::ceil(340 * dpi)), h = static_cast<int>(std::ceil(height * dpi));
+            auto bitmap = ::CreateCompatibleBitmap(desktop, w, h);
+            auto oldBitmap = ::SelectObject(dc, bitmap);
+            auto release = wil::scope_exit([&] {
+                ::SelectObject(dc, oldBitmap); ::DeleteObject(bitmap); ::DeleteDC(dc); ::ReleaseDC(nullptr, desktop);
+            });
+            winrt::check_bool(::BitBlt(dc, 0, 0, w, h, desktop, origin.X, origin.Y, SRCCOPY));
+            auto ink = [&](int paragraph) {
+                for (int y = paragraph * height / 3; y < (paragraph + 1) * height / 3; ++y) {
+                    int row = static_cast<int>(std::lround(y * dpi));
+                    auto background = ::GetPixel(dc, w - 1, row);
+                    for (int x = 4; x < 65; x += 2) {
+                        auto pixel = ::GetPixel(dc, static_cast<int>(std::lround(x * dpi)), row);
+                        if (std::abs(int(GetGValue(pixel)) - int(GetGValue(background))) > 65)
+                            return winrt::Windows::Foundation::Point{static_cast<float>(x), static_cast<float>(y)};
+                    }
+                }
+                throw std::runtime_error("could not locate the rendered paragraph");
+            };
+            auto input = paper.as<IUIElementProtected>();
+            auto move = [&](winrt::Windows::Foundation::Point point, std::optional<Shape> wanted) {
+                mouse.Move(paper, point);
+                Pump([&] {
+                    auto cursor = input.ProtectedCursor().try_as<winrt::Microsoft::UI::Input::InputSystemCursor>();
+                    return (cursor ? std::optional{cursor.CursorShape()} : std::nullopt) == wanted;
+                });
+            };
+            auto first = ink(0), link = ink(1), last = ink(2);
+            mouse.Move(hintOwner, {12, 12});
+            Primitives::Popup hint{nullptr};
+            Pump([&] {
+                for (auto const& popup : Media::VisualTreeHelper::GetOpenPopupsForXamlRoot(paper.XamlRoot())) {
+                    if (popup.PlacementTarget() == hintOwner) { hint = popup; return true; }
+                }
+                return false;
+            });
+            expect(hint.IsConstrainedToRootBounds());
+            move(first, Shape::IBeam);
+            Pump([&] { return !hint.IsOpen(); });
+            move(link, Shape::Hand);
+            move({330, link.Y}, Shape::Arrow);
+            mouse.Click();
+            move(link, Shape::Hand);
+            expect(opens == 0_i);
+            mouse.Click();
+            Pump([&] { return opens == 1; });
+            mouse.Left(true);
+            move({330, link.Y}, Shape::IBeam);
+            mouse.Move(paper, link);
+            mouse.Left(false);
+            move(last, Shape::IBeam);
+            expect(opens == 1_i) << "dragging a selection back to its starting link does not open it";
         };
 
         "the chat wheel animates reading-distance steps and reverses away from the live edge"_test = [] {

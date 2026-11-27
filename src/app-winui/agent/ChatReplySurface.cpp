@@ -21,6 +21,7 @@ namespace winrt::Folia::chat {
         self->paper_.Name(L"ChatMarkdownReply");
         self->paper_.Height(32);
         self->paper_.Background(Media::SolidColorBrush(Microsoft::UI::Colors::Transparent()));
+        self->slice_.IsHitTestVisible(false);
         self->slice_.Height(1);
         self->slice_.Width(1);
         self->paper_.Children().Append(self->slice_);
@@ -31,6 +32,7 @@ namespace winrt::Folia::chat {
                 item->top_ = rect.Y;
                 item->bottom_ = rect.Y + rect.Height;
                 item->Draw(false);
+                item->UpdateCursor();
             }
         });
         self->paper_.SizeChanged([weak](auto const&, SizeChangedEventArgs const& args) {
@@ -66,9 +68,48 @@ namespace winrt::Folia::chat {
         return true;
     }
 
+    ChatReplySurface::HoverHit ChatReplySurface::ContentAt(Windows::Foundation::Point point) const {
+        if (!renderer_) return {};
+        auto pos = renderer_->HitTestTextUnit(point.X, point.Y, folia::platform::editor::TextHitMode::VisibleCharacter);
+        if (!pos) return {};
+        auto action = session_.InteractionAt(*pos);
+        if (action && action->link) {
+            auto const& link = *action->link;
+            if (link.starts_with("http://") || link.starts_with("https://") || (openDocument && link.starts_with("folia-doc:")))
+                return {true, link};
+        }
+        return {true, {}};
+    }
+
+    void ChatReplySurface::UpdateCursor() {
+        using Shape = Microsoft::UI::Input::InputSystemCursorShape;
+        std::optional<Shape> shape;
+        if (pointer_ && session_.HasSelection()) shape = Shape::IBeam;
+        else if (pointerInRoot_ && paper_.IsLoaded()) {
+            auto local = paper_.XamlRoot().Content().TransformToVisual(slice_).TransformPoint(*pointerInRoot_);
+            auto hit = ContentAt(local);
+            if (!hit.link.empty()) shape = Shape::Hand;
+            else shape = hit.text ? Shape::IBeam : Shape::Arrow;
+        }
+        if (shape == cursorShape_) return;
+        cursorShape_ = shape;
+        paper_.as<IUIElementProtected>().ProtectedCursor(shape ? Microsoft::UI::Input::InputSystemCursor::Create(*shape) : nullptr);
+    }
+
     void ChatReplySurface::BindInput() {
         auto weak = weak_from_this();
         paper_.IsTabStop(true);
+        auto hover = [weak](auto const&, Input::PointerRoutedEventArgs const& e) {
+            if (auto self = weak.lock(); self && e.Pointer().PointerDeviceType() == Microsoft::UI::Input::PointerDeviceType::Mouse) {
+                self->pointerInRoot_ = e.GetCurrentPoint(self->paper_.XamlRoot().Content()).Position();
+                self->UpdateCursor();
+            }
+        };
+        paper_.PointerEntered(hover);
+        paper_.PointerExited([weak](auto const&, Input::PointerRoutedEventArgs const& e) {
+            if (e.Pointer().PointerDeviceType() != Microsoft::UI::Input::PointerDeviceType::Mouse) return;
+            if (auto self = weak.lock()) { self->pointerInRoot_.reset(); self->UpdateCursor(); }
+        });
         paper_.PointerPressed([weak](auto const&, Input::PointerRoutedEventArgs const& e) {
             auto self = weak.lock();
             if (!self || !self->renderer_ || e.Pointer().PointerDeviceType() == Microsoft::UI::Input::PointerDeviceType::Touch) return;
@@ -81,16 +122,19 @@ namespace winrt::Folia::chat {
             if (!self->paper_.CapturePointer(e.Pointer())) return;
             self->pointer_ = e.Pointer().PointerId();
             self->anchor_ = *hit;
+            self->pressedLink_ = self->ContentAt(p).link;
             self->session_.SetSelection(*hit, *hit);
             self->Draw(true);
             e.Handled(true);
         });
-        paper_.PointerMoved([weak](auto const&, Input::PointerRoutedEventArgs const& e) {
+        paper_.PointerMoved([weak, hover](auto const& sender, Input::PointerRoutedEventArgs const& e) {
+            hover(sender, e);
             auto self = weak.lock();
             if (!self || self->pointer_ != e.Pointer().PointerId() || !self->anchor_) return;
             auto p = e.GetCurrentPoint(self->slice_).Position();
             if (auto hit = self->renderer_->HitTest(p.X, p.Y)) {
                 self->session_.SetSelection(*self->anchor_, *hit);
+                if (self->session_.HasSelection()) self->pressedLink_.clear();
                 self->Draw(true);
             }
             e.Handled(true);
@@ -99,23 +143,22 @@ namespace winrt::Folia::chat {
             auto self = weak.lock();
             if (!self || self->pointer_ != e.Pointer().PointerId() || !self->anchor_) co_return;
             auto p = e.GetCurrentPoint(self->slice_).Position();
-            auto hit = self->renderer_->HitTest(p.X, p.Y);
-            bool click = hit && *hit == *self->anchor_ && !self->session_.HasSelection();
+            auto link = self->ContentAt(p).link;
+            const bool open = !link.empty() && link == self->pressedLink_ && !self->session_.HasSelection();
             self->paper_.ReleasePointerCapture(e.Pointer());
             self->pointer_.reset();
+            self->UpdateCursor();
             e.Handled(true);
-            if (!click) co_return;
-            auto action = self->session_.InteractionAt(*hit);
-            if (action && action->link && action->link->starts_with("folia-doc:") && self->openDocument) {
-                self->openDocument(*action->link);
-                co_return;
-            }
-            if (action && action->link && (action->link->starts_with("https://") || action->link->starts_with("http://"))) {
-                try { co_await Windows::System::Launcher::LaunchUriAsync(Windows::Foundation::Uri(to_hstring(*action->link))); }
+            if (!open) co_return;
+            if (link.starts_with("folia-doc:")) self->openDocument(link);
+            else {
+                try { co_await Windows::System::Launcher::LaunchUriAsync(Windows::Foundation::Uri(to_hstring(link))); }
                 catch (hresult_error const&) {}
             }
         });
-        paper_.PointerCaptureLost([weak](auto const&, auto const&) { if (auto self = weak.lock()) self->pointer_.reset(); });
+        paper_.PointerCaptureLost([weak](auto const&, auto const&) {
+            if (auto self = weak.lock()) { self->pointer_.reset(); self->pressedLink_.clear(); self->UpdateCursor(); }
+        });
         Input::KeyboardAccelerator copyKey;
         copyKey.Modifiers(Windows::System::VirtualKeyModifiers::Control);
         copyKey.Key(Windows::System::VirtualKey::C);
@@ -192,5 +235,6 @@ namespace winrt::Folia::chat {
         renderer_->Render(frame);
         auto measured = (std::max)(1., std::ceil(static_cast<double>(renderer_->DocumentHeight())));
         if (height != measured) paper_.Height(measured);
+        if (dirty) UpdateCursor();
     }
 }

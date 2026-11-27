@@ -24,6 +24,12 @@ namespace winrt::Folia::chat {
         void Draw(bool dirty);
         void BindInput();
         bool CopySelection();
+        struct HoverHit { bool text = false; std::string link; };
+        HoverHit ContentAt(Windows::Foundation::Point point) const;
+        void UpdateCursor();
+        std::optional<Windows::Foundation::Point> pointerInRoot_;
+        std::optional<Microsoft::UI::Input::InputSystemCursorShape> cursorShape_;
+        std::string pressedLink_;
         Microsoft::UI::Xaml::Controls::Canvas paper_;
         Microsoft::UI::Xaml::Controls::Grid slice_;
         EditorSession session_;
