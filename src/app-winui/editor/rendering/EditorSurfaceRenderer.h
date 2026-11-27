@@ -83,7 +83,8 @@ namespace winrt::Folia
         std::optional<D2D1_RECT_F> InlineMathPreviewBounds() const noexcept { return inlineMathPreviewBounds; }
         std::optional<folia::TextPosition> HitTest(float x, float y) const;
         std::optional<folia::TextPosition> HitTestTableText(float x, float y, folia::NodeId owner) const;
-        std::optional<folia::TextPosition> HitTestTextUnit(float x, float y) const;
+        std::optional<folia::TextPosition> HitTestTextUnit(float x, float y,
+            folia::platform::editor::TextHitMode mode = folia::platform::editor::TextHitMode::CharacterStart) const;
         std::optional<folia::TextPosition> ViewportPosition() const;
         std::optional<folia::TextPosition> TaskCheckboxAt(float x, float y) const;
         std::optional<EditorVisualFootnoteHit> FootnoteAt(float x, float y) const;

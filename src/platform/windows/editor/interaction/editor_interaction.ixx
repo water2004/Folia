@@ -227,12 +227,14 @@ export namespace folia::platform::editor
         Phase phase = Phase::Pressed;
     };
 
+    enum class TextHitMode { Caret, CharacterStart, VisibleCharacter };
+
     struct EditorInteractionMap
     {
         void Clear();
         void AddBlockLines(std::size_t blockIndex);
         void AddTableCellLines(std::size_t blockIndex, std::size_t tableIndex, std::size_t cellIndex);
-        std::optional<folia::TextPosition> HitTest(float x, float y, bool characterStart = false,
+        std::optional<folia::TextPosition> HitTest(float x, float y, TextHitMode mode = TextHitMode::Caret,
             folia::NodeId tableTextOwner = {}) const;
         std::optional<folia::TextPosition> TaskCheckboxAt(float x, float y) const;
         std::optional<EditorVisualFootnoteHit> FootnoteAt(float x, float y) const;

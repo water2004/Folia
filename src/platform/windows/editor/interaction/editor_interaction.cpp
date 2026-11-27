@@ -404,7 +404,7 @@ namespace folia::platform::editor
         return folia::TextPosition{span->container_id, span->source_range.end, folia::TextAffinity::Upstream};
     }
 
-    std::optional<folia::TextPosition> EditorInteractionMap::HitTest(float x, float y, bool characterStart,
+    std::optional<folia::TextPosition> EditorInteractionMap::HitTest(float x, float y, TextHitMode mode,
         folia::NodeId tableTextOwner) const
     {
         for (auto hit = mathHits.rbegin(); tableTextOwner.v == 0 && hit != mathHits.rend(); ++hit)
@@ -459,6 +459,8 @@ namespace folia::platform::editor
         auto const& lastSpan = line.SourceSpans().back();
         auto start = folia::TextPosition{firstSpan.container_id, firstSpan.source_range.start, folia::TextAffinity::Downstream};
         auto end = folia::TextPosition{lastSpan.container_id, lastSpan.source_range.end, folia::TextAffinity::Upstream};
+        const bool exact = mode == TextHitMode::VisibleCharacter;
+        if (exact && (bestDistance > 0 || block.thematicBreak || line.displayStart == line.displayEnd)) return std::nullopt;
         if (block.thematicBreak) return y < (block.rect.top + block.rect.bottom) * 0.5f ? start : end;
         IDWriteTextLayout* layout = block.layout.Get();
         auto textOrigin = block.textOrigin;
@@ -470,12 +472,15 @@ namespace folia::platform::editor
             textOrigin = cell.textOrigin;
             mapping = &cell.displayToSource;
         }
-        if (!layout) return start;
+        if (!layout) return exact ? std::nullopt : std::optional{start};
         BOOL trailing = FALSE, inside = FALSE;
         DWRITE_HIT_TEST_METRICS metrics{};
-        auto localY = (line.rect.top + line.rect.bottom) * 0.5f - textOrigin.y;
-        if (FAILED(layout->HitTestPoint(x - textOrigin.x, localY, &trailing, &inside, &metrics))) return start;
-        auto displayPos = static_cast<std::size_t>(metrics.textPosition + (trailing && !characterStart ? metrics.length : 0));
+        auto localY = (exact ? y : (line.rect.top + line.rect.bottom) * 0.5f) - textOrigin.y;
+        if (FAILED(layout->HitTestPoint(x - textOrigin.x, localY, &trailing, &inside, &metrics)))
+            return exact ? std::nullopt : std::optional{start};
+        if (exact && (!inside || !metrics.length || metrics.textPosition < line.displayStart || metrics.textPosition >= line.displayEnd))
+            return std::nullopt;
+        auto displayPos = static_cast<std::size_t>(metrics.textPosition + (trailing && mode == TextHitMode::Caret ? metrics.length : 0));
         displayPos = (std::clamp)(displayPos, static_cast<std::size_t>(line.displayStart), static_cast<std::size_t>(line.displayEnd));
         auto resolved = ResolveMappedPosition(line, *mapping, displayPos);
         auto position = resolved.value_or(end);

@@ -151,15 +151,15 @@ namespace winrt::Folia
     }
     std::optional<folia::TextPosition> EditorSurfaceRenderer::HitTestTableText(float x, float y, folia::NodeId owner) const
     {
-        return interactionMap.HitTest(x, y, false, owner);
+        return interactionMap.HitTest(x, y, folia::platform::editor::TextHitMode::Caret, owner);
     }
 
-    std::optional<folia::TextPosition> EditorSurfaceRenderer::HitTestTextUnit(float x, float y) const
+    std::optional<folia::TextPosition> EditorSurfaceRenderer::HitTestTextUnit(float x, float y, folia::platform::editor::TextHitMode mode) const
     {
         for (auto const& rect : nonInteractiveRegions)
             if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom)
                 return std::nullopt;
-        return interactionMap.HitTest(x, y, true);
+        return interactionMap.HitTest(x, y, mode);
     }
     std::optional<folia::TextPosition> EditorSurfaceRenderer::ViewportPosition() const
     {

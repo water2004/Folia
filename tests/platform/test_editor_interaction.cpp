@@ -209,16 +209,22 @@ suite editor_interaction_tests = [] {
         .textWidth = 400.0f, .sourceSpan = {owner, {0, 10}},
         .displayToSource = IdentityMapping(owner, 10), .layout = layout});
     interaction.AddBlockLines(0);
+    expect(!interaction.HitTest(390, 30, TextHitMode::VisibleCharacter));
+    expect(!interaction.HitTest(18, 75, TextHitMode::VisibleCharacter));
+    expect(interaction.HitTest(390, 30).has_value());
     for (UINT32 index : {3u, 4u, 5u}) {
         float x{}, y{};
         DWRITE_HIT_TEST_METRICS metrics{};
         expect(fatal(SUCCEEDED(layout->HitTestTextPosition(index, FALSE, &x, &y, &metrics))));
         for (float fraction : {0.25f, 0.75f}) {
             auto unit = interaction.HitTest(10.0f + x + fraction * metrics.width,
-                20.0f + y + metrics.height * 0.5f, true);
+                20.0f + y + metrics.height * 0.5f, TextHitMode::CharacterStart);
             expect(fatal(unit.has_value()));
             expect(unit->container_id == owner);
             expect(unit->source_offset == index);
+            auto visible = interaction.HitTest(10.0f + x + fraction * metrics.width,
+                20.0f + y + metrics.height * .5f, TextHitMode::VisibleCharacter);
+            expect(visible == unit);
         }
         auto caret = interaction.HitTest(10.0f + x + 0.75f * metrics.width,
             20.0f + y + metrics.height * 0.5f);
@@ -333,6 +339,13 @@ suite editor_interaction_tests = [] {
     expect(partial.front().right < whole.front().right);
     expect(partial.front().top == whole.front().top);
     expect(partial.front().bottom == whole.front().bottom);
+
+    const auto y = (partial.front().top + partial.front().bottom) * .5f;
+    auto hit = interaction.HitTest((partial.front().left + partial.front().right) * .5f, y, TextHitMode::VisibleCharacter);
+    expect(fatal(hit.has_value()));
+    expect(hit->container_id == owner && hit->source_offset >= 2 && hit->source_offset < 5);
+    expect(!interaction.HitTest(400, y, TextHitMode::VisibleCharacter));
+    expect(interaction.HitTest(400, y).has_value());
 };
 
 "table chrome keeps the four insertion edges and distinct row and column handles"_test = [] {
