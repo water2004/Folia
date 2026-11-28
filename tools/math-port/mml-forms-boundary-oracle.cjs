@@ -15,6 +15,6 @@ class Row extends MmlMrow {
 function run(length,position){formLength=length;formPosition=position;const f=new MmlFactory();f.setNodeClass('forms-row',Row);formMo=f.create('mo');formMo.parent=f.create('forms-row');formEvents=[];return formMo.getForms().join(',')+'|'+formEvents.join(',');}
 const rows=[];for(const length of [0,1,2])for(const position of ['first','last','neither'])rows.push({length,position,expected:run(length,position)});
 const data=JSON.stringify(rows)+'\n';
-const profile=path.join(root,'docs/math-port/evidence/p37-forms-boundary-source.json');
+const profile=path.join(root,'tools/math-port/profiles/evidence/p37-forms-boundary-source.json');
 if(process.argv.includes('--check')){assert.equal(fs.readFileSync(profile,'utf8').replaceAll('\r\n','\n'),data);}else{assert.ok(!fs.existsSync(profile));fs.writeFileSync(profile,data);}
 console.log(JSON.stringify({source_calls:rows.length,sha256:crypto.createHash('sha256').update(data).digest('hex')}));

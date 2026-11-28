@@ -1,7 +1,7 @@
 // Root executes actual Source for nullable arrays/products and retained factory stores.
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');const root=path.resolve(__dirname,'../..'),base=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src/cjs'),hash=b=>crypto.createHash('sha256').update(b).digest('hex');
-const pins=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p23b-sparse-mml-source.json'))).loadedPins;assert.equal(process.versions.node,'24.13.0');for(const[f,p]of Object.entries(pins))assert.equal(hash(fs.readFileSync(path.join(base,f))),p);
+const pins=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence/p23b-sparse-mml-source.json'))).loadedPins;assert.equal(process.versions.node,'24.13.0');for(const[f,p]of Object.entries(pins))assert.equal(hash(fs.readFileSync(path.join(base,f))),p);
 const {MmlFactory}=require(path.join(base,'core/MmlTree/MmlFactory.js'));
 const scalar=v=>v===undefined?'U':v===null?'N':typeof v==='boolean'?(v?'T':'F'):typeof v==='number'?'D'+v:'S'+v;
 const cases=[];for(const mode of ['source-null','inferred-inner-null','factory-null','destination-null-falsey','destination-rebind-after-copy','retained-properties']){
@@ -15,4 +15,4 @@ const cases=[];for(const mode of ['source-null','inferred-inner-null','factory-n
  const expected=error+'|'+nodes.map(n=>tag(n)+':'+n.kind+':'+tag(n.parent)+':'+array(n.childNodes)).join(';')+'|'+result+'|'+scalar(held?.sentinel)+'|'+scalar(held?.top)+'|'+scalar(!!held&&held===target?.properties);
  cases.push({mode,expected});
 }
-const data=JSON.stringify({schema:1,pins,cases},null,2)+'\n',out=path.join(root,'docs/math-port/evidence/p23g-copy-boundary-source.json');if(process.argv.includes('--check'))assert.equal(fs.readFileSync(out,'utf8').replaceAll('\r\n','\n'),data);else{assert.ok(!fs.existsSync(out));fs.writeFileSync(out,data);}console.log(JSON.stringify({cases:cases.length,sha256:hash(data)}));
+const data=JSON.stringify({schema:1,pins,cases},null,2)+'\n',out=path.join(root,'tools/math-port/profiles/evidence/p23g-copy-boundary-source.json');if(process.argv.includes('--check'))assert.equal(fs.readFileSync(out,'utf8').replaceAll('\r\n','\n'),data);else{assert.ok(!fs.existsSync(out));fs.writeFileSync(out,data);}console.log(JSON.stringify({cases:cases.length,sha256:hash(data)}));

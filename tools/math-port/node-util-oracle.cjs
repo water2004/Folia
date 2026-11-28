@@ -1,7 +1,7 @@
 // Pinned original NodeUtil observations; Native code only performs the calls.
 'use strict';const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 const {root,MmlFactory,core}=require(path.join(process.env.FOLIA_MATH_PORT_TOOLS||__dirname,'simple-mml-reference.cjs')),base=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src');
-const source='ts/input/tex/NodeUtil.ts',pin=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json'))).files.find(f=>f.source===source);
+const source='ts/input/tex/NodeUtil.ts',pin=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json'))).files.find(f=>f.source===source);
 const bytes=fs.readFileSync(path.join(root,'.reference/MathJax-src',source));assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),pin.source_sha256);assert.equal(bytes.toString().replaceAll('\r\n','\n'),fs.readFileSync(path.join(base,source),'utf8').replaceAll('\r\n','\n'));
 const u=require(path.join(base,'cjs/input/tex/NodeUtil.js')).default;
 const value=v=>v===undefined?'U':v===null?'N':typeof v+':'+String(v);
@@ -45,9 +45,9 @@ for(const text of ['+','∑','^','x'])for(const attr of ['accent','movablelimits
 
 // Frozen original Source JSON remains byte-identical; only renderer-only cpp fields are projected.
 assert.ok(process.argv.includes('--check'),'Source-only oracle supports read-only --check');
-const frozenProfilePath=path.join(root,"docs/math-port/evidence/p40-node-util-source.json");
+const frozenProfilePath=path.join(root,"tools/math-port/profiles/evidence/p40-node-util-source.json");
 const frozenBytes=fs.readFileSync(frozenProfilePath);
 function sourceFields(value){if(Array.isArray(value))return value.map(sourceFields);if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).filter(([key])=>key!=='cpp').map(([key,v])=>[key,sourceFields(v)]));return value;}
 const actualSourceProfile=rows;
 assert.deepStrictEqual(sourceFields(actualSourceProfile),sourceFields(JSON.parse(frozenBytes)),'Original Source inputs/expectations/pins changed');
-console.log(JSON.stringify({sourceCases:rows.length,profile:"docs/math-port/evidence/p40-node-util-source.json",profileSha256:crypto.createHash('sha256').update(frozenBytes).digest('hex'),mode:'check'}));
+console.log(JSON.stringify({sourceCases:rows.length,profile:"tools/math-port/profiles/evidence/p40-node-util-source.json",profileSha256:crypto.createHash('sha256').update(frozenBytes).digest('hex'),mode:'check'}));

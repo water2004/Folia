@@ -79,7 +79,7 @@ for (const value of Object.values(cases)) {
   }
 }
 const result = { schema: 'mml-constructor-identity-v1', hashes, cases };
-const evidence = path.join(root, 'docs/math-port/evidence/mml-constructor-identity-source.json');
+const evidence = path.join(root, 'tools/math-port/profiles/evidence/mml-constructor-identity-source.json');
 if (process.argv.includes('--check')) {
   assert.deepEqual(result, JSON.parse(fs.readFileSync(evidence, 'utf8')));
   console.log('Pinned MML constructor identity: 4 original observations agree');

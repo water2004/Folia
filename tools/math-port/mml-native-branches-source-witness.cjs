@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 function findRepositoryRoot(start = __dirname) {
   for (let current = path.resolve(start); current !== path.dirname(current); current = path.dirname(current)) {
-    if (fs.existsSync(path.join(current, 'docs/math-port/typed-mml-implementation.md')) &&
+    if (fs.existsSync(path.join(current, 'tools/math-port/README.md')) &&
         fs.existsSync(path.join(current, 'tools/mathjax-bundle/node_modules/@mathjax/src/package.json'))) return current;
   }
   return null;

@@ -4,7 +4,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
 const root=path.resolve(__dirname,'../..'),base=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src/cjs');
 const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
 assert.equal(process.versions.node,'24.13.0');
-const prerequisiteText=fs.readFileSync(path.join(root,'docs/math-port/evidence/p23b-sparse-mml-source.json'),'utf8').replaceAll('\r\n','\n');
+const prerequisiteText=fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence/p23b-sparse-mml-source.json'),'utf8').replaceAll('\r\n','\n');
 const prerequisite=JSON.parse(prerequisiteText);
 for(const[file,pin]of Object.entries(prerequisite.loadedPins))assert.equal(hash(fs.readFileSync(path.join(base,file))),pin);
 const {MmlFactory}=require(path.join(base,'core/MmlTree/MmlFactory.js'));
@@ -31,6 +31,6 @@ for(const state of ['H','U','N','a'])for(const method of ['core','coreMO'])trial
 for(const state of ['H','U','N','a'])trial('mstyle-notParent-flag-length-'+state,c=>{const n=c.create('mstyle','target');n.childNodes=c.array([state,'b']);return n.notParent;});
 assert.equal(cases.length,32);assert.ok(!JSON.stringify(cases).includes('UNBOUND'));
 const data=JSON.stringify({schema:1,status:'Root original Source return-value evidence; no native API acceptance',node:process.versions.node,prerequisite_sha256:hash(prerequisiteText),cases},null,2)+'\n';
-const out=path.join(root,'docs/math-port/evidence/p23b-sparse-mml-return-source.json');
+const out=path.join(root,'tools/math-port/profiles/evidence/p23b-sparse-mml-return-source.json');
 if(process.argv.includes('--check'))assert.equal(fs.readFileSync(out,'utf8').replaceAll('\r\n','\n'),data);else{assert.ok(!fs.existsSync(out));fs.writeFileSync(out,data);}
 console.log(JSON.stringify({cases:cases.length,actual_source_errors:cases.filter(c=>c.error).length,undefined_returns:cases.filter(c=>c.result==='U').length,null_returns:cases.filter(c=>c.result==='N').length,sha256:hash(data)}));

@@ -19,7 +19,7 @@ function finish(){
  assert.equal(cases,106);assert.equal(rawRows,1605);assert.equal(assertions,7667);
  const counts={scenarios:scenarios.length,sourceAssertions:assertions,matrixRows:rawRows,equal:0,deep:0,input:0,call:0,matrix:0};
  for(const s of scenarios)for(const o of s.observations)++counts[o.kind];
- const runtime=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p12b-source-lock.json'),'utf8'));
+ const runtime=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/locks/p12b-source-lock.json'),'utf8'));
  const profile={schema:'folia.math.simple-mml-source.v1',source:{node:process.version,package:'@mathjax/src',version:'4.1.3',pins:hashes,runtime},migration:{originalToolSha256:'25391161b4b90826d3f1c26c30e390eaa85f6f64ea336885467154e1be176308',frozenFixtureSha256:'6d585447047dc2e82addf1d6bb39a2483e89f9bedf07dccbbe463dc5c1e17849',note:'The one-time migration checks the complete original C++ fixture, every ordered Source scenario/observation, all matrix cells and all 296 recursive legacy value records. No native results generate this profile.'},counts,scenarios};
  return {profile,counts};
 }

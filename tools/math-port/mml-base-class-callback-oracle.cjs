@@ -17,6 +17,6 @@ function run(i){let active=false,trace=[],n,p;function note(s){if(active)trace.p
  try{if(i.op==='set'){const v=n.setTeXclass(arg);result=v===n?'self':v===p?'p':v===undefined?'U':v===null?'N':'UNBOUND';}else n[i.op==='update'?'updateTeXclass':'getPrevClass'](arg);}catch(e){error=e.name+'|'+e.message;result='THREW';}active=false;
  return error+'|'+result+'|'+[n.cur,n.pc,n.pl,p.cur,p.pc,p.pl].map(scalar).join(',')+'|'+Number(n.a!==null)+','+Number(p.a!==null)+'|'+trace.join(',');
 }
-const rows=inputs.map(input=>({input,expected:run(input)})),data=JSON.stringify(rows,null,2)+'\n',profile=path.join(root,'docs/math-port/evidence/p24-base-class-callback-source.json');
+const rows=inputs.map(input=>({input,expected:run(input)})),data=JSON.stringify(rows,null,2)+'\n',profile=path.join(root,'tools/math-port/profiles/evidence/p24-base-class-callback-source.json');
 if(process.argv.includes('--check')){assert.equal(fs.readFileSync(profile,'utf8').replaceAll('\r\n','\n'),data);}else{assert.ok(!fs.existsSync(profile));fs.writeFileSync(profile,data);}
 console.log(JSON.stringify({source_calls:rows.length,original_errors:rows.filter(r=>!r.expected.startsWith('ok|')).length,sha256:crypto.createHash('sha256').update(data).digest('hex')}));

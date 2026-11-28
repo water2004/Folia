@@ -32,8 +32,8 @@ const nodeSource=sourcePins.find(pin=>pin.source==='ts/core/MmlTree/MmlNode.ts')
 assert.ok(nodeSource);assert.equal(nodeSource.sha256,'cc0594eb5782928412c4307637866d9f80ac147af577297edd48ee88b63b8656');
 const nodeRuntime=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src/cjs/core/MmlTree/MmlNode.js');
 assert.equal(crypto.createHash('sha256').update(fs.readFileSync(nodeRuntime)).digest('hex'),'86c5eb572dcf2652c3c52a60b66c720d231e17f600cc9aeef3ace4aeafc81d45');
-const sourceFile=path.join(root,'docs/math-port/evidence/p32-verification-source.json');
-const flagsFile=path.join(root,'docs/math-port/evidence/p32-verification-flags-source.json');
+const sourceFile=path.join(root,'tools/math-port/profiles/evidence/p32-verification-source.json');
+const flagsFile=path.join(root,'tools/math-port/profiles/evidence/p32-verification-flags-source.json');
 const sourceBytes=fs.readFileSync(sourceFile),flagsBytes=fs.readFileSync(flagsFile);
 assert.equal(crypto.createHash('sha256').update(sourceBytes).digest('hex'),'020e72f32331a16e1ac42d7da65491d958b7b5a6a90923f2a729b02904aa61b7');
 assert.equal(crypto.createHash('sha256').update(flagsBytes).digest('hex'),'60578d1cc08ed3b283d8d8c1080e782325ed391b6e467213c1d3f642b53308b0');

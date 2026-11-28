@@ -11,7 +11,7 @@ assert.ok(process.argv.length === 2 ||
   (process.argv.length === 3 && process.argv[2] === '--write-fixture'),
 'usage: source-mglyph-scene.cjs [--write-fixture]');
 const root = path.resolve(__dirname, '../..');
-const scopePath = path.join(root, 'docs/math-port/scope.json');
+const scopePath = path.join(root, 'tools/math-port/profiles/scope.json');
 const scope = JSON.parse(fs.readFileSync(scopePath, 'utf8'));
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const DATA = 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E';

@@ -30,6 +30,21 @@ def retained_observations(entry, expected, legacy):
 
 
 class ObserverPacketTests(unittest.TestCase):
+    def test_leaf_and_mml_node_open_manifest_paths_and_preserve_historical_records(self):
+        catalog = entries()
+        for packet in ("leaf", "mml-node"):
+            entry = catalog[packet]
+            expected = read(ROOT / entry["profile"])
+            with self.subTest(packet=packet):
+                historical = expected["legacy" if packet == "leaf" else "originalProfile"]
+                self.assertEqual(historical["path"].split("/")[:2], ["docs", "math-port"])
+                self.assertEqual(entry["legacy"]["path"].split("/")[:3],
+                                 ["tools", "math-port", "profiles"])
+                live = legacy_inputs(entry, expected)
+                self.assertEqual(entry["legacy"]["sha256"], historical["sha256"])
+                self.assertEqual(entry["legacy"]["bytes"], historical["bytes"])
+                self.assertEqual(live, read(ROOT / entry["legacy"]["path"]))
+
     def test_all_seven_packets_retain_full_observations_and_summary(self):
         catalog = entries()
         self.assertEqual(len(catalog), 7)

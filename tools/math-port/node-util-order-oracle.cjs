@@ -22,6 +22,6 @@ for(const mode of ['global','capture','false-op','null-def','false-attr','null-a
  let result,error='ok';try{result=mode==='global'||mode==='capture'?u.getOp(mo)[3].test:u.getMoAttribute(mo,'test');}catch(e){error=e.name+'|'+e.message;}finally{Mo.OPTABLE=saved;}
  rows.push({mode,expected:error+'|'+trace.join(',')+'|'+val(result)});
 }
-const data=JSON.stringify(rows)+'\n',profile=path.join(root,'docs/math-port/evidence/p40-node-util-order-source.json');
+const data=JSON.stringify(rows)+'\n',profile=path.join(root,'tools/math-port/profiles/evidence/p40-node-util-order-source.json');
 if(process.argv.includes('--check'))assert.equal(fs.readFileSync(profile,'utf8').replaceAll('\r\n','\n'),data);else{assert.ok(!fs.existsSync(profile));fs.writeFileSync(profile,data);}
 console.log(JSON.stringify({source_calls:rows.length}));

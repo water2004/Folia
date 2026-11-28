@@ -26,7 +26,7 @@ function run(i){let active=false,trace=[],created=[],serial=0,parentReads=0,opts
 }
 const rows=inputs.map(input=>({input,expected:run(input)})),data=JSON.stringify(rows)+'\n';
 
-const frozen=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence',"p33-error-source.json"),'utf8'));
+const frozen=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence',"p33-error-source.json"),'utf8'));
 assert.deepEqual(rows,frozen);
-assert.equal(data,fs.readFileSync(path.join(root,'docs/math-port/evidence',"p33-error-source.json"),'utf8').replaceAll('\r\n','\n'));
+assert.equal(data,fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence',"p33-error-source.json"),'utf8').replaceAll('\r\n','\n'));
 console.log(JSON.stringify({sourceCases:rows.length,sourceErrors:rows.filter(r=>!r.expected.startsWith('ok|')).length}));

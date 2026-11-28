@@ -6,6 +6,6 @@ function run(i){let active=false,trace=[];const note=s=>{if(active)trace.push(s)
  const f=new MmlFactory();f.setNodeClass('mtd',Cell);f.setNodeClass('class-child',Child);const cell=f.create('mtd'),child=f.create('class-child'),prev=f.create('mi');prev.texClass=3;const a=i.mode==='null-array'?null:i.mode==='empty'?[]:i.mode==='hole'?new Array(1):i.mode==='null'?[null]:i.mode==='prototype'?Object.assign(new Array(1),{}):[child];if(i.mode==='prototype')Object.setPrototypeOf(a,{0:child});cell.childNodes=a;
  let error='ok',result='THREW';active=true;try{result=cell.setTeXclass(i.previous?prev:null)===cell?'cell':'other';}catch(e){error=e.name+'|'+e.message;}active=false;return [error,result,String(cell.prevClass),String(cell.prevLevel),trace.join(',')].join('|');}
 const rows=inputs.map(input=>({input,expected:run(input)})),data=JSON.stringify(rows)+'\n';
-const profile=path.join(root,'docs/math-port/evidence/p36-cell-class-source.json');
+const profile=path.join(root,'tools/math-port/profiles/evidence/p36-cell-class-source.json');
 if(process.argv.includes('--check')){assert.equal(fs.readFileSync(profile,'utf8').replaceAll('\r\n','\n'),data);}else{assert.ok(!fs.existsSync(profile));fs.writeFileSync(profile,data);}
 console.log(JSON.stringify({source_calls:rows.length,sha256:crypto.createHash('sha256').update(data).digest('hex')}));

@@ -22,6 +22,6 @@ function run(i){let active=false,events=[],opts,n,p;const note=s=>{if(active)eve
  let error='ok';active=true;try{n.verifyTree(opts);}catch(e){error=e.name+'|'+e.message;}active=false;return error+'|'+scalar(opts)+'|'+Number(n.parent===p)+'|'+events.join(',');
 }
 const rows=inputs.map(input=>({input,expected:run(input)})),data=JSON.stringify(rows)+'\n';
-const profile=path.join(root,'docs/math-port/evidence/p35-math-verification-source.json');
+const profile=path.join(root,'tools/math-port/profiles/evidence/p35-math-verification-source.json');
 assert.equal(fs.readFileSync(profile,'utf8').replaceAll('\r\n','\n'),data);
 console.log(JSON.stringify({source_calls:rows.length,source_errors:rows.filter(r=>!r.expected.startsWith('ok|')).length,sha256:crypto.createHash('sha256').update(data).digest('hex')}));

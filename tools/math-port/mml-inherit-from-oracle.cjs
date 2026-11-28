@@ -18,4 +18,4 @@ function run(i){let active=false,trace=[],captured=[],src,dst,old,alt,arg;const 
  return error+'|'+captured.length+'|'+result+'|'+fresh+'|'+saved(src)+','+saved(dst)+'|'+trace.join(',');
 }
 const rows=inputs.map(input=>({input,expected:run(input)})),data=JSON.stringify(rows)+'\n';
-;const profile=path.join(root,'docs/math-port/evidence/p29-inherit-from-source.json');;if(process.argv.includes('--check'))assert.equal(fs.readFileSync(profile,'utf8').replaceAll('\r\n','\n'),data);else throw new Error('Source-only oracle supports --check only');console.log(JSON.stringify({source_calls:rows.length,source_errors:rows.filter(r=>!r.expected.startsWith('ok|')).length,sha256:hash(data)}));
+;const profile=path.join(root,'tools/math-port/profiles/evidence/p29-inherit-from-source.json');;if(process.argv.includes('--check'))assert.equal(fs.readFileSync(profile,'utf8').replaceAll('\r\n','\n'),data);else throw new Error('Source-only oracle supports --check only');console.log(JSON.stringify({source_calls:rows.length,source_errors:rows.filter(r=>!r.expected.startsWith('ok|')).length,sha256:hash(data)}));

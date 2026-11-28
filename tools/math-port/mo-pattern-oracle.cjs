@@ -5,12 +5,12 @@ assert.ok(process.argv.includes('--check'),'This oracle is read-only; pass --che
 assert.ok(!process.argv.includes('--freeze-lock'),'Source pins are immutable.');
 const tools=process.env.FOLIA_MATH_PORT_TOOLS||__dirname;
 const {root,M,names,specs,lock}=require(path.join(tools,'mo-pattern-reference.cjs'));
-const goldPath=process.env.FOLIA_MO_GOLD||path.join(root,'docs/math-port/evidence/p12b-mo-pattern-complete-source.json');
+const goldPath=process.env.FOLIA_MO_GOLD||path.join(root,'tools/math-port/profiles/evidence/p12b-mo-pattern-complete-source.json');
 const gold=JSON.parse(fs.readFileSync(goldPath,'utf8'));
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
 assert.equal(gold.schema,'mo-pattern-complete-static-gold/v2');
 assert.deepEqual(lock,gold.sourceLock.pins);
-assert.equal(sha(fs.readFileSync(path.join(root,gold.sourceLock.path))),gold.sourceLock.sha256);
+assert.equal(sha(fs.readFileSync(path.join(root,'tools/math-port/locks/p12b-source-lock.json'))),gold.sourceLock.sha256);
 assert.equal(names.length,gold.patterns.length);
 const units=text=>Array.from({length:text.length},(_,i)=>text.charCodeAt(i));
 let sourceQueries=0,masks=0,membersCount=0,productBits=0,sampleCount=0;

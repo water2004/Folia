@@ -13,15 +13,22 @@ CONFIG = ROOT / "tools/math-port/observer-packets.json"
 
 
 def legacy_inputs(entry, expected, *, root=ROOT):
-    records = [entry["legacy"]] if "legacy" in entry else []
-    if entry["comparison"] in ("leaf", "mml-node"):
-        records.append(expected["legacy" if entry["comparison"] == "leaf" else "originalProfile"])
-    for record in records:
-        file = root / record["path"]
-        equal(record["sha256"], digest(file), "Original observer profile bytes changed: " + record["path"])
+    if "legacy" not in entry:
+        return None
+    record = entry["legacy"]
+    file = root / record["path"]
+    original = (expected["legacy"] if entry["comparison"] == "leaf" else
+                expected["originalProfile"] if entry["comparison"] == "mml-node" else None)
+    expected_sha = original["sha256"] if original is not None else record["sha256"]
+    equal(expected_sha, record["sha256"], "Original observer profile SHA disagrees with active manifest")
+    actual_sha = digest(file)
+    equal(expected_sha, actual_sha, "Original observer profile bytes changed: " + record["path"])
+    expected_bytes = original.get("bytes") if original is not None else record.get("bytes")
+    if expected_bytes is not None:
+        equal(expected_bytes, file.stat().st_size, "Original observer profile size")
         if "bytes" in record:
-            equal(record["bytes"], file.stat().st_size, "Original observer profile size")
-    return read(root / entry["legacy"]["path"]) if "legacy" in entry else None
+            equal(expected_bytes, record["bytes"], "Original observer profile size disagrees with active manifest")
+    return read(file)
 
 
 def encode_original(value):

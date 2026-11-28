@@ -67,6 +67,6 @@ assert.ok(cases.every(c=>c.nodes.every(n=>n.id!=='UNBOUND'&&n.parent!=='UNBOUND'
 assert.ok(!JSON.stringify(cases).includes('UNBOUND'),'Captured arrays and extra observations also require registered identities');
 const loadedPins=Object.fromEntries(Object.keys(require.cache).filter(f=>f.startsWith(base+path.sep)).sort().map(f=>[path.relative(base,f).replaceAll('\\','/'),hash(fs.readFileSync(f))]));
 const data=JSON.stringify({schema:1,status:'Root actual MML Source evidence only; native full child graph migration has not passed',node:process.versions.node,pins,loadedPins,cases},null,2)+'\n';
-const out=path.join(root,'docs/math-port/evidence/p23b-sparse-mml-source.json');
+const out=path.join(root,'tools/math-port/profiles/evidence/p23b-sparse-mml-source.json');
 if(process.argv.includes('--check'))assert.equal(fs.readFileSync(out,'utf8').replaceAll('\r\n','\n'),data);else{assert.ok(!fs.existsSync(out));fs.writeFileSync(out,data);}
 console.log(JSON.stringify({cases:cases.length,actual_source_errors:cases.filter(c=>c.error).length,loaded_source_files:Object.keys(loadedPins).length,sha256:hash(data)}));

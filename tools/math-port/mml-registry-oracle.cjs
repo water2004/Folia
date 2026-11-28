@@ -4,7 +4,7 @@ const {root,MmlFactory}=require('./inheritance-reference.cjs');
 assert.equal(process.version,'v24.13.0');
 const base=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src');
 const {MML}=require(path.join(base,'cjs/core/MmlTree/MML.js'));
-const scope=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json')));
+const scope=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json')));
 const sourcePins=[];
 for(const name of ['MML','MmlFactory','MmlNodes/maction']){const file='ts/core/MmlTree/'+name+'.ts',bytes=fs.readFileSync(path.join(root,'.reference/MathJax-src',file)),entry=scope.files.find(x=>x.source===file);assert.ok(entry);assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),entry.source_sha256);assert.equal(fs.readFileSync(path.join(base,file),'utf8').replaceAll('\r\n','\n'),bytes.toString().replaceAll('\r\n','\n'));sourcePins.push({source:file,sha256:entry.source_sha256});}
 function encode(v){if(v===undefined)return ['$undefined'];if(v===null)return null;if(typeof v==='number'){if(Number.isNaN(v))return ['$number','NaN'];if(v===Infinity)return ['$number','Infinity'];if(v===-Infinity)return ['$number','-Infinity'];if(Object.is(v,-0))return ['$number','-0'];return v;}if(typeof v==='string'||typeof v==='boolean')return v;if(Array.isArray(v))return ['$array',v.map(encode)];if(typeof v==='object')return ['$object',Object.keys(v).map(k=>[k,encode(v[k])])];throw new TypeError('Unsupported observed value type: '+typeof v);}

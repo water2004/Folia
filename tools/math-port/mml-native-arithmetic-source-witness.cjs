@@ -8,7 +8,7 @@ if(rootIndex>=0&&(!args[rootIndex+1]||args.length!==rootIndex+2))
   throw Error('usage: node typed-mml-arithmetic-source-witness.cjs [--repo-root <repository>]');
 function findRepositoryRoot(start=__dirname){
   for(let current=path.resolve(start);current!==path.dirname(current);current=path.dirname(current))
-    if(fs.existsSync(path.join(current,'docs/math-port/typed-mml-implementation.md'))&&
+    if(fs.existsSync(path.join(current,'tools/math-port/README.md'))&&
        fs.existsSync(path.join(current,'tools/mathjax-bundle/node_modules/@mathjax/src/package.json')))return current;
   return null;
 }

@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 function findRepositoryRoot(start) {
   let current=path.resolve(start);
-  while (!fs.existsSync(path.join(current, 'docs/math-port/typed-mml-implementation.md'))) {
+  while (!fs.existsSync(path.join(current, 'tools/math-port/README.md'))) {
     const parent=path.dirname(current);
     if(parent===current) throw new Error('Cannot locate repository root');
     current=parent;

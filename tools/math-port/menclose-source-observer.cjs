@@ -6,14 +6,14 @@ const root=path.resolve(__dirname,'../..');
 const packages=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax');
 const src=path.join(packages,'src');
 const digest=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-const scope=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json')));
+const scope=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json')));
 const sourceLock=JSON.parse(fs.readFileSync(path.join(__dirname,'common-layout-reference/profile-source-lock.json')));
-const scopeFile=path.join(root,'docs/math-port/scope.json');
+const scopeFile=path.join(root,'tools/math-port/profiles/scope.json');
 if(digest(scopeFile)!=='9705d389538b2fc8bf782feea4372ace639b3727304f2971937bbcfb0042a0d1')
   throw Error('MathJax scope lock changed');
 if(digest(path.join(root,scope.profile.file))!==scope.profile.sha256)
   throw Error('MathJax profile lock changed');
-if(sourceLock.scopeHash!==digest(path.join(root,'docs/math-port/scope.json')))
+if(sourceLock.scopeHash!==digest(path.join(root,'tools/math-port/profiles/scope.json')))
   throw Error('MathJax source dependency lock does not match the profile');
 for(const dependency of sourceLock.dependencies){
   const file=dependency.file.startsWith('src/cjs/')?

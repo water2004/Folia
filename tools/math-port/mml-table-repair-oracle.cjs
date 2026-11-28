@@ -11,6 +11,6 @@ function run(i){let active=false,trace=[],nodes=[],target,captured;const tag=n=>
  const array=a=>a===null?'N':a.map(tag).join(','),state=nodes.map(n=>[n.kind,tag(n.parent),array(n.childNodes)].join('/')).join(';');return error+'|'+state+'|captured/'+array(captured)+'|'+trace.join(',');}
 const rows=inputs.map(input=>({input,expected:run(input)})),data=JSON.stringify(rows)+'\n';
 
-const profile=process.env.FOLIA_TABLE_REPAIR_PROFILE||path.join(root,'docs/math-port/evidence/p36-table-repair-source.json');
+const profile=process.env.FOLIA_TABLE_REPAIR_PROFILE||path.join(root,'tools/math-port/profiles/evidence/p36-table-repair-source.json');
 assert.equal(fs.readFileSync(profile,'utf8').replaceAll('\r\n','\n'),data,'Frozen table repair Source profile changed');
 console.log(JSON.stringify({sourceCases:rows.length,profileSha256:crypto.createHash('sha256').update(fs.readFileSync(profile)).digest('hex'),mode:'check'}));

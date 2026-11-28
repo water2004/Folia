@@ -6,8 +6,8 @@ const {MmlFactory}=require(path.join(base,'core/MmlTree/MmlFactory.js')),{MmlMac
 class Probe extends MmlMaction{hook(){this.setChildInheritedAttributes({},false,0,false);}}
 const inputs=[['U',undefined],['N',null],['false',false],['zero',0],['array',[]],['object',{}],['tooltip','TOOLTIP'],['toggle','toggle']];
 const rows=inputs.map(([input,value])=>{const f=new MmlFactory();f.setNodeClass('action-errors',Probe);const n=f.create('action-errors');n.attributes.set('actiontype',value);let expected='ok';try{n.hook();}catch(e){expected=e.name+'|'+e.message;}return {input,expected};});
-const profile=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence',"p38-action-errors-source.json"),'utf8'));
+const profile=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence',"p38-action-errors-source.json"),'utf8'));
 assert.deepEqual(rows,profile);
 const data=JSON.stringify(rows)+'\n';
-assert.equal(data,fs.readFileSync(path.join(root,'docs/math-port/evidence',"p38-action-errors-source.json"),'utf8').replaceAll('\r\n','\n'));
+assert.equal(data,fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence',"p38-action-errors-source.json"),'utf8').replaceAll('\r\n','\n'));
 console.log(JSON.stringify({sourceCases:rows.length}));

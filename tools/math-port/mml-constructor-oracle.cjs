@@ -2,7 +2,7 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 const root=path.resolve(__dirname,'../..'),base=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src/cjs'),hash=b=>crypto.createHash('sha256').update(b).digest('hex');
-const prerequisite=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p23b-sparse-mml-source.json')));assert.equal(process.versions.node,'24.13.0');for(const[f,p]of Object.entries(prerequisite.loadedPins))assert.equal(hash(fs.readFileSync(path.join(base,f))),p);
+const prerequisite=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence/p23b-sparse-mml-source.json')));assert.equal(process.versions.node,'24.13.0');for(const[f,p]of Object.entries(prerequisite.loadedPins))assert.equal(hash(fs.readFileSync(path.join(base,f))),p);
 const {MmlFactory}=require(path.join(base,'core/MmlTree/MmlFactory.js')),{MmlMi}=require(path.join(base,'core/MmlTree/MmlNodes/mi.js'));
 const inputs=[],cases=[];for(const kind of new MmlFactory().getKinds())inputs.push({kind,properties:'empty',children:''});
 for(const kind of ['mi','mrow','mfrac','math','mstyle','msubsup','mtable','mtr'])for(const properties of ['list','null'])inputs.push({kind,properties,children:''});
@@ -25,5 +25,5 @@ function run(input){const ids=new WeakMap(),nodes=[],trace=[],register=n=>{if(!i
  return {input,expected:out+'|'+trace.join(',')};
 }
 for(const input of inputs)cases.push(run(input));
-const data=JSON.stringify({schema:1,status:'Root original constructor/registry evidence only; other MML semantics and full graph acceptance pending',node:process.versions.node,pins:prerequisite.loadedPins,cases},null,2)+'\n',out=path.join(root,'docs/math-port/evidence/p23f-constructor-source.json');
+const data=JSON.stringify({schema:1,status:'Root original constructor/registry evidence only; other MML semantics and full graph acceptance pending',node:process.versions.node,pins:prerequisite.loadedPins,cases},null,2)+'\n',out=path.join(root,'tools/math-port/profiles/evidence/p23f-constructor-source.json');
 if(process.argv.includes('--check'))assert.equal(fs.readFileSync(out,'utf8').replaceAll('\r\n','\n'),data);else{assert.ok(!fs.existsSync(out));fs.writeFileSync(out,data);}console.log(JSON.stringify({cases:cases.length,errors:cases.filter(c=>!c.expected.startsWith('ok|')).length,sha256:hash(data)}));

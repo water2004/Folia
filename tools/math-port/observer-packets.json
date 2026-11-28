@@ -2,21 +2,22 @@
   "mml": {
     "script": {
       "owner": "script-oracle.cjs",
-      "profile": "docs/math-port/evidence/script-source-profile.json",
+      "profile": "tools/math-port/profiles/evidence/script-source-profile.json",
       "sha256": "58aa2985bcf14a36b5b135c430a776e59e729132af615f4fcef21036a08a53d1",
       "legacy": {
-        "path": "docs/math-port/evidence/p23l-script-source-profile.json",
+        "path": "tools/math-port/profiles/evidence/p23l-script-source-profile.json",
         "sha256": "cc570115c252cd201bd2a59030cb8cc747ddbf3eb3106481d72df9d0b6cac898"
       },
       "comparison": "profile"
     },
     "leaf": {
       "owner": "leaf-oracle.cjs",
-      "profile": "docs/math-port/evidence/leaf-source-profile.json",
+      "profile": "tools/math-port/profiles/evidence/leaf-source-profile.json",
       "sha256": "67769d004e1ab15f32f8c7ea9ba776635d5b0a493366c8a838b2ab944fa5d748",
       "legacy": {
-        "path": "docs/math-port/evidence/p23l-leaf-source-profile.json",
-        "sha256": "2014a953aba93aae64e7a12be82e08d5cfc4fd44f8bf44ef6e8e83350ab1fce4"
+        "path": "tools/math-port/profiles/evidence/p23l-leaf-source-profile.json",
+        "sha256": "2014a953aba93aae64e7a12be82e08d5cfc4fd44f8bf44ef6e8e83350ab1fce4",
+        "bytes": 324020
       },
       "comparison": "leaf"
     }
@@ -24,30 +25,30 @@
   "operator": {
     "mo-values": {
       "owner": "mo-values-oracle.cjs",
-      "profile": "docs/math-port/evidence/p24-mo-values-source.json",
+      "profile": "tools/math-port/profiles/evidence/p24-mo-values-source.json",
       "sha256": "d7a2eecfc27538ccf9f3adfa4a8259c1d9332e3b33783eacab32eab7b81f24aa",
       "legacy": {
-        "path": "docs/math-port/evidence/p24-mo-values-observer-profile.json",
+        "path": "tools/math-port/profiles/evidence/p24-mo-values-observer-profile.json",
         "sha256": "aa4a959edcd2a6ac8bdfa74c27ea0d06c4fbfcc3a68f8df55e8b54620d530af3"
       },
       "comparison": "profile"
     },
     "mml-registry": {
       "owner": "mml-registry-oracle.cjs",
-      "profile": "docs/math-port/evidence/mml-registry-source.json",
+      "profile": "tools/math-port/profiles/evidence/mml-registry-source.json",
       "sha256": "47b1d8da20d41129a08beba3e5db8619a44c2b96a20208b0549890438c8d05a0",
       "legacy": {
-        "path": "docs/math-port/evidence/p24-mml-registry-observer-profile.json",
+        "path": "tools/math-port/profiles/evidence/p24-mml-registry-observer-profile.json",
         "sha256": "be28edd78005b1e8ad31b814b01400e89d35a40da9704d3c6c9872a0018de072"
       },
       "comparison": "profile"
     },
     "mo": {
       "owner": "mo-oracle.cjs",
-      "profile": "docs/math-port/evidence/p24-mo-source.json",
+      "profile": "tools/math-port/profiles/evidence/p24-mo-source.json",
       "sha256": "24a7e882ed10881e970f3a9f997ad973c47dc8753b68e0c78b3657c1865693b1",
       "legacy": {
-        "path": "docs/math-port/evidence/p24-mo-observer-profile.json",
+        "path": "tools/math-port/profiles/evidence/p24-mo-observer-profile.json",
         "sha256": "0af4f4633e9ddaa760a6db50ed046c36363e0c968eb6ffe61d3bc7c425150f98"
       },
       "comparison": "profile"
@@ -56,16 +57,21 @@
   "direct": {
     "mml-node": {
       "owner": "mml-node-oracle.cjs",
-      "profile": "docs/math-port/evidence/p23k-mml-node-structured-source-profile.json",
+      "profile": "tools/math-port/profiles/evidence/p23k-mml-node-structured-source-profile.json",
       "comparison": "mml-node",
-      "sha256": "027019e93960fa167dfdd83fe78921cd285455ab9a2e816f90a1ccfc2f54983c"
+      "sha256": "027019e93960fa167dfdd83fe78921cd285455ab9a2e816f90a1ccfc2f54983c",
+      "legacy": {
+        "path": "tools/math-port/profiles/evidence/p23k-mml-node-source-profile.json",
+        "sha256": "05b8ce98c2e6fa93edac57aac32deba966404e39e240fac042ff55cbf3841a03",
+        "bytes": 64568
+      }
     },
     "mathchoice": {
       "owner": "mathchoice-oracle.cjs",
-      "profile": "docs/math-port/evidence/source-mathchoice-profile.json",
+      "profile": "tools/math-port/profiles/evidence/source-mathchoice-profile.json",
       "comparison": "mathchoice",
       "legacy": {
-        "path": "docs/math-port/evidence/p23n-mathchoice-source-profile.json",
+        "path": "tools/math-port/profiles/evidence/p23n-mathchoice-source-profile.json",
         "sha256": "3dc783dce354ba83003d6949ade951047d83912982f3a2409d42085a3b871cea"
       },
       "sha256": "ffe785c5905eca42e98271390e1475ec6b755285e9177c4d1373a6d3ec649fa6"

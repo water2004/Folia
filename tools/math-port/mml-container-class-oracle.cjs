@@ -17,7 +17,7 @@ function run(i){let active=false,trace=[],n,b,q,p,s1,s2;const id=v=>v===null?'N'
  active=true;let result='THREW',error='ok';try{result=id((i.family==='layout'?core.AbstractMmlLayoutNode:core.AbstractMmlBaseNode).prototype.setTeXclass.call(n,i.prev==='p'?p:i.prev==='N'?null:undefined));}catch(e){error=e.name+'|'+e.message;}active=false;
  const slots=n.childNodes===null?'NULL':Array.from(n.childNodes,id).join(',');return error+'|'+result+'|'+[n.cur,n.pc,b.cur,q.cur,p.cur,s1.cur,s2.cur,b.calls,s1.calls,s2.calls].join(',')+'|'+slots+'|'+trace.join(',');
 }
-const rows=inputs.map(input=>({input,expected:run(input)})),data=JSON.stringify(rows)+'\n',profile=path.join(root,'docs/math-port/evidence/p25-container-class-source.json');
+const rows=inputs.map(input=>({input,expected:run(input)})),data=JSON.stringify(rows)+'\n',profile=path.join(root,'tools/math-port/profiles/evidence/p25-container-class-source.json');
 assert.ok(process.argv.includes('--check'),'Source-only candidate is exact-check only');
 assert.equal(fs.readFileSync(profile,'utf8').replaceAll('\r\n','\n'),data);
 console.log(JSON.stringify({source_calls:rows.length,source_errors:rows.filter(r=>!r.expected.startsWith('ok|')).length,sha256:crypto.createHash('sha256').update(data).digest('hex'),mode:'check'}));

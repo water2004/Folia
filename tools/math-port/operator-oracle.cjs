@@ -4,9 +4,9 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
 
 // Normal locked Source load. operator-data.cjs remains the independent production-table generator.
 const crypto=require('node:crypto');
-function findRoot(){let p=process.env.FOLIA_MATH_ROOT||__dirname;for(;;){if(fs.existsSync(path.join(p,'docs/math-port/evidence/p11-source-lock.json')))return p;const next=path.dirname(p);if(next===p)throw Error('Repository root not found');p=next;}}
+function findRoot(){let p=process.env.FOLIA_MATH_ROOT||__dirname;for(;;){if(fs.existsSync(path.join(p,'tools/math-port/locks/p11-source-lock.json')))return p;const next=path.dirname(p);if(next===p)throw Error('Repository root not found');p=next;}}
 const root=findRoot(),digest=x=>crypto.createHash('sha256').update(x).digest('hex');
-const lock=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p11-source-lock.json'),'utf8'));
+const lock=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/locks/p11-source-lock.json'),'utf8'));
 assert.equal(process.version,lock.node);assert.equal(lock.source,'ts/core/MmlTree/OperatorDictionary.ts');
 assert.equal(lock.sha256,'9afac6e3a8f3b778247a5a678c529b9edddb8172850df7384511bf61dfbffd37');
 assert.equal(lock.runtime_sha256,'db65e13a8f3c6290e711303d46cfb6f2fe8ec24e12c499bdf9b1bf4f42027ff8');
@@ -79,7 +79,7 @@ for(const rows of rowCases){D.RANGES.splice(0,D.RANGES.length,...rows);let value
   if(!error){if(rows.includes(value))eq(true);else range(value);}eq(!!error);
 }end();reset();
 
-function check(){const name='operator-source-profile.json',file=path.join(root,'docs/math-port/evidence',name),bytes=fs.readFileSync(file);
+function check(){const name='operator-source-profile.json',file=path.join(root,'tools/math-port/profiles/evidence',name),bytes=fs.readFileSync(file);
  assert.equal(digest(bytes),'c5f2913f724b4a987fec5f0036a363670fb8a9faae883bd8a1ada30e3e6e09d3','Frozen operator Source profile bytes changed');const expected=JSON.parse(bytes);assert.deepEqual(records,expected.records);
  console.log(JSON.stringify({mode:'check',cases:records.length,observations:records.reduce((n,r)=>n+r.observations.length,0),unicodeCodePoints:0x110000,profileSha256:digest(bytes)}));}
 module.exports={records,check};if(require.main===module)check();

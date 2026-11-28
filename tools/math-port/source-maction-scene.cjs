@@ -11,7 +11,7 @@ assert.ok(process.argv.length === 2 ||
   (process.argv.length === 3 && process.argv[2] === '--write-fixture'),
 'usage: source-maction-scene.cjs [--write-fixture]');
 const root = path.resolve(__dirname, '../..');
-const scopePath = path.join(root, 'docs/math-port/scope.json');
+const scopePath = path.join(root, 'tools/math-port/profiles/scope.json');
 const scope = JSON.parse(fs.readFileSync(scopePath, 'utf8'));
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const cases = [

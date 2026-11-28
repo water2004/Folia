@@ -3,7 +3,7 @@
 class Probe extends MmlMfenced{add(){this.addFakeNodes();}}
 const rows=[];for(const field of ['open','close','separators'])for(const [tag,value] of [['U',undefined],['N',null],['F',false]]){const f=new MmlFactory();f.setNodeClass('string-errors',Probe);const n=f.create('string-errors');n.attributes.set(field,value);let expected='ok';try{n.add();}catch(e){expected=e.name+'|'+e.message;}rows.push({field,tag,expected});}
 const data=JSON.stringify(rows)+'\n';
-const profile=path.join(root,'docs/math-port/evidence/p39-mfenced-string-errors-source.json');
+const profile=path.join(root,'tools/math-port/profiles/evidence/p39-mfenced-string-errors-source.json');
 const normalize=text=>text.replaceAll('\r\n','\n');
 if(process.argv.includes('--check')) assert.equal(normalize(fs.readFileSync(profile,'utf8')),data);
 else {assert.ok(!fs.existsSync(profile));fs.writeFileSync(profile,data);}

@@ -6,7 +6,7 @@
     "font": "NewCM 4.1.3",
     "inputJax": "MathML",
     "outputJax": "SVG",
-    "profileBoundary": "MathMLCompile is not among docs/math-port/scope.json files; this is pinned package MathML->Shared SVG Source evidence, not a TeX-package/full38 input-profile render."
+    "profileBoundary": "MathMLCompile is not among tools/math-port/profiles/scope.json files; this is pinned package MathML->Shared SVG Source evidence, not a TeX-package/full38 input-profile render."
   },
   "metrics": {
     "em": 16,

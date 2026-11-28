@@ -2,7 +2,7 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'../..'),npm=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src');
-const lock=require(path.join(root,'docs/math-port/evidence/p10-source-lock.json'));
+const lock=require(path.join(root,'tools/math-port/locks/p10-source-lock.json'));
 assert.equal(process.version,lock.node);
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex'),mods={};
 for(const f of lock.files){const b=fs.readFileSync(path.join(root,'.reference/MathJax-src',f.source));assert.equal(sha(b),f.sha256);assert.equal(fs.readFileSync(path.join(npm,f.source),'utf8').replaceAll('\r\n','\n'),b.toString().replaceAll('\r\n','\n'));const resolved=require.resolve('@mathjax/src/js/'+f.source.slice(3,-3)+'.js',{paths:[path.join(root,'tools/mathjax-bundle')]});assert.equal(fs.realpathSync(resolved),fs.realpathSync(path.join(npm,f.runtime)));assert.equal(sha(fs.readFileSync(resolved)),f.runtime_sha256);mods[path.basename(f.source,'.ts')]=require(resolved);}

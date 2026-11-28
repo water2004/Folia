@@ -8,7 +8,7 @@ const assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'../..');
 const packages=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax');
 const src=path.join(packages,'src');
-const scopePath=path.join(root,'docs/math-port/scope.json');
+const scopePath=path.join(root,'tools/math-port/profiles/scope.json');
 const digest=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const scope=JSON.parse(fs.readFileSync(scopePath,'utf8'));
 assert.equal(digest(path.join(root,scope.profile.file)),scope.profile.sha256);

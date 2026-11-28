@@ -22,7 +22,7 @@ function options(argv) {
 function findRepoRoot(start) {
   let current=path.resolve(start);
   for (;;) {
-    if (fs.existsSync(path.join(current,'docs/math-port/evidence/p11-source-lock.json')) &&
+    if (fs.existsSync(path.join(current,'tools/math-port/locks/p11-source-lock.json')) &&
         fs.existsSync(path.join(current,'.reference/MathJax-src'))) return current;
     const parent=path.dirname(current);
     if (parent===current) throw new Error(`Could not detect repository root from ${start}`);
@@ -34,8 +34,8 @@ const root=args['repo-root'] || findRepoRoot(__dirname);
 const outRoot=args['out-root'] || root;
 const packages = path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax/src');
 const digest = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-const p11 = JSON.parse(fs.readFileSync(path.join(root, 'docs/math-port/evidence/p11-source-lock.json'), 'utf8'));
-const p12 = JSON.parse(fs.readFileSync(path.join(root, 'docs/math-port/evidence/p12b-source-lock.json'), 'utf8'));
+const p11 = JSON.parse(fs.readFileSync(path.join(root, 'tools/math-port/locks/p11-source-lock.json'), 'utf8'));
+const p12 = JSON.parse(fs.readFileSync(path.join(root, 'tools/math-port/locks/p12b-source-lock.json'), 'utf8'));
 assert.equal(process.version, p11.node);
 
 function lockedSource(lock) {

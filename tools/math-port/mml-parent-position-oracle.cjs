@@ -14,6 +14,6 @@ function run(i){let active=false,trace=[],n,a,b,c;const note=s=>{if(active)trace
  try{const v=i.op==='Parent'?Object.getOwnPropertyDescriptor(core.AbstractMmlNode.prototype,'Parent').get.call(n):core.AbstractMmlNode.prototype.childPosition.call(n);result=i.op==='position'?(v===null?'N':String(v)):v===null?'N':v===undefined?'U':v.id;}catch(e){error=e.name+'|'+e.message;}active=false;
  return error+'|'+result+'|'+(a.bp===null?'N':a.bp===undefined?'U':a.bp.id)+'|'+trace.join(',');
 }
-const rows=inputs.map(input=>({input,expected:run(input)})),data=JSON.stringify(rows)+'\n',profile=path.join(root,supplement?'docs/math-port/evidence/p25-parent-position-rebind-source.json':'docs/math-port/evidence/p25-parent-position-source.json');
+const rows=inputs.map(input=>({input,expected:run(input)})),data=JSON.stringify(rows)+'\n',profile=path.join(root,supplement?'tools/math-port/profiles/evidence/p25-parent-position-rebind-source.json':'tools/math-port/profiles/evidence/p25-parent-position-source.json');
 if(process.argv.includes('--check'))assert.equal(fs.readFileSync(profile,'utf8').replaceAll('\r\n','\n'),data);else{assert.ok(!fs.existsSync(profile));fs.writeFileSync(profile,data);}
 console.log(JSON.stringify({source_calls:rows.length,source_errors:rows.filter(r=>!r.expected.startsWith('ok|')).length,sha256:crypto.createHash('sha256').update(data).digest('hex')}));

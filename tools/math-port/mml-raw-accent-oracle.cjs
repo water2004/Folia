@@ -5,7 +5,7 @@ function value(k){return k==='U'?undefined:k==='N'?null:k==='false'?false:k==='t
 function run(i){let active=false,trace=[],mo;const note=s=>{if(active)trace.push(s);};class Probe extends M{coreParent(){note('coreParent');return this;}get attributes(){note('attributes');return this.saved;}set attributes(a){this.saved=a;}}class Part extends AbstractMmlNode{get kind(){return 'raw-accent-part';}coreMO(){note('core/'+this.label);return i.kind==='munderover'&&this.label==='under'?mo:this;}}
  const f=new MmlFactory();f.setNodeClass('raw-accent-probe',Probe);f.setNodeClass('raw-accent-part',Part);mo=f.create('raw-accent-probe');const parent=f.create(i.kind),first=f.create('raw-accent-part'),under=f.create('raw-accent-part'),over=f.create('raw-accent-part');under.label='under';over.label='over';parent.childNodes=i.kind==='munderover'?[first,under,over]:[first,under];mo.parent=parent;const raw=value(i.raw);mo.attributes.set('accent',raw);parent.attributes.set(i.kind==='mover'?'accent':'accentunder',value(i.explicit));let error='ok',result='THREW';active=true;try{result=tag(mo.isAccent,raw);}catch(e){error=e.name+'|'+e.message;}active=false;return error+'|'+result+'|'+trace.join(',');}
 const rows=inputs.map(input=>({input,expected:run(input)})),data=JSON.stringify(rows)+'\n';
-const profile=path.join(root,"docs/math-port/evidence/p37-raw-accent-source.json");
+const profile=path.join(root,"tools/math-port/profiles/evidence/p37-raw-accent-source.json");
 assert.ok(process.argv.includes('--check'),'Source-only oracle is check-only');
 assert.equal(fs.readFileSync(profile,'utf8').replaceAll('\r\n','\n'),data);
 console.log(JSON.stringify({source_calls:rows.length,sha256:crypto.createHash('sha256').update(data).digest('hex'),mode:'check'}));

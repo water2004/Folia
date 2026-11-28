@@ -6,7 +6,7 @@ const names=['pseudoScripts','primes','opPattern','mathaccents','mathaccentsWith
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
 function compiledTree(){const entries=[];function walk(dir,rel=''){for(const e of fs.readdirSync(dir,{withFileTypes:true}).sort((a,b)=>a.name<b.name?-1:a.name>b.name?1:0)){const name=rel+e.name,p=path.join(dir,e.name);if(e.isDirectory())walk(p,name+'/');else if(/\.(js|cjs|mjs|json)$/.test(name))entries.push([name,sha(fs.readFileSync(p))]);}}walk(path.join(npm,'cjs'));return {files:entries.length,sha256:sha(JSON.stringify(entries))};}
 const source='ts/core/MmlTree/MmlNodes/mo.ts',runtime='cjs/core/MmlTree/MmlNodes/mo.js';
-const lockfile=path.join(root,'docs/math-port/evidence/p12b-source-lock.json');
+const lockfile=path.join(root,'tools/math-port/locks/p12b-source-lock.json');
 const sourceBytes=fs.readFileSync(path.join(root,'.reference/MathJax-src',source));
 assert.equal(sha(sourceBytes),'2082cd372a4c21fa46c67ab3972b51bcc950f711dd3369cbb2bd7ced62c2f605');
 assert.equal(process.version,'v24.13.0');assert.equal(require(path.join(npm,'package.json')).version,'4.1.3');

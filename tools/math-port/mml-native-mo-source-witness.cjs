@@ -5,7 +5,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 function findRepositoryRoot(start = __dirname) {
   for (let current = path.resolve(start); current !== path.dirname(current); current = path.dirname(current)) {
-    if (fs.existsSync(path.join(current, 'docs/math-port/typed-mml-implementation.md')) &&
+    if (fs.existsSync(path.join(current, 'tools/math-port/README.md')) &&
         fs.existsSync(path.join(current, 'tools/math-port/mo-pattern-reference.cjs'))) return current;
   }
   return null;
@@ -20,7 +20,7 @@ const { root: referenceRoot, M } = require(path.join(root, 'tools/math-port/mo-p
 assert.equal(referenceRoot, root);
 const { MmlFactory } = require(path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax/src/cjs/core/MmlTree/MmlFactory.js'));
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
-const sourceLock = JSON.parse(fs.readFileSync(path.join(root, 'docs/math-port/evidence/p12b-source-lock.json'), 'utf8'));
+const sourceLock = JSON.parse(fs.readFileSync(path.join(root, 'tools/math-port/locks/p12b-source-lock.json'), 'utf8'));
 assert.equal(sourceLock.version, '4.1.3');
 assert.equal(sourceLock.sha256, '2082cd372a4c21fa46c67ab3972b51bcc950f711dd3369cbb2bd7ced62c2f605');
 assert.equal(sha(fs.readFileSync(path.join(root, '.reference/MathJax-src', sourceLock.source))), sourceLock.sha256);

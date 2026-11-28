@@ -2,7 +2,7 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 const root=path.resolve(__dirname,'../..'),base=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src/cjs');assert.equal(process.versions.node,'24.13.0');
-const prerequisite=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p23b-sparse-mml-source.json'))),hash=b=>crypto.createHash('sha256').update(b).digest('hex');for(const[f,p]of Object.entries(prerequisite.loadedPins))assert.equal(hash(fs.readFileSync(path.join(base,f))),p);
+const prerequisite=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence/p23b-sparse-mml-source.json'))),hash=b=>crypto.createHash('sha256').update(b).digest('hex');for(const[f,p]of Object.entries(prerequisite.loadedPins))assert.equal(hash(fs.readFileSync(path.join(base,f))),p);
 const {MmlFactory}=require(path.join(base,'core/MmlTree/MmlFactory.js'));const extended=process.argv.includes('--extended');
 function getter(node,name){for(let p=Object.getPrototypeOf(node);p;p=Object.getPrototypeOf(p)){const d=Object.getOwnPropertyDescriptor(p,name);if(d?.get)return d.get;}throw Error('missing getter');}
 const inputs=[];for(const shape of ['', 'b','s','sb','bs','sbs','bb','a','sa','as','H','U','N','sHb','sNb','HUb','bHN','bab','es','z','c','sc'])for(const member of ['isEmpty','isSpacelike','isEmbellished'])inputs.push({kind:'mrow',shape,member});
@@ -27,5 +27,5 @@ function run(input){const created=[],ids=new WeakMap();class Observed extends Mm
 }
 const cases=inputs.map(input=>({input,expected:run(input)}));assert.equal(cases.length,extended?7:111);
 if(extended&&fs.existsSync(path.join(root,'build/p23h-rebind4-preserved.json')))assert.deepEqual(cases.slice(0,4),JSON.parse(fs.readFileSync(path.join(root,'build/p23h-rebind4-preserved.json'))).cases,'Supplementation must preserve all prior original rows');
-const data=JSON.stringify({schema:1,scope:'actual original positive MML predicates, row core-index side effects, TextNode RTTI/text and captured live iterators under getter/method callbacks',loadedPins:prerequisite.loadedPins,cases},null,2)+'\n',out=path.join(root,'docs/math-port/evidence/'+(extended?'p23h-predicate-rebind-source':'p23h-predicate-probe-source')+'.json');
+const data=JSON.stringify({schema:1,scope:'actual original positive MML predicates, row core-index side effects, TextNode RTTI/text and captured live iterators under getter/method callbacks',loadedPins:prerequisite.loadedPins,cases},null,2)+'\n',out=path.join(root,'tools/math-port/profiles/evidence/'+(extended?'p23h-predicate-rebind-source':'p23h-predicate-probe-source')+'.json');
 if(process.argv.includes('--check'))assert.equal(fs.readFileSync(out,'utf8').replaceAll('\r\n','\n'),data);else{assert.ok(!fs.existsSync(out));fs.writeFileSync(out,data);}console.log(JSON.stringify({cases:cases.length,sha256:hash(data)}));

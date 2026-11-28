@@ -31,6 +31,6 @@ for(const shape of shapes)for(const proto of [false,true]){
  for(const v of ['U','N','a','b','c'])for(const start of [-9,-1,0,2,9])add(shape,proto,{kind:'indexOf',value:v,start});
  for(const mutation of ['none','append','delete','shrink','fill'])add(shape,proto,{kind:'forEach',mutation});
 }
-const data=JSON.stringify({schema:1,scope:'ordinary numeric-index child arrays and bound numeric prototype data; no generic JS exotic/species/descriptors',node:process.versions.node,cases},null,2)+'\n',out=path.join(root,'docs/math-port/evidence/p23-child-array-source.json');
+const data=JSON.stringify({schema:1,scope:'ordinary numeric-index child arrays and bound numeric prototype data; no generic JS exotic/species/descriptors',node:process.versions.node,cases},null,2)+'\n',out=path.join(root,'tools/math-port/profiles/evidence/p23-child-array-source.json');
 if(process.argv.includes('--check'))assert.equal(fs.readFileSync(out,'utf8').replaceAll('\r\n','\n'),data);else{assert.ok(!fs.existsSync(out));fs.writeFileSync(out,data);}
 console.log(JSON.stringify({cases:cases.length,sha256:crypto.createHash('sha256').update(data).digest('hex')}));

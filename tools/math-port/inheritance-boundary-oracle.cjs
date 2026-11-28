@@ -48,6 +48,6 @@ const {n}=setup('plain');const key=String(origin);const old=core.AbstractMmlNode
 test('raw_origin_'+cases.length,result);
 }
 function profileValue(v){if(v===undefined)return {type:'missing'};if(v===null)return {type:'null'};if(typeof v==='boolean')return {type:'boolean',value:v};if(typeof v==='number')return {type:'number',value:Number.isNaN(v)?'NaN':Object.is(v,-0)?'-0':v};if(typeof v==='string')return {type:'string',units:Array.from({length:v.length},(_,i)=>v.charCodeAt(i))};if(Array.isArray(v))return {type:'array',items:v.map(profileValue)};return {type:'object',entries:Object.keys(v).map(k=>[k,profileValue(v[k])])};}
-const profilePath=path.join(root,'docs/math-port/evidence/inheritance-boundary-source-profile.json'),frozen=JSON.parse(fs.readFileSync(profilePath,'utf8'));
+const profilePath=path.join(root,'tools/math-port/profiles/evidence/inheritance-boundary-source-profile.json'),frozen=JSON.parse(fs.readFileSync(profilePath,'utf8'));
 assert.equal(cases.length,frozen.cases.length);for(let i=0;i<cases.length;i++){assert.equal(cases[i].name,frozen.cases[i].name);assert.deepEqual(cases[i].expected,frozen.valuePool[frozen.cases[i].expectedRef]);}
 console.log(JSON.stringify({cases:cases.length,assertions,source_values:frozen.valuePool.length,sourcePins:frozen.sourcePins.length,sourceSha256:hash(fs.readFileSync(path.join(root,'.reference/MathJax-src/ts/core/MmlTree/MmlNode.ts'))),mode:process.argv.includes('--check')?'check':'source-only-check'}));

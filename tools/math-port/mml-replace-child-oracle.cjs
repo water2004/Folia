@@ -19,6 +19,6 @@ function run(i){let active=false,trace=[],n,a,b,first,original,alternate;const i
  return error+'|'+result+'|'+snapshot(n.childNodes)+'|'+snapshot(original)+'|'+snapshot(alternate)+'|'+[n,a,b,first].map(x=>tag(x.saved)).join(',')+'|'+trace.join(',');
 }
 const rows=inputs.map(input=>({input,expected:run(input)})),data=JSON.stringify(rows)+'\n';
-const profile=path.join(root,'docs/math-port/evidence/p31-replace-child-source.json');
+const profile=path.join(root,'tools/math-port/profiles/evidence/p31-replace-child-source.json');
 assert.equal(fs.readFileSync(profile,'utf8').replaceAll('\r\n','\n'),data);
 console.log(JSON.stringify({source_calls:rows.length,source_errors:rows.filter(r=>!r.expected.startsWith('ok|')).length,profile_sha256:crypto.createHash('sha256').update(data).digest('hex'),mode:'source-profile-check-only'}));
