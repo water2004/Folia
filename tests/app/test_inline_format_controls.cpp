@@ -308,6 +308,46 @@ namespace {
             }
         };
 
+        "inline syntax markers use their heading font size"_test = [] {
+            auto const sheet = CreateEditorStyleSheet(folia::default_theme_profile(), {.font = 130});
+            EditorRenderResources resources;
+            resources.InitializeTextMeasurement(sheet, 640, 480);
+            EditorTextLayoutEngine engine(resources, sheet);
+            folia::platform::MathJaxRenderer math;
+            folia::platform::SvgNormalizer normalizer;
+            struct Example { wchar_t const* text; std::u32string_view marker; std::uint8_t level; };
+            for (auto const& example : {
+                Example{L"# 11111 $111", U"$", 1},
+                Example{L"> ## Value \\(111", U"\\(", 2},
+                Example{L"### Value *111*", U"*", 3},
+            }) {
+                EditorSession session;
+                session.SetText(example.text);
+                auto owner = session.Selection().active.container_id;
+                auto source = session.EditableSource(owner);
+                expect(fatal(source.has_value()));
+                auto const markerStart = source->find(example.marker);
+                expect(fatal(markerStart != std::u32string::npos));
+                auto frame = session.RenderFrame();
+                if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
+                auto const& items = frame.renderModel.blocks.front().inline_items;
+                folia::TextPosition caret{owner, markerStart + example.marker.size() + 1, folia::TextAffinity::Downstream};
+                auto display = BuildDisplayInlineText(items, caret, InlineItemsEndPosition(items, caret), math, normalizer,
+                    {sheet, sheet.textColor, sheet.body.size}, 640, false, false, false);
+                auto layout = engine.CreateFlow(display, engine.FormatFor(false, display.ranges), 640, {});
+                expect(fatal(bool(layout)));
+                auto const wide = ToWide(display.text);
+                auto const marker = ToWide(example.marker);
+                auto const range = std::ranges::find_if(display.ranges, [&](auto const& entry) {
+                    return entry.marker && std::wstring_view{wide}.substr(entry.start, entry.length) == marker;
+                });
+                expect(fatal(range != display.ranges.end()));
+                float fontSize = 0;
+                winrt::check_hresult(layout->GetFontSize(range->start, &fontSize, nullptr));
+                expect(fontSize == sheet.HeadingSize(example.level)) << static_cast<int>(example.level);
+            }
+        };
+
         "format controls reflect selection and use the existing reversible source edit"_test = [] {
             EditorSession session;
             session.SetText(L"__a\U0001F600b__ tail\n");

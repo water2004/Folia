@@ -804,6 +804,7 @@ struct Builder {
             InlineRenderItem marker;
             marker.kind = InlineRenderItem::Kind::Marker;
             marker.id = owner.id;
+            marker.style.heading_level = base.heading_level;
             marker.ensure_special().marker_owner = owner.id;
             marker.ensure_special().marker_construct = owner.range;
             marker.ensure_special().syntax_marker = delimiter_icon(owner, range);
