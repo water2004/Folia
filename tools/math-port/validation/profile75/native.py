@@ -25,7 +25,7 @@ def run_native(args):
         return result
     equal([projection(row, False) for row in corpus['cases']], [projection(row, True) for row in cases[-len(corpus['cases']):]],
           '75-case input inventory locked 57-case suffix')
-    equal(read(ROOT / 'docs/math-port/scope.json')['profile']['tex_packages'], capture['configuredPackages'])
+    equal(read(ROOT / 'tools/math-port/profiles/scope.json')['profile']['tex_packages'], capture['configuredPackages'])
     b64 = lambda value: base64.b64encode(svg_bytes(value)).decode('ascii')
     payload = ''.join('@group\t' + b64(group) + '\n' + '\n'.join('\t'.join([
         str(index), b64(row['name']), b64(row['tex']), '1' if truthy(row.get('display')) else '0',

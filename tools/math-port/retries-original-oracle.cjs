@@ -21,7 +21,7 @@ rows.push({name:'handle-retries-retry-after-then-success',...await capture(()=>h
 rows.push({name:'handle-retries-direct-error',...await capture(()=>handleRetriesFor(()=>{throw new Error('direct failure');}))});
 rows.push({name:'handle-retries-rejected-retry-promise',...await capture(()=>handleRetriesFor(()=>{const p=Promise.reject(new Error('retry rejection'));const e=new Error('retry');e.retry=p;throw e;}))});
 const output={schema:1,source_sha256:sourceHash,installed_ts_sha256:installedHash,cjs_sha256:cjsHash,observations:rows};
-const dest=path.join(root,'docs/math-port/evidence/retries-original-source.json'),serialized=JSON.stringify(output,null,2)+'\n';
+const dest=path.join(root,'tools/math-port/profiles/evidence/retries-original-source.json'),serialized=JSON.stringify(output,null,2)+'\n';
 if(process.argv.includes('--check'))assert.equal(fs.readFileSync(dest,'utf8').replaceAll('\r\n','\n'),serialized);else fs.writeFileSync(dest,serialized);
 console.log(JSON.stringify({observations:rows.length,output:path.relative(root,dest)}));
 }

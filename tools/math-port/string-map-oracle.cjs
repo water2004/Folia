@@ -22,7 +22,7 @@ add('keys-completion-is-sticky',()=>{const m=new Map([['a',1]]),i=m.keys(),a=i.n
 add('keys-iterator-retains-owner',()=>{const i=new Map([['a',1]]).keys();return i.next().value+':'+txt(i.next().value);});
 add('two-key-iterators-independent',()=>{const m=new Map([['a',1],['b',2]]),a=m.keys(),b=m.keys();return a.next().value+':'+a.next().value+':'+b.next().value;});
 const report={stage:'native string-keyed Map host; not parser algorithm acceptance',node:process.version,hashes,rows};
-const profile=path.join(root,'docs/math-port/evidence/p53-string-map-source.json');
+const profile=path.join(root,'tools/math-port/profiles/evidence/p53-string-map-source.json');
 const sourceGold=JSON.parse(fs.readFileSync(profile,'utf8'));
 const projected={...sourceGold,rows:sourceGold.rows.map(({cpp,...row})=>row)};
 assert.deepEqual(report,projected);

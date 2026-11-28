@@ -2,7 +2,7 @@
 // Original FunctionList consuming actual option arrays; no native gold algorithm.
 'use strict';const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 const {root}=require('./simple-mml-reference.cjs'),base=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src/cjs');
-const lock=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p46-parser-options-source.json'),'utf8')),hashes=[];
+const lock=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence/p46-parser-options-source.json'),'utf8')),hashes=[];
 for(const source of ['ts/util/FunctionList.ts','ts/util/PrioritizedList.ts','ts/util/Options.ts']){
  const entry=lock.hashes.find(x=>x.source===source);assert.ok(entry,source+' Source lock');
  const upstream=fs.readFileSync(path.join(root,'.reference/MathJax-src',source)),installed=fs.readFileSync(path.join(base,'..',source));
@@ -30,7 +30,7 @@ add('typed-context-call-same-canonical-body',e=>{e.list.addList([e.f]);const rec
 for(const [label,v]of [['undefined',undefined],['null',null],['false',false],['zero',0],['empty','']])add('constructor-falsy:'+label,()=>String(Array.from(new FunctionList(v)).length));
 ;
 const report={stage:'original ordinary-array/numeric-priority option binding observations',hashes,rows};
-const profile=path.join(root,'docs/math-port/evidence/p47-option-filter-source.json');
+const profile=path.join(root,'tools/math-port/profiles/evidence/p47-option-filter-source.json');
 const sourceGold=JSON.parse(fs.readFileSync(profile,'utf8'));
 const projected={...sourceGold,rows:sourceGold.rows.map(({cpp,...row})=>row)};
 assert.deepEqual(report,projected);

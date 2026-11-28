@@ -96,7 +96,7 @@ class ScopeInventoryTests(unittest.TestCase):
             self.assertEqual(scope.generate(self.root, check=True), original)
             changed = copy.deepcopy(original)
             changed["profile"]["tex_packages"].reverse()
-            self.write(self.root / "docs/math-port/scope.json", json.dumps(changed))
+            self.write(self.root / "tools/math-port/profiles/scope.json", json.dumps(changed))
             with self.assertRaisesRegex(ValueError, "Scope inventory differs"):
                 scope.generate(self.root, check=True)
 

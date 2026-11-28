@@ -2,7 +2,7 @@
 // Root observations of actual ECMAScript RegExp and pinned FindTeX generators.
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
-const root=path.resolve(__dirname,'../..'),base=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src'),lock=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p46-parser-options-source.json'))),hashes=[];
+const root=path.resolve(__dirname,'../..'),base=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src'),lock=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence/p46-parser-options-source.json'))),hashes=[];
 for(const source of ['ts/input/tex/FindTeX.ts','ts/util/string.ts']){const entry=lock.hashes.find(x=>x.source===source);assert.ok(entry,source);const bytes=fs.readFileSync(path.join(root,'.reference/MathJax-src',source));assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),entry.source_sha256);assert.equal(fs.readFileSync(path.join(base,source),'utf8').replaceAll('\r\n','\n'),bytes.toString().replaceAll('\r\n','\n'));assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(base,source.replace(/^ts\//,'cjs/').replace(/\.ts$/,'.js')))).digest('hex'),entry.cjs_sha256);hashes.push(entry);}
 const {FindTeX}=require(path.join(base,'cjs/input/tex/FindTeX.js')),{quotePattern}=require(path.join(base,'cjs/util/string.js'));
 const finder=new FindTeX({}),rows=[];
@@ -43,4 +43,4 @@ add('actual-environment-end-capture',finder.endPattern(null,'\\\\end\\s*(\\{a\\-
 add('invalid-group-is-syntax-error','(','x');
 add('duplicate-flags-are-syntax-error','x','x','gg');
 add('unknown-flag-is-syntax-error','x','x','z');
-const manifest={stage:'native numeric-cursor non-Unicode scanner RegExp host; not complete ECMAScript regex',node:process.version,srell_sha256:'eac98b722d702048e7448eb885f918d2343503b1ba9174d7efe86e2a791a0b9a',hashes,rows};;assert.ok(process.argv.includes('--check'));assert.equal(fs.readFileSync(path.join(root,'docs/math-port/evidence/p50-regexp-host-source.json'),'utf8').replaceAll('\r\n','\n'),JSON.stringify(manifest,null,2)+'\n');console.log(JSON.stringify({rows:rows.length,mode:'check'}));
+const manifest={stage:'native numeric-cursor non-Unicode scanner RegExp host; not complete ECMAScript regex',node:process.version,srell_sha256:'eac98b722d702048e7448eb885f918d2343503b1ba9174d7efe86e2a791a0b9a',hashes,rows};;assert.ok(process.argv.includes('--check'));assert.equal(fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence/p50-regexp-host-source.json'),'utf8').replaceAll('\r\n','\n'),JSON.stringify(manifest,null,2)+'\n');console.log(JSON.stringify({rows:rows.length,mode:'check'}));

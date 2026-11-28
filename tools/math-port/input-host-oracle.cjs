@@ -35,7 +35,7 @@ const invalid=[[0x80],[0xbf],[0xc0,0x80],[0xc1,0xbf],[0xc2],[0xc2,0x20],[0xe0,0x
 const invalidRows=[];for(const tail of invalid)for(const prefix of [[],[0x61],[0xf0,0x9f,0x98,0x80]]){const bytes=[...prefix,...tail];assert.throws(()=>new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from(bytes)));invalidRows.push({bytes,expected_byte_offset:prefix.length});}
 const output={schema:'input-host-source-values/v1',runtime:{node:process.version,unicode:process.versions.unicode},counts:{number:numberRows.length,parseInt:parseIntRows.length,utf16:utf16Rows.length,utf8_decode:decodeRows.length,utf8_invalid:invalidRows.length},number:numberRows,parseInt:parseIntRows,utf16:utf16Rows,utf8_decode:decodeRows,utf8_invalid:invalidRows};
 assert.ok(process.argv.includes('--check'),'This source-only oracle is check-only');
-const gold=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/input-host-source.json'),'utf8'));
+const gold=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence/input-host-source.json'),'utf8'));
 assert.equal(gold.schema,'input-host-complete-static-gold/v1');
 assert.equal(gold.source_fixture_sha256,'1c2b7bf427a11d8ba07132a3d070db4b77a6d46f2faa95aadb1a3760efbc3fcf');
 assert.deepEqual(output.counts,{number:gold.number.length,parseInt:gold.parseInt.length,utf16:gold.utf16.length,utf8_decode:gold.utf8_decode.length,utf8_invalid:gold.utf8_invalid.length});

@@ -22,7 +22,7 @@ def inventory():
 
 def validate(source, native):
     _, _, cases = inventory()
-    scope_path = ROOT / 'docs/math-port/scope.json'
+    scope_path = ROOT / 'tools/math-port/profiles/scope.json'
     scope, lock = read(scope_path), read(LOCK)
     equal(1, source['schema'])
     equal(1, native['schema'])

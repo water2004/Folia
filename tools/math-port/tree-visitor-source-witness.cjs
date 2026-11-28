@@ -8,7 +8,7 @@ const path = require('node:path');
 function findRoot(start) {
   let current = path.resolve(start);
   while (true) {
-    if (fs.existsSync(path.join(current, 'docs/math-port/HANDOFF.md')) &&
+    if (fs.existsSync(path.join(current, 'tools/math-port/README.md')) &&
         fs.existsSync(path.join(current, 'tools/math-port/common-layout-reference/profile-source-lock.json'))) {
       return current;
     }
@@ -26,7 +26,7 @@ const lockPath = path.join(root, 'tools/math-port/common-layout-reference/profil
 const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
 const expectedCjs = new Map(lock.dependencies.map(record => [record.file, record.sha256]));
 const digest = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-const scope = JSON.parse(fs.readFileSync(path.join(root, 'docs/math-port/scope.json'), 'utf8'));
+const scope = JSON.parse(fs.readFileSync(path.join(root, 'tools/math-port/profiles/scope.json'), 'utf8'));
 const tsPath = '.reference/MathJax-src/ts/core/Tree/Visitor.ts';
 const scopeRow = scope.files.find(record => record.source === 'ts/core/Tree/Visitor.ts');
 assert.ok(scopeRow, 'scope does not contain Visitor.ts');

@@ -24,7 +24,7 @@ for(const cp of relevant){const c=String.fromCharCode(cp),e=escape(c),upper=c.to
 for(const pattern of ['s','k','[a-z]','[^a-z]','\\w+','\\W+','\\b','\\B','(s)\\1','[ᾀ-ᾇ]','[^ᾀ-ᾇ]','[\\wſK]'])for(const flags of ['i','iu','iv','ig','igu','igv','iy','iyu','iyv','ims'])for(const text of ['Kſİı','ſs','sſ','ᾀᾈ','ᾳᾼ','\ud800x\udfff','a😀s'])for(const start of [0,1,2,text.length,text.length+1])add('stateful-mode-controls',pattern,flags,text,start);
 const data=JSON.stringify(cases),sha=crypto.createHash('sha256').update(data).digest('hex'),summary={stage:'independent Node legacy canonicalization witness; engine not accepted',node:process.version,unicode:process.versions.unicode,icu:process.versions.icu,relevant_bmp_units:relevant.size,cases:cases.length,source_case_sha256:sha,by_group:{}};
 for(const c of cases)summary.by_group[c.group]=(summary.by_group[c.group]??0)+1;
-const file=path.join(work,'node-reference.json'),report=path.join(root,'docs/math-port/evidence/p20b-legacy-regexp-source.json');
+const file=path.join(work,'node-reference.json'),report=path.join(root,'tools/math-port/profiles/evidence/p20b-legacy-regexp-source.json');
 if(process.argv.includes('--check')){assert.equal(fs.readFileSync(file,'utf8'),data);assert.deepEqual(JSON.parse(fs.readFileSync(report)),summary);}
 else{fs.mkdirSync(work,{recursive:true});fs.writeFileSync(file,data);fs.writeFileSync(report,JSON.stringify(summary,null,2)+'\n');}
 console.log(JSON.stringify({...summary,mode:process.argv.includes('--check')?'check':'freeze'}));

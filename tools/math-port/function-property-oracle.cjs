@@ -15,7 +15,7 @@ let count=0;function f(){return ++count}function g(){return ++count+10}const gra
 list.remove(graph['9']);flags.push(Array.from(list).length===0);list.add(graph.x);list.execute();flags.push(count===2);const counter=map.parse([{},'x']);flags.push(counter===3);let saved;
 function callback(){saved=this;return false}const l=new FunctionList();l.add(callback,13);const record=Array.from(l)[0];flags.push(l.execute()===false,saved===record,record.item===callback);
 const values=[f,g,undefined,null,false,true,0,-0,NaN,'','x',{},[]],equal=values.flatMap(a=>values.map(b=>a===b));
-const report={node:process.version,stage:'actual Source function-data and ordinary slice host only',cases,flags,equal},text=JSON.stringify(report,null,2)+'\n',out=path.join(root,'docs/math-port/evidence/p22a-function-property-source.json');
+const report={node:process.version,stage:'actual Source function-data and ordinary slice host only',cases,flags,equal},text=JSON.stringify(report,null,2)+'\n',out=path.join(root,'tools/math-port/profiles/evidence/p22a-function-property-source.json');
 assert.equal(fs.readFileSync(out,'utf8'),text);
 
 console.log(JSON.stringify({sourceCases:cases.length,flags:flags.length,equalities:equal.length,mode:'check'}));

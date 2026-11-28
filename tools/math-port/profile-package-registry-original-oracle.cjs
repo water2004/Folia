@@ -4,7 +4,7 @@ const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypt
 const assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'../..');
 const digest=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-const scopePath=path.join(root,'docs/math-port/scope.json');
+const scopePath=path.join(root,'tools/math-port/profiles/scope.json');
 const scope=JSON.parse(fs.readFileSync(scopePath));
 const profilePath=path.join(root,scope.profile.file);
 assert.equal(digest(profilePath),scope.profile.sha256);

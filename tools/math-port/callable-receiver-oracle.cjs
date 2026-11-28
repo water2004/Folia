@@ -51,6 +51,6 @@ for(const kind of ['character','macro','command']){
  const list=new FunctionList();list.add(function(){return ++genericCount;});list.execute();flags.push(genericCount===1);list.execute();flags.push(genericCount===2);add('closure_state',flags);
 }
 
-const file=path.join(root,'docs/math-port/evidence/callable-receiver-source.json');
+const file=path.join(root,'tools/math-port/profiles/evidence/callable-receiver-source.json');
 const frozen=JSON.parse(fs.readFileSync(file,'utf8'));assert.deepStrictEqual(pins,frozen.source.pins);assert.deepStrictEqual(observations,frozen.observations);assert.equal(observations.length,8);assert.equal(count,50);
 console.log(JSON.stringify({sourceCases:observations.length,sourceAssertions:count,profileSha256:crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'),mode:'check'}));

@@ -3,7 +3,7 @@
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const root=path.resolve(__dirname,'../..');
 const source=path.join(root,'.reference/MathJax-src/ts/input/tex/textcomp/TextcompMappings.ts');
-const scope=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json'),'utf8'));
+const scope=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json'),'utf8'));
 const lock=scope.files.find(item=>item.source==='ts/input/tex/textcomp/TextcompMappings.ts');
 if(!lock)throw new Error('TextcompMappings.ts is absent from the locked Source scope');
 const contents=fs.readFileSync(source,'utf8');

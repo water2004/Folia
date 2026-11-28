@@ -13,4 +13,4 @@ const alphabet=['A','Σ','B','σ','ς','İ','𐐀','\u0301','\u200d','\u0345',"'
 for(let n=0;n<320;++n){let s='';for(let i=0,count=random()%48;i<count;++i)s+=alphabet[random()%alphabet.length];fixed.push(s);}
 for(let n=0;n<128;++n){let s='';for(let i=0;i<24;++i)s+=String.fromCodePoint(random()%0x110000);fixed.push(s);}
 for(const input of fixed)examples.push({input:units(input),output:units(input.toLowerCase())});
-assert.ok(process.argv.includes('--check'));assert.deepEqual({changed,contexts,examples},JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p59-case-host-source.json'),'utf8')));console.log(JSON.stringify({scalarDomain:0x110000,mappings:changed.length,contextRanges:contexts.length,examples:examples.length,mode:'check'}));
+assert.ok(process.argv.includes('--check'));assert.deepEqual({changed,contexts,examples},JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence/p59-case-host-source.json'),'utf8')));console.log(JSON.stringify({scalarDomain:0x110000,mappings:changed.length,contextRanges:contexts.length,examples:examples.length,mode:'check'}));

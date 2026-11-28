@@ -7,7 +7,7 @@ const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '../..');
 const packageRoot = path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax/src');
 const sourceRoot = path.join(root, '.reference/MathJax-src');
-const lock = JSON.parse(fs.readFileSync(path.join(root, 'docs/math-port/evidence/texhtml-xml-source-lock.json'), 'utf8'));
+const lock = JSON.parse(fs.readFileSync(path.join(root, 'tools/math-port/locks/texhtml-xml-source-lock.json'), 'utf8'));
 const digest = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 for (const item of lock.sources) {
   assert.equal(digest(path.join(sourceRoot, item.file)), item.sha256, `${item.file} pinned source mismatch`);

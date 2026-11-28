@@ -1,7 +1,7 @@
 // Root original core/InputJax observations; stimuli do not implement a jax.
 'use strict';const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 const root=(process.env.FOLIA_MATH_ROOT||path.resolve(__dirname,'../..')),base=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src');
-const lock=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p46-parser-options-source.json'))),hashes=[];
+const lock=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence/p46-parser-options-source.json'))),hashes=[];
 for(const source of ['ts/core/InputJax.ts','ts/util/Options.ts','ts/util/FunctionList.ts','ts/util/PrioritizedList.ts']){
  const entry=lock.hashes.find(x=>x.source===source);assert.ok(entry,source);
  const bytes=fs.readFileSync(path.join(root,'.reference/MathJax-src',source));assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),entry.source_sha256);
@@ -53,9 +53,9 @@ add('filter-raw-throw-identity',e=>{e.make();const raw={reason:7};e.hook=(label,
 
 // Frozen original Source JSON remains byte-identical; only renderer-only cpp fields are projected.
 assert.ok(process.argv.includes('--check'),'Source-only oracle supports read-only --check');
-const frozenProfilePath=path.join(root,"docs/math-port/evidence/p48-input-jax-source.json");
+const frozenProfilePath=path.join(root,"tools/math-port/profiles/evidence/p48-input-jax-source.json");
 const frozenBytes=fs.readFileSync(frozenProfilePath);
 function sourceFields(value){if(Array.isArray(value))return value.map(sourceFields);if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).filter(([key])=>key!=='cpp').map(([key,v])=>[key,sourceFields(v)]));return value;}
 const actualSourceProfile={stage:'original core InputJax ordinary-option-array/bound-callback observations',hashes,rows};
 assert.deepStrictEqual(sourceFields(actualSourceProfile),sourceFields(JSON.parse(frozenBytes)),'Original Source inputs/expectations/pins changed');
-console.log(JSON.stringify({sourceCases:rows.length,profile:"docs/math-port/evidence/p48-input-jax-source.json",profileSha256:crypto.createHash('sha256').update(frozenBytes).digest('hex'),mode:'check'}));
+console.log(JSON.stringify({sourceCases:rows.length,profile:"tools/math-port/profiles/evidence/p48-input-jax-source.json",profileSha256:crypto.createHash('sha256').update(frozenBytes).digest('hex'),mode:'check'}));

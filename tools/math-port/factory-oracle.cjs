@@ -81,4 +81,4 @@ const cases=[];let currentCase;function begin(name){currentCase={name,observatio
  begin('predicate_is_not_construction');class Throwing extends B{constructor(...args){super(...args);throw new TypeError('body');}}const f=new F({chosen:Throwing,unknown:U});const r=Object.create(Throwing.prototype);;expect(f.nodeIsKind(r,'chosen'));throws(()=>f.create('chosen'));
  const duplicate={a:B,'10':B,'2':B};duplicate.a=D;;const other=new F(duplicate);kinds(other);expect(other.create('a').kind);end();
 }
-assert.ok(process.argv.includes('--check'));assert.deepEqual({cases},JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p58-factory-source.json'),'utf8')));console.log(JSON.stringify({cases:cases.length,assertions:cases.reduce((n,c)=>n+c.observations.length,0),mode:'check'}));
+assert.ok(process.argv.includes('--check'));assert.deepEqual({cases},JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence/p58-factory-source.json'),'utf8')));console.log(JSON.stringify({cases:cases.length,assertions:cases.reduce((n,c)=>n+c.observations.length,0),mode:'check'}));

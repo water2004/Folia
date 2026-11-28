@@ -12,6 +12,6 @@ for(const c of inputs)assert.ok(source.toString('utf8').includes(c.pattern),'Act
 const cases=inputs.map(c=>{const m=new RegExp(c.pattern,c.flags+'d').exec(c.text);return {...c,upstream_expected_match:true,node_expected_match:!!m,node_ranges:m?.indices??null};});
 assert.ok(cases.every(c=>!c.node_expected_match));
 const report={stage:'upstream legacy braced-escape expectations conflict with actual Node; not waived or engine accepted',node:process.version,upstream_test_source_sha256:hash(source),cases};
-const file=path.join(root,'docs/math-port/evidence/p21b-upstream-escape-witnesses.json');
+const file=path.join(root,'tools/math-port/profiles/evidence/p21b-upstream-escape-witnesses.json');
 if(process.argv.includes('--check'))assert.deepEqual(JSON.parse(fs.readFileSync(file)),report);else fs.writeFileSync(file,JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify({upstream_conflicting_tests:3,mode:process.argv.includes('--check')?'check':'generate'}));

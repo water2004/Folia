@@ -125,7 +125,7 @@ def generate(root: Path, check: bool = False) -> dict:
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=source_root, text=True).strip()
     if commit != EXPECTED_COMMIT:
         raise ValueError("Unexpected MathJax source commit: " + commit)
-    destination = root / "docs/math-port/scope.json"
+    destination = root / "tools/math-port/profiles/scope.json"
     prior = json.loads(destination.read_bytes()) if destination.exists() else None
     document = manifest(root, source_root, prior)
     if check:

@@ -12,7 +12,7 @@ def main(args):
     require(bool(args), 'Expected native executable [output JSON]')
     program = Path(args[0]).resolve()
     cases_path = ROOT / 'tools/math-port/table-layout-cases.json'
-    cases, scope = read(cases_path)['cases'], read(ROOT / 'docs/math-port/scope.json')
+    cases, scope = read(cases_path)['cases'], read(ROOT / 'tools/math-port/profiles/scope.json')
     b64 = lambda value: base64.b64encode(value.encode('utf-8')).decode('ascii')
     payload = '@packages\t' + '\t'.join(map(b64, scope['profile']['tex_packages'])) + '\n'
     payload += '\n'.join('\t'.join([b64(row['name']), b64(row['tex']), '1' if row['display'] else '0',

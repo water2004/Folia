@@ -2,7 +2,7 @@
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'../..'),pkg=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax');
 const digest=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
-const scopePath=path.join(root,'docs/math-port/scope.json'),scope=JSON.parse(fs.readFileSync(scopePath));
+const scopePath=path.join(root,'tools/math-port/profiles/scope.json'),scope=JSON.parse(fs.readFileSync(scopePath));
 assert.equal(digest(scopePath),'9705d389538b2fc8bf782feea4372ace639b3727304f2971937bbcfb0042a0d1');
 assert.equal(digest(path.join(root,scope.profile.file)),scope.profile.sha256);
 const lock=JSON.parse(fs.readFileSync(path.join(__dirname,'common-layout-reference/profile-source-lock.json')));

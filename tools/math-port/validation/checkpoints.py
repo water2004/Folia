@@ -11,7 +11,7 @@ PARSERS = [
     {'name': 'base', 'exe': 'FoliaMathBaseMethodsDump', 'file': True,
      'source': 'build/math-port/base-methods-original.json', 'base': True},
     {'name': 'frontend', 'exe': 'FoliaMathFrontendDump', 'file': True,
-     'source': 'docs/math-port/evidence/textmacros-native-tree-source.json', 'tree': True},
+     'source': 'tools/math-port/profiles/evidence/textmacros-native-tree-source.json', 'tree': True},
     {'name': 'bold', 'exe': 'FoliaMathBoldsymbolConfigmacrosDump', 'file': False,
      'source': 'tools/math-port/boldsymbol-configmacros-reference/original.json',
      'fields': ['name', 'result', 'error', 'maps', 'packageData']},

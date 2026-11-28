@@ -1,6 +1,6 @@
 {
   "atom-semantics": {
-    "accepted": "docs/math-port/evidence/p15bc-members.json",
+    "accepted": "tools/math-port/profiles/evidence/p15bc-members.json",
     "inputs": [
       "ts/core/MmlTree/MmlNodes/TeXAtom.ts",
       "ts/core/MmlTree/MmlNodes/semantics.ts"
@@ -20,16 +20,19 @@
       "members",
       "module_bindings"
     ],
-    "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md",
     "summary": {
       "members": 18,
       "module_bindings": 1,
       "source_files": 2,
       "status": "root_reviewed_inventory_matches_pinned_source"
-    }
+    },
+    "accepted_sha256": "867abb8b3d1f02fe5d4e46f0af68e81c9e3fae16756c34738cccf8ca197e1cc6",
+    "evidence_identifiers": [
+      "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+    ]
   },
   "html-node": {
-    "accepted": "docs/math-port/evidence/p15d-html-members.json",
+    "accepted": "tools/math-port/profiles/evidence/p15d-html-members.json",
     "inputs": [
       "ts/core/MmlTree/MmlNodes/HtmlNode.ts"
     ],
@@ -44,15 +47,18 @@
     "target": "truthy",
     "bootstrap": "html-node-reference.cjs",
     "input_selector": "source",
-    "evidence": "docs/math-port/evidence/p15d-html-node-acceptance.md",
     "summary": {
       "members": 7,
       "source_files": 1,
       "status": "root_reviewed_inventory_matches_pinned_source"
-    }
+    },
+    "accepted_sha256": "9583785ba03bc6903fed19ee2c9f862b75b8648c69b336fb9a91ca15aca1c055",
+    "evidence_identifiers": [
+      "docs/math-port/evidence/p15d-html-node-acceptance.md"
+    ]
   },
   "map-handler": {
-    "accepted": "docs/math-port/evidence/p20a-map-handler-members.json",
+    "accepted": "tools/math-port/profiles/evidence/p20a-map-handler-members.json",
     "inputs": [
       "ts/input/tex/MapHandler.ts"
     ],
@@ -71,7 +77,6 @@
       "members",
       "object_methods"
     ],
-    "evidence_exists": true,
     "target_exists": true,
     "freeze_status": "locally_accepted_complete_map_handler_not_concrete_token_maps_parser_or_renderer",
     "freeze_files": {
@@ -155,10 +160,14 @@
       "inventoried_members": 21,
       "object_methods": 2,
       "status": "reviewed_pinned_inventory_matches"
-    }
+    },
+    "accepted_sha256": "2e141b34ef24705de12f549ad9ac8a1bfd89de022cbfd01a69787569a5ea679f",
+    "evidence_identifiers": [
+      "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+    ]
   },
   "mathchoice": {
-    "accepted": "docs/math-port/evidence/p17c-mathchoice-members.json",
+    "accepted": "tools/math-port/profiles/evidence/p17c-mathchoice-members.json",
     "inputs": [
       "ts/core/MmlTree/MmlNodes/mathchoice.ts"
     ],
@@ -201,10 +210,14 @@
       "source_files": 1,
       "members": 5,
       "status": "reviewed_pinned_inventory_matches"
-    }
+    },
+    "accepted_sha256": "be008a41e749e7a975086d220a933b4fbe8620450a3e90d220c2838f0bf57ced",
+    "evidence_identifiers": [
+      "docs/math-port/evidence/p17c-mathchoice-acceptance.md"
+    ]
   },
   "mfenced": {
-    "accepted": "docs/math-port/evidence/p16c-mfenced-members.json",
+    "accepted": "tools/math-port/profiles/evidence/p16c-mfenced-members.json",
     "inputs": [
       "ts/core/MmlTree/MmlNodes/mfenced.ts"
     ],
@@ -219,15 +232,18 @@
     "target": "truthy",
     "bootstrap": "mfenced-reference.cjs",
     "input_selector": "source",
-    "evidence": "docs/math-port/evidence/p16c-mfenced-acceptance.md",
     "summary": {
       "source_files": 1,
       "members": 10,
       "status": "root_reviewed_inventory_matches_pinned_source"
-    }
+    },
+    "accepted_sha256": "d4ca1251b4b7579d1602f43dfc313969f72044ab73ac48f099fa72e35ad8fee7",
+    "evidence_identifiers": [
+      "docs/math-port/evidence/p16c-mfenced-acceptance.md"
+    ]
   },
   "mml-action": {
-    "accepted": "docs/math-port/evidence/p18-mml-action-members.json",
+    "accepted": "tools/math-port/profiles/evidence/p18-mml-action-members.json",
     "inputs": [
       "ts/core/MmlTree/MML.ts",
       "ts/core/MmlTree/MmlFactory.ts",
@@ -317,10 +333,15 @@
       "members": 15,
       "registry_entries": 43,
       "status": "reviewed_pinned_inventory_matches"
-    }
+    },
+    "accepted_sha256": "17a704aba2a6bfeb70efba6f775cbfb52684f3585ba3417ad936ded724dfeeb0",
+    "evidence_identifiers": [
+      "docs/math-port/evidence/p18c-mml-registry-acceptance.md",
+      "docs/math-port/evidence/p18b-maction-acceptance.md"
+    ]
   },
   "numeric-reductions": {
-    "accepted": "docs/math-port/evidence/p20c-numeric-reductions-members.json",
+    "accepted": "tools/math-port/profiles/evidence/p20c-numeric-reductions-members.json",
     "inputs": [
       "ts/util/numeric.ts"
     ],
@@ -334,7 +355,6 @@
     ],
     "file_fields": "source",
     "target": "mapped",
-    "evidence_exists": true,
     "target_exists": true,
     "freeze_status": "locally_accepted_complete_numeric_reductions_with_dense_binary64_host_adaptation",
     "freeze_files": {
@@ -354,10 +374,14 @@
       "source_files": 1,
       "inventoried_members": 2,
       "status": "reviewed_pinned_inventory_matches"
-    }
+    },
+    "accepted_sha256": "f2eda300990ea46cb2052b0d1d9d10ba58f2b1e33290f7aef51660b1e668c030",
+    "evidence_identifiers": [
+      "docs/math-port/evidence/p20c-numeric-reductions-acceptance.md"
+    ]
   },
   "simple-mml": {
-    "accepted": "docs/math-port/evidence/p16a-simple-mml-members.json",
+    "accepted": "tools/math-port/profiles/evidence/p16a-simple-mml-members.json",
     "inputs": [
       "ts/core/MmlTree/MmlNodes/menclose.ts",
       "ts/core/MmlTree/MmlNodes/mpadded.ts",
@@ -380,15 +404,18 @@
     "target": "truthy",
     "bootstrap": "simple-mml-reference.cjs",
     "input_selector": "hashes",
-    "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md",
     "summary": {
       "source_files": 5,
       "members": 22,
       "status": "root_reviewed_inventory_matches_pinned_source"
-    }
+    },
+    "accepted_sha256": "20954e098d679af07d4f57652f608022daa880c91ad6b74513bef4e2f5e71dd6",
+    "evidence_identifiers": [
+      "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+    ]
   },
   "tex-token": {
-    "accepted": "docs/math-port/evidence/p17a-token-members.json",
+    "accepted": "tools/math-port/profiles/evidence/p17a-token-members.json",
     "inputs": [
       "ts/input/tex/Token.ts",
       "ts/input/tex/Types.ts",
@@ -459,10 +486,14 @@
       "type_aliases": 6,
       "string_enum_members": 16,
       "status": "reviewed_pinned_inventory_matches"
-    }
+    },
+    "accepted_sha256": "64bf5b30df6a196977d652904fc738f0865d6f0cd6e8378026c69af0fa5b4a5c",
+    "evidence_identifiers": [
+      "docs/math-port/evidence/p17a-token-acceptance.md"
+    ]
   },
   "token-map": {
-    "accepted": "docs/math-port/evidence/p22b-token-map-members.json",
+    "accepted": "tools/math-port/profiles/evidence/p22b-token-map-members.json",
     "inputs": [
       "ts/input/tex/TokenMap.ts"
     ],
@@ -476,7 +507,6 @@
     ],
     "file_fields": "source",
     "target": "mapped",
-    "evidence_exists": true,
     "target_exists": true,
     "freeze_status": "locally_accepted_complete_token_map_under_explicit_native_host_profile_not_engine_parser_or_renderer",
     "freeze_files": {
@@ -552,12 +582,15 @@
         }
       }
     },
-    "freeze_evidence_required": "docs/math-port/evidence/p22b-token-map-acceptance.md",
     "summary": {
       "source_files": 1,
       "executable_members": 22,
       "initialized_fields": 1,
       "status": "reviewed_pinned_inventory_matches"
-    }
+    },
+    "accepted_sha256": "84901fae3118545a1c62c4df319c87f6edb23db8ebf444fa2c31f8414aabf955",
+    "evidence_identifiers": [
+      "docs/math-port/evidence/p22b-token-map-acceptance.md"
+    ]
   }
 }

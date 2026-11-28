@@ -8,8 +8,8 @@ const cp=require('node:child_process');
 const assert=require('node:assert/strict');
 const {createCapture}=require('./reference-capture.cjs');
 const root=path.resolve(__dirname,'../..');
-const corpusPath=path.join(root,'docs/math-port/reference-corpus.json');
-const goldenPath=path.join(root,'docs/math-port/evidence/reference-golden.json');
+const corpusPath=path.join(root,'tools/math-port/profiles/reference-corpus.json');
+const goldenPath=path.join(root,'tools/math-port/profiles/evidence/reference-golden.json');
 const sha=v=>crypto.createHash('sha256').update(v).digest('hex');
 // Git's Windows autocrlf setting must not invalidate tracked tool/corpus
 // hashes after checkout. JSON string contents remain escaped and unchanged.

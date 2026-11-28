@@ -9,7 +9,7 @@ const assert = require('node:assert/strict');
 function repoRoot(start) {
   let current = path.resolve(start);
   while (true) {
-    if (fs.existsSync(path.join(current, 'docs/math-port/HANDOFF.md')) &&
+    if (fs.existsSync(path.join(current, 'tools/math-port/README.md')) &&
         fs.existsSync(path.join(current, 'tools/math-port/common-layout-reference/profile-source-lock.json'))) return current;
     const parent = path.dirname(current);
     if (parent === current) return null;

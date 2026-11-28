@@ -143,7 +143,7 @@ def native_frontend(args):
     sys.stdout.buffer.write(stdout)
     sys.stderr.buffer.write(stderr)
     require(result['exitCode'] == 0 and not result.get('timedOut'), 'Pinned MathJax source fixture differs')
-    source = read(ROOT / 'docs/math-port/evidence/textmacros-native-tree-source.json')
+    source = read(ROOT / 'tools/math-port/profiles/evidence/textmacros-native-tree-source.json')
     native_path = default_path(args, 0, 'build/math-port/native-frontend.json')
     native = read(native_path)
     equal(source['schema'], field(native, 'schema'), 'Native schema differs')

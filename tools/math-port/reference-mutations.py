@@ -98,7 +98,7 @@ def run(snapshots):
 
 
 if __name__ == '__main__':
-    corpus = read(ROOT / 'docs/math-port/reference-corpus.json')
+    corpus = read(ROOT / 'tools/math-port/profiles/reference-corpus.json')
     snapshots = {case['name']: read(ROOT / 'build/math-port-reference' / (case['name'] + '.json.gz'))
                  for case in corpus['cases']}
     emit(run(snapshots))

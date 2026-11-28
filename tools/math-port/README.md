@@ -25,13 +25,13 @@ native tests' expected values.
 | Compare native SVG paint with official MathJax CSS and raster samples | `svg-paint/check.py`; stages and commands in [svg-paint/README.md](svg-paint/README.md) |
 | Inventory native source, module ownership and review provenance | `native-raii-inventory.py` |
 | Exercise the app's native layout/worker performance | `winui-math-layout-probe.ps1`, `winui-math-worker-probe.ps1` |
-| Native verification requirements | `../../docs/math-port/native-raii-acceptance.md` |
+| Native verification requirements | `../../docs/math/verification.md` |
 
-Run scripts from the repository root. The source locks, `reference/`,
-`common-layout-reference/`, and the pinned MathJax/font packages are inputs,
-not application assets. Source witnesses, fixture generators and their helper
-chains remain together so expected values can be regenerated independently of
-the C++ implementation. `tests/math` and CMake own executable native tests.
+Run scripts from the repository root. The source profile is `profiles/scope.json`.
+Pinned locks live in `locks/` and reference observations in `profiles/evidence/`.
+Witnesses and fixture generators use these files and the pinned MathJax and font
+packages to reproduce expected values independently of the C++ implementation.
+`tests/math` and CMake own executable native tests.
 
 The old Rust `regress` candidate, its source-copy preparation scripts and its
 experimental comparisons were removed after the production implementation
@@ -67,10 +67,10 @@ an unavailable or mismatched reference fails without replacing the source lock.
 The ten ledger checkers also run in Python. `ledger-source.cjs`,
 `member-ledger.cjs`, and the two specialized member generators only sample the
 locked MathJax TypeScript sources, retaining each original reference loader.
-The reviewed targets, evidence requirements, all members and module bindings,
-and optional explicit `--freeze-reviewed` operation are preserved. Validation
-never freezes metadata automatically; a missing pinned TypeScript installation,
-runtime version mismatch, or stale native target still fails.
+`ledger-profiles.json` records the location and SHA-256 of each reviewed ledger.
+The names of past acceptance reports serve as historical evidence identifiers.
+The checker compares members, module bindings, and native targets against the
+reviewed ledger. Use `--freeze-reviewed` only for an explicit snapshot update.
 
 `python tools/math-port/parser-host-mutation-test.py` (or `--preflight`) is
 read-only: it verifies all 33 retained fault anchors, original baseline hashes,
@@ -91,6 +91,12 @@ discovery follows the shared `.cmake` includes; it remains distinct from
 verified configured target membership. `--self-test` runs the retained original
 checks together with missing, malformed and stale File API controls. The tool
 only reports review state and does not mark unreviewed implementation as accepted.
+Historical Markdown source mappings are loaded from
+`reference/source-annotations.json`, pinned to the v0.9.0 commit recorded there;
+document paths and line numbers describe that historical snapshot. The index is
+data, not a live-doc dependency: regenerate only from an immutable provenance
+snapshot and verify all path/hash rows exactly. Current source-file header notes
+are still extracted from the live source files.
 
 Use `python tools/math-port/diagnose-tex-package-differences.py <source.json>
 <native.json>` for retained package/case difference reports. Differences are

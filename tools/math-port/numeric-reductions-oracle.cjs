@@ -19,7 +19,7 @@ function next() { seed ^= seed << 13; seed ^= seed >>> 17; seed ^= seed << 5; re
 for (let i = 0; i < 128; ++i) { const a=[]; for (let j=0,n=next()%24; j<n; ++j) { const word=(BigInt(next())<<32n)|BigInt(next()); a.push(number(word.toString(16).padStart(16,'0'))); } arrays.push(a); }
 const cases = arrays.map((input,id)=>({id,input:input.map(bits),sum:value(sum(input)),max:value(max(input))}));
 const report = {stage:'actual Source dense numeric reductions',source:'a2004a9888f5c85f3cf81126e43d04dfe66b64c55e3b5f7d97366631809d7c15',cases};
-const target = path.join(root, 'docs/math-port/evidence/p20c-numeric-reductions-source.json');
+const target = path.join(root, 'tools/math-port/profiles/evidence/p20c-numeric-reductions-source.json');
 const text = JSON.stringify(report,null,2)+'\n';
 assert.deepEqual(JSON.parse(fs.readFileSync(target,'utf8')),report);
 console.log(JSON.stringify({sourceCases:cases.length,sourceAssertions:cases.length*2,mode:'read-only-source-check'}));

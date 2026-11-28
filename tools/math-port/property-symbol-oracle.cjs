@@ -23,7 +23,7 @@ assert.deepEqual(cases.string,{name:'TypeError',message:'Cannot convert a Symbol
 assert.deepEqual(cases.number,{name:'TypeError',message:'Cannot convert a Symbol value to a number'});
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const result={schema:'property-symbol-v1',hashes:{[ts]:hash(cloned),[cjs]:hash(fs.readFileSync(path.join(installed,cjs)))},cases};
-const evidence=path.join(root,'docs/math-port/evidence/property-symbol-source.json');
+const evidence=path.join(root,'tools/math-port/profiles/evidence/property-symbol-source.json');
 if(process.argv.includes('--check')){
   assert.deepEqual(result,JSON.parse(fs.readFileSync(evidence,'utf8')));
   console.log('Pinned Symbol marker identity, TokenMap storage and coercion agree');

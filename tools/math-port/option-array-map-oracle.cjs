@@ -2,7 +2,7 @@
 // Root observes original ordinary Array.map for actual Configuration.ts callers.
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
-const root=path.resolve(__dirname,'../..'),source='ts/input/tex/Configuration.ts',scope=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json'))),caller=scope.files.find(x=>x.source===source);
+const root=path.resolve(__dirname,'../..'),source='ts/input/tex/Configuration.ts',scope=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json'))),caller=scope.files.find(x=>x.source===source);
 assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(root,'.reference/MathJax-src',source))).digest('hex'),caller.source_sha256);
 const text=v=>v===undefined?'U':v===null?'N':typeof v==='object'?'object':String(v),rows=[];
 function fixture(){const e={array:[],trace:[],set(i,v){this.array[i]=v;},get(i,body){Object.defineProperty(this.array,i,{get:body,configurable:true});},callback(body){return function(v,i,a){e.trace.push(i+':'+text(v)+':'+arguments.length+':'+(a===e.array)+':'+text(this));return body?body(v,i,a):99;};},map(cb,receiver){return this.array.map(cb,receiver);},summary(v){if(!Array.isArray(v))return text(v);let r='len:'+v.length;for(let i=0;i<v.length;i++)r+=';'+i+':'+(Object.hasOwn(v,i)?'O:'+text(v[i]):'H');return r;}};return e;}
@@ -40,7 +40,7 @@ add('result-slot-is-own-writable-enumerable-configurable-data',e=>{e.set(0,1);co
 add('object-this-argument-exact-identity',e=>{e.set(0,1);const sentinel={};return e.summary(e.map(function(){e.trace.push('same:'+(this===sentinel));return 98;},sentinel));});
 for(const inherited of [false,true])add((inherited?'inherited':'own')+'-getter-receives-original-array',e=>{const owner=inherited?Object.create(Array.prototype):e.array;if(inherited){Object.setPrototypeOf(e.array,owner);e.array.length=1;}Object.defineProperty(owner,'0',{get(){e.trace.push('same:'+(this===e.array));return 5;},configurable:true});return e.summary(e.map(e.callback()));});
 const report={stage:'ordinary native Array.map required by Configuration; not Configuration or parser acceptance',node:process.version,caller:{source,source_sha256:caller.source_sha256},rows};
-const profile=path.join(root,'docs/math-port/evidence/p56-option-array-map-source.json');
+const profile=path.join(root,'tools/math-port/profiles/evidence/p56-option-array-map-source.json');
 const sourceGold=JSON.parse(fs.readFileSync(profile,'utf8'));
 const projected={...sourceGold,rows:sourceGold.rows.map(({cpp,...row})=>row)};
 assert.deepEqual(report,projected);

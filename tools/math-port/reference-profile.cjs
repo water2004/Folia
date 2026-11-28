@@ -27,7 +27,7 @@ function moduleTreeHash(directory) {
 function createReference() {
   assert.equal(created,false,'One reference profile per process: font static extensions and global registries are shared');
   created = true;
-  const scope = JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json'),'utf8'));
+  const scope = JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json'),'utf8'));
   const commit = cp.execFileSync('git',['rev-parse','HEAD'],{cwd:path.join(root,'.reference/MathJax-src'),encoding:'utf8'}).trim();
   assert.equal(commit,scope.upstream.commit);
   const sourcePackage = req('@mathjax/src/package.json');

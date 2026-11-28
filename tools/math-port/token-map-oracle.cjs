@@ -96,5 +96,5 @@ group('new_lookup_bridge',()=>{
  const flags=[],macro=new Macro('x',f,[]);class Characters extends t.CharacterMap{contains(){return true;}lookup(){return macro;}}const m=new Characters(name('handler-macro'),f,{}),h=new SubHandler();h.add([m.name]);flags.push(h.contains('x'));m.lookup=()=>null;try{h.contains('x');flags.push(false);}catch(e){flags.push(e.name==='TypeError');}return flags;
 });
 const report={node:process.version,scope:'complete TokenMap Source methods under frozen native data/controlled dependency profile; engine separate',rows,regex_rows:regexRows,groups};
-const data=JSON.stringify(report,null,2)+'\n',target=path.join(root,'docs/math-port/evidence/p22b-token-map-source.json');assert.ok(process.argv.includes('--check'));assert.equal(fs.readFileSync(target,'utf8').replaceAll('\r\n','\n'),data);
+const data=JSON.stringify(report,null,2)+'\n',target=path.join(root,'tools/math-port/profiles/evidence/p22b-token-map-source.json');assert.ok(process.argv.includes('--check'));assert.equal(fs.readFileSync(target,'utf8').replaceAll('\r\n','\n'),data);
 console.log(JSON.stringify({base_cases:rows.length,regex_cases:regexRows.length,groups:Object.keys(groups).length,flags:Object.values(groups).flat().length,mode:'check'}));
