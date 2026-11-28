@@ -47,7 +47,7 @@ namespace winrt::Folia
         enum class Cursor { Text, Link, Move, Blocked, ResizeColumn };
         bool SelectWordAt(folia::TextPosition position);
         void SetCursor(Cursor cursor);
-        std::optional<std::string> LinkAtPosition(folia::TextPosition position) const;
+        std::optional<EditorDocumentInteraction> InteractionAtPoint(winrt::Windows::Foundation::Point point) const;
 
         EditorSession* session_ = nullptr;
         EditorSurfaceRenderer* renderer_ = nullptr;

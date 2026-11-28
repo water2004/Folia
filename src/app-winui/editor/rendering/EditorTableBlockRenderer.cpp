@@ -617,6 +617,7 @@ namespace winrt::Folia
                 color.a *= 0.4f;
                 fill(cell.rect, color);
             }
+            std::optional<D2D1_RECT_F> selectionBackground;
             if (selectionGeometry)
             {
                 const auto bounds = selectionGeometry->Bounds(pinned, sticky);
@@ -624,7 +625,7 @@ namespace winrt::Folia
                     (std::max)(clipRect.top, bounds.top), (std::min)(clipRect.right, bounds.right),
                     (std::min)(clipRect.bottom, bounds.bottom));
                 if (highlight.right > highlight.left && highlight.bottom > highlight.top)
-                    resources.d2dContext->FillRectangle(highlight, resources.selectionBrush.Get());
+                    selectionBackground = highlight;
             }
 
             const auto right = cell.rect.right;
@@ -663,21 +664,21 @@ namespace winrt::Folia
             Clip textClip{resources.d2dContext.Get()};
 
             auto const& display = prepared.displays[layoutIndex];
+            if (cell.layout && !cell.checkbox && !editing && !headerRow && !totalRow && metadata)
+                PaintValueBadge(resources, styleSheet, cell, display, *metadata);
+            auto* textBrush = resources.textBrush.Get();
+            if (appearance.foreground)
+            {
+                brush->SetColor(styleSheet.tablePalette[static_cast<std::size_t>(*appearance.foreground)]);
+                textBrush = brush;
+            }
+            documentPainter.DrawInlineText(cell.sourceSpan.container_id, cell.layout.Get(), cell.textOrigin,
+                display, cell.displayToSource, textBrush, cell.paintPlan, cell.layoutLines, selectionBackground);
             if (cell.layout)
             {
                 if (cell.checkbox)
                     resources.chromeIcons.Draw(resources.d2dContext.Get(), *cell.checkbox ? L"checkbox-checked" : L"checkbox",
                         cell.checkboxRect, *cell.checkbox ? styleSheet.accentColor : resources.mutedBrush->GetColor());
-                if (!cell.checkbox && !editing && !headerRow && !totalRow && metadata)
-                    PaintValueBadge(resources, styleSheet, cell, display, *metadata);
-                auto* textBrush = resources.textBrush.Get();
-                if (appearance.foreground)
-                {
-                    brush->SetColor(styleSheet.tablePalette[static_cast<std::size_t>(*appearance.foreground)]);
-                    textBrush = brush;
-                }
-                documentPainter.DrawInlineText(cell.sourceSpan.container_id, cell.layout.Get(), cell.textOrigin,
-                    display, cell.displayToSource, textBrush, cell.paintPlan, cell.layoutLines);
                 for (auto const& overlay : display.footnoteOverlays)
                 {
                     auto metrics = folia::platform::editor::TextRangeContentMetrics(

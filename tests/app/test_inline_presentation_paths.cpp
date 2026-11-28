@@ -88,7 +88,9 @@ namespace {
             }
             math.SetVisibleSvgIds(visibleIds);
             math.WaitForIdle();
-            EditorDocumentRenderPass pass(resources, sheet, interaction, caretAnimation, nonInteractive, images, painter,
+            EditorTableSelectionAnimation tableSelection;
+            tableSelection.BeginFrame(selection, frame.renderModel.revision, EditorCaretAnimation::Now());
+            EditorDocumentRenderPass pass(resources, sheet, interaction, caretAnimation, tableSelection, nonInteractive, images, painter,
                 [&](auto const& fragment, auto origin, auto color, float scale) {
                     mathRects.push_back({origin.x, origin.y, origin.x + fragment.width * scale, origin.y + fragment.height * scale});
                     mathColors.push_back(color);
@@ -140,6 +142,105 @@ namespace {
     };
 
     suite inline_presentation_paths = [] {
+        "wrapped list caret keeps the height of its text row"_test = [] {
+            EditorSession session;
+            session.SetText(L"- **创建交互**：八类项目资源按下实际创建入口时在原列表背景显示弹窗，Esc 能关闭。"
+                L"单元、部署、凭据池用路由参数，事件等用页面旗标。统一的地方值得保留；"
+                L"真正仍整页创建的是出口代理组、添加 S3 存储和添加控制节点接入点。"
+                L"复杂的二次配置仍在详情。对应 [说明](https://example.test/details)。");
+            NativeInlineFrame native;
+            native.Paint(session);
+            auto const& interaction = native.interaction;
+            expect(fatal(interaction.lines.size() >= 3_u));
+            std::size_t continuations = 0;
+            std::optional<folia::TextPosition> lastHit;
+            for (auto const& line : interaction.lines) {
+                if (!line.wrapContinuation) continue;
+                auto const& block = interaction.blocks[line.blockIndex];
+                auto const offset = line.displayStart + (line.displayEnd - line.displayStart) / 2;
+                DWRITE_HIT_TEST_METRICS metric{};
+                float x{}, y{};
+                winrt::check_hresult(block.layout->HitTestTextPosition(offset, FALSE, &x, &y, &metric));
+                auto hit = interaction.HitTest(block.textOrigin.x + metric.left + metric.width * .25f,
+                    block.textOrigin.y + metric.top + metric.height * .5f);
+                expect(fatal(hit.has_value()));
+                auto caret = interaction.CaretBounds(*hit, native.sheet.body.lineHeight);
+                expect(fatal(caret.has_value()));
+                expect(std::abs(caret->top - block.textOrigin.y - metric.top) < .5f);
+                expect(caret->bottom - caret->top >= native.sheet.body.size * .75f);
+                lastHit = hit;
+                ++continuations;
+            }
+            expect(fatal(continuations >= 2_u && lastHit.has_value()));
+            session.SetSelection(folia::TextSelection::caret(*lastHit));
+            native.Paint(session, {}, true, true);
+            auto const& caret = native.caretAnimation.Frame();
+            expect(caret.opacity > 0.0f && caret.bounds.bottom - caret.bounds.top >= native.sheet.body.size * .75f);
+        };
+
+        "table link targets respect glyphs and cell padding"_test = [] {
+            EditorSession session;
+            session.SetText(L"| Heading |\n| --- |\n| [link](https://example.test/)tail |\n");
+            NativeInlineFrame native;
+            native.Paint(session);
+            expect(fatal(native.interaction.tables.size() == 1_u));
+            auto const& table = native.interaction.tables.front();
+            auto cell = std::ranges::find(table.cells, std::size_t{1}, &folia::platform::editor::EditorVisualTableCell::row);
+            expect(fatal(cell != table.cells.end()));
+            auto owner = cell->sourceSpan.container_id;
+            auto source = session.EditableSource(owner);
+            expect(fatal(source.has_value()));
+            auto pointAt = [&](std::u32string_view word) {
+                auto const offset = source->find(word);
+                expect(fatal(offset != std::u32string::npos));
+                auto display = folia::platform::editor::DisplayPositionForSource(cell->displayToSource,
+                    {owner, offset, folia::TextAffinity::Downstream});
+                float x{}, y{};
+                DWRITE_HIT_TEST_METRICS metric{};
+                winrt::check_hresult(cell->layout->HitTestTextPosition(static_cast<UINT32>(display), FALSE, &x, &y, &metric));
+                return D2D1::Point2F(cell->textOrigin.x + metric.left + metric.width * .5f,
+                    cell->textOrigin.y + metric.top + metric.height * .5f);
+            };
+            auto linkAt = [&](D2D1_POINT_2F point) {
+                auto hit = native.interaction.HitTest(point.x, point.y, folia::platform::editor::TextHitMode::VisibleCharacter);
+                auto interaction = hit ? session.InteractionAt(*hit) : std::nullopt;
+                return interaction ? interaction->link : std::nullopt;
+            };
+            auto const link = pointAt(U"link");
+            expect(linkAt(link) == std::optional<std::string>{"https://example.test/"});
+            expect(!linkAt(pointAt(U"tail")));
+            expect(!linkAt({cell->rect.right - 4, link.y}));
+        };
+
+        "table selection shades inline code backgrounds"_test = [] {
+            EditorSession session;
+            session.SetText(L"| Heading |\n| --- |\n| `td[data-label]` |\n");
+            NativeInlineFrame native;
+            native.sheet.canvasColor = D2D1::ColorF(.25f, .25f, .25f);
+            native.resources.inlineCodeBackgroundBrush->SetColor(D2D1::ColorF(D2D1::ColorF::White));
+            native.resources.selectionBrush->SetColor(D2D1::ColorF(0, 0, 1, .5f));
+            auto const plain = native.Paint(session);
+            expect(fatal(native.interaction.tables.size() == 1_u));
+            auto const& table = native.interaction.tables.front();
+            auto cell = std::ranges::find(table.cells, std::size_t{1}, &folia::platform::editor::EditorVisualTableCell::row);
+            expect(fatal(cell != table.cells.end()));
+            auto const rect = cell->rect;
+            auto position = folia::TextPosition{cell->sourceSpan.container_id, 0};
+            session.SetSelection(folia::TextSelection::cells(position, position));
+            auto const selected = native.Paint(session, {}, true, true);
+            std::size_t codeBackground = 0, shaded = 0;
+            for (int y = static_cast<int>(rect.top) + 3; y < static_cast<int>(rect.bottom) - 3; ++y)
+                for (int x = static_cast<int>(rect.left) + 3; x < static_cast<int>(rect.right) - 3; ++x) {
+                    auto index = static_cast<std::size_t>(y) * 600 + x;
+                    if (plain[index] != 0xffffffff) continue;
+                    ++codeBackground;
+                    auto pixel = selected[index];
+                    if ((pixel & 255) > ((pixel >> 16) & 255) + 40) ++shaded;
+                }
+            expect(codeBackground > 20_u);
+            expect(shaded * 2 > codeBackground);
+        };
+
         "markdown and HTML highlighting share independent paint layers across wrapped lines"_test = [] {
             NativeInlineFrame native;
             native.width = 180;
@@ -489,9 +590,18 @@ namespace {
                 EditorMathPreparationContext context{theme, 1, 600, 400, true};
                 auto prepared = EditorSurfaceRenderer::PrepareMath(frame, context, {}, {});
                 auto sheet = CreateEditorStyleSheet(theme);
-                auto width = EditorDocumentContentWidth(600, sheet.horizontalPadding);
-                if (table) width = EditorTableCellContentWidth(width, 1);
-                auto colored = prepared->math.Lookup("x+1", false, sheet.body.size, width, "#CC3355");
+                if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
+                auto const& block = frame.renderModel.blocks.front();
+                auto width = EditorBlockContentWidth(block, EditorDocumentContentWidth(600, sheet.horizontalPadding));
+                auto em = sheet.body.size;
+                if (table) {
+                    auto const& grid = block.special();
+                    auto const* metadata = grid.table_metadata.get();
+                    auto columns = EditorTableColumnBoundaries(grid, width);
+                    width = EditorTableCellContentWidth(columns[1] - columns[0], metadata);
+                    em = EditorTableCellFontSize(em, metadata, EditorTableCellAppearance(metadata, 1, 0));
+                }
+                auto colored = prepared->math.Lookup("x+1", false, em, width, "#CC3355");
                 expect(static_cast<bool>(colored)) << "batch cache did not use the inherited foreground";
                 NativeInlineFrame native;
                 native.math = std::move(prepared->math);

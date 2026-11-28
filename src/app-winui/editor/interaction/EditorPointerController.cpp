@@ -57,7 +57,7 @@ namespace winrt::Folia
         openFootnote_ = std::move(openFootnote);
         resetCaretGoal_ = std::move(resetCaretGoal);
         tablePointer_.Attach(session, renderer, scroll, textInput, surface,
-            menuStyle, std::move(clipboard), executeCommand_, openLink_, render_, std::move(requestFrame));
+            menuStyle, std::move(clipboard), executeCommand_, render_, std::move(requestFrame));
     }
 
     Microsoft::UI::Xaml::Controls::MenuFlyout EditorPointerController::ContextMenuAt(
@@ -105,14 +105,26 @@ namespace winrt::Folia
         auto point = pointerPoint.Position();
         if (scroll_) scroll_->Stop();
         renderer_->UpdatePointer(static_cast<float>(point.X), static_cast<float>(point.Y));
-        if (tablePointer_.Press(args, point))
+        using Modifiers = winrt::Windows::System::VirtualKeyModifiers;
+        auto const modifiers = args.KeyModifiers();
+        auto const controls = tablePointer_.Controls(point);
+        if (openLink_ && (modifiers & Modifiers::Control) == Modifiers::Control
+            && !tablePointer_.Active() && !controls.Hit())
+        {
+            if (auto interaction = InteractionAtPoint(point); interaction && interaction->link)
+            {
+                openLink_(std::move(*interaction->link));
+                args.Handled(true);
+                return;
+            }
+        }
+        if (tablePointer_.Press(args, point, controls))
         {
             args.Handled(true);
             return;
         }
-        using Modifiers = winrt::Windows::System::VirtualKeyModifiers;
         if (args.Pointer().PointerDeviceType() == winrt::Microsoft::UI::Input::PointerDeviceType::Mouse
-            && args.KeyModifiers() == Modifiers::None
+            && modifiers == Modifiers::None
             && session_->HasSelection() && !session_->Selection().selects_cells()
             && renderer_->SelectionBackgroundAt(static_cast<float>(point.X), static_cast<float>(point.Y)))
         {
@@ -142,17 +154,7 @@ namespace winrt::Folia
         }
         auto hit = renderer_->HitTest(static_cast<float>(point.X), static_cast<float>(point.Y));
         if (!hit) return;
-        if ((args.KeyModifiers() & winrt::Windows::System::VirtualKeyModifiers::Control) == winrt::Windows::System::VirtualKeyModifiers::Control)
-        {
-            if (auto link = LinkAtPosition(*hit))
-            {
-                if (openLink_) openLink_(std::move(*link));
-                args.Handled(true);
-                return;
-            }
-        }
-        auto const extend = (args.KeyModifiers() & winrt::Windows::System::VirtualKeyModifiers::Shift)
-            == winrt::Windows::System::VirtualKeyModifiers::Shift;
+        auto const extend = (modifiers & Modifiers::Shift) == Modifiers::Shift;
         selectionDrag_.Begin(folia::editor_pointer_selection(session_->Selection(), *hit, extend),
             static_cast<float>(point.X), static_cast<float>(point.Y));
         surface_.CapturePointer(args.Pointer());
@@ -193,8 +195,7 @@ namespace winrt::Folia
             hoverTableControls_ = controls;
             if (requestFrame_) requestFrame_();
         }
-        auto hit = control ? std::nullopt : renderer_->HitTest(point.X, point.Y);
-        auto interaction = hit ? session_->InteractionAt(*hit) : std::nullopt;
+        auto interaction = control ? std::nullopt : InteractionAtPoint(point);
         auto tooltip = interaction ? std::move(interaction->tooltip) : std::nullopt;
         const auto interactive = checkbox || control || (interaction && interaction->link)
             || renderer_->CodeLanguageAt(point.X, point.Y).has_value();
@@ -302,11 +303,11 @@ namespace winrt::Folia
         currentCursor_ = cursor;
     }
 
-    std::optional<std::string> EditorPointerController::LinkAtPosition(folia::TextPosition position) const
+    std::optional<EditorDocumentInteraction> EditorPointerController::InteractionAtPoint(
+        winrt::Windows::Foundation::Point point) const
     {
-        if (!session_) return std::nullopt;
-        auto interaction = session_->InteractionAt(position);
-        return interaction ? std::move(interaction->link) : std::nullopt;
+        auto hit = renderer_->HitTestTextUnit(point.X, point.Y, folia::platform::editor::TextHitMode::VisibleCharacter);
+        return hit ? session_->InteractionAt(*hit) : std::nullopt;
     }
 
 }

@@ -15,7 +15,6 @@ namespace winrt::Folia
     {
     public:
         using Execute = std::function<bool(folia::Command const&)>;
-        using OpenLink = std::function<void(std::string)>;
         using PointerArgs = Microsoft::UI::Xaml::Input::PointerRoutedEventArgs;
         using Point = Windows::Foundation::Point;
         using Action = folia::platform::editor::EditorTableAction;
@@ -23,11 +22,11 @@ namespace winrt::Folia
 
         void Attach(EditorSession&, EditorSurfaceRenderer&, EditorScrollController&, EditorTextInputController&,
             Microsoft::UI::Xaml::FrameworkElement const&, Microsoft::UI::Xaml::Style const&,
-            EditorTableInteraction::ClipboardActions, Execute, OpenLink,
+            EditorTableInteraction::ClipboardActions, Execute,
             std::function<void()> render, std::function<void()> requestFrame);
         void Detach();
         Microsoft::UI::Xaml::Controls::MenuFlyout ContextMenuAt(std::optional<Point> point);
-        bool Press(PointerArgs const&, Point);
+        bool Press(PointerArgs const&, Point, ControlSet const&);
         bool Move(PointerArgs const&, Point);
         bool Release(PointerArgs const&, Point);
         bool DoubleTap(Point);
@@ -60,7 +59,6 @@ namespace winrt::Folia
         Microsoft::UI::Xaml::Style menuStyle{nullptr};
         EditorTableInteraction::ClipboardActions clipboard;
         Execute execute;
-        OpenLink openLink;
         std::function<void()> render;
         std::function<void()> requestFrame;
         std::shared_ptr<int> lifetime;

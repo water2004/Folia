@@ -67,7 +67,8 @@ namespace winrt::Folia
         void DrawInlineText(folia::NodeId owner, IDWriteTextLayout* layout, D2D1_POINT_2F origin,
             DisplayInlineText const& display, EditorDisplayMapping const& mapping, ID2D1Brush* textBrush,
             std::shared_ptr<const folia::platform::editor::EditorTextPaintPlan> const& paintPlan,
-            folia::platform::editor::EditorLayoutLines const& lines);
+            folia::platform::editor::EditorLayoutLines const& lines,
+            std::optional<D2D1_RECT_F> selectionBackground = std::nullopt);
 
         static std::vector<PositionedMath> PaintMath(IDWriteTextLayout* layout,
             D2D1_POINT_2F origin, std::vector<DisplayInlineText::MathOverlay> const& overlays, float width,

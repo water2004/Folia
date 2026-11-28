@@ -13,8 +13,11 @@ namespace winrt::Folia
     void EditorDocumentPainter::DrawInlineText(folia::NodeId owner, IDWriteTextLayout* layout, D2D1_POINT_2F origin,
         DisplayInlineText const& display, EditorDisplayMapping const& mapping, ID2D1Brush* textBrush,
         std::shared_ptr<const folia::platform::editor::EditorTextPaintPlan> const& paintPlan,
-        folia::platform::editor::EditorLayoutLines const& lines)
+        folia::platform::editor::EditorLayoutLines const& lines, std::optional<D2D1_RECT_F> selectionBackground)
     {
+        if (layout) DrawInlinePresentationBackgrounds(resources, styleSheet, layout, origin, display.ranges);
+        if (selectionBackground)
+            resources.d2dContext->FillRectangle(*selectionBackground, resources.selectionBrush.Get());
         if (!layout) return;
         auto infinity = std::numeric_limits<float>::infinity();
         auto viewport = printMode ? D2D1::RectF(-infinity, -infinity, infinity, infinity)
@@ -28,7 +31,6 @@ namespace winrt::Folia
             visible = first < last ? std::pair<std::size_t, std::size_t>{first->displayStart, (last - 1)->displayEnd}
                 : std::pair<std::size_t, std::size_t>{0, 0};
         }
-        DrawInlinePresentationBackgrounds(resources, styleSheet, layout, origin, display.ranges);
         PaintMathBrackets(resources, styleSheet, layout, origin, display, mapping);
         DrawSyntaxMarkers(layout, origin, display);
         DrawSelection(owner, layout, origin, mapping, visible);

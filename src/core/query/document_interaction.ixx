@@ -1,7 +1,7 @@
 // folia.core.document_interaction — block-local interactive metadata queries.
 //
 // Pointer interaction already supplies the authoritative block-local source
-// position. Resolve links and tooltips from that owner's CST instead of
+// character position. Resolve links and tooltips from that owner's CST instead of
 // walking the complete render projection.
 export module folia.core.document_interaction;
 import std;
@@ -46,7 +46,7 @@ inline std::optional<DocumentInteraction> document_interaction_at(
 
     auto visit = [&](auto& self, const InlineCstNodes& nodes) -> bool {
         for (const auto& node : nodes) {
-            if (!node.range.covers(position.source_offset)) continue;
+            if (!node.range.contains(position.source_offset)) continue;
             switch (node.kind) {
                 case InlineCstKind::Link:
                 case InlineCstKind::Autolink:

@@ -171,28 +171,33 @@ namespace folia::platform::editor
             auto const& metric = metrics[lineIndex];
             auto lineEnd = textPosition + metric.length;
             auto visibleEnd = lineEnd >= metric.newlineLength ? lineEnd - metric.newlineLength : lineEnd;
-            EditorVisualLine line;
-            line.sourceSpans = std::make_shared<const std::vector<folia::TextSpan>>(
-                SpansFromMapping(mapping, textPosition, visibleEnd, sourceSpan));
-            line.displayStart = textPosition;
-            line.displayEnd = visibleEnd;
-            line.wrapContinuation = lineIndex > 0 && previousNewlineLength == 0;
-            FLOAT x = 0.0f, y = 0.0f;
-            DWRITE_HIT_TEST_METRICS hit{};
-            auto measured = SUCCEEDED(layout->HitTestTextPosition(textPosition, FALSE, &x, &y, &hit));
-            auto top = measured ? hit.top : lineTop;
-            auto height = measured ? hit.height : metric.height;
-            line.rect = D2D1::RectF(0, top, width, top + height);
-            auto first = (std::min)(static_cast<std::size_t>(textPosition), mapping.size());
-            auto end = (std::min)(static_cast<std::size_t>(visibleEnd) + 1, mapping.size());
             // Generated prefixes, padding and control rows do not own source
             // lines. Include the terminal boundary so empty source rows remain
             // editable even when they have no visible glyphs.
-            auto decorationOnly = first < end && std::all_of(mapping.begin() + first,
-                mapping.begin() + end, [](auto const& point) {
-                    return point.kind == EditorDisplayPositionKind::BoundaryDecoration;
-                });
-            if (!decorationOnly) result->push_back(std::move(line));
+            auto first = mapping.begin() + (std::min)(static_cast<std::size_t>(textPosition), mapping.size());
+            auto end = mapping.begin() + (std::min)(static_cast<std::size_t>(visibleEnd) + 1, mapping.size());
+            auto content = std::find_if(first, end, [](auto const& point) {
+                return point.kind != EditorDisplayPositionKind::BoundaryDecoration;
+            });
+            if (first == end || content != end) {
+                EditorVisualLine line;
+                line.sourceSpans = std::make_shared<const std::vector<folia::TextSpan>>(
+                    SpansFromMapping(mapping, textPosition, visibleEnd, sourceSpan));
+                line.displayStart = textPosition;
+                line.displayEnd = visibleEnd;
+                line.wrapContinuation = lineIndex > 0 && previousNewlineLength == 0;
+                // Hanging indents are short inline objects. Measure the first
+                // content glyph, keeping empty lines on the line metrics.
+                auto offset = static_cast<UINT32>(content - mapping.begin());
+                FLOAT x = 0.0f, y = 0.0f;
+                DWRITE_HIT_TEST_METRICS hit{};
+                auto measured = offset < visibleEnd
+                    && SUCCEEDED(layout->HitTestTextPosition(offset, FALSE, &x, &y, &hit));
+                auto top = measured ? hit.top : lineTop;
+                auto height = measured ? hit.height : metric.height;
+                line.rect = D2D1::RectF(0, top, width, top + height);
+                result->push_back(std::move(line));
+            }
             textPosition = lineEnd;
             lineTop += metric.height;
             previousNewlineLength = metric.newlineLength;
@@ -425,12 +430,14 @@ namespace folia::platform::editor
             if (!tableCell) return std::nullopt;
         }
         else tableCell = TableCellAt(x, y);
+        const bool exact = mode == TextHitMode::VisibleCharacter;
         std::size_t best = 0;
         float bestDistance = (std::numeric_limits<float>::max)();
         for (std::size_t index = 0; index < lines.size(); ++index)
         {
             if (tableCell && (lines[index].tableIndex != tableCell->first
                 || lines[index].cellIndex != tableCell->second)) continue;
+            if (exact && !tableCell && lines[index].tableIndex < tables.size()) continue;
             auto const& rect = lines[index].rect;
             auto distance = y < rect.top ? rect.top - y : y > rect.bottom ? y - rect.bottom : 0.0f;
             if (lines[index].tableIndex < tables.size())
@@ -449,7 +456,6 @@ namespace folia::platform::editor
         auto const& lastSpan = line.SourceSpans().back();
         auto start = folia::TextPosition{firstSpan.container_id, firstSpan.source_range.start, folia::TextAffinity::Downstream};
         auto end = folia::TextPosition{lastSpan.container_id, lastSpan.source_range.end, folia::TextAffinity::Upstream};
-        const bool exact = mode == TextHitMode::VisibleCharacter;
         if (exact && (bestDistance > 0 || block.thematicBreak || line.displayStart == line.displayEnd)) return std::nullopt;
         if (block.thematicBreak) return y < (block.rect.top + block.rect.bottom) * 0.5f ? start : end;
         IDWriteTextLayout* layout = block.layout.Get();
@@ -472,6 +478,8 @@ namespace folia::platform::editor
             return std::nullopt;
         auto displayPos = static_cast<std::size_t>(metrics.textPosition + (trailing && mode == TextHitMode::Caret ? metrics.length : 0));
         displayPos = (std::clamp)(displayPos, static_cast<std::size_t>(line.displayStart), static_cast<std::size_t>(line.displayEnd));
+        if (exact && (displayPos >= mapping->size()
+            || (*mapping)[displayPos].kind == EditorDisplayPositionKind::BoundaryDecoration)) return std::nullopt;
         auto resolved = ResolveMappedPosition(line, *mapping, displayPos);
         auto position = resolved.value_or(end);
         auto nextWrap = best + 1 < lines.size() && lines[best + 1].blockIndex == line.blockIndex

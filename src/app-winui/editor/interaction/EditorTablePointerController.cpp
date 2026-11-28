@@ -16,7 +16,7 @@ namespace winrt::Folia
     void EditorTablePointerController::Attach(EditorSession& valueSession, EditorSurfaceRenderer& valueRenderer,
         EditorScrollController& valueScroll, EditorTextInputController& valueInput,
         Microsoft::UI::Xaml::FrameworkElement const& valueSurface, Microsoft::UI::Xaml::Style const& style,
-        EditorTableInteraction::ClipboardActions actions, Execute handler, OpenLink link,
+        EditorTableInteraction::ClipboardActions actions, Execute handler,
         std::function<void()> renderNow, std::function<void()> invalidate)
     {
         Detach();
@@ -28,7 +28,6 @@ namespace winrt::Folia
         menuStyle = style;
         clipboard = std::move(actions);
         execute = std::move(handler);
-        openLink = std::move(link);
         render = std::move(renderNow);
         requestFrame = std::move(invalidate);
         lifetime = std::make_shared<int>(0);
@@ -46,7 +45,6 @@ namespace winrt::Folia
         textInput = nullptr;
         scroll = nullptr;
         execute = {};
-        openLink = {};
         render = {};
         requestFrame = {};
     }
@@ -94,10 +92,9 @@ namespace winrt::Folia
         return true;
     }
 
-    bool EditorTablePointerController::Press(PointerArgs const& args, Point point)
+    bool EditorTablePointerController::Press(PointerArgs const& args, Point point, ControlSet const& controls)
     {
         if (press) return true;
-        const auto controls = Controls(point);
         const auto pointer = args.Pointer();
         const auto prior = session->Selection();
         auto finishEditing = [&] {
@@ -119,13 +116,6 @@ namespace winrt::Folia
         const folia::TextPosition position{cell->container_id, 0};
         const bool editing = !prior.selects_cells() && session->TableTextOwner(prior.active) == position.container_id;
         if (editing) return false; // Regular source caret and text selection inside the active cell.
-        if (openLink)
-            if (auto hit = renderer->HitTestTextUnit(point.X, point.Y); hit && session->TableTextOwner(*hit) == position.container_id)
-                if (auto interaction = session->InteractionAt(*hit); interaction && interaction->link)
-                {
-                    openLink(std::move(*interaction->link));
-                    return true;
-                }
         using Modifiers = Windows::System::VirtualKeyModifiers;
         const bool shift = (args.KeyModifiers() & Modifiers::Shift) == Modifiers::Shift;
         if (shift && prior.selects_cells() && session->SelectionInSameTable(position))
