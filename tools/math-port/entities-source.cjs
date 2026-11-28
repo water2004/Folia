@@ -5,7 +5,7 @@ const fs = require('node:fs'), path = require('node:path'), crypto = require('no
 const root = path.resolve(__dirname, '../..'),
       cjs = path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax/src/cjs');
 const lock = JSON.parse(
-    fs.readFileSync(path.join(root, 'docs/math-port/evidence/entities-source-lock.json'), 'utf8'));
+    fs.readFileSync(path.join(root, 'tools/math-port/locks/entities-source-lock.json'), 'utf8'));
 const hash = f => crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex');
 for (const [name, sha] of Object.entries(lock.source.ts))
     assert.equal(hash(path.join(root, '.reference/MathJax-src/ts/util', name)), sha);

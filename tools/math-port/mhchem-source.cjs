@@ -12,7 +12,7 @@ const root = path.resolve(__dirname, '../..');
 const sourceOutput = path.join(root, 'build/math-port/isolated/mhchem-package/original.json');
 const sourceSupplementOutput = path.join(root,
     'build/math-port/isolated/mhchem-package/supplement.json');
-const sourceLock = path.join(root, 'docs/math-port/evidence/mhchem-source-lock.json');
+const sourceLock = path.join(root, 'tools/math-port/locks/mhchem-source-lock.json');
 const fixturePath = path.join(root, 'tests/math/fixtures/packages/mhchem');
 const sourceTestPath = '.reference/MathJax-src/testsuite/tests/input/tex/Mhchem.test.ts';
 const expectedSourceTestSha256 = 'e0194d5d0e5931d18c3a237956cfee8065d901fbc7f5a934c835090506451dad';

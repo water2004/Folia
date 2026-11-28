@@ -8,7 +8,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const root = path.resolve(__dirname, '../..');
 const packages = path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax');
-const lock = JSON.parse(fs.readFileSync(path.join(root, 'docs/math-port/evidence/font-data-source-lock.json'), 'utf8'));
+const lock = JSON.parse(fs.readFileSync(path.join(root, 'tools/math-port/locks/font-data-source-lock.json'), 'utf8'));
 if (lock.source !== 'MathJax 4.1.3, commit fb987178c2d279a99b0db5ea02e751691703955e')
   throw new Error('wrong pinned MathJax source lock');
 const expectedPackageHashes = {

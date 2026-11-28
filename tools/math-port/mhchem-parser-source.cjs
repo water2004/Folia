@@ -10,7 +10,7 @@ const root = path.resolve(__dirname, '../..');
 const hash = file => crypto.createHash('sha256')
   .update(fs.readFileSync(path.join(root, file))).digest('hex');
 
-const lockPath = 'docs/math-port/evidence/mhchem-source-lock.json';
+const lockPath = 'tools/math-port/locks/mhchem-source-lock.json';
 const lock = JSON.parse(fs.readFileSync(path.join(root, lockPath), 'utf8'));
 for (const file of [...lock.files, ...lock.generated]) {
   assert.equal(hash(file.path), file.sha256, `Pinned mhchem input changed: ${file.path}`);

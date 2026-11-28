@@ -1,6 +1,7 @@
 """Conservative responsibility labels and exact Markdown/header note indexes."""
 
 import re
+import json
 
 from .files import unique
 
@@ -22,8 +23,35 @@ def responsibility(path):
 class SourceAnnotations:
     def __init__(self, repo, facts):
         self.repo, self.facts = repo, facts
-        self.lines = [(path, index + 1, line) for path in repo.files("docs/math-port") if path.endswith(".md")
-                      for index, line in enumerate(re.split(r"\r?\n", repo.read(path)))]
+        annotation_path = "tools/math-port/reference/source-annotations.json"
+        payload = json.loads(repo.read(annotation_path))
+        if (payload.get("schema") != "folia.math.source-annotations.v1"
+                or not payload.get("provenanceRevision")
+                or not isinstance(payload.get("files"), dict)
+                or not isinstance(payload.get("modules"), dict)):
+            raise ValueError(f"Invalid source annotation index: {annotation_path}")
+        self.provenance_revision = payload["provenanceRevision"]
+        records, file_index, module_index = payload.get("records"), payload["files"], payload["modules"]
+        if not isinstance(records, list) or any(not isinstance(item, dict) for item in records):
+            raise ValueError(f"Invalid source annotation records: {annotation_path}")
+
+        def expand(index, label):
+            if not isinstance(index, dict):
+                raise ValueError(f"Invalid {label} index: {annotation_path}")
+            expanded = {}
+            for key, references in index.items():
+                if not isinstance(key, str) or not isinstance(references, list) or any(
+                        not isinstance(reference, int) or reference < 0 or reference >= len(records)
+                        for reference in references):
+                    raise ValueError(f"Invalid {label} references: {annotation_path}")
+                expanded[key] = [records[reference] for reference in references]
+            return expanded
+
+        self.by_path = expand(file_index, "source path")
+        self.by_module = expand(module_index, "module")
+        for path, annotations in self.by_path.items():
+            if not isinstance(path, str) or any(not isinstance(item, dict) for item in annotations):
+                raise ValueError(f"Invalid source annotation entries: {annotation_path}")
 
     def for_file(self, path, facts):
         if re.search(r"/(?:LICENSE-[^/]+|NOTICE)\.txt$", path, re.I):
@@ -32,25 +60,14 @@ class SourceAnnotations:
         if not module and path.endswith(".cpp") and self.repo.exists(path[:-4] + ".ixx"):
             module = self.facts(path[:-4] + ".ixx")["declaration"]
         results = []
-        for document, number, line in self.lines:
-            if path not in line and not (module and module in line):
+        annotations = [*self.by_path.get(path, []), *(self.by_module.get(module, []) if module else [])]
+        seen = set()
+        for annotation in annotations:
+            identity = (annotation.get("document"), annotation.get("line"), tuple(annotation.get("sourcePaths", [])))
+            if identity in seen:
                 continue
-            sources = unique(re.findall(r"(?:\.reference/MathJax-src/)?ts/[A-Za-z0-9_./-]+\.(?:ts|js)", line))
-            if not sources:
-                continue
-            cells = [re.sub(r"^`|`$", "", cell.strip()) for cell in line.split("|")]
-            source_hash, evidence = None, ""
-            ts_index = next((index for index, cell in enumerate(cells) if re.match(r"^(?:\.reference/MathJax-src/)?ts/", cell)), -1)
-            adjacent = cells[ts_index + 1] if 0 <= ts_index < len(cells) - 1 else ""
-            if re.fullmatch(r"[a-f0-9]{64}", adjacent, re.I):
-                source_hash, evidence = adjacent.lower(), "adjacent table cell"
-            else:
-                hashes = unique(re.findall(r"\b[a-f0-9]{64}\b", line, re.I))
-                if len(sources) == len(hashes) == 1:
-                    source_hash, evidence = hashes[0].lower(), "single hash on exact mapping line"
-            results.append({"document": document, "line": number, "sourcePaths": sources,
-                            "sourceSha256": source_hash, "hashEvidence": evidence,
-                            "status": "annotated" if source_hash else "path-only-or-ambiguous"})
+            seen.add(identity)
+            results.append({**annotation, "documentRevision": self.provenance_revision})
         if re.search(r"\.(?:cpp|ixx|inc)$", path):
             for index, line in enumerate(re.split(r"\r?\n", self.repo.read(path))[:12]):
                 sources = unique(re.findall(r"[A-Za-z0-9_./-]+\.ts\b", line))

@@ -47,7 +47,7 @@ const data = {
   shards: {},
 };
 const sourceLock = JSON.parse(fs.readFileSync(
-  path.resolve(__dirname, '../../docs/math-port/evidence/entities-source-lock.json'), 'utf8'));
+  path.resolve(__dirname, '../../tools/math-port/locks/entities-source-lock.json'), 'utf8'));
 assert.deepEqual({ package: data.package, source: data.source }, sourceLock,
   'pinned MathJax Entities TypeScript/CJS source lock changed');
 for (const name of shardNames) data.shards[name] = tableFor(name).additions;

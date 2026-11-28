@@ -107,7 +107,7 @@ class Inventory:
                 if edge["file"] not in self.active:
                     self.active.add(edge["file"])
                     queue.append(edge["file"])
-        self.font_lock_path = "docs/math-port/evidence/font-data-source-lock.json"
+        self.font_lock_path = "tools/math-port/locks/font-data-source-lock.json"
         font_lock = json.loads(self.repo.read(self.font_lock_path))
         outputs = [item for item in font_lock["outputs"] if re.fullmatch(r"build/math-port/font-generated/newcm_dynamic_setup_[A-Za-z0-9_]+\.cpp", item["path"])]
         self.font_candidates = [{"id": f"G{index + 1:02d}", "target": "folia_math", **{key: unit[key] for key in ("path", "sha256", "bytes")},

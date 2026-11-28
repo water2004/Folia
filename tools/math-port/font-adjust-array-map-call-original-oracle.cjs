@@ -9,7 +9,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const root = path.resolve(__dirname, '../..');
 const source = path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax/src/cjs/output/common/FontData.js');
-const lockPath = path.join(root, 'docs/math-port/evidence/font-data-source-lock.json');
+const lockPath = path.join(root, 'tools/math-port/locks/font-data-source-lock.json');
 const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
 const relative = 'cjs/output/common/FontData.js';
 const pinned = lock.inputs.find(item => item.package === '@mathjax/src' && item.path === relative);

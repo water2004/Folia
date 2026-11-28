@@ -408,7 +408,7 @@ const sourceLock = {
     ...dynamicShardOutputs.map(x=>({path:`build/math-port/font-generated/newcm_dynamic_setup_${dynamicShardId(x.file)}.cpp`,sha256:crypto.createHash('sha256').update(x.source).digest('hex'),bytes:Buffer.byteLength(x.source)}))
   ]
 };
-const lockPath=path.join(root,'docs/math-port/evidence/font-data-source-lock.json');
+const lockPath=path.join(root,'tools/math-port/locks/font-data-source-lock.json');
 if(checkLock){
   if(!fs.existsSync(lockPath))throw new Error(`missing frozen font source lock: ${path.relative(root,lockPath)}`);
   const frozen=JSON.parse(fs.readFileSync(lockPath,'utf8'));

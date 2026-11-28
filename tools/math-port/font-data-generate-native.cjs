@@ -16,7 +16,7 @@ const outputArgument = args.find((arg,index) => arg !== '--repo-root' && (rootOp
 if (outputArgument && path.resolve(outputArgument) !== outputDir) throw new Error(`output is locked to ${outputDir}`);
 const packages = path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax');
 const newcm = path.join(packages, 'mathjax-newcm-font');
-const sourceLock = JSON.parse(fs.readFileSync(path.join(root, 'docs/math-port/evidence/font-data-source-lock.json'), 'utf8'));
+const sourceLock = JSON.parse(fs.readFileSync(path.join(root, 'tools/math-port/locks/font-data-source-lock.json'), 'utf8'));
 function writeIfChanged(file, value) {
   const bytes = Buffer.isBuffer(value) ? value : Buffer.from(value, 'utf8');
   try { if (fs.readFileSync(file).equals(bytes)) return false; } catch (error) { if (error.code !== 'ENOENT') throw error; }
@@ -552,7 +552,7 @@ for (const [name,variant] of Object.entries(sourceFont.variant)) {
   sourceResolvedKeys.set(name,sortCodepointKeyList(keys));
 }
 const sourceSnapshot = {
-  source_lock: 'docs/math-port/evidence/font-data-source-lock.json',
+  source_lock: 'tools/math-port/locks/font-data-source-lock.json',
   sourceProfile:{newcm_variant_glyph_keys:sourceProfileGlyphCount,dynamic_modules:registrations.size,
     provider_loader_calls:sourceProviderRequests,provider_trace_events:sourceProviderTraceEvents},
   newcm: {
@@ -631,11 +631,11 @@ if (!metricEquals(metricWitnesses[0].metrics,[.716,0,.75]) ||
 const extensionRecords = extensions.map(x=>({name:x.name,count:Object.values(x.data.chars||{}).reduce((sum,map)=>sum+Object.keys(map).length,0)}));
 if (extensionRecords.some((item,index)=>item.count !== [290,391,60][index])) throw new Error(`pinned extension glyph profile changed: ${JSON.stringify(extensionRecords)}`);
 const dependencyManifestPath = path.join(outputDir, 'font-data-source-dependencies.json');
-const dependencyManifest = {source_lock:'docs/math-port/evidence/font-data-source-lock.json',
+const dependencyManifest = {source_lock:'tools/math-port/locks/font-data-source-lock.json',
   source_dependencies:sourceLock.inputs.map(entry=>({path:`tools/mathjax-bundle/node_modules/${entry.package.replace(/^@mathjax\//,'@mathjax/')}/${entry.path}`,sha256:entry.sha256})),
   generated_cpp:generatedFiles.map(file=>path.relative(root,file).replaceAll('\\','/'))};
 writeIfChanged(dependencyManifestPath, JSON.stringify(dependencyManifest,null,2)+'\n');
-const manifest = {source:'MathJax 4.1.3 commit fb987178c2d279a99b0db5ea02e751691703955e', source_lock:'docs/math-port/evidence/font-data-source-lock.json', source_lock_input_count:sourceLock.inputs.length, source_dependency_manifest:path.relative(root,dependencyManifestPath).replaceAll('\\','/'), generated_cpp:dependencyManifest.generated_cpp, packages:[{name:'mathjax-newcm-font',sha256:newcmHash},...extensions.map(x=>({name:x.name,sha256:x.hash}))], modules:moduleInputs, newcm_direct_glyph_records:glyphs, newcm_source_variant_glyph_count:remappedCount, extension_glyph_records:extensionRecords, svg_effective_aliases:svgAliasCount, initializer_rows:glyphRowAudit, metric_witnesses:metricWitnesses, dynamic_modules:registrations.size, source_provider_loader_calls:sourceProviderRequests, source_provider_trace_events:sourceProviderTraceEvents, required_provider_requests:80, required_profile_glyphs:24646, generated_translation_units:generatedFiles.map(file=>({path:path.basename(file),bytes:fs.statSync(file).size,sha256:crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')})), compile_pool_limit:2};
+const manifest = {source:'MathJax 4.1.3 commit fb987178c2d279a99b0db5ea02e751691703955e', source_lock:'tools/math-port/locks/font-data-source-lock.json', source_lock_input_count:sourceLock.inputs.length, source_dependency_manifest:path.relative(root,dependencyManifestPath).replaceAll('\\','/'), generated_cpp:dependencyManifest.generated_cpp, packages:[{name:'mathjax-newcm-font',sha256:newcmHash},...extensions.map(x=>({name:x.name,sha256:x.hash}))], modules:moduleInputs, newcm_direct_glyph_records:glyphs, newcm_source_variant_glyph_count:remappedCount, extension_glyph_records:extensionRecords, svg_effective_aliases:svgAliasCount, initializer_rows:glyphRowAudit, metric_witnesses:metricWitnesses, dynamic_modules:registrations.size, source_provider_loader_calls:sourceProviderRequests, source_provider_trace_events:sourceProviderTraceEvents, required_provider_requests:80, required_profile_glyphs:24646, generated_translation_units:generatedFiles.map(file=>({path:path.basename(file),bytes:fs.statSync(file).size,sha256:crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')})), compile_pool_limit:2};
 manifest.generated_bytes=manifest.generated_translation_units.reduce((sum,file)=>sum+file.bytes,0);
 manifest.source_expected_table={path:path.basename(expectedPath),bytes:fs.statSync(expectedPath).size,sha256:crypto.createHash('sha256').update(fs.readFileSync(expectedPath)).digest('hex')};
 writeIfChanged(path.join(outputDir,'font-data-typed-manifest.json'), JSON.stringify(manifest,null,2)+'\n');

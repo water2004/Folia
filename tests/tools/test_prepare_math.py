@@ -29,7 +29,7 @@ class MathSourcePreparationTests(unittest.TestCase):
             package.mkdir(parents=True)
             raw = b"locked source\r\n"
             (package / "Entities.ts").write_bytes(raw.replace(b'\r\n', b'\n'))
-            lock_path = root / "docs/math-port/evidence/entities-source-lock.json"
+            lock_path = root / "tools/math-port/locks/entities-source-lock.json"
             lock_path.parent.mkdir(parents=True)
             entries = {"Entities.ts": hashlib.sha256(raw).hexdigest()}
             lock_path.write_text(json.dumps({"source": {"ts": dict(entries, missing="0" * 64)}}))

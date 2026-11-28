@@ -1,6 +1,6 @@
 # Pinned reference observations; values exported without normalization.
 # format_utf16	expected_utf16
-# source_evidence=docs/math-port/evidence/p40-tex-error-source.json
+# source_evidence=tools/math-port/profiles/evidence/p40-tex-error-source.json
 # source_sha256=8133cf789bce7f21b95c685dec132b291319dc00ea1a370740dbac394807021d
 	
 %	%

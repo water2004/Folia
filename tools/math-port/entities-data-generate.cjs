@@ -18,7 +18,7 @@ const shardDir = path.join(source, 'cjs/util/entities');
 const shardNames = [...'abcdefghijklmnopqrstuvwxyz', 'fr', 'opf', 'scr' ];
 const tsShardDir = path.join(repo, '.reference/MathJax-src/ts/util/entities');
 const lock = JSON.parse(
-    fs.readFileSync(path.join(repo, 'docs/math-port/evidence/entities-source-lock.json'), 'utf8'));
+    fs.readFileSync(path.join(repo, 'tools/math-port/locks/entities-source-lock.json'), 'utf8'));
 const files = [ 'Entities.js', ...shardNames.map((name) => `entities/${name}.js`) ];
 const tsFiles = [ 'Entities.ts', ...shardNames.map((name) => `entities/${name}.ts`) ];
 const sha = (file) => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');

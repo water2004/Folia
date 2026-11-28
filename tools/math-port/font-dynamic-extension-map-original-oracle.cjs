@@ -10,7 +10,7 @@ const {MathJaxNewcmFont}=require(path.join(root,
 const {MathJaxBboldxFontExtension}=require(path.join(root,
   'tools/mathjax-bundle/node_modules/@mathjax/mathjax-bboldx-font-extension/cjs/svg.js'));
 const lock=JSON.parse(fs.readFileSync(path.join(root,
-  'docs/math-port/evidence/font-data-source-lock.json'),'utf8'));
+  'tools/math-port/locks/font-data-source-lock.json'),'utf8'));
 const inputs=[
   ['@mathjax/mathjax-newcm-font','cjs/svg.js'],
   ['@mathjax/mathjax-bboldx-font-extension','cjs/svg.js'],

@@ -30,7 +30,7 @@ class RaiiFileApiChecks(unittest.TestCase):
         files = json.loads(FIXTURE.read_text().replace("$ROOT", self.root.as_posix()))
         for path, value in files.items():
             self.write(path, value)
-        (self.root / "tools/math-port").mkdir(parents=True)
+        (self.root / "tools/math-port").mkdir(parents=True, exist_ok=True)
         (self.root / "tests").mkdir()
         self.reply = self.root / "build/core/.cmake/api/v1/reply"
 
@@ -196,10 +196,19 @@ class RaiiFileApiChecks(unittest.TestCase):
 
     def test_annotations_remain_notes_and_licenses_are_preserved(self):
         hash_value = "a" * 64
-        self.write("docs/math-port/mapping.md", f"| src/math/a.ixx | ts/fixture/A.ts | {hash_value} |\n")
+        self.write("tools/math-port/reference/source-annotations.json", {
+            "schema": "folia.math.source-annotations.v1", "provenanceRevision": "v0.9.0",
+            "records": [{"document": "docs/math-port/mapping.md", "line": 1,
+                       "sourcePaths": ["ts/fixture/A.ts"], "sourceSha256": hash_value,
+                       "hashEvidence": "adjacent table cell", "status": "annotated",
+                       "documentRevision": "v0.9.0"}],
+            "files": {"src/math/a.ixx": [0]},
+            "modules": {}
+        })
         state = Inventory(self.root)
         rows = SourceAnnotations(state.repo, state.facts).for_file("src/math/a.ixx", state.facts("src/math/a.ixx"))
         self.assertEqual(rows[0]["sourceSha256"], hash_value)
         self.assertEqual(rows[0]["hashEvidence"], "adjacent table cell")
+        self.assertEqual(rows[0]["documentRevision"], "v0.9.0")
         self.assertEqual(responsibility("src/math/dependencies/NOTICE.txt")["decision"], "keep-license")
         self.assertEqual(responsibility("src/math/a.ixx")["decision"], "unreviewed")

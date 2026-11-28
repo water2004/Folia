@@ -20,7 +20,7 @@ def pinned_bytes(raw: bytes, expected: str, name: str) -> bytes:
 
 
 def restore(root: Path, check: bool = False) -> int:
-    lock = json.loads((root / "docs/math-port/evidence/entities-source-lock.json").read_bytes())
+    lock = json.loads((root / "tools/math-port/locks/entities-source-lock.json").read_bytes())
     package = root / "tools/mathjax-bundle/node_modules/@mathjax/src/ts/util"
     target = root / ".reference/MathJax-src/ts/util"
     writes = []

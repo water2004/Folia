@@ -1,7 +1,7 @@
 {
   "description": "Comparator selftest only: six unchanged pinned Source glyph tuples with an independent expected native projection; not a native observation.",
   "source": {
-    "source_lock": "docs/math-port/evidence/font-data-source-lock.json",
+    "source_lock": "tools/math-port/locks/font-data-source-lock.json",
     "sourceProfile": {
       "newcm_variant_glyph_keys": 24646,
       "dynamic_modules": 40,

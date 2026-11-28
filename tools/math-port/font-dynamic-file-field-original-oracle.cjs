@@ -10,7 +10,7 @@ const root = path.resolve(__dirname, '../..');
 const {FontData} = require(path.join(root,
   'tools/mathjax-bundle/node_modules/@mathjax/src/cjs/output/common/FontData.js'));
 const sourceLock = JSON.parse(fs.readFileSync(path.join(root,
-  'docs/math-port/evidence/font-data-source-lock.json'), 'utf8'));
+  'tools/math-port/locks/font-data-source-lock.json'), 'utf8'));
 const sourceModules = [
   'cjs/output/common/FontData.js',
   'cjs/output/common/Direction.js',

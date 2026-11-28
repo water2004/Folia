@@ -7,5 +7,5 @@ The native C++ implementation changes the original TypeScript/JavaScript
 language and typed host representation. It retains the original state machine,
 pattern definitions, parser actions and generated TeX behavior. Source hashes
 and the original-to-native responsibility map are recorded in
-docs/math-port/evidence/mhchem-source-lock.json and
-docs/math-port/evidence/mhchem-native-responsibilities.md.
+tools/math-port/locks/mhchem-source-lock.json and
+docs/math/architecture.md.

@@ -1,8 +1,15 @@
 {
   "CMakeLists.txt": "include(cmake/FoliaMath.cmake)\n",
   "cmake/FoliaMath.cmake": "add_library(folia_math STATIC)\ntarget_sources(folia_math PUBLIC FILE_SET CXX_MODULES BASE_DIRS \"${FOLIA_SOURCE_ROOT}\" FILES ${FOLIA_SOURCE_ROOT}/src/math/a.ixx ${FOLIA_SOURCE_ROOT}/src/math/b.ixx)\ntarget_sources(folia_math PRIVATE ${FOLIA_SOURCE_ROOT}/src/math/a.cpp ${FOLIA_FONT_GENERATED_CPP})\nadd_library(FoliaNativeMath SHARED src/math/native_renderer_bridge.cpp)\n",
-  "docs/math-port/HANDOFF.md": "# Fixture\n",
-  "docs/math-port/evidence/font-data-source-lock.json": {
+  "tools/math-port/native-raii-inventory.py": "# fixture root marker\n",
+  "tools/math-port/reference/source-annotations.json": {
+    "schema": "folia.math.source-annotations.v1",
+    "provenanceRevision": "v0.9.0",
+    "records": [],
+    "files": {},
+    "modules": {}
+  },
+  "tools/math-port/locks/font-data-source-lock.json": {
     "outputs": []
   },
   "src/math/a.ixx": "export module fixture.a;\nimport std;\nexport struct A {};\n",

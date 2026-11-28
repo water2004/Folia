@@ -34,7 +34,7 @@ string(JSON FOLIA_FONT_DEPENDENCY_COUNT LENGTH "${FOLIA_FONT_DEPENDENCIES}" sour
 math(EXPR FOLIA_FONT_DEPENDENCY_LAST "${FOLIA_FONT_DEPENDENCY_COUNT} - 1")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
     "${FOLIA_SOURCE_ROOT}/tools/math-port/font-data-generate-native.cjs"
-    "${FOLIA_SOURCE_ROOT}/docs/math-port/evidence/font-data-source-lock.json")
+    "${FOLIA_SOURCE_ROOT}/tools/math-port/locks/font-data-source-lock.json")
 foreach(FOLIA_FONT_INDEX RANGE 0 ${FOLIA_FONT_DEPENDENCY_LAST})
     string(JSON FOLIA_FONT_DEPENDENCY GET "${FOLIA_FONT_DEPENDENCIES}" source_dependencies ${FOLIA_FONT_INDEX} path)
     set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
@@ -63,7 +63,7 @@ execute_process(
 if(NOT FOLIA_ENTITIES_GENERATE_RESULT EQUAL 0)
     message(FATAL_ERROR "Native entity data generation failed: ${FOLIA_ENTITIES_GENERATE_ERROR}")
 endif()
-set(FOLIA_ENTITIES_LOCK "${FOLIA_SOURCE_ROOT}/docs/math-port/evidence/entities-source-lock.json")
+set(FOLIA_ENTITIES_LOCK "${FOLIA_SOURCE_ROOT}/tools/math-port/locks/entities-source-lock.json")
 file(READ "${FOLIA_ENTITIES_LOCK}" FOLIA_ENTITIES_DEPENDENCIES)
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
     "${FOLIA_SOURCE_ROOT}/tools/math-port/entities-data-generate.cjs"

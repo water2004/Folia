@@ -23,9 +23,9 @@ const rows=[...inputs].map(input=>({input,parts:input.split(TexError.pattern),me
 
 // Frozen original Source JSON remains byte-identical; only renderer-only cpp fields are projected.
 assert.ok(process.argv.includes('--check'),'Source-only oracle supports read-only --check');
-const frozenProfilePath=path.join(root,"docs/math-port/evidence/p40-tex-error-source.json");
+const frozenProfilePath=path.join(root,"tools/math-port/profiles/evidence/p40-tex-error-source.json");
 const frozenBytes=fs.readFileSync(frozenProfilePath);
 function sourceFields(value){if(Array.isArray(value))return value.map(sourceFields);if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).filter(([key])=>key!=='cpp').map(([key,v])=>[key,sourceFields(v)]));return value;}
 const actualSourceProfile=rows;
 assert.deepStrictEqual(sourceFields(actualSourceProfile),sourceFields(JSON.parse(frozenBytes)),'Original Source inputs/expectations/pins changed');
-console.log(JSON.stringify({sourceCases:rows.length,profile:"docs/math-port/evidence/p40-tex-error-source.json",profileSha256:crypto.createHash('sha256').update(frozenBytes).digest('hex'),mode:'check'}));
+console.log(JSON.stringify({sourceCases:rows.length,profile:"tools/math-port/profiles/evidence/p40-tex-error-source.json",profileSha256:crypto.createHash('sha256').update(frozenBytes).digest('hex'),mode:'check'}));

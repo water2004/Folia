@@ -1,5 +1,5 @@
 // Native storage adaptation for MathJax core/Tree/Node.ts PropertyList.
-// MathJax source is Apache-2.0; see docs/math-port/architecture.md for provenance.
+// MathJax source is Apache-2.0; see docs/math/architecture.md for provenance.
 export module folia.math.core.tree.property;
 export import folia.math.util.callable_types;
 import std;

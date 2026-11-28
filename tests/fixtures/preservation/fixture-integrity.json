@@ -1082,8 +1082,8 @@
     },
     {
       "path": "tests/math/fixtures/text/tex-error-exhaustive.tsv",
-      "bytes": 140617,
-      "sha256": "82b1470bec2076aae5d8c2b17301c5a7b264ba80dfcd2c4bff6c0b5ff38b8fd2",
+      "bytes": 140627,
+      "sha256": "10b82c061e16448c81c57ed5f58c9f3c7ebbf427e887b7f0486fcb1e14757130",
       "tsv_rows": 1981
     },
     {
@@ -1990,8 +1990,8 @@
     },
     {
       "path": "tools/math-port/tests/fixtures/font-catalog.json",
-      "bytes": 85660,
-      "sha256": "19d55ed871592d4b24753aec180dcd16d267a7701137de0fc7474745207ef020"
+      "bytes": 85658,
+      "sha256": "ee63dd56b9ec9cee402cfe5f291b2c96d31d664d9973ae804be24b11842eb5f5"
     },
     {
       "path": "tools/math-port/tests/fixtures/font-helper-edge-cases.json",
@@ -2220,8 +2220,8 @@
     },
     {
       "path": "tools/math-port/tests/fixtures/raii-file-api.json",
-      "bytes": 2558,
-      "sha256": "55dff18bcac914b83b958ad6681e244f499cb46427b926a8eb902e729462bf49"
+      "bytes": 2785,
+      "sha256": "c4873099679620d2dcc91cc155f870a7177fb3c02f916f0ef959084425d485e9"
     },
     {
       "path": "tools/math-port/tests/fixtures/raii-original-checks.json",

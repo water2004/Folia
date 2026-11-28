@@ -11,7 +11,7 @@ def discover_root(start=None):
     if candidate.is_file():
         candidate = candidate.parent
     for directory in (candidate, *candidate.parents):
-        if (directory / "CMakeLists.txt").exists() and (directory / "docs/math-port/HANDOFF.md").exists():
+        if (directory / "CMakeLists.txt").exists() and (directory / "tools/math-port/native-raii-inventory.py").exists():
             return directory
     raise ValueError(f"Could not discover repository root from {start}")
 
