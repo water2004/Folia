@@ -1,0 +1,36 @@
+{
+  "schema": "mml-constructor-identity-v1",
+  "hashes": {
+    "ts/core/Tree/Factory.ts": "e61d2f5868287e2f382503cf690cd241698bf212957c1795d0cd35ce3bef049e",
+    "ts/core/Tree/NodeFactory.ts": "b02c5ac2cabb61755785d35def6b57f8246322c626f548df600ca81af27b4599",
+    "ts/core/MmlTree/MmlFactory.ts": "5e7338cd3eed5a4002243b7371dc5098c6433ff4ba4345cb2d50cf0385b2abdb",
+    "ts/core/MmlTree/MmlNode.ts": "cc0594eb5782928412c4307637866d9f80ac147af577297edd48ee88b63b8656",
+    "ts/core/MmlTree/MmlNodes/mi.ts": "3bbddaeac72d2c0f2e5d8a0440c28188f98d1bf1481a0ec6872e103a50f146c2",
+    "cjs/core/Tree/Factory.js": "739db2e5760c29d7bb4f1bc7baa08ff8d727f4d117522aff5ede017f812cffef",
+    "cjs/core/Tree/NodeFactory.js": "148c9a3a2e469fc464036b88deb7067cd779989a43356812d31365a84ec75c54",
+    "cjs/core/MmlTree/MmlFactory.js": "d0c4e25237d04a9d21d12ee44776e46d30777e7f284db6f4f3ed1cc625b752d3",
+    "cjs/core/MmlTree/MmlNode.js": "86c5eb572dcf2652c3c52a60b66c720d231e17f600cc9aeef3ace4aeafc81d45",
+    "cjs/core/MmlTree/MmlNodes/mi.js": "47058d7ddb5b24ed530936baffe834a06c0557ec7dbdc03312d3ffa0aca17241"
+  },
+  "cases": {
+    "registryReplacementAndDeletion": {
+      "firstIsOriginal": true,
+      "secondIsReplacement": true,
+      "distinctClasses": true,
+      "absentRegistry": true
+    },
+    "initialization": {
+      "observed": true,
+      "identityAfterInit": true
+    },
+    "savedCreator": {
+      "originalClass": true,
+      "sameFactory": true,
+      "defaultsReadLiveRegistry": true
+    },
+    "emptyText": {
+      "originalClass": true,
+      "text": ""
+    }
+  }
+}

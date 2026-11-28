@@ -1,0 +1,34 @@
+{
+  "stage": "upstream legacy braced-escape expectations conflict with actual Node; not waived or engine accepted",
+  "node": "v24.13.0",
+  "upstream_test_source_sha256": "ea80b4caa29221726f4a3c95fd612a39a141ef5800084704fd702a1feafa8b26",
+  "cases": [
+    {
+      "upstream_test": "run_regexp_unicode_escape",
+      "pattern": "\\u{1}",
+      "flags": "",
+      "text": "\u0001",
+      "upstream_expected_match": true,
+      "node_expected_match": false,
+      "node_ranges": null
+    },
+    {
+      "upstream_test": "test_escapes_folding",
+      "pattern": "\\u{41}",
+      "flags": "",
+      "text": "A",
+      "upstream_expected_match": true,
+      "node_expected_match": false,
+      "node_ranges": null
+    },
+    {
+      "upstream_test": "test_high_folds",
+      "pattern": "\\u{100}",
+      "flags": "",
+      "text": "Ā",
+      "upstream_expected_match": true,
+      "node_expected_match": false,
+      "node_ranges": null
+    }
+  ]
+}

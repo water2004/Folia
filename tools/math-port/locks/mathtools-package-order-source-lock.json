@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "source": "MathJax 4.1.3 fb987178c2d279a99b0db5ea02e751691703955e",
+  "packages": ["base", "ams", "extpfeil", "mathtools"],
+  "extpfeilConfiguration": {
+    "ts": "ts/input/tex/extpfeil/ExtpfeilConfiguration.ts",
+    "tsSha256": "7dded3444fecd39520046ab4ccf3b9f0e9c397338e2b2056bdc074758a202cce",
+    "cjs": "cjs/input/tex/extpfeil/ExtpfeilConfiguration.js",
+    "cjsSha256": "e51f5adac0bf1485dc10a327b30bdb5bb54b1064c692f0ee855b805a4b5941a4"
+  },
+  "mathtoolsSourceLock": "mathtools-source-lock.json",
+  "oracleOutputSha256": "59507f3f56a932976a4d96c98eeea1122b95c1895053e1f2fec481ef9959ad18",
+  "purpose": "Verify Mathtools xmapsto wins over Extpfeil at the Folia package order; the complete 42-case lock remains unchanged."
+}

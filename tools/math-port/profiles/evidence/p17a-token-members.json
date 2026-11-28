@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "typescript": "5.9.3",
+  "status": "locally_accepted_token_and_type_foundation_not_parser",
+  "files": [
+    {
+      "source": "ts/input/tex/Token.ts",
+      "source_sha256": "6b4c0e42f277daebe8e676afc3b4d3b6083ebc87939ef8203672a831be1595bf",
+      "members": [
+        {
+          "owner": "Token",
+          "kind": "constructor",
+          "name": "constructor",
+          "static": false,
+          "line": 36,
+          "end_line": 40,
+          "member_sha256": "29c3ad7c47eedcb3449018de4f345107c09864fbbf72adb87818c5f421d47022",
+          "target": "src/math/input/tex/token.cpp:Token::Token",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p17a-token-acceptance.md"
+        },
+        {
+          "owner": "Token",
+          "kind": "get",
+          "name": "token",
+          "static": false,
+          "line": 42,
+          "end_line": 44,
+          "member_sha256": "3d7744a92c2b4b5abbd03964a551435f372b5e0033786df06ff4d6a0f99b5e52",
+          "target": "src/math/input/tex/token.cpp:Token::token",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p17a-token-acceptance.md"
+        },
+        {
+          "owner": "Token",
+          "kind": "get",
+          "name": "char",
+          "static": false,
+          "line": 46,
+          "end_line": 48,
+          "member_sha256": "7188a13230b4d957c72301c6edae084cbecdc71dab34a06108c9e0ba9d9c93f0",
+          "target": "src/math/input/tex/token.cpp:Token::character",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p17a-token-acceptance.md"
+        },
+        {
+          "owner": "Token",
+          "kind": "get",
+          "name": "attributes",
+          "static": false,
+          "line": 50,
+          "end_line": 52,
+          "member_sha256": "9dd8819f156dfe586468f9ec052382a55cc84b0e849943f89329a818d8a89846",
+          "target": "src/math/input/tex/token.cpp:Token::attributes",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p17a-token-acceptance.md"
+        },
+        {
+          "owner": "Macro",
+          "kind": "constructor",
+          "name": "constructor",
+          "static": false,
+          "line": 62,
+          "end_line": 66,
+          "member_sha256": "fbadc2917f705051e531407a50d50c3c75ab02cccb614166cf290879b7d6baf0",
+          "target": "src/math/input/tex/macro.cpp:Macro::Macro",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p17a-token-acceptance.md"
+        },
+        {
+          "owner": "Macro",
+          "kind": "get",
+          "name": "token",
+          "static": false,
+          "line": 68,
+          "end_line": 70,
+          "member_sha256": "3d7744a92c2b4b5abbd03964a551435f372b5e0033786df06ff4d6a0f99b5e52",
+          "target": "src/math/input/tex/macro.cpp:Macro::token",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p17a-token-acceptance.md"
+        },
+        {
+          "owner": "Macro",
+          "kind": "get",
+          "name": "func",
+          "static": false,
+          "line": 72,
+          "end_line": 74,
+          "member_sha256": "be5b9a04d09b14b6e8aa9d962cce6e33dcbed49c5c8289cac307fb1ff7e41417",
+          "target": "src/math/input/tex/macro.cpp:Macro::func",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p17a-token-acceptance.md"
+        },
+        {
+          "owner": "Macro",
+          "kind": "get",
+          "name": "args",
+          "static": false,
+          "line": 76,
+          "end_line": 78,
+          "member_sha256": "d5af1140ea54a28ae2b0bd8f953ad3bed7563313f9e20c4c9b4556529f48dc6e",
+          "target": "src/math/input/tex/macro.cpp:Macro::args",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p17a-token-acceptance.md"
+        }
+      ]
+    },
+    {
+      "source": "ts/input/tex/Types.ts",
+      "source_sha256": "924d0b48bf7b5fdb0ccc995171fbdfb001bc3ac51a0af1409bb8c1d953430927",
+      "members": []
+    },
+    {
+      "source": "ts/input/tex/HandlerTypes.ts",
+      "source_sha256": "5b9d091fc53640603956ab4ae39f146735621def9c36f312f8abd00afb043cfc",
+      "members": []
+    },
+    {
+      "source": "ts/input/tex/TexConstants.ts",
+      "source_sha256": "d9380972dd21333d4699ff351f6af0a589f7c1f9096f0918dc1152287aed37b5",
+      "members": [
+        {
+          "owner": "<module>",
+          "kind": "initialized_global",
+          "name": "TexConstant",
+          "static": false,
+          "line": 25,
+          "end_line": 171,
+          "member_sha256": "27ae33a2652c2239669e3f32cd6a05966d5fdabc8b4e2a3890f6c1c6bd80375a",
+          "target": "src/math/input/tex/tex_constants.ixx:TexConstant",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p17a-token-acceptance.md"
+        }
+      ]
+    }
+  ]
+}

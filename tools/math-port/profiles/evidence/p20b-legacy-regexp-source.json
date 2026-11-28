@@ -1,0 +1,16 @@
+{
+  "stage": "independent Node legacy canonicalization witness; engine not accepted",
+  "node": "v24.13.0",
+  "unicode": "16.0",
+  "icu": "77.1",
+  "relevant_bmp_units": 2431,
+  "cases": 111818,
+  "source_case_sha256": "ac9fbadad5d6da06de36de3458df1912bdebc9bf2d0810013d5c6edada7d7376",
+  "by_group": {
+    "literal-class-range": 49810,
+    "backreference": 9696,
+    "named-backreference": 9696,
+    "word-range-boundary": 38896,
+    "stateful-mode-controls": 3720
+  }
+}

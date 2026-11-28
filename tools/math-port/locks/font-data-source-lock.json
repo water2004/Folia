@@ -1,0 +1,799 @@
+{
+  "source": "MathJax 4.1.3, commit fb987178c2d279a99b0db5ea02e751691703955e",
+  "inputs": [
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg.js",
+      "sha256": "709d6e85113ef44645ad802b8424508d5f836dd61e4d1f2797b5e011a9693734",
+      "variants": 33,
+      "glyphs": 2315,
+      "delimiters": 222,
+      "dynamicFiles": 40
+    },
+    {
+      "package": "@mathjax/mathjax-bbm-font-extension",
+      "version": "4.1.3",
+      "path": "cjs/svg.js",
+      "sha256": "4330e4138451f2efd659d6a2bd4038c163e7fa98977474315b138bd5e6e2bf21",
+      "variants": 5,
+      "glyphs": 290,
+      "delimiters": 0
+    },
+    {
+      "package": "@mathjax/mathjax-bboldx-font-extension",
+      "version": "4.1.3",
+      "path": "cjs/svg.js",
+      "sha256": "9ac39ff107d6291e15e16764f45cb794cf133333ebf268281e651b54ed6ab0d1",
+      "variants": 3,
+      "glyphs": 391,
+      "delimiters": 0
+    },
+    {
+      "package": "@mathjax/mathjax-dsfont-font-extension",
+      "version": "4.1.3",
+      "path": "cjs/svg.js",
+      "sha256": "7a84404f759fcce1789a62389836245cb7aaf30c37556d1181c281d00a838478",
+      "variants": 2,
+      "glyphs": 60,
+      "delimiters": 0
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/common.js",
+      "sha256": "261e30460b9278dd7014f0c97153678c7432b4755e7c4f24f505cb605baba4b9"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/bbold.js",
+      "sha256": "dcd50283ac0fb56af66c8bd18e5eb102ce680e843b8d2ecb94ef0f05a7707d56"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/bold-italic.js",
+      "sha256": "3f521978c37b0d4db3e98411dbd29b0a89be2ddb3a1923f6e925e57609ddc471"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/bold.js",
+      "sha256": "f6aacb1b5ca23d3d67611ea8bd448fec34d33f6cc0fe97c67088438bdada6e43"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/delimiters.js",
+      "sha256": "8953079426870d36691c43a1a35969064410015b1f21d2f1d8873cf825361785"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/double-struck.js",
+      "sha256": "a350c976456b85bd2a703c925c66ba343675b392fa88621a6c073a0fa243f31f"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/ex-md.js",
+      "sha256": "e2015241fcca5b684ac05e8e4feac37b3c7b547cbb793507232b845f2314c67a"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/fraktur-bold.js",
+      "sha256": "33d3bc1680099a541fbdd5e9e28595a5bfaec580220c5ed343e56d73a46ccb3b"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/fraktur.js",
+      "sha256": "7dbcce9a97cd9051096dec2be551faddbb8e0a59f26ec5d1231fdb695305efce"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/italic.js",
+      "sha256": "7ed4b84c809f8881435d05855a3f4e9a9fa097f925d1c154ecca4bdad1aa5c87"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/largeop.js",
+      "sha256": "621b7988b83a0a8506be1e7fb613068a5bfadecfc256165ba1cd5c670ed085ae"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/lf-tp.js",
+      "sha256": "420ecaa497a0df25492abc5d3fc38b939de07504ac9aea644fb62168df763ccf"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/monospace.js",
+      "sha256": "9382fcb1cfb9c22d6097f95d6d807aa7748c12b3d690e6c019ec1ca2b179b371"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/normal.js",
+      "sha256": "362fcdbb2b80527ffce7d5918bcb6771b732d0141dc56206fb7b2d3db2a7060d"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/rt-bt.js",
+      "sha256": "0dfd8a0270e8e882775dc7d4702d32478f804157c6d4130ea14e5c41a4e76d19"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/sans-serif-bold-italic.js",
+      "sha256": "8e80bc59483b12d051ada34fd1e65e41bb0b260488e97587297440837283b27a"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/sans-serif-bold.js",
+      "sha256": "0ae2acf2808610318f7ee8c5c71f4b88e7511ebd7d43689309b76c3a241c3e09"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/sans-serif-italic.js",
+      "sha256": "40ebd9404fece00a3f0b26de355a20d066a4a610d1762d4d2edc5f77eb790d23"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/sans-serif.js",
+      "sha256": "a12b794ba87675462fba94fcd7e6f71c8b50cd4ac9fcebf73da64339c00a4fa4"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/script-bold.js",
+      "sha256": "495d6c0fd46aaabc740ab4cbce962a6fe202706c9b9086f3ae3b2baf9f18f130"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/script.js",
+      "sha256": "2aa9325efabc1596a86ae27dbba3bc019e10b86cee6616982a3be3b5e02a4057"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/size3.js",
+      "sha256": "2a7e245ca072ebe93ea4ebc3f8fc79cb5ce2f791b20c5cbadf11a6043364d970"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/size4.js",
+      "sha256": "19f7e229b42ea1a61d3720af750da4ffcc17c246e6065965468414b090cbcaf1"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/size5.js",
+      "sha256": "6b5319fb410c266cf12161700879425c94617f9437cd1c501e781aac8c1ad4bd"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/size6.js",
+      "sha256": "dce36da244c005dae4bca7928fb7dc02447898170d6abf71fa2b0b323efab4a3"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/size7.js",
+      "sha256": "5700513ef14463092fb51d9c0f06c617852f4991d16646befe321e57738f0e92"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/smallop.js",
+      "sha256": "c8bfcb840c856431d77a0c9b7ab8ba7bf2bed2068dd98060ffd40c55d067c3b3"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/tex-calligraphic-bold.js",
+      "sha256": "86f7713a4b4a14eef067fb2cfec20e29979710dacff1b15c200d05209fee69d1"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/tex-calligraphic.js",
+      "sha256": "1753a0fce62c44dd3fa17d9fd7b2165a87c404f63e433b6279e3194a1d4b340a"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/tex-mathit.js",
+      "sha256": "770f8da5ffb7dc01c73be7f572ea28dfed6951a2f2e06233fb4ba8590d678840"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/tex-oldstyle-bold.js",
+      "sha256": "76172f4aced7c13dea4ecb84725fa95d35ba94059e4237f0003f2d7dc4e5a6b1"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/tex-oldstyle.js",
+      "sha256": "eec56e0e75ae363849babe39ef04a182184e2a9a5d541b2ee7e813e95b436a87"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/tex-variant.js",
+      "sha256": "fc36a4a6d1fcde6753c0373e2686dacf5cfafc0b00a6335da62e4cbf492c9d53"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/uplarge.js",
+      "sha256": "1986b66d739081de9a2e6a3eeadc6adf7afe8ca0fdec05cc405b247ec04ac420"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/upsmall.js",
+      "sha256": "f8d3f2cf129c51dfa462d2231a85aad38aed1024f82e1afc1bf4ecb98e8fdfc6"
+    },
+    {
+      "package": "@mathjax/src",
+      "version": "4.1.3",
+      "path": "cjs/components/version.js",
+      "sha256": "6745428310a6a0e35b9a8fc9fab9d89f181bf5ca8ccc27c169efce14824f9d81"
+    },
+    {
+      "package": "@mathjax/src",
+      "version": "4.1.3",
+      "path": "cjs/core/HandlerList.js",
+      "sha256": "499ad4c1b81cbb52abdb74b124e3a691405464881fca347927a8d9d31647a59a"
+    },
+    {
+      "package": "@mathjax/src",
+      "version": "4.1.3",
+      "path": "cjs/mathjax.js",
+      "sha256": "17431ff42f26bfca6cc2baee68acb09d551fec8824f392290c5ebf0350df4ec6"
+    },
+    {
+      "package": "@mathjax/src",
+      "version": "4.1.3",
+      "path": "cjs/output/common/Direction.js",
+      "sha256": "6f807e606d7229d62245ae28e0a98848138b6f05a112de5612668a024ffaa132"
+    },
+    {
+      "package": "@mathjax/src",
+      "version": "4.1.3",
+      "path": "cjs/output/common/FontData.js",
+      "sha256": "b14584e26fcb9c76d74ae4688b37e0afcc348278dc26126b4baf6662886ff63a"
+    },
+    {
+      "package": "@mathjax/src",
+      "version": "4.1.3",
+      "path": "cjs/output/svg/FontData.js",
+      "sha256": "1ff7f2ec5dcc46dc92960f2f6d9c194ee1f86a3cb420adc52dbd704349552ed6"
+    },
+    {
+      "package": "@mathjax/src",
+      "version": "4.1.3",
+      "path": "cjs/util/AsyncLoad.js",
+      "sha256": "938fa1d48bf71ccc6b081a4d03f1acbe2b500acb235a2e449d2faf42a626ab0c"
+    },
+    {
+      "package": "@mathjax/src",
+      "version": "4.1.3",
+      "path": "cjs/util/context.js",
+      "sha256": "c3933cc87801c3a87a4a68b19ed845532750d70c14e19dca8252f2416d4a05f7"
+    },
+    {
+      "package": "@mathjax/src",
+      "version": "4.1.3",
+      "path": "cjs/util/Options.js",
+      "sha256": "76f3df8a3e899fba1d0944d5b79818b586c1d9f95cc7021c395fbb10295db660"
+    },
+    {
+      "package": "@mathjax/src",
+      "version": "4.1.3",
+      "path": "cjs/util/PrioritizedList.js",
+      "sha256": "787bd21f3634312af666917d8f140145864f98d09ede1bdde3c957d28ec2bc25"
+    },
+    {
+      "package": "@mathjax/src",
+      "version": "4.1.3",
+      "path": "cjs/util/Retries.js",
+      "sha256": "0ffe30ec3d65f1d5edfdbb505e5b76cf5b66ec1a920216ab53595df8e666b549"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "package.json",
+      "sha256": "b6fd3b04fb134b062950f1af6eb9f0fffc08e48c044f109f25775afa8ffc87ed"
+    },
+    {
+      "package": "@mathjax/mathjax-bbm-font-extension",
+      "version": "4.1.3",
+      "path": "package.json",
+      "sha256": "4ce21892535ab55c6e65e9720150405113e784c895c298a8ecae61cc91e54873"
+    },
+    {
+      "package": "@mathjax/mathjax-bboldx-font-extension",
+      "version": "4.1.3",
+      "path": "package.json",
+      "sha256": "3e1625099f8ce2539628a33d141fcb258264b677e42a99b9259b65d890f25214"
+    },
+    {
+      "package": "@mathjax/mathjax-dsfont-font-extension",
+      "version": "4.1.3",
+      "path": "package.json",
+      "sha256": "8a90e71eb1ea389202a190bebcfdf48c4a0f205d270fa38a796212face9b8f68"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/latin.js",
+      "sha256": "f535465ea65f2874bed0fff822e6884eca3d69478ef6c38b39ef23aa35264ed9"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/latin-b.js",
+      "sha256": "98e7239e44ae3879c6076defa353fdf64421a77e6d321335764bb0014f41310c"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/latin-i.js",
+      "sha256": "cb13e8b2db02b4a05a3259e4257a944ef6ef10c0f55880ee3132e1d5a4689c7a"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/latin-bi.js",
+      "sha256": "3db17ae93a62087c914e38f6855e0bf76fecd23496ef5277b49a9a27f9bc2840"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/double-struck.js",
+      "sha256": "493bf6b05b3eeacd4ceea0b55237680ff1f31563a750533df845cc7ce625726c"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/fraktur.js",
+      "sha256": "f1495511ed63abe50aab22f9f632c864041389f81b689b3ab7617bc92d8832d9"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/script.js",
+      "sha256": "23d265023a546ce396e5c7ce9172029448599ae482803dce2310f6f383fcdb8b"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/sans-serif.js",
+      "sha256": "50b066092a6b9ce8cb7e2c50a10d66b11f1f17b1bdc3f99ab6cc764329dae96a"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/sans-serif-r.js",
+      "sha256": "8d950f68ca78444906a0c701e18809304bc9eab2b7927f776d17c906c25a79ad"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/sans-serif-b.js",
+      "sha256": "d43a7acffb1772b6e20a5ccfa912969d36879318452699fefb1f7da7a59fe62f"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/sans-serif-i.js",
+      "sha256": "95c1fe7c7fff4be17dc9f53d95454ead9cd1d22535f41ecab43c39c9d5801e2e"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/sans-serif-bi.js",
+      "sha256": "459ffd2de9c26a503eda3e7196b3fb2f0e4b7c337f00c4c56d512c4a9feffda8"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/sans-serif-ex.js",
+      "sha256": "2ab5e7f61120a5ec5336d0192bfc9c7008bad41008cba2c541ec471bd1f0f08a"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/monospace.js",
+      "sha256": "c7c1cded480a36de8d48a3c609d40974121841b08ea84e1c2f4c9abe16fa90e9"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/monospace-l.js",
+      "sha256": "25b5a660f30dd4e5f2b6aebf33f3412be10f762ceadcd2ec3e8482d2c42f09bd"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/monospace-ex.js",
+      "sha256": "93a3f067c85694dca4d676d0f0683ef75fe2949a0e317de950e02ebb9387bc0f"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/calligraphic.js",
+      "sha256": "82ca048228884b6a1f551474ee73a38b42539a3e94e65aeb11d0db3d902e5363"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/math.js",
+      "sha256": "49358c9b288ab54c0674bee2d1aad007d7d8fe8307d1dccdfe806b4a43e7c18d"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/symbols.js",
+      "sha256": "54ad38049a5a32fc4f31fd556323f3bbeee7af685d38409f0c64295196ab3f3f"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/symbols-b-i.js",
+      "sha256": "b1d447100afe8485968dfcbec5584ca0d3138dca87fd182b8fb75116fdeaa866"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/greek.js",
+      "sha256": "af57588410e9ae201f77afccba59fed56c20bce8d75c048fa7588c2d83335320"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/greek-ss.js",
+      "sha256": "3d9b3cdbcf86c10bb673702cc886b9fb4bc7f0d662ee0db66b81776491fe3938"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/cyrillic.js",
+      "sha256": "7a6c7d8b654b01bce1ec3dbf93aba1792d4908afd919889ed36cb72c7af173e1"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/cyrillic-ss.js",
+      "sha256": "52cee925630dc913a9ea4558cc960c53423ae87d937a386996ee9d9d2a0e1c32"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/phonetics.js",
+      "sha256": "89a3ccc1edcba599c560e7b40a424ad96cc2a809d729d39326a42b100d62990e"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/phonetics-ss.js",
+      "sha256": "7a458b22b613221595ab874502842f7117fcb033e577f496f9aa66d722d6bb36"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/hebrew.js",
+      "sha256": "786f6ad78d390a325de7624d57ecb4b85847110af591c1242fe2b44759466fcc"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/devanagari.js",
+      "sha256": "a3110a8e3f61fc36f336211aa6c59e8316277b495d46a23ec5487c07a0281e6c"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/cherokee.js",
+      "sha256": "8aeceb8535f9cf564c45aafeb743ee08ee81a788acfa6e556b8252ffaf637605"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/arabic.js",
+      "sha256": "9983380861efecfa511665b8a500ff86d18c1ee4ea3578fb6a2617c05ed2ade7"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/braille-d.js",
+      "sha256": "2cb9f44e7d9c7e5fdf81bb7298eac2897681280c4c06d0e031321d1de8cf44f2"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/braille.js",
+      "sha256": "65853fb1f0ffe68277464920b816c8890fae438c1a21c0e25b8312f139fdf2b7"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/arrows.js",
+      "sha256": "0d504196a39400f9d6bfa6ee6f5c249b4f097e025c1f2a5d8bf4e5146225751d"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/marrows.js",
+      "sha256": "66f322f6eaff3054229416e48c9e21fb48b255c5c3af1b97e3561592dbadb721"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/accents.js",
+      "sha256": "3756257e7bb77a28d87067706f1a525f5573f4da9f0865e61027ae9294fe8586"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/accents-b-i.js",
+      "sha256": "baee9a26eb46b3ae7d6063790cc7a9de93cc497bb720ec28cb74c8030decbb1d"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/shapes.js",
+      "sha256": "4a35cfeb26c687d8a16e35749bee00fa16c7e1dfa6d5d53462b05752e28f35eb"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/mshapes.js",
+      "sha256": "f3521adc94c61b11c3fee33494e8d279a04137fcd5eea476d3bb3af2b62a0b8b"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/variants.js",
+      "sha256": "1cc85dca8a3bfd1a41f37f1a656c58436d574f2f4445fa3f68060c1babf2ec20"
+    },
+    {
+      "package": "@mathjax/mathjax-newcm-font",
+      "version": "4.1.3",
+      "path": "cjs/svg/dynamic/PUA.js",
+      "sha256": "e3a18857491c9dee46f8f1ae0218ec6183505864221c7a5f5c421667879ff4fe"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "build/math-port/font-generated/newcm_font_data.inc",
+      "sha256": "9d27347025bcb58e45c12b0565f2bfb1db11c5a8f52bfd314ef32828941a22cc",
+      "bytes": 1780893
+    },
+    {
+      "path": "build/math-port/font-generated/font_extensions.inc",
+      "sha256": "7d07c36f6d2ce25ab113a7be671cd63aa0d07fb78f76cc09fa605b60500e5dc6",
+      "bytes": 590650
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup.inc",
+      "sha256": "5454e60aa69bded99a97b9cd51d76541bc1efc94d60909e26a499523b923ab1a",
+      "bytes": 8913
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_latin.cpp",
+      "sha256": "ebaeacee932e5fe7193e9377708965f1e7577c284c393c78765058aee1d082c8",
+      "bytes": 525657
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_latin_b.cpp",
+      "sha256": "b0a671aa9a8e23125bcd7f5962d3235074cbab5cafd3aafdcc8b8a023963c134",
+      "bytes": 458357
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_latin_i.cpp",
+      "sha256": "399babd150ead731bc8ec1b3cce400f1b278b73a60fae8032d5198b8a6bb7077",
+      "bytes": 661920
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_latin_bi.cpp",
+      "sha256": "b85820df8656af44fda708416df80b7c3b3561f9fae12f7dd52fffda76dcbc4f",
+      "bytes": 629904
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_double_struck.cpp",
+      "sha256": "12f1dbdf7f44fc72f62e3f433cd387f3bb49633823b161b5bfde6c6015752f8c",
+      "bytes": 62676
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_fraktur.cpp",
+      "sha256": "e6ed2c840fc65d1f101c0d262bcd5440855b01f2043205f79836b95b73f8f868",
+      "bytes": 107615
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_script.cpp",
+      "sha256": "c2f12dbdd9f19c43672b277b1fda6bc6aae82adff4170417951919019c022a6f",
+      "bytes": 100841
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_sans_serif.cpp",
+      "sha256": "127223aa1222b2672dc2ffa5b50035c25476183a7cab47e9aea32efa8a5205a4",
+      "bytes": 454463
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_sans_serif_r.cpp",
+      "sha256": "8f9abec1ef863ff3d068ce34653b6ac77d98abd2f048e1b1beec03b264312817",
+      "bytes": 367856
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_sans_serif_b.cpp",
+      "sha256": "b8c7a0283330cd0ba34993ad06d87620ef80207ecb753d6b5ac1bb70fa1fe453",
+      "bytes": 362311
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_sans_serif_i.cpp",
+      "sha256": "631bc30ef44f3b2e312cec4b97641d2e48c540cd686d3b8a96900ab42483f0f3",
+      "bytes": 404442
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_sans_serif_bi.cpp",
+      "sha256": "10a2ba0003715116ec56ae588653e2e1f15835079acc1b626708a5f8e1dd5681",
+      "bytes": 380600
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_sans_serif_ex.cpp",
+      "sha256": "12776c2803939f9379bf54a1efe0dff4d192428cf75b353ea8bc306526a68eef",
+      "bytes": 1004705
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_monospace.cpp",
+      "sha256": "206d5d252063ca3c7bc984ab8982e5ae0afd69db31e0b16375210d0a031bd7c1",
+      "bytes": 140424
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_monospace_l.cpp",
+      "sha256": "6254e988dd95f1cd5c4cb2cb033474e32d1675528298a40489fa6a74c2133454",
+      "bytes": 550204
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_monospace_ex.cpp",
+      "sha256": "57d5530a6891830a7b03997867d023a7a3016576753588a663a7404bfb246783",
+      "bytes": 935074
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_calligraphic.cpp",
+      "sha256": "0f7afd3836a265fad75b62ba67df7e5c97eb970814ecc8293c9e51b433f18f88",
+      "bytes": 55772
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_math.cpp",
+      "sha256": "bb09c01a5dac880304148d4e430e2ef7a257932f82e11b6834a8b015e4568cd7",
+      "bytes": 301435
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_symbols.cpp",
+      "sha256": "c96b95b9e37f8fc3963c3dfe047b8d1f3a51cc4ca74fcecdf9b360d563d893be",
+      "bytes": 269691
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_symbols_b_i.cpp",
+      "sha256": "7ffd16a4f2ae5de89d6ec052b40854c0c9536fadabd749088f535f5539caf180",
+      "bytes": 191236
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_greek.cpp",
+      "sha256": "383231d8292776f535a1e33ec5e1f34b50411b3b31a1aa55131505ebe38cdc1e",
+      "bytes": 1528359
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_greek_ss.cpp",
+      "sha256": "5eb76fd0c8f949fe5853405341acec1c9bfaa2898a7944e9b052411915e89eca",
+      "bytes": 885662
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_cyrillic.cpp",
+      "sha256": "8e26ff5ee0feda60634f7d081dac92b622ad7472c22a55bd37febb686a8586c6",
+      "bytes": 973189
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_cyrillic_ss.cpp",
+      "sha256": "05406d128c2c130b8560de1811d1534d36980e26e5afa10e50369ac87bb550c6",
+      "bytes": 577662
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_phonetics.cpp",
+      "sha256": "0270468850495eaa350a2ec6146aa8f5e611b1522206c54c3371ddaef475c009",
+      "bytes": 371130
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_phonetics_ss.cpp",
+      "sha256": "bddc0d67866040f060e93d6b4ba810fda994fc33b82d8f8140f2da708c8792e1",
+      "bytes": 324749
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_hebrew.cpp",
+      "sha256": "14f85eb1d45a35af3cef575aaf7e49e47b49112b1040ef6b620876a06065e0f6",
+      "bytes": 400379
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_devanagari.cpp",
+      "sha256": "bb88a5732b71bd60667830ea272b6588988da456d9b71764385f3f98219d2c36",
+      "bytes": 119286
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_cherokee.cpp",
+      "sha256": "8f0ef092aec0836de56b4ec7f3f7f81a648640b3a3ba4add7c5f3597460d5366",
+      "bytes": 295832
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_arabic.cpp",
+      "sha256": "5a19965eda206e1d4a44df30c6adad07c0f22a5ce955f87b69f294c515492c3b",
+      "bytes": 127748
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_braille_d.cpp",
+      "sha256": "7fb575d1baa939cad0c62dffd4583c67e7fb9a584f13b7ca1afee9a2b0afc1ae",
+      "bytes": 317652
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_braille.cpp",
+      "sha256": "b7ffdcbdbf178c9d9f0a86d16a9af5acb64f74e67aadc13124e5d4fe0debc193",
+      "bytes": 177749
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_arrows.cpp",
+      "sha256": "6b9ab44d9d90b32904cff03524d81c86bcb232ae13b0d13fce582ae9409fe232",
+      "bytes": 342270
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_marrows.cpp",
+      "sha256": "c0c16a1fc1a921910cdb574fb711972899e6c8e0d2e1e31ca0ea1fe92ab564a0",
+      "bytes": 80677
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_accents.cpp",
+      "sha256": "025e20a9379865a8ec6e6adcd36dd55568227fd6cc64aa96a5dc20ff46d4a3c8",
+      "bytes": 136549
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_accents_b_i.cpp",
+      "sha256": "62306bfa5789369e91a95af8bb5468788682757fea2b6bb73986c46669894a03",
+      "bytes": 287391
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_shapes.cpp",
+      "sha256": "19286c5dc60034b9bc32c959e46aaf04b7013ddeaf5b33a915faa39a6557cb6f",
+      "bytes": 203156
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_mshapes.cpp",
+      "sha256": "82ee7f94a38ddc5cde51f04020608890ec59ba20c7f1b5878c2181b96b463c7e",
+      "bytes": 70852
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_variants.cpp",
+      "sha256": "c2fd5dd0838e6015f7719893c1aebdad976206a5dd834b324c05907a03fd030a",
+      "bytes": 28425
+    },
+    {
+      "path": "build/math-port/font-generated/newcm_dynamic_setup_PUA.cpp",
+      "sha256": "70be9d5b58e8c03c1c078c7e13c3f0510efbcca1be3a77e69f981c6b4aadb2f7",
+      "bytes": 569000
+    }
+  ]
+}

@@ -1,0 +1,334 @@
+{
+  "stage": "actual Source MapHandler; concrete token maps not accepted",
+  "source": "7cacdaef3ed1df90b4f05cc0b3183a2956ae8f848f20ae8833932faa4efcb2a2",
+  "cases": [
+    {
+      "name": "registry",
+      "flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "priority_remove",
+      "flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "missing_partial",
+      "flags": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "duplicates",
+      "flags": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "falsy_parse",
+      "flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "fallback_break",
+      "flags": [
+        true,
+        true
+      ]
+    },
+    {
+      "name": "other_symbol",
+      "flags": [
+        true
+      ]
+    },
+    {
+      "name": "live_iteration",
+      "flags": [
+        true,
+        true
+      ]
+    },
+    {
+      "name": "truthy_results",
+      "flags": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "empty_fallback",
+      "flags": [
+        true
+      ]
+    },
+    {
+      "name": "noncallable_fallback",
+      "flags": [
+        true
+      ]
+    },
+    {
+      "name": "lookup",
+      "flags": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "empty_queries",
+      "flags": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "character_null",
+      "flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "character_missing_lookup",
+      "flags": [
+        true
+      ]
+    },
+    {
+      "name": "strict_name",
+      "flags": [
+        true,
+        true
+      ]
+    },
+    {
+      "name": "fallback_receiver",
+      "flags": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "fallback_result",
+      "flags": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "throw_identity",
+      "flags": [
+        true
+      ]
+    },
+    {
+      "name": "subhandlers_add",
+      "flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "subhandlers_remove",
+      "flags": [
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "subhandlers_set",
+      "flags": [
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "live_keys",
+      "flags": [
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "add_snapshot",
+      "flags": [
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "mutable_fallback",
+      "flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "nullish_names",
+      "flags": [
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "array_holes",
+      "flags": [
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "fallback_shadow",
+      "flags": [
+        true,
+        true
+      ]
+    },
+    {
+      "name": "retained_keys",
+      "flags": [
+        true,
+        true
+      ]
+    },
+    {
+      "name": "warning_throw",
+      "flags": [
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "live_values",
+      "flags": [
+        true
+      ]
+    },
+    {
+      "name": "remove_identity",
+      "flags": [
+        true
+      ]
+    },
+    {
+      "name": "remove_array_live",
+      "flags": [
+        true,
+        true
+      ]
+    },
+    {
+      "name": "dynamic_priority",
+      "flags": [
+        true,
+        true
+      ]
+    },
+    {
+      "name": "unicode_warning",
+      "flags": [
+        true,
+        true
+      ]
+    }
+  ]
+}

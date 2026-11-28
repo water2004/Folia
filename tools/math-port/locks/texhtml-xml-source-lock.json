@@ -1,0 +1,730 @@
+{
+  "schema": 1,
+  "reference": "MathJax 4.1.3",
+  "commit": "fb987178c2d279a99b0db5ea02e751691703955e",
+  "scopeSha256": "9705d389538b2fc8bf782feea4372ace639b3727304f2971937bbcfb0042a0d1",
+  "sources": [
+    {
+      "file": "ts/handlers/html/HTMLDomStrings.ts",
+      "sha256": "e4a7da03465d6e69ebdca829b007d9905f180b0d4107ea5a1c5a44737c2712c8"
+    },
+    {
+      "file": "ts/input/tex/texhtml/TexHtmlConfiguration.ts",
+      "sha256": "e31f1539452eba33048d8e7bcf87fcf9690f23be1412799ddf2a6f43beab4a3b"
+    },
+    {
+      "file": "ts/output/common/Wrappers/XmlNode.ts",
+      "sha256": "aa03369e8f9e4b36154c9e3d4b7ad9bed94fa0713c8ead00467a289e42654dea"
+    },
+    {
+      "file": "ts/output/svg/Wrappers/semantics.ts",
+      "sha256": "6a68dd39649fcf05407dd12a700a294c78e9be140b7ceefe518523efae4bdb6e"
+    },
+    {
+      "file": "ts/output/svg/Wrappers/HtmlNode.ts",
+      "sha256": "902225b6605078eea19a893fa355875edb7adc5c5312924097e0c8d335b76b45"
+    }
+  ],
+  "cjsDependencies": [
+    {
+      "file": "cjs/adaptors/lite/Document.js",
+      "sha256": "c679ae2dc90a3c8fdd699d762079fc50f75aed5f48775859ebfb3ee050b69abc"
+    },
+    {
+      "file": "cjs/adaptors/lite/Element.js",
+      "sha256": "81626bfcd19aaf7b5d8a0c461d5f9c9f3a3d3c150b283c7641f9c38e6fcca9c6"
+    },
+    {
+      "file": "cjs/adaptors/lite/List.js",
+      "sha256": "6d2e9aa67581b15ce657c60081cd1958b882b928e4e1fb016f75e30d8d82e8a2"
+    },
+    {
+      "file": "cjs/adaptors/lite/Parser.js",
+      "sha256": "38874dadf30ee0bd60184dde9bdf29a1be9d45755893b2a025d8e1b0190ad8c0"
+    },
+    {
+      "file": "cjs/adaptors/lite/Text.js",
+      "sha256": "aab6de43d689d449401990932909c895bc29b76e28bcf22158d6f543a2059ffd"
+    },
+    {
+      "file": "cjs/adaptors/lite/Window.js",
+      "sha256": "9feeac0e2f5802cf0e590bd72b2a98cabde368103790fdb50a657155efae9caf"
+    },
+    {
+      "file": "cjs/adaptors/liteAdaptor.js",
+      "sha256": "e9879de720f356cf8f54c0960102b1e40b4eafc1e34a14481aa896e1e99bd76f"
+    },
+    {
+      "file": "cjs/adaptors/NodeMixin.js",
+      "sha256": "d331d73f054c46dfd3122c41bd6762389935b68c2e89bf1a4011cc70ea42ef3a"
+    },
+    {
+      "file": "cjs/components/version.js",
+      "sha256": "6745428310a6a0e35b9a8fc9fab9d89f181bf5ca8ccc27c169efce14824f9d81"
+    },
+    {
+      "file": "cjs/core/DOMAdaptor.js",
+      "sha256": "153998de1ae9f156cc9a5c2323f8840fc10010004ea1dfd2e25c09547e4de15d"
+    },
+    {
+      "file": "cjs/core/FindMath.js",
+      "sha256": "d38ba2d6c307ba3a9935e63c0b76fb2ed50e1c56f1b491c8c2872cc9a9271e4d"
+    },
+    {
+      "file": "cjs/core/HandlerList.js",
+      "sha256": "499ad4c1b81cbb52abdb74b124e3a691405464881fca347927a8d9d31647a59a"
+    },
+    {
+      "file": "cjs/core/InputJax.js",
+      "sha256": "e2e330b4ba637c93bc3d2411e59129d681f865be7ad76297e8ab79d8f0f01f7a"
+    },
+    {
+      "file": "cjs/core/MathItem.js",
+      "sha256": "e6ed5008854e4d2ac6b34ab98c53bec6afb34e460895e8320c90a0d8d700d261"
+    },
+    {
+      "file": "cjs/core/MmlTree/Attributes.js",
+      "sha256": "efa567c0c573f13f136f1d37b0af6bdc1a675f70cc13a9ae1cd7334321f30749"
+    },
+    {
+      "file": "cjs/core/MmlTree/MML.js",
+      "sha256": "380332b7f0cc13104130affb65532ebca2ac214ccd897b93edda551cea443684"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlFactory.js",
+      "sha256": "d0c4e25237d04a9d21d12ee44776e46d30777e7f284db6f4f3ed1cc625b752d3"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNode.js",
+      "sha256": "86c5eb572dcf2652c3c52a60b66c720d231e17f600cc9aeef3ace4aeafc81d45"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/HtmlNode.js",
+      "sha256": "cd10798f07fbdafb6f2a375b85904a5fdcf0c546cc95ddc955cae5e411ce3eef"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/maction.js",
+      "sha256": "eddcdd2111b4b7cf5ad72937b0a4ff7beb555b98308c6771a013a18121af8ce7"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/maligngroup.js",
+      "sha256": "ec7d583f79bd49dfdd5b69630cf7f52d56e6e34f9f9c7e0963b0e1933cc4176c"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/malignmark.js",
+      "sha256": "9dba71cd21e25a0c43e58e13c02f4ec9629b1b7d4c87991cf62e12415e6a1ad7"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/math.js",
+      "sha256": "44debed089b254bc09e73e22d4c30336db13ff8dad0af140e915a320bdda8e71"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/mathchoice.js",
+      "sha256": "659a1e37a309512beaa1636725155aced82dc8195b81c2ebd5a44d5f7cb3a8b7"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/menclose.js",
+      "sha256": "2cea1d1819a2eb545727f37940b341ac0ce802fad4d7daa11f813ce7381f23de"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/merror.js",
+      "sha256": "cd9b48970d5d0878d3806e8ff4e4f091d2db38f5021a63aa043acfc50d952d6a"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/mfenced.js",
+      "sha256": "33dee590a2a6c2f104ccfb175e79c5179f422e150625f4b89bf2fa42ec8f69cf"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/mfrac.js",
+      "sha256": "b2e053ce68304c03ea740fb22baa5b01a28d540002faeddc30ad5720a4172770"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/mglyph.js",
+      "sha256": "1f19fe167f2b606a8bd84b0a82e81313a7a9d0cfef90fef3bfe954ad5cbabe09"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/mi.js",
+      "sha256": "47058d7ddb5b24ed530936baffe834a06c0557ec7dbdc03312d3ffa0aca17241"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/mmultiscripts.js",
+      "sha256": "db40a3543cffbd706c0070ae0877285ce22b07db3a7e530e56f42eaa7b2d922e"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/mn.js",
+      "sha256": "8da61e1b68bfb4abbff2103c04b6fcf6c03b35c6934a3abba55ba1144b4ac142"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/mo.js",
+      "sha256": "7c68f0570d82f585eb6ca7e8bbca119b96a02666e0d4b268a413bf4035ff0b2c"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/mpadded.js",
+      "sha256": "675aae98959b257582171d58584f220da4543deb8e0e3d3b8b07a48ab6fc23a2"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/mphantom.js",
+      "sha256": "dae156634a5a2fd1076af9abd551df195463a2b6db029635b13e9809ddb566f3"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/mroot.js",
+      "sha256": "f73d25a1ca793ab21cc78ae73ce6062c925f49c8a51c4484211b8098a1a6bcd8"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/mrow.js",
+      "sha256": "5846d2b0334223b759a4059dfb0ac5e31aef1f5a96c041da45b3de94c0689896"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/ms.js",
+      "sha256": "db185825f9f19d22b7ad23e9c75c9e869b3dfc423eb61962f129b8a18781c8eb"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/mspace.js",
+      "sha256": "61dc8d544aa9550e3e132dfc1c426c5204fab292ddf9f46171e9baf6f4f35383"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/msqrt.js",
+      "sha256": "5dfe5af23967d82ccc74cf3f187c49d847da21e13ea721a539cb93afcde0ef35"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/mstyle.js",
+      "sha256": "49e13c923b88f6b41806c3f030a30edbfe8527beee6350e0e7067fc87707c488"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/msubsup.js",
+      "sha256": "7971b391a8d7c92e0d6115b17c4c394dafc828942fc00591ba6064b871610c18"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/mtable.js",
+      "sha256": "89f9cf650c72e146c544efdb640108f6f0b496d74f6bd7258a5ecaf28a284516"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/mtd.js",
+      "sha256": "0210a0d98d9098fcdab7362302841a77625341bf1459582e72f57f39314d9699"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/mtext.js",
+      "sha256": "1d3f64150977d8a1cfcc95a9974c9ad4c01f7894a0d05b7f68f5bfae5026b1b5"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/mtr.js",
+      "sha256": "d6820d1a7f2ad6cb8ea714c0e73d25993987174d8cf51820fac742204df2bf47"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/munderover.js",
+      "sha256": "104a6ed2f1a8967726c4a0da6ffd0ffb917c23fe0b3847138161c975fa0785b9"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/semantics.js",
+      "sha256": "61d0e500cbb96d395ef0ac91ae1fb3369a7cebba25204cef1c20d939eaf71f9b"
+    },
+    {
+      "file": "cjs/core/MmlTree/MmlNodes/TeXAtom.js",
+      "sha256": "bf72fd0716f88d144a8ba0befef383de4a0a4fd4d690d37fec9d55b2f15a02e4"
+    },
+    {
+      "file": "cjs/core/MmlTree/OperatorDictionary.js",
+      "sha256": "db65e13a8f3c6290e711303d46cfb6f2fe8ec24e12c499bdf9b1bf4f42027ff8"
+    },
+    {
+      "file": "cjs/core/OutputJax.js",
+      "sha256": "9f751917529fdf076b65746a9c910526599944193a9bffcc78c765f7140f8047"
+    },
+    {
+      "file": "cjs/core/Tree/Factory.js",
+      "sha256": "739db2e5760c29d7bb4f1bc7baa08ff8d727f4d117522aff5ede017f812cffef"
+    },
+    {
+      "file": "cjs/core/Tree/Node.js",
+      "sha256": "94174004b89f19bf3c98e8eec5fabdd0bcbf1e13e0b740963fa69554ad8a12a7"
+    },
+    {
+      "file": "cjs/core/Tree/NodeFactory.js",
+      "sha256": "148c9a3a2e469fc464036b88deb7067cd779989a43356812d31365a84ec75c54"
+    },
+    {
+      "file": "cjs/core/Tree/Visitor.js",
+      "sha256": "a3778626991afe0bf1cf5930f4944ecab2e3a31123c0023761467c0e2c7c3a54"
+    },
+    {
+      "file": "cjs/core/Tree/Wrapper.js",
+      "sha256": "8a0c647c4f22bba75dec4164f03889a29534ddff0129ebffe36439d2f81b7276"
+    },
+    {
+      "file": "cjs/core/Tree/WrapperFactory.js",
+      "sha256": "bbeb7c85e0dfd3c8e437d500d37f083a6b031cd9490b58d41c3285e8f7f679d5"
+    },
+    {
+      "file": "cjs/handlers/html/HTMLDomStrings.js",
+      "sha256": "5dc1b7e3435c21518515286d6ae3ea21831e36a28625a889375f2fe400b9186b"
+    },
+    {
+      "file": "cjs/input/tex.js",
+      "sha256": "ef2852b197173f373e62326016e980aef01ffc838f5f766ab6076262f944eada"
+    },
+    {
+      "file": "cjs/input/tex/base/BaseConfiguration.js",
+      "sha256": "0feedc60ac600b647cf2a1437c7244196a5aec04715f4a301fe6e9ec09722c57"
+    },
+    {
+      "file": "cjs/input/tex/base/BaseItems.js",
+      "sha256": "5310d0429b7b62d405ae9b93c8d21ad17b787e5eb3fd1f01439c62f2094f7d1a"
+    },
+    {
+      "file": "cjs/input/tex/base/BaseMappings.js",
+      "sha256": "3522fc3fbb50af2f65442be3b2fbb2623824620899ebe775a87b885928c4acce"
+    },
+    {
+      "file": "cjs/input/tex/base/BaseMethods.js",
+      "sha256": "b8d5c74e01f85ae391ec8d16ffcd216a4ca4267bd8ffa091c5bfe1462ad7b491"
+    },
+    {
+      "file": "cjs/input/tex/ColumnParser.js",
+      "sha256": "9d09d0b921ce50255facfe303d7771309ad71ea473388167535d5acf711feae9"
+    },
+    {
+      "file": "cjs/input/tex/Configuration.js",
+      "sha256": "86f62a6f6e44fec20156546b7e8d424cac493c7465c2c8ec621c604332a276f3"
+    },
+    {
+      "file": "cjs/input/tex/FilterUtil.js",
+      "sha256": "2e626da51d95be455ddde976660abb8ebab035a8712db0f0820870b95e9b1bd8"
+    },
+    {
+      "file": "cjs/input/tex/FindTeX.js",
+      "sha256": "1361bd1171e5ef0c8210342d89c9cebd660dbb9d4810bc571c64172b3a5c3d4b"
+    },
+    {
+      "file": "cjs/input/tex/HandlerTypes.js",
+      "sha256": "bf6216270252efca24688a2bf8afda18a9adb762b4a7ae41471d013063bf4103"
+    },
+    {
+      "file": "cjs/input/tex/html/HtmlConfiguration.js",
+      "sha256": "284d5341c6b8055e540e2a286956ece2deb83925945f204d268d6ece25b408f0"
+    },
+    {
+      "file": "cjs/input/tex/html/HtmlMethods.js",
+      "sha256": "fabb2f71a057bf3c6f3f52e23ebd0ea93fbe744500cf3e6792c41dd8c37b8234"
+    },
+    {
+      "file": "cjs/input/tex/MapHandler.js",
+      "sha256": "d82e3034776d2392689aad86500b5e60dbe0aa5540853b48f308841879f3cf67"
+    },
+    {
+      "file": "cjs/input/tex/NodeFactory.js",
+      "sha256": "426e3ca8822d209edc8a22b5e9f11c5631e52213b232220a2a55e81828374db5"
+    },
+    {
+      "file": "cjs/input/tex/NodeUtil.js",
+      "sha256": "4a55841fd22167d25f505e8f41adea072715ef024e00ea5ac6df3f199f2cb809"
+    },
+    {
+      "file": "cjs/input/tex/ParseMethods.js",
+      "sha256": "2af91730bf39c97e86169c68cdc8c1054c05c58216f60a2f2d8e54ec75294851"
+    },
+    {
+      "file": "cjs/input/tex/ParseOptions.js",
+      "sha256": "ff19d70539cb76911c5f1d7673ddfd908183dcf5849c91cb068b19e58da8a9ec"
+    },
+    {
+      "file": "cjs/input/tex/ParseUtil.js",
+      "sha256": "adafa18cefad39e8408bcc0e4eb7103dceb6d16c9e7ea2eb013f23602c3f8941"
+    },
+    {
+      "file": "cjs/input/tex/setoptions/SetOptionsConfiguration.js",
+      "sha256": "dac7cec87b390b199257df54f4942a14f7c5ef0cbef54e75ff4f471551a41852"
+    },
+    {
+      "file": "cjs/input/tex/Stack.js",
+      "sha256": "78743f9dfcf1ebf9beb890629d908111be5c1e47f49c16d5ffa0877c5935c385"
+    },
+    {
+      "file": "cjs/input/tex/StackItem.js",
+      "sha256": "53baa91d7c27475a91a9b6993235071ab32b04a29736c5920bdda2836ab5a91b"
+    },
+    {
+      "file": "cjs/input/tex/StackItemFactory.js",
+      "sha256": "2722b21be90f76b48325c22a65b37f80dc283e4bc9f74b644dcae81386d001c2"
+    },
+    {
+      "file": "cjs/input/tex/Tags.js",
+      "sha256": "e027c7edb6f7207f3b3ce7e7203dcfc763219b1fa37a3b39925ae83c1beef896"
+    },
+    {
+      "file": "cjs/input/tex/TexConstants.js",
+      "sha256": "5c30716472a64ee59b58ddc1c4fe53c7d00baf9d0a37e2288e307996d5dfbcff"
+    },
+    {
+      "file": "cjs/input/tex/TexError.js",
+      "sha256": "a5713111ff2ab646740da13ca6273cb5f2a7ceff9d0fb6a2e116185e4994e64f"
+    },
+    {
+      "file": "cjs/input/tex/texhtml/TexHtmlConfiguration.js",
+      "sha256": "8ee3bfb0d6ecc5a44ee9bec33cc44bafdb35369096ade324603d1e2a10d7db3e"
+    },
+    {
+      "file": "cjs/input/tex/TexParser.js",
+      "sha256": "106d7ff9298dce899d046339eab1996358f3efca3a7ce66f5ca915747dc9c6a8"
+    },
+    {
+      "file": "cjs/input/tex/Token.js",
+      "sha256": "d317b026fc1ae0ff93d6939a15041d225385a826f8c33115284464bc2f527e35"
+    },
+    {
+      "file": "cjs/input/tex/TokenMap.js",
+      "sha256": "9e3f086080a6ab052b68b22a5d9ee3dbc5e17d7b0c03a31e789664b01df36cf7"
+    },
+    {
+      "file": "cjs/input/tex/UnitUtil.js",
+      "sha256": "22fd8e826575bf9cd612b2f85208a49b07eb3cb6d9ace6c6db36e79d6e50bade"
+    },
+    {
+      "file": "cjs/mathjax.js",
+      "sha256": "17431ff42f26bfca6cc2baee68acb09d551fec8824f392290c5ebf0350df4ec6"
+    },
+    {
+      "file": "cjs/output/common.js",
+      "sha256": "b8a58d983e465f21ed36574472140bfd65e2696bb72f6c5647e0a2ae47eb1bd9"
+    },
+    {
+      "file": "cjs/output/common/Direction.js",
+      "sha256": "6f807e606d7229d62245ae28e0a98848138b6f05a112de5612668a024ffaa132"
+    },
+    {
+      "file": "cjs/output/common/FontData.js",
+      "sha256": "b14584e26fcb9c76d74ae4688b37e0afcc348278dc26126b4baf6662886ff63a"
+    },
+    {
+      "file": "cjs/output/common/LineBBox.js",
+      "sha256": "5e6464e467ef82116d6933af020450bacb354d518848049188cd0dde0b2eadd2"
+    },
+    {
+      "file": "cjs/output/common/LinebreakVisitor.js",
+      "sha256": "1df824024d443eeae425142d6cada899779cebea9d7190d9aa0807efcf1b1c43"
+    },
+    {
+      "file": "cjs/output/common/Notation.js",
+      "sha256": "15b351d807ac3c348c1ce8b8167e6097e5d5a0284bb9e875bf67ea4972760159"
+    },
+    {
+      "file": "cjs/output/common/Wrapper.js",
+      "sha256": "9e21f886b91624d170ff89df0eecef31e789ffecda001abc3e5649a38419412b"
+    },
+    {
+      "file": "cjs/output/common/WrapperFactory.js",
+      "sha256": "57ce2e232ec1919fa518699226466ceef52cbcb2af75559137d2bb2dc83ea2ab"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/maction.js",
+      "sha256": "0ff1cc7ec6b74055ddefa93b1e7d27afd3e7344ce6d830877ec4d0bef5f495f9"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/math.js",
+      "sha256": "8271bc3ec9babb16dd2849bbbe458b169ebe8423fd05f246c5bc1b53a7ea82ed"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/menclose.js",
+      "sha256": "12b926073fbc0e86371770ecd470f87de54ead40e36f0439c99344a343ebe6ed"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/mfenced.js",
+      "sha256": "a02799dfd87903d59a13c509f9a9593bdc6882c2a0d7c43c1a8220ff35ceb166"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/mfrac.js",
+      "sha256": "4deba461704fca1492f630a9e0f712c6e02f4ab9abc9507290be05b2d4df06ea"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/mglyph.js",
+      "sha256": "48cb609a11e76dee83f66f3934fc1b2b1d8c3aba598967948e8e2f50dc675196"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/mi.js",
+      "sha256": "98b595b520eaa1566720c43a63ef0bc4febd6cef06453a26cb596f6e09687155"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/mmultiscripts.js",
+      "sha256": "82802f8b88dc48ffec0439cc8ffc8e5163c21cf82a28dcc84c7c44513bb05c2b"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/mn.js",
+      "sha256": "6c551ff9abed78c471e9b26c05e8b41e6802eeef14b316a53f7b5ec2199c57b0"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/mo.js",
+      "sha256": "d447975853c750ad94eb3cc5fe4e3ae012fbdc73841d39bbef3080619e765a1c"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/mpadded.js",
+      "sha256": "4405c3a0ae4274fb3d0cf015487b56798f9c5781a6274c932c80b0ff823f6c40"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/mroot.js",
+      "sha256": "1f0c1f5b864beefae82f40e670afc0413ffb309787981ef5e334465815962f17"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/mrow.js",
+      "sha256": "656d226a08412290c90284fa5ab0b311b288e8aaeb33c257d8d99e20ee920776"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/ms.js",
+      "sha256": "5bfa7ffdf07f2bc46375274e4c764d821a08365c224e4adc9aa6f1fdd6051a1b"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/mspace.js",
+      "sha256": "f06917de1e5f5d788495789522ee77f3ddea2b096ae740beee64300492edc67a"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/msqrt.js",
+      "sha256": "0b97de1e4817c61b679c8d3cad9ae8542a3876c0edac5eed055030bb08dbd865"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/msubsup.js",
+      "sha256": "10c11393a9ec6273de294cb31fd1c51665f4be8e11a5b830bad9d739def680be"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/mtable.js",
+      "sha256": "3b536684d4899f8603fa5db61a081db2bad9ed9d09b4e3de45f7d0f2fbade29c"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/mtd.js",
+      "sha256": "57ee84fffc3ad38998ab4572f4b08240a25d529941f8de92cbdcda35eb295c5b"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/mtext.js",
+      "sha256": "fbce8b6ed6ab47b74f0c5f53ceba920b36ef77dd12941cc21665ddaee6a85901"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/mtr.js",
+      "sha256": "41d3ffdc6f110e96e48d1d0f5d4cf07a489a299b2884cd81011c80a0260d0c4f"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/munderover.js",
+      "sha256": "6b746b059ad85131b28ca62c755b234e31f0aa4403956eafb8621d4ff0a81d4e"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/scriptbase.js",
+      "sha256": "3781ec869fc7c95bbc6d993a7b5cc82724f1592fe00e9b712cf82d4272c06289"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/semantics.js",
+      "sha256": "356b86f1704ed8cd5988ff81ffeb9dc3b5b4be4efa98b0859ac27ff69857de08"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/TeXAtom.js",
+      "sha256": "84d821ef425d7a06307e5a5afc8726ff8c22ba55e541eea3fadbcc99a376dcba"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/TextNode.js",
+      "sha256": "0a7528be5df7ebbf2c261e437dd6e2affbfc63a27274ba8c8c7877dde36165ae"
+    },
+    {
+      "file": "cjs/output/common/Wrappers/XmlNode.js",
+      "sha256": "ef66ae37fb3736f54aafebcac194890b9399472523acea730680335c2193de68"
+    },
+    {
+      "file": "cjs/output/svg.js",
+      "sha256": "1495e23a9da0bf6b0e8b44d71f54271fa12e902c11444e4f18cdd749ad3b800e"
+    },
+    {
+      "file": "cjs/output/svg/DefaultFont.js",
+      "sha256": "2178536649e5481e2c2b54a813db9f393b2964276034f2a72f1ab1fa1af1b3dc"
+    },
+    {
+      "file": "cjs/output/svg/FontCache.js",
+      "sha256": "4a85ac93c95a587260967dad89e89ad61a4ac6741848f2fecf3871af264f8303"
+    },
+    {
+      "file": "cjs/output/svg/FontData.js",
+      "sha256": "1ff7f2ec5dcc46dc92960f2f6d9c194ee1f86a3cb420adc52dbd704349552ed6"
+    },
+    {
+      "file": "cjs/output/svg/Notation.js",
+      "sha256": "31f1c9b6031eb8f61093119f58b5a8af9ee16a0ee96c262142399f20a11515d0"
+    },
+    {
+      "file": "cjs/output/svg/Wrapper.js",
+      "sha256": "3ba6e35cf799f0cffe5c555be3f81c12d8a8f81fe36257685ddccb96f4671ee4"
+    },
+    {
+      "file": "cjs/output/svg/WrapperFactory.js",
+      "sha256": "f24b66442ed15a4aa54ac9167394975190f35de3d783138cda6201bf43a1a5f7"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers.js",
+      "sha256": "5abcd05f7094165c61b3850ad163a030858d3729b653f3313374526b16ba1eec"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/HtmlNode.js",
+      "sha256": "1f33320e33dad4efec9f1d5f9cdea7404da5a2c75884781ada5ba6a239b36ac3"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/maction.js",
+      "sha256": "84e662d879ac7ca1e51e88ded9c9d0a4042379420a9c5b9fe676399d237ea867"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/math.js",
+      "sha256": "d54d1222519d5907e8ff35252f0f0bff06b75b2cc4bb00088ef6f2f054f236eb"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/menclose.js",
+      "sha256": "525fa96606a69df73a9854bb626bdb84ff524dafe05964a30c184b730c878f0c"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/merror.js",
+      "sha256": "5e5fd4c8228833ff63f51a83446b79ea687f095ab8170102300a8f98df248a67"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/mfenced.js",
+      "sha256": "7a8e121e97ded41f126f66850baf4de107df406bbf6899c9020ba84c421522e2"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/mfrac.js",
+      "sha256": "55068c351d419d68b459eca706653c1a95ad6947cbce406eeaabddd627a0a9a6"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/mglyph.js",
+      "sha256": "78768469e2e21ebe9526b8f948c11624b1a0ad72c684050f4c1fbba453d55fb1"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/mi.js",
+      "sha256": "eea38da4ce0c22e448771bb50c66b694b78a98c16f30b5f6e8f59118f57bc0b1"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/mmultiscripts.js",
+      "sha256": "0b45bf08868a91fcf9a0ed876e1e6b96d7a6752f5525f0e9709598b6328ab917"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/mn.js",
+      "sha256": "f1875f3146af1e51db575af21bb701fd58ffccc9e79b970039fa1b897d0ee6bc"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/mo.js",
+      "sha256": "6ff6cfde9ed7e46e8f1d28b2e5c2507a984651bca00a66d263e1b450a0fc2149"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/mpadded.js",
+      "sha256": "49c15f412d2f5b811b9008b7b465453f5d7e6684433fe1b975b8e25703c4d854"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/mphantom.js",
+      "sha256": "77b95fe416d42887eeb6f285d192c3cff6555c17d725d387723cbcdb369e4fa8"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/mroot.js",
+      "sha256": "938c1b73be3193a49610588f38a23e7634c5d922e9947ddcde3e9a256a4e3de4"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/mrow.js",
+      "sha256": "a7602848502a134a8daf0c435473ec48269da36ad9e0cac84ef4f4d560e84981"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/ms.js",
+      "sha256": "642862db40efeacef90d7a3edeb16a012e5be26618b79ed42ab77896229a36f7"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/mspace.js",
+      "sha256": "e329befacd87d948ed430deed19371c194662d258fe1a44b4002b91babf78045"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/msqrt.js",
+      "sha256": "c4423e667287af40a89c550a712353a224c732e9c57137b3e54fe9608791adda"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/msubsup.js",
+      "sha256": "c780cb5eca2512b8714b386f982ae8f00bbdcf96121b0641e2303eb4974f7d2b"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/mtable.js",
+      "sha256": "ab992608e8971aa29e7d5d21833d93a26451348cb46651a3e8c7492e3175cd3e"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/mtd.js",
+      "sha256": "f96a94464bf9cf839218b959b126dbf0777f2e42362ba6b2472c528e54aefa96"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/mtext.js",
+      "sha256": "0f1659fccfbf0e867339f615fdc800b008d3c180fa6a175a538d978a1b1aa9d0"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/mtr.js",
+      "sha256": "2089e457a30e74a1588304044113b401879456fd46220fe8445fcd1b642155f6"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/munderover.js",
+      "sha256": "fea19d233928d7660dc695dd6e9e102596330de02f29a9ea956f7ba1811e07e0"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/scriptbase.js",
+      "sha256": "587756a7323e47b03922a3e9ebabd4a4607edda39ab3576b05a184183b18c74e"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/semantics.js",
+      "sha256": "f5a4268643694d42f93f56ab6d1cb0ea78a49b5f072ed9c58de90c57e65a33ab"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/TeXAtom.js",
+      "sha256": "4ac44b86efe4f6fa8899e13ba5a0cba15ce290b9db1281d08b739fac3e0b5bc0"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/TextNode.js",
+      "sha256": "0360179f7bb1b798d03601d62e8e7503bf49fc6f87b6686a9cc42aed111a5be2"
+    },
+    {
+      "file": "cjs/output/svg/Wrappers/zero.js",
+      "sha256": "26e1c2c031e476d2f8f9a30510437d098897a704ff8bbe9563d426835be2b79e"
+    },
+    {
+      "file": "cjs/util/AsyncLoad.js",
+      "sha256": "938fa1d48bf71ccc6b081a4d03f1acbe2b500acb235a2e449d2faf42a626ab0c"
+    },
+    {
+      "file": "cjs/util/BBox.js",
+      "sha256": "792428ce9802696fe669aa8a13b1a92f5f2eaadd07e05fc28bd359acd8d2062d"
+    },
+    {
+      "file": "cjs/util/context.js",
+      "sha256": "c3933cc87801c3a87a4a68b19ed845532750d70c14e19dca8252f2416d4a05f7"
+    },
+    {
+      "file": "cjs/util/Entities.js",
+      "sha256": "a616936550aa115ad994c5f1f7d3bfb50cb818c2876beaae6b60a6e58a647d07"
+    },
+    {
+      "file": "cjs/util/FunctionList.js",
+      "sha256": "571f57801b863b2d9f01a66dc72f2836b7fd06a1a48a3fe0057e4ec3d51a7278"
+    },
+    {
+      "file": "cjs/util/lengths.js",
+      "sha256": "6b6cd0b9fa024c461c730db54f055a6388d095bcb7dd0d794214c4fd48ded860"
+    },
+    {
+      "file": "cjs/util/numeric.js",
+      "sha256": "ea8a2810b86707438361be533cc80b9566eb685619abff81990befb3f0fb5b50"
+    },
+    {
+      "file": "cjs/util/Options.js",
+      "sha256": "76f3df8a3e899fba1d0944d5b79818b586c1d9f95cc7021c395fbb10295db660"
+    },
+    {
+      "file": "cjs/util/PrioritizedList.js",
+      "sha256": "787bd21f3634312af666917d8f140145864f98d09ede1bdde3c957d28ec2bc25"
+    },
+    {
+      "file": "cjs/util/Retries.js",
+      "sha256": "0ffe30ec3d65f1d5edfdbb505e5b76cf5b66ec1a920216ab53595df8e666b549"
+    },
+    {
+      "file": "cjs/util/string.js",
+      "sha256": "e1f09bca257dd268b9483b7310e4c77039dd022f01c5e9f5a62f47a981921e9c"
+    },
+    {
+      "file": "cjs/util/StyleJson.js",
+      "sha256": "dfd45381fc15fa9b8a038e8ac782550934b5327871d10534df52af02aa43f11f"
+    },
+    {
+      "file": "cjs/util/Styles.js",
+      "sha256": "842ae4900f4075463e0863d7419909f0f398b5ec98f85c2c951588fc5d4de5c2"
+    }
+  ]
+}

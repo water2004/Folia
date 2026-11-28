@@ -1,0 +1,209 @@
+{
+  "schema": 1,
+  "typescript": "5.9.3",
+  "status": "locally_accepted_mml_registry_and_action_not_renderer",
+  "files": [
+    {
+      "source": "ts/core/MmlTree/MML.ts",
+      "source_sha256": "c64bcfdf65452559995a92c13db75133b1500ef59efc2be5c9489ceacc4d4964",
+      "members": [
+        {
+          "owner": "<module>",
+          "kind": "initialized_global",
+          "name": "MML",
+          "static": false,
+          "line": 82,
+          "end_line": 135,
+          "member_sha256": "660f1ff03e96544486da9a8d14a8dbcc7894ce36694c2b532447ea7e6bcb98e9",
+          "target": "src/math/core/mml_tree/mml.cpp:folia::math::mml::MML",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p18c-mml-registry-acceptance.md",
+          "native_adaptation": "One const shared binding to an ordered mutable registry; all 43 compiled constructor identities retained."
+        }
+      ]
+    },
+    {
+      "source": "ts/core/MmlTree/MmlFactory.ts",
+      "source_sha256": "5e7338cd3eed5a4002243b7371dc5098c6433ff4ba4345cb2d50cf0385b2abdb",
+      "members": [
+        {
+          "owner": "MmlFactory",
+          "kind": "initialized_field",
+          "name": "defaultNodes",
+          "static": true,
+          "line": 37,
+          "end_line": 37,
+          "member_sha256": "8819f6003a157e85c79fc1880d8babd9fb4ab6b85d18ad84c1a6dd83ce53baff",
+          "target": "src/math/core/mml_tree/mml_factory.ixx:MmlFactory::defaultNodes",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p18c-mml-registry-acceptance.md",
+          "native_adaptation": "Separately rebindable shared handle initially aliases the registry; inherited this.constructor.defaultNodes is selected by the existing typed injected-default constructor."
+        },
+        {
+          "owner": "MmlFactory",
+          "kind": "get",
+          "name": "MML",
+          "static": false,
+          "line": 43,
+          "end_line": 45,
+          "member_sha256": "fadb38a200fcbcbafb8a85b206f4dcbe86d2a0c73fde3d6d9abe691ca3408420",
+          "target": "src/math/core/mml_tree/mml_factory.cpp:MmlFactory::MML",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p18c-mml-registry-acceptance.md"
+        }
+      ]
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/maction.ts",
+      "source_sha256": "fa173b7e2b25b90e0f83ac201098357a8abf28462fa86fa69d92b65906527895",
+      "members": [
+        {
+          "owner": "MmlMaction",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 36,
+          "end_line": 40,
+          "member_sha256": "6bb9596064daeb2f8091ffad161f3564d81de60213dee2cf67d9a1e34744776b",
+          "target": "src/math/core/mml_tree/mml_nodes/maction_bindings.cpp:MmlMaction::defaults",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 45,
+          "end_line": 47,
+          "member_sha256": "9d873e87c692a6c274721602bc9f2791f2a8c3a2f4b8248058ae9a448bd14438",
+          "target": "src/math/core/mml_tree/mml_nodes/maction_bindings.cpp:MmlMaction::kind",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "get",
+          "name": "arity",
+          "static": false,
+          "line": 54,
+          "end_line": 56,
+          "member_sha256": "5b1e7efcbaaee87e360d1b2d4f0cef10497a01d081347aa263f00e7a210bfc7b",
+          "target": "src/math/core/mml_tree/mml_nodes/maction_bindings.cpp:MmlMaction::arity",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "get",
+          "name": "selected",
+          "static": false,
+          "line": 61,
+          "end_line": 65,
+          "member_sha256": "29cbd29f75037b271cfefbec1f8d8ee006c0cfaa49c073e1d7cd9f983f1e9f30",
+          "target": "src/math/core/mml_tree/mml_nodes/maction_selection.cpp:MmlMaction::selected",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md",
+          "native_adaptation": "Virtual pointer getter in the dense nullable native child-array and raw scalar/record/array host; full NaN/fraction/default behavior retained."
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "get",
+          "name": "isEmbellished",
+          "static": false,
+          "line": 70,
+          "end_line": 72,
+          "member_sha256": "e8fa24a65b39a99281e26941cc990d37705bb20e8d825a3bba9de102d287069e",
+          "target": "src/math/core/mml_tree/mml_nodes/maction_selection.cpp:MmlMaction::isEmbellished",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "get",
+          "name": "isSpacelike",
+          "static": false,
+          "line": 77,
+          "end_line": 79,
+          "member_sha256": "5fcf235c41220ba3c3a6bd203fde7ae12aa17d1e88efb8d37397577421aab143",
+          "target": "src/math/core/mml_tree/mml_nodes/maction_selection.cpp:MmlMaction::isSpacelike",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "method",
+          "name": "core",
+          "static": false,
+          "line": 84,
+          "end_line": 86,
+          "member_sha256": "67e42456644adf8c77cb7a51c4fcc0d8d427a89a71e76f90c267afec8de08348",
+          "target": "src/math/core/mml_tree/mml_nodes/maction_selection.cpp:MmlMaction::core",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "method",
+          "name": "coreMO",
+          "static": false,
+          "line": 91,
+          "end_line": 93,
+          "member_sha256": "ef344c77c404e1fea8def128ec3ca371f087993d3ab4621eba31be07c16238d4",
+          "target": "src/math/core/mml_tree/mml_nodes/maction_selection.cpp:MmlMaction::coreMO",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "method",
+          "name": "verifyAttributes",
+          "static": false,
+          "line": 98,
+          "end_line": 106,
+          "member_sha256": "5634f19f3542dceffc730880e0d01aa4666a1ed38782298c881b8c516645c0a5",
+          "target": "src/math/core/mml_tree/mml_nodes/maction_behavior.cpp:MmlMaction::verifyAttributes",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "method",
+          "name": "setTeXclass",
+          "static": false,
+          "line": 114,
+          "end_line": 122,
+          "member_sha256": "dcf7daeba149ed131653efcf67c762530c959d622b180bfdfdf8525da62e51e5",
+          "target": "src/math/core/mml_tree/mml_nodes/maction_behavior.cpp:MmlMaction::setTeXclass",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "method",
+          "name": "nextToggleSelection",
+          "static": false,
+          "line": 127,
+          "end_line": 136,
+          "member_sha256": "526adbee803079a1d0255a6533bdf4b775bf6efb434fd1c224433565f34859fa",
+          "target": "src/math/core/mml_tree/mml_nodes/maction_behavior.cpp:MmlMaction::nextToggleSelection",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "method",
+          "name": "setChildInheritedAttributes",
+          "static": false,
+          "line": 141,
+          "end_line": 160,
+          "member_sha256": "83ac1c5c7b156b3fd32a8c229896bcac571aae60f63e959afe6c216e198f44a0",
+          "target": "src/math/core/mml_tree/mml_nodes/maction_behavior.cpp:MmlMaction::setChildInheritedAttributes",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md",
+          "native_adaptation": "The accepted general Unicode default-lowercase host implements the actual string method; no coercion of non-string receivers."
+        }
+      ]
+    }
+  ]
+}

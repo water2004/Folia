@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "source": "MathJax 4.1.3 fb987178c2d279a99b0db5ea02e751691703955e",
+  "scopeSha256": "9705d389538b2fc8bf782feea4372ace639b3727304f2971937bbcfb0042a0d1",
+  "oracleOutputSha256": "ff0a27897f3c05997f127bc4da8d8bf8439013441fa4590e24b7fe1bbaed2bea",
+  "files": [
+    {
+      "ts": "ts/input/tex/mathtools/MathtoolsConfiguration.ts",
+      "tsSha256": "7b14b1d6e4324397ab315fa012ceada7999df6cbf3b4c9f09fc3742f8b5a30ae",
+      "cjs": "cjs/input/tex/mathtools/MathtoolsConfiguration.js",
+      "cjsSha256": "863415dfbc384852e5b3b39724d50cc453e1bb6e54f8f6a1073b9e5e43b8734d"
+    },
+    {
+      "ts": "ts/input/tex/mathtools/MathtoolsItems.ts",
+      "tsSha256": "61cadb6dcd19a00d7a6e3bbd7b6eb61a9e9fb72edc8982c83890f08f37a013bb",
+      "cjs": "cjs/input/tex/mathtools/MathtoolsItems.js",
+      "cjsSha256": "89bc6d7f2597a48d231743d06d031c7042f9963798cb514a84dabc52de4e023d"
+    },
+    {
+      "ts": "ts/input/tex/mathtools/MathtoolsMappings.ts",
+      "tsSha256": "57522ac1c99b3154cbe19057c61d365e027a41f3946efa9093d3f1f05f28b1df",
+      "cjs": "cjs/input/tex/mathtools/MathtoolsMappings.js",
+      "cjsSha256": "2bc22670070f957d770adb74bdb0e6795c6373560adadfc62fbe82fec42fc03b"
+    },
+    {
+      "ts": "ts/input/tex/mathtools/MathtoolsMethods.ts",
+      "tsSha256": "ad6562e23ba65cafdb480afc33387982c7f7b14a2886ae7844dfbe64ec44e918",
+      "cjs": "cjs/input/tex/mathtools/MathtoolsMethods.js",
+      "cjsSha256": "ec67f90855dec0ab60f4933beffe081799247a2ac01572429b696e4e02ed8a5a"
+    },
+    {
+      "ts": "ts/input/tex/mathtools/MathtoolsTags.ts",
+      "tsSha256": "2437a2beea0f0c04fac8697ab407a09672b2395d483b1942aefa51e9df057e47",
+      "cjs": "cjs/input/tex/mathtools/MathtoolsTags.js",
+      "cjsSha256": "bcdd1c9f8592d5640fa2b8bb8cade19c29e2d8f732e19a2dfbcb5415135e3e2d"
+    },
+    {
+      "ts": "ts/input/tex/mathtools/MathtoolsUtil.ts",
+      "tsSha256": "e8f02143609f1201b5c9c39638d0eb3f14a3d5adcb93fc5a6b4c1e888b3903e0",
+      "cjs": "cjs/input/tex/mathtools/MathtoolsUtil.js",
+      "cjsSha256": "c132df85a45b50812466c8643f9dabd156f5205e5699d514f01292e02469e2d5"
+    }
+  ]
+}

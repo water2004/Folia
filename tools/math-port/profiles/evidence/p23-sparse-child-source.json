@@ -1,0 +1,5563 @@
+{
+  "schema": 1,
+  "status": "Root original Source evidence; concrete native declarations/red tests/migration not yet frozen",
+  "pins": {
+    "core/Tree/Node.js": "94174004b89f19bf3c98e8eec5fabdd0bcbf1e13e0b740963fa69554ad8a12a7",
+    "input/tex/NodeUtil.js": "4a55841fd22167d25f505e8f41adea072715ef024e00ea5ac6df3f199f2cb809"
+  },
+  "cases": [
+    {
+      "name": "copyChildren-H-H-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          false,
+          false,
+          true
+        ],
+        "has": [
+          false,
+          false,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            false,
+            false,
+            true
+          ],
+          "has": [
+            false,
+            false,
+            true
+          ],
+          "values": [
+            "U",
+            "U",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-H-H-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of undefined (setting 'parent')"
+      },
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "U"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          false,
+          false,
+          true
+        ],
+        "has": [
+          false,
+          false,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-H-H-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          false,
+          false,
+          true
+        ],
+        "has": [
+          false,
+          false,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "copy6"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-H-U-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          false,
+          true,
+          true
+        ],
+        "has": [
+          false,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            false,
+            true,
+            true
+          ],
+          "has": [
+            false,
+            true,
+            true
+          ],
+          "values": [
+            "U",
+            "U",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-H-U-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of undefined (setting 'parent')"
+      },
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "U"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          false,
+          true,
+          true
+        ],
+        "has": [
+          false,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-H-U-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          false,
+          true,
+          true
+        ],
+        "has": [
+          false,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "copy6"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-H-N-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          false,
+          true,
+          true
+        ],
+        "has": [
+          false,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "N",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "N",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            false,
+            true,
+            true
+          ],
+          "has": [
+            false,
+            true,
+            true
+          ],
+          "values": [
+            "U",
+            "N",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-H-N-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of undefined (setting 'parent')"
+      },
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "U"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          false,
+          true,
+          true
+        ],
+        "has": [
+          false,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "N",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-H-N-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          false,
+          true,
+          true
+        ],
+        "has": [
+          false,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "N",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "copy6"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-H-a-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          false,
+          true,
+          true
+        ],
+        "has": [
+          false,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "a",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "a",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "new",
+        "b": "N",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            false,
+            true,
+            true
+          ],
+          "has": [
+            false,
+            true,
+            true
+          ],
+          "values": [
+            "U",
+            "a",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-H-a-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of undefined (setting 'parent')"
+      },
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "U"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          false,
+          true,
+          true
+        ],
+        "has": [
+          false,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "a",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-H-a-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          false,
+          true,
+          true
+        ],
+        "has": [
+          false,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "a",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "copy6",
+          "copy7"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5",
+        "copy7": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-H-b-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          false,
+          true,
+          true
+        ],
+        "has": [
+          false,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "b",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "b",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "new",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            false,
+            true,
+            true
+          ],
+          "has": [
+            false,
+            true,
+            true
+          ],
+          "values": [
+            "U",
+            "b",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-H-b-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of undefined (setting 'parent')"
+      },
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "U"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          false,
+          true,
+          true
+        ],
+        "has": [
+          false,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "b",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-H-b-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          false,
+          true,
+          true
+        ],
+        "has": [
+          false,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "b",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "copy6",
+          "copy7"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5",
+        "copy7": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-U-H-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            false,
+            true
+          ],
+          "has": [
+            true,
+            false,
+            true
+          ],
+          "values": [
+            "U",
+            "U",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-U-H-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of undefined (setting 'parent')"
+      },
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "U"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-U-H-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "copy6"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-U-U-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            true,
+            true
+          ],
+          "has": [
+            true,
+            true,
+            true
+          ],
+          "values": [
+            "U",
+            "U",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-U-U-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of undefined (setting 'parent')"
+      },
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "U"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-U-U-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "copy6"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-U-N-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "N",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "N",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            true,
+            true
+          ],
+          "has": [
+            true,
+            true,
+            true
+          ],
+          "values": [
+            "U",
+            "N",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-U-N-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of undefined (setting 'parent')"
+      },
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "U"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "N",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-U-N-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "N",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "copy6"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-U-a-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "a",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "a",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "new",
+        "b": "N",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            true,
+            true
+          ],
+          "has": [
+            true,
+            true,
+            true
+          ],
+          "values": [
+            "U",
+            "a",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-U-a-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of undefined (setting 'parent')"
+      },
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "U"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "a",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-U-a-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "a",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "copy6",
+          "copy7"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5",
+        "copy7": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-U-b-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "b",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "b",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "new",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            true,
+            true
+          ],
+          "has": [
+            true,
+            true,
+            true
+          ],
+          "values": [
+            "U",
+            "b",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-U-b-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of undefined (setting 'parent')"
+      },
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "U"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "b",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-U-b-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "b",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "copy6",
+          "copy7"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5",
+        "copy7": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-N-H-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          true
+        ],
+        "values": [
+          "N",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "N",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            false,
+            true
+          ],
+          "has": [
+            true,
+            false,
+            true
+          ],
+          "values": [
+            "N",
+            "U",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-N-H-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of null (setting 'parent')"
+      },
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "N"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          true
+        ],
+        "values": [
+          "N",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-N-H-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          true
+        ],
+        "values": [
+          "N",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "copy6"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-N-U-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "N",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "N",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            true,
+            true
+          ],
+          "has": [
+            true,
+            true,
+            true
+          ],
+          "values": [
+            "N",
+            "U",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-N-U-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of null (setting 'parent')"
+      },
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "N"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "N",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-N-U-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "N",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "copy6"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-N-N-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "N",
+          "N",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "N",
+          "N",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            true,
+            true
+          ],
+          "has": [
+            true,
+            true,
+            true
+          ],
+          "values": [
+            "N",
+            "N",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-N-N-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of null (setting 'parent')"
+      },
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "N"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "N",
+          "N",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-N-N-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "N",
+          "N",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "copy6"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-N-a-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "N",
+          "a",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "N",
+          "a",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "new",
+        "b": "N",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            true,
+            true
+          ],
+          "has": [
+            true,
+            true,
+            true
+          ],
+          "values": [
+            "N",
+            "a",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-N-a-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of null (setting 'parent')"
+      },
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "N"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "N",
+          "a",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-N-a-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "N",
+          "a",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "copy6",
+          "copy7"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5",
+        "copy7": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-N-b-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "N",
+          "b",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "N",
+          "b",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "new",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            true,
+            true
+          ],
+          "has": [
+            true,
+            true,
+            true
+          ],
+          "values": [
+            "N",
+            "b",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-N-b-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of null (setting 'parent')"
+      },
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "N"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "N",
+          "b",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-N-b-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "N",
+          "b",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "copy6",
+          "copy7"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5",
+        "copy7": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-a-H-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "new",
+        "b": "N",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            false,
+            true
+          ],
+          "has": [
+            true,
+            false,
+            true
+          ],
+          "values": [
+            "a",
+            "U",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-a-H-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of undefined (setting 'parent')"
+      },
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "U"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "old",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-a-H-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "copy6",
+          "copy7"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5",
+        "copy7": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-a-U-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "new",
+        "b": "N",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            true,
+            true
+          ],
+          "has": [
+            true,
+            true,
+            true
+          ],
+          "values": [
+            "a",
+            "U",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-a-U-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of undefined (setting 'parent')"
+      },
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "U"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "old",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-a-U-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "copy6",
+          "copy7"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5",
+        "copy7": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-a-N-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "N",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "N",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "new",
+        "b": "N",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            true,
+            true
+          ],
+          "has": [
+            true,
+            true,
+            true
+          ],
+          "values": [
+            "a",
+            "N",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-a-N-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of null (setting 'parent')"
+      },
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "N"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "N",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "old",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-a-N-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "N",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "copy6",
+          "copy7"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5",
+        "copy7": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-a-a-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "a",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "a",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "new",
+        "b": "N",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            true,
+            true
+          ],
+          "has": [
+            true,
+            true,
+            true
+          ],
+          "values": [
+            "a",
+            "a",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-a-a-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "a",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "a",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "old",
+        "b": "N",
+        "c": "old"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-a-a-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "a",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "copy6",
+          "copy7",
+          "copy8"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5",
+        "copy7": "copy5",
+        "copy8": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-a-b-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "new",
+        "b": "new",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            true,
+            true
+          ],
+          "has": [
+            true,
+            true,
+            true
+          ],
+          "values": [
+            "a",
+            "b",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-a-b-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "old",
+        "b": "old",
+        "c": "old"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-a-b-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "copy6",
+          "copy7",
+          "copy8"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5",
+        "copy7": "copy5",
+        "copy8": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-b-H-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          true
+        ],
+        "values": [
+          "b",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "new",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            false,
+            true
+          ],
+          "has": [
+            true,
+            false,
+            true
+          ],
+          "values": [
+            "b",
+            "U",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-b-H-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of undefined (setting 'parent')"
+      },
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "U"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          true
+        ],
+        "values": [
+          "b",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "old",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-b-H-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          true
+        ],
+        "values": [
+          "b",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "copy6",
+          "copy7"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5",
+        "copy7": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-b-U-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "new",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            true,
+            true
+          ],
+          "has": [
+            true,
+            true,
+            true
+          ],
+          "values": [
+            "b",
+            "U",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-b-U-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of undefined (setting 'parent')"
+      },
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "U"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "old",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-b-U-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "copy6",
+          "copy7"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5",
+        "copy7": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-b-N-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "N",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "N",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "new",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            true,
+            true
+          ],
+          "has": [
+            true,
+            true,
+            true
+          ],
+          "values": [
+            "b",
+            "N",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-b-N-c",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of null (setting 'parent')"
+      },
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "N"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "N",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "old",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-b-N-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "N",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "copy6",
+          "copy7"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5",
+        "copy7": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-b-a-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "a",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "a",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "new",
+        "b": "new",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            true,
+            true
+          ],
+          "has": [
+            true,
+            true,
+            true
+          ],
+          "values": [
+            "b",
+            "a",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-b-a-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "a",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "a",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "old",
+        "b": "old",
+        "c": "old"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-b-a-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "a",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "copy6",
+          "copy7",
+          "copy8"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5",
+        "copy7": "copy5",
+        "copy8": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "copyChildren-b-b-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "b",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "b",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "new",
+        "c": "new"
+      },
+      "extra": {
+        "captured": {
+          "length": 3,
+          "own": [
+            true,
+            true,
+            true
+          ],
+          "has": [
+            true,
+            true,
+            true
+          ],
+          "values": [
+            "b",
+            "b",
+            "c"
+          ]
+        },
+        "alias": true
+      }
+    },
+    {
+      "name": "setChildren-b-b-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "b",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "b",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "old",
+        "c": "old"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copy-b-b-c",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "b",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "copy6",
+          "copy7",
+          "copy8"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N",
+        "copy5": "N",
+        "copy6": "copy5",
+        "copy7": "copy5",
+        "copy8": "copy5"
+      },
+      "extra": {
+        "sameArray": false
+      }
+    },
+    {
+      "name": "setChild-0-U",
+      "error": null,
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "U"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "setChild-1-U",
+      "error": null,
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "U"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "setChild-2-U",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "U"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "setChild-5-U",
+      "error": null,
+      "old": {
+        "length": 6,
+        "own": [
+          true,
+          false,
+          false,
+          false,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          false,
+          false,
+          false,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "U",
+          "U",
+          "U",
+          "U"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "setChild-0-N",
+      "error": null,
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "N"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "setChild-1-N",
+      "error": null,
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "N"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "setChild-2-N",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "N"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "setChild-5-N",
+      "error": null,
+      "old": {
+        "length": 6,
+        "own": [
+          true,
+          false,
+          false,
+          false,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          false,
+          false,
+          false,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "U",
+          "U",
+          "U",
+          "N"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "setChild-0-a",
+      "error": null,
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "a"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "old",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "setChild-1-a",
+      "error": null,
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "a"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "old",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "setChild-2-a",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "a"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "old",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "setChild-5-a",
+      "error": null,
+      "old": {
+        "length": 6,
+        "own": [
+          true,
+          false,
+          false,
+          false,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          false,
+          false,
+          false,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "U",
+          "U",
+          "U",
+          "a"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "old",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "setChild-0-b",
+      "error": null,
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "b"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "old",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "setChild-1-b",
+      "error": null,
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "b"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "old",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "setChild-2-b",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "b"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "old",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "setChild-5-b",
+      "error": null,
+      "old": {
+        "length": 6,
+        "own": [
+          true,
+          false,
+          false,
+          false,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          false,
+          false,
+          false,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "U",
+          "U",
+          "U",
+          "b"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "old",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "appendChild-U",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of undefined (setting 'parent')"
+      },
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "U"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "replaceChild-U",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of undefined (setting 'parent')"
+      },
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "b"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "old",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "removeChild-U",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of undefined (setting 'parent')"
+      },
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "b"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "appendChild-N",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of null (setting 'parent')"
+      },
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "N"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "replaceChild-N",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of null (setting 'parent')"
+      },
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "N",
+          "b"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "old",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "removeChild-N",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot set properties of null (setting 'parent')"
+      },
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "b"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "appendChild-a",
+      "error": null,
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "b",
+          "a"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "old",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {
+        "result": true
+      }
+    },
+    {
+      "name": "replaceChild-a",
+      "error": null,
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "b"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "removeChild-a",
+      "error": null,
+      "old": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "b"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {}
+    },
+    {
+      "name": "childIndex-hole-present-U",
+      "error": null,
+      "old": {
+        "length": 5,
+        "own": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "has": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "N",
+          "a",
+          "b"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {
+        "index": 1
+      }
+    },
+    {
+      "name": "childIndex-hole-present-N",
+      "error": null,
+      "old": {
+        "length": 5,
+        "own": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "has": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "N",
+          "a",
+          "b"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {
+        "index": 2
+      }
+    },
+    {
+      "name": "childIndex-hole-present-a",
+      "error": null,
+      "old": {
+        "length": 5,
+        "own": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "has": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "N",
+          "a",
+          "b"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {
+        "index": 3
+      }
+    },
+    {
+      "name": "childIndex-hole-present-b",
+      "error": null,
+      "old": {
+        "length": 5,
+        "own": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "has": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "N",
+          "a",
+          "b"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {
+        "index": 4
+      }
+    },
+    {
+      "name": "childIndex-hole-present-c",
+      "error": null,
+      "old": {
+        "length": 5,
+        "own": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "has": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "U",
+          "U",
+          "N",
+          "a",
+          "b"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "N",
+        "c": "N"
+      },
+      "extra": {
+        "index": null
+      }
+    },
+    {
+      "name": "superscript-first-and-subscript",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "new",
+        "b": "old",
+        "c": "new"
+      },
+      "extra": {
+        "superscript": {
+          "length": 3,
+          "own": [
+            true,
+            false,
+            true
+          ],
+          "has": [
+            true,
+            false,
+            true
+          ],
+          "values": [
+            "a",
+            "U",
+            "c"
+          ]
+        },
+        "copied": {
+          "length": 3,
+          "own": [
+            true,
+            true,
+            true
+          ],
+          "has": [
+            true,
+            true,
+            true
+          ],
+          "values": [
+            "a",
+            "U",
+            "c"
+          ]
+        }
+      }
+    },
+    {
+      "name": "copyChildren-live-source-length",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "new",
+        "b": "new",
+        "c": "new"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copyChildren-captured-source-rebind",
+      "error": null,
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "c"
+        ]
+      },
+      "new": {
+        "length": 2,
+        "own": [
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "b"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "new",
+        "b": "new",
+        "c": "N"
+      },
+      "extra": {
+        "captured": {
+          "length": 2,
+          "own": [
+            true,
+            true
+          ],
+          "has": [
+            true,
+            true
+          ],
+          "values": [
+            "a",
+            "b"
+          ]
+        }
+      }
+    },
+    {
+      "name": "copyChildren-live-source-delete",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          false,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "U",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "new",
+        "b": "N",
+        "c": "new"
+      },
+      "extra": {}
+    },
+    {
+      "name": "copyChildren-inherited-numeric-slot",
+      "error": null,
+      "old": {
+        "length": 3,
+        "own": [
+          true,
+          false,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      "new": {
+        "length": 3,
+        "own": [
+          true,
+          true,
+          true
+        ],
+        "has": [
+          true,
+          true,
+          true
+        ],
+        "values": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "new",
+        "b": "new",
+        "c": "new"
+      },
+      "extra": {
+        "before": {
+          "length": 3,
+          "own": [
+            true,
+            false,
+            true
+          ],
+          "has": [
+            true,
+            true,
+            true
+          ],
+          "values": [
+            "a",
+            "b",
+            "c"
+          ]
+        }
+      }
+    },
+    {
+      "name": "setChild-captured-target-before-parent-setter",
+      "error": null,
+      "old": {
+        "length": 1,
+        "own": [
+          true
+        ],
+        "has": [
+          true
+        ],
+        "values": [
+          "c"
+        ]
+      },
+      "new": {
+        "length": 0,
+        "own": [],
+        "has": [],
+        "values": []
+      },
+      "parents": {
+        "old": "N",
+        "new": "N",
+        "a": "N",
+        "b": "old",
+        "c": "N"
+      },
+      "extra": {
+        "captured": {
+          "length": 4,
+          "own": [
+            true,
+            false,
+            false,
+            true
+          ],
+          "has": [
+            true,
+            false,
+            false,
+            true
+          ],
+          "values": [
+            "a",
+            "U",
+            "U",
+            "b"
+          ]
+        }
+      }
+    }
+  ]
+}

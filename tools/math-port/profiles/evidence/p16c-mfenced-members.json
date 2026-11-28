@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "typescript": "5.9.3",
+  "status": "locally_accepted_complete_mfenced_semantics_not_renderer",
+  "files": [
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mfenced.ts",
+      "source_sha256": "64b3f4d89d47765eb83034b480b843b2769d8de12e31d7571c50e5c4bb2bd397",
+      "members": [
+        {
+          "owner": "MmlMfenced",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 42,
+          "end_line": 47,
+          "member_sha256": "2fbe9c6e186297fd8cddefa4da16d07a846b361ce2d83571fbb12f2249009948",
+          "target": "src/math/core/mml_tree/mml_nodes/mfenced_bindings.cpp:MmlMfenced::defaults",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p16c-mfenced-acceptance.md",
+          "mapping": "Root-generated source constants/accessor and field phase."
+        },
+        {
+          "owner": "MmlMfenced",
+          "kind": "initialized_field",
+          "name": "texclass",
+          "static": false,
+          "line": 52,
+          "end_line": 52,
+          "member_sha256": "8bef32159bf2c5ec5e90f44345cc55ad388eee273c0ecbed9713c8ecb28f57ef",
+          "target": "src/math/core/mml_tree/mml_nodes/mfenced_bindings.cpp:MmlMfenced::initializeClassFields",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p16c-mfenced-acceptance.md",
+          "mapping": "Root-generated source constants/accessor and field phase."
+        },
+        {
+          "owner": "MmlMfenced",
+          "kind": "initialized_field",
+          "name": "separators",
+          "static": false,
+          "line": 57,
+          "end_line": 57,
+          "member_sha256": "8a9ebcafd3019fbb9950ab855f81b4c771dc10c779e70340ad7813301963ec2d",
+          "target": "src/math/core/mml_tree/mml_nodes/mfenced_bindings.cpp:MmlMfenced::initializeClassFields",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p16c-mfenced-acceptance.md",
+          "mapping": "Root-generated source constants/accessor and field phase."
+        },
+        {
+          "owner": "MmlMfenced",
+          "kind": "initialized_field",
+          "name": "open",
+          "static": false,
+          "line": 61,
+          "end_line": 61,
+          "member_sha256": "06897ae5b46ad8e4c013f219e2980955e4a32b753430addbc8fa3b0c26712710",
+          "target": "src/math/core/mml_tree/mml_nodes/mfenced_bindings.cpp:MmlMfenced::initializeClassFields",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p16c-mfenced-acceptance.md",
+          "mapping": "Root-generated source constants/accessor and field phase."
+        },
+        {
+          "owner": "MmlMfenced",
+          "kind": "initialized_field",
+          "name": "close",
+          "static": false,
+          "line": 65,
+          "end_line": 65,
+          "member_sha256": "6e83a691e8f35ac250609eab6c10da4fd3bda0e69a6adfbda2c3c94e4f135fcc",
+          "target": "src/math/core/mml_tree/mml_nodes/mfenced_bindings.cpp:MmlMfenced::initializeClassFields",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p16c-mfenced-acceptance.md",
+          "mapping": "Root-generated source constants/accessor and field phase."
+        },
+        {
+          "owner": "MmlMfenced",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 70,
+          "end_line": 72,
+          "member_sha256": "39490947eef4aca3341bc60b209d3f4be1d76ca03410efb07e18b3bfafb455cf",
+          "target": "src/math/core/mml_tree/mml_nodes/mfenced_bindings.cpp:MmlMfenced::kind",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p16c-mfenced-acceptance.md",
+          "mapping": "Root-generated source constants/accessor and field phase."
+        },
+        {
+          "owner": "MmlMfenced",
+          "kind": "method",
+          "name": "setTeXclass",
+          "static": false,
+          "line": 80,
+          "end_line": 103,
+          "member_sha256": "182b05b6c2a00e0c18a6d46cdaa8c325fe39287fe50d3bb9b36c9f559906b0da",
+          "target": "src/math/core/mml_tree/mml_nodes/mfenced.cpp:MmlMfenced::setTeXclass",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p16c-mfenced-acceptance.md",
+          "mapping": "Complete source method port; independently reviewed callback/receiver/evaluation order."
+        },
+        {
+          "owner": "MmlMfenced",
+          "kind": "method",
+          "name": "setChildInheritedAttributes",
+          "static": false,
+          "line": 111,
+          "end_line": 124,
+          "member_sha256": "0c121090400a003a6f115de94b9cfa01ef00bcac141633af0a206e6e1cc6c7f5",
+          "target": "src/math/core/mml_tree/mml_nodes/mfenced.cpp:MmlMfenced::setChildInheritedAttributes",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p16c-mfenced-acceptance.md",
+          "mapping": "Complete source method port; independently reviewed callback/receiver/evaluation order."
+        },
+        {
+          "owner": "MmlMfenced",
+          "kind": "method",
+          "name": "addFakeNodes",
+          "static": false,
+          "line": 129,
+          "end_line": 172,
+          "member_sha256": "3224cc918f1f17a12d409a42cf82a09455acb0f055b2754372584c6d81f3635b",
+          "target": "src/math/core/mml_tree/mml_nodes/mfenced.cpp:MmlMfenced::addFakeNodes",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p16c-mfenced-acceptance.md",
+          "mapping": "Complete source method port; independently reviewed callback/receiver/evaluation order."
+        },
+        {
+          "owner": "MmlMfenced",
+          "kind": "method",
+          "name": "fakeNode",
+          "static": false,
+          "line": 180,
+          "end_line": 190,
+          "member_sha256": "1924201e9a23d5c6c5f551d45aab41488c7cd15ec647424929d3383e935bb7d8",
+          "target": "src/math/core/mml_tree/mml_nodes/mfenced.cpp:MmlMfenced::fakeNode",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p16c-mfenced-acceptance.md",
+          "mapping": "Complete source method port; independently reviewed callback/receiver/evaluation order."
+        }
+      ]
+    }
+  ]
+}

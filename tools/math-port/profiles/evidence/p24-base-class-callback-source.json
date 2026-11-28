@@ -1,0 +1,3890 @@
+[
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "",
+      "current": "N"
+    },
+    "expected": "ok|N|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "",
+      "current": "U"
+    },
+    "expected": "ok|N|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "throw-n-P",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "throw-n-P",
+      "current": "N"
+    },
+    "expected": "ok|N|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "throw-n-P",
+      "current": "U"
+    },
+    "expected": "ok|N|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "throw-n-L",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "throw-n-L",
+      "current": "N"
+    },
+    "expected": "ok|N|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "throw-n-L",
+      "current": "U"
+    },
+    "expected": "ok|N|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "throw-n-C",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "throw-n-C",
+      "current": "N"
+    },
+    "expected": "ok|N|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "throw-n-C",
+      "current": "U"
+    },
+    "expected": "ok|N|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "throw-p-L",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "throw-p-L",
+      "current": "N"
+    },
+    "expected": "ok|N|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "throw-p-L",
+      "current": "U"
+    },
+    "expected": "ok|N|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "throw-p-P",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "throw-p-P",
+      "current": "N"
+    },
+    "expected": "ok|N|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "throw-p-P",
+      "current": "U"
+    },
+    "expected": "ok|N|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "mutate-n-P",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "mutate-n-P",
+      "current": "N"
+    },
+    "expected": "ok|N|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "mutate-n-P",
+      "current": "U"
+    },
+    "expected": "ok|N|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "attrs-null",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,0|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "attrs-null",
+      "current": "N"
+    },
+    "expected": "ok|N|N,11,7,2,5,3|1,0|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "attrs-null",
+      "current": "U"
+    },
+    "expected": "ok|N|U,11,7,2,5,3|1,0|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "attrs-rebind",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "attrs-rebind",
+      "current": "N"
+    },
+    "expected": "ok|N|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "attrs-rebind",
+      "current": "U"
+    },
+    "expected": "ok|N|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "skip-hook",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "skip-hook",
+      "current": "N"
+    },
+    "expected": "ok|N|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "skip-hook",
+      "current": "U"
+    },
+    "expected": "ok|N|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "null-hook",
+      "current": "0"
+    },
+    "expected": "ok|N|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "null-hook",
+      "current": "N"
+    },
+    "expected": "ok|N|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "null-hook",
+      "current": "U"
+    },
+    "expected": "ok|N|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "get-current-change",
+      "current": "0"
+    },
+    "expected": "ok|self|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "get-current-change",
+      "current": "N"
+    },
+    "expected": "ok|N|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "N",
+      "mode": "get-current-change",
+      "current": "U"
+    },
+    "expected": "ok|N|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "throw-n-P",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "throw-n-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "throw-n-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "throw-n-L",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "throw-n-L",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "throw-n-L",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "throw-n-C",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "throw-n-C",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "throw-n-C",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "throw-p-L",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "throw-p-L",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "throw-p-L",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "throw-p-P",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "throw-p-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "throw-p-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "mutate-n-P",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "mutate-n-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "mutate-n-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "attrs-null",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,0|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "attrs-null",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,0|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "attrs-null",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,0|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "attrs-rebind",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "attrs-rebind",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "attrs-rebind",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "skip-hook",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "skip-hook",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "skip-hook",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "null-hook",
+      "current": "0"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "null-hook",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "null-hook",
+      "current": "U"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "get-current-change",
+      "current": "0"
+    },
+    "expected": "ok|self|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "get-current-change",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "U",
+      "mode": "get-current-change",
+      "current": "U"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "",
+      "current": "0"
+    },
+    "expected": "ok|self|0,0,0,2,5,3|1,1|n.hook,n.c,n.P=0,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "",
+      "current": "N"
+    },
+    "expected": "ok|self|N,N,0,2,5,3|1,1|n.hook,n.c,n.P=N,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "",
+      "current": "U"
+    },
+    "expected": "ok|self|U,U,0,2,5,3|1,1|n.hook,n.c,n.P=U,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "throw-n-P",
+      "current": "0"
+    },
+    "expected": "WitnessError|witness|THREW|0,0,7,2,5,3|1,1|n.hook,n.c,n.P=0"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "throw-n-P",
+      "current": "N"
+    },
+    "expected": "WitnessError|witness|THREW|N,N,7,2,5,3|1,1|n.hook,n.c,n.P=N"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "throw-n-P",
+      "current": "U"
+    },
+    "expected": "WitnessError|witness|THREW|U,U,7,2,5,3|1,1|n.hook,n.c,n.P=U"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "throw-n-L",
+      "current": "0"
+    },
+    "expected": "WitnessError|witness|THREW|0,0,0,2,5,3|1,1|n.hook,n.c,n.P=0,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "throw-n-L",
+      "current": "N"
+    },
+    "expected": "WitnessError|witness|THREW|N,N,0,2,5,3|1,1|n.hook,n.c,n.P=N,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "throw-n-L",
+      "current": "U"
+    },
+    "expected": "WitnessError|witness|THREW|U,U,0,2,5,3|1,1|n.hook,n.c,n.P=U,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "throw-n-C",
+      "current": "0"
+    },
+    "expected": "ok|self|0,0,0,2,5,3|1,1|n.hook,n.c,n.P=0,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "throw-n-C",
+      "current": "N"
+    },
+    "expected": "ok|self|N,N,0,2,5,3|1,1|n.hook,n.c,n.P=N,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "throw-n-C",
+      "current": "U"
+    },
+    "expected": "ok|self|U,U,0,2,5,3|1,1|n.hook,n.c,n.P=U,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "throw-p-L",
+      "current": "0"
+    },
+    "expected": "ok|self|0,0,0,2,5,3|1,1|n.hook,n.c,n.P=0,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "throw-p-L",
+      "current": "N"
+    },
+    "expected": "ok|self|N,N,0,2,5,3|1,1|n.hook,n.c,n.P=N,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "throw-p-L",
+      "current": "U"
+    },
+    "expected": "ok|self|U,U,0,2,5,3|1,1|n.hook,n.c,n.P=U,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "throw-p-P",
+      "current": "0"
+    },
+    "expected": "ok|self|0,0,0,2,5,3|1,1|n.hook,n.c,n.P=0,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "throw-p-P",
+      "current": "N"
+    },
+    "expected": "ok|self|N,N,0,2,5,3|1,1|n.hook,n.c,n.P=N,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "throw-p-P",
+      "current": "U"
+    },
+    "expected": "ok|self|U,U,0,2,5,3|1,1|n.hook,n.c,n.P=U,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "mutate-n-P",
+      "current": "0"
+    },
+    "expected": "ok|self|0,0,0,2,5,9|1,1|n.hook,n.c,n.P=0,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "mutate-n-P",
+      "current": "N"
+    },
+    "expected": "ok|self|N,N,0,2,5,9|1,1|n.hook,n.c,n.P=N,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "mutate-n-P",
+      "current": "U"
+    },
+    "expected": "ok|self|U,U,0,2,5,9|1,1|n.hook,n.c,n.P=U,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "attrs-null",
+      "current": "0"
+    },
+    "expected": "ok|self|0,0,0,2,5,3|1,0|n.hook,n.c,n.P=0,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "attrs-null",
+      "current": "N"
+    },
+    "expected": "ok|self|N,N,0,2,5,3|1,0|n.hook,n.c,n.P=N,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "attrs-null",
+      "current": "U"
+    },
+    "expected": "ok|self|U,U,0,2,5,3|1,0|n.hook,n.c,n.P=U,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "attrs-rebind",
+      "current": "0"
+    },
+    "expected": "ok|self|0,0,0,2,5,3|1,1|n.hook,n.c,n.P=0,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "attrs-rebind",
+      "current": "N"
+    },
+    "expected": "ok|self|N,N,0,2,5,3|1,1|n.hook,n.c,n.P=N,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "attrs-rebind",
+      "current": "U"
+    },
+    "expected": "ok|self|U,U,0,2,5,3|1,1|n.hook,n.c,n.P=U,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "skip-hook",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "skip-hook",
+      "current": "N"
+    },
+    "expected": "ok|self|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "skip-hook",
+      "current": "U"
+    },
+    "expected": "ok|self|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "null-hook",
+      "current": "0"
+    },
+    "expected": "ok|self|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "null-hook",
+      "current": "N"
+    },
+    "expected": "ok|self|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "null-hook",
+      "current": "U"
+    },
+    "expected": "ok|self|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "get-current-change",
+      "current": "0"
+    },
+    "expected": "ok|self|N,0,0,2,5,3|1,1|n.hook,n.c,n.P=0,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "get-current-change",
+      "current": "N"
+    },
+    "expected": "ok|self|N,N,0,2,5,3|1,1|n.hook,n.c,n.P=N,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "self",
+      "mode": "get-current-change",
+      "current": "U"
+    },
+    "expected": "ok|self|N,U,0,2,5,3|1,1|n.hook,n.c,n.P=U,n.a,n.L=0,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "",
+      "current": "0"
+    },
+    "expected": "ok|self|0,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "",
+      "current": "N"
+    },
+    "expected": "ok|p|N,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "",
+      "current": "U"
+    },
+    "expected": "ok|p|U,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "throw-n-P",
+      "current": "0"
+    },
+    "expected": "WitnessError|witness|THREW|0,2,7,2,5,3|1,1|n.hook,p.c,n.P=2"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "throw-n-P",
+      "current": "N"
+    },
+    "expected": "WitnessError|witness|THREW|N,2,7,2,5,3|1,1|n.hook,p.c,n.P=2"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "throw-n-P",
+      "current": "U"
+    },
+    "expected": "WitnessError|witness|THREW|U,2,7,2,5,3|1,1|n.hook,p.c,n.P=2"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "throw-n-L",
+      "current": "0"
+    },
+    "expected": "WitnessError|witness|THREW|0,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "throw-n-L",
+      "current": "N"
+    },
+    "expected": "WitnessError|witness|THREW|N,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "throw-n-L",
+      "current": "U"
+    },
+    "expected": "WitnessError|witness|THREW|U,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "throw-n-C",
+      "current": "0"
+    },
+    "expected": "ok|self|0,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "throw-n-C",
+      "current": "N"
+    },
+    "expected": "ok|p|N,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "throw-n-C",
+      "current": "U"
+    },
+    "expected": "ok|p|U,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "throw-p-L",
+      "current": "0"
+    },
+    "expected": "ok|self|0,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "throw-p-L",
+      "current": "N"
+    },
+    "expected": "ok|p|N,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "throw-p-L",
+      "current": "U"
+    },
+    "expected": "ok|p|U,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "throw-p-P",
+      "current": "0"
+    },
+    "expected": "ok|self|0,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "throw-p-P",
+      "current": "N"
+    },
+    "expected": "ok|p|N,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "throw-p-P",
+      "current": "U"
+    },
+    "expected": "ok|p|U,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "mutate-n-P",
+      "current": "0"
+    },
+    "expected": "ok|self|0,2,3,2,5,9|1,1|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "mutate-n-P",
+      "current": "N"
+    },
+    "expected": "ok|p|N,2,3,2,5,9|1,1|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "mutate-n-P",
+      "current": "U"
+    },
+    "expected": "ok|p|U,2,3,2,5,9|1,1|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "attrs-null",
+      "current": "0"
+    },
+    "expected": "TypeError|Cannot read properties of null (reading 'get')|THREW|0,2,7,2,5,3|1,0|n.hook,p.c,n.P=2,p.a"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "attrs-null",
+      "current": "N"
+    },
+    "expected": "TypeError|Cannot read properties of null (reading 'get')|THREW|N,2,7,2,5,3|1,0|n.hook,p.c,n.P=2,p.a"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "attrs-null",
+      "current": "U"
+    },
+    "expected": "TypeError|Cannot read properties of null (reading 'get')|THREW|U,2,7,2,5,3|1,0|n.hook,p.c,n.P=2,p.a"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "attrs-rebind",
+      "current": "0"
+    },
+    "expected": "ok|self|0,2,3,2,5,3|1,0|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "attrs-rebind",
+      "current": "N"
+    },
+    "expected": "ok|p|N,2,3,2,5,3|1,0|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "attrs-rebind",
+      "current": "U"
+    },
+    "expected": "ok|p|U,2,3,2,5,3|1,0|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "skip-hook",
+      "current": "0"
+    },
+    "expected": "ok|self|0,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "skip-hook",
+      "current": "N"
+    },
+    "expected": "ok|p|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "skip-hook",
+      "current": "U"
+    },
+    "expected": "ok|p|U,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "null-hook",
+      "current": "0"
+    },
+    "expected": "ok|p|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "null-hook",
+      "current": "N"
+    },
+    "expected": "ok|p|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "null-hook",
+      "current": "U"
+    },
+    "expected": "ok|p|N,11,7,2,5,3|1,1|n.hook,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "get-current-change",
+      "current": "0"
+    },
+    "expected": "ok|self|N,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "get-current-change",
+      "current": "N"
+    },
+    "expected": "ok|p|N,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "set",
+      "value": "p",
+      "mode": "get-current-change",
+      "current": "U"
+    },
+    "expected": "ok|p|N,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3,n.c"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "throw-n-P",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "throw-n-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "throw-n-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "throw-n-L",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "throw-n-L",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "throw-n-L",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "throw-n-C",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "throw-n-C",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "throw-n-C",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "throw-p-L",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "throw-p-L",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "throw-p-L",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "throw-p-P",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "throw-p-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "throw-p-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "mutate-n-P",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "mutate-n-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "mutate-n-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "attrs-null",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,0|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "attrs-null",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,0|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "attrs-null",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,0|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "attrs-rebind",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "attrs-rebind",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "attrs-rebind",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "skip-hook",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "skip-hook",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "skip-hook",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "null-hook",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "null-hook",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "null-hook",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "get-current-change",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "get-current-change",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "N",
+      "mode": "get-current-change",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "throw-n-P",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "throw-n-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "throw-n-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "throw-n-L",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "throw-n-L",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "throw-n-L",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "throw-n-C",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "throw-n-C",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "throw-n-C",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "throw-p-L",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "throw-p-L",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "throw-p-L",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "throw-p-P",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "throw-p-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "throw-p-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "mutate-n-P",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "mutate-n-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "mutate-n-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "attrs-null",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,0|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "attrs-null",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,0|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "attrs-null",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,0|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "attrs-rebind",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "attrs-rebind",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "attrs-rebind",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "skip-hook",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "skip-hook",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "skip-hook",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "null-hook",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "null-hook",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "null-hook",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "get-current-change",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "get-current-change",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "U",
+      "mode": "get-current-change",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "",
+      "current": "0"
+    },
+    "expected": "ok|U|0,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=0"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "",
+      "current": "N"
+    },
+    "expected": "ok|U|N,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=N"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "",
+      "current": "U"
+    },
+    "expected": "ok|U|U,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=U"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "throw-n-P",
+      "current": "0"
+    },
+    "expected": "WitnessError|witness|THREW|0,11,7,2,5,3|1,1|n.p,n.P=11"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "throw-n-P",
+      "current": "N"
+    },
+    "expected": "WitnessError|witness|THREW|N,11,7,2,5,3|1,1|n.p,n.P=11"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "throw-n-P",
+      "current": "U"
+    },
+    "expected": "WitnessError|witness|THREW|U,11,7,2,5,3|1,1|n.p,n.P=11"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "throw-n-L",
+      "current": "0"
+    },
+    "expected": "WitnessError|witness|THREW|0,11,7,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "throw-n-L",
+      "current": "N"
+    },
+    "expected": "WitnessError|witness|THREW|N,11,7,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "throw-n-L",
+      "current": "U"
+    },
+    "expected": "WitnessError|witness|THREW|U,11,7,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "throw-n-C",
+      "current": "0"
+    },
+    "expected": "WitnessError|witness|THREW|0,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=0"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "throw-n-C",
+      "current": "N"
+    },
+    "expected": "WitnessError|witness|THREW|N,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=N"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "throw-n-C",
+      "current": "U"
+    },
+    "expected": "WitnessError|witness|THREW|U,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=U"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "throw-p-L",
+      "current": "0"
+    },
+    "expected": "ok|U|0,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=0"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "throw-p-L",
+      "current": "N"
+    },
+    "expected": "ok|U|N,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=N"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "throw-p-L",
+      "current": "U"
+    },
+    "expected": "ok|U|U,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=U"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "throw-p-P",
+      "current": "0"
+    },
+    "expected": "ok|U|0,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=0"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "throw-p-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=N"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "throw-p-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=U"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "mutate-n-P",
+      "current": "0"
+    },
+    "expected": "ok|U|0,N,N,2,5,9|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=0"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "mutate-n-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,N,N,2,5,9|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=N"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "mutate-n-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,N,N,2,5,9|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=U"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "attrs-null",
+      "current": "0"
+    },
+    "expected": "ok|U|0,N,N,2,5,3|1,0|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=0"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "attrs-null",
+      "current": "N"
+    },
+    "expected": "ok|U|N,N,N,2,5,3|1,0|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=N"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "attrs-null",
+      "current": "U"
+    },
+    "expected": "ok|U|U,N,N,2,5,3|1,0|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=U"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "attrs-rebind",
+      "current": "0"
+    },
+    "expected": "ok|U|0,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=0"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "attrs-rebind",
+      "current": "N"
+    },
+    "expected": "ok|U|N,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=N"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "attrs-rebind",
+      "current": "U"
+    },
+    "expected": "ok|U|U,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=U"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "skip-hook",
+      "current": "0"
+    },
+    "expected": "ok|U|0,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=0"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "skip-hook",
+      "current": "N"
+    },
+    "expected": "ok|U|N,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=N"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "skip-hook",
+      "current": "U"
+    },
+    "expected": "ok|U|U,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=U"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "null-hook",
+      "current": "0"
+    },
+    "expected": "ok|U|0,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=0"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "null-hook",
+      "current": "N"
+    },
+    "expected": "ok|U|N,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=N"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "null-hook",
+      "current": "U"
+    },
+    "expected": "ok|U|U,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=U"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "get-current-change",
+      "current": "0"
+    },
+    "expected": "ok|U|0,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=0"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "get-current-change",
+      "current": "N"
+    },
+    "expected": "ok|U|N,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=N"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "self",
+      "mode": "get-current-change",
+      "current": "U"
+    },
+    "expected": "ok|U|U,N,N,2,5,3|1,1|n.p,n.P=11,n.l,n.L=7,n.L=N,n.P=N,n.c,n.C=U"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "",
+      "current": "0"
+    },
+    "expected": "ok|U|2,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "",
+      "current": "N"
+    },
+    "expected": "ok|U|2,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "",
+      "current": "U"
+    },
+    "expected": "ok|U|2,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "throw-n-P",
+      "current": "0"
+    },
+    "expected": "WitnessError|witness|THREW|0,5,7,2,5,3|1,1|p.p,n.P=5"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "throw-n-P",
+      "current": "N"
+    },
+    "expected": "WitnessError|witness|THREW|N,5,7,2,5,3|1,1|p.p,n.P=5"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "throw-n-P",
+      "current": "U"
+    },
+    "expected": "WitnessError|witness|THREW|U,5,7,2,5,3|1,1|p.p,n.P=5"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "throw-n-L",
+      "current": "0"
+    },
+    "expected": "WitnessError|witness|THREW|0,5,3,2,5,3|1,1|p.p,n.P=5,p.l,n.L=3"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "throw-n-L",
+      "current": "N"
+    },
+    "expected": "WitnessError|witness|THREW|N,5,3,2,5,3|1,1|p.p,n.P=5,p.l,n.L=3"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "throw-n-L",
+      "current": "U"
+    },
+    "expected": "WitnessError|witness|THREW|U,5,3,2,5,3|1,1|p.p,n.P=5,p.l,n.L=3"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "throw-n-C",
+      "current": "0"
+    },
+    "expected": "WitnessError|witness|THREW|2,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "throw-n-C",
+      "current": "N"
+    },
+    "expected": "WitnessError|witness|THREW|2,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "throw-n-C",
+      "current": "U"
+    },
+    "expected": "WitnessError|witness|THREW|2,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "throw-p-L",
+      "current": "0"
+    },
+    "expected": "WitnessError|witness|THREW|0,5,3,2,5,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "throw-p-L",
+      "current": "N"
+    },
+    "expected": "WitnessError|witness|THREW|N,5,3,2,5,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "throw-p-L",
+      "current": "U"
+    },
+    "expected": "WitnessError|witness|THREW|U,5,3,2,5,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "throw-p-P",
+      "current": "0"
+    },
+    "expected": "WitnessError|witness|THREW|0,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "throw-p-P",
+      "current": "N"
+    },
+    "expected": "WitnessError|witness|THREW|N,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "throw-p-P",
+      "current": "U"
+    },
+    "expected": "WitnessError|witness|THREW|U,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "mutate-n-P",
+      "current": "0"
+    },
+    "expected": "ok|U|2,5,9,2,N,N|1,1|p.p,n.P=5,p.l,n.L=9,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "mutate-n-P",
+      "current": "N"
+    },
+    "expected": "ok|U|2,5,9,2,N,N|1,1|p.p,n.P=5,p.l,n.L=9,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "mutate-n-P",
+      "current": "U"
+    },
+    "expected": "ok|U|2,5,9,2,N,N|1,1|p.p,n.P=5,p.l,n.L=9,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "attrs-null",
+      "current": "0"
+    },
+    "expected": "ok|U|2,5,3,2,N,N|1,0|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "attrs-null",
+      "current": "N"
+    },
+    "expected": "ok|U|2,5,3,2,N,N|1,0|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "attrs-null",
+      "current": "U"
+    },
+    "expected": "ok|U|2,5,3,2,N,N|1,0|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "attrs-rebind",
+      "current": "0"
+    },
+    "expected": "ok|U|2,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "attrs-rebind",
+      "current": "N"
+    },
+    "expected": "ok|U|2,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "attrs-rebind",
+      "current": "U"
+    },
+    "expected": "ok|U|2,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "skip-hook",
+      "current": "0"
+    },
+    "expected": "ok|U|2,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "skip-hook",
+      "current": "N"
+    },
+    "expected": "ok|U|2,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "skip-hook",
+      "current": "U"
+    },
+    "expected": "ok|U|2,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "null-hook",
+      "current": "0"
+    },
+    "expected": "ok|U|2,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "null-hook",
+      "current": "N"
+    },
+    "expected": "ok|U|2,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "null-hook",
+      "current": "U"
+    },
+    "expected": "ok|U|2,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "get-current-change",
+      "current": "0"
+    },
+    "expected": "ok|U|2,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "get-current-change",
+      "current": "N"
+    },
+    "expected": "ok|U|2,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "update",
+      "value": "p",
+      "mode": "get-current-change",
+      "current": "U"
+    },
+    "expected": "ok|U|2,5,3,2,N,N|1,1|p.p,n.P=5,p.l,n.L=3,p.L=N,p.P=N,p.c,n.C=2"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "throw-n-P",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "throw-n-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "throw-n-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "throw-n-L",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "throw-n-L",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "throw-n-L",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "throw-n-C",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "throw-n-C",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "throw-n-C",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "throw-p-L",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "throw-p-L",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "throw-p-L",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "throw-p-P",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "throw-p-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "throw-p-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "mutate-n-P",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "mutate-n-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "mutate-n-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "attrs-null",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,0|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "attrs-null",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,0|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "attrs-null",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,0|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "attrs-rebind",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "attrs-rebind",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "attrs-rebind",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "skip-hook",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "skip-hook",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "skip-hook",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "null-hook",
+      "current": "0"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "null-hook",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "null-hook",
+      "current": "U"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "get-current-change",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "get-current-change",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "N",
+      "mode": "get-current-change",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "throw-n-P",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "throw-n-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "throw-n-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "throw-n-L",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "throw-n-L",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "throw-n-L",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "throw-n-C",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "throw-n-C",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "throw-n-C",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "throw-p-L",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "throw-p-L",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "throw-p-L",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "throw-p-P",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "throw-p-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "throw-p-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "mutate-n-P",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "mutate-n-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "mutate-n-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "attrs-null",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,0|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "attrs-null",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,0|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "attrs-null",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,0|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "attrs-rebind",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "attrs-rebind",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "attrs-rebind",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "skip-hook",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "skip-hook",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "skip-hook",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "null-hook",
+      "current": "0"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "null-hook",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "null-hook",
+      "current": "U"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "get-current-change",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "get-current-change",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "U",
+      "mode": "get-current-change",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "",
+      "current": "0"
+    },
+    "expected": "ok|U|0,0,0,2,5,3|1,1|n.hook,n.c,n.P=0,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "",
+      "current": "N"
+    },
+    "expected": "ok|U|N,N,0,2,5,3|1,1|n.hook,n.c,n.P=N,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "",
+      "current": "U"
+    },
+    "expected": "ok|U|U,U,0,2,5,3|1,1|n.hook,n.c,n.P=U,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "throw-n-P",
+      "current": "0"
+    },
+    "expected": "WitnessError|witness|THREW|0,0,7,2,5,3|1,1|n.hook,n.c,n.P=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "throw-n-P",
+      "current": "N"
+    },
+    "expected": "WitnessError|witness|THREW|N,N,7,2,5,3|1,1|n.hook,n.c,n.P=N"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "throw-n-P",
+      "current": "U"
+    },
+    "expected": "WitnessError|witness|THREW|U,U,7,2,5,3|1,1|n.hook,n.c,n.P=U"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "throw-n-L",
+      "current": "0"
+    },
+    "expected": "WitnessError|witness|THREW|0,0,0,2,5,3|1,1|n.hook,n.c,n.P=0,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "throw-n-L",
+      "current": "N"
+    },
+    "expected": "WitnessError|witness|THREW|N,N,0,2,5,3|1,1|n.hook,n.c,n.P=N,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "throw-n-L",
+      "current": "U"
+    },
+    "expected": "WitnessError|witness|THREW|U,U,0,2,5,3|1,1|n.hook,n.c,n.P=U,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "throw-n-C",
+      "current": "0"
+    },
+    "expected": "ok|U|0,0,0,2,5,3|1,1|n.hook,n.c,n.P=0,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "throw-n-C",
+      "current": "N"
+    },
+    "expected": "ok|U|N,N,0,2,5,3|1,1|n.hook,n.c,n.P=N,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "throw-n-C",
+      "current": "U"
+    },
+    "expected": "ok|U|U,U,0,2,5,3|1,1|n.hook,n.c,n.P=U,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "throw-p-L",
+      "current": "0"
+    },
+    "expected": "ok|U|0,0,0,2,5,3|1,1|n.hook,n.c,n.P=0,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "throw-p-L",
+      "current": "N"
+    },
+    "expected": "ok|U|N,N,0,2,5,3|1,1|n.hook,n.c,n.P=N,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "throw-p-L",
+      "current": "U"
+    },
+    "expected": "ok|U|U,U,0,2,5,3|1,1|n.hook,n.c,n.P=U,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "throw-p-P",
+      "current": "0"
+    },
+    "expected": "ok|U|0,0,0,2,5,3|1,1|n.hook,n.c,n.P=0,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "throw-p-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,N,0,2,5,3|1,1|n.hook,n.c,n.P=N,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "throw-p-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,U,0,2,5,3|1,1|n.hook,n.c,n.P=U,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "mutate-n-P",
+      "current": "0"
+    },
+    "expected": "ok|U|0,0,0,2,5,9|1,1|n.hook,n.c,n.P=0,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "mutate-n-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,N,0,2,5,9|1,1|n.hook,n.c,n.P=N,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "mutate-n-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,U,0,2,5,9|1,1|n.hook,n.c,n.P=U,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "attrs-null",
+      "current": "0"
+    },
+    "expected": "ok|U|0,0,0,2,5,3|1,0|n.hook,n.c,n.P=0,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "attrs-null",
+      "current": "N"
+    },
+    "expected": "ok|U|N,N,0,2,5,3|1,0|n.hook,n.c,n.P=N,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "attrs-null",
+      "current": "U"
+    },
+    "expected": "ok|U|U,U,0,2,5,3|1,0|n.hook,n.c,n.P=U,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "attrs-rebind",
+      "current": "0"
+    },
+    "expected": "ok|U|0,0,0,2,5,3|1,1|n.hook,n.c,n.P=0,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "attrs-rebind",
+      "current": "N"
+    },
+    "expected": "ok|U|N,N,0,2,5,3|1,1|n.hook,n.c,n.P=N,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "attrs-rebind",
+      "current": "U"
+    },
+    "expected": "ok|U|U,U,0,2,5,3|1,1|n.hook,n.c,n.P=U,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "skip-hook",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "skip-hook",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "skip-hook",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "null-hook",
+      "current": "0"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "null-hook",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "null-hook",
+      "current": "U"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "get-current-change",
+      "current": "0"
+    },
+    "expected": "ok|U|N,0,0,2,5,3|1,1|n.hook,n.c,n.P=0,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "get-current-change",
+      "current": "N"
+    },
+    "expected": "ok|U|N,N,0,2,5,3|1,1|n.hook,n.c,n.P=N,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "self",
+      "mode": "get-current-change",
+      "current": "U"
+    },
+    "expected": "ok|U|N,U,0,2,5,3|1,1|n.hook,n.c,n.P=U,n.a,n.L=0"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "",
+      "current": "0"
+    },
+    "expected": "ok|U|0,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "",
+      "current": "N"
+    },
+    "expected": "ok|U|N,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "",
+      "current": "U"
+    },
+    "expected": "ok|U|U,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "throw-n-P",
+      "current": "0"
+    },
+    "expected": "WitnessError|witness|THREW|0,2,7,2,5,3|1,1|n.hook,p.c,n.P=2"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "throw-n-P",
+      "current": "N"
+    },
+    "expected": "WitnessError|witness|THREW|N,2,7,2,5,3|1,1|n.hook,p.c,n.P=2"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "throw-n-P",
+      "current": "U"
+    },
+    "expected": "WitnessError|witness|THREW|U,2,7,2,5,3|1,1|n.hook,p.c,n.P=2"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "throw-n-L",
+      "current": "0"
+    },
+    "expected": "WitnessError|witness|THREW|0,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "throw-n-L",
+      "current": "N"
+    },
+    "expected": "WitnessError|witness|THREW|N,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "throw-n-L",
+      "current": "U"
+    },
+    "expected": "WitnessError|witness|THREW|U,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "throw-n-C",
+      "current": "0"
+    },
+    "expected": "ok|U|0,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "throw-n-C",
+      "current": "N"
+    },
+    "expected": "ok|U|N,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "throw-n-C",
+      "current": "U"
+    },
+    "expected": "ok|U|U,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "throw-p-L",
+      "current": "0"
+    },
+    "expected": "ok|U|0,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "throw-p-L",
+      "current": "N"
+    },
+    "expected": "ok|U|N,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "throw-p-L",
+      "current": "U"
+    },
+    "expected": "ok|U|U,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "throw-p-P",
+      "current": "0"
+    },
+    "expected": "ok|U|0,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "throw-p-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "throw-p-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "mutate-n-P",
+      "current": "0"
+    },
+    "expected": "ok|U|0,2,3,2,5,9|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "mutate-n-P",
+      "current": "N"
+    },
+    "expected": "ok|U|N,2,3,2,5,9|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "mutate-n-P",
+      "current": "U"
+    },
+    "expected": "ok|U|U,2,3,2,5,9|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "attrs-null",
+      "current": "0"
+    },
+    "expected": "TypeError|Cannot read properties of null (reading 'get')|THREW|0,2,7,2,5,3|1,0|n.hook,p.c,n.P=2,p.a"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "attrs-null",
+      "current": "N"
+    },
+    "expected": "TypeError|Cannot read properties of null (reading 'get')|THREW|N,2,7,2,5,3|1,0|n.hook,p.c,n.P=2,p.a"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "attrs-null",
+      "current": "U"
+    },
+    "expected": "TypeError|Cannot read properties of null (reading 'get')|THREW|U,2,7,2,5,3|1,0|n.hook,p.c,n.P=2,p.a"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "attrs-rebind",
+      "current": "0"
+    },
+    "expected": "ok|U|0,2,3,2,5,3|1,0|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "attrs-rebind",
+      "current": "N"
+    },
+    "expected": "ok|U|N,2,3,2,5,3|1,0|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "attrs-rebind",
+      "current": "U"
+    },
+    "expected": "ok|U|U,2,3,2,5,3|1,0|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "skip-hook",
+      "current": "0"
+    },
+    "expected": "ok|U|0,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "skip-hook",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "skip-hook",
+      "current": "U"
+    },
+    "expected": "ok|U|U,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "null-hook",
+      "current": "0"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "null-hook",
+      "current": "N"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "null-hook",
+      "current": "U"
+    },
+    "expected": "ok|U|N,11,7,2,5,3|1,1|n.hook"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "get-current-change",
+      "current": "0"
+    },
+    "expected": "ok|U|0,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "get-current-change",
+      "current": "N"
+    },
+    "expected": "ok|U|N,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  },
+  {
+    "input": {
+      "op": "previous",
+      "value": "p",
+      "mode": "get-current-change",
+      "current": "U"
+    },
+    "expected": "ok|U|U,2,3,2,5,3|1,1|n.hook,p.c,n.P=2,p.a,n.L=3"
+  }
+]

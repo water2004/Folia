@@ -1,0 +1,8 @@
+{
+  "stage": "actual Node supplemental bare-operand algebra and later union ranges; coverage extension after singleton/range mutants survived",
+  "node": "v24.13.0",
+  "unicode": "16.0",
+  "patterns": 1516,
+  "cases": 72768,
+  "source_case_sha256": "13f819f34f2c4a9c828fc166beb30b9a3a2727b4b763c09c20c20f66a98f5736"
+}

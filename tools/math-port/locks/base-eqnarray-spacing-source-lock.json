@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "source": "MathJax 4.1.3 fb987178c2d279a99b0db5ea02e751691703955e",
+  "sourceOutputSha256": "f34f5a493b7ddd9f99e28f0d40c42325fa8b32989080a3b29396b311ea4a287a",
+  "files": [
+    {
+      "ts": "ts/input/tex/base/BaseMethods.ts",
+      "tsSha256": "7336240c8f9c5037f9fdcd5a84ea079312854f1ef3f406aeb5a8b6a8ff765cda",
+      "cjs": "cjs/input/tex/base/BaseMethods.js",
+      "cjsSha256": "b8d5c74e01f85ae391ec8d16ffcd216a4ca4267bd8ffa091c5bfe1462ad7b491"
+    }
+  ]
+}

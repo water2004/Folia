@@ -19,6 +19,14 @@ tools/math-port/common-scene-source.cjs text eol=lf
 tools/math-port/table-mathml-cases.json text eol=lf
 tools/math-port/common-semantics-fenced-mathml-cases.json text eol=lf
 
+# Verification inputs keep the same bytes on every platform.
+tools/math-port/locks/** text eol=lf
+tools/math-port/profiles/** text eol=lf
+tools/math-port/profiles/evidence/input-host-source.json -text !eol
+tools/math-port/profiles/evidence/p12b-mo-pattern-complete-source.json -text !eol
+tools/math-port/profiles/evidence/p23h2-return-prototype-source.json -text !eol
+tools/mermaid-cpp/source-lock.json text eol=lf
+
 # Preserve frozen Source observation profile bytes across Windows checkouts.
 docs/math-port/evidence/leaf-source-profile.json text eol=lf
 docs/math-port/evidence/mml-registry-source.json text eol=lf

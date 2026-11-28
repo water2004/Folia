@@ -1,0 +1,13 @@
+{
+  "stage": "actual Node Unicode escape grammar; no candidate/host accepted",
+  "node": "v24.13.0",
+  "unicode": "16.0",
+  "icu": "77.1",
+  "cases": 31488,
+  "by_group": {
+    "braced-mode-and-hex-digit": 27648,
+    "hex4-lexical-and-surrogate-trial": 3456,
+    "named-identifier-independent-grammar": 384
+  },
+  "source_case_sha256": "cf090d64ed483a82a37740784a3c97b388c1a7c75335d9a6da8e82deced67bc6"
+}

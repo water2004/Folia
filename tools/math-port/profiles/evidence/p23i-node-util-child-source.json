@@ -1,0 +1,1475 @@
+{
+  "schema": 1,
+  "scope": "actual original NodeUtil getChildAt/setChild/copyChildren; typed indexed children, captured/live arrays, receiver and parent hooks",
+  "loadedPins": {
+    "core/MmlTree/Attributes.js": "efa567c0c573f13f136f1d37b0af6bdc1a675f70cc13a9ae1cd7334321f30749",
+    "core/MmlTree/MML.js": "380332b7f0cc13104130affb65532ebca2ac214ccd897b93edda551cea443684",
+    "core/MmlTree/MmlFactory.js": "d0c4e25237d04a9d21d12ee44776e46d30777e7f284db6f4f3ed1cc625b752d3",
+    "core/MmlTree/MmlNode.js": "86c5eb572dcf2652c3c52a60b66c720d231e17f600cc9aeef3ace4aeafc81d45",
+    "core/MmlTree/MmlNodes/HtmlNode.js": "cd10798f07fbdafb6f2a375b85904a5fdcf0c546cc95ddc955cae5e411ce3eef",
+    "core/MmlTree/MmlNodes/TeXAtom.js": "bf72fd0716f88d144a8ba0befef383de4a0a4fd4d690d37fec9d55b2f15a02e4",
+    "core/MmlTree/MmlNodes/maction.js": "eddcdd2111b4b7cf5ad72937b0a4ff7beb555b98308c6771a013a18121af8ce7",
+    "core/MmlTree/MmlNodes/maligngroup.js": "ec7d583f79bd49dfdd5b69630cf7f52d56e6e34f9f9c7e0963b0e1933cc4176c",
+    "core/MmlTree/MmlNodes/malignmark.js": "9dba71cd21e25a0c43e58e13c02f4ec9629b1b7d4c87991cf62e12415e6a1ad7",
+    "core/MmlTree/MmlNodes/math.js": "44debed089b254bc09e73e22d4c30336db13ff8dad0af140e915a320bdda8e71",
+    "core/MmlTree/MmlNodes/mathchoice.js": "659a1e37a309512beaa1636725155aced82dc8195b81c2ebd5a44d5f7cb3a8b7",
+    "core/MmlTree/MmlNodes/menclose.js": "2cea1d1819a2eb545727f37940b341ac0ce802fad4d7daa11f813ce7381f23de",
+    "core/MmlTree/MmlNodes/merror.js": "cd9b48970d5d0878d3806e8ff4e4f091d2db38f5021a63aa043acfc50d952d6a",
+    "core/MmlTree/MmlNodes/mfenced.js": "33dee590a2a6c2f104ccfb175e79c5179f422e150625f4b89bf2fa42ec8f69cf",
+    "core/MmlTree/MmlNodes/mfrac.js": "b2e053ce68304c03ea740fb22baa5b01a28d540002faeddc30ad5720a4172770",
+    "core/MmlTree/MmlNodes/mglyph.js": "1f19fe167f2b606a8bd84b0a82e81313a7a9d0cfef90fef3bfe954ad5cbabe09",
+    "core/MmlTree/MmlNodes/mi.js": "47058d7ddb5b24ed530936baffe834a06c0557ec7dbdc03312d3ffa0aca17241",
+    "core/MmlTree/MmlNodes/mmultiscripts.js": "db40a3543cffbd706c0070ae0877285ce22b07db3a7e530e56f42eaa7b2d922e",
+    "core/MmlTree/MmlNodes/mn.js": "8da61e1b68bfb4abbff2103c04b6fcf6c03b35c6934a3abba55ba1144b4ac142",
+    "core/MmlTree/MmlNodes/mo.js": "7c68f0570d82f585eb6ca7e8bbca119b96a02666e0d4b268a413bf4035ff0b2c",
+    "core/MmlTree/MmlNodes/mpadded.js": "675aae98959b257582171d58584f220da4543deb8e0e3d3b8b07a48ab6fc23a2",
+    "core/MmlTree/MmlNodes/mphantom.js": "dae156634a5a2fd1076af9abd551df195463a2b6db029635b13e9809ddb566f3",
+    "core/MmlTree/MmlNodes/mroot.js": "f73d25a1ca793ab21cc78ae73ce6062c925f49c8a51c4484211b8098a1a6bcd8",
+    "core/MmlTree/MmlNodes/mrow.js": "5846d2b0334223b759a4059dfb0ac5e31aef1f5a96c041da45b3de94c0689896",
+    "core/MmlTree/MmlNodes/ms.js": "db185825f9f19d22b7ad23e9c75c9e869b3dfc423eb61962f129b8a18781c8eb",
+    "core/MmlTree/MmlNodes/mspace.js": "61dc8d544aa9550e3e132dfc1c426c5204fab292ddf9f46171e9baf6f4f35383",
+    "core/MmlTree/MmlNodes/msqrt.js": "5dfe5af23967d82ccc74cf3f187c49d847da21e13ea721a539cb93afcde0ef35",
+    "core/MmlTree/MmlNodes/mstyle.js": "49e13c923b88f6b41806c3f030a30edbfe8527beee6350e0e7067fc87707c488",
+    "core/MmlTree/MmlNodes/msubsup.js": "7971b391a8d7c92e0d6115b17c4c394dafc828942fc00591ba6064b871610c18",
+    "core/MmlTree/MmlNodes/mtable.js": "89f9cf650c72e146c544efdb640108f6f0b496d74f6bd7258a5ecaf28a284516",
+    "core/MmlTree/MmlNodes/mtd.js": "0210a0d98d9098fcdab7362302841a77625341bf1459582e72f57f39314d9699",
+    "core/MmlTree/MmlNodes/mtext.js": "1d3f64150977d8a1cfcc95a9974c9ad4c01f7894a0d05b7f68f5bfae5026b1b5",
+    "core/MmlTree/MmlNodes/mtr.js": "d6820d1a7f2ad6cb8ea714c0e73d25993987174d8cf51820fac742204df2bf47",
+    "core/MmlTree/MmlNodes/munderover.js": "104a6ed2f1a8967726c4a0da6ffd0ffb917c23fe0b3847138161c975fa0785b9",
+    "core/MmlTree/MmlNodes/semantics.js": "61d0e500cbb96d395ef0ac91ae1fb3369a7cebba25204cef1c20d939eaf71f9b",
+    "core/MmlTree/OperatorDictionary.js": "db65e13a8f3c6290e711303d46cfb6f2fe8ec24e12c499bdf9b1bf4f42027ff8",
+    "core/Tree/Factory.js": "739db2e5760c29d7bb4f1bc7baa08ff8d727f4d117522aff5ede017f812cffef",
+    "core/Tree/Node.js": "94174004b89f19bf3c98e8eec5fabdd0bcbf1e13e0b740963fa69554ad8a12a7",
+    "core/Tree/NodeFactory.js": "148c9a3a2e469fc464036b88deb7067cd779989a43356812d31365a84ec75c54",
+    "input/tex/NodeUtil.js": "4a55841fd22167d25f505e8f41adea072715ef024e00ea5ac6df3f199f2cb809",
+    "util/string.js": "e1f09bca257dd268b9483b7310e4c77039dd022f01c5e9f5a62f47a981921e9c"
+  },
+  "cases": [
+    {
+      "input": {
+        "op": "get",
+        "shape": "",
+        "position": 0
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:0:::|0:::|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "",
+        "position": 0,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:1:1:1:U|0:::|1:1:1:U|11|set:0:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "",
+        "position": 0,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:1:1:1:N|0:::|1:1:1:N|11|set:0:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "",
+        "position": 0,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:1:1:1:a|0:::|1:1:1:a|11|set:0:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "",
+        "position": 0,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:0:::;target:N:1:1:1:b|0:::|1:1:1:b|11|set:0:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "",
+        "position": 1
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:0:::|0:::|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "",
+        "position": 1,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:2:01:01:U,U|0:::|2:01:01:U,U|11|set:1:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "",
+        "position": 1,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:2:01:01:U,N|0:::|2:01:01:U,N|11|set:1:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "",
+        "position": 1,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:2:01:01:U,a|0:::|2:01:01:U,a|11|set:1:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "",
+        "position": 1,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:0:::;target:N:2:01:01:U,b|0:::|2:01:01:U,b|11|set:1:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "",
+        "position": 3
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:0:::|0:::|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "",
+        "position": 3,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:4:0001:0001:U,U,U,U|0:::|4:0001:0001:U,U,U,U|11|set:3:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "",
+        "position": 3,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:4:0001:0001:U,U,U,N|0:::|4:0001:0001:U,U,U,N|11|set:3:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "",
+        "position": 3,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:4:0001:0001:U,U,U,a|0:::|4:0001:0001:U,U,U,a|11|set:3:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "",
+        "position": 3,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:0:::;target:N:4:0001:0001:U,U,U,b|0:::|4:0001:0001:U,U,U,b|11|set:3:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "H",
+        "position": 0
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:0:0:U;target:N:0:::|1:0:0:U|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "H",
+        "position": 0,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:0:0:U;target:N:1:1:1:U|1:0:0:U|1:1:1:U|11|set:0:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "H",
+        "position": 0,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:0:0:U;target:N:1:1:1:N|1:0:0:U|1:1:1:N|11|set:0:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "H",
+        "position": 0,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:1:0:0:U;target:N:1:1:1:a|1:0:0:U|1:1:1:a|11|set:0:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "H",
+        "position": 0,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:1:0:0:U;target:N:1:1:1:b|1:0:0:U|1:1:1:b|11|set:0:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "H",
+        "position": 1
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:0:0:U;target:N:0:::|1:0:0:U|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "H",
+        "position": 1,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:0:0:U;target:N:2:01:01:U,U|1:0:0:U|2:01:01:U,U|11|set:1:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "H",
+        "position": 1,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:0:0:U;target:N:2:01:01:U,N|1:0:0:U|2:01:01:U,N|11|set:1:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "H",
+        "position": 1,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:1:0:0:U;target:N:2:01:01:U,a|1:0:0:U|2:01:01:U,a|11|set:1:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "H",
+        "position": 1,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:1:0:0:U;target:N:2:01:01:U,b|1:0:0:U|2:01:01:U,b|11|set:1:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "H",
+        "position": 3
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:0:0:U;target:N:0:::|1:0:0:U|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "H",
+        "position": 3,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:0:0:U;target:N:4:0001:0001:U,U,U,U|1:0:0:U|4:0001:0001:U,U,U,U|11|set:3:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "H",
+        "position": 3,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:0:0:U;target:N:4:0001:0001:U,U,U,N|1:0:0:U|4:0001:0001:U,U,U,N|11|set:3:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "H",
+        "position": 3,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:1:0:0:U;target:N:4:0001:0001:U,U,U,a|1:0:0:U|4:0001:0001:U,U,U,a|11|set:3:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "H",
+        "position": 3,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:1:0:0:U;target:N:4:0001:0001:U,U,U,b|1:0:0:U|4:0001:0001:U,U,U,b|11|set:3:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "U",
+        "position": 0
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:U;target:N:0:::|1:1:1:U|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "U",
+        "position": 0,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:U;target:N:1:1:1:U|1:1:1:U|1:1:1:U|11|set:0:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "U",
+        "position": 0,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:U;target:N:1:1:1:N|1:1:1:U|1:1:1:N|11|set:0:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "U",
+        "position": 0,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:U;target:N:1:1:1:a|1:1:1:U|1:1:1:a|11|set:0:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "U",
+        "position": 0,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:1:1:1:U;target:N:1:1:1:b|1:1:1:U|1:1:1:b|11|set:0:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "U",
+        "position": 1
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:U;target:N:0:::|1:1:1:U|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "U",
+        "position": 1,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:U;target:N:2:01:01:U,U|1:1:1:U|2:01:01:U,U|11|set:1:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "U",
+        "position": 1,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:U;target:N:2:01:01:U,N|1:1:1:U|2:01:01:U,N|11|set:1:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "U",
+        "position": 1,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:U;target:N:2:01:01:U,a|1:1:1:U|2:01:01:U,a|11|set:1:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "U",
+        "position": 1,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:1:1:1:U;target:N:2:01:01:U,b|1:1:1:U|2:01:01:U,b|11|set:1:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "U",
+        "position": 3
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:U;target:N:0:::|1:1:1:U|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "U",
+        "position": 3,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:U;target:N:4:0001:0001:U,U,U,U|1:1:1:U|4:0001:0001:U,U,U,U|11|set:3:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "U",
+        "position": 3,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:U;target:N:4:0001:0001:U,U,U,N|1:1:1:U|4:0001:0001:U,U,U,N|11|set:3:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "U",
+        "position": 3,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:U;target:N:4:0001:0001:U,U,U,a|1:1:1:U|4:0001:0001:U,U,U,a|11|set:3:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "U",
+        "position": 3,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:1:1:1:U;target:N:4:0001:0001:U,U,U,b|1:1:1:U|4:0001:0001:U,U,U,b|11|set:3:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "N",
+        "position": 0
+      },
+      "expected": "ok|N|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:N;target:N:0:::|1:1:1:N|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "N",
+        "position": 0,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:N;target:N:1:1:1:U|1:1:1:N|1:1:1:U|11|set:0:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "N",
+        "position": 0,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:N;target:N:1:1:1:N|1:1:1:N|1:1:1:N|11|set:0:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "N",
+        "position": 0,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:N;target:N:1:1:1:a|1:1:1:N|1:1:1:a|11|set:0:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "N",
+        "position": 0,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:1:1:1:N;target:N:1:1:1:b|1:1:1:N|1:1:1:b|11|set:0:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "N",
+        "position": 1
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:N;target:N:0:::|1:1:1:N|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "N",
+        "position": 1,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:N;target:N:2:01:01:U,U|1:1:1:N|2:01:01:U,U|11|set:1:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "N",
+        "position": 1,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:N;target:N:2:01:01:U,N|1:1:1:N|2:01:01:U,N|11|set:1:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "N",
+        "position": 1,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:N;target:N:2:01:01:U,a|1:1:1:N|2:01:01:U,a|11|set:1:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "N",
+        "position": 1,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:1:1:1:N;target:N:2:01:01:U,b|1:1:1:N|2:01:01:U,b|11|set:1:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "N",
+        "position": 3
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:N;target:N:0:::|1:1:1:N|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "N",
+        "position": 3,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:N;target:N:4:0001:0001:U,U,U,U|1:1:1:N|4:0001:0001:U,U,U,U|11|set:3:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "N",
+        "position": 3,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:N;target:N:4:0001:0001:U,U,U,N|1:1:1:N|4:0001:0001:U,U,U,N|11|set:3:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "N",
+        "position": 3,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:N;target:N:4:0001:0001:U,U,U,a|1:1:1:N|4:0001:0001:U,U,U,a|11|set:3:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "N",
+        "position": 3,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:1:1:1:N;target:N:4:0001:0001:U,U,U,b|1:1:1:N|4:0001:0001:U,U,U,b|11|set:3:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "a",
+        "position": 0
+      },
+      "expected": "ok|a|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:0:::|1:1:1:a|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "a",
+        "position": 0,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:1:1:1:U|1:1:1:a|1:1:1:U|11|set:0:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "a",
+        "position": 0,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:1:1:1:N|1:1:1:a|1:1:1:N|11|set:0:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "a",
+        "position": 0,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:1:1:1:a|1:1:1:a|1:1:1:a|11|set:0:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "a",
+        "position": 0,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:1:1:1:a;target:N:1:1:1:b|1:1:1:a|1:1:1:b|11|set:0:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "a",
+        "position": 1
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:0:::|1:1:1:a|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "a",
+        "position": 1,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:2:01:01:U,U|1:1:1:a|2:01:01:U,U|11|set:1:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "a",
+        "position": 1,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:2:01:01:U,N|1:1:1:a|2:01:01:U,N|11|set:1:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "a",
+        "position": 1,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:2:01:01:U,a|1:1:1:a|2:01:01:U,a|11|set:1:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "a",
+        "position": 1,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:1:1:1:a;target:N:2:01:01:U,b|1:1:1:a|2:01:01:U,b|11|set:1:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "a",
+        "position": 3
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:0:::|1:1:1:a|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "a",
+        "position": 3,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:4:0001:0001:U,U,U,U|1:1:1:a|4:0001:0001:U,U,U,U|11|set:3:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "a",
+        "position": 3,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:4:0001:0001:U,U,U,N|1:1:1:a|4:0001:0001:U,U,U,N|11|set:3:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "a",
+        "position": 3,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:4:0001:0001:U,U,U,a|1:1:1:a|4:0001:0001:U,U,U,a|11|set:3:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "a",
+        "position": 3,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:1:1:1:a;target:N:4:0001:0001:U,U,U,b|1:1:1:a|4:0001:0001:U,U,U,b|11|set:3:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "HNb",
+        "position": 0
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:011:011:U,N,b;target:N:0:::|3:011:011:U,N,b|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "HNb",
+        "position": 0,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:011:011:U,N,b;target:N:1:1:1:U|3:011:011:U,N,b|1:1:1:U|11|set:0:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "HNb",
+        "position": 0,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:011:011:U,N,b;target:N:1:1:1:N|3:011:011:U,N,b|1:1:1:N|11|set:0:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "HNb",
+        "position": 0,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:3:011:011:U,N,b;target:N:1:1:1:a|3:011:011:U,N,b|1:1:1:a|11|set:0:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "HNb",
+        "position": 0,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:3:011:011:U,N,b;target:N:1:1:1:b|3:011:011:U,N,b|1:1:1:b|11|set:0:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "HNb",
+        "position": 1
+      },
+      "expected": "ok|N|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:011:011:U,N,b;target:N:0:::|3:011:011:U,N,b|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "HNb",
+        "position": 1,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:011:011:U,N,b;target:N:2:01:01:U,U|3:011:011:U,N,b|2:01:01:U,U|11|set:1:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "HNb",
+        "position": 1,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:011:011:U,N,b;target:N:2:01:01:U,N|3:011:011:U,N,b|2:01:01:U,N|11|set:1:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "HNb",
+        "position": 1,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:3:011:011:U,N,b;target:N:2:01:01:U,a|3:011:011:U,N,b|2:01:01:U,a|11|set:1:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "HNb",
+        "position": 1,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:3:011:011:U,N,b;target:N:2:01:01:U,b|3:011:011:U,N,b|2:01:01:U,b|11|set:1:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "HNb",
+        "position": 3
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:011:011:U,N,b;target:N:0:::|3:011:011:U,N,b|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "HNb",
+        "position": 3,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:011:011:U,N,b;target:N:4:0001:0001:U,U,U,U|3:011:011:U,N,b|4:0001:0001:U,U,U,U|11|set:3:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "HNb",
+        "position": 3,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:011:011:U,N,b;target:N:4:0001:0001:U,U,U,N|3:011:011:U,N,b|4:0001:0001:U,U,U,N|11|set:3:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "HNb",
+        "position": 3,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:3:011:011:U,N,b;target:N:4:0001:0001:U,U,U,a|3:011:011:U,N,b|4:0001:0001:U,U,U,a|11|set:3:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "HNb",
+        "position": 3,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:3:011:011:U,N,b;target:N:4:0001:0001:U,U,U,b|3:011:011:U,N,b|4:0001:0001:U,U,U,b|11|set:3:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "aUb",
+        "position": 0
+      },
+      "expected": "ok|a|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:111:111:a,U,b;target:N:0:::|3:111:111:a,U,b|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "aUb",
+        "position": 0,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:111:111:a,U,b;target:N:1:1:1:U|3:111:111:a,U,b|1:1:1:U|11|set:0:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "aUb",
+        "position": 0,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:111:111:a,U,b;target:N:1:1:1:N|3:111:111:a,U,b|1:1:1:N|11|set:0:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "aUb",
+        "position": 0,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:3:111:111:a,U,b;target:N:1:1:1:a|3:111:111:a,U,b|1:1:1:a|11|set:0:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "aUb",
+        "position": 0,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:3:111:111:a,U,b;target:N:1:1:1:b|3:111:111:a,U,b|1:1:1:b|11|set:0:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "aUb",
+        "position": 1
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:111:111:a,U,b;target:N:0:::|3:111:111:a,U,b|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "aUb",
+        "position": 1,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:111:111:a,U,b;target:N:2:01:01:U,U|3:111:111:a,U,b|2:01:01:U,U|11|set:1:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "aUb",
+        "position": 1,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:111:111:a,U,b;target:N:2:01:01:U,N|3:111:111:a,U,b|2:01:01:U,N|11|set:1:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "aUb",
+        "position": 1,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:3:111:111:a,U,b;target:N:2:01:01:U,a|3:111:111:a,U,b|2:01:01:U,a|11|set:1:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "aUb",
+        "position": 1,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:3:111:111:a,U,b;target:N:2:01:01:U,b|3:111:111:a,U,b|2:01:01:U,b|11|set:1:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "aUb",
+        "position": 3
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:111:111:a,U,b;target:N:0:::|3:111:111:a,U,b|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "aUb",
+        "position": 3,
+        "child": "U"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:111:111:a,U,b;target:N:4:0001:0001:U,U,U,U|3:111:111:a,U,b|4:0001:0001:U,U,U,U|11|set:3:U"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "aUb",
+        "position": 3,
+        "child": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:111:111:a,U,b;target:N:4:0001:0001:U,U,U,N|3:111:111:a,U,b|4:0001:0001:U,U,U,N|11|set:3:N"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "aUb",
+        "position": 3,
+        "child": "a"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:3:111:111:a,U,b;target:N:4:0001:0001:U,U,U,a|3:111:111:a,U,b|4:0001:0001:U,U,U,a|11|set:3:a"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "aUb",
+        "position": 3,
+        "child": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:3:111:111:a,U,b;target:N:4:0001:0001:U,U,U,b|3:111:111:a,U,b|4:0001:0001:U,U,U,b|11|set:3:b"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "",
+        "target": ""
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:0:::|0:::|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "",
+        "target": "HN"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:2:01:01:U,N|0:::|2:01:01:U,N|11|"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "",
+        "target": "aUb"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:3:111:111:a,U,b|0:::|3:111:111:a,U,b|11|"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "H",
+        "target": ""
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:0:0:U;target:N:1:1:1:U|1:0:0:U|1:1:1:U|11|set:0:U"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "H",
+        "target": "HN"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:0:0:U;target:N:2:11:11:U,N|1:0:0:U|2:11:11:U,N|11|set:0:U"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "H",
+        "target": "aUb"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:0:0:U;target:N:3:111:111:U,U,b|1:0:0:U|3:111:111:U,U,b|11|set:0:U"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "U",
+        "target": ""
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:U;target:N:1:1:1:U|1:1:1:U|1:1:1:U|11|set:0:U"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "U",
+        "target": "HN"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:U;target:N:2:11:11:U,N|1:1:1:U|2:11:11:U,N|11|set:0:U"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "U",
+        "target": "aUb"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:U;target:N:3:111:111:U,U,b|1:1:1:U|3:111:111:U,U,b|11|set:0:U"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "N",
+        "target": ""
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:N;target:N:1:1:1:N|1:1:1:N|1:1:1:N|11|set:0:N"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "N",
+        "target": "HN"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:N;target:N:2:11:11:N,N|1:1:1:N|2:11:11:N,N|11|set:0:N"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "N",
+        "target": "aUb"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:N;target:N:3:111:111:N,U,b|1:1:1:N|3:111:111:N,U,b|11|set:0:N"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "a",
+        "target": ""
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:1:1:1:a|1:1:1:a|1:1:1:a|11|set:0:a"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "a",
+        "target": "HN"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:2:11:11:a,N|1:1:1:a|2:11:11:a,N|11|set:0:a"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "a",
+        "target": "aUb"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:3:111:111:a,U,b|1:1:1:a|3:111:111:a,U,b|11|set:0:a"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "HNb",
+        "target": ""
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:3:011:011:U,N,b;target:N:3:111:111:U,N,b|3:011:011:U,N,b|3:111:111:U,N,b|11|set:0:U,set:1:N,set:2:b"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "HNb",
+        "target": "HN"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:3:011:011:U,N,b;target:N:3:111:111:U,N,b|3:011:011:U,N,b|3:111:111:U,N,b|11|set:0:U,set:1:N,set:2:b"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "HNb",
+        "target": "aUb"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:3:011:011:U,N,b;target:N:3:111:111:U,N,b|3:011:011:U,N,b|3:111:111:U,N,b|11|set:0:U,set:1:N,set:2:b"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aUb",
+        "target": ""
+      },
+      "expected": "ok|U|a:target:0:::;b:target:0:::;c:N:0:::;old:N:3:111:111:a,U,b;target:N:3:111:111:a,U,b|3:111:111:a,U,b|3:111:111:a,U,b|11|set:0:a,set:1:U,set:2:b"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aUb",
+        "target": "HN"
+      },
+      "expected": "ok|U|a:target:0:::;b:target:0:::;c:N:0:::;old:N:3:111:111:a,U,b;target:N:3:111:111:a,U,b|3:111:111:a,U,b|3:111:111:a,U,b|11|set:0:a,set:1:U,set:2:b"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aUb",
+        "target": "aUb"
+      },
+      "expected": "ok|U|a:target:0:::;b:target:0:::;c:N:0:::;old:N:3:111:111:a,U,b;target:N:3:111:111:a,U,b|3:111:111:a,U,b|3:111:111:a,U,b|11|set:0:a,set:1:U,set:2:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "",
+        "position": 0,
+        "sourceNull": true
+      },
+      "expected": "TypeError|Cannot read properties of null (reading '0')|THREW|a:N:0:::;b:N:0:::;c:N:0:::;old:N:N;target:N:0:::|N|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "",
+        "position": 0,
+        "child": "a",
+        "targetNull": true
+      },
+      "expected": "TypeError|Cannot set properties of null (setting '0')|THREW|a:N:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:N|0:::|N|11|set:0:a"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "",
+        "position": 3,
+        "sourceNull": true
+      },
+      "expected": "TypeError|Cannot read properties of null (reading '3')|THREW|a:N:0:::;b:N:0:::;c:N:0:::;old:N:N;target:N:0:::|N|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "",
+        "position": 3,
+        "child": "a",
+        "targetNull": true
+      },
+      "expected": "TypeError|Cannot set properties of null (setting '3')|THREW|a:N:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:N|0:::|N|11|set:3:a"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "",
+        "targetNull": true
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:N|0:::|N|11|"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "H",
+        "targetNull": true
+      },
+      "expected": "TypeError|Cannot set properties of null (setting '0')|THREW|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:0:0:U;target:N:N|1:0:0:U|N|11|set:0:U"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "a",
+        "targetNull": true
+      },
+      "expected": "TypeError|Cannot set properties of null (setting '0')|THREW|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:N|1:1:1:a|N|11|set:0:a"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "",
+        "sourceNull": true
+      },
+      "expected": "TypeError|Cannot read properties of null (reading 'length')|THREW|a:N:0:::;b:N:0:::;c:N:0:::;old:N:N;target:N:0:::|N|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "a",
+        "position": 0,
+        "child": "a",
+        "receiver": "U"
+      },
+      "expected": "TypeError|Cannot read properties of undefined (reading 'childNodes')|THREW|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:0:::|1:1:1:a|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "a",
+        "position": 0,
+        "child": "a",
+        "receiver": "U"
+      },
+      "expected": "TypeError|Cannot read properties of undefined (reading 'childNodes')|THREW|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:0:::|1:1:1:a|0:::|11|set:0:a"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "a",
+        "position": 0,
+        "child": "a",
+        "receiver": "U"
+      },
+      "expected": "TypeError|Cannot read properties of undefined (reading 'childNodes')|THREW|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:0:::|1:1:1:a|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "a",
+        "position": 0,
+        "child": "a",
+        "receiver": "N"
+      },
+      "expected": "TypeError|Cannot read properties of null (reading 'childNodes')|THREW|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:0:::|1:1:1:a|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "set",
+        "shape": "a",
+        "position": 0,
+        "child": "a",
+        "receiver": "N"
+      },
+      "expected": "TypeError|Cannot read properties of null (reading 'childNodes')|THREW|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:0:::|1:1:1:a|0:::|11|set:0:a"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "a",
+        "position": 0,
+        "child": "a",
+        "receiver": "N"
+      },
+      "expected": "TypeError|Cannot read properties of null (reading 'childNodes')|THREW|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:0:::|1:1:1:a|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "H",
+        "position": 0,
+        "prototype": "b"
+      },
+      "expected": "ok|b|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:0:1:b;target:N:0:::|1:0:1:b|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "H",
+        "position": 0,
+        "prototype": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:target:0:::;c:N:0:::;old:N:1:0:1:b;target:N:1:1:1:b|1:0:1:b|1:1:1:b|11|set:0:b"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "U",
+        "position": 0,
+        "prototype": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:U;target:N:0:::|1:1:1:U|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "U",
+        "position": 0,
+        "prototype": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:U;target:N:1:1:1:U|1:1:1:U|1:1:1:U|11|set:0:U"
+    },
+    {
+      "input": {
+        "op": "get",
+        "shape": "N",
+        "position": 0,
+        "prototype": "b"
+      },
+      "expected": "ok|N|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:N;target:N:0:::|1:1:1:N|0:::|11|"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "N",
+        "position": 0,
+        "prototype": "b"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:N;target:N:1:1:1:N|1:1:1:N|1:1:1:N|11|set:0:N"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aHc",
+        "target": "N",
+        "mode": "source-rebind"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:target:0:::;old:N:1:1:1:b;target:N:3:111:111:a,U,c|3:101:101:a,U,c|3:111:111:a,U,c|01|set:0:a,set:1:U,set:2:c"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aHc",
+        "target": "N",
+        "mode": "source-grow"
+      },
+      "expected": "ok|U|a:target:0:::;b:target:0:::;c:target:0:::;old:N:4:1011:1011:a,U,c,b;target:N:4:1111:1111:a,U,c,b|4:1011:1011:a,U,c,b|4:1111:1111:a,U,c,b|11|set:0:a,set:1:U,set:2:c,set:3:b"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aHc",
+        "target": "N",
+        "mode": "source-truncate"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:1:1:1:a|1:1:1:a|1:1:1:a|11|set:0:a"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aHc",
+        "target": "N",
+        "mode": "source-delete"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:3:100:100:a,U,U;target:N:3:111:111:a,U,U|3:100:100:a,U,U|3:111:111:a,U,U|11|set:0:a,set:1:U,set:2:U"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aHc",
+        "target": "N",
+        "mode": "source-prototype"
+      },
+      "expected": "ok|U|a:target:0:::;b:target:0:::;c:target:0:::;old:N:3:101:111:a,b,c;target:N:3:111:111:a,b,c|3:101:111:a,b,c|3:111:111:a,b,c|11|set:0:a,set:1:b,set:2:c"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aHc",
+        "target": "N",
+        "mode": "target-rebind"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:target:0:::;old:N:3:101:101:a,U,c;target:N:3:111:111:b,U,c|3:101:101:a,U,c|1:1:1:a|10|set:0:a,set:1:U,set:2:c"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aHc",
+        "target": "N",
+        "mode": "target-null"
+      },
+      "expected": "TypeError|Cannot set properties of null (setting '1')|THREW|a:target:0:::;b:N:0:::;c:N:0:::;old:N:3:101:101:a,U,c;target:N:N|3:101:101:a,U,c|1:1:1:a|10|set:0:a,set:1:U"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aHc",
+        "target": "N",
+        "mode": "throw"
+      },
+      "expected": "Error|boom|THREW|a:target:0:::;b:N:0:::;c:N:0:::;old:N:3:101:101:a,U,c;target:N:1:1:1:a|3:101:101:a,U,c|1:1:1:a|11|set:0:a"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aHc",
+        "target": "N",
+        "parentMode": "source-rebind"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:target:0:::;old:N:1:1:1:b;target:N:3:111:111:a,U,c|3:101:101:a,U,c|3:111:111:a,U,c|01|set:0:a,parent:a:target,set:1:U,set:2:c"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aHc",
+        "target": "N",
+        "parentMode": "source-grow"
+      },
+      "expected": "ok|U|a:target:0:::;b:target:0:::;c:target:0:::;old:N:4:1011:1011:a,U,c,b;target:N:4:1111:1111:a,U,c,b|4:1011:1011:a,U,c,b|4:1111:1111:a,U,c,b|11|set:0:a,parent:a:target,set:1:U,set:2:c,set:3:b"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aHc",
+        "target": "N",
+        "parentMode": "source-truncate"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:N:0:::;old:N:1:1:1:a;target:N:1:1:1:a|1:1:1:a|1:1:1:a|11|set:0:a,parent:a:target"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aHc",
+        "target": "N",
+        "parentMode": "target-rebind"
+      },
+      "expected": "ok|U|a:target:0:::;b:N:0:::;c:target:0:::;old:N:3:101:101:a,U,c;target:N:3:111:111:b,U,c|3:101:101:a,U,c|1:1:1:a|10|set:0:a,parent:a:target,set:1:U,set:2:c"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aHc",
+        "target": "N",
+        "parentMode": "target-null"
+      },
+      "expected": "TypeError|Cannot set properties of null (setting '1')|THREW|a:target:0:::;b:N:0:::;c:N:0:::;old:N:3:101:101:a,U,c;target:N:N|3:101:101:a,U,c|1:1:1:a|10|set:0:a,parent:a:target,set:1:U"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aHc",
+        "target": "N",
+        "parentMode": "throw"
+      },
+      "expected": "Error|boom|THREW|a:target:0:::;b:N:0:::;c:N:0:::;old:N:3:101:101:a,U,c;target:N:1:1:1:a|3:101:101:a,U,c|1:1:1:a|11|set:0:a,parent:a:target"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aHc",
+        "newReceiver": "U"
+      },
+      "expected": "TypeError|Cannot read properties of undefined (reading 'childNodes')|THREW|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:101:101:a,U,c;target:N:0:::|3:101:101:a,U,c|0:::|11|set:0:a"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "aHc",
+        "newReceiver": "N"
+      },
+      "expected": "TypeError|Cannot read properties of null (reading 'childNodes')|THREW|a:N:0:::;b:N:0:::;c:N:0:::;old:N:3:101:101:a,U,c;target:N:0:::|3:101:101:a,U,c|0:::|11|set:0:a"
+    },
+    {
+      "input": {
+        "op": "copy",
+        "shape": "",
+        "newReceiver": "N"
+      },
+      "expected": "ok|U|a:N:0:::;b:N:0:::;c:N:0:::;old:N:0:::;target:N:0:::|0:::|0:::|11|"
+    }
+  ]
+}

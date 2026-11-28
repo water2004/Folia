@@ -1,0 +1,44 @@
+[
+  {
+    "op": "setTeXclass",
+    "self": true,
+    "n": [
+      0,
+      11,
+      7
+    ],
+    "p": [
+      2,
+      5,
+      3
+    ]
+  },
+  {
+    "op": "updateTeXclass",
+    "self": false,
+    "n": [
+      2,
+      5,
+      3
+    ],
+    "p": [
+      2,
+      null,
+      null
+    ]
+  },
+  {
+    "op": "getPrevClass",
+    "self": false,
+    "n": [
+      0,
+      2,
+      3
+    ],
+    "p": [
+      2,
+      5,
+      3
+    ]
+  }
+]

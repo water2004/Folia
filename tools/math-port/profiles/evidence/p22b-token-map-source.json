@@ -1,0 +1,2926 @@
+{
+  "node": "v24.13.0",
+  "scope": "complete TokenMap Source methods under frozen native data/controlled dependency profile; engine separate",
+  "rows": [
+    {
+      "method": 0,
+      "map": 0,
+      "contains": false,
+      "result_index": 0,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 0,
+      "contains": true,
+      "result_index": 0,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 1,
+      "contains": false,
+      "result_index": 1,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 1,
+      "contains": true,
+      "result_index": 1,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 2,
+      "contains": false,
+      "result_index": 2,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 2,
+      "contains": true,
+      "result_index": 2,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 3,
+      "contains": false,
+      "result_index": 3,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 3,
+      "contains": true,
+      "result_index": 3,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 4,
+      "contains": false,
+      "result_index": 4,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 4,
+      "contains": true,
+      "result_index": 4,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 5,
+      "contains": false,
+      "result_index": 5,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 5,
+      "contains": true,
+      "result_index": 5,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 6,
+      "contains": false,
+      "result_index": 6,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 6,
+      "contains": true,
+      "result_index": 6,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 7,
+      "contains": false,
+      "result_index": 7,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 7,
+      "contains": true,
+      "result_index": 7,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 8,
+      "contains": false,
+      "result_index": 8,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 8,
+      "contains": true,
+      "result_index": 8,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 9,
+      "contains": false,
+      "result_index": 9,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 9,
+      "contains": true,
+      "result_index": 9,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 10,
+      "contains": false,
+      "result_index": 10,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 10,
+      "contains": true,
+      "result_index": 10,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 11,
+      "contains": false,
+      "result_index": 11,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 11,
+      "contains": true,
+      "result_index": 11,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 12,
+      "contains": false,
+      "result_index": 12,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 0,
+      "map": 12,
+      "contains": true,
+      "result_index": 12,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 0,
+      "contains": false,
+      "result_index": 13,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 0,
+      "contains": true,
+      "result_index": 13,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 1,
+      "contains": false,
+      "result_index": 0,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 1,
+      "contains": true,
+      "result_index": 0,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 2,
+      "contains": false,
+      "result_index": 1,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 2,
+      "contains": true,
+      "result_index": 1,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 3,
+      "contains": false,
+      "result_index": 2,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 3,
+      "contains": true,
+      "result_index": 2,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 4,
+      "contains": false,
+      "result_index": 3,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 4,
+      "contains": true,
+      "result_index": 3,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 5,
+      "contains": false,
+      "result_index": 4,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 5,
+      "contains": true,
+      "result_index": 4,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 6,
+      "contains": false,
+      "result_index": 5,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 6,
+      "contains": true,
+      "result_index": 5,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 7,
+      "contains": false,
+      "result_index": 6,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 7,
+      "contains": true,
+      "result_index": 6,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 8,
+      "contains": false,
+      "result_index": 7,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 8,
+      "contains": true,
+      "result_index": 7,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 9,
+      "contains": false,
+      "result_index": 8,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 9,
+      "contains": true,
+      "result_index": 8,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 10,
+      "contains": false,
+      "result_index": 9,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 10,
+      "contains": true,
+      "result_index": 9,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 11,
+      "contains": false,
+      "result_index": 10,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 11,
+      "contains": true,
+      "result_index": 10,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 12,
+      "contains": false,
+      "result_index": 11,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 1,
+      "map": 12,
+      "contains": true,
+      "result_index": 11,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 0,
+      "contains": false,
+      "result_index": 12,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 0,
+      "contains": true,
+      "result_index": 12,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 1,
+      "contains": false,
+      "result_index": 13,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 1,
+      "contains": true,
+      "result_index": 13,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 2,
+      "contains": false,
+      "result_index": 0,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 2,
+      "contains": true,
+      "result_index": 0,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 3,
+      "contains": false,
+      "result_index": 1,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 3,
+      "contains": true,
+      "result_index": 1,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 4,
+      "contains": false,
+      "result_index": 2,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 4,
+      "contains": true,
+      "result_index": 2,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 5,
+      "contains": false,
+      "result_index": 3,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 5,
+      "contains": true,
+      "result_index": 3,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 6,
+      "contains": false,
+      "result_index": 4,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 6,
+      "contains": true,
+      "result_index": 4,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 7,
+      "contains": false,
+      "result_index": 5,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 7,
+      "contains": true,
+      "result_index": 5,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 8,
+      "contains": false,
+      "result_index": 6,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 8,
+      "contains": true,
+      "result_index": 6,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 9,
+      "contains": false,
+      "result_index": 7,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 9,
+      "contains": true,
+      "result_index": 7,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 10,
+      "contains": false,
+      "result_index": 8,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 10,
+      "contains": true,
+      "result_index": 8,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 11,
+      "contains": false,
+      "result_index": 9,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 11,
+      "contains": true,
+      "result_index": 9,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 12,
+      "contains": false,
+      "result_index": 10,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 2,
+      "map": 12,
+      "contains": true,
+      "result_index": 10,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 0,
+      "contains": false,
+      "result_index": 11,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 0,
+      "contains": true,
+      "result_index": 11,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 1,
+      "contains": false,
+      "result_index": 12,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 1,
+      "contains": true,
+      "result_index": 12,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 2,
+      "contains": false,
+      "result_index": 13,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 2,
+      "contains": true,
+      "result_index": 13,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 3,
+      "contains": false,
+      "result_index": 0,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 3,
+      "contains": true,
+      "result_index": 0,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 4,
+      "contains": false,
+      "result_index": 1,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 4,
+      "contains": true,
+      "result_index": 1,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 5,
+      "contains": false,
+      "result_index": 2,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 5,
+      "contains": true,
+      "result_index": 2,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 6,
+      "contains": false,
+      "result_index": 3,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 6,
+      "contains": true,
+      "result_index": 3,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 7,
+      "contains": false,
+      "result_index": 4,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 7,
+      "contains": true,
+      "result_index": 4,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 8,
+      "contains": false,
+      "result_index": 5,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 8,
+      "contains": true,
+      "result_index": 5,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 9,
+      "contains": false,
+      "result_index": 6,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 9,
+      "contains": true,
+      "result_index": 6,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 10,
+      "contains": false,
+      "result_index": 7,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 10,
+      "contains": true,
+      "result_index": 7,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 11,
+      "contains": false,
+      "result_index": 8,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 11,
+      "contains": true,
+      "result_index": 8,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 12,
+      "contains": false,
+      "result_index": 9,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 3,
+      "map": 12,
+      "contains": true,
+      "result_index": 9,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 0,
+      "contains": false,
+      "result_index": 10,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 0,
+      "contains": true,
+      "result_index": 10,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 1,
+      "contains": false,
+      "result_index": 11,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 1,
+      "contains": true,
+      "result_index": 11,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 2,
+      "contains": false,
+      "result_index": 12,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 2,
+      "contains": true,
+      "result_index": 12,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 3,
+      "contains": false,
+      "result_index": 13,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 3,
+      "contains": true,
+      "result_index": 13,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 4,
+      "contains": false,
+      "result_index": 0,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 4,
+      "contains": true,
+      "result_index": 0,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 5,
+      "contains": false,
+      "result_index": 1,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 5,
+      "contains": true,
+      "result_index": 1,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 6,
+      "contains": false,
+      "result_index": 2,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 6,
+      "contains": true,
+      "result_index": 2,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 7,
+      "contains": false,
+      "result_index": 3,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 7,
+      "contains": true,
+      "result_index": 3,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 8,
+      "contains": false,
+      "result_index": 4,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 8,
+      "contains": true,
+      "result_index": 4,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 9,
+      "contains": false,
+      "result_index": 5,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 9,
+      "contains": true,
+      "result_index": 5,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 10,
+      "contains": false,
+      "result_index": 6,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 10,
+      "contains": true,
+      "result_index": 6,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 11,
+      "contains": false,
+      "result_index": 7,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 11,
+      "contains": true,
+      "result_index": 7,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 12,
+      "contains": false,
+      "result_index": 8,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 4,
+      "map": 12,
+      "contains": true,
+      "result_index": 8,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 0,
+      "contains": false,
+      "result_index": 9,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 0,
+      "contains": true,
+      "result_index": 9,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 1,
+      "contains": false,
+      "result_index": 10,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 1,
+      "contains": true,
+      "result_index": 10,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 2,
+      "contains": false,
+      "result_index": 11,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 2,
+      "contains": true,
+      "result_index": 11,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 3,
+      "contains": false,
+      "result_index": 12,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 3,
+      "contains": true,
+      "result_index": 12,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 4,
+      "contains": false,
+      "result_index": 13,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 4,
+      "contains": true,
+      "result_index": 13,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 5,
+      "contains": false,
+      "result_index": 0,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 5,
+      "contains": true,
+      "result_index": 0,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 6,
+      "contains": false,
+      "result_index": 1,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 6,
+      "contains": true,
+      "result_index": 1,
+      "result": "",
+      "error": "TypeError",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 7,
+      "contains": false,
+      "result_index": 2,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 7,
+      "contains": true,
+      "result_index": 2,
+      "result": "",
+      "error": "TypeError",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 8,
+      "contains": false,
+      "result_index": 3,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 8,
+      "contains": true,
+      "result_index": 3,
+      "result": "",
+      "error": "TypeError",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 9,
+      "contains": false,
+      "result_index": 4,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 9,
+      "contains": true,
+      "result_index": 4,
+      "result": "",
+      "error": "TypeError",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 10,
+      "contains": false,
+      "result_index": 5,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 10,
+      "contains": true,
+      "result_index": 5,
+      "result": "",
+      "error": "TypeError",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 11,
+      "contains": false,
+      "result_index": 6,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 11,
+      "contains": true,
+      "result_index": 6,
+      "result": "",
+      "error": "TypeError",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 12,
+      "contains": false,
+      "result_index": 7,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 5,
+      "map": 12,
+      "contains": true,
+      "result_index": 7,
+      "result": "",
+      "error": "TypeError",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 0,
+      "contains": false,
+      "result_index": 8,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 0,
+      "contains": true,
+      "result_index": 8,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 1,
+      "contains": false,
+      "result_index": 9,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 1,
+      "contains": true,
+      "result_index": 9,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 2,
+      "contains": false,
+      "result_index": 10,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 2,
+      "contains": true,
+      "result_index": 10,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 3,
+      "contains": false,
+      "result_index": 11,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 3,
+      "contains": true,
+      "result_index": 11,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 4,
+      "contains": false,
+      "result_index": 12,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 4,
+      "contains": true,
+      "result_index": 12,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 5,
+      "contains": false,
+      "result_index": 13,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 5,
+      "contains": true,
+      "result_index": 13,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 6,
+      "contains": false,
+      "result_index": 0,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 6,
+      "contains": true,
+      "result_index": 0,
+      "result": "",
+      "error": "TypeError",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 7,
+      "contains": false,
+      "result_index": 1,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 7,
+      "contains": true,
+      "result_index": 1,
+      "result": "",
+      "error": "TypeError",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 8,
+      "contains": false,
+      "result_index": 2,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 8,
+      "contains": true,
+      "result_index": 2,
+      "result": "",
+      "error": "TypeError",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 9,
+      "contains": false,
+      "result_index": 3,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 9,
+      "contains": true,
+      "result_index": 3,
+      "result": "",
+      "error": "TypeError",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 10,
+      "contains": false,
+      "result_index": 4,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 10,
+      "contains": true,
+      "result_index": 4,
+      "result": "",
+      "error": "TypeError",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 11,
+      "contains": false,
+      "result_index": 5,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 11,
+      "contains": true,
+      "result_index": 5,
+      "result": "",
+      "error": "TypeError",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 12,
+      "contains": false,
+      "result_index": 6,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 6,
+      "map": 12,
+      "contains": true,
+      "result_index": 6,
+      "result": "",
+      "error": "TypeError",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 0,
+      "contains": false,
+      "result_index": 7,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 0,
+      "contains": true,
+      "result_index": 7,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 1,
+      "contains": false,
+      "result_index": 8,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 1,
+      "contains": true,
+      "result_index": 8,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 2,
+      "contains": false,
+      "result_index": 9,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 2,
+      "contains": true,
+      "result_index": 9,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 3,
+      "contains": false,
+      "result_index": 10,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 3,
+      "contains": true,
+      "result_index": 10,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 4,
+      "contains": false,
+      "result_index": 11,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 4,
+      "contains": true,
+      "result_index": 11,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 5,
+      "contains": false,
+      "result_index": 12,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 5,
+      "contains": true,
+      "result_index": 12,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 6,
+      "contains": false,
+      "result_index": 13,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 6,
+      "contains": true,
+      "result_index": 13,
+      "result": "symbol",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup",
+        "body:num:7",
+        "bare"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 7,
+      "contains": false,
+      "result_index": 0,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 7,
+      "contains": true,
+      "result_index": 0,
+      "result": "true",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup",
+        "body:str:0078",
+        "bare"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 8,
+      "contains": false,
+      "result_index": 1,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 8,
+      "contains": true,
+      "result_index": 1,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup",
+        "body:object",
+        "bare"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 9,
+      "contains": false,
+      "result_index": 2,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 9,
+      "contains": true,
+      "result_index": 2,
+      "result": "false",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup",
+        "body:array",
+        "bare"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 10,
+      "contains": false,
+      "result_index": 3,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 10,
+      "contains": true,
+      "result_index": 3,
+      "result": "true",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup",
+        "body:token",
+        "bare"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 11,
+      "contains": false,
+      "result_index": 4,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 11,
+      "contains": true,
+      "result_index": 4,
+      "result": "num:0",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup",
+        "body:macro",
+        "bare"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 12,
+      "contains": false,
+      "result_index": 5,
+      "result": "null",
+      "error": "",
+      "events": [
+        "contains",
+        "lookup"
+      ]
+    },
+    {
+      "method": 7,
+      "map": 12,
+      "contains": true,
+      "result_index": 5,
+      "result": "-0",
+      "error": "",
+      "events": [
+        "contains",
+        "parser",
+        "lookup",
+        "body:function",
+        "bare"
+      ]
+    }
+  ],
+  "regex_rows": [
+    {
+      "sequence": [
+        true,
+        true
+      ],
+      "result": "true",
+      "events": [
+        "test:str:0078",
+        "regex-receiver",
+        "test:str:0078",
+        "regex-receiver",
+        "body:str:0078",
+        "bare"
+      ],
+      "calls": 2
+    },
+    {
+      "sequence": [
+        true,
+        false
+      ],
+      "result": "null",
+      "events": [
+        "test:str:0078",
+        "regex-receiver",
+        "test:str:0078",
+        "regex-receiver"
+      ],
+      "calls": 2
+    },
+    {
+      "sequence": [
+        false,
+        true
+      ],
+      "result": "null",
+      "events": [
+        "test:str:0078",
+        "regex-receiver",
+        "test:str:0078",
+        "regex-receiver"
+      ],
+      "calls": 2
+    },
+    {
+      "sequence": [
+        false,
+        false
+      ],
+      "result": "null",
+      "events": [
+        "test:str:0078",
+        "regex-receiver",
+        "test:str:0078",
+        "regex-receiver"
+      ],
+      "calls": 2
+    }
+  ],
+  "groups": {
+    "parse_result": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "registry_constructor": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "ordinary_map": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "character_data": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "constructor_enumeration": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "macro_data": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "macro_dispatch": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "delimiter_dispatch": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "command_dispatch": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "environment_dispatch": [
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "regexp_live_service_dependency": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "new_lookup_bridge": [
+      true,
+      true
+    ]
+  }
+}

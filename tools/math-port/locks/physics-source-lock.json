@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "source": "MathJax-src 4.1.3 fb987178c2d279a99b0db5ea02e751691703955e",
+  "scopeSha256": "9705d389538b2fc8bf782feea4372ace639b3727304f2971937bbcfb0042a0d1",
+  "oracleOutputSha256": "982e6d22bd8b0940cb5a3fc04f1f73cfdb6e7b019d03cd0447716c9ae4b59c33",
+  "files": [
+    {"ts": "ts/input/tex/physics/PhysicsConfiguration.ts", "tsSha256": "5fcdc5a67af1e7103c819786e00f5648f0478e33900ebc617ddecac3bf073cd9", "cjs": "cjs/input/tex/physics/PhysicsConfiguration.js", "cjsSha256": "119e700d70e7f6fed4854af927e93d8d997fa42d0135f308b8a3ef7bfdc18d12"},
+    {"ts": "ts/input/tex/physics/PhysicsItems.ts", "tsSha256": "6065e6b2c9c647e86acd50bbf3cca186c4ef545754b80bbd904e659478f1e993", "cjs": "cjs/input/tex/physics/PhysicsItems.js", "cjsSha256": "84e9128b2005c18654844902db643a2c351da6fad22b8475f3fda5cdfed2ba64"},
+    {"ts": "ts/input/tex/physics/PhysicsMappings.ts", "tsSha256": "bbd198b470045f74ada6987480cb662cd1fe4911efb5830fd43c65b5a4682304", "cjs": "cjs/input/tex/physics/PhysicsMappings.js", "cjsSha256": "959950867884100b825474824f34051298e9fe6167d7087ae653dc8470e489ad"},
+    {"ts": "ts/input/tex/physics/PhysicsMethods.ts", "tsSha256": "b86d2d3a84c553581aec08ebb46fc50fc6b32f9322dd67e3d00b493ef8acef22", "cjs": "cjs/input/tex/physics/PhysicsMethods.js", "cjsSha256": "ddf56512e6f2c45e3d271dc702cc77dd5fc42fdd85ee137165f930cb332f74fa"}
+  ]
+}

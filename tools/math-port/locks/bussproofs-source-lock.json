@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "source": "MathJax-src 4.1.3 fb987178c2d279a99b0db5ea02e751691703955e",
+  "scopeSha256": "9705d389538b2fc8bf782feea4372ace639b3727304f2971937bbcfb0042a0d1",
+  "oracleOutputSha256": "f253b38cb839fe38b5a38be73d54ba3dfe03d0f40d2fb93fe0d26f3c9f966a35",
+  "files": [
+    {
+      "ts": "ts/input/tex/bussproofs/BussproofsConfiguration.ts",
+      "tsSha256": "2aefb3c006598ccc5ef08a4f5d5e2b596aec048737f8e2aaf571cf63c2f075df",
+      "cjs": "cjs/input/tex/bussproofs/BussproofsConfiguration.js",
+      "cjsSha256": "249ab0f53fb4ed0c4bcabe8bc20ba39be5c65dc6ab0912acd252b202261310c9"
+    },
+    {
+      "ts": "ts/input/tex/bussproofs/BussproofsItems.ts",
+      "tsSha256": "133a085cbeea74c316cee57432876e15c2142b5cc54c5625cb108d9a950f1a7f",
+      "cjs": "cjs/input/tex/bussproofs/BussproofsItems.js",
+      "cjsSha256": "e1b0a23de54c9ed334e30d1c1e679c6dcde24a2d1558ac7645abc21a041ab13a"
+    },
+    {
+      "ts": "ts/input/tex/bussproofs/BussproofsMappings.ts",
+      "tsSha256": "76ef61358cac14baa65bfcfcaf7d862d2e068fbac89d48f2dc9d5e60a58e9c9c",
+      "cjs": "cjs/input/tex/bussproofs/BussproofsMappings.js",
+      "cjsSha256": "237e8be03370951f7dac389d79980454d930fcb82be5d4d821dc93e95fe8aff9"
+    },
+    {
+      "ts": "ts/input/tex/bussproofs/BussproofsMethods.ts",
+      "tsSha256": "25e6a7c51def3f5912df78d8822b6d92b370c9cc9b472f9ffc852c357b7727e5",
+      "cjs": "cjs/input/tex/bussproofs/BussproofsMethods.js",
+      "cjsSha256": "c671b2b31b229e73454c70c794a82923f8d059f43b5f1af134588b530055c054"
+    },
+    {
+      "ts": "ts/input/tex/bussproofs/BussproofsUtil.ts",
+      "tsSha256": "f6e3f1f95cd8e0961f3ddbf28c4bf1d4f3f0b3c30e488f68ae125341014992bd",
+      "cjs": "cjs/input/tex/bussproofs/BussproofsUtil.js",
+      "cjsSha256": "8ed15ce9672065e5d4ae2e3f06703bbb456f836287fa1fb6a0aa45ecfb1a305d"
+    }
+  ]
+}

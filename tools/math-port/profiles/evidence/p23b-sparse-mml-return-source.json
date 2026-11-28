@@ -1,0 +1,1579 @@
+{
+  "schema": 1,
+  "status": "Root original Source return-value evidence; no native API acceptance",
+  "node": "24.13.0",
+  "prerequisite_sha256": "b9717d5f5213ad400617fb680f92d3f744cae0b7f7b2182f86a194b205367ab4",
+  "cases": [
+    {
+      "name": "mstyle-core-H",
+      "result": "U",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              false
+            ],
+            "values": [
+              "U"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mstyle-coreMO-H",
+      "result": "THREW",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'coreMO')"
+      },
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              false
+            ],
+            "values": [
+              "U"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mstyle-core-U",
+      "result": "U",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "U"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mstyle-coreMO-U",
+      "result": "THREW",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'coreMO')"
+      },
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "U"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mstyle-core-N",
+      "result": "N",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "N"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mstyle-coreMO-N",
+      "result": "THREW",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot read properties of null (reading 'coreMO')"
+      },
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "N"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mstyle-core-a",
+      "result": "a",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "a"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mstyle-coreMO-a",
+      "result": "a",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "a"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mfrac-core-H",
+      "result": "U",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              false
+            ],
+            "values": [
+              "U"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mfrac-coreMO-H",
+      "result": "THREW",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'coreMO')"
+      },
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              false
+            ],
+            "values": [
+              "U"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mfrac-core-U",
+      "result": "U",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "U"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mfrac-coreMO-U",
+      "result": "THREW",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'coreMO')"
+      },
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "U"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mfrac-core-N",
+      "result": "N",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "N"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mfrac-coreMO-N",
+      "result": "THREW",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot read properties of null (reading 'coreMO')"
+      },
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "N"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mfrac-core-a",
+      "result": "a",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "a"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mfrac-coreMO-a",
+      "result": "a",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "a"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mstyle-notParent-H",
+      "result": "U",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              false
+            ],
+            "values": [
+              "U"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mstyle-notParent-U",
+      "result": "U",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "U"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mstyle-notParent-N",
+      "result": "N",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "N"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mstyle-notParent-a",
+      "result": false,
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "a"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mrow-core-getter-rebind-H",
+      "result": "U",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              false
+            ],
+            "values": [
+              "U"
+            ]
+          }
+        }
+      },
+      "captured": {
+        "original": {
+          "length": 1,
+          "own": [
+            true
+          ],
+          "values": [
+            "b"
+          ]
+        }
+      },
+      "trace": [
+        "embellished:true"
+      ]
+    },
+    {
+      "name": "mrow-coreMO-getter-rebind-H",
+      "result": "THREW",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'coreMO')"
+      },
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              false
+            ],
+            "values": [
+              "U"
+            ]
+          }
+        }
+      },
+      "captured": {
+        "original": {
+          "length": 1,
+          "own": [
+            true
+          ],
+          "values": [
+            "b"
+          ]
+        }
+      },
+      "trace": [
+        "embellished:true"
+      ]
+    },
+    {
+      "name": "mrow-core-getter-rebind-U",
+      "result": "U",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "U"
+            ]
+          }
+        }
+      },
+      "captured": {
+        "original": {
+          "length": 1,
+          "own": [
+            true
+          ],
+          "values": [
+            "b"
+          ]
+        }
+      },
+      "trace": [
+        "embellished:true"
+      ]
+    },
+    {
+      "name": "mrow-coreMO-getter-rebind-U",
+      "result": "THREW",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot read properties of undefined (reading 'coreMO')"
+      },
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "U"
+            ]
+          }
+        }
+      },
+      "captured": {
+        "original": {
+          "length": 1,
+          "own": [
+            true
+          ],
+          "values": [
+            "b"
+          ]
+        }
+      },
+      "trace": [
+        "embellished:true"
+      ]
+    },
+    {
+      "name": "mrow-core-getter-rebind-N",
+      "result": "N",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "N"
+            ]
+          }
+        }
+      },
+      "captured": {
+        "original": {
+          "length": 1,
+          "own": [
+            true
+          ],
+          "values": [
+            "b"
+          ]
+        }
+      },
+      "trace": [
+        "embellished:true"
+      ]
+    },
+    {
+      "name": "mrow-coreMO-getter-rebind-N",
+      "result": "THREW",
+      "error": {
+        "name": "TypeError",
+        "message": "Cannot read properties of null (reading 'coreMO')"
+      },
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "N"
+            ]
+          }
+        }
+      },
+      "captured": {
+        "original": {
+          "length": 1,
+          "own": [
+            true
+          ],
+          "values": [
+            "b"
+          ]
+        }
+      },
+      "trace": [
+        "embellished:true"
+      ]
+    },
+    {
+      "name": "mrow-core-getter-rebind-a",
+      "result": "a",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "a"
+            ]
+          }
+        }
+      },
+      "captured": {
+        "original": {
+          "length": 1,
+          "own": [
+            true
+          ],
+          "values": [
+            "b"
+          ]
+        }
+      },
+      "trace": [
+        "embellished:true"
+      ]
+    },
+    {
+      "name": "mrow-coreMO-getter-rebind-a",
+      "result": "a",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 1,
+            "own": [
+              true
+            ],
+            "values": [
+              "a"
+            ]
+          }
+        }
+      },
+      "captured": {
+        "original": {
+          "length": 1,
+          "own": [
+            true
+          ],
+          "values": [
+            "b"
+          ]
+        }
+      },
+      "trace": [
+        "embellished:true"
+      ]
+    },
+    {
+      "name": "mstyle-notParent-flag-length-H",
+      "result": "U",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 2,
+            "own": [
+              false,
+              true
+            ],
+            "values": [
+              "U",
+              "b"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mstyle-notParent-flag-length-U",
+      "result": "U",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 2,
+            "own": [
+              true,
+              true
+            ],
+            "values": [
+              "U",
+              "b"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mstyle-notParent-flag-length-N",
+      "result": "N",
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 2,
+            "own": [
+              true,
+              true
+            ],
+            "values": [
+              "N",
+              "b"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    },
+    {
+      "name": "mstyle-notParent-flag-length-a",
+      "result": false,
+      "error": null,
+      "nodes": {
+        "a": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "b": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "c": {
+          "parent": "N",
+          "children": {
+            "length": 0,
+            "own": [],
+            "values": []
+          }
+        },
+        "target": {
+          "parent": "N",
+          "children": {
+            "length": 2,
+            "own": [
+              true,
+              true
+            ],
+            "values": [
+              "a",
+              "b"
+            ]
+          }
+        }
+      },
+      "captured": {},
+      "trace": []
+    }
+  ]
+}

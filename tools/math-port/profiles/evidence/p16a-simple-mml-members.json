@@ -1,0 +1,323 @@
+{
+  "schema": 1,
+  "typescript": "5.9.3",
+  "status": "locally_accepted_complete_five_simple_mml_semantics_not_renderer",
+  "files": [
+    {
+      "source": "ts/core/MmlTree/MmlNodes/menclose.ts",
+      "source_sha256": "ffa4ab507744cb4f190312ca8dcd692474c333bee6e19c86709554aa9dad4333",
+      "members": [
+        {
+          "owner": "MmlMenclose",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 36,
+          "end_line": 39,
+          "member_sha256": "dce99ba6bdd9dbd78e880bd6735f2737b0984d1263d019721d0f3178378b2144",
+          "target": "src/math/core/mml_tree/mml_nodes/menclose_bindings.cpp:MmlMenclose::defaults",
+          "review": "root_review_passed",
+          "mapping": "Root-generated complete source defaults/accessor or source-ordered field initialization binding.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        },
+        {
+          "owner": "MmlMenclose",
+          "kind": "initialized_field",
+          "name": "texclass",
+          "static": false,
+          "line": 44,
+          "end_line": 44,
+          "member_sha256": "ae6973db2de12fc183bff054f14d2701c2ea70f7166ba201a4afe297037ff180",
+          "target": "src/math/core/mml_tree/mml_nodes/menclose_bindings.cpp:MmlMenclose::initializeClassFields",
+          "review": "root_review_passed",
+          "mapping": "Root-generated complete source defaults/accessor or source-ordered field initialization binding.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        },
+        {
+          "owner": "MmlMenclose",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 51,
+          "end_line": 53,
+          "member_sha256": "c2116ab0e319734c360469d5871ab08c7870523607f4c439a3e4270df8224fce",
+          "target": "src/math/core/mml_tree/mml_nodes/menclose_bindings.cpp:MmlMenclose::kind",
+          "review": "root_review_passed",
+          "mapping": "Root-generated complete source defaults/accessor or source-ordered field initialization binding.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        },
+        {
+          "owner": "MmlMenclose",
+          "kind": "get",
+          "name": "arity",
+          "static": false,
+          "line": 60,
+          "end_line": 62,
+          "member_sha256": "d8b1ec790a6cb6ae2ce454b47578e524928326ae1ea6446cb2be437326c776a7",
+          "target": "src/math/core/mml_tree/mml_nodes/menclose_bindings.cpp:MmlMenclose::arity",
+          "review": "root_review_passed",
+          "mapping": "Root-generated complete source defaults/accessor or source-ordered field initialization binding.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        },
+        {
+          "owner": "MmlMenclose",
+          "kind": "get",
+          "name": "linebreakContainer",
+          "static": false,
+          "line": 69,
+          "end_line": 71,
+          "member_sha256": "ec2da68353631b78744bc66456517d5140af5845080c40553e5c95ed54f2e58a",
+          "target": "src/math/core/mml_tree/mml_nodes/menclose_bindings.cpp:MmlMenclose::linebreakContainer",
+          "review": "root_review_passed",
+          "mapping": "Root-generated complete source defaults/accessor or source-ordered field initialization binding.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        },
+        {
+          "owner": "MmlMenclose",
+          "kind": "method",
+          "name": "setTeXclass",
+          "static": false,
+          "line": 76,
+          "end_line": 80,
+          "member_sha256": "8e70c1191a1a682d61b8660afd881d72f4d95212df969fc29e5853cc14e54581",
+          "target": "src/math/core/mml_tree/mml_nodes/menclose.cpp:MmlMenclose::setTeXclass",
+          "review": "root_review_passed",
+          "mapping": "Complete source method, root reviewed order/virtual callbacks/raw values and superclass boundary.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        }
+      ]
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mpadded.ts",
+      "source_sha256": "b5aac516c32fb019ac5ace504f86312f3e0849e1faa44006567bac05815c7271",
+      "members": [
+        {
+          "owner": "MmlMpadded",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 36,
+          "end_line": 43,
+          "member_sha256": "64a5af284eb0488bee3b445f10ed84ac1cf67286aac32b9a5d5844e73008d95d",
+          "target": "src/math/core/mml_tree/mml_nodes/mpadded_bindings.cpp:MmlMpadded::defaults",
+          "review": "root_review_passed",
+          "mapping": "Root-generated complete source defaults/accessor or source-ordered field initialization binding.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        },
+        {
+          "owner": "MmlMpadded",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 48,
+          "end_line": 50,
+          "member_sha256": "86d6eef9033a63a516ca5d7c7b72e2120217c67aa86836f09da7d5ca4d602883",
+          "target": "src/math/core/mml_tree/mml_nodes/mpadded_bindings.cpp:MmlMpadded::kind",
+          "review": "root_review_passed",
+          "mapping": "Root-generated complete source defaults/accessor or source-ordered field initialization binding.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        },
+        {
+          "owner": "MmlMpadded",
+          "kind": "get",
+          "name": "linebreakContainer",
+          "static": false,
+          "line": 55,
+          "end_line": 57,
+          "member_sha256": "ec2da68353631b78744bc66456517d5140af5845080c40553e5c95ed54f2e58a",
+          "target": "src/math/core/mml_tree/mml_nodes/mpadded_bindings.cpp:MmlMpadded::linebreakContainer",
+          "review": "root_review_passed",
+          "mapping": "Root-generated complete source defaults/accessor or source-ordered field initialization binding.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        },
+        {
+          "owner": "MmlMpadded",
+          "kind": "method",
+          "name": "setTeXclass",
+          "static": false,
+          "line": 62,
+          "end_line": 70,
+          "member_sha256": "0c8dc42535806d44827c92b57309f11138a2250603835342bae6adeae1d5b190",
+          "target": "src/math/core/mml_tree/mml_nodes/mpadded.cpp:MmlMpadded::setTeXclass",
+          "review": "root_review_passed",
+          "mapping": "Complete source method, root reviewed order/virtual callbacks/raw values and superclass boundary.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        }
+      ]
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/maligngroup.ts",
+      "source_sha256": "4d8ecdae93aaff85887ec4eb09c8821811866a9e9b56e037ac61d0b6d81bf2b1",
+      "members": [
+        {
+          "owner": "MmlMaligngroup",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 37,
+          "end_line": 40,
+          "member_sha256": "44fd6ff638503f80e4918fb27188c4e94f5d37b2d2d22ad5ed6b0440d8cd0d8f",
+          "target": "src/math/core/mml_tree/mml_nodes/maligngroup_bindings.cpp:MmlMaligngroup::defaults",
+          "review": "root_review_passed",
+          "mapping": "Root-generated complete source defaults/accessor or source-ordered field initialization binding.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        },
+        {
+          "owner": "MmlMaligngroup",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 45,
+          "end_line": 47,
+          "member_sha256": "d9b3f93ea72f715116ec23d0196017b113ecfa9b9350562caf033e5ffaea0241",
+          "target": "src/math/core/mml_tree/mml_nodes/maligngroup_bindings.cpp:MmlMaligngroup::kind",
+          "review": "root_review_passed",
+          "mapping": "Root-generated complete source defaults/accessor or source-ordered field initialization binding.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        },
+        {
+          "owner": "MmlMaligngroup",
+          "kind": "get",
+          "name": "isSpacelike",
+          "static": false,
+          "line": 54,
+          "end_line": 56,
+          "member_sha256": "9da090c1d0c23d05aeff874a2b229626793130929f60c29e567bfca5d1bb563f",
+          "target": "src/math/core/mml_tree/mml_nodes/maligngroup_bindings.cpp:MmlMaligngroup::isSpacelike",
+          "review": "root_review_passed",
+          "mapping": "Root-generated complete source defaults/accessor or source-ordered field initialization binding.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        },
+        {
+          "owner": "MmlMaligngroup",
+          "kind": "method",
+          "name": "setChildInheritedAttributes",
+          "static": false,
+          "line": 63,
+          "end_line": 74,
+          "member_sha256": "99488e680756e4ea7bb9f6229d682a47a4b884fd56ef98894fe9f00a786d3ca6",
+          "target": "src/math/core/mml_tree/mml_nodes/maligngroup.cpp:MmlMaligngroup::setChildInheritedAttributes",
+          "review": "root_review_passed",
+          "mapping": "Complete source method, root reviewed order/virtual callbacks/raw values and superclass boundary.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        }
+      ]
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/malignmark.ts",
+      "source_sha256": "f35d8b9edcf1afce67f74eef1dc1c04434f9caea944b3f3fd439d1aaf484cb61",
+      "members": [
+        {
+          "owner": "MmlMalignmark",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 36,
+          "end_line": 39,
+          "member_sha256": "43494be89b78baf070f759225aaf33631f0813386144a5e1b713e834436882fa",
+          "target": "src/math/core/mml_tree/mml_nodes/malignmark_bindings.cpp:MmlMalignmark::defaults",
+          "review": "root_review_passed",
+          "mapping": "Root-generated complete source defaults/accessor or source-ordered field initialization binding.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        },
+        {
+          "owner": "MmlMalignmark",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 44,
+          "end_line": 46,
+          "member_sha256": "c6cab08a8132a2ce9df6cfd3dfcc049beb73cb5c70b177c493e2c7169f54065a",
+          "target": "src/math/core/mml_tree/mml_nodes/malignmark_bindings.cpp:MmlMalignmark::kind",
+          "review": "root_review_passed",
+          "mapping": "Root-generated complete source defaults/accessor or source-ordered field initialization binding.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        },
+        {
+          "owner": "MmlMalignmark",
+          "kind": "get",
+          "name": "arity",
+          "static": false,
+          "line": 53,
+          "end_line": 55,
+          "member_sha256": "9966fe86c33365348922f329ad34380a52807b15171ff503010c84139d7f4f2e",
+          "target": "src/math/core/mml_tree/mml_nodes/malignmark_bindings.cpp:MmlMalignmark::arity",
+          "review": "root_review_passed",
+          "mapping": "Root-generated complete source defaults/accessor or source-ordered field initialization binding.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        },
+        {
+          "owner": "MmlMalignmark",
+          "kind": "get",
+          "name": "isSpacelike",
+          "static": false,
+          "line": 62,
+          "end_line": 64,
+          "member_sha256": "9da090c1d0c23d05aeff874a2b229626793130929f60c29e567bfca5d1bb563f",
+          "target": "src/math/core/mml_tree/mml_nodes/malignmark_bindings.cpp:MmlMalignmark::isSpacelike",
+          "review": "root_review_passed",
+          "mapping": "Root-generated complete source defaults/accessor or source-ordered field initialization binding.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        }
+      ]
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mglyph.ts",
+      "source_sha256": "2c2d336067d3970c55f3fcdafb82b55d4339a2c11d69088c8c7eff4a6d953504",
+      "members": [
+        {
+          "owner": "MmlMglyph",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 36,
+          "end_line": 44,
+          "member_sha256": "bb2dc46727e365dc280a87e6d336b26b8edde7e3260bc80f5c426cad8ee13346",
+          "target": "src/math/core/mml_tree/mml_nodes/mglyph_bindings.cpp:MmlMglyph::defaults",
+          "review": "root_review_passed",
+          "mapping": "Root-generated complete source defaults/accessor or source-ordered field initialization binding.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        },
+        {
+          "owner": "MmlMglyph",
+          "kind": "initialized_field",
+          "name": "texclass",
+          "static": false,
+          "line": 49,
+          "end_line": 49,
+          "member_sha256": "ae6973db2de12fc183bff054f14d2701c2ea70f7166ba201a4afe297037ff180",
+          "target": "src/math/core/mml_tree/mml_nodes/mglyph_bindings.cpp:MmlMglyph::initializeClassFields",
+          "review": "root_review_passed",
+          "mapping": "Root-generated complete source defaults/accessor or source-ordered field initialization binding.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        },
+        {
+          "owner": "MmlMglyph",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 54,
+          "end_line": 56,
+          "member_sha256": "e37d71a862c17431c2317e2774148b136e4ec9bbf8ce216e4191b42f442e1f08",
+          "target": "src/math/core/mml_tree/mml_nodes/mglyph_bindings.cpp:MmlMglyph::kind",
+          "review": "root_review_passed",
+          "mapping": "Root-generated complete source defaults/accessor or source-ordered field initialization binding.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        },
+        {
+          "owner": "MmlMglyph",
+          "kind": "method",
+          "name": "verifyAttributes",
+          "static": false,
+          "line": 61,
+          "end_line": 76,
+          "member_sha256": "02edb87e1d972b3389e856e85c8b0bf6f84c437362f6b2b9d37b0dbad4327b03",
+          "target": "src/math/core/mml_tree/mml_nodes/mglyph.cpp:MmlMglyph::verifyAttributes",
+          "review": "root_review_passed",
+          "mapping": "Complete source method, root reviewed order/virtual callbacks/raw values and superclass boundary.",
+          "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "version": "4.1.3",
+  "node": "v24.13.0",
+  "source": "ts/core/MmlTree/MmlNodes/mo.ts",
+  "sha256": "2082cd372a4c21fa46c67ab3972b51bcc950f711dd3369cbb2bd7ced62c2f605",
+  "runtime": "cjs/core/MmlTree/MmlNodes/mo.js",
+  "runtime_sha256": "7c68f0570d82f585eb6ca7e8bbca119b96a02666e0d4b268a413bf4035ff0b2c",
+  "compiled_package": {
+    "files": 424,
+    "sha256": "773bf3ae1c075baa36c02b6958f7e3bed5fb116d0818ecf99bb70c5337d9e537"
+  }
+}

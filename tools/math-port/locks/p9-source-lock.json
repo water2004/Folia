@@ -1,0 +1,65 @@
+{
+  "version": "4.1.3",
+  "files": [
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mrow.ts",
+      "sha256": "af58f0c1aa39a71d6c3dc5addf358a8cefeecb3f76cb483ec940f3a7ea72b4b9",
+      "runtime": "cjs/core/MmlTree/MmlNodes/mrow.js",
+      "runtime_sha256": "5846d2b0334223b759a4059dfb0ac5e31aef1f5a96c041da45b3de94c0689896"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/math.ts",
+      "sha256": "ca0769f26d00145b2c520ac7bcfb1ac1f3e3eb34c387d0eeb8e4444e7d382ea0",
+      "runtime": "cjs/core/MmlTree/MmlNodes/math.js",
+      "runtime_sha256": "44debed089b254bc09e73e22d4c30336db13ff8dad0af140e915a320bdda8e71"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mi.ts",
+      "sha256": "3bbddaeac72d2c0f2e5d8a0440c28188f98d1bf1481a0ec6872e103a50f146c2",
+      "runtime": "cjs/core/MmlTree/MmlNodes/mi.js",
+      "runtime_sha256": "47058d7ddb5b24ed530936baffe834a06c0557ec7dbdc03312d3ffa0aca17241"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mn.ts",
+      "sha256": "5eaf9e5c7e0222303e98757aeed6a1d909ff08560591fd7a6985220d70e0522c",
+      "runtime": "cjs/core/MmlTree/MmlNodes/mn.js",
+      "runtime_sha256": "8da61e1b68bfb4abbff2103c04b6fcf6c03b35c6934a3abba55ba1144b4ac142"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mtext.ts",
+      "sha256": "66e24a47505714c0d67b334a8c73c6e85dbfcac1f920913eef9f664546f2403f",
+      "runtime": "cjs/core/MmlTree/MmlNodes/mtext.js",
+      "runtime_sha256": "1d3f64150977d8a1cfcc95a9974c9ad4c01f7894a0d05b7f68f5bfae5026b1b5"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/ms.ts",
+      "sha256": "71b28a279461524fce585c4e57960d5586bd04a5f52379c66c04e4b1f82cdaf0",
+      "runtime": "cjs/core/MmlTree/MmlNodes/ms.js",
+      "runtime_sha256": "db185825f9f19d22b7ad23e9c75c9e869b3dfc423eb61962f129b8a18781c8eb"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mspace.ts",
+      "sha256": "69961341e3323cc3af8721f9d800190e2051057b11cba5558ef1940e0deefdd4",
+      "runtime": "cjs/core/MmlTree/MmlNodes/mspace.js",
+      "runtime_sha256": "61dc8d544aa9550e3e132dfc1c426c5204fab292ddf9f46171e9baf6f4f35383"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mstyle.ts",
+      "sha256": "7442e2885d2f4605d42f5b4472b3183f9cbadbd8ed5c0aeddf03b8f23c1d8616",
+      "runtime": "cjs/core/MmlTree/MmlNodes/mstyle.js",
+      "runtime_sha256": "49e13c923b88f6b41806c3f030a30edbfe8527beee6350e0e7067fc87707c488"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/merror.ts",
+      "sha256": "a13174c3d2ea478562efb382e77cac194010f65111203d05df018e11506703bf",
+      "runtime": "cjs/core/MmlTree/MmlNodes/merror.js",
+      "runtime_sha256": "cd9b48970d5d0878d3806e8ff4e4f091d2db38f5021a63aa043acfc50d952d6a"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mphantom.ts",
+      "sha256": "b06531aeaf78ef1a0e78ebb4e94024079e37d0fadf1cbb8b8a68e56d52e46006",
+      "runtime": "cjs/core/MmlTree/MmlNodes/mphantom.js",
+      "runtime_sha256": "dae156634a5a2fd1076af9abd551df195463a2b6db029635b13e9809ddb566f3"
+    }
+  ]
+}

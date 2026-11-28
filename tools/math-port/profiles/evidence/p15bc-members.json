@@ -1,0 +1,265 @@
+{
+  "schema": 1,
+  "typescript": "5.9.3",
+  "status": "locally_accepted_complete_atom_semantics_sources_not_renderer",
+  "files": [
+    {
+      "source": "ts/core/MmlTree/MmlNodes/TeXAtom.ts",
+      "source_sha256": "bad114224392b94852456a4636b85ad90a5a2c96b63e6c7911d155db299f7028",
+      "members": [
+        {
+          "owner": "TeXAtom",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 38,
+          "end_line": 40,
+          "member_sha256": "1a0e13e7810161f692efd3cde67f6ab8ad3d71465ac3601de9f2957e303594dd",
+          "target": "src/math/core/mml_tree/mml_nodes/tex_atom_bindings.cpp:MmlTeXAtom::defaults",
+          "review": "root_review_passed",
+          "mapping": "Root-generated fresh source defaults object.",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+        },
+        {
+          "owner": "TeXAtom",
+          "kind": "initialized_field",
+          "name": "texclass",
+          "static": false,
+          "line": 45,
+          "end_line": 45,
+          "member_sha256": "ae6973db2de12fc183bff054f14d2701c2ea70f7166ba201a4afe297037ff180",
+          "target": "src/math/core/mml_tree/mml_nodes/tex_atom_bindings.cpp:MmlTeXAtom::initializeClassFields",
+          "review": "root_review_passed",
+          "mapping": "Root-generated source-ordered derived field/constructor phase.",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+        },
+        {
+          "owner": "TeXAtom",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 50,
+          "end_line": 52,
+          "member_sha256": "b2affa9365ad7c7bb5f0b0beb776f39630ce47a9dae352dc8337316dbf88975d",
+          "target": "src/math/core/mml_tree/mml_nodes/tex_atom_bindings.cpp:MmlTeXAtom::kind",
+          "review": "root_review_passed",
+          "mapping": "Root-generated exact source accessor.",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+        },
+        {
+          "owner": "TeXAtom",
+          "kind": "get",
+          "name": "arity",
+          "static": false,
+          "line": 59,
+          "end_line": 61,
+          "member_sha256": "d8b1ec790a6cb6ae2ce454b47578e524928326ae1ea6446cb2be437326c776a7",
+          "target": "src/math/core/mml_tree/mml_nodes/tex_atom_bindings.cpp:MmlTeXAtom::arity",
+          "review": "root_review_passed",
+          "mapping": "Root-generated exact source accessor.",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+        },
+        {
+          "owner": "TeXAtom",
+          "kind": "get",
+          "name": "notParent",
+          "static": false,
+          "line": 68,
+          "end_line": 70,
+          "member_sha256": "32c65f75d68f4f0dba7888f92ebfdcf88fa32c4bab98ef20b3ebd4e83be9d5e9",
+          "target": "src/math/core/mml_tree/mml_nodes/tex_atom_bindings.cpp:MmlTeXAtom::notParent",
+          "review": "root_review_passed",
+          "mapping": "Root-generated exact source accessor.",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+        },
+        {
+          "owner": "TeXAtom",
+          "kind": "constructor",
+          "name": "constructor",
+          "static": false,
+          "line": 75,
+          "end_line": 82,
+          "member_sha256": "0c7f400742d7a581ec01f8fe8f3f0e1e264f3c31d5ed308af23423e5c32f7438",
+          "target": "src/math/core/mml_tree/mml_nodes/tex_atom_bindings.cpp:MmlTeXAtom::initializeClassFields",
+          "review": "root_review_passed",
+          "mapping": "Root-generated source-ordered derived field/constructor phase.",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+        },
+        {
+          "owner": "TeXAtom",
+          "kind": "method",
+          "name": "setTeXclass",
+          "static": false,
+          "line": 87,
+          "end_line": 90,
+          "member_sha256": "ffc219ee2b3346ed02e6075d6e8f1fcadada614e28e4552e73e326027cdb9e98",
+          "target": "src/math/core/mml_tree/mml_nodes/tex_atom.cpp:MmlTeXAtom::setTeXclass",
+          "review": "root_review_passed",
+          "mapping": "Root-reviewed exact source method.",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+        },
+        {
+          "owner": "TeXAtom",
+          "kind": "method",
+          "name": "adjustTeXclass",
+          "static": false,
+          "line": 97,
+          "end_line": 99,
+          "member_sha256": "114ae1e99d7007fc3f1c95325af6b3a7f038bed0f43d7771853cfb10476ebbc7",
+          "target": "src/math/core/mml_tree/mml_nodes/tex_atom.cpp:MmlTeXAtom::adjustTeXclass",
+          "review": "root_review_passed",
+          "mapping": "Class-body identity stub is overwritten upstream; effective method delegates to root-shared operator_class.cpp operation, as final module assignment requires.",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+        }
+      ],
+      "module_bindings": [
+        {
+          "kind": "prototype_assignment",
+          "name": "TeXAtom.prototype.adjustTeXclass",
+          "line": 104,
+          "member_sha256": "3bdd30fa0aacec459604ed1441eb87e67a3a993ea8471f47fccb0f8ea4156fc0",
+          "target": "src/math/core/mml_tree/operator_class.cpp:adjustOperatorTeXclass",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md",
+          "mapping": "Effective Mo/TeXAtom call/effect/return behavior through one shared MML operation. Native API does not expose JS prototype function objects."
+        }
+      ]
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/semantics.ts",
+      "source_sha256": "e609dfc3d7510a996a87804e3929cd4f53a5aa060003e351f45f1fc5dcfb6e96",
+      "members": [
+        {
+          "owner": "MmlSemantics",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 36,
+          "end_line": 40,
+          "member_sha256": "55cf77c6180eaa246b7badcefbfe92084b6b9a667b9725736807cddb8ca84f09",
+          "target": "src/math/core/mml_tree/mml_nodes/semantics_bindings.cpp:MmlSemantics::defaults",
+          "review": "root_review_passed",
+          "mapping": "Root-generated fresh source defaults object.",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+        },
+        {
+          "owner": "MmlSemantics",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 45,
+          "end_line": 47,
+          "member_sha256": "2148fe9ac1108e2151ac7ead7b05836ab70d76fcaf9a6a78fb80698d3e5c15e6",
+          "target": "src/math/core/mml_tree/mml_nodes/semantics_bindings.cpp:MmlSemantics::kind",
+          "review": "root_review_passed",
+          "mapping": "Root-generated exact source accessor.",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+        },
+        {
+          "owner": "MmlSemantics",
+          "kind": "get",
+          "name": "arity",
+          "static": false,
+          "line": 54,
+          "end_line": 56,
+          "member_sha256": "5b1e7efcbaaee87e360d1b2d4f0cef10497a01d081347aa263f00e7a210bfc7b",
+          "target": "src/math/core/mml_tree/mml_nodes/semantics_bindings.cpp:MmlSemantics::arity",
+          "review": "root_review_passed",
+          "mapping": "Root-generated exact source accessor.",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+        },
+        {
+          "owner": "MmlSemantics",
+          "kind": "get",
+          "name": "notParent",
+          "static": false,
+          "line": 63,
+          "end_line": 65,
+          "member_sha256": "32c65f75d68f4f0dba7888f92ebfdcf88fa32c4bab98ef20b3ebd4e83be9d5e9",
+          "target": "src/math/core/mml_tree/mml_nodes/semantics_bindings.cpp:MmlSemantics::notParent",
+          "review": "root_review_passed",
+          "mapping": "Root-generated exact source accessor.",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+        },
+        {
+          "owner": "MmlAnnotationXML",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 77,
+          "end_line": 84,
+          "member_sha256": "5d60db5c192d564fdbac3f97834702c475ce3362e23466bdf638334f7dc8d01f",
+          "target": "src/math/core/mml_tree/mml_nodes/semantics_bindings.cpp:MmlAnnotationXML::defaults",
+          "review": "root_review_passed",
+          "mapping": "Root-generated fresh source defaults object.",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+        },
+        {
+          "owner": "MmlAnnotationXML",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 89,
+          "end_line": 91,
+          "member_sha256": "ea9138e39776f69af865b5da8ec93bd857edcc8f6b6fd6b5068be2c0e5994be3",
+          "target": "src/math/core/mml_tree/mml_nodes/semantics_bindings.cpp:MmlAnnotationXML::kind",
+          "review": "root_review_passed",
+          "mapping": "Root-generated exact source accessor.",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+        },
+        {
+          "owner": "MmlAnnotationXML",
+          "kind": "method",
+          "name": "setChildInheritedAttributes",
+          "static": false,
+          "line": 98,
+          "end_line": 98,
+          "member_sha256": "3d9828070a0425cd0df6e29ae9106c5730ad6b2e41e1736a9547c2c166b98af4",
+          "target": "src/math/core/mml_tree/mml_nodes/semantics.cpp:MmlAnnotationXML::setChildInheritedAttributes",
+          "review": "root_review_passed",
+          "mapping": "Root-reviewed exact source method.",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+        },
+        {
+          "owner": "MmlAnnotation",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 110,
+          "end_line": 112,
+          "member_sha256": "5493f19d88750406b8305971e486f74e24ccfa7329d02b6468b3f72f324768e9",
+          "target": "src/math/core/mml_tree/mml_nodes/semantics_bindings.cpp:MmlAnnotation::defaults",
+          "review": "root_review_passed",
+          "mapping": "Root-generated fresh source defaults object.",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+        },
+        {
+          "owner": "MmlAnnotation",
+          "kind": "initialized_field",
+          "name": "properties",
+          "static": false,
+          "line": 117,
+          "end_line": 119,
+          "member_sha256": "5511be6e51da190e49110397f975ee82c396eede9408cc1fab6766d5e45974eb",
+          "target": "src/math/core/mml_tree/mml_nodes/semantics_bindings.cpp:MmlAnnotation::initializeClassFields",
+          "review": "root_review_passed",
+          "mapping": "Root-generated source-ordered derived field/constructor phase.",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+        },
+        {
+          "owner": "MmlAnnotation",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 124,
+          "end_line": 126,
+          "member_sha256": "8d03d849d250eae06a70433df91e1a712c03f7ec060d551cf7f4df6ca4dd95f9",
+          "target": "src/math/core/mml_tree/mml_nodes/semantics_bindings.cpp:MmlAnnotation::kind",
+          "review": "root_review_passed",
+          "mapping": "Root-generated exact source accessor.",
+          "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md"
+        }
+      ]
+    }
+  ]
+}

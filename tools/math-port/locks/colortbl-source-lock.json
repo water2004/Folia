@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "source": "MathJax-src 4.1.3 fb987178c2d279a99b0db5ea02e751691703955e",
+  "oracleOutputSha256": "4463db52f0e8b8602ea59c2446d0103569e4d1572b4358c362e0a73739962627",
+  "files": [
+    {
+      "ts": "ts/input/tex/colortbl/ColortblConfiguration.ts",
+      "tsSha256": "0a10559b100eb9576ac5d1bcd5db4e5e288144a9de753a866bca7c87f819464c",
+      "cjs": "cjs/input/tex/colortbl/ColortblConfiguration.js",
+      "cjsSha256": "b2da866632dcecb74b05559fa13c0fdd3d79c9d2b4a927bb22a587ef6c76227e"
+    }
+  ]
+}

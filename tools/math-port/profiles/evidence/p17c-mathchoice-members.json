@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "typescript": "5.9.3",
+  "status": "locally_accepted_mathchoice_semantics_not_renderer",
+  "files": [
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mathchoice.ts",
+      "source_sha256": "e1f9fdf92e345c7bc09e3333c4f436ae8f2d1e4c8fa9a2280877590cf9025d76",
+      "members": [
+        {
+          "owner": "MathChoice",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 39,
+          "end_line": 41,
+          "member_sha256": "1a0e13e7810161f692efd3cde67f6ab8ad3d71465ac3601de9f2957e303594dd",
+          "target": "src/math/core/mml_tree/mml_nodes/mathchoice_bindings.cpp:MathChoice::defaults",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p17c-mathchoice-acceptance.md"
+        },
+        {
+          "owner": "MathChoice",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 46,
+          "end_line": 48,
+          "member_sha256": "839fd51f7cd7d2a1d239337d3e74f0c17837eb0248f6ea807fa832df3edaf57c",
+          "target": "src/math/core/mml_tree/mml_nodes/mathchoice_bindings.cpp:MathChoice::kind",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p17c-mathchoice-acceptance.md"
+        },
+        {
+          "owner": "MathChoice",
+          "kind": "get",
+          "name": "arity",
+          "static": false,
+          "line": 55,
+          "end_line": 57,
+          "member_sha256": "cf15150f43e2667e7df01e6bfb9ed52fd619ab4317c7b5709a7e636f4bdcf410",
+          "target": "src/math/core/mml_tree/mml_nodes/mathchoice_bindings.cpp:MathChoice::arity",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p17c-mathchoice-acceptance.md"
+        },
+        {
+          "owner": "MathChoice",
+          "kind": "get",
+          "name": "notParent",
+          "static": false,
+          "line": 64,
+          "end_line": 66,
+          "member_sha256": "32c65f75d68f4f0dba7888f92ebfdcf88fa32c4bab98ef20b3ebd4e83be9d5e9",
+          "target": "src/math/core/mml_tree/mml_nodes/mathchoice_bindings.cpp:MathChoice::notParent",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p17c-mathchoice-acceptance.md"
+        },
+        {
+          "owner": "MathChoice",
+          "kind": "method",
+          "name": "setInheritedAttributes",
+          "static": false,
+          "line": 74,
+          "end_line": 84,
+          "member_sha256": "59ab2dc19aa0ea2c1d8f4d11512c0e65581df31aabca2a88e2f1649df295ef89",
+          "target": "src/math/core/mml_tree/mml_nodes/mathchoice.cpp:MathChoice::inheritAttributes",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p17c-mathchoice-acceptance.md",
+          "native_adaptation": "The single raw public facade dispatches here without defaults; qualified source body identity is preserved."
+        }
+      ]
+    }
+  ]
+}

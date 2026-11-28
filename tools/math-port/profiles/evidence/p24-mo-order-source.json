@@ -1,0 +1,4851 @@
+{
+  "cases": [
+    {
+      "id": "math_port_mo_order_lookup_trace_2b",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_lookup_trace_6162",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "static.table",
+            "set/noDictDef",
+            "attributes",
+            "static.op",
+            "get/texClass",
+            "get/texClass",
+            "tex.write"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_lookup_trace_21",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_lookup_trace_f09f9880",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "static.table",
+            "set/noDictDef",
+            "attributes",
+            "static.op",
+            "static.spacing",
+            "get/texClass",
+            "tex.write"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_inherited_gettext_once_dispatch",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "attributes",
+            "attributes",
+            "attributes",
+            "attributes",
+            "attributes",
+            "set/texprimestyle",
+            "text",
+            "table/x",
+            "pseudo/x",
+            "prime/x",
+            "accent/x"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_phase_missing_before_initializers",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "phase/missing/missing/missing",
+            "attributes"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_parent_read_before_predefined_accent",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "Parent",
+            "get/mathaccent"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_null_core_pseudo",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "static.pseudo"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_null_core_isAccent",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "trace",
+          "value": []
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_remap_missing_range_error",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "RangeError"
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "static.primes",
+            "static.remap"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_sparse_forms_keep_inherited_slots",
+      "observations": [
+        {
+          "kind": "scalar",
+          "expected": {
+            "type": "number",
+            "value": 4
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              105,
+              110,
+              102,
+              105,
+              120
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              112,
+              114,
+              101,
+              102,
+              105,
+              120
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              112,
+              111,
+              115,
+              116,
+              102,
+              105,
+              120
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              112,
+              114,
+              101,
+              102,
+              105,
+              120
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_module_rebind_is_separate_from_class_alias",
+      "observations": [
+        {
+          "kind": "scalar",
+          "expected": {
+            "type": "boolean",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_class_table_live_rebinding_after_construction",
+      "observations": [
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 6
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              99,
+              117,
+              115,
+              116,
+              111,
+              109
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_live_pattern_and_remap_after_construction",
+      "observations": [
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              55357,
+              56832
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_attribute_receiver_before_definition_slot",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write",
+            "attributes",
+            "attributes"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 9
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 8
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_accent_children_snapshot_before_virtual_base",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "Parent",
+            "get/mathaccent",
+            "snapshot",
+            "static.accent",
+            "set/mathaccent"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "boolean",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_coreparent_actual_registered_instanceof",
+      "observations": [
+        {
+          "kind": "scalar",
+          "expected": {
+            "type": "boolean",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_replacement_pattern_survives_its_own_rebinding",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "static.primes",
+            "static.remap",
+            "set/primes"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              8242
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_lookup_limits_shortcircuit_ab",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "static.table",
+            "set/noDictDef",
+            "attributes",
+            "static.op",
+            "get/texClass",
+            "static.spacing"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_lookup_limits_shortcircuit_x",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "static.table",
+            "set/noDictDef",
+            "attributes",
+            "static.op",
+            "get/texClass",
+            "static.spacing"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_null_attributes_failure_table",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_null_attributes_failure_pseudo",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "static.pseudo",
+            "Parent",
+            "set/pseudoscript",
+            "attributes"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "boolean",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_string_spacing_iterator",
+      "observations": [
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              55357,
+              56832
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              120
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_malformed_accent_empty",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "Parent",
+            "get/mathaccent"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_malformed_accent_null-array",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "Parent",
+            "get/mathaccent"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_malformed_accent_null-base",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "Parent",
+            "get/mathaccent"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_malformed_accent_missing-under-embellished-over",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "Parent",
+            "get/mathaccent"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_accent_missing_script_mover",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "trace",
+          "value": []
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_accent_missing_script_munder",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "trace",
+          "value": []
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_accent_missing_script_munderover",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "trace",
+          "value": []
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_adjust_null_prev_-1",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "tex.read"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": -1
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "null"
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_adjust_null_prev_0",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "tex.read"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_adjust_null_prev_1",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "tex.read"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_adjust_null_prev_2",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "tex.read",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_adjust_null_prev_3",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "tex.read"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 3
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_adjust_null_prev_4",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "tex.read"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 4
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_adjust_null_prev_5",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "tex.read"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 5
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_adjust_null_prev_6",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "tex.read"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 6
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_adjust_null_prev_7",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "tex.read"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 7
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_function_prototype_form_hits_and_poison_accessors",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "null"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "null"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write",
+            "attributes"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              106
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "null"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "null"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write",
+            "attributes"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              83
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "set/noDictDef",
+            "attributes",
+            "static.op",
+            "get/texClass",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "null"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "null"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write",
+            "attributes"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              108
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "set/noDictDef",
+            "attributes",
+            "static.op",
+            "get/texClass",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "set/noDictDef",
+            "attributes",
+            "static.op",
+            "get/texClass",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "set/noDictDef",
+            "attributes",
+            "static.op",
+            "get/texClass",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "set/noDictDef",
+            "attributes",
+            "static.op",
+            "get/texClass",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "set/noDictDef",
+            "attributes",
+            "static.op",
+            "get/texClass",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "set/noDictDef",
+            "attributes",
+            "static.op",
+            "get/texClass",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "set/noDictDef",
+            "attributes",
+            "static.op",
+            "get/texClass",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        {
+          "kind": "trace",
+          "value": [
+            "forms",
+            "Parent",
+            "explicit",
+            "attributes",
+            "attributes",
+            "attributes",
+            "static.table",
+            "set/noDictDef",
+            "attributes",
+            "static.op",
+            "get/texClass",
+            "get/texClass",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "boolean",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_coretext_non_embellished_nested-singletons",
+      "observations": [
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              120
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_coretext_non_embellished_multiple-row",
+      "observations": [
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_coretext_non_embellished_under-over",
+      "observations": [
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              120
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_coretext_non_embellished_atom",
+      "observations": [
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              120
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_binary_parent_walk_row-last",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "tex.read",
+            "attributes",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_binary_parent_walk_style-chain-last",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "tex.read",
+            "attributes",
+            "tex.write"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_binary_parent_walk_script-chain-last",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "tex.read",
+            "attributes"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_binary_parent_walk_style-chain-not-last",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "tex.read",
+            "attributes"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_binary_previous_assignment_right_to_left",
+      "observations": [
+        {
+          "kind": "trace",
+          "value": [
+            "tex.read",
+            "get/autoOP",
+            "prev.tex.read",
+            "tex.read",
+            "attributes",
+            "prev.tex.write/0",
+            "tex.write"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_order_intrinsic_function_identity_metadata",
+      "observations": [
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              79,
+              98,
+              106,
+              101,
+              99,
+              116,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "identity",
+          "name": "prototype"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              79,
+              98,
+              106,
+              101,
+              99,
+              116
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              95,
+              95,
+              100,
+              101,
+              102,
+              105,
+              110,
+              101,
+              71,
+              101,
+              116,
+              116,
+              101,
+              114,
+              95,
+              95,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              95,
+              95,
+              100,
+              101,
+              102,
+              105,
+              110,
+              101,
+              71,
+              101,
+              116,
+              116,
+              101,
+              114,
+              95,
+              95
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 2
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              95,
+              95,
+              100,
+              101,
+              102,
+              105,
+              110,
+              101,
+              83,
+              101,
+              116,
+              116,
+              101,
+              114,
+              95,
+              95,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              95,
+              95,
+              100,
+              101,
+              102,
+              105,
+              110,
+              101,
+              83,
+              101,
+              116,
+              116,
+              101,
+              114,
+              95,
+              95
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 2
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              104,
+              97,
+              115,
+              79,
+              119,
+              110,
+              80,
+              114,
+              111,
+              112,
+              101,
+              114,
+              116,
+              121,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              104,
+              97,
+              115,
+              79,
+              119,
+              110,
+              80,
+              114,
+              111,
+              112,
+              101,
+              114,
+              116,
+              121
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              95,
+              95,
+              108,
+              111,
+              111,
+              107,
+              117,
+              112,
+              71,
+              101,
+              116,
+              116,
+              101,
+              114,
+              95,
+              95,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              95,
+              95,
+              108,
+              111,
+              111,
+              107,
+              117,
+              112,
+              71,
+              101,
+              116,
+              116,
+              101,
+              114,
+              95,
+              95
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              95,
+              95,
+              108,
+              111,
+              111,
+              107,
+              117,
+              112,
+              83,
+              101,
+              116,
+              116,
+              101,
+              114,
+              95,
+              95,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              95,
+              95,
+              108,
+              111,
+              111,
+              107,
+              117,
+              112,
+              83,
+              101,
+              116,
+              116,
+              101,
+              114,
+              95,
+              95
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              105,
+              115,
+              80,
+              114,
+              111,
+              116,
+              111,
+              116,
+              121,
+              112,
+              101,
+              79,
+              102,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              105,
+              115,
+              80,
+              114,
+              111,
+              116,
+              111,
+              116,
+              121,
+              112,
+              101,
+              79,
+              102
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              112,
+              114,
+              111,
+              112,
+              101,
+              114,
+              116,
+              121,
+              73,
+              115,
+              69,
+              110,
+              117,
+              109,
+              101,
+              114,
+              97,
+              98,
+              108,
+              101,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              112,
+              114,
+              111,
+              112,
+              101,
+              114,
+              116,
+              121,
+              73,
+              115,
+              69,
+              110,
+              117,
+              109,
+              101,
+              114,
+              97,
+              98,
+              108,
+              101
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              116,
+              111,
+              83,
+              116,
+              114,
+              105,
+              110,
+              103,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              116,
+              111,
+              83,
+              116,
+              114,
+              105,
+              110,
+              103
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              118,
+              97,
+              108,
+              117,
+              101,
+              79,
+              102,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              118,
+              97,
+              108,
+              117,
+              101,
+              79,
+              102
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              116,
+              111,
+              76,
+              111,
+              99,
+              97,
+              108,
+              101,
+              83,
+              116,
+              114,
+              105,
+              110,
+              103,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              116,
+              111,
+              76,
+              111,
+              99,
+              97,
+              108,
+              101,
+              83,
+              116,
+              114,
+              105,
+              110,
+              103
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              65,
+              114,
+              114,
+              97,
+              121,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "identity",
+          "name": "arrayPrototype"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              65,
+              114,
+              114,
+              97,
+              121
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              116,
+              111,
+              83,
+              116,
+              114,
+              105,
+              110,
+              103,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              116,
+              111,
+              83,
+              116,
+              114,
+              105,
+              110,
+              103
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              106,
+              111,
+              105,
+              110,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              106,
+              111,
+              105,
+              110
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              78,
+              117,
+              109,
+              98,
+              101,
+              114,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "identity",
+          "name": "numberPrototype"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              78,
+              117,
+              109,
+              98,
+              101,
+              114
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              116,
+              111,
+              83,
+              116,
+              114,
+              105,
+              110,
+              103,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              116,
+              111,
+              83,
+              116,
+              114,
+              105,
+              110,
+              103
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              118,
+              97,
+              108,
+              117,
+              101,
+              79,
+              102,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              118,
+              97,
+              108,
+              117,
+              101,
+              79,
+              102
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "prototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": []
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              70,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              70,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              99,
+              97,
+              108,
+              108,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              99,
+              97,
+              108,
+              108
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              97,
+              112,
+              112,
+              108,
+              121,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              97,
+              112,
+              112,
+              108,
+              121
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 2
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              98,
+              105,
+              110,
+              100,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              98,
+              105,
+              110,
+              100
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              102,
+              117,
+              110,
+              99,
+              116,
+              105,
+              111,
+              110,
+              32,
+              116,
+              111,
+              83,
+              116,
+              114,
+              105,
+              110,
+              103,
+              40,
+              41,
+              32,
+              123,
+              32,
+              91,
+              110,
+              97,
+              116,
+              105,
+              118,
+              101,
+              32,
+              99,
+              111,
+              100,
+              101,
+              93,
+              32,
+              125
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "functionPrototype"
+        },
+        {
+          "kind": "identity",
+          "name": "functionConstructor"
+        },
+        {
+          "kind": "identity",
+          "name": "functionCall"
+        },
+        {
+          "kind": "identity",
+          "name": "functionApply"
+        },
+        {
+          "kind": "identity",
+          "name": "functionBind"
+        },
+        {
+          "kind": "identity",
+          "name": "functionToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              116,
+              111,
+              83,
+              116,
+              114,
+              105,
+              110,
+              103
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              91,
+              111,
+              98,
+              106,
+              101,
+              99,
+              116,
+              32,
+              79,
+              98,
+              106,
+              101,
+              99,
+              116,
+              93
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "null"
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "constructor"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "toString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": []
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "prototype"
+        },
+        {
+          "kind": "identity",
+          "name": "arrayConstructor"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "arrayToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              48
+            ]
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "prototype"
+        },
+        {
+          "kind": "identity",
+          "name": "numberConstructor"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "identity",
+          "name": "numberToString"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        }
+      ]
+    }
+  ],
+  "assertions": 538
+}

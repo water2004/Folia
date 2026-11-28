@@ -1,0 +1,477 @@
+{
+  "stage": "53 unchanged Unicode 17 upstream tests conflict with actual Node 16 witnesses; not waived",
+  "node": "v24.13.0",
+  "unicode": "16.0",
+  "upstream_test_source_sha256": "ee0d35945395a20e5eb29a3f56c1f9be0d5c42a2a45f4ae0dc1a3cdb968faacb",
+  "witnesses": [
+    {
+      "upstream_test": "unicode_escape_property_binary_diacritic",
+      "pattern": "^\\p{Diacritic}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 1479,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_changeswhencasemapped",
+      "pattern": "^\\p{Changes_When_Casemapped}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 93856,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_alphabetic",
+      "pattern": "^\\p{Alphabetic}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 3164,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_caseignorable",
+      "pattern": "^\\p{Case_Ignorable}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 6880,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_changeswhenlowercased",
+      "pattern": "^\\p{Changes_When_Lowercased}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 42958,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_cased",
+      "pattern": "^\\p{Cased}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 42993,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_extender",
+      "pattern": "^\\p{Extender}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 73177,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_changeswhentitlecased",
+      "pattern": "^\\p{Changes_When_Titlecased}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 42959,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_changeswhenuppercased",
+      "pattern": "^\\p{Changes_When_Uppercased}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 42959,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_emoji",
+      "pattern": "^\\p{Emoji}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 128728,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_emojipresentation",
+      "pattern": "^\\p{Emoji_Presentation}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 128728,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_graphemebase",
+      "pattern": "^\\p{Grapheme_Base}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 3164,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_ideographic",
+      "pattern": "^\\p{Ideographic}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 94194,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_changeswhencasefolded",
+      "pattern": "^\\p{Changes_When_Casefolded}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 42958,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_graphemeextend",
+      "pattern": "^\\p{Grapheme_Extend}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 6880,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_idstart",
+      "pattern": "^\\p{ID_Start}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 3164,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_changeswhennfkccasefolded",
+      "pattern": "^\\p{Changes_When_NFKC_Casefolded}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 42958,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_idcontinue",
+      "pattern": "^\\p{ID_Continue}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 3164,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_math",
+      "pattern": "^\\p{Math}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 118512,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_lowercase",
+      "pattern": "^\\p{Lowercase}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 42959,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_xidstart",
+      "pattern": "^\\p{XID_Start}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 3164,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_uppercase",
+      "pattern": "^\\p{Uppercase}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 42958,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_binary_xidcontinue",
+      "pattern": "^\\p{XID_Continue}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 3164,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_gc_decimalnumber",
+      "pattern": "^\\p{General_Category=Decimal_Number}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 73184,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_gc_casedletter",
+      "pattern": "^\\p{General_Category=Cased_Letter}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 42959,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_gc_letternumber",
+      "pattern": "^\\p{General_Category=Letter_Number}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 94196,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_gc_mathsymbol",
+      "pattern": "^\\p{General_Category=Math_Symbol}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 118512,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_gc_mark",
+      "pattern": "^\\p{General_Category=Mark}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 72545,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_gc_number",
+      "pattern": "^\\p{General_Category=Number}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 73184,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_gc_letter",
+      "pattern": "^\\p{General_Category=Letter}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 42959,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_gc_otherletter",
+      "pattern": "^\\p{General_Category=Other_Letter}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 3164,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_gc_lowercaseletter",
+      "pattern": "^\\p{General_Category=Lowercase_Letter}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 42959,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_gc_otherpunctuation",
+      "pattern": "^\\p{General_Category=Other_Punctuation}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 69328,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_gc_othersymbol",
+      "pattern": "^\\p{General_Category=Other_Symbol}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 64451,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_gc_modifierletter",
+      "pattern": "^\\p{General_Category=Modifier_Letter}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 42993,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_gc_nonspacingmark",
+      "pattern": "^\\p{General_Category=Nonspacing_Mark}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 6880,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_gc_punctuation",
+      "pattern": "^\\p{General_Category=Punctuation}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 69328,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_gc_spacingmark",
+      "pattern": "^\\p{General_Category=Spacing_Mark}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 72545,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_gc_symbol",
+      "pattern": "^\\p{General_Category=Symbol}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 118512,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_gc_uppercaseletter",
+      "pattern": "^\\p{General_Category=Uppercase_Letter}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 42958,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_script_arabic",
+      "pattern": "^\\p{Script=Arabic}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 2191,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_script_beria_erfe",
+      "pattern": "^\\p{Script=Beria_Erfe}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "SyntaxError"
+    },
+    {
+      "upstream_test": "unicode_escape_property_script_common",
+      "pattern": "^\\p{Script=Common}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 8385,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_script_han",
+      "pattern": "^\\p{Script=Han}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 94198,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_script_inherited",
+      "pattern": "^\\p{Script=Inherited}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 6863,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_script_kannada",
+      "pattern": "^\\p{Script=Kannada}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 3292,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_script_latin",
+      "pattern": "^\\p{Script=Latin}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 42958,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_script_sharada",
+      "pattern": "^\\p{Script=Sharada}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 72544,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_script_sidetic",
+      "pattern": "^\\p{Script=Sidetic}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "SyntaxError"
+    },
+    {
+      "upstream_test": "unicode_escape_property_script_tai_yo",
+      "pattern": "^\\p{Script=Tai_Yo}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "SyntaxError"
+    },
+    {
+      "upstream_test": "unicode_escape_property_script_telugu",
+      "pattern": "^\\p{Script=Telugu}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 3164,
+      "node_expected_match": false
+    },
+    {
+      "upstream_test": "unicode_escape_property_script_tolong_siki",
+      "pattern": "^\\p{Script=Tolong_Siki}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "SyntaxError"
+    },
+    {
+      "upstream_test": "unicode_escape_property_script_tangut",
+      "pattern": "^\\p{Script=Tangut}+$",
+      "flags": "u",
+      "upstream_expected_match": true,
+      "constructor": "ok",
+      "code_point": 100344,
+      "node_expected_match": false
+    }
+  ]
+}

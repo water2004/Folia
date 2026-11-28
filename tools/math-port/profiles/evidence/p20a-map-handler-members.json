@@ -1,0 +1,288 @@
+{
+  "schema": 1,
+  "typescript": "5.9.3",
+  "status": "locally_accepted_complete_map_handler_not_concrete_token_maps_parser_or_renderer",
+  "files": [
+    {
+      "source": "ts/input/tex/MapHandler.ts",
+      "source_sha256": "7cacdaef3ed1df90b4f05cc0b3183a2956ae8f848f20ae8833932faa4efcb2a2",
+      "members": [
+        {
+          "owner": "<module>",
+          "kind": "initialized_global",
+          "name": "maps",
+          "static": false,
+          "line": 33,
+          "end_line": 33,
+          "member_sha256": "0c86f36cf3c4d8fd6d49a5476177ba0c770470775eb6e63fb0bcc716f31f80c3",
+          "target": "src/math/input/tex/map_handler.cpp:mapRegistry",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "<module>",
+          "kind": "initialized_global",
+          "name": "MapHandler",
+          "static": false,
+          "line": 35,
+          "end_line": 55,
+          "member_sha256": "29bd44da758afa720a3719fade96365cafb421cd5d32ab90700775d7d9752683",
+          "target": "src/math/input/tex/map_handler.ixx:MapHandler",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandler",
+          "kind": "initialized_field",
+          "name": "FALLBACK",
+          "static": true,
+          "line": 61,
+          "end_line": 61,
+          "member_sha256": "91d0b5ccf6087b9e830695e1770c36efb2c5739bdce3132c90af07dfdbb1d4c6",
+          "target": "src/math/input/tex/map_handler.cpp:SubHandler::FALLBACK",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandler",
+          "kind": "initialized_field",
+          "name": "_configuration",
+          "static": false,
+          "line": 63,
+          "end_line": 64,
+          "member_sha256": "422ed12464429f59f4ea21d4a102d96460ae9454c4a53d82d489f88cec99ca96",
+          "target": "src/math/input/tex/map_handler.ixx:SubHandler::configuration_",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandler",
+          "kind": "initialized_field",
+          "name": "_fallback",
+          "static": false,
+          "line": 65,
+          "end_line": 65,
+          "member_sha256": "4bbb47f0668542de5225c89f3d541a97520216830ddd16f697cfb9d6ac8f659d",
+          "target": "src/math/input/tex/map_handler.ixx:SubHandler::fallback_",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandler",
+          "kind": "method",
+          "name": "add",
+          "static": false,
+          "line": 74,
+          "end_line": 90,
+          "member_sha256": "5bac1f801c72caa34be24a487de60fc144bbe4167eccb50b35a8645069b7a7c7",
+          "target": "src/math/input/tex/map_handler.cpp:SubHandler::add",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandler",
+          "kind": "method",
+          "name": "remove",
+          "static": false,
+          "line": 98,
+          "end_line": 108,
+          "member_sha256": "6e8723b0e86d41c143c6ca6761a2346938b2017d74c2245eaee9514d0383b518",
+          "target": "src/math/input/tex/map_handler.cpp:SubHandler::remove",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandler",
+          "kind": "method",
+          "name": "parse",
+          "static": false,
+          "line": 116,
+          "end_line": 129,
+          "member_sha256": "8995d4d9f3d3b808dff0bf2c510970c9921f91af6b01b2e656ddb3c221c4a3fc",
+          "target": "src/math/input/tex/map_handler.cpp:SubHandler::parse",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandler",
+          "kind": "method",
+          "name": "lookup",
+          "static": false,
+          "line": 139,
+          "end_line": 142,
+          "member_sha256": "a276cc2a7b7ce6f91303ecd7c0f0cbcc17affa3e22ba96002ce0277d0676f3f3",
+          "target": "src/math/input/tex/map_handler.cpp:SubHandler::lookup",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandler",
+          "kind": "method",
+          "name": "contains",
+          "static": false,
+          "line": 151,
+          "end_line": 156,
+          "member_sha256": "0c363aae9bda003ebd88c58e4916701936f0f17d03a47f43bb80ec4771d01b2a",
+          "target": "src/math/input/tex/map_handler.cpp:SubHandler::contains",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandler",
+          "kind": "method",
+          "name": "toString",
+          "static": false,
+          "line": 161,
+          "end_line": 167,
+          "member_sha256": "47b54f8faa78b8cb872e2bb1288fc4996cf5e2f5e0f72ef606bb57f0938e8cb8",
+          "target": "src/math/input/tex/map_handler.cpp:SubHandler::toString",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandler",
+          "kind": "method",
+          "name": "applicable",
+          "static": false,
+          "line": 175,
+          "end_line": 182,
+          "member_sha256": "ac5ed5b17f4a5aea620c36dff558299b6016fbe52e3656dbeb0c6a97fee283ac",
+          "target": "src/math/input/tex/map_handler.cpp:SubHandler::applicable",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandler",
+          "kind": "method",
+          "name": "retrieve",
+          "static": false,
+          "line": 190,
+          "end_line": 197,
+          "member_sha256": "7db06453ff1a504b0b1b1eee4bfbb3bb57aef19668ff325bb3bd361bf70767d0",
+          "target": "src/math/input/tex/map_handler.cpp:SubHandler::retrieve",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandler",
+          "kind": "method",
+          "name": "warn",
+          "static": false,
+          "line": 204,
+          "end_line": 206,
+          "member_sha256": "6931e2e59a8c2abf62d8622e0385411f88d23dd537a45fa17ba9ae4860d03a97",
+          "target": "src/math/input/tex/map_handler.cpp:SubHandler::warn",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandlers",
+          "kind": "initialized_field",
+          "name": "map",
+          "static": false,
+          "line": 210,
+          "end_line": 210,
+          "member_sha256": "ff88e9123a6c50f9fd3714d2e6e368f412fc9a3b3b5842b49beaeaa0dfef9cc3",
+          "target": "src/math/input/tex/map_handler.ixx:SubHandlers::map_",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandlers",
+          "kind": "method",
+          "name": "add",
+          "static": false,
+          "line": 219,
+          "end_line": 233,
+          "member_sha256": "6936d64ec0ee02c5120423308c2311c91c973722e9cc0a9a68cddf0f9648dd1f",
+          "target": "src/math/input/tex/map_handler.cpp:SubHandlers::add",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandlers",
+          "kind": "method",
+          "name": "remove",
+          "static": false,
+          "line": 241,
+          "end_line": 248,
+          "member_sha256": "6347718bdea2f46e9335ff9762b9270b553f3ed5b0a7bec13ef9c507df9cbdb8",
+          "target": "src/math/input/tex/map_handler.cpp:SubHandlers::remove",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandlers",
+          "kind": "method",
+          "name": "set",
+          "static": false,
+          "line": 256,
+          "end_line": 258,
+          "member_sha256": "433fede18770c62a0eaf9f8ccb36a5871f3eec7c4228f99dff1044c66f4937f4",
+          "target": "src/math/input/tex/map_handler.cpp:SubHandlers::set",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandlers",
+          "kind": "method",
+          "name": "get",
+          "static": false,
+          "line": 266,
+          "end_line": 268,
+          "member_sha256": "6be25fbfab99bb8d025858a6a5b317938947c0d87d28458c44cfba5c86ab55bf",
+          "target": "src/math/input/tex/map_handler.cpp:SubHandlers::get",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandlers",
+          "kind": "method",
+          "name": "retrieve",
+          "static": false,
+          "line": 276,
+          "end_line": 284,
+          "member_sha256": "309e090ca79a2273fc6a7e8fecb7a1ebbd0bc96354bf17897266979f5aa1a36e",
+          "target": "src/math/input/tex/map_handler.cpp:SubHandlers::retrieve",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "SubHandlers",
+          "kind": "method",
+          "name": "keys",
+          "static": false,
+          "line": 291,
+          "end_line": 293,
+          "member_sha256": "b3bbcb50e18727e0a72d875ea63355247e9d8a2e461bc04715e855b581afe444",
+          "target": "src/math/input/tex/map_handler.ixx:SubHandlers::keys",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        }
+      ],
+      "object_methods": [
+        {
+          "owner": "MapHandler",
+          "name": "register",
+          "line": 42,
+          "end_line": 44,
+          "member_sha256": "a77d9e884c395b104e9094b14c0f865a2e5e7a1a2b4cc4c57bf87410727d1b0e",
+          "target": "src/math/input/tex/map_handler.cpp:MapHandler::registerMap",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        },
+        {
+          "owner": "MapHandler",
+          "name": "getMap",
+          "line": 52,
+          "end_line": 54,
+          "member_sha256": "9083eb0e79a3cab3cce21cd6b72604e7111bf933f6dfcffff6eb48d9e941bd8a",
+          "target": "src/math/input/tex/map_handler.cpp:MapHandler::getMap",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+        }
+      ],
+      "native_adaptation": "Root-frozen TokenMap protocol with raw Property map keys, actual prioritized-list records, native MethodConfig, RTTI CharacterMap family and retained live Map iterator. Concrete TokenMap algorithms and regexp engine remain unaccepted."
+    }
+  ]
+}

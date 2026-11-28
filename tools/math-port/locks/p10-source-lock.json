@@ -1,0 +1,24 @@
+{
+  "version": "4.1.3",
+  "node": "v24.13.0",
+  "files": [
+    {
+      "source": "ts/core/MmlTree/MmlNodes/msubsup.ts",
+      "sha256": "37fd01fa0c44ceab5b4ed30ba3d95ab43ffb8aed55db27c7290d6d786131f6e7",
+      "runtime": "cjs/core/MmlTree/MmlNodes/msubsup.js",
+      "runtime_sha256": "7971b391a8d7c92e0d6115b17c4c394dafc828942fc00591ba6064b871610c18"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/munderover.ts",
+      "sha256": "b9bf04f77922c50044c4d99b3093882cab9b35ec36203f20e1e999997f9adf82",
+      "runtime": "cjs/core/MmlTree/MmlNodes/munderover.js",
+      "runtime_sha256": "104a6ed2f1a8967726c4a0da6ffd0ffb917c23fe0b3847138161c975fa0785b9"
+    },
+    {
+      "source": "ts/util/string.ts",
+      "sha256": "024a2ac6f96a314884f2bd71a913060c06fb75d46cbf6c94e15f4e71643a7084",
+      "runtime": "cjs/util/string.js",
+      "runtime_sha256": "e1f09bca257dd268b9483b7310e4c77039dd022f01c5e9f5a62f47a981921e9c"
+    }
+  ]
+}

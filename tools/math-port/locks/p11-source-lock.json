@@ -1,0 +1,8 @@
+{
+  "version": "4.1.3",
+  "node": "v24.13.0",
+  "source": "ts/core/MmlTree/OperatorDictionary.ts",
+  "sha256": "9afac6e3a8f3b778247a5a678c529b9edddb8172850df7384511bf61dfbffd37",
+  "runtime": "cjs/core/MmlTree/OperatorDictionary.js",
+  "runtime_sha256": "db65e13a8f3c6290e711303d46cfb6f2fe8ec24e12c499bdf9b1bf4f42027ff8"
+}

@@ -1,0 +1,594 @@
+{
+  "schema": 1,
+  "typescript": "5.9.3",
+  "status": "unreviewed_member_inventory",
+  "files": [
+    {
+      "source": "ts/core/MmlTree/MmlNodes/maction.ts",
+      "source_sha256": "fa173b7e2b25b90e0f83ac201098357a8abf28462fa86fa69d92b65906527895",
+      "members": [
+        {
+          "owner": "MmlMaction",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 36,
+          "end_line": 40,
+          "member_sha256": "6bb9596064daeb2f8091ffad161f3564d81de60213dee2cf67d9a1e34744776b",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 45,
+          "end_line": 47,
+          "member_sha256": "9d873e87c692a6c274721602bc9f2791f2a8c3a2f4b8248058ae9a448bd14438",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "get",
+          "name": "arity",
+          "static": false,
+          "line": 54,
+          "end_line": 56,
+          "member_sha256": "5b1e7efcbaaee87e360d1b2d4f0cef10497a01d081347aa263f00e7a210bfc7b",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "get",
+          "name": "selected",
+          "static": false,
+          "line": 61,
+          "end_line": 65,
+          "member_sha256": "29cbd29f75037b271cfefbec1f8d8ee006c0cfaa49c073e1d7cd9f983f1e9f30",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "get",
+          "name": "isEmbellished",
+          "static": false,
+          "line": 70,
+          "end_line": 72,
+          "member_sha256": "e8fa24a65b39a99281e26941cc990d37705bb20e8d825a3bba9de102d287069e",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "get",
+          "name": "isSpacelike",
+          "static": false,
+          "line": 77,
+          "end_line": 79,
+          "member_sha256": "5fcf235c41220ba3c3a6bd203fde7ae12aa17d1e88efb8d37397577421aab143",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "method",
+          "name": "core",
+          "static": false,
+          "line": 84,
+          "end_line": 86,
+          "member_sha256": "67e42456644adf8c77cb7a51c4fcc0d8d427a89a71e76f90c267afec8de08348",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "method",
+          "name": "coreMO",
+          "static": false,
+          "line": 91,
+          "end_line": 93,
+          "member_sha256": "ef344c77c404e1fea8def128ec3ca371f087993d3ab4621eba31be07c16238d4",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "method",
+          "name": "verifyAttributes",
+          "static": false,
+          "line": 98,
+          "end_line": 106,
+          "member_sha256": "5634f19f3542dceffc730880e0d01aa4666a1ed38782298c881b8c516645c0a5",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "method",
+          "name": "setTeXclass",
+          "static": false,
+          "line": 114,
+          "end_line": 122,
+          "member_sha256": "dcf7daeba149ed131653efcf67c762530c959d622b180bfdfdf8525da62e51e5",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "method",
+          "name": "nextToggleSelection",
+          "static": false,
+          "line": 127,
+          "end_line": 136,
+          "member_sha256": "526adbee803079a1d0255a6533bdf4b775bf6efb434fd1c224433565f34859fa",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMaction",
+          "kind": "method",
+          "name": "setChildInheritedAttributes",
+          "static": false,
+          "line": 141,
+          "end_line": 160,
+          "member_sha256": "83ac1c5c7b156b3fd32a8c229896bcac571aae60f63e959afe6c216e198f44a0",
+          "target": null,
+          "review": "unreviewed"
+        }
+      ]
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/maligngroup.ts",
+      "source_sha256": "4d8ecdae93aaff85887ec4eb09c8821811866a9e9b56e037ac61d0b6d81bf2b1",
+      "members": [
+        {
+          "owner": "MmlMaligngroup",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 37,
+          "end_line": 40,
+          "member_sha256": "44fd6ff638503f80e4918fb27188c4e94f5d37b2d2d22ad5ed6b0440d8cd0d8f",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMaligngroup",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 45,
+          "end_line": 47,
+          "member_sha256": "d9b3f93ea72f715116ec23d0196017b113ecfa9b9350562caf033e5ffaea0241",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMaligngroup",
+          "kind": "get",
+          "name": "isSpacelike",
+          "static": false,
+          "line": 54,
+          "end_line": 56,
+          "member_sha256": "9da090c1d0c23d05aeff874a2b229626793130929f60c29e567bfca5d1bb563f",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMaligngroup",
+          "kind": "method",
+          "name": "setChildInheritedAttributes",
+          "static": false,
+          "line": 63,
+          "end_line": 74,
+          "member_sha256": "99488e680756e4ea7bb9f6229d682a47a4b884fd56ef98894fe9f00a786d3ca6",
+          "target": null,
+          "review": "unreviewed"
+        }
+      ]
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/malignmark.ts",
+      "source_sha256": "f35d8b9edcf1afce67f74eef1dc1c04434f9caea944b3f3fd439d1aaf484cb61",
+      "members": [
+        {
+          "owner": "MmlMalignmark",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 36,
+          "end_line": 39,
+          "member_sha256": "43494be89b78baf070f759225aaf33631f0813386144a5e1b713e834436882fa",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMalignmark",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 44,
+          "end_line": 46,
+          "member_sha256": "c6cab08a8132a2ce9df6cfd3dfcc049beb73cb5c70b177c493e2c7169f54065a",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMalignmark",
+          "kind": "get",
+          "name": "arity",
+          "static": false,
+          "line": 53,
+          "end_line": 55,
+          "member_sha256": "9966fe86c33365348922f329ad34380a52807b15171ff503010c84139d7f4f2e",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMalignmark",
+          "kind": "get",
+          "name": "isSpacelike",
+          "static": false,
+          "line": 62,
+          "end_line": 64,
+          "member_sha256": "9da090c1d0c23d05aeff874a2b229626793130929f60c29e567bfca5d1bb563f",
+          "target": null,
+          "review": "unreviewed"
+        }
+      ]
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mathchoice.ts",
+      "source_sha256": "e1f9fdf92e345c7bc09e3333c4f436ae8f2d1e4c8fa9a2280877590cf9025d76",
+      "members": [
+        {
+          "owner": "MathChoice",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 39,
+          "end_line": 41,
+          "member_sha256": "1a0e13e7810161f692efd3cde67f6ab8ad3d71465ac3601de9f2957e303594dd",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MathChoice",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 46,
+          "end_line": 48,
+          "member_sha256": "839fd51f7cd7d2a1d239337d3e74f0c17837eb0248f6ea807fa832df3edaf57c",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MathChoice",
+          "kind": "get",
+          "name": "arity",
+          "static": false,
+          "line": 55,
+          "end_line": 57,
+          "member_sha256": "cf15150f43e2667e7df01e6bfb9ed52fd619ab4317c7b5709a7e636f4bdcf410",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MathChoice",
+          "kind": "get",
+          "name": "notParent",
+          "static": false,
+          "line": 64,
+          "end_line": 66,
+          "member_sha256": "32c65f75d68f4f0dba7888f92ebfdcf88fa32c4bab98ef20b3ebd4e83be9d5e9",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MathChoice",
+          "kind": "method",
+          "name": "setInheritedAttributes",
+          "static": false,
+          "line": 74,
+          "end_line": 84,
+          "member_sha256": "59ab2dc19aa0ea2c1d8f4d11512c0e65581df31aabca2a88e2f1649df295ef89",
+          "target": null,
+          "review": "unreviewed"
+        }
+      ]
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/menclose.ts",
+      "source_sha256": "ffa4ab507744cb4f190312ca8dcd692474c333bee6e19c86709554aa9dad4333",
+      "members": [
+        {
+          "owner": "MmlMenclose",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 36,
+          "end_line": 39,
+          "member_sha256": "dce99ba6bdd9dbd78e880bd6735f2737b0984d1263d019721d0f3178378b2144",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMenclose",
+          "kind": "initialized_field",
+          "name": "texclass",
+          "static": false,
+          "line": 44,
+          "end_line": 44,
+          "member_sha256": "ae6973db2de12fc183bff054f14d2701c2ea70f7166ba201a4afe297037ff180",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMenclose",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 51,
+          "end_line": 53,
+          "member_sha256": "c2116ab0e319734c360469d5871ab08c7870523607f4c439a3e4270df8224fce",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMenclose",
+          "kind": "get",
+          "name": "arity",
+          "static": false,
+          "line": 60,
+          "end_line": 62,
+          "member_sha256": "d8b1ec790a6cb6ae2ce454b47578e524928326ae1ea6446cb2be437326c776a7",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMenclose",
+          "kind": "get",
+          "name": "linebreakContainer",
+          "static": false,
+          "line": 69,
+          "end_line": 71,
+          "member_sha256": "ec2da68353631b78744bc66456517d5140af5845080c40553e5c95ed54f2e58a",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMenclose",
+          "kind": "method",
+          "name": "setTeXclass",
+          "static": false,
+          "line": 76,
+          "end_line": 80,
+          "member_sha256": "8e70c1191a1a682d61b8660afd881d72f4d95212df969fc29e5853cc14e54581",
+          "target": null,
+          "review": "unreviewed"
+        }
+      ]
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mfenced.ts",
+      "source_sha256": "64b3f4d89d47765eb83034b480b843b2769d8de12e31d7571c50e5c4bb2bd397",
+      "members": [
+        {
+          "owner": "MmlMfenced",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 42,
+          "end_line": 47,
+          "member_sha256": "2fbe9c6e186297fd8cddefa4da16d07a846b361ce2d83571fbb12f2249009948",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMfenced",
+          "kind": "initialized_field",
+          "name": "texclass",
+          "static": false,
+          "line": 52,
+          "end_line": 52,
+          "member_sha256": "8bef32159bf2c5ec5e90f44345cc55ad388eee273c0ecbed9713c8ecb28f57ef",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMfenced",
+          "kind": "initialized_field",
+          "name": "separators",
+          "static": false,
+          "line": 57,
+          "end_line": 57,
+          "member_sha256": "8a9ebcafd3019fbb9950ab855f81b4c771dc10c779e70340ad7813301963ec2d",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMfenced",
+          "kind": "initialized_field",
+          "name": "open",
+          "static": false,
+          "line": 61,
+          "end_line": 61,
+          "member_sha256": "06897ae5b46ad8e4c013f219e2980955e4a32b753430addbc8fa3b0c26712710",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMfenced",
+          "kind": "initialized_field",
+          "name": "close",
+          "static": false,
+          "line": 65,
+          "end_line": 65,
+          "member_sha256": "6e83a691e8f35ac250609eab6c10da4fd3bda0e69a6adfbda2c3c94e4f135fcc",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMfenced",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 70,
+          "end_line": 72,
+          "member_sha256": "39490947eef4aca3341bc60b209d3f4be1d76ca03410efb07e18b3bfafb455cf",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMfenced",
+          "kind": "method",
+          "name": "setTeXclass",
+          "static": false,
+          "line": 80,
+          "end_line": 103,
+          "member_sha256": "182b05b6c2a00e0c18a6d46cdaa8c325fe39287fe50d3bb9b36c9f559906b0da",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMfenced",
+          "kind": "method",
+          "name": "setChildInheritedAttributes",
+          "static": false,
+          "line": 111,
+          "end_line": 124,
+          "member_sha256": "0c121090400a003a6f115de94b9cfa01ef00bcac141633af0a206e6e1cc6c7f5",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMfenced",
+          "kind": "method",
+          "name": "addFakeNodes",
+          "static": false,
+          "line": 129,
+          "end_line": 172,
+          "member_sha256": "3224cc918f1f17a12d409a42cf82a09455acb0f055b2754372584c6d81f3635b",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMfenced",
+          "kind": "method",
+          "name": "fakeNode",
+          "static": false,
+          "line": 180,
+          "end_line": 190,
+          "member_sha256": "1924201e9a23d5c6c5f551d45aab41488c7cd15ec647424929d3383e935bb7d8",
+          "target": null,
+          "review": "unreviewed"
+        }
+      ]
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mglyph.ts",
+      "source_sha256": "2c2d336067d3970c55f3fcdafb82b55d4339a2c11d69088c8c7eff4a6d953504",
+      "members": [
+        {
+          "owner": "MmlMglyph",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 36,
+          "end_line": 44,
+          "member_sha256": "bb2dc46727e365dc280a87e6d336b26b8edde7e3260bc80f5c426cad8ee13346",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMglyph",
+          "kind": "initialized_field",
+          "name": "texclass",
+          "static": false,
+          "line": 49,
+          "end_line": 49,
+          "member_sha256": "ae6973db2de12fc183bff054f14d2701c2ea70f7166ba201a4afe297037ff180",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMglyph",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 54,
+          "end_line": 56,
+          "member_sha256": "e37d71a862c17431c2317e2774148b136e4ec9bbf8ce216e4191b42f442e1f08",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMglyph",
+          "kind": "method",
+          "name": "verifyAttributes",
+          "static": false,
+          "line": 61,
+          "end_line": 76,
+          "member_sha256": "02edb87e1d972b3389e856e85c8b0bf6f84c437362f6b2b9d37b0dbad4327b03",
+          "target": null,
+          "review": "unreviewed"
+        }
+      ]
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mpadded.ts",
+      "source_sha256": "b5aac516c32fb019ac5ace504f86312f3e0849e1faa44006567bac05815c7271",
+      "members": [
+        {
+          "owner": "MmlMpadded",
+          "kind": "initialized_field",
+          "name": "defaults",
+          "static": true,
+          "line": 36,
+          "end_line": 43,
+          "member_sha256": "64a5af284eb0488bee3b445f10ed84ac1cf67286aac32b9a5d5844e73008d95d",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMpadded",
+          "kind": "get",
+          "name": "kind",
+          "static": false,
+          "line": 48,
+          "end_line": 50,
+          "member_sha256": "86d6eef9033a63a516ca5d7c7b72e2120217c67aa86836f09da7d5ca4d602883",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMpadded",
+          "kind": "get",
+          "name": "linebreakContainer",
+          "static": false,
+          "line": 55,
+          "end_line": 57,
+          "member_sha256": "ec2da68353631b78744bc66456517d5140af5845080c40553e5c95ed54f2e58a",
+          "target": null,
+          "review": "unreviewed"
+        },
+        {
+          "owner": "MmlMpadded",
+          "kind": "method",
+          "name": "setTeXclass",
+          "static": false,
+          "line": 62,
+          "end_line": 70,
+          "member_sha256": "0c8dc42535806d44827c92b57309f11138a2250603835342bae6adeae1d5b190",
+          "target": null,
+          "review": "unreviewed"
+        }
+      ]
+    }
+  ]
+}

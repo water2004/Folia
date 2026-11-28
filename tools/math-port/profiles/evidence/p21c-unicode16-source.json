@@ -1,0 +1,23 @@
+{
+  "stage": "actual Node Unicode 16 properties; no candidate or host accepted",
+  "node": "v24.13.0",
+  "unicode": "16.0",
+  "icu": "77.1",
+  "stimulus_input_hashes": {
+    "PropertyValueAliases.txt": "440fd3e5460b9bfe31da67b6f923992e1989d31fe2ed91e091c4b8f8e2620bf9",
+    "Scripts.txt": "9e88f0a677df47311106340be8ede2ecdacd9c1c931831218d2be6d5508e0039",
+    "PropertyAliases.txt": "33a9f2266ad6b8e8de05c0ea3dfac411ac62cf8839ff1c94057471e4c5f6a2b3",
+    "CaseFolding.txt": "6f1f9c588eb4a5c718d9e8f93b782685e5c7fec872cf05e8e6878053599e09bb",
+    "emoji-sequences.txt": "3fe3c77e72e8f26df302dc7d99b106c5d08fd808ef7246fb5d4502d659fe659c",
+    "emoji-zwj-sequences.txt": "9423ec235474356f970a696506737e2d5d65453a67f45df66b8bbe920c3fab83"
+  },
+  "cases": 286500,
+  "by_group": {
+    "all-script-aliases-and-range-witnesses": 158832,
+    "all-general-category-aliases": 34560,
+    "binary-and-rejected-property-aliases": 38592,
+    "every-simple-case-fold-mapping": 11872,
+    "all-emoji-sequences-string-properties": 42644
+  },
+  "source_case_sha256": "03d1dd3cc23955f107d1a2265f04720497743bdb30b83d5ea804ba8adbb8094e"
+}

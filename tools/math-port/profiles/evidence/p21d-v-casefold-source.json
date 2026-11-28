@@ -1,0 +1,15 @@
+{
+  "stage": "actual Node point-set folding; no engine or host accepted",
+  "node": "v24.13.0",
+  "unicode": "16.0",
+  "icu": "77.1",
+  "v8": "13.6.233.17-node.37",
+  "cases": 227712,
+  "patterns": 593,
+  "by_group": {
+    "property-and-nested-complement": 27648,
+    "operand-point-set-algebra": 194688,
+    "literal-range-and-escape-controls": 5376
+  },
+  "source_case_sha256": "0d65e4dcf82471c630fcea1f370e444af451c86b4b9cecb886ff80cbe87db063"
+}

@@ -1,0 +1,72 @@
+{
+  "mathjax": {
+    "version": "4.1.3",
+    "commit": "fb987178c2d279a99b0db5ea02e751691703955e"
+  },
+  "dependency": {
+    "name": "mhchemparser",
+    "version": "4.2.1",
+    "esmAlias": "#mhchem/* -> mhchemparser/esm/*",
+    "cjsAlias": "#mhchem/* -> mhchemparser/dist/*"
+  },
+  "files": [
+    {
+      "path": ".reference/MathJax-src/ts/input/tex/mhchem/MhchemConfiguration.ts",
+      "sha256": "bacc438afa26698e9e7d8ad6e4a6094eefa12f0d265c4384d60c0dbb474c4ace"
+    },
+    {
+      "path": ".reference/MathJax-src/package.json",
+      "sha256": "0beefd610c779fb7510875be37366eec586e9a13cc3728c3d5d8d1601f0098c5"
+    },
+    {
+      "path": ".reference/MathJax-src/pnpm-lock.yaml",
+      "sha256": "1a9dfbbdcfbbd04945bdd8179063f7bde2799393655e52df1ac49a0b6c338015"
+    },
+    {
+      "path": "tools/mathjax-bundle/node_modules/@mathjax/src/cjs/input/tex/mhchem/MhchemConfiguration.js",
+      "sha256": "66d7c41c44dfe73d458718edb8ccc3c1577ec2b24b7299b9515f905986d9e279"
+    },
+    {
+      "path": "tools/mathjax-bundle/node_modules/@mathjax/src/cjs/package.json",
+      "sha256": "cbcf216e3dd1f378e661bc915021907e1c7ea692a0c9e3385da3e336e10f1c05"
+    },
+    {
+      "path": "tools/mathjax-bundle/package-lock.json",
+      "sha256": "828fefdb77d220eb3ce0f4d2ad7deedc7411072824719897f9a50f61bf462c8b"
+    },
+    {
+      "path": "tools/mathjax-bundle/node_modules/mhchemparser/package.json",
+      "sha256": "434459a7c35b7b8d5e416fc9fb69981ff6922fd96fb3e0b176441652a8cc094d"
+    },
+    {
+      "path": "tools/mathjax-bundle/node_modules/mhchemparser/src/mhchemParser.ts",
+      "sha256": "4101725911e3bb2caae1535ee2ccf8d497d27ea2fb7902bde51c27a46d8e1c38"
+    },
+    {
+      "path": "tools/mathjax-bundle/node_modules/mhchemparser/src/mhchemParser.d.ts",
+      "sha256": "9e46695a680ee59624d09fc5d338e24e67b2e2291d79abc8c12fa65089cb3229"
+    },
+    {
+      "path": "tools/mathjax-bundle/node_modules/mhchemparser/esm/mhchemParser.js",
+      "sha256": "7dfb5a67a010455705b9bc04d95ce4c2c54901a61ac6079265c4f4a30f3ed03c"
+    },
+    {
+      "path": "tools/mathjax-bundle/node_modules/mhchemparser/dist/mhchemParser.js",
+      "sha256": "4a1aedf6a468247941c3d03a661078f2140df1160a3991a71c370f467064e224"
+    },
+    {
+      "path": "tools/mathjax-bundle/node_modules/mhchemparser/LICENSE.txt",
+      "sha256": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1"
+    }
+  ],
+  "generated": [
+    {
+      "path": "src/math/dependencies/mhchem_parser/transitions_data.inc",
+      "sha256": "06bdba965d64c36a6eb5c9b7f5b340aef01c7cdbf4d647a015e3b26642ac671f"
+    },
+    {
+      "path": "src/math/dependencies/mhchem_parser/patterns_data.inc",
+      "sha256": "211e2028c42c8d0abbdcbd002ab6c17fbdc8bd77af6e5ec19b6b807c3454230a"
+    }
+  ]
+}

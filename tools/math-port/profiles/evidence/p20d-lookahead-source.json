@@ -1,0 +1,8 @@
+{
+  "stage": "actual Node surrogate escape lookahead; engine not accepted",
+  "node": "v24.13.0",
+  "unicode": "16.0",
+  "icu": "77.1",
+  "cases": 4032,
+  "source_case_sha256": "9bedc9186f90a3f4eddfcd01fbdbe8cee6a097cc3d229639743d8cb1a801323a"
+}

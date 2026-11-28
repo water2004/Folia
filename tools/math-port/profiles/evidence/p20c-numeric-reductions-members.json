@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "typescript": "5.9.3",
+  "status": "locally_accepted_complete_numeric_reductions_with_dense_binary64_host_adaptation",
+  "files": [
+    {
+      "source": "ts/util/numeric.ts",
+      "source_sha256": "a2004a9888f5c85f3cf81126e43d04dfe66b64c55e3b5f7d97366631809d7c15",
+      "members": [
+        {
+          "owner": "<module>",
+          "kind": "function",
+          "name": "sum",
+          "static": false,
+          "line": 28,
+          "end_line": 30,
+          "member_sha256": "030185488f450ad5aea03c895f633056273e270abb41137077c0d9cfdb588641",
+          "target": "src/math/util/numeric.cpp:folia::math::numeric::sum",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20c-numeric-reductions-acceptance.md"
+        },
+        {
+          "owner": "<module>",
+          "kind": "function",
+          "name": "max",
+          "static": false,
+          "line": 36,
+          "end_line": 38,
+          "member_sha256": "4d0f8ce34fd80c4adb0daffc8aa76c2d075faf92d4b894e214abbdeea8e6a0fc",
+          "target": "src/math/util/numeric.cpp:folia::math::numeric::max",
+          "review": "root_review_passed",
+          "evidence": "docs/math-port/evidence/p20c-numeric-reductions-acceptance.md"
+        }
+      ],
+      "native_adaptation": "Borrowed readonly dense binary64 span. Common mtable retains its numeric array producer and string-width conversion responsibilities."
+    }
+  ]
+}
