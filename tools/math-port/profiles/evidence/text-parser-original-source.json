@@ -1,0 +1,992 @@
+{
+  "schema": 1,
+  "source": {
+    "path": "ts/input/tex/textmacros/TextParser.ts",
+    "sha256": "ec2fa0145f5e90ef231b023a38ed7d9c1064a8cc58a46bb683d46439bd8fb400"
+  },
+  "scope_sha256": "9705d389538b2fc8bf782feea4372ace639b3727304f2971937bbcfb0042a0d1",
+  "modules": [
+    {
+      "source": "ts/input/tex/textmacros/TextParser.ts",
+      "source_sha256": "538059c8482022c1a4bc6f8e763fdc21993fa6353f1956655ae11c9271788a30",
+      "installed_ts_sha256": "0d8717ce674eae333c4d1bdc98ae65c9a3be03137ddf49fe9f834795837a335e",
+      "normalized_ts_sha256": "0d8717ce674eae333c4d1bdc98ae65c9a3be03137ddf49fe9f834795837a335e",
+      "source_crlf_lines": 242,
+      "installed_crlf_lines": 0,
+      "cjs": "input/tex/textmacros/TextParser.js",
+      "cjs_sha256": "ec2fa0145f5e90ef231b023a38ed7d9c1064a8cc58a46bb683d46439bd8fb400"
+    },
+    {
+      "source": "ts/input/tex/ParseUtil.ts",
+      "source_sha256": "b43646071997f88f27df51610c7972a8cb5791ea76194e7318d17d1a2f81f76a",
+      "installed_ts_sha256": "15060cc72658c922cedc568391791cb928ca6aa12e9a41cd4382de6ff7416f43",
+      "normalized_ts_sha256": "15060cc72658c922cedc568391791cb928ca6aa12e9a41cd4382de6ff7416f43",
+      "source_crlf_lines": 931,
+      "installed_crlf_lines": 0,
+      "cjs": "input/tex/ParseUtil.js",
+      "cjs_sha256": "adafa18cefad39e8408bcc0e4eb7103dceb6d16c9e7ea2eb013f23602c3f8941"
+    },
+    {
+      "source": "ts/input/tex/TexParser.ts",
+      "source_sha256": "9afdfff070ec7ed7115a1afe97048b3d1f1befae5b75e8ec963e0456685ee167",
+      "installed_ts_sha256": "75acc969b38757523955cd1a520156406ef7788de4b25cf501146ee6947d708c",
+      "normalized_ts_sha256": "75acc969b38757523955cd1a520156406ef7788de4b25cf501146ee6947d708c",
+      "source_crlf_lines": 799,
+      "installed_crlf_lines": 0,
+      "cjs": "input/tex/TexParser.js",
+      "cjs_sha256": "106d7ff9298dce899d046339eab1996358f3efca3a7ce66f5ca915747dc9c6a8"
+    },
+    {
+      "cjs": "input/tex/textmacros/TextParser.js",
+      "cjs_sha256": "ec2fa0145f5e90ef231b023a38ed7d9c1064a8cc58a46bb683d46439bd8fb400"
+    },
+    {
+      "cjs": "input/tex/ParseUtil.js",
+      "cjs_sha256": "adafa18cefad39e8408bcc0e4eb7103dceb6d16c9e7ea2eb013f23602c3f8941"
+    },
+    {
+      "cjs": "input/tex/TexParser.js",
+      "cjs_sha256": "106d7ff9298dce899d046339eab1996358f3efca3a7ce66f5ca915747dc9c6a8"
+    },
+    {
+      "cjs": "input/tex.js",
+      "cjs_sha256": "ef2852b197173f373e62326016e980aef01ffc838f5f766ab6076262f944eada"
+    },
+    {
+      "cjs": "input/tex/textmacros/TextMacrosConfiguration.js",
+      "cjs_sha256": "5803611b187a6256cae6289cfc2f61fafa7f93395432d3a7b365f8089334b5cf"
+    },
+    {
+      "cjs": "input/tex/StackItem.js",
+      "cjs_sha256": "53baa91d7c27475a91a9b6993235071ab32b04a29736c5920bdda2836ab5a91b"
+    },
+    {
+      "cjs": "input/tex/base/BaseItems.js",
+      "cjs_sha256": "5310d0429b7b62d405ae9b93c8d21ad17b787e5eb3fd1f01439c62f2094f7d1a"
+    },
+    {
+      "cjs": "input/tex/NodeUtil.js",
+      "cjs_sha256": "4a55841fd22167d25f505e8f41adea072715ef024e00ea5ac6df3f199f2cb809"
+    },
+    {
+      "cjs": "core/MmlTree/MmlFactory.js",
+      "cjs_sha256": "d0c4e25237d04a9d21d12ee44776e46d30777e7f284db6f4f3ed1cc625b752d3"
+    },
+    {
+      "cjs": "core/MmlTree/MmlNode.js",
+      "cjs_sha256": "86c5eb572dcf2652c3c52a60b66c720d231e17f600cc9aeef3ace4aeafc81d45"
+    },
+    {
+      "cjs": "core/Tree/Factory.js",
+      "cjs_sha256": "739db2e5760c29d7bb4f1bc7baa08ff8d727f4d117522aff5ede017f812cffef"
+    }
+  ],
+  "observations": [
+    {
+      "label": "textparser-class-descriptors-and-texparser-inheritance",
+      "result": {
+        "class": {
+          "name": "TextParser",
+          "length": 4,
+          "ownKeys": [
+            "length",
+            "name",
+            "prototype"
+          ],
+          "prototypeDescriptor": {
+            "writable": true,
+            "enumerable": false,
+            "configurable": false
+          }
+        },
+        "prototypeKeys": [
+          "constructor",
+          "texParser",
+          "tags",
+          "mml",
+          "copyLists",
+          "Parse",
+          "saveText",
+          "Push",
+          "PushMath",
+          "addAttributes",
+          "ParseTextArg",
+          "ParseArg",
+          "Error"
+        ],
+        "parent": true,
+        "methods": [
+          {
+            "name": "texParser",
+            "enumerable": false,
+            "configurable": true,
+            "get": {
+              "name": "get",
+              "length": 0
+            },
+            "value": null
+          },
+          {
+            "name": "tags",
+            "enumerable": false,
+            "configurable": true,
+            "get": {
+              "name": "get",
+              "length": 0
+            },
+            "value": null
+          },
+          {
+            "name": "constructor",
+            "enumerable": true,
+            "configurable": true,
+            "get": null,
+            "value": {
+              "name": "TextParser",
+              "length": 4
+            }
+          },
+          {
+            "name": "mml",
+            "enumerable": true,
+            "configurable": true,
+            "get": null,
+            "value": {
+              "name": "",
+              "length": 0
+            }
+          },
+          {
+            "name": "copyLists",
+            "enumerable": true,
+            "configurable": true,
+            "get": null,
+            "value": {
+              "name": "",
+              "length": 0
+            }
+          },
+          {
+            "name": "Parse",
+            "enumerable": true,
+            "configurable": true,
+            "get": null,
+            "value": {
+              "name": "",
+              "length": 0
+            }
+          },
+          {
+            "name": "saveText",
+            "enumerable": true,
+            "configurable": true,
+            "get": null,
+            "value": {
+              "name": "",
+              "length": 0
+            }
+          },
+          {
+            "name": "Push",
+            "enumerable": true,
+            "configurable": true,
+            "get": null,
+            "value": {
+              "name": "",
+              "length": 1
+            }
+          },
+          {
+            "name": "PushMath",
+            "enumerable": true,
+            "configurable": true,
+            "get": null,
+            "value": {
+              "name": "",
+              "length": 1
+            }
+          },
+          {
+            "name": "addAttributes",
+            "enumerable": true,
+            "configurable": true,
+            "get": null,
+            "value": {
+              "name": "",
+              "length": 1
+            }
+          },
+          {
+            "name": "ParseTextArg",
+            "enumerable": true,
+            "configurable": true,
+            "get": null,
+            "value": {
+              "name": "",
+              "length": 2
+            }
+          },
+          {
+            "name": "ParseArg",
+            "enumerable": true,
+            "configurable": true,
+            "get": null,
+            "value": {
+              "name": "",
+              "length": 1
+            }
+          },
+          {
+            "name": "Error",
+            "enumerable": true,
+            "configurable": true,
+            "get": null,
+            "value": {
+              "name": "",
+              "length": 2
+            }
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "label": "actual-textmacros-configuration-and-internalmath-callback",
+      "result": {
+        "before": {
+          "keys": [
+            "textConf",
+            "parseOptions",
+            "jax",
+            "texParser"
+          ],
+          "sharedOptions": true,
+          "sharedPackageMap": true
+        },
+        "callback": {
+          "name": "internalMath",
+          "length": 4
+        },
+        "output": [
+          {
+            "kind": "mstyle",
+            "attrs": {
+              "displaystyle": false,
+              "scriptlevel": 2
+            },
+            "properties": {},
+            "children": [
+              {
+                "kind": "inferredMrow",
+                "attrs": {},
+                "properties": {},
+                "children": [
+                  {
+                    "kind": "mtext",
+                    "attrs": {
+                      "mathvariant": "bold"
+                    },
+                    "properties": {},
+                    "children": [
+                      {
+                        "kind": "text",
+                        "attrs": {},
+                        "properties": {},
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "texParserIsMain": true,
+        "innerParserCount": 0,
+        "optionsInternalMathSame": true
+      },
+      "error": null
+    },
+    {
+      "label": "internalmath-real-segments-and-source-error",
+      "result": [
+        {
+          "source": "alpha beta",
+          "result": {
+            "result": [
+              {
+                "kind": "mtext",
+                "attrs": {},
+                "properties": {},
+                "children": [
+                  {
+                    "kind": "text",
+                    "attrs": {},
+                    "properties": {},
+                    "children": []
+                  }
+                ]
+              }
+            ],
+            "error": null
+          },
+          "registeredMainParser": true,
+          "innerParserCount": 0,
+          "innerRoot": null
+        },
+        {
+          "source": "a\\(x\\)z",
+          "result": {
+            "result": [
+              {
+                "kind": "mrow",
+                "attrs": {},
+                "properties": {},
+                "children": [
+                  {
+                    "kind": "mtext",
+                    "attrs": {},
+                    "properties": {},
+                    "children": [
+                      {
+                        "kind": "text",
+                        "attrs": {},
+                        "properties": {},
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "TeXAtom",
+                    "attrs": {},
+                    "properties": {
+                      "texClass": 0
+                    },
+                    "children": [
+                      {
+                        "kind": "inferredMrow",
+                        "attrs": {},
+                        "properties": {},
+                        "children": [
+                          {
+                            "kind": "mi",
+                            "attrs": {
+                              "data-latex": "x"
+                            },
+                            "properties": {},
+                            "children": [
+                              {
+                                "kind": "text",
+                                "attrs": {},
+                                "properties": {},
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "mtext",
+                    "attrs": {},
+                    "properties": {},
+                    "children": [
+                      {
+                        "kind": "text",
+                        "attrs": {},
+                        "properties": {},
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "error": null
+          },
+          "registeredMainParser": true,
+          "innerParserCount": 0,
+          "innerRoot": null
+        },
+        {
+          "source": "$x$",
+          "result": {
+            "result": [
+              {
+                "kind": "TeXAtom",
+                "attrs": {},
+                "properties": {
+                  "texClass": 0
+                },
+                "children": [
+                  {
+                    "kind": "inferredMrow",
+                    "attrs": {},
+                    "properties": {},
+                    "children": [
+                      {
+                        "kind": "mi",
+                        "attrs": {
+                          "data-latex": "x"
+                        },
+                        "properties": {},
+                        "children": [
+                          {
+                            "kind": "text",
+                            "attrs": {},
+                            "properties": {},
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "error": null
+          },
+          "registeredMainParser": true,
+          "innerParserCount": 0,
+          "innerRoot": null
+        },
+        {
+          "source": "\\U{1F600}",
+          "result": {
+            "result": null,
+            "error": {
+              "name": "TexError",
+              "id": "UndefinedControlSequence",
+              "message": "Undefined control sequence \\U"
+            }
+          },
+          "registeredMainParser": true,
+          "innerParserCount": 1,
+          "innerRoot": null
+        },
+        {
+          "source": "\\ref{label}",
+          "result": {
+            "result": [
+              {
+                "kind": "mrow",
+                "attrs": {
+                  "href": "#",
+                  "class": "MathJax_ref"
+                },
+                "properties": {},
+                "children": [
+                  {
+                    "kind": "mtext",
+                    "attrs": {},
+                    "properties": {},
+                    "children": [
+                      {
+                        "kind": "text",
+                        "attrs": {},
+                        "properties": {},
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "error": null
+          },
+          "registeredMainParser": true,
+          "innerParserCount": 0,
+          "innerRoot": null
+        }
+      ],
+      "error": null
+    },
+    {
+      "label": "textparser-mml-level-empty-single-and-multiple",
+      "result": [
+        {
+          "label": "empty",
+          "result": {
+            "result": {
+              "kind": "mrow",
+              "attrs": {},
+              "properties": {},
+              "children": []
+            },
+            "error": null
+          },
+          "parserCount": 0,
+          "nodeListKeys": [
+            "mrow"
+          ]
+        },
+        {
+          "label": "one",
+          "result": {
+            "result": {
+              "kind": "mtext",
+              "attrs": {},
+              "properties": {},
+              "children": [
+                {
+                  "kind": "text",
+                  "attrs": {},
+                  "properties": {},
+                  "children": []
+                }
+              ]
+            },
+            "error": null
+          },
+          "parserCount": 0,
+          "nodeListKeys": []
+        },
+        {
+          "label": "multiple",
+          "result": {
+            "result": {
+              "kind": "mtext",
+              "attrs": {},
+              "properties": {},
+              "children": [
+                {
+                  "kind": "text",
+                  "attrs": {},
+                  "properties": {},
+                  "children": []
+                }
+              ]
+            },
+            "error": null
+          },
+          "parserCount": 0,
+          "nodeListKeys": []
+        },
+        {
+          "label": "level-number",
+          "result": {
+            "result": {
+              "kind": "mstyle",
+              "attrs": {
+                "displaystyle": false,
+                "scriptlevel": 2
+              },
+              "properties": {},
+              "children": [
+                {
+                  "kind": "inferredMrow",
+                  "attrs": {},
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "mtext",
+                      "attrs": {},
+                      "properties": {},
+                      "children": [
+                        {
+                          "kind": "text",
+                          "attrs": {},
+                          "properties": {},
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "error": null
+          },
+          "parserCount": 0,
+          "nodeListKeys": [
+            "mstyle"
+          ]
+        },
+        {
+          "label": "level-string",
+          "result": {
+            "result": {
+              "kind": "mstyle",
+              "attrs": {
+                "displaystyle": false,
+                "scriptlevel": "-1"
+              },
+              "properties": {},
+              "children": [
+                {
+                  "kind": "inferredMrow",
+                  "attrs": {},
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "mtext",
+                      "attrs": {},
+                      "properties": {},
+                      "children": [
+                        {
+                          "kind": "text",
+                          "attrs": {},
+                          "properties": {},
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "error": null
+          },
+          "parserCount": 0,
+          "nodeListKeys": [
+            "mstyle"
+          ]
+        }
+      ],
+      "error": null
+    },
+    {
+      "label": "textparser-saveText-and-push-token-attributes",
+      "result": {
+        "text": "",
+        "nodes": [
+          {
+            "kind": "mtext",
+            "attrs": {
+              "mathvariant": "bold",
+              "mathsize": "2em",
+              "mathcolor": "red"
+            },
+            "properties": {},
+            "children": [
+              {
+                "kind": "text",
+                "attrs": {},
+                "properties": {},
+                "children": []
+              }
+            ]
+          },
+          {
+            "kind": "mi",
+            "attrs": {
+              "mathsize": "2em",
+              "mathcolor": "red",
+              "mathvariant": "bold"
+            },
+            "properties": {},
+            "children": [
+              {
+                "kind": "text",
+                "attrs": {},
+                "properties": {},
+                "children": []
+              }
+            ]
+          }
+        ],
+        "top": "mml"
+      },
+      "error": null
+    },
+    {
+      "label": "textparser-Push-stop-style-and-other-base-stackitem",
+      "result": {
+        "afterStop": {
+          "text": "",
+          "top": "stop",
+          "height": 2
+        },
+        "afterStyle": {
+          "environment": {
+            "color": "blue",
+            "mathcolor": "blue"
+          },
+          "nodes": [
+            {
+              "kind": "mtext",
+              "attrs": {
+                "mathcolor": "red"
+              },
+              "properties": {},
+              "children": [
+                {
+                  "kind": "text",
+                  "attrs": {},
+                  "properties": {},
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        "afterStyleStack": {
+          "height": 2,
+          "top": "stop"
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "textparser-PushMath-wrapper-attributes-and-inferred-row",
+      "result": {
+        "nodes": [
+          {
+            "kind": "TeXAtom",
+            "attrs": {},
+            "properties": {
+              "texClass": 0
+            },
+            "children": [
+              {
+                "kind": "inferredMrow",
+                "attrs": {},
+                "properties": {},
+                "children": [
+                  {
+                    "kind": "mi",
+                    "attrs": {
+                      "mathsize": "2em",
+                      "mathcolor": "red"
+                    },
+                    "properties": {},
+                    "children": [
+                      {
+                        "kind": "text",
+                        "attrs": {},
+                        "properties": {},
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "TeXAtom",
+            "attrs": {},
+            "properties": {
+              "texClass": 0
+            },
+            "children": [
+              {
+                "kind": "inferredMrow",
+                "attrs": {},
+                "properties": {},
+                "children": [
+                  {
+                    "kind": "mstyle",
+                    "attrs": {
+                      "mathsize": "2em",
+                      "mathcolor": "red"
+                    },
+                    "properties": {},
+                    "children": [
+                      {
+                        "kind": "inferredMrow",
+                        "attrs": {},
+                        "properties": {},
+                        "children": [
+                          {
+                            "kind": "mrow",
+                            "attrs": {},
+                            "properties": {},
+                            "children": [
+                              {
+                                "kind": "text",
+                                "attrs": {},
+                                "properties": {},
+                                "children": []
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "TeXAtom",
+            "attrs": {},
+            "properties": {
+              "texClass": 0
+            },
+            "children": [
+              {
+                "kind": "inferredMrow",
+                "attrs": {},
+                "properties": {},
+                "children": [
+                  {
+                    "kind": "mstyle",
+                    "attrs": {
+                      "mathsize": "2em",
+                      "mathcolor": "red"
+                    },
+                    "properties": {},
+                    "children": [
+                      {
+                        "kind": "inferredMrow",
+                        "attrs": {},
+                        "properties": {},
+                        "children": [
+                          {
+                            "kind": "mrow",
+                            "attrs": {},
+                            "properties": {},
+                            "children": [
+                              {
+                                "kind": "mi",
+                                "attrs": {},
+                                "properties": {},
+                                "children": [
+                                  {
+                                    "kind": "text",
+                                    "attrs": {},
+                                    "properties": {},
+                                    "children": []
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "explicit": "red"
+      },
+      "error": null
+    },
+    {
+      "label": "textparser-copyLists-transfers-real-child-array-membership",
+      "result": {
+        "before": {
+          "innerKeys": [
+            "custom",
+            "mi",
+            "inferredMrow"
+          ],
+          "mainKeys": [
+            "inferredMrow",
+            "mi"
+          ]
+        },
+        "afterInnerKeys": [],
+        "afterMainKeys": [
+          "inferredMrow",
+          "mi",
+          "custom"
+        ],
+        "sameNode": true,
+        "mainMi": 2
+      },
+      "error": null
+    },
+    {
+      "label": "textparser-copyLists-object-entries-values-snapshot-before-addNode",
+      "result": null,
+      "error": {
+        "name": "TypeError",
+        "id": null,
+        "message": "Object is not iterable."
+      }
+    },
+    {
+      "label": "textparser-copyLists-array-iterator-reads-live-length",
+      "result": {
+        "added": [
+          "first",
+          "appended"
+        ],
+        "sourceLengthAfter": 2,
+        "targetLength": 2
+      },
+      "error": null
+    },
+    {
+      "label": "textparser-ParseArg-and-ParseTextArg-real-argument-consumption",
+      "result": [
+        {
+          "method": "ParseArg",
+          "result": {
+            "result": {
+              "kind": "mtext",
+              "attrs": {},
+              "properties": {},
+              "children": [
+                {
+                  "kind": "text",
+                  "attrs": {},
+                  "properties": {},
+                  "children": []
+                }
+              ]
+            },
+            "error": null
+          },
+          "index": 5,
+          "nestedParserCount": 1,
+          "mainParserCount": 1
+        },
+        {
+          "method": "ParseTextArg",
+          "result": {
+            "result": {
+              "kind": "mtext",
+              "attrs": {
+                "mathcolor": "blue"
+              },
+              "properties": {},
+              "children": [
+                {
+                  "kind": "text",
+                  "attrs": {},
+                  "properties": {},
+                  "children": []
+                }
+              ]
+            },
+            "error": null
+          },
+          "index": 5,
+          "nestedParserCount": 1,
+          "mainParserCount": 1
+        }
+      ],
+      "error": null
+    },
+    {
+      "label": "textparser-Error-real-TexError-substitution",
+      "result": {
+        "single": {
+          "result": null,
+          "error": {
+            "name": "TexError",
+            "id": "Demo",
+            "message": "bad x"
+          }
+        },
+        "missing": {
+          "result": null,
+          "error": {
+            "name": "TexError",
+            "id": "Demo",
+            "message": "bad "
+          }
+        }
+      },
+      "error": null
+    }
+  ]
+}

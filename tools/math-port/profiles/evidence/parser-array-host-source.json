@@ -1,0 +1,643 @@
+{
+  "stage": "Node observations for actual ordinary Array methods used by enabled MathJax TeX source",
+  "node": "v24.13.0",
+  "source": {
+    "file": "ts/input/tex/Configuration.ts",
+    "sha256": "8184716579abf3ffa14c64413d276dab4fc721e3e3f43afb0cdccbe2ab782719"
+  },
+  "methods": [
+    "slice",
+    "reverse",
+    "includes",
+    "push",
+    "pop",
+    "join",
+    "fill",
+    "find"
+  ],
+  "rows": [
+    {
+      "name": "metadata:slice",
+      "expected": "ok|2:false:true:true|"
+    },
+    {
+      "name": "metadata:reverse",
+      "expected": "ok|0:false:true:true|"
+    },
+    {
+      "name": "metadata:includes",
+      "expected": "ok|1:false:true:true|"
+    },
+    {
+      "name": "metadata:push",
+      "expected": "ok|1:false:true:true|"
+    },
+    {
+      "name": "metadata:pop",
+      "expected": "ok|0:false:true:true|"
+    },
+    {
+      "name": "metadata:join",
+      "expected": "ok|1:false:true:true|"
+    },
+    {
+      "name": "metadata:fill",
+      "expected": "ok|1:false:true:true|"
+    },
+    {
+      "name": "metadata:find",
+      "expected": "ok|1:false:true:true|"
+    },
+    {
+      "name": "method:current-own-override-is-called",
+      "expected": "ok|result|override:true:2"
+    },
+    {
+      "name": "slice:negative-and-clamped",
+      "expected": "ok|[0,1,2,3]|"
+    },
+    {
+      "name": "slice:holes-preserved",
+      "expected": "ok|[H,x,H,H]|"
+    },
+    {
+      "name": "slice:constructor-get-after-index-conversions",
+      "expected": "ok|[1]|constructor"
+    },
+    {
+      "name": "slice:constructor-undefined-defaults",
+      "expected": "ok|[1]|"
+    },
+    {
+      "name": "slice:primitive-constructor:null",
+      "expected": "TypeError|U|"
+    },
+    {
+      "name": "slice:primitive-constructor:false",
+      "expected": "TypeError|U|"
+    },
+    {
+      "name": "slice:primitive-constructor:zero",
+      "expected": "TypeError|U|"
+    },
+    {
+      "name": "slice:object-constructor-defaults-nullish-species",
+      "expected": "ok|[1]|"
+    },
+    {
+      "name": "slice:function-constructor-defaults-missing-species",
+      "expected": "ok|[1]|"
+    },
+    {
+      "name": "slice:custom-species-function",
+      "expected": "ok|Object|"
+    },
+    {
+      "name": "slice:species-getter-after-conversions",
+      "expected": "ok|[1]|start/species"
+    },
+    {
+      "name": "slice:start-coercion-before-end",
+      "expected": "ok|[1]|start/end"
+    },
+    {
+      "name": "slice:index-get-after-conversions-and-species",
+      "expected": "ok|[1]|start/species/get0"
+    },
+    {
+      "name": "slice:numeric-bounds-constructor-species-index-order",
+      "expected": "ok|[1]|constructor/species/get0"
+    },
+    {
+      "name": "slice:defines-own-result-without-array-prototype-setter",
+      "expected": "ok|[4,true,true,true,true]|"
+    },
+    {
+      "name": "reverse:both-holes",
+      "expected": "ok|[H,H,b,H]|"
+    },
+    {
+      "name": "reverse:lower-only-hole-move",
+      "expected": "ok|[H,a]|"
+    },
+    {
+      "name": "reverse:upper-only-hole-move",
+      "expected": "ok|[b,H]|"
+    },
+    {
+      "name": "reverse:has-get-and-set-order",
+      "expected": "ok|[A,A]|get0/get1/set0:2/set1:1"
+    },
+    {
+      "name": "reverse:lower-get-mutates-upper-before-upper-has",
+      "expected": "ok|[H,1]|get0"
+    },
+    {
+      "name": "reverse:lower-set-throws-before-upper-set",
+      "expected": "ok|[A,2]|set0/setter"
+    },
+    {
+      "name": "includes:hole-matches-undefined",
+      "expected": "ok|true|"
+    },
+    {
+      "name": "includes:zero-length-skips-symbol-from-index-conversion",
+      "expected": "ok|false|"
+    },
+    {
+      "name": "includes:NaN-is-same-value-zero",
+      "expected": "ok|true|"
+    },
+    {
+      "name": "includes:from-index-string-coercion",
+      "expected": "ok|true|from"
+    },
+    {
+      "name": "includes:primitive-string-from-index",
+      "expected": "ok|false|"
+    },
+    {
+      "name": "includes:from-index:positive-infinity",
+      "expected": "ok|false|"
+    },
+    {
+      "name": "includes:from-index:negative-infinity",
+      "expected": "ok|true|"
+    },
+    {
+      "name": "includes:from-index:fractional-negative",
+      "expected": "ok|false|"
+    },
+    {
+      "name": "includes:from-index:NaN",
+      "expected": "ok|true|"
+    },
+    {
+      "name": "includes:inherited-hole-get",
+      "expected": "ok|true|get0"
+    },
+    {
+      "name": "push:variadic-return-and-identity",
+      "expected": "ok|[3,true,[1,2,Object]]|"
+    },
+    {
+      "name": "push:sequential-set-partial-mutation",
+      "expected": "ok|[3]|set1/setter"
+    },
+    {
+      "name": "push:nonwritable-length-zero-args",
+      "expected": "ok|0|TypeError"
+    },
+    {
+      "name": "push:max-length-range-error-partial-write",
+      "expected": "ok|[4294967295,1]|RangeError"
+    },
+    {
+      "name": "pop:hole-reads-inherited-value",
+      "expected": "ok|[9,0,false]|"
+    },
+    {
+      "name": "pop:get-delete-length-order",
+      "expected": "ok|[4,0,false]|get"
+    },
+    {
+      "name": "pop:delete-fails-before-length-write",
+      "expected": "ok|[1,4]|TypeError"
+    },
+    {
+      "name": "pop:deletes-configurable-tail-before-readonly-length-fails",
+      "expected": "ok|[1,false]|TypeError"
+    },
+    {
+      "name": "pop:zero-length-still-writes-length",
+      "expected": "ok|0|TypeError"
+    },
+    {
+      "name": "join:nullish-empty-and-default-separator",
+      "expected": "ok|,,0,false,x|"
+    },
+    {
+      "name": "join:holes-and-captured-length-with-primitive-separator",
+      "expected": "ok|p|1||get0/get1"
+    },
+    {
+      "name": "join:separator-coerced-before-elements",
+      "expected": "ok|1|2|sep/get0"
+    },
+    {
+      "name": "join:symbol-element-type-error",
+      "expected": "TypeError|U|"
+    },
+    {
+      "name": "join:symbol-separator-type-error",
+      "expected": "TypeError|U|"
+    },
+    {
+      "name": "join:object-coercion",
+      "expected": "ok|v|object"
+    },
+    {
+      "name": "join:nullish-elements-skip-object-conversion",
+      "expected": "ok|||separator"
+    },
+    {
+      "name": "fill:range-conversion-order",
+      "expected": "ok|[8,0]|start/end"
+    },
+    {
+      "name": "fill:range:negative-fraction",
+      "expected": "ok|[0,0,7]|"
+    },
+    {
+      "name": "fill:range:NaN",
+      "expected": "ok|[7,7,7]|"
+    },
+    {
+      "name": "fill:range:positive-infinity",
+      "expected": "ok|[0,0,0]|"
+    },
+    {
+      "name": "fill:range:negative-infinity",
+      "expected": "ok|[7,7,0]|"
+    },
+    {
+      "name": "fill:sequential-set-partial-mutation",
+      "expected": "ok|[7,A,0]|set1/setter"
+    },
+    {
+      "name": "fill:inherited-setter-stops-before-next-slot",
+      "expected": "ok|[7,H,H]|set1/setter"
+    },
+    {
+      "name": "find:visits-holes-as-undefined",
+      "expected": "ok|U|0:U:3:true:true"
+    },
+    {
+      "name": "find:callback-receiver-and-three-args",
+      "expected": "ok|1|0:3:true:true"
+    },
+    {
+      "name": "find:captured-length-live-values",
+      "expected": "ok|9|0:1/1:9"
+    },
+    {
+      "name": "find:shrink-length-still-visits-captured-indices",
+      "expected": "ok|U|0:1/1:undefined/2:undefined"
+    },
+    {
+      "name": "find:inherited-hole-getter",
+      "expected": "ok|4|get0"
+    },
+    {
+      "name": "find:invalid-callback-before-index-get",
+      "expected": "TypeError|U|"
+    }
+  ],
+  "nativeCoverage": [
+    {
+      "sourceObservation": "metadata:slice",
+      "nativeCandidate": "source_rows_0_to_7_method_metadata",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "metadata:reverse",
+      "nativeCandidate": "source_rows_0_to_7_method_metadata",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "metadata:includes",
+      "nativeCandidate": "source_rows_0_to_7_method_metadata",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "metadata:push",
+      "nativeCandidate": "source_rows_0_to_7_method_metadata",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "metadata:pop",
+      "nativeCandidate": "source_rows_0_to_7_method_metadata",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "metadata:join",
+      "nativeCandidate": "source_rows_0_to_7_method_metadata",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "metadata:fill",
+      "nativeCandidate": "source_rows_0_to_7_method_metadata",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "metadata:find",
+      "nativeCandidate": "source_rows_0_to_7_method_metadata",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "method:current-own-override-is-called",
+      "nativeCandidate": "current_method_override_is_called",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "slice:negative-and-clamped",
+      "nativeCandidate": "slice_negative_and_clamped_bounds",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "slice:holes-preserved",
+      "nativeCandidate": "slice_holes_and_length",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "slice:constructor-get-after-index-conversions",
+      "nativeCandidate": "slice_constructor_get_precedes_index_get",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "slice:constructor-undefined-defaults",
+      "nativeCandidate": "slice_constructor_undefined_defaults",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "slice:primitive-constructor:null",
+      "nativeCandidate": "slice_primitive_constructor_throws",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "slice:primitive-constructor:false",
+      "nativeCandidate": "slice_false_and_zero_constructors_throw",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "slice:primitive-constructor:zero",
+      "nativeCandidate": "slice_false_and_zero_constructors_throw",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "slice:object-constructor-defaults-nullish-species",
+      "nativeCandidate": "slice_object_constructor_nullish_species_defaults",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "slice:function-constructor-defaults-missing-species",
+      "nativeCandidate": "slice_function_constructor_missing_species_defaults",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "slice:custom-species-function",
+      "nativeCandidate": "slice_custom_species_is_explicit_boundary",
+      "status": "unsupported-custom-species"
+    },
+    {
+      "sourceObservation": "slice:species-getter-after-conversions",
+      "nativeCandidate": "slice_object_bound_is_explicit_conversion_boundary",
+      "status": "unsupported-object-ToNumber"
+    },
+    {
+      "sourceObservation": "slice:start-coercion-before-end",
+      "nativeCandidate": "slice_object_bound_is_explicit_conversion_boundary",
+      "status": "unsupported-object-ToNumber"
+    },
+    {
+      "sourceObservation": "slice:index-get-after-conversions-and-species",
+      "nativeCandidate": "slice_object_bound_is_explicit_conversion_boundary",
+      "status": "unsupported-object-ToNumber"
+    },
+    {
+      "sourceObservation": "slice:numeric-bounds-constructor-species-index-order",
+      "nativeCandidate": "slice_numeric_bounds_constructor_species_index_order",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "slice:defines-own-result-without-array-prototype-setter",
+      "nativeCandidate": "slice_result_owns_data_and_bypasses_prototype_setter",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "reverse:both-holes",
+      "nativeCandidate": "reverse_two_sided_holes",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "reverse:lower-only-hole-move",
+      "nativeCandidate": "reverse_moves_lower_only_slot",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "reverse:upper-only-hole-move",
+      "nativeCandidate": "reverse_moves_one_sided_slots",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "reverse:has-get-and-set-order",
+      "nativeCandidate": "reverse_live_pair_order_and_holes",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "reverse:lower-get-mutates-upper-before-upper-has",
+      "nativeCandidate": "reverse_lower_get_mutates_upper_before_test",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "reverse:lower-set-throws-before-upper-set",
+      "nativeCandidate": "reverse_lower_set_throw_stops_before_upper_set",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "includes:hole-matches-undefined",
+      "nativeCandidate": "includes_hole_matches_undefined",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "includes:zero-length-skips-symbol-from-index-conversion",
+      "nativeCandidate": "includes_zero_length_skips_symbol_conversion",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "includes:NaN-is-same-value-zero",
+      "nativeCandidate": "includes_nan_uses_samevaluezero",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "includes:from-index-string-coercion",
+      "nativeCandidate": "includes_object_offset_is_explicit_conversion_boundary",
+      "status": "unsupported-object-ToNumber"
+    },
+    {
+      "sourceObservation": "includes:primitive-string-from-index",
+      "nativeCandidate": "includes_from_index_string_to_number",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "includes:from-index:positive-infinity",
+      "nativeCandidate": "includes_infinite_and_nan_offsets",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "includes:from-index:negative-infinity",
+      "nativeCandidate": "includes_infinite_and_nan_offsets",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "includes:from-index:fractional-negative",
+      "nativeCandidate": "includes_fractional_negative_offset_truncates_toward_zero",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "includes:from-index:NaN",
+      "nativeCandidate": "includes_infinite_and_nan_offsets",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "includes:inherited-hole-get",
+      "nativeCandidate": "includes_reads_inherited_hole",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "push:variadic-return-and-identity",
+      "nativeCandidate": "push_variadic_identity_and_metadata",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "push:sequential-set-partial-mutation",
+      "nativeCandidate": "push_partial_write_before_inherited_setter_throw",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "push:nonwritable-length-zero-args",
+      "nativeCandidate": "push_empty_on_nonwritable_length_throws",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "push:max-length-range-error-partial-write",
+      "nativeCandidate": "push_max_length_writes_tail_then_range_errors",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "pop:hole-reads-inherited-value",
+      "nativeCandidate": "pop_hole_gets_inherited_value",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "pop:get-delete-length-order",
+      "nativeCandidate": "pop_get_delete_then_length",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "pop:delete-fails-before-length-write",
+      "nativeCandidate": "pop_nonconfigurable_delete_aborts_length_write",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "pop:deletes-configurable-tail-before-readonly-length-fails",
+      "nativeCandidate": "pop_deletes_tail_before_readonly_length_failure",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "pop:zero-length-still-writes-length",
+      "nativeCandidate": "pop_zero_length_nonwritable_length_throws",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "join:nullish-empty-and-default-separator",
+      "nativeCandidate": "join_nullish_separator_and_primitives",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "join:holes-and-captured-length-with-primitive-separator",
+      "nativeCandidate": "join_hole_gets_and_captured_length",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "join:separator-coerced-before-elements",
+      "nativeCandidate": "join_object_separator_conversion_is_explicit_boundary",
+      "status": "unsupported-object-ToString"
+    },
+    {
+      "sourceObservation": "join:symbol-element-type-error",
+      "nativeCandidate": "join_symbol_throws_and_object_conversion_boundary",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "join:symbol-separator-type-error",
+      "nativeCandidate": "join_symbol_separator_throws",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "join:object-coercion",
+      "nativeCandidate": "join_object_to_primitive_is_explicit_boundary",
+      "status": "unsupported-object-ToPrimitive"
+    },
+    {
+      "sourceObservation": "join:nullish-elements-skip-object-conversion",
+      "nativeCandidate": "join_object_separator_conversion_is_explicit_boundary",
+      "status": "unsupported-object-ToString"
+    },
+    {
+      "sourceObservation": "fill:range-conversion-order",
+      "nativeCandidate": "fill_object_bound_is_explicit_conversion_boundary",
+      "status": "unsupported-object-ToNumber"
+    },
+    {
+      "sourceObservation": "fill:range:negative-fraction",
+      "nativeCandidate": "fill_fractional_and_infinite_bounds",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "fill:range:NaN",
+      "nativeCandidate": "fill_nan_bounds_cover_full_range",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "fill:range:positive-infinity",
+      "nativeCandidate": "fill_fractional_and_infinite_bounds",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "fill:range:negative-infinity",
+      "nativeCandidate": "fill_fractional_and_infinite_bounds",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "fill:sequential-set-partial-mutation",
+      "nativeCandidate": "fill_partial_set_via_own_accessor",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "fill:inherited-setter-stops-before-next-slot",
+      "nativeCandidate": "fill_partial_set_via_inherited_setter",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "find:visits-holes-as-undefined",
+      "nativeCandidate": "find_hole_callback_returns_undefined_value",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "find:callback-receiver-and-three-args",
+      "nativeCandidate": "find_reads_holes_and_passes_exact_callback_arguments",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "find:captured-length-live-values",
+      "nativeCandidate": "find_reads_future_values_live_captured_length",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "find:shrink-length-still-visits-captured-indices",
+      "nativeCandidate": "find_shrink_still_gets_captured_slots",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "find:inherited-hole-getter",
+      "nativeCandidate": "find_inherited_hole_getter",
+      "status": "matched"
+    },
+    {
+      "sourceObservation": "find:invalid-callback-before-index-get",
+      "nativeCandidate": "find_invalid_callback_before_get",
+      "status": "matched"
+    }
+  ]
+}

@@ -1,0 +1,4700 @@
+{
+  "schema": 1,
+  "source": "actual pinned MathJax 4.1.3 CJS; no native runtime or fake upstream parser peers",
+  "sourceCommit": "fb987178c2d279a99b0db5ea02e751691703955e",
+  "scope_sha256": "9705d389538b2fc8bf782feea4372ace639b3727304f2971937bbcfb0042a0d1",
+  "modules": [
+    {
+      "source": "ts/input/tex/Configuration.ts",
+      "source_sha256": "8184716579abf3ffa14c64413d276dab4fc721e3e3f43afb0cdccbe2ab782719",
+      "cjs": "input/tex/Configuration.js",
+      "cjs_sha256": "86f62a6f6e44fec20156546b7e8d424cac493c7465c2c8ec621c604332a276f3"
+    },
+    {
+      "source": "ts/input/tex/Tags.ts",
+      "source_sha256": "5a73a8d16f1d3c87ece167fc06dac0c323ea05a519e5ee5ea9aadbb76cef9a5d",
+      "cjs": "input/tex/Tags.js",
+      "cjs_sha256": "e027c7edb6f7207f3b3ce7e7203dcfc763219b1fa37a3b39925ae83c1beef896"
+    },
+    {
+      "source": "ts/input/tex/ColumnParser.ts",
+      "source_sha256": "4bffbf64ef23395d551d0e190043222bfffe7fd71e2417e3fb8008c5f3377d5c",
+      "cjs": "input/tex/ColumnParser.js",
+      "cjs_sha256": "9d09d0b921ce50255facfe303d7771309ad71ea473388167535d5acf711feae9"
+    },
+    {
+      "source": "ts/input/tex/ParseOptions.ts",
+      "source_sha256": "ab60a07dbb24040c0fb9bd67b942755ffc5b0b18980abf1938736d8d90b22209",
+      "cjs": "input/tex/ParseOptions.js",
+      "cjs_sha256": "ff19d70539cb76911c5f1d7673ddfd908183dcf5849c91cb068b19e58da8a9ec"
+    },
+    {
+      "source": "ts/input/tex/TexParser.ts",
+      "source_sha256": "9afdfff070ec7ed7115a1afe97048b3d1f1befae5b75e8ec963e0456685ee167",
+      "cjs": "input/tex/TexParser.js",
+      "cjs_sha256": "106d7ff9298dce899d046339eab1996358f3efca3a7ce66f5ca915747dc9c6a8"
+    },
+    {
+      "source": "ts/input/tex/StackItem.ts",
+      "source_sha256": "ac138d321e1efbc54afbd961a4b6bfa24f7d0923eddba1c8d891dee9424602b5",
+      "cjs": "input/tex/StackItem.js",
+      "cjs_sha256": "53baa91d7c27475a91a9b6993235071ab32b04a29736c5920bdda2836ab5a91b"
+    },
+    {
+      "source": "ts/input/tex/StackItemFactory.ts",
+      "source_sha256": "229bf0f6bd58642bff86102bb8fb6fd2b9a61d3f52ad31ce738f3f2cefa2e405",
+      "cjs": "input/tex/StackItemFactory.js",
+      "cjs_sha256": "2722b21be90f76b48325c22a65b37f80dc283e4bc9f74b644dcae81386d001c2"
+    },
+    {
+      "source": "ts/input/tex/base/BaseItems.ts",
+      "source_sha256": "0c0d8448f3577be6642c95a412682310362819d2d383ab83b817d2888e4e5f0c",
+      "cjs": "input/tex/base/BaseItems.js",
+      "cjs_sha256": "5310d0429b7b62d405ae9b93c8d21ad17b787e5eb3fd1f01439c62f2094f7d1a"
+    },
+    {
+      "source": "ts/input/tex/ParseUtil.ts",
+      "source_sha256": "b43646071997f88f27df51610c7972a8cb5791ea76194e7318d17d1a2f81f76a",
+      "cjs": "input/tex/ParseUtil.js",
+      "cjs_sha256": "adafa18cefad39e8408bcc0e4eb7103dceb6d16c9e7ea2eb013f23602c3f8941"
+    },
+    {
+      "source": "ts/input/tex/UnitUtil.ts",
+      "source_sha256": "90f461310aa6d07b494cda98dc5398e9737231f046e20099ea0f5c19fa24c66e",
+      "cjs": "input/tex/UnitUtil.js",
+      "cjs_sha256": "22fd8e826575bf9cd612b2f85208a49b07eb3cb6d9ace6c6db36e79d6e50bade"
+    },
+    {
+      "source": "ts/input/tex/TexError.ts",
+      "source_sha256": "30f398ff1910edecf029b1e4dde846bef10990539f60c43a4ef2da8783ba7ac8",
+      "cjs": "input/tex/TexError.js",
+      "cjs_sha256": "a5713111ff2ab646740da13ca6273cb5f2a7ceff9d0fb6a2e116185e4994e64f"
+    },
+    {
+      "source": "ts/input/tex.ts",
+      "source_sha256": "151d3c73697bfbf874001549f6e0c80dbebeabba2b36ab50501a4ffd7753bf06",
+      "cjs": "input/tex.js",
+      "cjs_sha256": "ef2852b197173f373e62326016e980aef01ffc838f5f766ab6076262f944eada"
+    },
+    {
+      "source": "ts/core/MathItem.ts",
+      "source_sha256": "c1c7308320ae15514fd1114c3f94642a4e8a8268bfe6f68192e8a557829626ce",
+      "cjs": "core/MathItem.js",
+      "cjs_sha256": "e6ed5008854e4d2ac6b34ab98c53bec6afb34e460895e8320c90a0d8d700d261"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNode.ts",
+      "source_sha256": "cc0594eb5782928412c4307637866d9f80ac147af577297edd48ee88b63b8656",
+      "cjs": "core/MmlTree/MmlNode.js",
+      "cjs_sha256": "86c5eb572dcf2652c3c52a60b66c720d231e17f600cc9aeef3ace4aeafc81d45"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlFactory.ts",
+      "source_sha256": "5e7338cd3eed5a4002243b7371dc5098c6433ff4ba4345cb2d50cf0385b2abdb",
+      "cjs": "core/MmlTree/MmlFactory.js",
+      "cjs_sha256": "d0c4e25237d04a9d21d12ee44776e46d30777e7f284db6f4f3ed1cc625b752d3"
+    },
+    {
+      "source": "ts/core/Tree/Factory.ts",
+      "source_sha256": "e61d2f5868287e2f382503cf690cd241698bf212957c1795d0cd35ce3bef049e",
+      "cjs": "core/Tree/Factory.js",
+      "cjs_sha256": "739db2e5760c29d7bb4f1bc7baa08ff8d727f4d117522aff5ede017f812cffef"
+    },
+    {
+      "source": "ts/util/Options.ts",
+      "source_sha256": "b810ffc09864eb8ed9295d829b229194d7e38aaac6c8f01525bc1a4b190a61e3",
+      "cjs": "util/Options.js",
+      "cjs_sha256": "76f3df8a3e899fba1d0944d5b79818b586c1d9f95cc7021c395fbb10295db660"
+    },
+    {
+      "source": "ts/util/PrioritizedList.ts",
+      "source_sha256": "a700459f984ba1a5f18bf0e7dc183c242961b94c33587a9aa81bbaacf97180c8",
+      "cjs": "util/PrioritizedList.js",
+      "cjs_sha256": "787bd21f3634312af666917d8f140145864f98d09ede1bdde3c957d28ec2bc25"
+    },
+    {
+      "source": "ts/util/FunctionList.ts",
+      "source_sha256": "d4106c42268e0d7cb3549f8ffdbeb5bab87eae6daffae7314d5e724045a6918f",
+      "cjs": "util/FunctionList.js",
+      "cjs_sha256": "571f57801b863b2d9f01a66dc72f2836b7fd06a1a48a3fe0057e4ec3d51a7278"
+    }
+  ],
+  "observations": [
+    {
+      "label": "parse-options-field-order-sharing-and-math-style-variants",
+      "result": {
+        "keys": {
+          "$": "array",
+          "items": [
+            "options",
+            "columnParser",
+            "packageData",
+            "parsers",
+            "root",
+            "nodeLists",
+            "error",
+            "handlers",
+            "nodeFactory",
+            "itemFactory",
+            "mathStyle",
+            "tags"
+          ]
+        },
+        "handlersSharedWithConfiguration": true,
+        "handlersConstructor": "SubHandlers",
+        "optionsOwnRecord": true,
+        "variantMap": {
+          "$": "array",
+          "items": [
+            "TeX",
+            "ISO",
+            "French",
+            "upright"
+          ]
+        },
+        "selectedMathStyle": true,
+        "fresh": {
+          "keys": {
+            "$": "array",
+            "items": [
+              "options",
+              "columnParser",
+              "packageData",
+              "parsers",
+              "root",
+              "nodeLists",
+              "error",
+              "handlers",
+              "nodeFactory",
+              "itemFactory",
+              "mathStyle"
+            ]
+          },
+          "options": {
+            "maxMacros": 1000,
+            "digits": "",
+            "numberPattern": {
+              "lastIndex": 0
+            },
+            "initialDigit": {
+              "lastIndex": 0
+            },
+            "identifierPattern": {
+              "lastIndex": 0
+            },
+            "initialLetter": {
+              "lastIndex": 0
+            },
+            "baseURL": ""
+          },
+          "mathStyleFallback": true
+        },
+        "descriptors": {
+          "constructor": {
+            "value": {
+              "$": "function",
+              "name": "ParseOptions"
+            },
+            "writable": true,
+            "enumerable": false,
+            "configurable": true
+          },
+          "pushParser": {
+            "value": {
+              "$": "function",
+              "name": ""
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "popParser": {
+            "value": {
+              "$": "function",
+              "name": ""
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "parser": {
+            "get": {
+              "$": "function",
+              "name": "get"
+            },
+            "set": {
+              "$": "undefined"
+            },
+            "enumerable": false,
+            "configurable": true
+          },
+          "clear": {
+            "value": {
+              "$": "function",
+              "name": ""
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "addNode": {
+            "value": {
+              "$": "function",
+              "name": ""
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "getList": {
+            "value": {
+              "$": "function",
+              "name": ""
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "removeFromList": {
+            "value": {
+              "$": "function",
+              "name": ""
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "inTree": {
+            "value": {
+              "$": "function",
+              "name": ""
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "parse-options-parser-stack-live-array-and-identity",
+      "result": {
+        "before": false,
+        "sameArray": true,
+        "first": true,
+        "second": true,
+        "popReturnsUndefined": true,
+        "afterPopIsFirst": true,
+        "length": 3
+      },
+      "error": null
+    },
+    {
+      "label": "parse-options-clear-rebinds-ephemeral-fields-and-resets-tags",
+      "result": {
+        "newParsers": true,
+        "newLists": true,
+        "rootWasNode": true,
+        "rootNull": true,
+        "error": false,
+        "parserUndefined": true,
+        "optionsSame": true,
+        "handlersSame": true,
+        "tagsSame": true,
+        "resetCalls": 1,
+        "fields": {
+          "$": "array",
+          "items": [
+            "options",
+            "columnParser",
+            "packageData",
+            "parsers",
+            "root",
+            "nodeLists",
+            "error",
+            "handlers",
+            "nodeFactory",
+            "itemFactory",
+            "mathStyle",
+            "tags"
+          ]
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "parse-options-addnode-inlists-and-getlist-live-tree-replacement",
+      "result": {
+        "inLists": "custom",
+        "savedLength": 2,
+        "resultLength": 1,
+        "onlyLive": true,
+        "replaced": true,
+        "secondReusesCurrent": true,
+        "secondIsNewArray": true,
+        "kindList": {
+          "$": "array",
+          "items": [
+            "mi"
+          ]
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "parse-options-removelist-first-strict-match-preserves-array-identity",
+      "result": {
+        "sameList": true,
+        "afterOne": {
+          "$": "array",
+          "items": [
+            "mi",
+            "mn"
+          ]
+        },
+        "final": {
+          "$": "array",
+          "items": [
+            "mn"
+          ]
+        },
+        "missingNoCreate": true
+      },
+      "error": null
+    },
+    {
+      "label": "function-list-execute-binds-priority-entry-as-receiver",
+      "result": {
+        "observed": {
+          "$": "array",
+          "items": [
+            {
+              "receiverIsPriorityEntry": true,
+              "receiver": {
+                "item": {
+                  "$": "function",
+                  "name": "callback"
+                },
+                "priority": 23
+              },
+              "arity": 1,
+              "argumentIsOriginal": true
+            }
+          ]
+        },
+        "returnValue": true,
+        "entry": {
+          "item": {
+            "$": "function",
+            "name": "callback"
+          },
+          "priority": 23
+        },
+        "ownKeys": {
+          "$": "array",
+          "items": [
+            "item",
+            "priority"
+          ]
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "configuration-defaults-local-versus-create",
+      "result": {
+        "local": {
+          "name": "",
+          "registered": false,
+          "priority": 5,
+          "parser": "tex",
+          "handler": {
+            "$": "array",
+            "items": [
+              "character",
+              "delimiter",
+              "macro",
+              "environment"
+            ]
+          },
+          "handlersFresh": true,
+          "eachDefaultFresh": true
+        },
+        "named": {
+          "name": "parser-family-4242-registered",
+          "registered": true,
+          "priority": 5,
+          "parser": "tex"
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "configuration-config-property-get-order",
+      "result": {
+        "trace": {
+          "$": "array",
+          "items": [
+            "priority",
+            "init",
+            "init",
+            "config",
+            "config",
+            "preprocessors",
+            "postprocessors",
+            "parser",
+            "handler",
+            "fallback",
+            "items",
+            "tags",
+            "options",
+            "nodes"
+          ]
+        },
+        "initMethod": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              {
+                "$": "function",
+                "name": "initMethod"
+              },
+              5
+            ]
+          }
+        },
+        "configMethod": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              {
+                "$": "function",
+                "name": "initMethod"
+              },
+              0
+            ]
+          }
+        },
+        "initSame": true,
+        "configSame": true,
+        "priority": 5,
+        "parser": "tex",
+        "handler": {
+          "character": {
+            "$": "array",
+            "items": {
+              "$": "array",
+              "items": []
+            }
+          },
+          "delimiter": {
+            "$": "array",
+            "items": {
+              "$": "array",
+              "items": []
+            }
+          },
+          "macro": {
+            "$": "array",
+            "items": {
+              "$": "array",
+              "items": []
+            }
+          },
+          "environment": {
+            "$": "array",
+            "items": {
+              "$": "array",
+              "items": []
+            }
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "configuration-truthy-property-rereads-and-priority-coalescing",
+      "result": {
+        "trace": {
+          "$": "array",
+          "items": [
+            "priority",
+            "init1",
+            "init2",
+            "config1",
+            "config2",
+            "preprocessors",
+            "postprocessors",
+            "parser",
+            "handler",
+            "fallback",
+            "items",
+            "tags",
+            "options",
+            "nodes"
+          ]
+        },
+        "initReads": 2,
+        "configReads": 2,
+        "initSame": true,
+        "configSame": true,
+        "priority": 5,
+        "parser": "tex"
+      },
+      "error": null
+    },
+    {
+      "label": "configuration-falsy-init-config-and-array-processor-alias",
+      "result": {
+        "init": null,
+        "config": null,
+        "preprocessorMapped": true,
+        "tuple": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              {
+                "$": "function",
+                "name": ""
+              },
+              0
+            ]
+          }
+        },
+        "inputTupleSame": true,
+        "holes": {
+          "length": 0,
+          "hole0": true
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "configuration-array-map-captured-length-holes-and-getter-effects",
+      "result": {
+        "trace": {
+          "$": "array",
+          "items": [
+            "get:0",
+            "get:2"
+          ]
+        },
+        "inputLength": 4,
+        "outputLength": 3,
+        "output": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": [
+                    {
+                      "$": "function",
+                      "name": "first"
+                    },
+                    5
+                  ]
+                }
+              },
+              {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": [
+                    {
+                      "$": "function",
+                      "name": "late"
+                    },
+                    5
+                  ]
+                }
+              },
+              {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": [
+                    {
+                      "$": "function",
+                      "name": "third"
+                    },
+                    5
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "own": {
+          "$": "array",
+          "items": [
+            true,
+            true,
+            true
+          ]
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "configuration-handler-object-assign-enumerability-symbol-and-proto-setter",
+      "result": {
+        "trace": {
+          "$": "array",
+          "items": [
+            "get:macro",
+            "get:symbol"
+          ]
+        },
+        "ownKeys": {
+          "$": "array",
+          "items": [
+            "character",
+            "delimiter",
+            "macro",
+            "environment",
+            "symbol:source-symbol"
+          ]
+        },
+        "proto": {
+          "injected": true
+        },
+        "macro": {
+          "$": "array",
+          "items": [
+            "own"
+          ]
+        },
+        "symbol": "symbol-value",
+        "inherited": {
+          "$": "undefined"
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "configuration-create-registers-only-after-success",
+      "result": {
+        "failed": {
+          "result": null,
+          "error": {
+            "name": "Error",
+            "id": null,
+            "message": "source-init-get"
+          }
+        },
+        "absent": true,
+        "localDoesNotRegister": true
+      },
+      "error": null
+    },
+    {
+      "label": "configuration-handler-live-map-keys-and-overwrite-order",
+      "result": {
+        "priorCount": 2,
+        "firstKey": "base",
+        "restIncludesNew": true,
+        "replacementKeepsOrder": true,
+        "getIdentity": true,
+        "bIdentity": true
+      },
+      "error": null
+    },
+    {
+      "label": "configuration-property-reads-short-circuit-and-null-failure",
+      "result": {
+        "trace": {
+          "$": "array",
+          "items": [
+            "priority",
+            "init-test",
+            "config-test",
+            "preprocessors",
+            "postprocessors",
+            "parser",
+            "handler",
+            "fallback",
+            "items",
+            "tags",
+            "options",
+            "nodes"
+          ]
+        },
+        "priority": 0,
+        "parser": "tex",
+        "methods": {
+          "$": "array",
+          "items": [
+            null,
+            null
+          ]
+        },
+        "nullFailure": {
+          "result": null,
+          "error": {
+            "name": "TypeError",
+            "id": null,
+            "message": "Cannot read properties of null (reading 'priority')"
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "configuration-init-config-falsy-short-circuit-read-count",
+      "result": {
+        "trace": {
+          "$": "array",
+          "items": [
+            "init",
+            "config"
+          ]
+        },
+        "init": null,
+        "config": null
+      },
+      "error": null
+    },
+    {
+      "label": "configuration-init-config-truthy-getter-rereads-current-values",
+      "result": {
+        "trace": {
+          "$": "array",
+          "items": [
+            "init1",
+            "init2",
+            "config1",
+            "config2"
+          ]
+        },
+        "initReads": 2,
+        "configReads": 2,
+        "initStored": "secondInit",
+        "configStored": "secondConfig"
+      },
+      "error": null
+    },
+    {
+      "label": "configuration-runtime-descriptors-direct-constructor-and-mutable-method-metadata",
+      "result": {
+        "configurationLength": 13,
+        "constructorLength": 13,
+        "rawOwnDescriptors": {
+          "name": {
+            "value": "runtime-direct",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "handler": {
+            "value": {
+              "character": {
+                "$": "array",
+                "items": []
+              },
+              "delimiter": {
+                "$": "array",
+                "items": []
+              },
+              "macro": {
+                "$": "array",
+                "items": []
+              },
+              "environment": {
+                "$": "array",
+                "items": []
+              }
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "fallback": {
+            "value": {},
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "items": {
+            "value": {},
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "tags": {
+            "value": {},
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "options": {
+            "value": {},
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "nodes": {
+            "value": {},
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "preprocessors": {
+            "value": {
+              "$": "array",
+              "items": []
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "postprocessors": {
+            "value": {
+              "$": "array",
+              "items": []
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "initMethod": {
+            "value": null,
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "configMethod": {
+            "value": null,
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "priority": {
+            "value": {
+              "$": "undefined"
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "parser": {
+            "value": {
+              "$": "undefined"
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          }
+        },
+        "prototypeDescriptors": {
+          "constructor": {
+            "value": {
+              "$": "function",
+              "name": "Configuration"
+            },
+            "writable": true,
+            "enumerable": false,
+            "configurable": true
+          },
+          "init": {
+            "get": {
+              "$": "function",
+              "name": "get"
+            },
+            "set": {
+              "$": "undefined"
+            },
+            "enumerable": false,
+            "configurable": true
+          },
+          "config": {
+            "get": {
+              "$": "function",
+              "name": "get"
+            },
+            "set": {
+              "$": "undefined"
+            },
+            "enumerable": false,
+            "configurable": true
+          }
+        },
+        "staticDescriptors": {
+          "length": {
+            "value": 13,
+            "writable": false,
+            "enumerable": false,
+            "configurable": true
+          },
+          "name": {
+            "value": "Configuration",
+            "writable": false,
+            "enumerable": false,
+            "configurable": true
+          },
+          "prototype": {
+            "value": {
+              "constructor": {
+                "$": "function",
+                "name": "Configuration"
+              },
+              "init": null,
+              "config": null
+            },
+            "writable": true,
+            "enumerable": false,
+            "configurable": false
+          },
+          "makeProcessor": {
+            "value": {
+              "$": "function",
+              "name": ""
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "_create": {
+            "value": {
+              "$": "function",
+              "name": ""
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "create": {
+            "value": {
+              "$": "function",
+              "name": ""
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "local": {
+            "value": {
+              "$": "function",
+              "name": ""
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          }
+        },
+        "before": {
+          "priority": 12,
+          "init": "sourceInit",
+          "initMethod": {
+            "$": "array",
+            "items": {
+              "$": "array",
+              "items": [
+                {
+                  "$": "function",
+                  "name": "sourceInit"
+                },
+                4
+              ]
+            }
+          },
+          "configMethod": {
+            "$": "array",
+            "items": {
+              "$": "array",
+              "items": [
+                {
+                  "$": "function",
+                  "name": "sourceConfig"
+                },
+                6
+              ]
+            }
+          }
+        },
+        "mutation": {
+          "priority": 23,
+          "changedPairFirst": "replacementInit",
+          "initMethod": {
+            "$": "array",
+            "items": {
+              "$": "array",
+              "items": [
+                {
+                  "$": "function",
+                  "name": "replacedPairInit"
+                },
+                9
+              ]
+            }
+          },
+          "init": "replacedPairInit"
+        },
+        "canDirectConstruct": true,
+        "defaults": {
+          "parser": {
+            "$": "undefined"
+          },
+          "priority": {
+            "$": "undefined"
+          },
+          "handler": {
+            "character": {
+              "$": "array",
+              "items": {
+                "$": "array",
+                "items": []
+              }
+            },
+            "delimiter": {
+              "$": "array",
+              "items": {
+                "$": "array",
+                "items": []
+              }
+            },
+            "macro": {
+              "$": "array",
+              "items": {
+                "$": "array",
+                "items": []
+              }
+            },
+            "environment": {
+              "$": "array",
+              "items": {
+                "$": "array",
+                "items": []
+              }
+            }
+          },
+          "items": {},
+          "tags": {},
+          "options": {},
+          "nodes": {}
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "configuration-callable-metadata-and-direct-call-versus-new",
+      "result": {
+        "class": {
+          "name": "Configuration",
+          "length": 13
+        },
+        "staticMethods": {
+          "makeProcessor": {
+            "descriptor": {
+              "enumerable": true,
+              "writable": true,
+              "configurable": true
+            },
+            "function": {
+              "name": "",
+              "length": 2
+            }
+          },
+          "_create": {
+            "descriptor": {
+              "enumerable": true,
+              "writable": true,
+              "configurable": true
+            },
+            "function": {
+              "name": "",
+              "length": 2
+            }
+          },
+          "create": {
+            "descriptor": {
+              "enumerable": true,
+              "writable": true,
+              "configurable": true
+            },
+            "function": {
+              "name": "",
+              "length": 2
+            }
+          },
+          "local": {
+            "descriptor": {
+              "enumerable": true,
+              "writable": true,
+              "configurable": true
+            },
+            "function": {
+              "name": "",
+              "length": 1
+            }
+          }
+        },
+        "prototype": {
+          "constructor": {
+            "descriptor": {
+              "enumerable": false,
+              "writable": true,
+              "configurable": true
+            },
+            "function": {
+              "name": "Configuration",
+              "length": 13
+            }
+          },
+          "init": {
+            "descriptor": {
+              "enumerable": false,
+              "writable": {
+                "$": "undefined"
+              },
+              "configurable": true
+            },
+            "function": {
+              "name": "get",
+              "length": 0
+            }
+          },
+          "config": {
+            "descriptor": {
+              "enumerable": false,
+              "writable": {
+                "$": "undefined"
+              },
+              "configurable": true
+            },
+            "function": {
+              "name": "get",
+              "length": 0
+            }
+          }
+        },
+        "directCall": {
+          "result": null,
+          "error": {
+            "name": "TypeError",
+            "id": null,
+            "message": "Cannot set properties of undefined (setting 'name')"
+          }
+        },
+        "construct": {
+          "result": {
+            "name": "with-new",
+            "handler": {
+              "character": {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": []
+                }
+              },
+              "delimiter": {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": []
+                }
+              },
+              "macro": {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": []
+                }
+              },
+              "environment": {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": []
+                }
+              }
+            },
+            "fallback": {},
+            "items": {},
+            "tags": {},
+            "options": {},
+            "nodes": {},
+            "preprocessors": {
+              "$": "array",
+              "items": {
+                "$": "array",
+                "items": []
+              }
+            },
+            "postprocessors": {
+              "$": "array",
+              "items": {
+                "$": "array",
+                "items": []
+              }
+            },
+            "initMethod": null,
+            "configMethod": null,
+            "priority": {
+              "$": "undefined"
+            },
+            "parser": {
+              "$": "undefined"
+            }
+          },
+          "error": null
+        },
+        "privateStaticCalls": {
+          "makeProcessor": {
+            "$": "array",
+            "items": {
+              "$": "array",
+              "items": [
+                {
+                  "$": "function",
+                  "name": "directProcessor"
+                },
+                29
+              ]
+            }
+          },
+          "createInternal": {
+            "name": "internal-direct",
+            "registered": false
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "configuration-preprocessor-map-override-get-and-receiver",
+      "result": {
+        "trace": {
+          "$": "array",
+          "items": [
+            "map-this:true",
+            "map-callback:sourcePre"
+          ]
+        },
+        "mappedIsReturned": true,
+        "resultNames": {
+          "$": "array",
+          "items": [
+            "replacementPre"
+          ]
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "parser-configuration-own-fields-and-array-alias",
+      "result": {
+        "parsersAlias": true,
+        "handlers": "SubHandlers",
+        "itemKeys": {
+          "$": "array",
+          "items": []
+        },
+        "tagKeys": {
+          "$": "array",
+          "items": []
+        },
+        "optionKeys": {
+          "$": "array",
+          "items": []
+        },
+        "nodesKeys": {
+          "$": "array",
+          "items": []
+        },
+        "ownDescriptors": {
+          "initMethod": {
+            "enumerable": true,
+            "configurable": true,
+            "writable": true,
+            "getter": null,
+            "setter": null,
+            "valueType": "object"
+          },
+          "configMethod": {
+            "enumerable": true,
+            "configurable": true,
+            "writable": true,
+            "getter": null,
+            "setter": null,
+            "valueType": "object"
+          },
+          "configurations": {
+            "enumerable": true,
+            "configurable": true,
+            "writable": true,
+            "getter": null,
+            "setter": null,
+            "valueType": "object"
+          },
+          "parsers": {
+            "enumerable": true,
+            "configurable": true,
+            "writable": true,
+            "getter": null,
+            "setter": null,
+            "valueType": "object"
+          },
+          "handlers": {
+            "enumerable": true,
+            "configurable": true,
+            "writable": true,
+            "getter": null,
+            "setter": null,
+            "valueType": "object"
+          },
+          "items": {
+            "enumerable": true,
+            "configurable": true,
+            "writable": true,
+            "getter": null,
+            "setter": null,
+            "valueType": "object"
+          },
+          "tags": {
+            "enumerable": true,
+            "configurable": true,
+            "writable": true,
+            "getter": null,
+            "setter": null,
+            "valueType": "object"
+          },
+          "options": {
+            "enumerable": true,
+            "configurable": true,
+            "writable": true,
+            "getter": null,
+            "setter": null,
+            "valueType": "object"
+          },
+          "nodes": {
+            "enumerable": true,
+            "configurable": true,
+            "writable": true,
+            "getter": null,
+            "setter": null,
+            "valueType": "object"
+          }
+        },
+        "prototypeDescriptors": {
+          "constructor": {
+            "enumerable": false,
+            "configurable": true,
+            "writable": true,
+            "getter": null,
+            "setter": null,
+            "valueType": "function"
+          },
+          "init": {
+            "enumerable": true,
+            "configurable": true,
+            "writable": true,
+            "getter": null,
+            "setter": null,
+            "valueType": "function"
+          },
+          "config": {
+            "enumerable": true,
+            "configurable": true,
+            "writable": true,
+            "getter": null,
+            "setter": null,
+            "valueType": "function"
+          },
+          "addPackage": {
+            "enumerable": true,
+            "configurable": true,
+            "writable": true,
+            "getter": null,
+            "setter": null,
+            "valueType": "function"
+          },
+          "add": {
+            "enumerable": true,
+            "configurable": true,
+            "writable": true,
+            "getter": null,
+            "setter": null,
+            "valueType": "function"
+          },
+          "getPackage": {
+            "enumerable": true,
+            "configurable": true,
+            "writable": true,
+            "getter": null,
+            "setter": null,
+            "valueType": "function"
+          },
+          "append": {
+            "enumerable": true,
+            "configurable": true,
+            "writable": true,
+            "getter": null,
+            "setter": null,
+            "valueType": "function"
+          },
+          "addFilters": {
+            "enumerable": true,
+            "configurable": true,
+            "writable": true,
+            "getter": null,
+            "setter": null,
+            "valueType": "function"
+          },
+          "warn": {
+            "enumerable": true,
+            "configurable": true,
+            "writable": true,
+            "getter": null,
+            "setter": null,
+            "valueType": "function"
+          }
+        },
+        "configurationList": {
+          "items": {
+            "$": "array",
+            "items": {
+              "$": "array",
+              "items": []
+            }
+          }
+        },
+        "initList": "FunctionList",
+        "configList": "FunctionList",
+        "constructorMetadata": {
+          "name": "ParserConfiguration",
+          "length": 2,
+          "prototypeKeys": {
+            "$": "array",
+            "items": [
+              "constructor",
+              "init",
+              "config",
+              "addPackage",
+              "add",
+              "getPackage",
+              "append",
+              "addFilters",
+              "warn"
+            ]
+          },
+          "methods": {
+            "init": {
+              "name": "",
+              "length": 0,
+              "enumerable": true
+            },
+            "config": {
+              "name": "",
+              "length": 1,
+              "enumerable": true
+            },
+            "addPackage": {
+              "name": "",
+              "length": 1,
+              "enumerable": true
+            },
+            "add": {
+              "name": "",
+              "length": 3,
+              "enumerable": true
+            },
+            "getPackage": {
+              "name": "",
+              "length": 1,
+              "enumerable": true
+            },
+            "append": {
+              "name": "",
+              "length": 2,
+              "enumerable": true
+            },
+            "addFilters": {
+              "name": "",
+              "length": 2,
+              "enumerable": true
+            },
+            "warn": {
+              "name": "",
+              "length": 1,
+              "enumerable": true
+            }
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "parser-addpackage-snapshot-reverse-and-tuple-index-get-order",
+      "result": {
+        "trace": {
+          "$": "array",
+          "items": [
+            "tuple:0",
+            "tuple:1"
+          ]
+        },
+        "samePackagesArray": true,
+        "configOrder": {
+          "$": "array",
+          "items": [
+            {
+              "$": "array",
+              "items": [
+                "parser-family-4242-append-a",
+                0
+              ]
+            },
+            {
+              "$": "array",
+              "items": [
+                "parser-family-4242-append-b",
+                4
+              ]
+            }
+          ]
+        },
+        "tupleLength": 2
+      },
+      "error": null
+    },
+    {
+      "label": "parser-configuration-init-and-config-method-callback-order",
+      "result": {
+        "trace": {
+          "$": "array",
+          "items": [
+            "init:false:true",
+            "config:false:true:true"
+          ]
+        },
+        "initEntries": {
+          "$": "array",
+          "items": [
+            {
+              "$": "array",
+              "items": [
+                "init",
+                5
+              ]
+            }
+          ]
+        },
+        "configEntries": {
+          "$": "array",
+          "items": [
+            {
+              "$": "array",
+              "items": [
+                "ready",
+                5
+              ]
+            }
+          ]
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "parser-append-processor-direct-index-and-live-object-assign-order",
+      "result": {
+        "trace": {
+          "$": "array",
+          "items": [
+            "get:priority",
+            "get:initMethod",
+            "get:initMethod",
+            "get:initMethod",
+            "get:configMethod",
+            "get:configMethod",
+            "get:configMethod",
+            "get:handler",
+            "get:fallback",
+            "handlers.add",
+            "get:items",
+            "get:tags",
+            "get:options",
+            "get:nodes"
+          ]
+        },
+        "initEntries": {
+          "$": "array",
+          "items": [
+            {
+              "$": "array",
+              "items": [
+                "init",
+                7
+              ]
+            }
+          ]
+        },
+        "configEntries": {
+          "$": "array",
+          "items": [
+            {
+              "$": "array",
+              "items": [
+                "configure",
+                8
+              ]
+            }
+          ]
+        },
+        "effectiveCount": 0
+      },
+      "error": null
+    },
+    {
+      "label": "parser-append-reads-live-configuration-fields-and-method-tuples",
+      "result": {
+        "trace": {
+          "$": "array",
+          "items": [
+            "get:priority",
+            "get:initMethod",
+            "get:initMethod",
+            "get:initMethod",
+            "get:configMethod",
+            "get:configMethod",
+            "get:configMethod",
+            "get:handler",
+            "get:fallback",
+            "get:items",
+            "get:tags",
+            "get:options",
+            "get:nodes"
+          ]
+        },
+        "init": {
+          "$": "array",
+          "items": [
+            {
+              "$": "array",
+              "items": [
+                "initPairMutated",
+                1
+              ]
+            }
+          ]
+        },
+        "configure": {
+          "$": "array",
+          "items": [
+            {
+              "$": "array",
+              "items": [
+                "configPairReplaced",
+                8
+              ]
+            }
+          ]
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "parser-append-processor-index-get-order-on-inherited-tuple",
+      "result": {
+        "trace": {
+          "$": "array",
+          "items": [
+            "pair:0",
+            "pair:1",
+            "pair:0",
+            "pair:1"
+          ]
+        },
+        "init": {
+          "$": "array",
+          "items": [
+            {
+              "$": "array",
+              "items": [
+                "inheritedInit",
+                17
+              ]
+            }
+          ]
+        },
+        "config": {
+          "$": "array",
+          "items": [
+            {
+              "$": "array",
+              "items": [
+                "inheritedInit",
+                17
+              ]
+            }
+          ]
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "parser-constructor-config-getters-and-filter-array-map-override",
+      "result": {
+        "trace": {
+          "$": "array",
+          "items": [
+            "pre-map:true",
+            "post-map:true"
+          ]
+        },
+        "filterTrace": {
+          "$": "array",
+          "items": [
+            {
+              "$": "array",
+              "items": [
+                "pre",
+                "pre",
+                5
+              ]
+            },
+            {
+              "$": "array",
+              "items": [
+                "post",
+                "post",
+                5
+              ]
+            }
+          ]
+        },
+        "storedPre": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": [
+                    {
+                      "$": "function",
+                      "name": "pre"
+                    },
+                    5
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "storedPost": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": [
+                    {
+                      "$": "function",
+                      "name": "post"
+                    },
+                    5
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "parser-addfilters-destructures-through-tuple-iterator-and-closes-it",
+      "result": {
+        "trace": {
+          "$": "array",
+          "items": [
+            "iterator-get:true",
+            "iterator-call:true",
+            "next:0",
+            "next:1",
+            "return:true"
+          ]
+        },
+        "added": {
+          "$": "array",
+          "items": [
+            {
+              "$": "array",
+              "items": [
+                "iteratorPre",
+                33
+              ]
+            }
+          ]
+        },
+        "storedSameTuple": true
+      },
+      "error": null
+    },
+    {
+      "label": "parser-getpackage-parser-target-error-and-missing-warning",
+      "result": {
+        "wrong": {
+          "result": null,
+          "error": {
+            "name": "Error",
+            "id": null,
+            "message": "Package 'parser-family-4242-wrong-parser' doesn't target the proper parser"
+          }
+        },
+        "warnings": {
+          "$": "array",
+          "items": [
+            "MathJax Warning: Package 'parser-family-4242-missing' not found.  Omitted."
+          ]
+        },
+        "missing": {
+          "$": "undefined"
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "parser-add-package-real-tex-order-and-configuration-callback-receiver",
+      "result": {
+        "outcome": {
+          "result": {
+            "$": "undefined"
+          },
+          "error": null
+        },
+        "trace": {
+          "$": "array",
+          "items": [
+            "creators:true",
+            "item:array:true",
+            "tags:true",
+            "filter:runtimeFilter:5",
+            "descriptor-receiver:true",
+            "args:true:true"
+          ]
+        },
+        "itemInstalled": true,
+        "option": "center",
+        "configPresent": 1
+      },
+      "error": null
+    },
+    {
+      "label": "parser-configuration-public-fields-are-live-authoritative-properties",
+      "result": {
+        "originalItemsUnchanged": true,
+        "replacementItems": {
+          "$": "array",
+          "items": [
+            "marker",
+            "liveAdded"
+          ]
+        },
+        "itemIdentity": true,
+        "parsersIdentity": true,
+        "packageCheck": {
+          "result": {
+            "$": "undefined"
+          },
+          "error": null
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "parser-add-default-user-options-undefined-and-null",
+      "result": {
+        "$": "array",
+        "items": [
+          {
+            "mode": "omitted",
+            "result": {
+              "$": "undefined"
+            },
+            "error": null,
+            "options": {
+              "preFilters": {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": []
+                }
+              },
+              "postFilters": {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": []
+                }
+              },
+              "FindTeX": null,
+              "packages": {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": [
+                    "base"
+                  ]
+                }
+              },
+              "maxBuffer": 5120,
+              "maxTemplateSubtitutions": 10000,
+              "mathStyle": "TeX",
+              "formatError": {
+                "$": "function",
+                "name": "formatError"
+              },
+              "tags": "none",
+              "tagSide": "right",
+              "tagIndent": "0.8em",
+              "useLabelIds": true,
+              "ignoreDuplicateLabels": false,
+              "tagAlign": "baseline",
+              "maxMacros": 1000,
+              "digits": "",
+              "numberPattern": {
+                "lastIndex": 0
+              },
+              "initialDigit": {
+                "lastIndex": 0
+              },
+              "identifierPattern": {
+                "lastIndex": 0
+              },
+              "initialLetter": {
+                "lastIndex": 0
+              },
+              "baseURL": ""
+            }
+          },
+          {
+            "mode": "undefined",
+            "result": {
+              "$": "undefined"
+            },
+            "error": null,
+            "options": {
+              "preFilters": {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": []
+                }
+              },
+              "postFilters": {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": []
+                }
+              },
+              "FindTeX": null,
+              "packages": {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": [
+                    "base"
+                  ]
+                }
+              },
+              "maxBuffer": 5120,
+              "maxTemplateSubtitutions": 10000,
+              "mathStyle": "TeX",
+              "formatError": {
+                "$": "function",
+                "name": "formatError"
+              },
+              "tags": "none",
+              "tagSide": "right",
+              "tagIndent": "0.8em",
+              "useLabelIds": true,
+              "ignoreDuplicateLabels": false,
+              "tagAlign": "baseline",
+              "maxMacros": 1000,
+              "digits": "",
+              "numberPattern": {
+                "lastIndex": 0
+              },
+              "initialDigit": {
+                "lastIndex": 0
+              },
+              "identifierPattern": {
+                "lastIndex": 0
+              },
+              "initialLetter": {
+                "lastIndex": 0
+              },
+              "baseURL": ""
+            }
+          },
+          {
+            "mode": "null",
+            "result": {
+              "$": "undefined"
+            },
+            "error": null,
+            "options": {
+              "preFilters": {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": []
+                }
+              },
+              "postFilters": {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": []
+                }
+              },
+              "FindTeX": null,
+              "packages": {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": [
+                    "base"
+                  ]
+                }
+              },
+              "maxBuffer": 5120,
+              "maxTemplateSubtitutions": 10000,
+              "mathStyle": "TeX",
+              "formatError": {
+                "$": "function",
+                "name": "formatError"
+              },
+              "tags": "none",
+              "tagSide": "right",
+              "tagIndent": "0.8em",
+              "useLabelIds": true,
+              "ignoreDuplicateLabels": false,
+              "tagAlign": "baseline",
+              "maxMacros": 1000,
+              "digits": "",
+              "numberPattern": {
+                "lastIndex": 0
+              },
+              "initialDigit": {
+                "lastIndex": 0
+              },
+              "identifierPattern": {
+                "lastIndex": 0
+              },
+              "initialLetter": {
+                "lastIndex": 0
+              },
+              "baseURL": ""
+            }
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "label": "tag-record-constructor-default-and-explicit-values",
+      "result": {
+        "labelDefault": {
+          "tag": "???",
+          "id": ""
+        },
+        "labelExplicitUndefined": {
+          "tag": "???",
+          "id": ""
+        },
+        "labelNulls": {
+          "tag": null,
+          "id": null
+        },
+        "tagInfoDefault": {
+          "env": "",
+          "taggable": false,
+          "defaultTags": false,
+          "tag": null,
+          "tagId": "",
+          "tagFormat": "",
+          "noTag": false,
+          "labelId": ""
+        },
+        "tagInfoExplicit": {
+          "env": "align",
+          "taggable": true,
+          "defaultTags": false,
+          "tag": null,
+          "tagId": "id",
+          "tagFormat": {
+            "$": "array",
+            "items": {
+              "$": "array",
+              "items": [
+                "(",
+                "4",
+                ")"
+              ]
+            }
+          },
+          "noTag": true,
+          "labelId": "lab"
+        },
+        "tagInfoUndefinedDefaults": {
+          "env": "",
+          "taggable": false,
+          "defaultTags": false,
+          "tag": null,
+          "tagId": "",
+          "tagFormat": "",
+          "noTag": false,
+          "labelId": ""
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "tags-class-runtime-arity-own-enumerability-and-prototype-inheritance",
+      "result": {
+        "classes": {
+          "$": "array",
+          "items": [
+            {
+              "name": "AbstractTags",
+              "length": 0,
+              "ownKeys": {
+                "$": "array",
+                "items": [
+                  "length",
+                  "name",
+                  "prototype"
+                ]
+              },
+              "prototypeKeys": {
+                "$": "array",
+                "items": [
+                  "constructor",
+                  "start",
+                  "env",
+                  "end",
+                  "tag",
+                  "notag",
+                  "noTag",
+                  "label",
+                  "formatUrl",
+                  "formatTag",
+                  "formatRef",
+                  "formatId",
+                  "formatNumber",
+                  "autoTag",
+                  "clearTag",
+                  "getTag",
+                  "resetTag",
+                  "reset",
+                  "startEquation",
+                  "finishEquation",
+                  "finalize",
+                  "makeId",
+                  "makeTag"
+                ]
+              }
+            },
+            {
+              "name": "NoTags",
+              "length": 0,
+              "ownKeys": {
+                "$": "array",
+                "items": [
+                  "length",
+                  "name",
+                  "prototype"
+                ]
+              },
+              "prototypeKeys": {
+                "$": "array",
+                "items": [
+                  "constructor",
+                  "autoTag",
+                  "getTag"
+                ]
+              }
+            },
+            {
+              "name": "AllTags",
+              "length": 0,
+              "ownKeys": {
+                "$": "array",
+                "items": [
+                  "length",
+                  "name",
+                  "prototype"
+                ]
+              },
+              "prototypeKeys": {
+                "$": "array",
+                "items": [
+                  "constructor",
+                  "finalize"
+                ]
+              }
+            },
+            {
+              "name": "Label",
+              "length": 2,
+              "ownKeys": {
+                "$": "array",
+                "items": [
+                  "length",
+                  "name",
+                  "prototype"
+                ]
+              },
+              "prototypeKeys": {
+                "$": "array",
+                "items": [
+                  "constructor"
+                ]
+              }
+            },
+            {
+              "name": "TagInfo",
+              "length": 8,
+              "ownKeys": {
+                "$": "array",
+                "items": [
+                  "length",
+                  "name",
+                  "prototype"
+                ]
+              },
+              "prototypeKeys": {
+                "$": "array",
+                "items": [
+                  "constructor"
+                ]
+              }
+            }
+          ]
+        },
+        "instances": {
+          "noneIsAbstract": true,
+          "allIsAbstract": true,
+          "abstractEnTagOwn": true,
+          "enTagDescriptor": {
+            "value": {
+              "$": "function",
+              "name": ""
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "currentTagOwn": true,
+          "currentTagDescriptor": {
+            "value": {
+              "env": "",
+              "taggable": false,
+              "defaultTags": false,
+              "tag": null,
+              "tagId": "",
+              "tagFormat": "",
+              "noTag": false,
+              "labelId": ""
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          }
+        },
+        "noTagsFinalizeInherited": true,
+        "allTagsFinalizeOverride": true
+      },
+      "error": null
+    },
+    {
+      "label": "abstract-tags-start-tag-notag-end-history-label",
+      "result": {
+        "inner": {
+          "env": "split",
+          "tag": {
+            "env": "split",
+            "taggable": false,
+            "defaultTags": false,
+            "tag": "",
+            "tagId": "",
+            "tagFormat": "",
+            "noTag": true,
+            "labelId": "inner"
+          },
+          "label": "inner",
+          "noTag": true
+        },
+        "restored": {
+          "env": "align",
+          "label": "outer",
+          "noTag": false,
+          "history": {
+            "$": "array",
+            "items": {
+              "$": "array",
+              "items": [
+                {
+                  "env": "split",
+                  "taggable": false,
+                  "defaultTags": false,
+                  "tag": "",
+                  "tagId": "",
+                  "tagFormat": "",
+                  "noTag": true,
+                  "labelId": "inner"
+                }
+              ]
+            }
+          }
+        },
+        "finalEnv": "",
+        "finalLabel": "outer",
+        "history": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              {
+                "env": "split",
+                "taggable": false,
+                "defaultTags": false,
+                "tag": "",
+                "tagId": "",
+                "tagFormat": "",
+                "noTag": true,
+                "labelId": "inner"
+              },
+              {
+                "env": "align",
+                "taggable": true,
+                "defaultTags": true,
+                "tag": "7",
+                "tagId": "",
+                "tagFormat": {
+                  "$": "array",
+                  "items": {
+                    "$": "array",
+                    "items": [
+                      "(",
+                      "7",
+                      ")"
+                    ]
+                  }
+                },
+                "noTag": false,
+                "labelId": "outer"
+              }
+            ]
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "abstract-tags-gettag-gates-auto-and-force-real-mml",
+      "result": {
+        "afterAuto": {
+          "counter": 1,
+          "tag": "1",
+          "tagId": "mjx-eqn:1",
+          "node": {
+            "kind": "mtd",
+            "attrs": {
+              "id": "mjx-eqn:1",
+              "rowalign": "baseline"
+            },
+            "properties": {},
+            "children": {
+              "$": "array",
+              "items": [
+                {
+                  "kind": "inferredMrow",
+                  "attrs": {},
+                  "properties": {},
+                  "children": {
+                    "$": "array",
+                    "items": [
+                      {
+                        "kind": "mtext",
+                        "attrs": {
+                          "data-latex": "\\text{(}"
+                        },
+                        "properties": {},
+                        "children": {
+                          "$": "array",
+                          "items": [
+                            {
+                              "kind": "text",
+                              "attrs": {},
+                              "properties": {},
+                              "children": {
+                                "$": "array",
+                                "items": []
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "kind": "mtext",
+                        "attrs": {
+                          "data-latex": "\\text{1}"
+                        },
+                        "properties": {},
+                        "children": {
+                          "$": "array",
+                          "items": [
+                            {
+                              "kind": "text",
+                              "attrs": {},
+                              "properties": {},
+                              "children": {
+                                "$": "array",
+                                "items": []
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "kind": "mtext",
+                        "attrs": {
+                          "data-latex": "\\text{)}"
+                        },
+                        "properties": {},
+                        "children": {
+                          "$": "array",
+                          "items": [
+                            {
+                              "kind": "text",
+                              "attrs": {},
+                              "properties": {},
+                              "children": {
+                                "$": "array",
+                                "items": []
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "denied": null,
+        "forced": {
+          "kind": "mtd",
+          "attrs": {
+            "id": "mjx-eqn:12",
+            "rowalign": "baseline"
+          },
+          "properties": {},
+          "children": {
+            "$": "array",
+            "items": [
+              {
+                "kind": "inferredMrow",
+                "attrs": {},
+                "properties": {},
+                "children": {
+                  "$": "array",
+                  "items": [
+                    {
+                      "kind": "mtext",
+                      "attrs": {
+                        "data-latex": "\\text{[}"
+                      },
+                      "properties": {},
+                      "children": {
+                        "$": "array",
+                        "items": [
+                          {
+                            "kind": "text",
+                            "attrs": {},
+                            "properties": {},
+                            "children": {
+                              "$": "array",
+                              "items": []
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "kind": "mtext",
+                      "attrs": {
+                        "data-latex": "\\text{12}"
+                      },
+                      "properties": {},
+                      "children": {
+                        "$": "array",
+                        "items": [
+                          {
+                            "kind": "text",
+                            "attrs": {},
+                            "properties": {},
+                            "children": {
+                              "$": "array",
+                              "items": []
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "kind": "mtext",
+                      "attrs": {
+                        "data-latex": "\\text{]}"
+                      },
+                      "properties": {},
+                      "children": {
+                        "$": "array",
+                        "items": [
+                          {
+                            "kind": "text",
+                            "attrs": {},
+                            "properties": {},
+                            "children": {
+                              "$": "array",
+                              "items": []
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "counter": 1,
+        "current": {
+          "env": "force-env",
+          "taggable": false,
+          "defaultTags": false,
+          "tag": "12",
+          "tagId": "mjx-eqn:12",
+          "tagFormat": {
+            "$": "array",
+            "items": {
+              "$": "array",
+              "items": [
+                "[",
+                "12",
+                "]"
+              ]
+            }
+          },
+          "noTag": false,
+          "labelId": ""
+        },
+        "activeParsers": 0
+      },
+      "error": null
+    },
+    {
+      "label": "abstract-tags-format-url-and-encode-uri-errors",
+      "result": {
+        "url": "https://x.test/#a%20b%2F%23%3F",
+        "unicode": "base#%CE%BB%F0%9D%91%A5",
+        "loneSurrogate": {
+          "result": null,
+          "error": {
+            "name": "URIError",
+            "id": null,
+            "message": "URI malformed"
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "abstract-tags-format-tag-ref-label-and-cleartag",
+      "result": {
+        "formatted": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              "(",
+              "8",
+              ")"
+            ]
+          }
+        },
+        "reference": {
+          "$": "array",
+          "items": [
+            "(",
+            "8",
+            ")"
+          ]
+        },
+        "trace": {
+          "$": "array",
+          "items": [
+            "formatTag:8",
+            "formatTag:8"
+          ]
+        },
+        "tag": null,
+        "tagId": "",
+        "noTag": false,
+        "label": "first"
+      },
+      "error": null
+    },
+    {
+      "label": "abstract-tags-reset-and-equation-lifetime-real-math-item",
+      "result": {
+        "begun": {
+          "counter": 3,
+          "refUpdate": true,
+          "ids": {},
+          "labels": {},
+          "currentTag": {
+            "env": "",
+            "taggable": false,
+            "defaultTags": false,
+            "tag": null,
+            "tagId": "",
+            "tagFormat": "",
+            "noTag": false,
+            "labelId": ""
+          }
+        },
+        "finished": {
+          "recompile": {
+            "state": 0,
+            "counter": 5
+          },
+          "counter": 3,
+          "allCounter": 5,
+          "allIds": {
+            "keep": true
+          },
+          "allLabels": {
+            "keep": {
+              "tag": "old",
+              "id": "old-id"
+            }
+          }
+        },
+        "reset": {
+          "counter": 9,
+          "allCounter": 9,
+          "allIds": {},
+          "allLabels": {},
+          "label": "",
+          "history": {
+            "$": "array",
+            "items": {
+              "$": "array",
+              "items": []
+            }
+          },
+          "redo": false,
+          "refUpdate": false
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "abstract-tags-finalize-enTag-real-tex-parser-and-mml",
+      "result": {
+        "result": {
+          "kind": "mtable",
+          "attrs": {
+            "side": "right",
+            "minlabelspacing": "0.8em",
+            "displaystyle": true
+          },
+          "properties": {
+            "useHeight": true
+          },
+          "children": {
+            "$": "array",
+            "items": [
+              {
+                "kind": "mlabeledtr",
+                "attrs": {},
+                "properties": {},
+                "children": {
+                  "$": "array",
+                  "items": [
+                    {
+                      "kind": "mtd",
+                      "attrs": {
+                        "id": "mjx-eqn:eq:four",
+                        "rowalign": "baseline"
+                      },
+                      "properties": {},
+                      "children": {
+                        "$": "array",
+                        "items": [
+                          {
+                            "kind": "inferredMrow",
+                            "attrs": {},
+                            "properties": {},
+                            "children": {
+                              "$": "array",
+                              "items": [
+                                {
+                                  "kind": "mtext",
+                                  "attrs": {
+                                    "data-latex": "\\text{(}"
+                                  },
+                                  "properties": {},
+                                  "children": {
+                                    "$": "array",
+                                    "items": [
+                                      {
+                                        "kind": "text",
+                                        "attrs": {},
+                                        "properties": {},
+                                        "children": {
+                                          "$": "array",
+                                          "items": []
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "kind": "mtext",
+                                  "attrs": {
+                                    "data-latex": "\\text{4}"
+                                  },
+                                  "properties": {},
+                                  "children": {
+                                    "$": "array",
+                                    "items": [
+                                      {
+                                        "kind": "text",
+                                        "attrs": {},
+                                        "properties": {},
+                                        "children": {
+                                          "$": "array",
+                                          "items": []
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "kind": "mtext",
+                                  "attrs": {
+                                    "data-latex": "\\text{)}"
+                                  },
+                                  "properties": {},
+                                  "children": {
+                                    "$": "array",
+                                    "items": [
+                                      {
+                                        "kind": "text",
+                                        "attrs": {},
+                                        "properties": {},
+                                        "children": {
+                                          "$": "array",
+                                          "items": []
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "kind": "mtd",
+                      "attrs": {},
+                      "properties": {},
+                      "children": {
+                        "$": "array",
+                        "items": [
+                          {
+                            "kind": "inferredMrow",
+                            "attrs": {},
+                            "properties": {},
+                            "children": {
+                              "$": "array",
+                              "items": [
+                                {
+                                  "kind": "mi",
+                                  "attrs": {
+                                    "mathvariant": "italic"
+                                  },
+                                  "properties": {},
+                                  "children": {
+                                    "$": "array",
+                                    "items": []
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "original": {
+          "kind": "mi",
+          "attrs": {
+            "mathvariant": "italic"
+          },
+          "properties": {},
+          "children": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "labels": {
+          "eq:four": {
+            "tag": "4",
+            "id": "mjx-eqn:eq:four"
+          }
+        },
+        "tagId": "mjx-eqn:eq:four",
+        "parsers": 0
+      },
+      "error": null
+    },
+    {
+      "label": "abstract-tags-finalize-display-env-tag-short-circuits",
+      "result": {
+        "nondisplaySame": true,
+        "envSame": true,
+        "noTagSame": true
+      },
+      "error": null
+    },
+    {
+      "label": "abstract-tags-finalize-live-guard-order-and-owned-entag-dispatch",
+      "result": {
+        "trace": {
+          "$": "array",
+          "items": [
+            "env.display",
+            "currentTag",
+            "tag.env",
+            "currentTag",
+            "tag.tag",
+            "currentTag-enTag",
+            "currentTag-enTag",
+            "makeTag",
+            "enTag"
+          ]
+        },
+        "skippedSame": true,
+        "finalSame": true,
+        "ownEnTagDescriptor": {
+          "value": {
+            "$": "function",
+            "name": ""
+          },
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "receiver": true,
+        "args": {
+          "$": "array",
+          "items": [
+            "same-node",
+            "same-node"
+          ]
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "no-tags-and-all-tags-overrides",
+      "result": {
+        "noneBefore": null,
+        "noneExplicit": {
+          "kind": "mtd",
+          "attrs": {
+            "id": "mjx-eqn:explicit",
+            "rowalign": "baseline"
+          },
+          "properties": {},
+          "children": {
+            "$": "array",
+            "items": [
+              {
+                "kind": "inferredMrow",
+                "attrs": {},
+                "properties": {},
+                "children": {
+                  "$": "array",
+                  "items": []
+                }
+              }
+            ]
+          }
+        },
+        "allFirst": {
+          "kind": "mtable",
+          "attrs": {
+            "side": "right",
+            "minlabelspacing": "0.8em",
+            "displaystyle": true
+          },
+          "properties": {
+            "useHeight": true
+          },
+          "children": {
+            "$": "array",
+            "items": [
+              {
+                "kind": "mlabeledtr",
+                "attrs": {},
+                "properties": {},
+                "children": {
+                  "$": "array",
+                  "items": [
+                    {
+                      "kind": "mtd",
+                      "attrs": {
+                        "id": "mjx-eqn:9",
+                        "rowalign": "baseline"
+                      },
+                      "properties": {},
+                      "children": {
+                        "$": "array",
+                        "items": [
+                          {
+                            "kind": "inferredMrow",
+                            "attrs": {},
+                            "properties": {},
+                            "children": {
+                              "$": "array",
+                              "items": [
+                                {
+                                  "kind": "mtext",
+                                  "attrs": {
+                                    "data-latex": "\\text{9}"
+                                  },
+                                  "properties": {},
+                                  "children": {
+                                    "$": "array",
+                                    "items": [
+                                      {
+                                        "kind": "text",
+                                        "attrs": {},
+                                        "properties": {},
+                                        "children": {
+                                          "$": "array",
+                                          "items": []
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "kind": "mtd",
+                      "attrs": {},
+                      "properties": {},
+                      "children": {
+                        "$": "array",
+                        "items": [
+                          {
+                            "kind": "inferredMrow",
+                            "attrs": {},
+                            "properties": {},
+                            "children": {
+                              "$": "array",
+                              "items": [
+                                {
+                                  "kind": "mi",
+                                  "attrs": {},
+                                  "properties": {},
+                                  "children": {
+                                    "$": "array",
+                                    "items": []
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "allSecondIsOriginal": true,
+        "history": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              {
+                "env": "eq",
+                "taggable": true,
+                "defaultTags": false,
+                "tag": "9",
+                "tagId": "mjx-eqn:9",
+                "tagFormat": "9",
+                "noTag": false,
+                "labelId": ""
+              }
+            ]
+          }
+        },
+        "counter": 0
+      },
+      "error": null
+    },
+    {
+      "label": "tags-factory-default-fallback-addtags-key-selection",
+      "result": {
+        "oldDefault": "NoTags",
+        "registeredKeys": {
+          "$": "array",
+          "items": [
+            {
+              "key": "own",
+              "className": "AllTags"
+            },
+            {
+              "key": "inherited",
+              "className": "NoTags"
+            },
+            {
+              "key": "hidden",
+              "className": "NoTags"
+            }
+          ]
+        },
+        "defaultWasFallback": true,
+        "selectedOwn": true,
+        "selected": true,
+        "unknownUsesDefault": false
+      },
+      "error": null
+    },
+    {
+      "label": "tags-factory-options-record-and-default-selection-are-independent",
+      "result": {
+        "optionsIdentityStable": true,
+        "initialTagsOption": "none",
+        "afterSet": "AllTags",
+        "optionsMutationDoesNotSetDefault": "AllTags",
+        "oldInstance": "NoTags",
+        "optionsOwnDescriptors": {
+          "tags": {
+            "value": "none",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "tagSide": {
+            "value": "right",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "tagIndent": {
+            "value": "0.8em",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "useLabelIds": {
+            "value": true,
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "ignoreDuplicateLabels": {
+            "value": false,
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "tagAlign": {
+            "value": "baseline",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "column-constructor-default-handler-keys-and-maxcolumns",
+      "result": {
+        "max": 10000,
+        "handlerKeys": {
+          "$": "array",
+          "items": [
+            "l",
+            "c",
+            "r",
+            "p",
+            "m",
+            "b",
+            "w",
+            "W",
+            "|",
+            ":",
+            ">",
+            "<",
+            "@",
+            "!",
+            "*",
+            "{",
+            "P",
+            "M",
+            "B",
+            " ",
+            "\n"
+          ]
+        },
+        "handlerTypes": {
+          "l": "function",
+          "c": "function",
+          "r": "function",
+          "p": "function",
+          "m": "function",
+          "b": "function",
+          "w": "function",
+          "W": "function",
+          "|": "function",
+          ":": "function",
+          ">": "function",
+          "<": "function",
+          "@": "function",
+          "!": "function",
+          "*": "function",
+          "{": "function",
+          "P": "function",
+          "M": "function",
+          "B": "function",
+          " ": "function",
+          "\n": "function"
+        },
+        "runtimeMethods": {
+          "constructor": {
+            "length": 0,
+            "name": "ColumnParser",
+            "enumerable": false
+          },
+          "process": {
+            "length": 3,
+            "name": "",
+            "enumerable": true
+          },
+          "processColumn": {
+            "length": 2,
+            "name": "",
+            "enumerable": true
+          },
+          "setColumnAlign": {
+            "length": 2,
+            "name": "",
+            "enumerable": true
+          },
+          "setColumnWidths": {
+            "length": 2,
+            "name": "",
+            "enumerable": true
+          },
+          "setColumnSpacing": {
+            "length": 2,
+            "name": "",
+            "enumerable": true
+          },
+          "setColumnLines": {
+            "length": 2,
+            "name": "",
+            "enumerable": true
+          },
+          "setPadding": {
+            "length": 2,
+            "name": "",
+            "enumerable": true
+          },
+          "getColumn": {
+            "length": 3,
+            "name": "",
+            "enumerable": true
+          },
+          "getDimen": {
+            "length": 1,
+            "name": "",
+            "enumerable": true
+          },
+          "getAlign": {
+            "length": 1,
+            "name": "",
+            "enumerable": true
+          },
+          "getBraces": {
+            "length": 1,
+            "name": "",
+            "enumerable": true
+          },
+          "macroColumn": {
+            "length": 3,
+            "name": "",
+            "enumerable": true
+          },
+          "addRule": {
+            "length": 2,
+            "name": "",
+            "enumerable": true
+          },
+          "addAt": {
+            "length": 2,
+            "name": "",
+            "enumerable": true
+          },
+          "addBang": {
+            "length": 2,
+            "name": "",
+            "enumerable": true
+          },
+          "repeat": {
+            "length": 1,
+            "name": "",
+            "enumerable": true
+          },
+          "brace": {
+            "length": 1,
+            "name": "",
+            "enumerable": true
+          }
+        },
+        "columnParserClass": {
+          "name": "ColumnParser",
+          "length": 0,
+          "ownKeys": {
+            "$": "array",
+            "items": [
+              "length",
+              "name",
+              "prototype"
+            ]
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-basic-alignments",
+      "result": {
+        "template": "lcr",
+        "outcome": {
+          "result": {
+            "$": "undefined"
+          },
+          "error": null
+        },
+        "arraydef": {
+          "columnalign": "left center right"
+        },
+        "frame": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cstart": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cend": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cextra": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "ralign": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "aliasPreserved": true,
+        "parserString": "",
+        "parserI": 0,
+        "parsers": 1
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-column-dimensions",
+      "result": {
+        "template": "p{1em}m{2ex}b{3pt}",
+        "outcome": {
+          "result": {
+            "$": "undefined"
+          },
+          "error": null
+        },
+        "arraydef": {
+          "columnalign": "left left left",
+          "columnwidth": "1em 2ex 3pt"
+        },
+        "frame": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cstart": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cend": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cextra": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "ralign": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": [
+                    "top",
+                    "1em",
+                    "left"
+                  ]
+                }
+              },
+              {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": [
+                    "middle",
+                    "2ex",
+                    "left"
+                  ]
+                }
+              },
+              {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": [
+                    "bottom",
+                    "3pt",
+                    "left"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "aliasPreserved": true,
+        "parserString": "",
+        "parserI": 0,
+        "parsers": 1
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-explicit-alignment-fallback",
+      "result": {
+        "template": "w{1em}{r}W{2em}{c}",
+        "outcome": {
+          "result": null,
+          "error": {
+            "name": "TexError",
+            "id": "MissingColumnDimOrUnits",
+            "message": "Missing dimension or its units for w column declaration"
+          }
+        },
+        "arraydef": {},
+        "frame": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cstart": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cend": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cextra": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "ralign": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "aliasPreserved": true,
+        "parserString": "",
+        "parserI": 0,
+        "parsers": 1
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-rules-and-spacing",
+      "result": {
+        "template": "|c::r|",
+        "outcome": {
+          "result": {
+            "$": "undefined"
+          },
+          "error": null
+        },
+        "arraydef": {
+          "columnalign": "center center right",
+          "columnspacing": "0 0",
+          "columnlines": "dashed dashed"
+        },
+        "frame": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": [
+                    "left",
+                    "solid"
+                  ]
+                }
+              },
+              {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": [
+                    "right",
+                    "solid"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "cstart": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              {
+                "$": "hole"
+              },
+              "\\,",
+              "\\hspace{.5em}"
+            ]
+          }
+        },
+        "cend": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              "\\hspace{.5em}"
+            ]
+          }
+        },
+        "cextra": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              {
+                "$": "hole"
+              },
+              true
+            ]
+          }
+        },
+        "ralign": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "aliasPreserved": true,
+        "parserString": "",
+        "parserI": 0,
+        "parsers": 1
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-prefix-and-suffix",
+      "result": {
+        "template": ">{\\bf}c<{\\it}",
+        "outcome": {
+          "result": {
+            "$": "undefined"
+          },
+          "error": null
+        },
+        "arraydef": {
+          "columnalign": "center"
+        },
+        "frame": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cstart": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              "\\bf"
+            ]
+          }
+        },
+        "cend": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              "\\it"
+            ]
+          }
+        },
+        "cextra": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "ralign": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "aliasPreserved": true,
+        "parserString": "",
+        "parserI": 0,
+        "parsers": 1
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-at-and-bang",
+      "result": {
+        "template": "@{x}c!{y}r",
+        "outcome": {
+          "result": {
+            "$": "undefined"
+          },
+          "error": null
+        },
+        "arraydef": {
+          "columnalign": "center center center right",
+          "columnspacing": "0 .5em .5em",
+          "data-array-padding": "0 .5em"
+        },
+        "frame": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cstart": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              "x",
+              {
+                "$": "hole"
+              },
+              "y"
+            ]
+          }
+        },
+        "cend": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cextra": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              true,
+              {
+                "$": "hole"
+              },
+              true
+            ]
+          }
+        },
+        "ralign": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "aliasPreserved": true,
+        "parserString": "",
+        "parserI": 0,
+        "parsers": 1
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-repeat",
+      "result": {
+        "template": "*{2}{lr}",
+        "outcome": {
+          "result": {
+            "$": "undefined"
+          },
+          "error": null
+        },
+        "arraydef": {
+          "columnalign": "left right left right"
+        },
+        "frame": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cstart": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cend": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cextra": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "ralign": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "aliasPreserved": true,
+        "parserString": "",
+        "parserI": 0,
+        "parsers": 1
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-braced-expansion",
+      "result": {
+        "template": "{lc}",
+        "outcome": {
+          "result": {
+            "$": "undefined"
+          },
+          "error": null
+        },
+        "arraydef": {
+          "columnalign": "left center"
+        },
+        "frame": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cstart": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cend": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cextra": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "ralign": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "aliasPreserved": true,
+        "parserString": "",
+        "parserI": 0,
+        "parsers": 1
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-macro-columns",
+      "result": {
+        "template": "P{1em}M{2em}B{3em}",
+        "outcome": {
+          "result": {
+            "$": "undefined"
+          },
+          "error": null
+        },
+        "arraydef": {
+          "columnalign": "left left left",
+          "columnwidth": "1em 2em 3em"
+        },
+        "frame": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cstart": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              "$",
+              "$",
+              "$"
+            ]
+          }
+        },
+        "cend": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              "$",
+              "$",
+              "$"
+            ]
+          }
+        },
+        "cextra": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "ralign": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": [
+                    "top",
+                    "1em",
+                    "left"
+                  ]
+                }
+              },
+              {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": [
+                    "middle",
+                    "2em",
+                    "left"
+                  ]
+                }
+              },
+              {
+                "$": "array",
+                "items": {
+                  "$": "array",
+                  "items": [
+                    "bottom",
+                    "3em",
+                    "left"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "aliasPreserved": true,
+        "parserString": "",
+        "parserI": 0,
+        "parsers": 1
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-space-newline",
+      "result": {
+        "template": " l\n c ",
+        "outcome": {
+          "result": {
+            "$": "undefined"
+          },
+          "error": null
+        },
+        "arraydef": {
+          "columnalign": "left center"
+        },
+        "frame": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cstart": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cend": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cextra": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "ralign": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "aliasPreserved": true,
+        "parserString": "",
+        "parserI": 0,
+        "parsers": 1
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-astral-handler-error",
+      "result": {
+        "template": "😀",
+        "outcome": {
+          "result": null,
+          "error": {
+            "name": "TexError",
+            "id": "BadPreamToken",
+            "message": "Illegal pream-token (😀)"
+          }
+        },
+        "arraydef": {},
+        "frame": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cstart": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cend": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cextra": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "ralign": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "aliasPreserved": true,
+        "parserString": "",
+        "parserI": 0,
+        "parsers": 1
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-unknown-handler-error",
+      "result": {
+        "template": "x",
+        "outcome": {
+          "result": null,
+          "error": {
+            "name": "TexError",
+            "id": "BadPreamToken",
+            "message": "Illegal pream-token (x)"
+          }
+        },
+        "arraydef": {},
+        "frame": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cstart": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cend": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cextra": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "ralign": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "aliasPreserved": true,
+        "parserString": "",
+        "parserI": 0,
+        "parsers": 1
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-missing-argument",
+      "result": {
+        "template": "p",
+        "outcome": {
+          "result": null,
+          "error": {
+            "name": "TexError",
+            "id": "MissingArgForColumn",
+            "message": "Missing argument for p column declaration"
+          }
+        },
+        "arraydef": {},
+        "frame": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cstart": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cend": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cextra": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "ralign": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "aliasPreserved": true,
+        "parserString": "",
+        "parserI": 0,
+        "parsers": 1
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-bad-dimension",
+      "result": {
+        "template": "p{bad}",
+        "outcome": {
+          "result": null,
+          "error": {
+            "name": "TexError",
+            "id": "MissingColumnDimOrUnits",
+            "message": "Missing dimension or its units for p column declaration"
+          }
+        },
+        "arraydef": {},
+        "frame": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cstart": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cend": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cextra": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "ralign": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "aliasPreserved": true,
+        "parserString": "",
+        "parserI": 0,
+        "parsers": 1
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-missing-close-brace",
+      "result": {
+        "template": "p{1em",
+        "outcome": {
+          "result": null,
+          "error": {
+            "name": "TexError",
+            "id": "MissingCloseBrace",
+            "message": "Missing close brace"
+          }
+        },
+        "arraydef": {},
+        "frame": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cstart": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cend": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cextra": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "ralign": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "aliasPreserved": true,
+        "parserString": "",
+        "parserI": 0,
+        "parsers": 1
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-repeat-bad-number",
+      "result": {
+        "template": "*{02}{c}",
+        "outcome": {
+          "result": null,
+          "error": {
+            "name": "TexError",
+            "id": "ColArgNotNum",
+            "message": "First argument to * column specifier must be a number"
+          }
+        },
+        "arraydef": {},
+        "frame": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cstart": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cend": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cextra": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "ralign": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "aliasPreserved": true,
+        "parserString": "",
+        "parserI": 0,
+        "parsers": 1
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-nested-repeat",
+      "result": {
+        "template": "*{2}{c*{2}{r}}",
+        "outcome": {
+          "result": {
+            "$": "undefined"
+          },
+          "error": null
+        },
+        "arraydef": {
+          "columnalign": "center right right center right right"
+        },
+        "frame": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cstart": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cend": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cextra": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "ralign": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "aliasPreserved": true,
+        "parserString": "",
+        "parserI": 0,
+        "parsers": 1
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-handler-and-finalizer-order-live-lookups",
+      "result": {
+        "trace": {
+          "$": "array",
+          "items": [
+            "desc:l",
+            "get:l",
+            "desc:c",
+            "get:c",
+            "setColumnAlign",
+            "setColumnWidths",
+            "setColumnSpacing",
+            "setColumnLines",
+            "setPadding"
+          ]
+        },
+        "arraydef": {
+          "columnalign": "left center"
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "column-processColumn-own-handler-only-and-function-receiver",
+      "result": {
+        "ownRun": {
+          "result": {
+            "$": "undefined"
+          },
+          "error": null
+        },
+        "inheritedRun": {
+          "result": null,
+          "error": {
+            "name": "TexError",
+            "id": "BadPreamToken",
+            "message": "Illegal pream-token (x)"
+          }
+        },
+        "receiverIsHandler": true,
+        "stateFields": {
+          "parserIsReal": true,
+          "template": "z",
+          "i": 1,
+          "j": 1,
+          "c": "z",
+          "calign": {
+            "$": "array",
+            "items": {
+              "$": "array",
+              "items": [
+                "custom"
+              ]
+            }
+          },
+          "cstartAliases": true,
+          "ralignAliases": true
+        },
+        "arraydef": {
+          "columnalign": "custom"
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "column-processColumn-rereads-replaced-handler-object",
+      "result": {
+        "outcome": {
+          "result": {
+            "$": "undefined"
+          },
+          "error": null
+        },
+        "reads": 2,
+        "trace": {
+          "$": "array",
+          "items": [
+            "handler1",
+            "handler2",
+            "call-receiver:true"
+          ]
+        },
+        "align": "from-second"
+      },
+      "error": null
+    },
+    {
+      "label": "column-repeat-number-boundaries-and-partial-state",
+      "result": {
+        "$": "array",
+        "items": [
+          {
+            "num": "02",
+            "outcome": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "ColArgNotNum",
+                "message": "First argument to * column specifier must be a number"
+              }
+            },
+            "arraydef": {},
+            "parserI": 0
+          },
+          {
+            "num": "+2",
+            "outcome": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "ColArgNotNum",
+                "message": "First argument to * column specifier must be a number"
+              }
+            },
+            "arraydef": {},
+            "parserI": 0
+          },
+          {
+            "num": "2.0",
+            "outcome": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "ColArgNotNum",
+                "message": "First argument to * column specifier must be a number"
+              }
+            },
+            "arraydef": {},
+            "parserI": 0
+          },
+          {
+            "num": "2x",
+            "outcome": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "ColArgNotNum",
+                "message": "First argument to * column specifier must be a number"
+              }
+            },
+            "arraydef": {},
+            "parserI": 0
+          },
+          {
+            "num": "-1",
+            "outcome": {
+              "result": null,
+              "error": {
+                "name": "RangeError",
+                "id": null,
+                "message": "Invalid array length"
+              }
+            },
+            "arraydef": {},
+            "parserI": 0
+          },
+          {
+            "num": "0",
+            "outcome": {
+              "result": {
+                "$": "undefined"
+              },
+              "error": null
+            },
+            "arraydef": {
+              "columnalign": ""
+            },
+            "parserI": 0
+          },
+          {
+            "num": "2",
+            "outcome": {
+              "result": {
+                "$": "undefined"
+              },
+              "error": null
+            },
+            "arraydef": {
+              "columnalign": "center center"
+            },
+            "parserI": 0
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-partial-array-writes-before-invalid-column",
+      "result": {
+        "outcome": {
+          "result": null,
+          "error": {
+            "name": "Error",
+            "id": null,
+            "message": "intentional handler failure"
+          }
+        },
+        "arraydef": {},
+        "cstart": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": [
+              "prefix"
+            ]
+          }
+        },
+        "cend": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "cextra": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "ralign": {
+          "$": "array",
+          "items": {
+            "$": "array",
+            "items": []
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "column-process-captured-maxcolumns-boundary",
+      "result": {
+        "exactlyLimit": {
+          "result": {
+            "$": "undefined"
+          },
+          "error": null
+        },
+        "overLimit": {
+          "result": null,
+          "error": {
+            "name": "TexError",
+            "id": "MaxColumns",
+            "message": "Too many column specifiers (perhaps looping column definitions?)"
+          }
+        },
+        "max": 1
+      },
+      "error": null
+    },
+    {
+      "label": "column-public-brace-align-dimen-direct-via-real-state",
+      "result": {
+        "braces": "a{b}\\}c",
+        "afterBraces": {
+          "i": 11,
+          "rest": "tail"
+        },
+        "align": "",
+        "dim": "2em",
+        "badDim": {
+          "result": null,
+          "error": {
+            "name": "TexError",
+            "id": "MissingColumnDimOrUnits",
+            "message": "Missing dimension or its units for p column declaration"
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "column-macro-getbraces-error-boundaries",
+      "result": {
+        "empty": {
+          "result": null,
+          "error": {
+            "name": "TexError",
+            "id": "MissingArgForColumn",
+            "message": "Missing argument for @ column declaration"
+          }
+        },
+        "trailingSpace": {
+          "result": null,
+          "error": {
+            "name": "TexError",
+            "id": "MissingArgForColumn",
+            "message": "Missing argument for @ column declaration"
+          }
+        },
+        "loneSlash": {
+          "result": "\\",
+          "error": null
+        },
+        "loneHighSurrogate": {
+          "result": "\ud800",
+          "error": null
+        },
+        "nestedEscaped": {
+          "result": "x\\}y",
+          "error": null
+        }
+      },
+      "error": null
+    }
+  ]
+}

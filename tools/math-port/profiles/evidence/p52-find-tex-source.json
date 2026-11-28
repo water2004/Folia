@@ -1,0 +1,418 @@
+{
+  "stage": "complete actual FindTeX algorithms; not TeXParser",
+  "node": "v24.13.0",
+  "hashes": [
+    {
+      "source": "ts/input/tex/FindTeX.ts",
+      "source_sha256": "65355d94cac0c1e8a790313c52e231212733b5a98d6f6697c2c7864812a72944",
+      "cjs_sha256": "1361bd1171e5ef0c8210342d89c9cebd660dbb9d4810bc571c64172b3a5c3d4b"
+    },
+    {
+      "source": "ts/core/FindMath.ts",
+      "source_sha256": "6beae5addf391086272ffdcf7050d85e7bb42457842d12b7ec3af991583720d8",
+      "cjs_sha256": "d38ba2d6c307ba3a9935e63c0b76fb2ed50e1c56f1b491c8c2872cc9a9271e4d"
+    },
+    {
+      "source": "ts/core/MathItem.ts",
+      "source_sha256": "c1c7308320ae15514fd1114c3f94642a4e8a8268bfe6f68192e8a557829626ce",
+      "cjs_sha256": "e6ed5008854e4d2ac6b34ab98c53bec6afb34e460895e8320c90a0d8d700d261"
+    },
+    {
+      "source": "ts/util/string.ts",
+      "source_sha256": "024a2ac6f96a314884f2bd71a913060c06fb75d46cbf6c94e15f4e71643a7084",
+      "cjs_sha256": "e1f09bca257dd268b9483b7310e4c77039dd022f01c5e9f5a62f47a981921e9c"
+    },
+    {
+      "source": "ts/util/Options.ts",
+      "source_sha256": "b810ffc09864eb8ed9295d829b229194d7e38aaac6c8f01525bc1a4b190a61e3",
+      "cjs_sha256": "76f3df8a3e899fba1d0944d5b79818b586c1d9f95cc7021c395fbb10295db660"
+    }
+  ],
+  "rows": [
+    {
+      "label": "default-empty",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({}))));",
+      "expected": "ok||"
+    },
+    {
+      "label": "default-plain",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x61),char16_t(0x62),char16_t(0x63)})}))));",
+      "expected": "ok||"
+    },
+    {
+      "label": "default-dollar-not-inline",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x24),char16_t(0x78),char16_t(0x24)})}))));",
+      "expected": "ok||"
+    },
+    {
+      "label": "default-inline",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x61),char16_t(0x20),char16_t(0x5c),char16_t(0x28),char16_t(0x78),char16_t(0x2b),char16_t(0x31),char16_t(0x5c),char16_t(0x29),char16_t(0x20),char16_t(0x62)})}))));",
+      "expected": "ok|005c0028,0078002b0031,005c0029,0,2,9,false|"
+    },
+    {
+      "label": "default-display-dollar",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x61),char16_t(0x20),char16_t(0x24),char16_t(0x24),char16_t(0x78),char16_t(0x24),char16_t(0x24),char16_t(0x20),char16_t(0x62)})}))));",
+      "expected": "ok|00240024,0078,00240024,0,2,7,true|"
+    },
+    {
+      "label": "default-display-bracket",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x5b),char16_t(0x78),char16_t(0x5c),char16_t(0x5d)})}))));",
+      "expected": "ok|005c005b,0078,005c005d,0,0,5,true|"
+    },
+    {
+      "label": "default-mixed",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x28),char16_t(0x78),char16_t(0x5c),char16_t(0x29),char16_t(0x20),char16_t(0x24),char16_t(0x24),char16_t(0x79),char16_t(0x24),char16_t(0x24),char16_t(0x20),char16_t(0x5c),char16_t(0x5b),char16_t(0x7a),char16_t(0x5c),char16_t(0x5d)})}))));",
+      "expected": "ok|005c0028,0078,005c0029,0,0,5,false/00240024,0079,00240024,0,6,11,true/005c005b,007a,005c005d,0,12,17,true|"
+    },
+    {
+      "label": "default-multiple-strings",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x61),char16_t(0x20),char16_t(0x5c),char16_t(0x28),char16_t(0x78),char16_t(0x5c),char16_t(0x29)}),std::u16string({char16_t(0x24),char16_t(0x24),char16_t(0x79),char16_t(0x24),char16_t(0x24)}),std::u16string({char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x69),char16_t(0x6e)})}))));",
+      "expected": "ok|005c0028,0078,005c0029,0,2,7,false/00240024,0079,00240024,1,0,5,true|"
+    },
+    {
+      "label": "default-unmatched",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x28),char16_t(0x78)})}))));",
+      "expected": "ok||"
+    },
+    {
+      "label": "default-empty-math",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x28),char16_t(0x5c),char16_t(0x29)})}))));",
+      "expected": "ok|005c0028,,005c0029,0,0,4,false|"
+    },
+    {
+      "label": "default-control-sequence-skips-close",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x28),char16_t(0x61),char16_t(0x5c),char16_t(0x66),char16_t(0x6f),char16_t(0x6f),char16_t(0x20),char16_t(0x62),char16_t(0x5c),char16_t(0x29)})}))));",
+      "expected": "ok|005c0028,0061005c0066006f006f00200062,005c0029,0,0,11,false|"
+    },
+    {
+      "label": "default-braces-hide-close",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x28),char16_t(0x61),char16_t(0x7b),char16_t(0x62),char16_t(0x5c),char16_t(0x29),char16_t(0x63),char16_t(0x7d),char16_t(0x64),char16_t(0x5c),char16_t(0x29)})}))));",
+      "expected": "ok|005c0028,0061007b0062005c00290063007d0064,005c0029,0,0,12,false|"
+    },
+    {
+      "label": "default-unbalanced-braces",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x28),char16_t(0x61),char16_t(0x7b),char16_t(0x62),char16_t(0x5c),char16_t(0x29)})}))));",
+      "expected": "ok||"
+    },
+    {
+      "label": "default-extra-close-brace",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x28),char16_t(0x61),char16_t(0x7d),char16_t(0x62),char16_t(0x5c),char16_t(0x29)})}))));",
+      "expected": "ok|005c0028,0061007d0062,005c0029,0,0,7,false|"
+    },
+    {
+      "label": "default-newlines",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x28),char16_t(0x61),char16_t(0xa),char16_t(0x62),char16_t(0x5c),char16_t(0x29)})}))));",
+      "expected": "ok|005c0028,0061000a0062,005c0029,0,0,7,false|"
+    },
+    {
+      "label": "default-environment",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x61),char16_t(0x20),char16_t(0x5c),char16_t(0x62),char16_t(0x65),char16_t(0x67),char16_t(0x69),char16_t(0x6e),char16_t(0x7b),char16_t(0x61),char16_t(0x6c),char16_t(0x69),char16_t(0x67),char16_t(0x6e),char16_t(0x7d),char16_t(0x78),char16_t(0x26),char16_t(0x79),char16_t(0x5c),char16_t(0x65),char16_t(0x6e),char16_t(0x64),char16_t(0x7b),char16_t(0x61),char16_t(0x6c),char16_t(0x69),char16_t(0x67),char16_t(0x6e),char16_t(0x7d),char16_t(0x20),char16_t(0x62)})}))));",
+      "expected": "ok|,005c0062006500670069006e007b0061006c00690067006e007d007800260079005c0065006e0064007b0061006c00690067006e007d,,0,2,29,true|"
+    },
+    {
+      "label": "default-environment-whitespace",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x62),char16_t(0x65),char16_t(0x67),char16_t(0x69),char16_t(0x6e),char16_t(0xa0),char16_t(0x7b),char16_t(0x61),char16_t(0x6c),char16_t(0x69),char16_t(0x67),char16_t(0x6e),char16_t(0x7d),char16_t(0x78),char16_t(0x5c),char16_t(0x65),char16_t(0x6e),char16_t(0x64),char16_t(0xfeff),char16_t(0x7b),char16_t(0x61),char16_t(0x6c),char16_t(0x69),char16_t(0x67),char16_t(0x6e),char16_t(0x7d)})}))));",
+      "expected": "ok|,005c0062006500670069006e00a0007b0061006c00690067006e007d0078005c0065006e0064feff007b0061006c00690067006e007d,,0,0,27,true|"
+    },
+    {
+      "label": "default-empty-environment-name",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x62),char16_t(0x65),char16_t(0x67),char16_t(0x69),char16_t(0x6e),char16_t(0x7b),char16_t(0x7d),char16_t(0x78),char16_t(0x5c),char16_t(0x65),char16_t(0x6e),char16_t(0x64),char16_t(0x7b),char16_t(0x7d)})}))));",
+      "expected": "ok|,005c0062006500670069006e007b007d0078005c0065006e0064007b007d,,0,0,15,true|"
+    },
+    {
+      "label": "default-punctuation-environment",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x62),char16_t(0x65),char16_t(0x67),char16_t(0x69),char16_t(0x6e),char16_t(0x7b),char16_t(0x61),char16_t(0x2d),char16_t(0x62),char16_t(0x3a),char16_t(0x63),char16_t(0x7d),char16_t(0x78),char16_t(0x5c),char16_t(0x65),char16_t(0x6e),char16_t(0x64),char16_t(0x7b),char16_t(0x61),char16_t(0x2d),char16_t(0x62),char16_t(0x3a),char16_t(0x63),char16_t(0x7d)})}))));",
+      "expected": "ok|,005c0062006500670069006e007b0061002d0062003a0063007d0078005c0065006e0064007b0061002d0062003a0063007d,,0,0,25,true|"
+    },
+    {
+      "label": "default-unmatched-environment",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x62),char16_t(0x65),char16_t(0x67),char16_t(0x69),char16_t(0x6e),char16_t(0x7b),char16_t(0x61),char16_t(0x6c),char16_t(0x69),char16_t(0x67),char16_t(0x6e),char16_t(0x7d),char16_t(0x78),char16_t(0x5c),char16_t(0x65),char16_t(0x6e),char16_t(0x64),char16_t(0x7b),char16_t(0x6f),char16_t(0x74),char16_t(0x68),char16_t(0x65),char16_t(0x72),char16_t(0x7d)})}))));",
+      "expected": "ok||"
+    },
+    {
+      "label": "default-ref-and-eqref",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x61),char16_t(0x20),char16_t(0x5c),char16_t(0x72),char16_t(0x65),char16_t(0x66),char16_t(0x7b),char16_t(0x72),char16_t(0x7d),char16_t(0x20),char16_t(0x5c),char16_t(0x65),char16_t(0x71),char16_t(0x72),char16_t(0x65),char16_t(0x66),char16_t(0x7b),char16_t(0x73),char16_t(0x7d)})}))));",
+      "expected": "ok|,005c007200650066007b0072007d,,0,2,9,false/,005c00650071007200650066007b0073007d,,0,10,19,false|"
+    },
+    {
+      "label": "default-ref-whitespace",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x72),char16_t(0x65),char16_t(0x66),char16_t(0xa0),char16_t(0x7b),char16_t(0x72),char16_t(0x7d)})}))));",
+      "expected": "ok|,005c00720065006600a0007b0072007d,,0,0,8,false|"
+    },
+    {
+      "label": "default-escaped-dollar",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x61),char16_t(0x20),char16_t(0x5c),char16_t(0x24),char16_t(0x20),char16_t(0x62)})}))));",
+      "expected": "ok|005c,0024,,0,2,4,N|"
+    },
+    {
+      "label": "default-escaped-backslash",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x61),char16_t(0x20),char16_t(0x5c),char16_t(0x5c),char16_t(0x20),char16_t(0x62)})}))));",
+      "expected": "ok|005c,005c,,0,2,4,N|"
+    },
+    {
+      "label": "default-substitutions-mixed",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x24),char16_t(0x20),char16_t(0x5c),char16_t(0x72),char16_t(0x65),char16_t(0x66),char16_t(0x7b),char16_t(0x72),char16_t(0x7d),char16_t(0x20),char16_t(0x5c),char16_t(0x28),char16_t(0x78),char16_t(0x5c),char16_t(0x29)})}))));",
+      "expected": "ok|005c,0024,,0,0,2,N/,005c007200650066007b0072007d,,0,3,10,false/005c0028,0078,005c0029,0,11,16,false|"
+    },
+    {
+      "label": "default-astral-offsets",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0xd83d),char16_t(0xde00),char16_t(0x20),char16_t(0x5c),char16_t(0x28),char16_t(0xd83d),char16_t(0xde00),char16_t(0x2b),char16_t(0x78),char16_t(0x5c),char16_t(0x29),char16_t(0x20),char16_t(0xd83e),char16_t(0xddee)})}))));",
+      "expected": "ok|005c0028,d83dde00002b0078,005c0029,0,3,11,false|"
+    },
+    {
+      "label": "default-surrogate-halves",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0xd800),char16_t(0x20),char16_t(0x5c),char16_t(0x28),char16_t(0xdc00),char16_t(0x5c),char16_t(0x29)})}))));",
+      "expected": "ok|005c0028,dc00,005c0029,0,2,7,false|"
+    },
+    {
+      "label": "default-slash-astral-control",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x28),char16_t(0x5c),char16_t(0xd83d),char16_t(0xde00),char16_t(0x7b),char16_t(0x78),char16_t(0x7d),char16_t(0x5c),char16_t(0x29)})}))));",
+      "expected": "ok|005c0028,005cd83dde00007b0078007d,005c0029,0,0,10,false|"
+    },
+    {
+      "label": "inline-dollar",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x24)}),std::u16string({char16_t(0x24)})})})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x61),char16_t(0x20),char16_t(0x24),char16_t(0x78),char16_t(0x24),char16_t(0x20),char16_t(0x62)})}))));",
+      "expected": "ok|0024,0078,0024,0,2,5,false|"
+    },
+    {
+      "label": "inline-dollar-empty",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x24)}),std::u16string({char16_t(0x24)})})})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x24),char16_t(0x24)})}))));",
+      "expected": "ok||"
+    },
+    {
+      "label": "display-dollar-wins-prefix",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x24)}),std::u16string({char16_t(0x24)})})})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x24),char16_t(0x24),char16_t(0x78),char16_t(0x24),char16_t(0x24),char16_t(0x20),char16_t(0x24),char16_t(0x79),char16_t(0x24)})}))));",
+      "expected": "ok|00240024,0078,00240024,0,0,5,true/0024,0079,0024,0,6,9,false|"
+    },
+    {
+      "label": "multiple-dollar",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x24)}),std::u16string({char16_t(0x24)})})})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x24),char16_t(0x78),char16_t(0x24),char16_t(0x20),char16_t(0x24),char16_t(0x79),char16_t(0x24)})}))));",
+      "expected": "ok|0024,0078,0024,0,0,3,false/0024,0079,0024,0,4,7,false|"
+    },
+    {
+      "label": "escaped-dollar-with-inline",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x24)}),std::u16string({char16_t(0x24)})})})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x24),char16_t(0x78),char16_t(0x20),char16_t(0x24),char16_t(0x79),char16_t(0x24)})}))));",
+      "expected": "ok|005c,0024,,0,0,2,N/0024,0079,0024,0,4,7,false|"
+    },
+    {
+      "label": "dollar-in-braces",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x24)}),std::u16string({char16_t(0x24)})})})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x24),char16_t(0x61),char16_t(0x7b),char16_t(0x62),char16_t(0x24),char16_t(0x63),char16_t(0x7d),char16_t(0x64),char16_t(0x24)})}))));",
+      "expected": "ok|0024,0061007b006200240063007d0064,0024,0,0,9,false|"
+    },
+    {
+      "label": "dollar-escaped-close",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x24)}),std::u16string({char16_t(0x24)})})})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x24),char16_t(0x61),char16_t(0x5c),char16_t(0x24),char16_t(0x62),char16_t(0x24)})}))));",
+      "expected": "ok|0024,0061005c00240062,0024,0,0,6,false|"
+    },
+    {
+      "label": "incomplete-then-valid",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x24)}),std::u16string({char16_t(0x24)})})})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x24),char16_t(0x61),char16_t(0x20),char16_t(0x5c),char16_t(0x28),char16_t(0x78),char16_t(0x5c),char16_t(0x29)})}))));",
+      "expected": "ok||"
+    },
+    {
+      "label": "adjacent-default-math",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x28),char16_t(0x78),char16_t(0x5c),char16_t(0x29),char16_t(0x5c),char16_t(0x28),char16_t(0x79),char16_t(0x5c),char16_t(0x29)})}))));",
+      "expected": "ok|005c0028,0078,005c0029,0,0,5,false/005c0028,0079,005c0029,0,5,10,false|"
+    },
+    {
+      "label": "adjacent-inline-dollar",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x24)}),std::u16string({char16_t(0x24)})})})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x24),char16_t(0x78),char16_t(0x24),char16_t(0x24),char16_t(0x79),char16_t(0x24)})}))));",
+      "expected": "ok|0024,0078,0024,0,0,3,false/0024,0079,0024,0,3,6,false|"
+    },
+    {
+      "label": "disabled-no-patterns",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x45),char16_t(0x73),char16_t(0x63),char16_t(0x61),char16_t(0x70),char16_t(0x65),char16_t(0x73)}),false},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x45),char16_t(0x6e),char16_t(0x76),char16_t(0x69),char16_t(0x72),char16_t(0x6f),char16_t(0x6e),char16_t(0x6d),char16_t(0x65),char16_t(0x6e),char16_t(0x74),char16_t(0x73)}),false},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x52),char16_t(0x65),char16_t(0x66),char16_t(0x73)}),false}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x24),char16_t(0x78),char16_t(0x24),char16_t(0x20),char16_t(0x5c),char16_t(0x28),char16_t(0x79),char16_t(0x5c),char16_t(0x29),char16_t(0x20),char16_t(0x5c),char16_t(0x72),char16_t(0x65),char16_t(0x66),char16_t(0x7b),char16_t(0x72),char16_t(0x7d)})}))));",
+      "expected": "ok||"
+    },
+    {
+      "label": "escapes-disabled",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x24)}),std::u16string({char16_t(0x24)})})})},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x45),char16_t(0x73),char16_t(0x63),char16_t(0x61),char16_t(0x70),char16_t(0x65),char16_t(0x73)}),false}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x24),char16_t(0x78),char16_t(0x24)})}))));",
+      "expected": "ok|0024,0078,0024,0,1,4,false|"
+    },
+    {
+      "label": "environments-disabled",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x45),char16_t(0x6e),char16_t(0x76),char16_t(0x69),char16_t(0x72),char16_t(0x6f),char16_t(0x6e),char16_t(0x6d),char16_t(0x65),char16_t(0x6e),char16_t(0x74),char16_t(0x73)}),false}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x62),char16_t(0x65),char16_t(0x67),char16_t(0x69),char16_t(0x6e),char16_t(0x7b),char16_t(0x61),char16_t(0x6c),char16_t(0x69),char16_t(0x67),char16_t(0x6e),char16_t(0x7d),char16_t(0x78),char16_t(0x5c),char16_t(0x65),char16_t(0x6e),char16_t(0x64),char16_t(0x7b),char16_t(0x61),char16_t(0x6c),char16_t(0x69),char16_t(0x67),char16_t(0x6e),char16_t(0x7d)})}))));",
+      "expected": "ok||"
+    },
+    {
+      "label": "references-disabled",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x52),char16_t(0x65),char16_t(0x66),char16_t(0x73)}),false}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x72),char16_t(0x65),char16_t(0x66),char16_t(0x7b),char16_t(0x72),char16_t(0x7d),char16_t(0x20),char16_t(0x5c),char16_t(0x65),char16_t(0x71),char16_t(0x72),char16_t(0x65),char16_t(0x66),char16_t(0x7b),char16_t(0x73),char16_t(0x7d)})}))));",
+      "expected": "ok||"
+    },
+    {
+      "label": "only-references",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x45),char16_t(0x73),char16_t(0x63),char16_t(0x61),char16_t(0x70),char16_t(0x65),char16_t(0x73)}),false},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x45),char16_t(0x6e),char16_t(0x76),char16_t(0x69),char16_t(0x72),char16_t(0x6f),char16_t(0x6e),char16_t(0x6d),char16_t(0x65),char16_t(0x6e),char16_t(0x74),char16_t(0x73)}),false},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x52),char16_t(0x65),char16_t(0x66),char16_t(0x73)}),true}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x72),char16_t(0x65),char16_t(0x66),char16_t(0x7b),char16_t(0x72),char16_t(0x7d),char16_t(0x20),char16_t(0x5c),char16_t(0x65),char16_t(0x71),char16_t(0x72),char16_t(0x65),char16_t(0x66),char16_t(0x7b),char16_t(0x73),char16_t(0x7d)})}))));",
+      "expected": "ok|,005c007200650066007b0072007d,,0,0,7,false/,005c00650071007200650066007b0073007d,,0,8,17,false|"
+    },
+    {
+      "label": "only-escapes",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x45),char16_t(0x73),char16_t(0x63),char16_t(0x61),char16_t(0x70),char16_t(0x65),char16_t(0x73)}),true},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x45),char16_t(0x6e),char16_t(0x76),char16_t(0x69),char16_t(0x72),char16_t(0x6f),char16_t(0x6e),char16_t(0x6d),char16_t(0x65),char16_t(0x6e),char16_t(0x74),char16_t(0x73)}),false},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x52),char16_t(0x65),char16_t(0x66),char16_t(0x73)}),false}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x24),char16_t(0x20),char16_t(0x5c),char16_t(0x5c)})}))));",
+      "expected": "ok|005c,0024,,0,0,2,N/005c,005c,,0,3,5,N|"
+    },
+    {
+      "label": "only-environments",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x45),char16_t(0x73),char16_t(0x63),char16_t(0x61),char16_t(0x70),char16_t(0x65),char16_t(0x73)}),false},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x45),char16_t(0x6e),char16_t(0x76),char16_t(0x69),char16_t(0x72),char16_t(0x6f),char16_t(0x6e),char16_t(0x6d),char16_t(0x65),char16_t(0x6e),char16_t(0x74),char16_t(0x73)}),true},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x52),char16_t(0x65),char16_t(0x66),char16_t(0x73)}),false}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x62),char16_t(0x65),char16_t(0x67),char16_t(0x69),char16_t(0x6e),char16_t(0x7b),char16_t(0x78),char16_t(0x7d),char16_t(0x61),char16_t(0x5c),char16_t(0x65),char16_t(0x6e),char16_t(0x64),char16_t(0x7b),char16_t(0x78),char16_t(0x7d)})}))));",
+      "expected": "ok|,005c0062006500670069006e007b0078007d0061005c0065006e0064007b0078007d,,0,0,17,true|"
+    },
+    {
+      "label": "literal-quoted-punctuation",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x3a),char16_t(0x28)}),std::u16string({char16_t(0x2d),char16_t(0x5d)})})})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x61),char16_t(0x20),char16_t(0x3a),char16_t(0x28),char16_t(0x78),char16_t(0x2d),char16_t(0x5d),char16_t(0x20),char16_t(0x62)})}))));",
+      "expected": "ok|003a0028,0078,002d005d,0,2,7,false|"
+    },
+    {
+      "label": "literal-all-regex-punctuation",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x5e),char16_t(0x24),char16_t(0x28),char16_t(0x29),char16_t(0x7b),char16_t(0x7d),char16_t(0x2e),char16_t(0x2b),char16_t(0x2a),char16_t(0x3f),char16_t(0x2d),char16_t(0x7c),char16_t(0x5b),char16_t(0x5d),char16_t(0x3a),char16_t(0x5c)}),std::u16string({char16_t(0x45),char16_t(0x4e),char16_t(0x44),char16_t(0x2e),char16_t(0x2a)})})})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5e),char16_t(0x24),char16_t(0x28),char16_t(0x29),char16_t(0x7b),char16_t(0x7d),char16_t(0x2e),char16_t(0x2b),char16_t(0x2a),char16_t(0x3f),char16_t(0x2d),char16_t(0x7c),char16_t(0x5b),char16_t(0x5d),char16_t(0x3a),char16_t(0x5c),char16_t(0x78),char16_t(0x45),char16_t(0x4e),char16_t(0x44),char16_t(0x2e),char16_t(0x2a)})}))));",
+      "expected": "ok|005e002400280029007b007d002e002b002a003f002d007c005b005d003a005c,0078,0045004e0044002e002a,0,0,22,false|"
+    },
+    {
+      "label": "longer-opener-wins",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x40)}),std::u16string({char16_t(0x40)})}),e.array({std::u16string({char16_t(0x40),char16_t(0x40)}),std::u16string({char16_t(0x40),char16_t(0x40)})})})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x40),char16_t(0x40),char16_t(0x78),char16_t(0x40),char16_t(0x40),char16_t(0x20),char16_t(0x40),char16_t(0x79),char16_t(0x40)})}))));",
+      "expected": "ok|00400040,0078,00400040,0,0,5,false/0040,0079,0040,0,6,9,false|"
+    },
+    {
+      "label": "same-length-opener-lexical-sort",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x62),char16_t(0x40)}),std::u16string({char16_t(0x40),char16_t(0x62)})}),e.array({std::u16string({char16_t(0x61),char16_t(0x40)}),std::u16string({char16_t(0x40),char16_t(0x61)})})})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x62),char16_t(0x40),char16_t(0x78),char16_t(0x40),char16_t(0x62),char16_t(0x20),char16_t(0x61),char16_t(0x40),char16_t(0x79),char16_t(0x40),char16_t(0x61)})}))));",
+      "expected": "ok|00620040,0078,00400062,0,0,5,false/00610040,0079,00400061,0,6,11,false|"
+    },
+    {
+      "label": "duplicate-opener-last-end-wins",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x40)}),std::u16string({char16_t(0x21)})}),e.array({std::u16string({char16_t(0x40)}),std::u16string({char16_t(0x3f)})})})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x40),char16_t(0x78),char16_t(0x21),char16_t(0x79),char16_t(0x3f)})}))));",
+      "expected": "ok|0040,007800210079,003f,0,0,5,false|"
+    },
+    {
+      "label": "display-definition-overwrites-inline",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x40)}),std::u16string({char16_t(0x21)})})})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x40)}),std::u16string({char16_t(0x3f)})})})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x40),char16_t(0x78),char16_t(0x3f)})}))));",
+      "expected": "ok|0040,0078,003f,0,0,3,true|"
+    },
+    {
+      "label": "ordinary-end-prototype-key",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x5f),char16_t(0x5f),char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x74),char16_t(0x6f),char16_t(0x5f),char16_t(0x5f)}),std::u16string({char16_t(0x45),char16_t(0x4e),char16_t(0x44)})})})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5f),char16_t(0x5f),char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x74),char16_t(0x6f),char16_t(0x5f),char16_t(0x5f),char16_t(0x78),char16_t(0x45),char16_t(0x4e),char16_t(0x44)})}))));",
+      "expected": "ok|005f005f00700072006f0074006f005f005f,0078,0045004e0044,0,0,13,false|"
+    },
+    {
+      "label": "ordinary-end-constructor-key",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x63),char16_t(0x6f),char16_t(0x6e),char16_t(0x73),char16_t(0x74),char16_t(0x72),char16_t(0x75),char16_t(0x63),char16_t(0x74),char16_t(0x6f),char16_t(0x72)}),std::u16string({char16_t(0x45),char16_t(0x4e),char16_t(0x44)})})})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x63),char16_t(0x6f),char16_t(0x6e),char16_t(0x73),char16_t(0x74),char16_t(0x72),char16_t(0x75),char16_t(0x63),char16_t(0x74),char16_t(0x6f),char16_t(0x72),char16_t(0x78),char16_t(0x45),char16_t(0x4e),char16_t(0x44)})}))));",
+      "expected": "ok|0063006f006e007300740072007500630074006f0072,0078,0045004e0044,0,0,15,false|"
+    },
+    {
+      "label": "ordinary-end-tostring-key",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x74),char16_t(0x6f),char16_t(0x53),char16_t(0x74),char16_t(0x72),char16_t(0x69),char16_t(0x6e),char16_t(0x67)}),std::u16string({char16_t(0x45),char16_t(0x4e),char16_t(0x44)})})})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x74),char16_t(0x6f),char16_t(0x53),char16_t(0x74),char16_t(0x72),char16_t(0x69),char16_t(0x6e),char16_t(0x67),char16_t(0x78),char16_t(0x45),char16_t(0x4e),char16_t(0x44)})}))));",
+      "expected": "ok|0074006f0053007400720069006e0067,0078,0045004e0044,0,0,12,false|"
+    },
+    {
+      "label": "astral-delimiter-and-utf16-offsets",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0xd83d),char16_t(0xde00)}),std::u16string({char16_t(0xd83e),char16_t(0xddee)})})})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x61),char16_t(0xd83d),char16_t(0xde00),char16_t(0x78),char16_t(0xd83e),char16_t(0xddee),char16_t(0x62)})}))));",
+      "expected": "ok|d83dde00,0078,d83eddee,0,1,6,false|"
+    },
+    {
+      "label": "empty-close-delimiter",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x40)}),std::u16string({})})})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})}}));return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x40),char16_t(0x78)})}))));",
+      "expected": "ok|0040,,,0,0,1,false|"
+    },
+    {
+      "label": "null-inline-array-is-type-error",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),opts::Null{}}}));return serialize(j->findMath(opts::Value(e.array({}))));",
+      "expected": "TypeError|THREW|"
+    },
+    {
+      "label": "false-inline-array-is-type-error",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),false}}));return serialize(j->findMath(opts::Value(e.array({}))));",
+      "expected": "TypeError|THREW|"
+    },
+    {
+      "label": "missing-close-is-type-error",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x40)})})})}}));return serialize(j->findMath(opts::Value(e.array({}))));",
+      "expected": "TypeError|THREW|"
+    },
+    {
+      "label": "nonstring-close-is-type-error",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x40)}),4})})}}));return serialize(j->findMath(opts::Value(e.array({}))));",
+      "expected": "TypeError|THREW|"
+    },
+    {
+      "label": "constructor-derived-fields-and-virtual-phase",
+      "cpp": "e.hooks.phase=true;auto j=e.make(e.object({}));return j->fields();",
+      "expected": "ok|O/R/O/true/1/2|before:O/U/U/U/U/U~after:O/R/O/true/1/2"
+    },
+    {
+      "label": "fresh-results-and-reset-start-cursor",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x24)}),std::u16string({char16_t(0x24)})})})}}));auto input=e.array({std::u16string({char16_t(0x24),char16_t(0x78),char16_t(0x24)})});auto a=j->findMath(opts::Value(input));auto b=j->findMath(opts::Value(input));return yes(a!=b)+\":\"+serialize(a)+\":\"+serialize(b);",
+      "expected": "ok|true:0024,0078,0024,0,0,3,false:0024,0078,0024,0,0,3,false|"
+    },
+    {
+      "label": "environment-mutates-same-proto-record",
+      "cpp": "e.hooks.capture=true;auto j=e.make(e.object({}));auto result=j->findMath(opts::Value(e.array({std::u16string({char16_t(0x5c),char16_t(0x62),char16_t(0x65),char16_t(0x67),char16_t(0x69),char16_t(0x6e),char16_t(0x7b),char16_t(0x78),char16_t(0x7d),char16_t(0x61),char16_t(0x5c),char16_t(0x65),char16_t(0x6e),char16_t(0x64),char16_t(0x7b),char16_t(0x78),char16_t(0x7d)})})));return yes(e.hooks.saved==std::get<folia::math::Property>((*result)[0]))+\":\"+serialize(result)+\":\"+serializeItem(e.hooks.saved);",
+      "expected": "ok|true:,005c0062006500670069006e007b0078007d0061005c0065006e0064007b0078007d,,0,0,17,true:,005c0062006500670069006e007b0078007d0061005c0065006e0064007b0078007d,,0,0,17,true|"
+    },
+    {
+      "label": "input-slots-read-live-after-first-scan",
+      "cpp": "e.hooks.scan=true;e.hooks.mutation=1;auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x24)}),std::u16string({char16_t(0x24)})})})}}));e.hooks.input=e.array({std::u16string({char16_t(0x24),char16_t(0x78),char16_t(0x24)}),std::u16string({char16_t(0x24),char16_t(0x79),char16_t(0x24)})});return serialize(j->findMath(opts::Value(e.hooks.input)));",
+      "expected": "ok|0024,0078,0024,0,0,3,false/0024,007a,0024,1,0,3,false|scan:0:$x$~scan:1:$z$"
+    },
+    {
+      "label": "input-length-captured-before-scan",
+      "cpp": "e.hooks.scan=true;e.hooks.mutation=2;auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x24)}),std::u16string({char16_t(0x24)})})})}}));e.hooks.input=e.array({std::u16string({char16_t(0x24),char16_t(0x78),char16_t(0x24)})});return serialize(j->findMath(opts::Value(e.hooks.input)));",
+      "expected": "ok|0024,0078,0024,0,0,3,false|scan:0:$x$"
+    },
+    {
+      "label": "input-getters-read-once-in-order",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x24)}),std::u16string({char16_t(0x24)})})})}}));auto input=e.context.array(2);e.getter(input,u\"0\",[&]{e.trace.push_back(\"get0\");return opts::Value(u\"$x$\");});e.getter(input,u\"1\",[&]{e.trace.push_back(\"get1\");return opts::Value(u\"$y$\");});return serialize(j->findMath(opts::Value(input)));",
+      "expected": "ok|0024,0078,0024,0,0,3,false/0024,0079,0024,1,0,3,false|get0~get1"
+    },
+    {
+      "label": "input-hole-exec-coercion-is-deferred",
+      "cpp": "auto j=e.make(e.object({}));auto input=e.context.array(1);return serialize(j->findMath(opts::Value(input)));",
+      "expected": "ok||"
+    },
+    {
+      "label": "primitive-input-slot-with-no-start",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(e.array({opts::Null{},opts::Undefined{},7,false}))));",
+      "expected": "ok||"
+    },
+    {
+      "label": "matched-nonstring-slot-substring-is-type-error",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x6e)}),std::u16string({char16_t(0x6c)})})})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})}}));return serialize(j->findMath(opts::Value(e.array({opts::Null{}}))));",
+      "expected": "TypeError|THREW|"
+    },
+    {
+      "label": "disabled-finder-does-not-inspect-null-input",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x45),char16_t(0x73),char16_t(0x63),char16_t(0x61),char16_t(0x70),char16_t(0x65),char16_t(0x73)}),false},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x45),char16_t(0x6e),char16_t(0x76),char16_t(0x69),char16_t(0x72),char16_t(0x6f),char16_t(0x6e),char16_t(0x6d),char16_t(0x65),char16_t(0x6e),char16_t(0x74),char16_t(0x73)}),false},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x52),char16_t(0x65),char16_t(0x66),char16_t(0x73)}),false}}));return serialize(j->findMath(opts::Value(opts::Null{})));",
+      "expected": "ok||"
+    },
+    {
+      "label": "enabled-finder-null-input-is-type-error",
+      "cpp": "auto j=e.make(e.object({}));return serialize(j->findMath(opts::Value(opts::Null{})));",
+      "expected": "TypeError|THREW|"
+    },
+    {
+      "label": "getpatterns-replaces-end-and-regex-identities",
+      "cpp": "auto j=e.make(e.object({}));auto oldEnd=j->endValue(),oldStart=j->startValue();j->refresh();return yes(oldEnd!=j->endValue())+\":\"+yes(oldStart!=j->startValue());",
+      "expected": "ok|true:true|"
+    },
+    {
+      "label": "getpatterns-real-looked-up-forEach",
+      "cpp": "auto j=e.make(e.object({}));auto options=j->currentOptions();auto inlines=e.context.get(options,opts::Key(u\"inlineMath\"));auto method=e.context.function(u\"override\",[&](auto&,auto,auto)->opts::Value{e.trace.push_back(\"forEach\");return opts::Undefined{};});e.context.set(inlines,opts::Key(u\"forEach\"),method);j->refresh();return j->fields();",
+      "expected": "ok|O/R/O/true/1/2|forEach"
+    },
+    {
+      "label": "delimiter-getters-consumed-in-source-order",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x40)}),std::u16string({char16_t(0x21)})})})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x45),char16_t(0x73),char16_t(0x63),char16_t(0x61),char16_t(0x70),char16_t(0x65),char16_t(0x73)}),false},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x45),char16_t(0x6e),char16_t(0x76),char16_t(0x69),char16_t(0x72),char16_t(0x6f),char16_t(0x6e),char16_t(0x6d),char16_t(0x65),char16_t(0x6e),char16_t(0x74),char16_t(0x73)}),false},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x52),char16_t(0x65),char16_t(0x66),char16_t(0x73)}),false}}));auto tuple=e.context.get(e.context.get(j->currentOptions(),opts::Key(u\"inlineMath\")),opts::Key(u\"0\"));auto object=std::get<opts::ObjectRef>(tuple.data);e.getter(object,u\"0\",[&]{e.trace.push_back(\"open\");return opts::Value(u\"@\");});e.getter(object,u\"1\",[&]{e.trace.push_back(\"close\");return opts::Value(u\"!\");});j->refresh();return serialize(j->findMath(opts::Value(e.array({std::u16string({char16_t(0x40),char16_t(0x78),char16_t(0x21)})}))));",
+      "expected": "ok|0040,0078,0021,0,0,3,false|open~close"
+    },
+    {
+      "label": "delimiter-iterator-skips-inherited-close-beyond-length",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x40)}),std::u16string({char16_t(0x21)})})})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x45),char16_t(0x73),char16_t(0x63),char16_t(0x61),char16_t(0x70),char16_t(0x65),char16_t(0x73)}),false},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x45),char16_t(0x6e),char16_t(0x76),char16_t(0x69),char16_t(0x72),char16_t(0x6f),char16_t(0x6e),char16_t(0x6d),char16_t(0x65),char16_t(0x6e),char16_t(0x74),char16_t(0x73)}),false},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x52),char16_t(0x65),char16_t(0x66),char16_t(0x73)}),false}}));auto tuple=e.context.get(e.context.get(j->currentOptions(),opts::Key(u\"inlineMath\")),opts::Key(u\"0\"));auto object=std::get<opts::ObjectRef>(tuple.data);auto prototype=e.context.objectWithPrototype(e.context.intrinsics().arrayPrototype);e.getter(prototype,u\"1\",[&]{e.trace.push_back(\"inherited-close\");return opts::Value(u\"!\");});e.context.setPrototype(object,prototype);e.context.set(object,opts::Key(u\"length\"),1);e.getter(object,u\"0\",[&]{e.trace.push_back(\"open\");return opts::Value(u\"@\");});j->refresh();return \"unexpected\";",
+      "expected": "TypeError|THREW|open"
+    },
+    {
+      "label": "delimiter-iterator-rechecks-length-after-open-getter",
+      "cpp": "auto j=e.make(e.object({{std::u16string({char16_t(0x69),char16_t(0x6e),char16_t(0x6c),char16_t(0x69),char16_t(0x6e),char16_t(0x65),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({e.array({std::u16string({char16_t(0x40)}),std::u16string({char16_t(0x21)})})})},{std::u16string({char16_t(0x64),char16_t(0x69),char16_t(0x73),char16_t(0x70),char16_t(0x6c),char16_t(0x61),char16_t(0x79),char16_t(0x4d),char16_t(0x61),char16_t(0x74),char16_t(0x68)}),e.array({})},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x45),char16_t(0x73),char16_t(0x63),char16_t(0x61),char16_t(0x70),char16_t(0x65),char16_t(0x73)}),false},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x45),char16_t(0x6e),char16_t(0x76),char16_t(0x69),char16_t(0x72),char16_t(0x6f),char16_t(0x6e),char16_t(0x6d),char16_t(0x65),char16_t(0x6e),char16_t(0x74),char16_t(0x73)}),false},{std::u16string({char16_t(0x70),char16_t(0x72),char16_t(0x6f),char16_t(0x63),char16_t(0x65),char16_t(0x73),char16_t(0x73),char16_t(0x52),char16_t(0x65),char16_t(0x66),char16_t(0x73)}),false}}));auto tuple=e.context.get(e.context.get(j->currentOptions(),opts::Key(u\"inlineMath\")),opts::Key(u\"0\"));auto object=std::get<opts::ObjectRef>(tuple.data);auto prototype=e.context.objectWithPrototype(e.context.intrinsics().arrayPrototype);e.getter(prototype,u\"1\",[&]{e.trace.push_back(\"inherited-close\");return opts::Value(u\"!\");});e.context.setPrototype(object,prototype);e.getter(object,u\"0\",[&]{e.trace.push_back(\"open\");e.context.set(object,opts::Key(u\"length\"),1);return opts::Value(u\"@\");});j->refresh();return \"unexpected\";",
+      "expected": "TypeError|THREW|open"
+    },
+    {
+      "label": "actual-constructor-metadata-and-defaults",
+      "cpp": "auto klass=e.module.constructorIdentity();auto defaults=e.context.get(klass,opts::Key(u\"OPTIONS\"));std::string out=text(e.context.get(klass,opts::Key(u\"name\")))+\":\"+text(e.context.get(klass,opts::Key(u\"length\")))+\":\"+yes(e.context.hasOwn(klass,opts::Key(u\"OPTIONS\")));for(auto name:{u\"inlineMath\",u\"displayMath\"}){auto array=e.context.get(defaults,opts::Key(name));auto object=std::get<opts::ObjectRef>(array.data);for(std::uint32_t i=0;i<e.context.arrayLength(object);++i){auto key=std::to_string(i);auto tuple=e.context.get(array,opts::Key(std::u16string(key.begin(),key.end())));out+=\":\"+text(e.context.get(tuple,opts::Key(u\"0\")))+\",\"+text(e.context.get(tuple,opts::Key(u\"1\")));}}for(auto name:{u\"processEscapes\",u\"processEnvironments\",u\"processRefs\"})out+=\":\"+text(e.context.get(defaults,opts::Key(name)));return out;",
+      "expected": "ok|FindTeX:1:true:\\(,\\):$$,$$:\\[,\\]:true:true:true|"
+    }
+  ]
+}

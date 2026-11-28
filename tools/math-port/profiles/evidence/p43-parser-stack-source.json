@@ -1,0 +1,366 @@
+{
+  "source": "ts/input/tex/Stack.ts",
+  "sha256": "36be7583b14111961367e9e3f1dd5911456d235b096a2fcee62f438d37c7e11a",
+  "rows": [
+    {
+      "label": "constructor:U",
+      "cpp": "make(Property(Missing{}));return topName()+\":\"+rec(s->global)+\":\"+std::string(s->global==start->global?\"same\":\"bad\");",
+      "expected": "ok|start:isInner=false:same||h=1:env=start=1"
+    },
+    {
+      "label": "constructor:N",
+      "cpp": "make(Property(PropertyNull{}));return topName()+\":\"+rec(s->global)+\":\"+std::string(s->global==start->global?\"same\":\"bad\");",
+      "expected": "ok|start:isInner=false:same||h=1:env=start=1"
+    },
+    {
+      "label": "constructor:false",
+      "cpp": "make(Property(false));return topName()+\":\"+rec(s->global)+\":\"+std::string(s->global==start->global?\"same\":\"bad\");",
+      "expected": "ok|start:isInner=false:same||h=1:env=start=1"
+    },
+    {
+      "label": "constructor:0",
+      "cpp": "make(Property(0));return topName()+\":\"+rec(s->global)+\":\"+std::string(s->global==start->global?\"same\":\"bad\");",
+      "expected": "ok|start:isInner=false:same||h=1:env=start=1"
+    },
+    {
+      "label": "constructor:empty",
+      "cpp": "make(Property(\"\"));return topName()+\":\"+rec(s->global)+\":\"+std::string(s->global==start->global?\"same\":\"bad\");",
+      "expected": "ok|start:isInner=false:same||h=1:env=start=1"
+    },
+    {
+      "label": "constructor:env",
+      "cpp": "make(Property(PropertyList{{\"q\",2}}));return topName()+\":\"+rec(s->global)+\":\"+std::string(s->global==start->global?\"same\":\"bad\");",
+      "expected": "ok|start:isInner=false:same||h=1:env=q=2"
+    },
+    {
+      "label": "constructor-inner",
+      "cpp": "make(Missing{},true);return rec(s->global);",
+      "expected": "ok|isInner=true||h=1:env=start=1"
+    },
+    {
+      "label": "constructor-global-factory-identity",
+      "cpp": "auto creator=f.creatorView()->entries.front().second;auto original=creator->call;creator->call=[&](tree::FactoryArgs args){trace.push_back(\"arg:\"+rec(std::any_cast<Property>(args[0])));return original(args);};make(Missing{});return rec(start->global);",
+      "expected": "ok|isInner=false|arg:isInner=false|h=1:env=start=1"
+    },
+    {
+      "label": "set-env:U",
+      "cpp": "make(Missing{});s->setEnv(Property(Missing{}));return rec(s->env());",
+      "expected": "ok|U||h=1:env=U"
+    },
+    {
+      "label": "set-env:N",
+      "cpp": "make(Missing{});s->setEnv(Property(PropertyNull{}));return rec(s->env());",
+      "expected": "ok|N||h=1:env=N"
+    },
+    {
+      "label": "set-env:false",
+      "cpp": "make(Missing{});s->setEnv(Property(false));return rec(s->env());",
+      "expected": "ok|false||h=1:env=false"
+    },
+    {
+      "label": "set-env:0",
+      "cpp": "make(Missing{});s->setEnv(Property(0));return rec(s->env());",
+      "expected": "ok|0||h=1:env=0"
+    },
+    {
+      "label": "set-env:empty",
+      "cpp": "make(Missing{});s->setEnv(Property(\"\"));return rec(s->env());",
+      "expected": "ok|||h=1:env="
+    },
+    {
+      "label": "set-env:record",
+      "cpp": "make(Missing{});s->setEnv(Property(PropertyList{{\"a\",3}}));return rec(s->env());",
+      "expected": "ok|a=3||h=1:env=a=3"
+    },
+    {
+      "label": "top:undefined",
+      "cpp": "make(Missing{});return entryName(s->Top(Property(Missing{})));",
+      "expected": "ok|start||h=1:env=start=1"
+    },
+    {
+      "label": "top:null",
+      "cpp": "make(Missing{});return entryName(s->Top(Property(PropertyNull{})));",
+      "expected": "ok|U||h=1:env=start=1"
+    },
+    {
+      "label": "top:0",
+      "cpp": "make(Missing{});return entryName(s->Top(Property(0)));",
+      "expected": "ok|U||h=1:env=start=1"
+    },
+    {
+      "label": "top:1",
+      "cpp": "make(Missing{});return entryName(s->Top(Property(1)));",
+      "expected": "ok|start||h=1:env=start=1"
+    },
+    {
+      "label": "top:2",
+      "cpp": "make(Missing{});return entryName(s->Top(Property(2)));",
+      "expected": "ok|N||h=1:env=start=1"
+    },
+    {
+      "label": "top:-1",
+      "cpp": "make(Missing{});return entryName(s->Top(Property(-1)));",
+      "expected": "ok|U||h=1:env=start=1"
+    },
+    {
+      "label": "top:0.5",
+      "cpp": "make(Missing{});return entryName(s->Top(Property(0.5)));",
+      "expected": "ok|U||h=1:env=start=1"
+    },
+    {
+      "label": "top:NaN",
+      "cpp": "make(Missing{});return entryName(s->Top(Property(std::numeric_limits<double>::quiet_NaN())));",
+      "expected": "ok|U||h=1:env=start=1"
+    },
+    {
+      "label": "top:Infinity",
+      "cpp": "make(Missing{});return entryName(s->Top(Property(std::numeric_limits<double>::infinity())));",
+      "expected": "ok|N||h=1:env=start=1"
+    },
+    {
+      "label": "top:1",
+      "cpp": "make(Missing{});return entryName(s->Top(Property(\"1\")));",
+      "expected": "ok|start||h=1:env=start=1"
+    },
+    {
+      "label": "top:2",
+      "cpp": "make(Missing{});return entryName(s->Top(Property(\"2\")));",
+      "expected": "ok|N||h=1:env=start=1"
+    },
+    {
+      "label": "top-multiple",
+      "cpp": "make(Missing{});auto*x=item(\"x\"),*y=item(\"y\");push(x);push(y);return entryName(s->Top(1))+\":\"+entryName(s->Top(2))+\":\"+entryName(s->Top(3))+\":\"+entryName(s->Top(4));",
+      "expected": "ok|y:x:start:N|check:start:x/check:x:y|h=3:env=start=1"
+    },
+    {
+      "label": "push-falsy",
+      "cpp": "make(Missing{});std::array<tex::StackEntry,6> args{Property(Missing{}),Property(PropertyNull{}),Property(false),Property(0),Property(\"\"),mml::NodeValue(Missing{})};s->Push(args);return topName();",
+      "expected": "ok|start||h=1:env=start=1"
+    },
+    {
+      "label": "push-node-wrap",
+      "cpp": "make(Missing{});std::array<tex::StackEntry,1> args{mml::NodeValue(a)};s->Push(args);auto&x=tex::stack_host::item(s->Top(),\"First\");return x.kind()+\":\"+nodeName(x.First())+\":\"+std::string(x.global==s->global?\"same\":\"bad\");",
+      "expected": "ok|mml:mi:same|check:start:mml|h=2:env=start=1"
+    },
+    {
+      "label": "push-success-item-identity",
+      "cpp": "make(Missing{});auto*x=item(\"x\");push(x);return std::string(std::get<tex::StackItemRef>(s->Top())==f.reference(x)?\"same\":\"bad\")+\":\"+rec(x->env());",
+      "expected": "ok|same:start=1|check:start:x|h=2:env=start=1"
+    },
+    {
+      "label": "check-success:false",
+      "cpp": "make(Missing{});auto*x=item(\"x\");start->checkHook=[&](auto*received){trace.push_back(\"global:\"+std::string(received->global==s->global?\"same\":\"bad\"));return check(Property(false));};push(x);return topName()+\":\"+rec(x->env());",
+      "expected": "ok|start:U|global:same|h=1:env=start=1"
+    },
+    {
+      "label": "check-success:0",
+      "cpp": "make(Missing{});auto*x=item(\"x\");start->checkHook=[&](auto*received){trace.push_back(\"global:\"+std::string(received->global==s->global?\"same\":\"bad\"));return check(Property(0));};push(x);return topName()+\":\"+rec(x->env());",
+      "expected": "ok|start:U|global:same|h=1:env=start=1"
+    },
+    {
+      "label": "check-success:",
+      "cpp": "make(Missing{});auto*x=item(\"x\");start->checkHook=[&](auto*received){trace.push_back(\"global:\"+std::string(received->global==s->global?\"same\":\"bad\"));return check(Property(\"\"));};push(x);return topName()+\":\"+rec(x->env());",
+      "expected": "ok|start:U|global:same|h=1:env=start=1"
+    },
+    {
+      "label": "check-success:undefined",
+      "cpp": "make(Missing{});auto*x=item(\"x\");start->checkHook=[&](auto*received){trace.push_back(\"global:\"+std::string(received->global==s->global?\"same\":\"bad\"));return check(Property(Missing{}));};push(x);return topName()+\":\"+rec(x->env());",
+      "expected": "ok|start:U|global:same|h=1:env=start=1"
+    },
+    {
+      "label": "check-success:null",
+      "cpp": "make(Missing{});auto*x=item(\"x\");start->checkHook=[&](auto*received){trace.push_back(\"global:\"+std::string(received->global==s->global?\"same\":\"bad\"));return check(Property(PropertyNull{}));};push(x);return topName()+\":\"+rec(x->env());",
+      "expected": "ok|start:U|global:same|h=1:env=start=1"
+    },
+    {
+      "label": "check-success:true",
+      "cpp": "make(Missing{});auto*x=item(\"x\");start->checkHook=[&](auto*received){trace.push_back(\"global:\"+std::string(received->global==s->global?\"same\":\"bad\"));return check(Property(true));};push(x);return topName()+\":\"+rec(x->env());",
+      "expected": "ok|x:start=1|global:same|h=2:env=start=1"
+    },
+    {
+      "label": "check-throws-global-retained",
+      "cpp": "make(Missing{});auto*x=item(\"x\");start->checkHook=[&](auto*received)->tex::CheckType{trace.push_back(\"global:\"+std::string(received->global==s->global?\"same\":\"bad\"));throw Error(\"Error\",u\"check\");};push(x);return \"ok\";",
+      "expected": "Error|check|THREW|global:same|h=1:env=start=1"
+    },
+    {
+      "label": "check-null-tuple:undefined",
+      "cpp": "make(Missing{});start->checkHook=[](auto*)->tex::CheckType{return Missing{};};push(item(\"x\"));return \"ok\";",
+      "expected": "TypeError|undefined is not iterable (cannot read property Symbol(Symbol.iterator))|THREW||h=1:env=start=1"
+    },
+    {
+      "label": "check-null-tuple:null",
+      "cpp": "make(Missing{});start->checkHook=[](auto*)->tex::CheckType{return PropertyNull{};};push(item(\"x\"));return \"ok\";",
+      "expected": "TypeError|object null is not iterable (cannot read property Symbol(Symbol.iterator))|THREW||h=1:env=start=1"
+    },
+    {
+      "label": "null-kind-still-environment",
+      "cpp": "make(Missing{});auto*x=item(\"x\",\"null\");x->setEnv(PropertyList{{\"nullenv\",7}});push(x);return topName()+\":\"+rec(x->env());",
+      "expected": "ok|start:nullenv=7,start=1|check:start:x|h=1:env=nullenv=7,start=1"
+    },
+    {
+      "label": "copy-env:false",
+      "cpp": "make(PropertyList{{\"a\",1},{\"b\",2}});auto*x=item(\"x\");x->setEnv(PropertyList{{\"a\",9},{\"c\",3}});x->copyHook=[] {return false;};push(x);return rec(x->env());",
+      "expected": "ok|a=9,c=3|check:start:x|h=2:env=a=9,c=3"
+    },
+    {
+      "label": "copy-env:true",
+      "cpp": "make(PropertyList{{\"a\",1},{\"b\",2}});auto*x=item(\"x\");x->setEnv(PropertyList{{\"a\",9},{\"c\",3}});x->copyHook=[] {return true;};push(x);return rec(x->env());",
+      "expected": "ok|a=1,c=3,b=2|check:start:x|h=2:env=a=1,c=3,b=2"
+    },
+    {
+      "label": "env-receiver-before-source-live-reads",
+      "cpp": "make(PropertyList{{\"old\",1}});auto*x=item(\"x\");PropertyList target{{\"target\",2}},last{{\"last\",3}};int n=0;x->envHook=[&](){trace.push_back(\"item-env:\"+std::to_string(++n));if(n==2)s->setEnv(PropertyList{{\"current\",4}});return Property(n==3?last:target);};x->copyHook=[&] {trace.push_back(\"copy\");return true;};push(x);return rec(target)+\":\"+rec(last);",
+      "expected": "ok|target=2,current=4:last=3|check:start:x/item-env:1/copy/item-env:2/item-env:3|h=2:env=last=3"
+    },
+    {
+      "label": "env-falsy-setter-current",
+      "cpp": "make(PropertyList{{\"e\",1}});auto*x=item(\"x\");x->envHook=[&](){trace.push_back(\"item-env\");s->setEnv(PropertyList{{\"changed\",2}});return Property(false);};x->envSetHook=[&](Property p){trace.push_back(\"set:\"+rec(p));x->BaseItem::setEnv(p);};push(x);return \"ok\";",
+      "expected": "ok|ok|check:start:x/item-env/set:changed=2|h=2:env=changed=2"
+    },
+    {
+      "label": "env-second-read-null-retains-append",
+      "cpp": "make(Missing{});auto*x=item(\"x\");int n=0;x->envHook=[&](){trace.push_back(\"env:\"+std::to_string(++n));return n==1?Property(PropertyList{}):Property(PropertyNull{});};push(x);return \"ok\";",
+      "expected": "TypeError|Cannot convert undefined or null to object|THREW|check:start:x/env:1/env:2|h=2:env=start=1"
+    },
+    {
+      "label": "env-getter-throw-retains-append",
+      "cpp": "make(Missing{});auto*x=item(\"x\");x->envHook=[]()->Property{throw Error(\"Error\",u\"env\");};push(x);return \"ok\";",
+      "expected": "Error|env|THREW|check:start:x|h=2:env=start=1"
+    },
+    {
+      "label": "copy-getter-throw-retains-append",
+      "cpp": "make(Missing{});auto*x=item(\"x\");x->setEnv(PropertyList{});x->copyHook=[]()->bool{throw Error(\"Error\",u\"copy\");};push(x);return \"ok\";",
+      "expected": "Error|copy|THREW|check:start:x|h=2:env=start=1"
+    },
+    {
+      "label": "recursive-replacement-discard-original",
+      "cpp": "make(Missing{});auto*x=item(\"x\"),*y=item(\"y\"),*z=item(\"z\");start->checkHook=[&](auto*){trace.push_back(\"replace\");return check(true,{entry(y),entry(z)});};y->checkHook=[&](auto*received){trace.push_back(\"check:y:\"+static_cast<Probe*>(received)->label);return check(true);};push(x);return topName()+\":\"+rec(x->env())+\":\"+std::string(y->global==s->global&&z->global==s->global?\"same\":\"bad\");",
+      "expected": "ok|z:U:same|replace/check:y:z|h=2:env="
+    },
+    {
+      "label": "recursive-empty-array-truthy",
+      "cpp": "make(Missing{});start->checkHook=[](auto*){return check(true,{});};push(item(\"x\"));return entryName(s->Top());",
+      "expected": "ok|N||h=0:env="
+    },
+    {
+      "label": "recursive-global-live-after-pop",
+      "cpp": "make(Missing{});auto*x=item(\"x\"),*y=item(\"y\");start->checkHook=[&](auto*){return check(true,{entry(y)});};start->openHook=[&] {s->global=PropertyList{{\"next\",8}};return false;};push(x);return rec(y->global);",
+      "expected": "ok|next=8||h=1:env="
+    },
+    {
+      "label": "pop-env-preserved:false",
+      "cpp": "make(Missing{});auto*x=item(\"x\");x->setEnv(PropertyList{{\"x\",2}});x->openHook=[] {return false;};push(x);auto popped=s->Pop();return entryName(popped)+\":\"+rec(x->env())+\":\"+topName();",
+      "expected": "ok|x:x=2,start=1:start|check:start:x|h=1:env=start=1"
+    },
+    {
+      "label": "pop-env-preserved:true",
+      "cpp": "make(Missing{});auto*x=item(\"x\");x->setEnv(PropertyList{{\"x\",2}});x->openHook=[] {return true;};push(x);auto popped=s->Pop();return entryName(popped)+\":\"+rec(x->env())+\":\"+topName();",
+      "expected": "ok|x:x=2,start=1:start|check:start:x|h=1:env=start=1"
+    },
+    {
+      "label": "pop-last-fresh-env",
+      "cpp": "make(Missing{});Property old=s->env();auto popped=s->Pop();return entryName(popped)+\":\"+std::string(s->env()!=old?\"fresh\":\"bad\")+\":\"+entryName(s->Top());",
+      "expected": "ok|start:fresh:N||h=0:env="
+    },
+    {
+      "label": "pop-empty-error",
+      "cpp": "make(Missing{});s->Pop();s->Pop();return \"ok\";",
+      "expected": "TypeError|Cannot read properties of undefined (reading 'isOpen')|THREW||h=0:env="
+    },
+    {
+      "label": "pop-open-getter-error-after-remove",
+      "cpp": "make(Missing{});auto*x=item(\"x\");x->setEnv(PropertyList{{\"x\",2}});push(x);x->openHook=[]()->bool{throw Error(\"Error\",u\"open\");};s->Pop();return \"ok\";",
+      "expected": "Error|open|THREW|check:start:x|h=1:env=x=2,start=1"
+    },
+    {
+      "label": "pop-top-env-error-after-remove",
+      "cpp": "make(Missing{});push(item(\"x\"));start->envHook=[]()->Property{throw Error(\"Error\",u\"top-env\");};s->Pop();return \"ok\";",
+      "expected": "Error|top-env|THREW|check:start:x|h=1:env=start=1"
+    },
+    {
+      "label": "pop-top-live-after-open-callback",
+      "cpp": "make(Missing{});auto*x=item(\"x\"),*y=item(\"y\");y->setEnv(PropertyList{{\"y\",9}});push(x);x->openHook=[&](){push(y);return false;};s->Pop();return topName();",
+      "expected": "ok|y|check:start:x/check:start:y|h=2:env=y=9,start=1"
+    },
+    {
+      "label": "prev:undefined",
+      "cpp": "make(Missing{});std::array<mml::NodeValue,2> nodes{a,b};start->Push(nodes);const auto previous=s->Prev(Property(Missing{}));const auto size=start->Size();return nodeName(previous)+\":\"+std::to_string(static_cast<int>(size));",
+      "expected": "ok|mn:1||h=1:env=start=1"
+    },
+    {
+      "label": "prev:false",
+      "cpp": "make(Missing{});std::array<mml::NodeValue,2> nodes{a,b};start->Push(nodes);const auto previous=s->Prev(Property(false));const auto size=start->Size();return nodeName(previous)+\":\"+std::to_string(static_cast<int>(size));",
+      "expected": "ok|mn:1||h=1:env=start=1"
+    },
+    {
+      "label": "prev:true",
+      "cpp": "make(Missing{});std::array<mml::NodeValue,2> nodes{a,b};start->Push(nodes);const auto previous=s->Prev(Property(true));const auto size=start->Size();return nodeName(previous)+\":\"+std::to_string(static_cast<int>(size));",
+      "expected": "ok|mn:2||h=1:env=start=1"
+    },
+    {
+      "label": "prev:0",
+      "cpp": "make(Missing{});std::array<mml::NodeValue,2> nodes{a,b};start->Push(nodes);const auto previous=s->Prev(Property(0));const auto size=start->Size();return nodeName(previous)+\":\"+std::to_string(static_cast<int>(size));",
+      "expected": "ok|mn:1||h=1:env=start=1"
+    },
+    {
+      "label": "prev:",
+      "cpp": "make(Missing{});std::array<mml::NodeValue,2> nodes{a,b};start->Push(nodes);const auto previous=s->Prev(Property(\"\"));const auto size=start->Size();return nodeName(previous)+\":\"+std::to_string(static_cast<int>(size));",
+      "expected": "ok|mn:1||h=1:env=start=1"
+    },
+    {
+      "label": "prev:yes",
+      "cpp": "make(Missing{});std::array<mml::NodeValue,2> nodes{a,b};start->Push(nodes);const auto previous=s->Prev(Property(\"yes\"));const auto size=start->Size();return nodeName(previous)+\":\"+std::to_string(static_cast<int>(size));",
+      "expected": "ok|mn:2||h=1:env=start=1"
+    },
+    {
+      "label": "prev-empty:false",
+      "cpp": "make(Missing{});s->Pop();return nodeName(s->Prev(false));",
+      "expected": "TypeError|Cannot read properties of null (reading 'Pop')|THREW||h=0:env="
+    },
+    {
+      "label": "prev-empty:true",
+      "cpp": "make(Missing{});s->Pop();return nodeName(s->Prev(true));",
+      "expected": "TypeError|Cannot read properties of null (reading 'First')|THREW||h=0:env="
+    },
+    {
+      "label": "replacement-captured-tuple-slot",
+      "cpp": "make(Missing{});auto*x=item(\"x\"),*y=item(\"y\"),*z=item(\"z\");auto t=std::get<std::shared_ptr<tex::CheckTuple>>(check(true,{entry(y)}));start->checkHook=[&](auto*)->tex::CheckType{return t;};start->openHook=[&](){t->items=std::make_shared<std::vector<tex::StackEntry>>(std::initializer_list<tex::StackEntry>{entry(z)});return false;};push(x);return topName();",
+      "expected": "ok|y||h=1:env="
+    },
+    {
+      "label": "replacement-spread-after-pop",
+      "cpp": "make(Missing{});auto*x=item(\"x\"),*y=item(\"y\"),*z=item(\"z\");auto t=std::get<std::shared_ptr<tex::CheckTuple>>(check(true,{entry(y)}));start->checkHook=[&](auto*)->tex::CheckType{return t;};start->openHook=[&](){std::get<tex::CheckList>(t->items)->at(0)=entry(z);return false;};push(x);return topName();",
+      "expected": "ok|z||h=1:env="
+    },
+    {
+      "label": "input-rest-array-snapshot",
+      "cpp": "make(Missing{});auto*x=item(\"x\"),*y=item(\"y\"),*z=item(\"z\");std::vector<tex::StackEntry> args{entry(x),entry(y)};start->checkHook=[&](auto*){args[1]=entry(z);return check(true);};s->Push(args);return topName();",
+      "expected": "ok|y|check:x:y|h=3:env=start=1"
+    },
+    {
+      "label": "environment-own-only-alias",
+      "cpp": "auto parent=PropertyList{{\"inherited\",8}};auto source=PropertyList::withPrototype(parent);PropertyList nested{{\"v\",1}};source.set(\"nested\",nested);make(source);auto*x=item(\"x\");PropertyList target;x->setEnv(target);push(x);nested.set(\"v\",2);return rec(target)+\":\"+rec(target.get(\"nested\"))+\":\"+val(target.get(\"inherited\"))+\":\"+std::string(target.get(\"nested\")==Property(nested)?\"same\":\"bad\");",
+      "expected": "ok|nested=object:v=2:U:same|check:start:x|h=2:env=nested=object"
+    },
+    {
+      "label": "string-basic",
+      "cpp": "make(Missing{});push(item(\"x\"));push(item(\"y\"));return s->toString();",
+      "expected": "ok|stack[\n  start\n  x\n  y\n]|check:start:x/check:x:y|h=3:env=start=1"
+    },
+    {
+      "label": "string-empty",
+      "cpp": "make(Missing{});s->Pop();return s->toString();",
+      "expected": "ok|stack[\n  \n]||h=0:env="
+    },
+    {
+      "label": "string-live-captured-length",
+      "cpp": "make(Missing{});auto*x=item(\"x\"),*y=item(\"y\"),*z=item(\"z\");push(x);start->stringHook=[&](){trace.push_back(\"string:start\");s->Pop();push(y);push(z);return \"S\";};y->stringHook=[&](){trace.push_back(\"string:y\");return \"Y\";};return s->toString();",
+      "expected": "ok|stack[\n  S\n  Y\n]|check:start:x/string:start/check:start:y/check:y:z/string:y|h=3:env=start=1"
+    },
+    {
+      "label": "string-shrink-live-slots",
+      "cpp": "make(Missing{});push(item(\"x\"));start->stringHook=[&](){s->Pop();return \"S\";};return s->toString();",
+      "expected": "ok|stack[\n  S\n  \n]|check:start:x|h=1:env=start=1"
+    }
+  ]
+}

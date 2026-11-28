@@ -1,0 +1,1202 @@
+{
+  "schema": 1,
+  "provenance": {
+    "oracle": "tools/math-port/arithmetic-order-oracle.cjs",
+    "oracleSha256": "30ca94343d158027f4c18454ec9004c60070d2912c0a660e25dacc187f078c69",
+    "frozenCpp": "tests/math/reference_arithmetic_order.cpp",
+    "frozenCppSha256": "9ee25c4204a88f8c9e0e8b2163055242041cb26f3bb03955accdb437d5e5d3d4",
+    "extraction": "Static Property/sourceValues/inline assertion decoding; no Source execution or gold recomputation."
+  },
+  "records": [
+    {
+      "name": "math_port_arithmetic_order_construction_phase_mfrac",
+      "observations": [
+        [
+          "phase/null",
+          "attributes"
+        ],
+        null
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_construction_phase_msqrt",
+      "observations": [
+        [
+          "phase/null",
+          "attributes"
+        ],
+        0
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_construction_phase_mroot",
+      "observations": [
+        [
+          "phase/null",
+          "attributes"
+        ],
+        0
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_fraction_dispatch_normal",
+      "observations": [
+        [
+          "attributes",
+          "attributes",
+          "add/numalign",
+          "add/denalign",
+          "inherit/first",
+          "inherit/second"
+        ],
+        {
+          "shared": [
+            "test",
+            "old"
+          ],
+          "numalign": [
+            "mfrac",
+            "left"
+          ],
+          "indentshift": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignfirst": [
+            "mfrac",
+            "left"
+          ],
+          "indentshiftfirst": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignlast": [
+            "mfrac",
+            "indentalign"
+          ],
+          "indentshiftlast": [
+            "mfrac",
+            "indentshift"
+          ]
+        },
+        {
+          "shared": [
+            "test",
+            "old"
+          ],
+          "denalign": [
+            "mfrac",
+            "old"
+          ],
+          "indentshift": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignfirst": [
+            "mfrac",
+            "old"
+          ],
+          "indentshiftfirst": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignlast": [
+            "mfrac",
+            "indentalign"
+          ],
+          "indentshiftlast": [
+            "mfrac",
+            "indentshift"
+          ]
+        },
+        {
+          "shared": [
+            "test",
+            "old"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_fraction_dispatch_receiver",
+      "observations": [
+        [
+          "attributes",
+          "attributes",
+          "add/numalign",
+          "add/denalign",
+          "inherit/first",
+          "inherit/second"
+        ],
+        {
+          "shared": [
+            "test",
+            "old"
+          ],
+          "numalign": [
+            "mfrac",
+            "left"
+          ],
+          "indentshift": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignfirst": [
+            "mfrac",
+            "left"
+          ],
+          "indentshiftfirst": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignlast": [
+            "mfrac",
+            "indentalign"
+          ],
+          "indentshiftlast": [
+            "mfrac",
+            "indentshift"
+          ]
+        },
+        {
+          "shared": [
+            "test",
+            "old"
+          ],
+          "denalign": [
+            "mfrac",
+            "right"
+          ],
+          "indentshift": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignfirst": [
+            "mfrac",
+            "right"
+          ],
+          "indentshiftfirst": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignlast": [
+            "mfrac",
+            "indentalign"
+          ],
+          "indentshiftlast": [
+            "mfrac",
+            "indentshift"
+          ]
+        },
+        {
+          "shared": [
+            "test",
+            "old"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_fraction_dispatch_helper",
+      "observations": [
+        [
+          "attributes",
+          "attributes",
+          "add/numalign",
+          "add/denalign",
+          "inherit/first",
+          "inherit/second"
+        ],
+        {
+          "shared": [
+            "test",
+            "old"
+          ],
+          "numalign": [
+            "mfrac",
+            "left"
+          ],
+          "indentshift": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignfirst": [
+            "mfrac",
+            "left"
+          ],
+          "indentshiftfirst": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignlast": [
+            "mfrac",
+            "indentalign"
+          ],
+          "indentshiftlast": [
+            "mfrac",
+            "indentshift"
+          ]
+        },
+        {
+          "shared": [
+            "test",
+            "old"
+          ],
+          "between": [
+            "test",
+            "later"
+          ],
+          "denalign": [
+            "mfrac",
+            "old"
+          ],
+          "indentshift": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignfirst": [
+            "mfrac",
+            "old"
+          ],
+          "indentshiftfirst": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignlast": [
+            "mfrac",
+            "indentalign"
+          ],
+          "indentshiftlast": [
+            "mfrac",
+            "indentshift"
+          ]
+        },
+        {
+          "shared": [
+            "test",
+            "old"
+          ],
+          "between": [
+            "test",
+            "later"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_fraction_dispatch_proto",
+      "observations": [
+        [
+          "attributes",
+          "attributes",
+          "add/numalign",
+          "keys/shared",
+          "prototype/true",
+          "add/denalign",
+          "keys/shared",
+          "prototype/true",
+          "inherit/first",
+          "inherit/second"
+        ],
+        {
+          "shared": [
+            "test",
+            "old"
+          ],
+          "numalign": [
+            "mfrac",
+            "left"
+          ],
+          "indentshift": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignfirst": [
+            "mfrac",
+            "left"
+          ],
+          "indentshiftfirst": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignlast": [
+            "mfrac",
+            "indentalign"
+          ],
+          "indentshiftlast": [
+            "mfrac",
+            "indentshift"
+          ]
+        },
+        {
+          "shared": [
+            "test",
+            "old"
+          ],
+          "denalign": [
+            "mfrac",
+            "old"
+          ],
+          "indentshift": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignfirst": [
+            "mfrac",
+            "old"
+          ],
+          "indentshiftfirst": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignlast": [
+            "mfrac",
+            "indentalign"
+          ],
+          "indentshiftlast": [
+            "mfrac",
+            "indentshift"
+          ]
+        },
+        {
+          "shared": [
+            "test",
+            "old"
+          ],
+          "__proto__": [
+            "test",
+            "own"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_fraction_dispatch_copy-identity",
+      "observations": [
+        [
+          "attributes",
+          "attributes",
+          "add/numalign",
+          "input/false",
+          "add/denalign",
+          "input/false",
+          "inherit/first",
+          "inherit/second"
+        ],
+        {
+          "shared": [
+            "test",
+            "old"
+          ],
+          "numalign": [
+            "mfrac",
+            "left"
+          ],
+          "indentshift": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignfirst": [
+            "mfrac",
+            "left"
+          ],
+          "indentshiftfirst": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignlast": [
+            "mfrac",
+            "indentalign"
+          ],
+          "indentshiftlast": [
+            "mfrac",
+            "indentshift"
+          ]
+        },
+        {
+          "shared": [
+            "test",
+            "old"
+          ],
+          "denalign": [
+            "mfrac",
+            "old"
+          ],
+          "indentshift": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignfirst": [
+            "mfrac",
+            "old"
+          ],
+          "indentshiftfirst": [
+            "mfrac",
+            "0"
+          ],
+          "indentalignlast": [
+            "mfrac",
+            "indentalign"
+          ],
+          "indentshiftlast": [
+            "mfrac",
+            "indentshift"
+          ]
+        },
+        {
+          "shared": [
+            "test",
+            "old"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_base_helper_own_spread",
+      "observations": [
+        [],
+        {
+          "shared": [
+            "test",
+            "old"
+          ]
+        },
+        false,
+        true
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_outer_mfrac_false_false",
+      "observations": [
+        [],
+        [
+          {
+            "kind": "text",
+            "children": 0,
+            "tex": -1,
+            "prime": {
+              "$type": "undefined"
+            }
+          },
+          {
+            "kind": "mi",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": 3,
+              "mathvariant": "italic"
+            }
+          },
+          {
+            "kind": "text",
+            "children": 0,
+            "tex": -1,
+            "prime": {
+              "$type": "undefined"
+            }
+          },
+          {
+            "kind": "mi",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": 3,
+              "mathvariant": "italic"
+            }
+          },
+          {
+            "kind": "mfrac",
+            "children": 2,
+            "tex": null,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "2"
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_outer_mfrac_false_true",
+      "observations": [
+        [],
+        [
+          {
+            "kind": "mrow",
+            "children": 0,
+            "tex": null,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": 3
+            }
+          },
+          {
+            "kind": "mrow",
+            "children": 0,
+            "tex": null,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": 3
+            }
+          },
+          {
+            "kind": "mfrac",
+            "children": 2,
+            "tex": null,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "2"
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_outer_mfrac_true_false",
+      "observations": [
+        [],
+        [
+          {
+            "kind": "text",
+            "children": 0,
+            "tex": -1,
+            "prime": {
+              "$type": "undefined"
+            }
+          },
+          {
+            "kind": "mi",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": 3,
+              "mathvariant": "italic"
+            }
+          },
+          {
+            "kind": "text",
+            "children": 0,
+            "tex": -1,
+            "prime": {
+              "$type": "undefined"
+            }
+          },
+          {
+            "kind": "mi",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": 3,
+              "mathvariant": "italic"
+            }
+          },
+          {
+            "kind": "mfrac",
+            "children": 2,
+            "tex": null,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%"
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_outer_mfrac_true_true",
+      "observations": [
+        [],
+        [
+          {
+            "kind": "mrow",
+            "children": 0,
+            "tex": null,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": 3
+            }
+          },
+          {
+            "kind": "mrow",
+            "children": 0,
+            "tex": null,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": 3
+            }
+          },
+          {
+            "kind": "mfrac",
+            "children": 2,
+            "tex": null,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%"
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_outer_msqrt_false_false",
+      "observations": [
+        [],
+        [
+          {
+            "kind": "text",
+            "children": 0,
+            "tex": -1,
+            "prime": {
+              "$type": "undefined"
+            }
+          },
+          {
+            "kind": "mi",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "2",
+              "mathvariant": "italic"
+            }
+          },
+          {
+            "kind": "text",
+            "children": 0,
+            "tex": -1,
+            "prime": {
+              "$type": "undefined"
+            }
+          },
+          {
+            "kind": "mi",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "2",
+              "mathvariant": "italic"
+            }
+          },
+          {
+            "kind": "inferredMrow",
+            "children": 2,
+            "tex": null,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "2"
+            }
+          },
+          {
+            "kind": "msqrt",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "2"
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_outer_msqrt_false_true",
+      "observations": [
+        [],
+        [
+          {
+            "kind": "inferredMrow",
+            "children": 0,
+            "tex": null,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "2"
+            }
+          },
+          {
+            "kind": "msqrt",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "2"
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_outer_msqrt_true_false",
+      "observations": [
+        [],
+        [
+          {
+            "kind": "text",
+            "children": 0,
+            "tex": -1,
+            "prime": {
+              "$type": "undefined"
+            }
+          },
+          {
+            "kind": "mi",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "2",
+              "mathvariant": "italic"
+            }
+          },
+          {
+            "kind": "text",
+            "children": 0,
+            "tex": -1,
+            "prime": {
+              "$type": "undefined"
+            }
+          },
+          {
+            "kind": "mi",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "2",
+              "mathvariant": "italic"
+            }
+          },
+          {
+            "kind": "inferredMrow",
+            "children": 2,
+            "tex": null,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "2"
+            }
+          },
+          {
+            "kind": "msqrt",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%"
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_outer_msqrt_true_true",
+      "observations": [
+        [],
+        [
+          {
+            "kind": "inferredMrow",
+            "children": 0,
+            "tex": null,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "2"
+            }
+          },
+          {
+            "kind": "msqrt",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%"
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_outer_mroot_false_false",
+      "observations": [
+        [],
+        [
+          {
+            "kind": "text",
+            "children": 0,
+            "tex": -1,
+            "prime": {
+              "$type": "undefined"
+            }
+          },
+          {
+            "kind": "mi",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "2",
+              "mathvariant": "italic"
+            }
+          },
+          {
+            "kind": "text",
+            "children": 0,
+            "tex": -1,
+            "prime": {
+              "$type": "undefined"
+            }
+          },
+          {
+            "kind": "mi",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "22",
+              "mathvariant": "italic"
+            }
+          },
+          {
+            "kind": "mroot",
+            "children": 2,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "2"
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_outer_mroot_false_true",
+      "observations": [
+        [],
+        [
+          {
+            "kind": "mrow",
+            "children": 0,
+            "tex": null,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "2"
+            }
+          },
+          {
+            "kind": "mrow",
+            "children": 0,
+            "tex": null,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "22"
+            }
+          },
+          {
+            "kind": "mroot",
+            "children": 2,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "2"
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_outer_mroot_true_false",
+      "observations": [
+        [],
+        [
+          {
+            "kind": "text",
+            "children": 0,
+            "tex": -1,
+            "prime": {
+              "$type": "undefined"
+            }
+          },
+          {
+            "kind": "mi",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "2",
+              "mathvariant": "italic"
+            }
+          },
+          {
+            "kind": "text",
+            "children": 0,
+            "tex": -1,
+            "prime": {
+              "$type": "undefined"
+            }
+          },
+          {
+            "kind": "mi",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "22",
+              "mathvariant": "italic"
+            }
+          },
+          {
+            "kind": "mroot",
+            "children": 2,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%"
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_outer_mroot_true_true",
+      "observations": [
+        [],
+        [
+          {
+            "kind": "mrow",
+            "children": 0,
+            "tex": null,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "2"
+            }
+          },
+          {
+            "kind": "mrow",
+            "children": 0,
+            "tex": null,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%",
+              "displaystyle": false,
+              "scriptlevel": "22"
+            }
+          },
+          {
+            "kind": "mroot",
+            "children": 2,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "mathcolor": "blue",
+              "mathsize": "120%"
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "name": "math_port_arithmetic_order_nested_outer_shared_tree",
+      "observations": [
+        [],
+        [
+          {
+            "kind": "text",
+            "children": 0,
+            "tex": -1,
+            "prime": {
+              "$type": "undefined"
+            }
+          },
+          {
+            "kind": "mi",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "displaystyle": false,
+              "scriptlevel": 1,
+              "mathvariant": "italic"
+            }
+          },
+          {
+            "kind": "text",
+            "children": 0,
+            "tex": -1,
+            "prime": {
+              "$type": "undefined"
+            }
+          },
+          {
+            "kind": "mi",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "displaystyle": false,
+              "scriptlevel": 1,
+              "mathvariant": "italic"
+            }
+          },
+          {
+            "kind": "mfrac",
+            "children": 2,
+            "tex": null,
+            "prime": true,
+            "inherited": {
+              "displaystyle": false,
+              "scriptlevel": 0
+            }
+          },
+          {
+            "kind": "inferredMrow",
+            "children": 1,
+            "tex": null,
+            "prime": true,
+            "inherited": {
+              "displaystyle": false,
+              "scriptlevel": 0
+            }
+          },
+          {
+            "kind": "msqrt",
+            "children": 1,
+            "tex": 0,
+            "prime": true,
+            "inherited": {
+              "displaystyle": false,
+              "scriptlevel": 0
+            }
+          },
+          {
+            "kind": "text",
+            "children": 0,
+            "tex": -1,
+            "prime": {
+              "$type": "undefined"
+            }
+          },
+          {
+            "kind": "mi",
+            "children": 1,
+            "tex": 0,
+            "prime": {
+              "$type": "undefined"
+            },
+            "inherited": {
+              "displaystyle": false,
+              "scriptlevel": 2,
+              "mathvariant": "italic"
+            }
+          },
+          {
+            "kind": "mroot",
+            "children": 2,
+            "tex": 0,
+            "prime": {
+              "$type": "undefined"
+            },
+            "inherited": {
+              "displaystyle": false,
+              "scriptlevel": 0
+            }
+          }
+        ]
+      ]
+    }
+  ]
+}

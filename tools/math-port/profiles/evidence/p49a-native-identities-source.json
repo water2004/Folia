@@ -1,0 +1,77 @@
+{
+  "stage": "original Options/MML reference observations, not parser acceptance",
+  "hashes": [
+    {
+      "source": "ts/util/Options.ts",
+      "source_sha256": "b810ffc09864eb8ed9295d829b229194d7e38aaac6c8f01525bc1a4b190a61e3",
+      "cjs_sha256": "76f3df8a3e899fba1d0944d5b79818b586c1d9f95cc7021c395fbb10295db660"
+    },
+    {
+      "source": "ts/core/Tree/Factory.ts",
+      "source_sha256": "e61d2f5868287e2f382503cf690cd241698bf212957c1795d0cd35ce3bef049e",
+      "cjs_sha256": "739db2e5760c29d7bb4f1bc7baa08ff8d727f4d117522aff5ede017f812cffef"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlFactory.ts",
+      "source_sha256": "5e7338cd3eed5a4002243b7371dc5098c6433ff4ba4345cb2d50cf0385b2abdb",
+      "cjs_sha256": "d0c4e25237d04a9d21d12ee44776e46d30777e7f284db6f4f3ed1cc625b752d3"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNode.ts",
+      "source_sha256": "cc0594eb5782928412c4307637866d9f80ac147af577297edd48ee88b63b8656",
+      "cjs_sha256": "86c5eb572dcf2652c3c52a60b66c720d231e17f600cc9aeef3ace4aeafc81d45"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mi.ts",
+      "source_sha256": "3bbddaeac72d2c0f2e5d8a0440c28188f98d1bf1481a0ec6872e103a50f146c2",
+      "cjs_sha256": "47058d7ddb5b24ed530936baffe834a06c0557ec7dbdc03312d3ffa0aca17241"
+    }
+  ],
+  "rows": [
+    {
+      "label": "same-node-canonical-handle",
+      "cpp": "auto a=e.nodes.instance(e.node,e.klass,e.factory),b=e.nodes.instance(e.node,e.klass,e.factory);return yes(a==b)+\":\"+yes(e.nodes.resolve(a)==e.node);",
+      "expected": "true:true"
+    },
+    {
+      "label": "distinct-native-nodes",
+      "cpp": "auto other=e.factory->create(\"mi\");auto a=e.nodes.instance(e.node,e.klass,e.factory),b=e.nodes.instance(other,e.klass,e.factory);return yes(a!=b)+\":\"+yes(e.nodes.resolve(b)==other);",
+      "expected": "true:true"
+    },
+    {
+      "label": "actual-factory-class-identity",
+      "cpp": "auto nativeClass=e.factory->getNodeClass(\"mi\");auto value=e.classes.bind(nativeClass,e.klass);mml::MmlFactory second;return yes(e.classes.resolve(value)==second.getNodeClass(\"mi\"));",
+      "expected": "true"
+    },
+    {
+      "label": "node-alias-through-option-copy",
+      "cpp": "auto node=e.nodes.instance(e.node,e.klass,e.factory);auto source=e.object({{u\"node\",node},{u\"array\",e.array({node,node})}});std::array<opts::Value,1> defs{source};auto result=opts::defaultOptions(e.context,e.context.object(),defs);auto array=e.get(result,u\"array\");return yes(e.get(result,u\"node\")==opts::Value(node))+\":\"+yes(e.get(array,u\"0\")==opts::Value(node))+\":\"+yes(array!=e.get(source,u\"array\"));",
+      "expected": "true:true:true"
+    },
+    {
+      "label": "factory-class-alias-through-option-copy",
+      "cpp": "auto nativeClass=e.factory->getNodeClass(\"mi\");auto type=e.classes.bind(nativeClass,e.klass);auto source=e.object({{u\"items\",e.object({{u\"mi\",type}})}});std::array<opts::Value,1> defs{source};auto result=opts::defaultOptions(e.context,e.context.object(),defs);return yes(e.get(result,u\"items\")!=e.get(source,u\"items\"))+\":\"+yes(e.classes.resolve(std::get<opts::ObjectRef>(e.get(e.get(result,u\"items\"),u\"mi\").data))==nativeClass);",
+      "expected": "true:true"
+    },
+    {
+      "label": "same-node-graph-observed-through-alias",
+      "cpp": "auto node=e.nodes.instance(e.node,e.klass,e.factory);auto source=e.object({{u\"node\",node}});auto result=opts::copy(e.context,source);auto bound=std::get<opts::ObjectRef>(e.get(result,u\"node\").data);e.nodes.resolve(bound)->setProperty(\"probe\",9);return property_host::debugText(property_host::string(e.node->getProperty(\"probe\")));",
+      "expected": "9"
+    },
+    {
+      "label": "ordinary-node-list-array-and-inherited-key",
+      "cpp": "auto node=e.nodes.instance(e.node,e.klass,e.factory);auto dictionary=e.object({{u\"mi\",e.array({node,node})}});auto list=e.get(dictionary,u\"mi\");return yes(e.get(dictionary,u\"constructor\")==opts::Value(e.context.intrinsics().objectConstructor))+\":\"+yes(e.get(list,u\"0\")==e.get(list,u\"1\"));",
+      "expected": "true:true"
+    },
+    {
+      "label": "dictionary-enumeration-order",
+      "cpp": "auto node=e.nodes.instance(e.node,e.klass,e.factory);auto dictionary=e.object({{u\"z\",node},{u\"2\",node},{u\"a\",node},{u\"1\",node}});std::string out;for(auto k:e.context.enumerableStringKeys(dictionary)){if(!out.empty())out+=\",\";out+=property_host::debugText(k);}return out;",
+      "expected": "1,2,z,a"
+    },
+    {
+      "label": "node-list-array-rebinding-retains-captured-array",
+      "cpp": "auto node=e.nodes.instance(e.node,e.klass,e.factory);auto dictionary=e.object({{u\"mi\",e.array({node})}});auto old=e.get(dictionary,u\"mi\");e.context.set(dictionary,opts::Key(u\"mi\"),e.array({}));return yes(old!=e.get(dictionary,u\"mi\"))+\":\"+yes(e.nodes.resolve(std::get<opts::ObjectRef>(e.get(old,u\"0\").data))==e.node);",
+      "expected": "true:true"
+    }
+  ]
+}

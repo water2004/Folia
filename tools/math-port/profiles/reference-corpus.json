@@ -1,0 +1,1756 @@
+{
+  "schema": 1,
+  "owner": "root",
+  "status": "entry_and_regression_witnesses_not_full_branch_coverage",
+  "session": "ordered_single_production_profile",
+  "cases": [
+    {
+      "name": "base_sum_fraction_root_and_limits",
+      "package": "base",
+      "request": {
+        "tex": "\\sum_{k=1}^{n}\\frac{1}{\\sqrt{k^2+1}}",
+        "display": true,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "line": 186,
+          "source": "ts/input/tex/base/BaseMappings.ts",
+          "method": "mathchar0mo.sum"
+        },
+        {
+          "line": 535,
+          "source": "ts/input/tex/base/BaseMappings.ts",
+          "method": "macros.frac"
+        },
+        {
+          "line": 536,
+          "source": "ts/input/tex/base/BaseMappings.ts",
+          "method": "macros.sqrt"
+        },
+        {
+          "line": 707,
+          "source": "ts/input/tex/base/BaseMethods.ts",
+          "method": "Frac"
+        },
+        {
+          "line": 721,
+          "source": "ts/input/tex/base/BaseMethods.ts",
+          "method": "Sqrt"
+        }
+      ],
+      "coverage_note": "Exercises a movable big operator with scripts plus nested fraction and radical under display mode."
+    },
+    {
+      "name": "base_left_middle_right_fence",
+      "package": "base",
+      "request": {
+        "tex": "\\left\\{a\\middle|b\\right\\}",
+        "display": false,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "line": 541,
+          "source": "ts/input/tex/base/BaseMappings.ts",
+          "method": "macros.left"
+        },
+        {
+          "line": 542,
+          "source": "ts/input/tex/base/BaseMappings.ts",
+          "method": "macros.right"
+        },
+        {
+          "line": 543,
+          "source": "ts/input/tex/base/BaseMappings.ts",
+          "method": "macros.middle"
+        },
+        {
+          "line": 564,
+          "source": "ts/input/tex/base/BaseMethods.ts",
+          "method": "LeftRight"
+        }
+      ],
+      "coverage_note": "Checks the base package's paired delimiter stack and middle delimiter handling."
+    },
+    {
+      "name": "action_mathematical_tooltip_host_event_failure",
+      "package": "action",
+      "request": {
+        "tex": "\\mathtip{x^2}{tip}",
+        "display": false,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "exception",
+        "exception": {
+          "name": "TypeError",
+          "message": "node.addEventListener is not a function"
+        }
+      },
+      "classification": "host_exception",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/action/ActionConfiguration.ts",
+          "method": "ActionMethods.Mathtip",
+          "line": 60
+        },
+        {
+          "source": "ts/output/svg/Wrappers/maction.ts",
+          "method": "SvgMaction.actions.tooltip math-tooltip branch",
+          "line": 281
+        },
+        {
+          "source": "ts/output/svg/Wrappers/maction.ts",
+          "method": "SvgMaction.setEventHandler",
+          "line": 418
+        }
+      ],
+      "coverage_note": "This is valid TeX and ActionMethods.Mathtip parses both arguments, but rendering the math-valued tooltip enters SvgMaction tooltip handling, which calls setEventHandler; that method invokes addEventListener on LiteAdaptor nodes, producing the observed host exception. The failure is in the pinned SVG host integration, after parsing."
+    },
+    {
+      "name": "action_text_tooltip_title_node",
+      "package": "action",
+      "request": {
+        "tex": "\\texttip{x^2}{tip}",
+        "display": false,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/action/ActionConfiguration.ts",
+          "method": "action-macros texttip expansion",
+          "line": 74
+        },
+        {
+          "source": "ts/output/svg/Wrappers/maction.ts",
+          "method": "SvgMaction.actions.tooltip mtext title branch",
+          "line": 270
+        }
+      ],
+      "coverage_note": "The texttip expansion makes the second child mtext; the SVG maction wrapper renders that tooltip as a title node and does not register event handlers. Confirmed to render in the exact pinned profile."
+    },
+    {
+      "name": "ams_aligned_equations",
+      "package": "ams",
+      "request": {
+        "tex": "\\begin{align}a&=b\\\\c&=d\\end{align}",
+        "display": true,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "line": 39,
+          "source": "ts/input/tex/ams/AmsConfiguration.ts",
+          "method": "AmsConfiguration environment handler and tags"
+        },
+        {
+          "line": 116,
+          "source": "ts/input/tex/ams/AmsMappings.ts",
+          "method": "AMSmath-environment align entry"
+        },
+        {
+          "line": 792,
+          "source": "ts/input/tex/ams/AmsMethods.ts",
+          "method": "AmsMethods.EqnArray registration alias"
+        }
+      ],
+      "coverage_note": "Exercises AMS display alignment, row breaks, aligned columns and AMS tag configuration."
+    },
+    {
+      "name": "amscd_commutative_diagram_arrows",
+      "package": "amscd",
+      "request": {
+        "tex": "\\begin{CD}A @>f>> B \\\\ @VgVV @VVhV \\\\ C @>>k> D\\end{CD}",
+        "display": true,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "line": 28,
+          "source": "ts/input/tex/amscd/AmsCdConfiguration.ts",
+          "method": "AmsCdConfiguration handlers"
+        },
+        {
+          "line": 29,
+          "source": "ts/input/tex/amscd/AmsCdMappings.ts",
+          "method": "AMScd environment map entry"
+        },
+        {
+          "line": 37,
+          "source": "ts/input/tex/amscd/AmsCdMappings.ts",
+          "method": "@ macro map registration"
+        },
+        {
+          "line": 42,
+          "source": "ts/input/tex/amscd/AmsCdMethods.ts",
+          "method": "CD"
+        },
+        {
+          "line": 66,
+          "source": "ts/input/tex/amscd/AmsCdMethods.ts",
+          "method": "arrow"
+        }
+      ],
+      "coverage_note": "Checks the CD environment plus horizontal and vertical labelled arrow cells."
+    },
+    {
+      "name": "bbox_background_padding_and_nested_math",
+      "package": "bbox",
+      "request": {
+        "tex": "\\bbox[lightblue,2pt]{\\frac{x}{y}+1}",
+        "display": false,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "line": 39,
+          "source": "ts/input/tex/bbox/BboxConfiguration.ts",
+          "method": "BBox"
+        },
+        {
+          "line": 144,
+          "source": "ts/input/tex/bbox/BboxConfiguration.ts",
+          "method": "bbox CommandMap registration"
+        },
+        {
+          "line": 146,
+          "source": "ts/input/tex/bbox/BboxConfiguration.ts",
+          "method": "BboxConfiguration macro handler"
+        }
+      ],
+      "coverage_note": "Exercises color and dimensional padding with nested fraction content."
+    },
+    {
+      "name": "bbox_duplicate_padding_error",
+      "package": "bbox",
+      "request": {
+        "tex": "\\bbox[2pt,3pt]{x}",
+        "display": false,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "formula_error"
+      },
+      "classification": "formula_error",
+      "source_evidence": [
+        {
+          "line": 51,
+          "source": "ts/input/tex/bbox/BboxConfiguration.ts",
+          "method": "BboxMethods.BBox duplicate padding error branch"
+        }
+      ],
+      "coverage_note": "The source explicitly raises MultipleBBoxProperty when padding is supplied twice; oracle should confirm profile error representation."
+    },
+    {
+      "name": "begingroup_local_macro_scope",
+      "package": "begingroup",
+      "request": {
+        "tex": "\\begingroup\\def\\local{x}\\local\\endgroup+\\text{y}",
+        "display": false,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/begingroup/BegingroupConfiguration.ts",
+          "method": "begingroup CommandMap and registered package state/pre/postprocessors",
+          "line": 33
+        },
+        {
+          "source": "ts/input/tex/begingroup/BegingroupMethods.ts",
+          "method": "begingroup",
+          "line": 37
+        },
+        {
+          "source": "ts/input/tex/begingroup/BegingroupMethods.ts",
+          "method": "endgroup",
+          "line": 47
+        }
+      ],
+      "coverage_note": "Uses a locally defined macro inside an explicit group and continues parsing after the group; the package stack owns scope restoration."
+    },
+    {
+      "name": "boldsymbol_boldsymbol_identifier_and_greek",
+      "package": "boldsymbol",
+      "request": {
+        "tex": "\\boldsymbol{\\alpha+x}",
+        "display": false,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "line": 62,
+          "source": "ts/input/tex/boldsymbol/BoldsymbolConfiguration.ts",
+          "method": "boldsymbol CommandMap"
+        },
+        {
+          "line": 53,
+          "source": "ts/input/tex/boldsymbol/BoldsymbolConfiguration.ts",
+          "method": "Boldsymbol"
+        },
+        {
+          "line": 73,
+          "source": "ts/input/tex/boldsymbol/BoldsymbolConfiguration.ts",
+          "method": "createBoldToken"
+        },
+        {
+          "line": 96,
+          "source": "ts/input/tex/boldsymbol/BoldsymbolConfiguration.ts",
+          "method": "rewriteBoldTokens and postprocessor config"
+        }
+      ],
+      "coverage_note": "Exercises the package's scoped boldsymbol environment and postprocessor across both Greek and Latin token nodes."
+    },
+    {
+      "name": "braket_stretchy_braket_with_bar",
+      "package": "braket",
+      "request": {
+        "tex": "\\Braket{\\psi|\\phi}",
+        "display": false,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "line": 29,
+          "source": "ts/input/tex/braket/BraketConfiguration.ts",
+          "method": "BraketConfiguration registration"
+        },
+        {
+          "line": 37,
+          "source": "ts/input/tex/braket/BraketMappings.ts",
+          "method": "Braket-macros Braket mapping"
+        },
+        {
+          "line": 42,
+          "source": "ts/input/tex/braket/BraketMethods.ts",
+          "method": "Braket and bar stack handling"
+        }
+      ],
+      "coverage_note": "Exercises stretchy angle delimiters, parsed interior math, and the package's in-braket vertical bar behavior."
+    },
+    {
+      "name": "bussproofs_binary_inference_tree",
+      "package": "bussproofs",
+      "request": {
+        "tex": "\\begin{prooftree}\\AxiomC{$P$}\\AxiomC{$Q$}\\BinaryInfC{$P\\land Q$}\\end{prooftree}",
+        "display": true,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "line": 35,
+          "source": "ts/input/tex/bussproofs/BussproofsConfiguration.ts",
+          "method": "BussproofsConfiguration registration"
+        },
+        {
+          "line": 81,
+          "source": "ts/input/tex/bussproofs/BussproofsMappings.ts",
+          "method": "Bussproofs-environments.prooftree"
+        },
+        {
+          "line": 32,
+          "source": "ts/input/tex/bussproofs/BussproofsMappings.ts",
+          "method": "AxiomC mapping"
+        },
+        {
+          "line": 34,
+          "source": "ts/input/tex/bussproofs/BussproofsMappings.ts",
+          "method": "BinaryInfC mapping"
+        },
+        {
+          "line": 196,
+          "source": "ts/input/tex/bussproofs/BussproofsMethods.ts",
+          "method": "Prooftree"
+        },
+        {
+          "line": 215,
+          "source": "ts/input/tex/bussproofs/BussproofsMethods.ts",
+          "method": "Axiom"
+        },
+        {
+          "line": 236,
+          "source": "ts/input/tex/bussproofs/BussproofsMethods.ts",
+          "method": "Inference"
+        }
+      ],
+      "coverage_note": "Builds a two-premise proof tree through the environment stack item and binary inference command."
+    },
+    {
+      "name": "cancel_nested_diagonal_cancellation",
+      "package": "cancel",
+      "request": {
+        "tex": "\\cancel{x+\\bcancel{y}}",
+        "display": false,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "line": 82,
+          "source": "ts/input/tex/cancel/CancelConfiguration.ts",
+          "method": "cancel CommandMap entry"
+        },
+        {
+          "line": 83,
+          "source": "ts/input/tex/cancel/CancelConfiguration.ts",
+          "method": "bcancel CommandMap entry"
+        },
+        {
+          "line": 93,
+          "source": "ts/input/tex/cancel/CancelConfiguration.ts",
+          "method": "CancelConfiguration macro handler"
+        },
+        {
+          "line": 42,
+          "source": "ts/input/tex/cancel/CancelConfiguration.ts",
+          "method": "Cancel"
+        }
+      ],
+      "coverage_note": "Checks nested menclose nodes with opposite diagonal strike notations."
+    },
+    {
+      "name": "cases_numbered_cases_text_command_error",
+      "package": "cases",
+      "request": {
+        "tex": "\\begin{numcases}{|x|=}x & \\text{if }x\\ge0\\\\-x & \\text{if }x<0\\end{numcases}",
+        "display": true,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "formula_error"
+      },
+      "classification": "formula_error",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/cases/CasesConfiguration.ts",
+          "method": "CasesMethods.NumCases",
+          "line": 92
+        },
+        {
+          "source": "ts/input/tex/cases/CasesConfiguration.ts",
+          "method": "numcases EnvironmentMap registration",
+          "line": 243
+        },
+        {
+          "source": "ts/input/tex/cases/CasesConfiguration.ts",
+          "method": "CasesMethods.Entry calling ParseUtil.internalMath for second-column text",
+          "line": 218
+        }
+      ],
+      "coverage_note": "Retained as an observed formula error in the pinned profile: the second column is processed by Entry as text through ParseUtil.internalMath, so the embedded \\text command is rejected with MathMacro (\"\\\\text is only supported in math mode\")."
+    },
+    {
+      "name": "cases_numbered_cases_plain_text_column",
+      "package": "cases",
+      "request": {
+        "tex": "\\begin{numcases}{|x|=}x & if x >= 0\\\\-x & if x < 0\\end{numcases}",
+        "display": true,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/cases/CasesConfiguration.ts",
+          "method": "CasesMethods.NumCases",
+          "line": 92
+        },
+        {
+          "source": "ts/input/tex/cases/CasesConfiguration.ts",
+          "method": "numcases EnvironmentMap registration",
+          "line": 243
+        },
+        {
+          "source": "ts/input/tex/cases/CasesConfiguration.ts",
+          "method": "CasesMethods.Entry parses second-column literal text",
+          "line": 217
+        }
+      ],
+      "coverage_note": "Uses literal text and comparison characters in numcases second column, without math-only commands. Confirmed to render in the exact pinned profile."
+    },
+    {
+      "name": "centernot_centered_negation",
+      "package": "centernot",
+      "request": {
+        "tex": "\\centernot\\subseteq",
+        "display": false,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "line": 63,
+          "source": "ts/input/tex/centernot/CenternotConfiguration.ts",
+          "method": "centernot CommandMap expansion"
+        },
+        {
+          "line": 38,
+          "source": "ts/input/tex/centernot/CenternotConfiguration.ts",
+          "method": "CenterOver"
+        },
+        {
+          "line": 72,
+          "source": "ts/input/tex/centernot/CenternotConfiguration.ts",
+          "method": "filterCenterOver postprocessor"
+        },
+        {
+          "line": 83,
+          "source": "ts/input/tex/centernot/CenternotConfiguration.ts",
+          "method": "CenternotConfiguration registration"
+        }
+      ],
+      "coverage_note": "Exercises the package macro expansion, overlaid slash geometry, and postprocessor that restores the base TeX class."
+    },
+    {
+      "name": "color_defined_rgb_textcolor",
+      "package": "color",
+      "request": {
+        "tex": "\\definecolor{foliaBlue}{RGB}{12,34,56}\\textcolor{foliaBlue}{x+1}",
+        "display": false,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "line": 34,
+          "source": "ts/input/tex/color/ColorConfiguration.ts",
+          "method": "color CommandMap registration"
+        },
+        {
+          "line": 58,
+          "source": "ts/input/tex/color/ColorConfiguration.ts",
+          "method": "ColorModel package setup and configuration"
+        },
+        {
+          "line": 105,
+          "source": "ts/input/tex/color/ColorMethods.ts",
+          "method": "DefineColor"
+        },
+        {
+          "line": 78,
+          "source": "ts/input/tex/color/ColorMethods.ts",
+          "method": "TextColor"
+        }
+      ],
+      "coverage_note": "Defines an RGB color in package state and consumes it in a separately scoped colored math argument."
+    },
+    {
+      "name": "colortbl_row_and_cell_backgrounds",
+      "package": "colortbl",
+      "request": {
+        "tex": "\\begin{array}{cc}\\rowcolor{red}a&b\\\\c&\\cellcolor{yellow}d\\end{array}",
+        "display": true,
+        "em": 16,
+        "width": 1280
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/colortbl/ColortblConfiguration.ts",
+          "method": "TableColor",
+          "line": 124
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/colortbl/ColortblConfiguration.ts",
+          "method": "ColorArrayItem.EndEntry",
+          "line": 67
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/colortbl/ColortblConfiguration.ts",
+          "method": "ColorArrayItem.createMml",
+          "line": 90
+        }
+      ],
+      "coverage_note": "Exercises row and cell color propagation into table-cell backgrounds, including colored-cell edge sizing."
+    },
+    {
+      "name": "colortbl_row_color_after_first_cell_error",
+      "package": "colortbl",
+      "request": {
+        "tex": "\\begin{array}{cc}a&\\rowcolor{red}b\\end{array}",
+        "display": true,
+        "em": 16,
+        "width": 1280
+      },
+      "expected": {
+        "kind": "formula_error"
+      },
+      "classification": "formula_error",
+      "source_evidence": [
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/colortbl/ColortblConfiguration.ts",
+          "method": "TableColor",
+          "line": 124
+        }
+      ],
+      "coverage_note": "TableColor rejects rowcolor after row content with RowColorNotFirst; oracle should confirm the package-level error behavior."
+    },
+    {
+      "name": "configmacros_unconfigured_macro_policy_witness",
+      "package": "configmacros",
+      "request": {
+        "tex": "\\FoliaConfiguredSquare{x}",
+        "display": false,
+        "em": 16,
+        "width": 1280
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/configmacros/ConfigMacrosConfiguration.ts",
+          "method": "configmacrosConfig",
+          "line": 78
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/configmacros/ConfigMacrosConfiguration.ts",
+          "method": "configActives",
+          "line": 112
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/configmacros/ConfigMacrosConfiguration.ts",
+          "method": "configMacros",
+          "line": 121
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/configmacros/ConfigMacrosConfiguration.ts",
+          "method": "configEnvironments",
+          "line": 130
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/configmacros/ConfigMacrosConfiguration.ts",
+          "method": "setMacros",
+          "line": 91
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/configmacros/ConfigMacrosConfiguration.ts",
+          "method": "ConfigMacrosConfiguration OPTIONS",
+          "line": 156
+        },
+        {
+          "source": "tools/mathjax-bundle/entry.cjs",
+          "method": "TeX constructor packages",
+          "line": 59
+        }
+      ],
+      "coverage_note": "Production-default policy witness only: the capture renders through noundefined handling (rendered, with no formula diagnostic), so this is not positive configmacros syntax coverage. The entry constructs TeX without macros, active, or environments options. Positive fixtures remain uncovered and require an explicit TeX configuration API fixture to exercise configmacrosConfig -> configActives/configMacros/configEnvironments -> setMacros (including BeginEnv for configured environments)."
+    },
+    {
+      "name": "empheq_left_brace_around_align",
+      "package": "empheq",
+      "request": {
+        "tex": "\\begin{empheq}[left=\\empheqlbrace]{align}x&=1\\\\y&=2\\end{empheq}",
+        "display": true,
+        "em": 16,
+        "width": 1280
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/empheq/EmpheqConfiguration.ts",
+          "method": "EmpheqMethods.Empheq",
+          "line": 44
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/empheq/EmpheqConfiguration.ts",
+          "method": "empheq environment map",
+          "line": 118
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/empheq/EmpheqUtil.ts",
+          "method": "EmpheqUtil.adjustTable",
+          "line": 238
+        }
+      ],
+      "coverage_note": "Exercises empheq's allowed align nesting and its post-parse insertion of a stretchable left delimiter around the table."
+    },
+    {
+      "name": "enclose_combined_menclose_notations",
+      "package": "enclose",
+      "request": {
+        "tex": "\\enclose{circle,updiagonalstrike}{x+y}",
+        "display": false,
+        "em": 16,
+        "width": 1280
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/enclose/EncloseConfiguration.ts",
+          "method": "EncloseMethods.Enclose",
+          "line": 55
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/enclose/EncloseConfiguration.ts",
+          "method": "enclose CommandMap",
+          "line": 65
+        }
+      ],
+      "coverage_note": "Exercises notation-list normalization and menclose structure with multiple simultaneous notations."
+    },
+    {
+      "name": "extpfeil_labeled_xmapsto_with_lower_label",
+      "package": "extpfeil",
+      "request": {
+        "tex": "A\\xmapsto[g]{f}B",
+        "display": false,
+        "em": 16,
+        "width": 1280
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/extpfeil/ExtpfeilConfiguration.ts",
+          "method": "extpfeil CommandMap.xmapsto",
+          "line": 84
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/ams/AmsMethods.ts",
+          "method": "AmsMethods.xArrow",
+          "line": 545
+        }
+      ],
+      "coverage_note": "Exercises an extpfeil-specific arrow mapping, upper and optional lower labels, and a stretchy arrow with asymmetric side spaces."
+    },
+    {
+      "name": "fontsizev3_huge_size_with_script",
+      "package": "fontsizev3",
+      "request": {
+        "tex": "{\\Huge X_1}+x",
+        "display": false,
+        "em": 16,
+        "width": 1280
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/fontsizev3/FontSizeV3Configuration.ts",
+          "method": "fontsizev3 CommandMap.Huge",
+          "line": 39
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/base/BaseMethods.ts",
+          "method": "BaseMethods.SetSize",
+          "line": 479
+        }
+      ],
+      "coverage_note": "Checks the v3 Huge size multiplier (2.49) and its interaction with a script and following normal-size material."
+    },
+    {
+      "name": "gensymb_celsius_and_degree_symbols",
+      "package": "gensymb",
+      "request": {
+        "tex": "25\\celsius+90\\degree",
+        "display": false,
+        "em": 16,
+        "width": 1280
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/gensymb/GensymbConfiguration.ts",
+          "method": "gensymb-symbols CharacterMap",
+          "line": 48
+        }
+      ],
+      "coverage_note": "Exercises the package's unit-style Unicode character mappings for Celsius and degree."
+    },
+    {
+      "name": "html_class_and_id_attributes",
+      "package": "html",
+      "request": {
+        "tex": "\\class{term}{x+y}+\\cssId{target}{z}",
+        "display": false,
+        "em": 16,
+        "width": 1280
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/html/HtmlConfiguration.ts",
+          "method": "html_macros map",
+          "line": 29
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/html/HtmlMethods.ts",
+          "method": "HtmlMethods.Class",
+          "line": 96
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/html/HtmlMethods.ts",
+          "method": "HtmlMethods.Id",
+          "line": 134
+        }
+      ],
+      "coverage_note": "Exercises attached MathML class and id attributes that the SVG output wrapper copies to generated nodes."
+    },
+    {
+      "name": "mathtools_prescript_and_zero_width_clap",
+      "package": "mathtools",
+      "request": {
+        "tex": "\\prescript{a}{b}{X}+\\mathclap{wide}",
+        "display": false,
+        "em": 16,
+        "width": 1280
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/mathtools/MathtoolsMappings.ts",
+          "method": "mathtools-macros.mathclap",
+          "line": 71
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/mathtools/MathtoolsMethods.ts",
+          "method": "MathtoolsMethods.MathLap",
+          "line": 278
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/mathtools/MathtoolsMappings.ts",
+          "method": "mathtools-macros.prescript",
+          "line": 159
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/mathtools/MathtoolsMethods.ts",
+          "method": "MathtoolsMethods.Prescript",
+          "line": 910
+        }
+      ],
+      "coverage_note": "Combines left prescripts represented through multiscripts with zero-width centered material that may overlap following content."
+    },
+    {
+      "name": "mathtools_aligned_parenthesized_matrix_star",
+      "package": "mathtools",
+      "request": {
+        "tex": "\\begin{pmatrix*}[r]a&b\\\\c&d\\end{pmatrix*}",
+        "display": true,
+        "em": 16,
+        "width": 1280
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/mathtools/MathtoolsMappings.ts",
+          "method": "mathtools-environments.pmatrix*",
+          "line": 199
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/mathtools/MathtoolsMethods.ts",
+          "method": "MathtoolsMethods.MtMatrix",
+          "line": 68
+        }
+      ],
+      "coverage_note": "Exercises the starred matrix environment's optional column alignment and paired delimiters."
+    },
+    {
+      "name": "mhchem_chemical_formula_without_extended_relation_glyphs",
+      "package": "mhchem",
+      "request": {
+        "tex": "\\ce{H2O}",
+        "display": false,
+        "em": 16,
+        "width": 1280
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/mhchem/MhchemConfiguration.ts",
+          "method": "MhchemMethods.Machine",
+          "line": 99
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/mhchem/MhchemConfiguration.ts",
+          "method": "mhchemMacros.ce",
+          "line": 122
+        }
+      ],
+      "coverage_note": "Isolated clean syntax witness: the reference profile renders this as SVG without diagnostics. It covers ce parsing/subscripts but does not cover mhchem relation glyphs."
+    },
+    {
+      "name": "mhchem_reaction_arrow_requires_unregistered_mhchem_font_extension",
+      "package": "mhchem",
+      "request": {
+        "tex": "\\ce{2 H2 + O2 -> 2 H2O}",
+        "display": false,
+        "em": 16,
+        "width": 1280
+      },
+      "expected": {
+        "kind": "rendered",
+        "warning": "Invalid variant: -mhchem"
+      },
+      "classification": "rendered_with_warning",
+      "source_evidence": [
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/mhchem/MhchemConfiguration.ts",
+          "method": "MhchemUtils.relmo",
+          "line": 40
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/mhchem/MhchemConfiguration.ts",
+          "method": "MhchemMethods.Machine",
+          "line": 99
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/mhchem/MhchemConfiguration.ts",
+          "method": "mhchemChars CharacterMap",
+          "line": 136
+        },
+        {
+          "source": "tools/mathjax-bundle/node_modules/@mathjax/src/components/cjs/input/tex/extensions/mhchem/mhchem.js",
+          "method": "fontExtension registration",
+          "line": 5
+        },
+        {
+          "source": "tools/mathjax-bundle/entry.cjs",
+          "method": "output.addExtension registrations",
+          "line": 77
+        },
+        {
+          "source": "tools/mathjax-bundle/node_modules/@mathjax/mathjax-newcm-font/cjs/common.js",
+          "method": "defaultVariants",
+          "line": 65
+        }
+      ],
+      "coverage_note": "The reference profile emits an SVG but records warning `Invalid variant: -mhchem`. MhchemUtils.relmo assigns -mhchem to relation glyphs; the TeX extension component requests the separate `mathjax-mhchem-font-extension` font package, while entry.cjs only attaches bboldx, bbm, and dsfont extensions. NewCM defaultVariants also has no -mhchem variant. That separate mhchem font extension is required for clean arrow/relation coverage, and is not installed or registered in this production profile, so this case is a profile limitation rather than valid parity coverage.",
+      "known_reference_limitation": "missing_mhchem_font_extension"
+    },
+    {
+      "name": "newcommand_parameterized_user_macro",
+      "package": "newcommand",
+      "request": {
+        "tex": "\\newcommand{\\squares}[1]{#1^2}\\squares{x}",
+        "display": false,
+        "em": 16,
+        "width": 1280
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/newcommand/NewcommandMappings.ts",
+          "method": "Newcommand-macros.newcommand",
+          "line": 31
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/newcommand/NewcommandMethods.ts",
+          "method": "NewcommandMethods.NewCommand",
+          "line": 44
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/newcommand/NewcommandConfiguration.ts",
+          "method": "NewcommandConfiguration",
+          "line": 78
+        }
+      ],
+      "coverage_note": "Exercises runtime macro definition, one-argument substitution and subsequent expansion in the same formula."
+    },
+    {
+      "name": "physics_automatic_quantity_fences",
+      "package": "physics",
+      "request": {
+        "tex": "\\qty{x+1}+y",
+        "display": false,
+        "em": 16,
+        "width": 1280
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/physics/PhysicsMappings.ts",
+          "method": "Physics-automatic-bracing-macros.qty",
+          "line": 40
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/physics/PhysicsMethods.ts",
+          "method": "PhysicsMethods.Quantity",
+          "line": 219
+        }
+      ],
+      "coverage_note": "Exercises physics automatic bracing around a compound quantity while leaving adjacent material outside the fences."
+    },
+    {
+      "name": "physics_partial_derivative_fraction",
+      "package": "physics",
+      "request": {
+        "tex": "\\pdv{f}{x}",
+        "display": false,
+        "em": 16,
+        "width": 1280
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/physics/PhysicsMappings.ts",
+          "method": "Physics-derivative-macros.pdv",
+          "line": 226
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/physics/PhysicsMethods.ts",
+          "method": "PhysicsMethods.Derivative",
+          "line": 612
+        }
+      ],
+      "coverage_note": "Exercises the package derivative macro's numerator/denominator construction and partial-differential glyphs."
+    },
+    {
+      "name": "setoptions_set_physics_italic_differential",
+      "package": "setoptions",
+      "request": {
+        "tex": "\\setOptions[physics]{italicdiff=true}\\dd{x}",
+        "display": false,
+        "em": 16,
+        "width": 1280
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/setoptions/SetOptionsConfiguration.ts",
+          "method": "SetOptions",
+          "line": 148
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/setoptions/SetOptionsConfiguration.ts",
+          "method": "SetOptionsUtil.filterOption",
+          "line": 75
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/physics/PhysicsConfiguration.ts",
+          "method": "physics options.italicdiff",
+          "line": 50
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/physics/PhysicsMethods.ts",
+          "method": "PhysicsMethods.DiffD",
+          "line": 1101
+        }
+      ],
+      "coverage_note": "Exercises a TeX-time package option update that changes the differential token selected by physics."
+    },
+    {
+      "name": "setoptions_reject_unknown_physics_option",
+      "package": "setoptions",
+      "request": {
+        "tex": "\\setOptions[physics]{unknown=true}x",
+        "display": false,
+        "em": 16,
+        "width": 1280
+      },
+      "expected": {
+        "kind": "formula_error"
+      },
+      "classification": "formula_error",
+      "source_evidence": [
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/setoptions/SetOptionsConfiguration.ts",
+          "method": "SetOptions",
+          "line": 148
+        },
+        {
+          "source": ".reference/MathJax-src/ts/input/tex/setoptions/SetOptionsConfiguration.ts",
+          "method": "SetOptionsUtil.filterOption",
+          "line": 75
+        }
+      ],
+      "coverage_note": "The physics option filter rejects keys absent from the package's declared option object; oracle should confirm error classification."
+    },
+    {
+      "name": "bbm_bbm_variant_families",
+      "package": "bbm",
+      "request": {
+        "tex": "\\mathbbm{1}+\\mathbbmss{R}+\\mathbbmtt{N}",
+        "display": false,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/bbm/BbmConfiguration.ts",
+          "method": "BbmMethods.ChooseFont and CommandMap mathbbm/mathbbmss/mathbbmtt",
+          "line": "35-55"
+        }
+      ],
+      "coverage_note": "Exercises the package's regular double-struck, sans-serif double-struck, and monospace variants so the reference scene exposes their selected glyph outlines."
+    },
+    {
+      "name": "bbm_bbm_mathversion_switch",
+      "package": "bbm",
+      "request": {
+        "tex": "\\mathbbm{R}\\mathversion{bold}\\mathbbm{N}\\mathversion{normal}",
+        "display": false,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/bbm/BbmConfiguration.ts",
+          "method": "BbmMethods.ChangeBold and ChooseFont",
+          "line": "43-46, 51-55"
+        }
+      ],
+      "coverage_note": "Exercises regular and bold outlines, then explicitly restores the package option to normal in the same formula. ChangeBold mutates parser.options.bbm.bold, so the reset makes the state transition visible without depending on fixture order."
+    },
+    {
+      "name": "bboldx_bboldx_normal_and_bold_greek",
+      "package": "bboldx",
+      "request": {
+        "tex": "\\mathbb{R}+\\bbGamma+\\mathbfbb{A}+\\bfbbGamma",
+        "display": false,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/bboldx/BboldxMappings.ts",
+          "method": "bboldx-mathchar0miNormal bbGamma; bboldx-mathchar0miBold bfbbGamma; CommandMap mathbb/mathbfbb",
+          "line": "30-32, 86-88, 139-155"
+        },
+        {
+          "source": "ts/input/tex/bboldx/BboldxMethods.ts",
+          "method": "ChooseFont and mathchar0miNormal/mathchar0miBold",
+          "line": "36-45, 64-72, 94-102"
+        }
+      ],
+      "coverage_note": "Exercises normal and bold double-struck commands plus explicit Greek glyph mappings in both variants."
+    },
+    {
+      "name": "dsfont_dsfont_symbols",
+      "package": "dsfont",
+      "request": {
+        "tex": "\\mathds{R}+\\mathds{1}",
+        "display": false,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/dsfont/DsfontConfiguration.ts",
+          "method": "DsfontMethods.ChooseFont and CommandMap mathds",
+          "line": "36-46"
+        }
+      ],
+      "coverage_note": "Exercises dsfont's default upright double-struck font on a letter and a digit."
+    },
+    {
+      "name": "noundefined_unknown_macro_fallback",
+      "package": "noundefined",
+      "request": {
+        "tex": "x+\\FoliaUnknownMacro",
+        "display": false,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/noundefined/NoUndefinedConfiguration.ts",
+          "method": "noUndefined fallback handler",
+          "line": "35-56"
+        }
+      ],
+      "coverage_note": "The enabled package's fallback converts an unrecognized macro into styled mtext, rather than leaving it as a parser error."
+    },
+    {
+      "name": "tagformat_tagformat_display_tag",
+      "package": "tagformat",
+      "request": {
+        "tex": "\\begin{equation}x=1\\tag{A}\\end{equation}",
+        "display": true,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/tagformat/TagFormatConfiguration.ts",
+          "method": "tagformatConfig.formatTag and default tag formatter",
+          "line": "42-88, 123-133"
+        }
+      ],
+      "coverage_note": "Exercises the display equation tag path and the active default formatter that wraps a tag in parentheses."
+    },
+    {
+      "name": "texhtml_texhtml_default_policy",
+      "package": "texhtml",
+      "request": {
+        "tex": "x+<tex-html><b>HTML</b></tex-html>",
+        "display": false,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "profile_disabled",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/texhtml/TexHtmlConfiguration.ts",
+          "method": "HtmlNodeMethods.TexHTML allowTexHTML guard; default OPTIONS.allowTexHTML",
+          "line": "44-49, 92-99"
+        },
+        {
+          "source": "ts/input/tex/texhtml/TexHtmlConfiguration.ts",
+          "method": "tex-html MacroMap dispatches < to TexHTML",
+          "line": "90-93"
+        }
+      ],
+      "coverage_note": "Production-default policy witness only: allowTexHTML defaults false and TexHTML immediately returns false at the guard. Under this exact profile the reference renders the markup literally across 10 SVG fragments and creates no HTML nodes. A reference fixture must preserve the rendered result and fragment split; this does not claim enabled HTML parsing coverage, and the option must not be enabled for this case."
+    },
+    {
+      "name": "textcomp_textcomp_unicode_glyphs",
+      "package": "textcomp",
+      "request": {
+        "tex": "\\text{\\texteuro\\textcopyright}",
+        "display": false,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/textcomp/TextcompConfiguration.ts",
+          "method": "TextcompConfiguration CONFIG adds text-textcomp to textmacros",
+          "line": "33-40"
+        },
+        {
+          "source": "ts/input/tex/textcomp/TextcompMappings.ts",
+          "method": "textcomp-macros texteuro and textcopyright",
+          "line": "56-118"
+        }
+      ],
+      "coverage_note": "Exercises text-mode macro dispatch and two mapped Unicode text glyphs."
+    },
+    {
+      "name": "textmacros_textmacros_style_and_embedded_math",
+      "package": "textmacros",
+      "request": {
+        "tex": "x+\\text{word \\textbf{bold} and \\(y\\)}",
+        "display": false,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/textmacros/TextMacrosConfiguration.ts",
+          "method": "TextMacrosConfiguration text parser setup and default package list",
+          "line": "115-168"
+        },
+        {
+          "source": "ts/input/tex/textmacros/TextMacrosMappings.ts",
+          "method": "text-macros Math and textbf mappings",
+          "line": "56-58, 111-115"
+        },
+        {
+          "source": "ts/input/tex/textmacros/TextMacrosMethods.ts",
+          "method": "TextMacrosMethods.Math",
+          "line": "52-83"
+        }
+      ],
+      "coverage_note": "Combines text-style macro expansion with the text parser's embedded inline-math path."
+    },
+    {
+      "name": "unicode_unicode_hex_and_decimal_char",
+      "package": "unicode",
+      "request": {
+        "tex": "\\unicode{x3B1}+\\char\"03A9",
+        "display": false,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/unicode/UnicodeConfiguration.ts",
+          "method": "UnicodeMethods.Unicode and Char; unicode CommandMap",
+          "line": "46-103, 131-191, 193-197"
+        }
+      ],
+      "coverage_note": "Exercises hexadecimal codepoint input and TeX char's quoted hexadecimal form, producing explicit Greek Unicode characters."
+    },
+    {
+      "name": "unicode_unicode_bad_argument",
+      "package": "unicode",
+      "request": {
+        "tex": "x+\\unicode{not-a-number}",
+        "display": false,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "formula_error"
+      },
+      "classification": "formula_error",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/unicode/UnicodeConfiguration.ts",
+          "method": "UnicodeMethods.Unicode BadUnicode validation",
+          "line": "46-73"
+        }
+      ],
+      "coverage_note": "A bounded malformed-input witness for the package's explicit nonnumeric argument error."
+    },
+    {
+      "name": "units_units_value_and_fraction",
+      "package": "units",
+      "request": {
+        "tex": "5\\units[12]{kg}+\\unitfrac{m}{s}",
+        "display": false,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/units/UnitsConfiguration.ts",
+          "method": "UnitsMethods.Unit and UnitFrac; CommandMap units/unitfrac/nicefrac",
+          "line": "38-68, 93-97"
+        }
+      ],
+      "coverage_note": "Exercises a unit with optional numeric value and the unit fraction expansion into a nice fraction."
+    },
+    {
+      "name": "upgreek_upright_greek_variants",
+      "package": "upgreek",
+      "request": {
+        "tex": "\\upalpha+\\Upgamma+\\upvarphi",
+        "display": false,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/upgreek/UpgreekConfiguration.ts",
+          "method": "mathchar0miNormal and upgreek CharacterMap",
+          "line": "37-90"
+        }
+      ],
+      "coverage_note": "Exercises lowercase and uppercase upright Greek plus a variant Greek glyph through the package's normal mathvariant mapping."
+    },
+    {
+      "name": "verb_verb_raw_content",
+      "package": "verb",
+      "request": {
+        "tex": "\\verb|a b_%{}|",
+        "display": false,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "valid",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/verb/VerbConfiguration.ts",
+          "method": "VerbMethods.Verb delimiter scan, NBSP replacement, monospace mtext",
+          "line": "40-68"
+        }
+      ],
+      "coverage_note": "Exercises raw verbatim delimiter scanning with whitespace and TeX-special characters inside the payload."
+    },
+    {
+      "name": "verb_verb_missing_closer",
+      "package": "verb",
+      "request": {
+        "tex": "\\verb|unterminated",
+        "display": false,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "formula_error"
+      },
+      "classification": "formula_error",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/verb/VerbConfiguration.ts",
+          "method": "VerbMethods.Verb NoClosingDelim path",
+          "line": "40-58"
+        }
+      ],
+      "coverage_note": "A bounded malformed-input witness for the explicit unmatched-delimiter error."
+    },
+    {
+      "name": "regression_inline_fragments",
+      "package": "root_regression",
+      "request": {
+        "tex": "a+b+c",
+        "display": false,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "rendered",
+        "minimum_fragments": 3
+      },
+      "classification": "regression",
+      "coverage_note": "Root-authored mechanism witness; not a complete branch inventory."
+    },
+    {
+      "name": "regression_fraction_rule",
+      "package": "root_regression",
+      "request": {
+        "tex": "\\frac{a}{b}",
+        "display": true,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "regression",
+      "coverage_note": "Root-authored mechanism witness; not a complete branch inventory."
+    },
+    {
+      "name": "regression_stretch_delimiter",
+      "package": "root_regression",
+      "request": {
+        "tex": "\\left(\\frac{\\frac{a}{b}}{\\frac{c}{d}}\\right)",
+        "display": true,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "regression",
+      "coverage_note": "Root-authored mechanism witness; not a complete branch inventory."
+    },
+    {
+      "name": "regression_display_breaks",
+      "package": "root_regression",
+      "request": {
+        "tex": "a+b+c+d+e+f+g+h+i+j+k+l+m+n+o+p",
+        "display": true,
+        "em": 16,
+        "width": 95
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "regression",
+      "coverage_note": "Root-authored mechanism witness; not a complete branch inventory."
+    },
+    {
+      "name": "regression_over_and_prime",
+      "package": "root_regression",
+      "request": {
+        "tex": "{a\\over b}+x''+x^{\\prime}",
+        "display": true,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "regression",
+      "coverage_note": "Root-authored mechanism witness; not a complete branch inventory."
+    },
+    {
+      "name": "regression_optional_macro",
+      "package": "root_regression",
+      "request": {
+        "tex": "\\newcommand{\\opt}[2][a]{#1+#2}\\opt{b}+\\opt[c]{d}",
+        "display": false,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "regression",
+      "coverage_note": "Root-authored mechanism witness; not a complete branch inventory."
+    },
+    {
+      "name": "regression_group_macro",
+      "package": "root_regression",
+      "request": {
+        "tex": "\\def\\rootlocal{a}\\begingroup\\def\\rootlocal{b}\\rootlocal\\endgroup+\\rootlocal",
+        "display": true,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "regression",
+      "coverage_note": "Root-authored scope restoration witness: scoped b followed by restored a; a leaked local macro produces b+b and must be rejected.",
+      "source_evidence": [
+        {
+          "source": "ts/input/tex/begingroup/BegingroupMethods.ts",
+          "method": "begingroup/endgroup",
+          "line": "37-53"
+        }
+      ]
+    },
+    {
+      "name": "regression_double_script",
+      "package": "root_regression",
+      "request": {
+        "tex": "x^a^b",
+        "display": true,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "formula_error"
+      },
+      "classification": "invalid_input",
+      "coverage_note": "Root-authored mechanism witness; not a complete branch inventory."
+    },
+    {
+      "name": "regression_array_columns",
+      "package": "root_regression",
+      "request": {
+        "tex": "\\begin{array}{r|cl}a&b&c\\\\d&e&f\\end{array}",
+        "display": true,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "regression",
+      "coverage_note": "Root-authored mechanism witness; not a complete branch inventory."
+    },
+    {
+      "name": "regression_styled_group",
+      "package": "root_regression",
+      "request": {
+        "tex": "{\\scriptstyle a+{\\displaystyle b+c}}+d",
+        "display": false,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "regression",
+      "coverage_note": "Root-authored mechanism witness; not a complete branch inventory."
+    },
+    {
+      "name": "regression_unicode_tokens",
+      "package": "root_regression",
+      "request": {
+        "tex": "\\text{𝛼é😀}+\\unicode{x1D538}",
+        "display": false,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "regression",
+      "coverage_note": "Root-authored mechanism witness; not a complete branch inventory."
+    },
+    {
+      "name": "regression_nested_style_color",
+      "package": "root_regression",
+      "request": {
+        "tex": "\\bbox[2px,red]{\\color{blue}{\\sqrt{\\frac{x}{y}}}}",
+        "display": true,
+        "em": 16,
+        "width": 640
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "regression",
+      "coverage_note": "Root-authored mechanism witness; not a complete branch inventory."
+    },
+    {
+      "name": "regression_vertical_clip",
+      "package": "root_regression",
+      "request": {
+        "tex": "\\left(\\rule{1em}{10em}\\right)",
+        "display": true,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "nested_viewport_clip",
+      "source_evidence": [
+        {
+          "source": "ts/output/svg/Wrappers/mo.ts",
+          "method": "SvgMo.addExtV",
+          "line": 358
+        }
+      ],
+      "coverage_note": "Assembled stretchy glyph includes nested SVG viewBox clipping; every viewport must remain in the result."
+    },
+    {
+      "name": "regression_horizontal_clip",
+      "package": "root_regression",
+      "request": {
+        "tex": "\\xrightarrow{a+b+c+d+e+f+g+h+i+j+k+l}",
+        "display": true,
+        "em": 16,
+        "width": 900
+      },
+      "expected": {
+        "kind": "rendered"
+      },
+      "classification": "nested_viewport_clip",
+      "source_evidence": [
+        {
+          "source": "ts/output/svg/Wrappers/mo.ts",
+          "method": "SvgMo.addExtH",
+          "line": 445
+        }
+      ],
+      "coverage_note": "Assembled stretchy glyph includes nested SVG viewBox clipping; every viewport must remain in the result."
+    }
+  ]
+}

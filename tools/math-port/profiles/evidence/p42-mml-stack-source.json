@@ -1,0 +1,382 @@
+[
+  {
+    "label": "initial-source-fields",
+    "cpp": "return std::string(s.startStr.empty()?\"empty\":\"bad\")+\":\"+val(Property(s.startI))+\":\"+val(Property(s.stopI))+\":\"+snap(s.array());",
+    "expected": "ok|empty:0:0:len=0;|"
+  },
+  {
+    "label": "push-pop-tagged",
+    "cpp": "std::array<NodeValue,3> values{Missing{},PropertyNull{},a};s.Push(values);auto old=s.array();auto first=s.Pop();auto second=s.Pop();auto third=s.Pop();auto fourth=s.Pop();return tag(first)+\":\"+tag(second)+\":\"+tag(third)+\":\"+tag(fourth)+\":\"+snap(old);",
+    "expected": "ok|mi:N:U:U:len=0;|"
+  },
+  {
+    "label": "push-zero",
+    "cpp": "auto old=s.array();s.Push({});return std::string(old==s.array()?\"same\":\"bad\")+\":\"+snap(old);",
+    "expected": "ok|same:len=0;|"
+  },
+  {
+    "label": "constructor-array-alias",
+    "cpp": "auto arr=std::make_shared<tree::ChildArray<MmlNode>>();arr->push_back(a);Probe other(trace,arr);arr->push_back(b);return std::string(other.array()==arr?\"same\":\"bad\")+\":\"+tag(other.First())+\":\"+snap(other.array());",
+    "expected": "ok|same:mn:len=2;mi,mn|"
+  },
+  {
+    "label": "first-empty-named",
+    "cpp": "s.setFirst(a);return tag(s.First())+\":\"+snap(s.array())+\":\"+(s.array()->hasOwnProperty(\"-1\")?\"own\":\"missing\");",
+    "expected": "ok|mi:len=0;:own|"
+  },
+  {
+    "label": "first-last-order",
+    "cpp": "std::array<NodeValue,3> values{a,b,c};s.Push(values);auto before=tag(s.First())+\":\"+tag(s.Last());s.setFirst(a);s.setLast(c);return before+\":\"+snap(s.array());",
+    "expected": "ok|mo:mi:len=3;mo,mn,mi|"
+  },
+  {
+    "label": "last-empty",
+    "cpp": "auto before=tag(s.Last());s.setLast(b);return before+\":\"+tag(s.Last())+\":\"+snap(s.array());",
+    "expected": "ok|U:mn:len=1;mn|"
+  },
+  {
+    "label": "clear-rebind",
+    "cpp": "auto old=s.array();s.setFirst(c);std::array<NodeValue,2> values{a,b};s.Push(values);s.Clear();return std::string(old==s.array()?\"same\":\"fresh\")+\":\"+snap(old)+\":\"+snap(s.array())+\":\"+tag(old->getProperty(\"-1\"))+\":\"+tag(s.First());",
+    "expected": "ok|fresh:len=2;mi,mn:len=0;:mo:U|"
+  },
+  {
+    "label": "peek-sparse:omitted",
+    "cpp": "s.array()->resize(4);s.array()->set(0,a);s.array()->set(3,b);auto old=s.array();auto result=s.Peek(Property(Missing{}));return snap(result)+\":\"+(result==old?\"same\":\"fresh\")+\":\"+snap(old);",
+    "expected": "ok|len=1;mn:fresh:len=4;mi,H,H,mn|"
+  },
+  {
+    "label": "peek-sparse:null",
+    "cpp": "s.array()->resize(4);s.array()->set(0,a);s.array()->set(3,b);auto old=s.array();auto result=s.Peek(Property(PropertyNull{}));return snap(result)+\":\"+(result==old?\"same\":\"fresh\")+\":\"+snap(old);",
+    "expected": "ok|len=1;mn:fresh:len=4;mi,H,H,mn|"
+  },
+  {
+    "label": "peek-sparse:zero",
+    "cpp": "s.array()->resize(4);s.array()->set(0,a);s.array()->set(3,b);auto old=s.array();auto result=s.Peek(Property(0));return snap(result)+\":\"+(result==old?\"same\":\"fresh\")+\":\"+snap(old);",
+    "expected": "ok|len=0;:fresh:len=4;mi,H,H,mn|"
+  },
+  {
+    "label": "peek-sparse:one",
+    "cpp": "s.array()->resize(4);s.array()->set(0,a);s.array()->set(3,b);auto old=s.array();auto result=s.Peek(Property(1));return snap(result)+\":\"+(result==old?\"same\":\"fresh\")+\":\"+snap(old);",
+    "expected": "ok|len=1;mn:fresh:len=4;mi,H,H,mn|"
+  },
+  {
+    "label": "peek-sparse:two",
+    "cpp": "s.array()->resize(4);s.array()->set(0,a);s.array()->set(3,b);auto old=s.array();auto result=s.Peek(Property(2));return snap(result)+\":\"+(result==old?\"same\":\"fresh\")+\":\"+snap(old);",
+    "expected": "ok|len=2;H,mn:fresh:len=4;mi,H,H,mn|"
+  },
+  {
+    "label": "peek-sparse:negative",
+    "cpp": "s.array()->resize(4);s.array()->set(0,a);s.array()->set(3,b);auto old=s.array();auto result=s.Peek(Property(-1));return snap(result)+\":\"+(result==old?\"same\":\"fresh\")+\":\"+snap(old);",
+    "expected": "ok|len=0;:fresh:len=4;mi,H,H,mn|"
+  },
+  {
+    "label": "peek-sparse:large",
+    "cpp": "s.array()->resize(4);s.array()->set(0,a);s.array()->set(3,b);auto old=s.array();auto result=s.Peek(Property(20));return snap(result)+\":\"+(result==old?\"same\":\"fresh\")+\":\"+snap(old);",
+    "expected": "ok|len=4;mi,H,H,mn:fresh:len=4;mi,H,H,mn|"
+  },
+  {
+    "label": "peek-sparse:fraction",
+    "cpp": "s.array()->resize(4);s.array()->set(0,a);s.array()->set(3,b);auto old=s.array();auto result=s.Peek(Property(1.25));return snap(result)+\":\"+(result==old?\"same\":\"fresh\")+\":\"+snap(old);",
+    "expected": "ok|len=2;H,mn:fresh:len=4;mi,H,H,mn|"
+  },
+  {
+    "label": "peek-sparse:negative-fraction",
+    "cpp": "s.array()->resize(4);s.array()->set(0,a);s.array()->set(3,b);auto old=s.array();auto result=s.Peek(Property(-1.25));return snap(result)+\":\"+(result==old?\"same\":\"fresh\")+\":\"+snap(old);",
+    "expected": "ok|len=0;:fresh:len=4;mi,H,H,mn|"
+  },
+  {
+    "label": "peek-sparse:nan",
+    "cpp": "s.array()->resize(4);s.array()->set(0,a);s.array()->set(3,b);auto old=s.array();auto result=s.Peek(Property(std::numeric_limits<double>::quiet_NaN()));return snap(result)+\":\"+(result==old?\"same\":\"fresh\")+\":\"+snap(old);",
+    "expected": "ok|len=4;mi,H,H,mn:fresh:len=4;mi,H,H,mn|"
+  },
+  {
+    "label": "peek-sparse:inf",
+    "cpp": "s.array()->resize(4);s.array()->set(0,a);s.array()->set(3,b);auto old=s.array();auto result=s.Peek(Property(std::numeric_limits<double>::infinity()));return snap(result)+\":\"+(result==old?\"same\":\"fresh\")+\":\"+snap(old);",
+    "expected": "ok|len=4;mi,H,H,mn:fresh:len=4;mi,H,H,mn|"
+  },
+  {
+    "label": "peek-sparse:-inf",
+    "cpp": "s.array()->resize(4);s.array()->set(0,a);s.array()->set(3,b);auto old=s.array();auto result=s.Peek(Property(-std::numeric_limits<double>::infinity()));return snap(result)+\":\"+(result==old?\"same\":\"fresh\")+\":\"+snap(old);",
+    "expected": "ok|len=0;:fresh:len=4;mi,H,H,mn|"
+  },
+  {
+    "label": "peek-sparse:false",
+    "cpp": "s.array()->resize(4);s.array()->set(0,a);s.array()->set(3,b);auto old=s.array();auto result=s.Peek(Property(false));return snap(result)+\":\"+(result==old?\"same\":\"fresh\")+\":\"+snap(old);",
+    "expected": "ok|len=0;:fresh:len=4;mi,H,H,mn|"
+  },
+  {
+    "label": "peek-sparse:string",
+    "cpp": "s.array()->resize(4);s.array()->set(0,a);s.array()->set(3,b);auto old=s.array();auto result=s.Peek(Property(\"2\"));return snap(result)+\":\"+(result==old?\"same\":\"fresh\")+\":\"+snap(old);",
+    "expected": "ok|len=2;H,mn:fresh:len=4;mi,H,H,mn|"
+  },
+  {
+    "label": "sparse-prototype-pop-peek",
+    "cpp": "auto parent=std::make_shared<tree::ChildArray<MmlNode>>();parent->set(1,b);parent->setProperty(\"-1\",c);s.array()->setPrototype(parent);s.array()->resize(2);s.array()->set(0,a);auto peek=s.Peek(2);auto pop=s.Pop();return snap(peek)+\":\"+tag(pop)+\":\"+snap(s.array());",
+    "expected": "ok|len=2;mi,mn:mn:len=1;mi|"
+  },
+  {
+    "label": "first-virtual-size:zero",
+    "cpp": "s.sizeHook=[&](){trace.push_back(\"size\");return 0;};s.setFirst(c);return tag(s.First())+\":\"+snap(s.array());",
+    "expected": "ok|mo:len=0;|size/size"
+  },
+  {
+    "label": "first-virtual-size:fraction",
+    "cpp": "s.sizeHook=[&](){trace.push_back(\"size\");return 1.5;};s.setFirst(c);return tag(s.First())+\":\"+snap(s.array());",
+    "expected": "ok|mo:len=0;|size/size"
+  },
+  {
+    "label": "first-virtual-size:nan",
+    "cpp": "s.sizeHook=[&](){trace.push_back(\"size\");return std::numeric_limits<double>::quiet_NaN();};s.setFirst(c);return tag(s.First())+\":\"+snap(s.array());",
+    "expected": "ok|mo:len=0;|size/size"
+  },
+  {
+    "label": "first-virtual-size:inf",
+    "cpp": "s.sizeHook=[&](){trace.push_back(\"size\");return std::numeric_limits<double>::infinity();};s.setFirst(c);return tag(s.First())+\":\"+snap(s.array());",
+    "expected": "ok|mo:len=0;|size/size"
+  },
+  {
+    "label": "first-virtual-size:negative",
+    "cpp": "s.sizeHook=[&](){trace.push_back(\"size\");return -2;};s.setFirst(c);return tag(s.First())+\":\"+snap(s.array());",
+    "expected": "ok|mo:len=0;|size/size"
+  },
+  {
+    "label": "first-get-captures-array",
+    "cpp": "std::array<NodeValue,2> values{a,b};s.Push(values);auto old=s.array();s.sizeHook=[&](){trace.push_back(\"size-clear\");s.Clear();return 2;};auto first=s.First();return tag(first)+\":\"+snap(old)+\":\"+snap(s.array());",
+    "expected": "ok|mn:len=2;mi,mn:len=0;|size-clear"
+  },
+  {
+    "label": "first-set-captures-array",
+    "cpp": "std::array<NodeValue,2> values{a,b};s.Push(values);auto old=s.array();s.sizeHook=[&](){trace.push_back(\"size-clear\");s.Clear();return 2;};s.setFirst(c);return snap(old)+\":\"+snap(s.array());",
+    "expected": "ok|len=2;mi,mo:len=0;|size-clear"
+  },
+  {
+    "label": "peek-captures-array",
+    "cpp": "std::array<NodeValue,2> values{a,b};s.Push(values);auto old=s.array();s.sizeHook=[&](){trace.push_back(\"size-clear\");s.Clear();return 2;};auto peek=s.Peek(1);return snap(peek)+\":\"+snap(old)+\":\"+snap(s.array());",
+    "expected": "ok|len=1;mn:len=2;mi,mn:len=0;|size-clear"
+  },
+  {
+    "label": "last-no-size-dispatch",
+    "cpp": "s.sizeHook=[&]()->double{throw Error(\"Error\",u\"unexpected Size\");};s.setLast(a);return tag(s.Last());",
+    "expected": "ok|mi|"
+  },
+  {
+    "label": "tomml:0:default:false",
+    "cpp": "std::array<NodeValue,0> values{};s.Push(values);auto value=s.toMml(Property(Missing{}),Property(false));return tag(value)+\":\"+snap(s.array())+\":\"+(value.isNode()&&value.nodeOrNull()->childNodes==s.array()?\"shared\":\"other\");",
+    "expected": "ok|inferredMrow:len=0;:other|factory/nf/create:node:3/add:inferredMrow"
+  },
+  {
+    "label": "tomml:0:default:true",
+    "cpp": "std::array<NodeValue,0> values{};s.Push(values);auto value=s.toMml(Property(Missing{}),Property(true));return tag(value)+\":\"+snap(s.array())+\":\"+(value.isNode()&&value.nodeOrNull()->childNodes==s.array()?\"shared\":\"other\");",
+    "expected": "ok|inferredMrow:len=0;:other|factory/nf/create:node:3/add:inferredMrow"
+  },
+  {
+    "label": "tomml:0:false:false",
+    "cpp": "std::array<NodeValue,0> values{};s.Push(values);auto value=s.toMml(Property(false),Property(false));return tag(value)+\":\"+snap(s.array())+\":\"+(value.isNode()&&value.nodeOrNull()->childNodes==s.array()?\"shared\":\"other\");",
+    "expected": "ok|mrow:len=0;:other|factory/nf/create:node:3/add:mrow"
+  },
+  {
+    "label": "tomml:0:false:true",
+    "cpp": "std::array<NodeValue,0> values{};s.Push(values);auto value=s.toMml(Property(false),Property(true));return tag(value)+\":\"+snap(s.array())+\":\"+(value.isNode()&&value.nodeOrNull()->childNodes==s.array()?\"shared\":\"other\");",
+    "expected": "ok|mrow:len=0;:other|factory/nf/create:node:3/add:mrow"
+  },
+  {
+    "label": "tomml:0:null:false",
+    "cpp": "std::array<NodeValue,0> values{};s.Push(values);auto value=s.toMml(Property(PropertyNull{}),Property(false));return tag(value)+\":\"+snap(s.array())+\":\"+(value.isNode()&&value.nodeOrNull()->childNodes==s.array()?\"shared\":\"other\");",
+    "expected": "ok|mrow:len=0;:other|factory/nf/create:node:3/add:mrow"
+  },
+  {
+    "label": "tomml:0:null:true",
+    "cpp": "std::array<NodeValue,0> values{};s.Push(values);auto value=s.toMml(Property(PropertyNull{}),Property(true));return tag(value)+\":\"+snap(s.array())+\":\"+(value.isNode()&&value.nodeOrNull()->childNodes==s.array()?\"shared\":\"other\");",
+    "expected": "ok|mrow:len=0;:other|factory/nf/create:node:3/add:mrow"
+  },
+  {
+    "label": "tomml:1:default:false",
+    "cpp": "std::array<NodeValue,1> values{a};s.Push(values);auto value=s.toMml(Property(Missing{}),Property(false));return tag(value)+\":\"+snap(s.array())+\":\"+(value.isNode()&&value.nodeOrNull()->childNodes==s.array()?\"shared\":\"other\");",
+    "expected": "ok|mi:len=1;mi:other|"
+  },
+  {
+    "label": "tomml:1:default:true",
+    "cpp": "std::array<NodeValue,1> values{a};s.Push(values);auto value=s.toMml(Property(Missing{}),Property(true));return tag(value)+\":\"+snap(s.array())+\":\"+(value.isNode()&&value.nodeOrNull()->childNodes==s.array()?\"shared\":\"other\");",
+    "expected": "ok|inferredMrow:len=1;mi:other|factory/nf/create:node:3/add:inferredMrow"
+  },
+  {
+    "label": "tomml:1:false:false",
+    "cpp": "std::array<NodeValue,1> values{a};s.Push(values);auto value=s.toMml(Property(false),Property(false));return tag(value)+\":\"+snap(s.array())+\":\"+(value.isNode()&&value.nodeOrNull()->childNodes==s.array()?\"shared\":\"other\");",
+    "expected": "ok|mi:len=1;mi:other|"
+  },
+  {
+    "label": "tomml:1:false:true",
+    "cpp": "std::array<NodeValue,1> values{a};s.Push(values);auto value=s.toMml(Property(false),Property(true));return tag(value)+\":\"+snap(s.array())+\":\"+(value.isNode()&&value.nodeOrNull()->childNodes==s.array()?\"shared\":\"other\");",
+    "expected": "ok|mrow:len=1;mi:other|factory/nf/create:node:3/add:mrow"
+  },
+  {
+    "label": "tomml:1:null:false",
+    "cpp": "std::array<NodeValue,1> values{a};s.Push(values);auto value=s.toMml(Property(PropertyNull{}),Property(false));return tag(value)+\":\"+snap(s.array())+\":\"+(value.isNode()&&value.nodeOrNull()->childNodes==s.array()?\"shared\":\"other\");",
+    "expected": "ok|mi:len=1;mi:other|"
+  },
+  {
+    "label": "tomml:1:null:true",
+    "cpp": "std::array<NodeValue,1> values{a};s.Push(values);auto value=s.toMml(Property(PropertyNull{}),Property(true));return tag(value)+\":\"+snap(s.array())+\":\"+(value.isNode()&&value.nodeOrNull()->childNodes==s.array()?\"shared\":\"other\");",
+    "expected": "ok|mrow:len=1;mi:other|factory/nf/create:node:3/add:mrow"
+  },
+  {
+    "label": "tomml:2:default:false",
+    "cpp": "std::array<NodeValue,2> values{a,b};s.Push(values);auto value=s.toMml(Property(Missing{}),Property(false));return tag(value)+\":\"+snap(s.array())+\":\"+(value.isNode()&&value.nodeOrNull()->childNodes==s.array()?\"shared\":\"other\");",
+    "expected": "ok|inferredMrow:len=2;mi,mn:other|factory/nf/create:node:3/add:inferredMrow"
+  },
+  {
+    "label": "tomml:2:default:true",
+    "cpp": "std::array<NodeValue,2> values{a,b};s.Push(values);auto value=s.toMml(Property(Missing{}),Property(true));return tag(value)+\":\"+snap(s.array())+\":\"+(value.isNode()&&value.nodeOrNull()->childNodes==s.array()?\"shared\":\"other\");",
+    "expected": "ok|inferredMrow:len=2;mi,mn:other|factory/nf/create:node:3/add:inferredMrow"
+  },
+  {
+    "label": "tomml:2:false:false",
+    "cpp": "std::array<NodeValue,2> values{a,b};s.Push(values);auto value=s.toMml(Property(false),Property(false));return tag(value)+\":\"+snap(s.array())+\":\"+(value.isNode()&&value.nodeOrNull()->childNodes==s.array()?\"shared\":\"other\");",
+    "expected": "ok|mrow:len=2;mi,mn:other|factory/nf/create:node:3/add:mrow"
+  },
+  {
+    "label": "tomml:2:false:true",
+    "cpp": "std::array<NodeValue,2> values{a,b};s.Push(values);auto value=s.toMml(Property(false),Property(true));return tag(value)+\":\"+snap(s.array())+\":\"+(value.isNode()&&value.nodeOrNull()->childNodes==s.array()?\"shared\":\"other\");",
+    "expected": "ok|mrow:len=2;mi,mn:other|factory/nf/create:node:3/add:mrow"
+  },
+  {
+    "label": "tomml:2:null:false",
+    "cpp": "std::array<NodeValue,2> values{a,b};s.Push(values);auto value=s.toMml(Property(PropertyNull{}),Property(false));return tag(value)+\":\"+snap(s.array())+\":\"+(value.isNode()&&value.nodeOrNull()->childNodes==s.array()?\"shared\":\"other\");",
+    "expected": "ok|mrow:len=2;mi,mn:other|factory/nf/create:node:3/add:mrow"
+  },
+  {
+    "label": "tomml:2:null:true",
+    "cpp": "std::array<NodeValue,2> values{a,b};s.Push(values);auto value=s.toMml(Property(PropertyNull{}),Property(true));return tag(value)+\":\"+snap(s.array())+\":\"+(value.isNode()&&value.nodeOrNull()->childNodes==s.array()?\"shared\":\"other\");",
+    "expected": "ok|mrow:len=2;mi,mn:other|factory/nf/create:node:3/add:mrow"
+  },
+  {
+    "label": "tomml-first-dispatch",
+    "cpp": "std::array<NodeValue,1> values{a};s.Push(values);s.firstHook=[&](){trace.push_back(\"first\");return NodeValue(c);};return tag(s.toMml());",
+    "expected": "ok|mo|first"
+  },
+  {
+    "label": "tomml-does-not-use-size",
+    "cpp": "std::array<NodeValue,1> values{a};s.Push(values);s.sizeHook=[&](){trace.push_back(\"size\");return 0;};return tag(s.toMml())+\":\"+snap(s.array());",
+    "expected": "ok|U:len=1;mi|size"
+  },
+  {
+    "label": "tomml-virtual-create",
+    "cpp": "std::array<NodeValue,2> values{a,b};s.Push(values);auto old=s.array();s.createHook=[&](auto k,FunctionArgs args){trace.push_back(std::string(k)+\":\"+val(std::any_cast<Property>(args[0]))+\":\"+(std::any_cast<Children>(args[1])==old?\"same\":\"copy\")+\":\"+val(std::any_cast<Property>(args[2])));return NodeValue(c);};return tag(s.toMml(false));",
+    "expected": "ok|mo|node:mrow:same:[object Object]"
+  },
+  {
+    "label": "create-forward-args",
+    "cpp": "std::array<std::any,1> args{Property(\"x\")};return tag(s.create(\"text\",args));",
+    "expected": "ok|text|factory/nf/create:text:1"
+  },
+  {
+    "label": "create-nodefactory-live",
+    "cpp": "Config next(trace);next.nf=nf.get();config.hook=[&](){trace.push_back(\"getter\");service.configuration=&next;return tex::TeXNodeFactoryReference(nf.get());};std::array<std::any,1> args{Property(\"x\")};s.create(\"text\",args);s.create(\"text\",args);return \"ok\";",
+    "expected": "ok|ok|factory/nf/getter/create:text:1/factory/nf/create:text:1"
+  },
+  {
+    "label": "factory-nullish:U",
+    "cpp": "s.factoryRef=Missing{};return tag(s.create(\"text\"));",
+    "expected": "TypeError|Cannot read properties of undefined (reading 'configuration')|THREW|factory"
+  },
+  {
+    "label": "configuration-nullish:U",
+    "cpp": "service.configuration=Missing{};return tag(s.create(\"text\"));",
+    "expected": "TypeError|Cannot read properties of undefined (reading 'nodeFactory')|THREW|factory"
+  },
+  {
+    "label": "nodefactory-nullish:U",
+    "cpp": "config.nf=Missing{};return tag(s.create(\"text\"));",
+    "expected": "TypeError|Cannot read properties of undefined (reading 'create')|THREW|factory/nf"
+  },
+  {
+    "label": "factory-nullish:N",
+    "cpp": "s.factoryRef=PropertyNull{};return tag(s.create(\"text\"));",
+    "expected": "TypeError|Cannot read properties of null (reading 'configuration')|THREW|factory"
+  },
+  {
+    "label": "configuration-nullish:N",
+    "cpp": "service.configuration=PropertyNull{};return tag(s.create(\"text\"));",
+    "expected": "TypeError|Cannot read properties of null (reading 'nodeFactory')|THREW|factory"
+  },
+  {
+    "label": "nodefactory-nullish:N",
+    "cpp": "config.nf=PropertyNull{};return tag(s.create(\"text\"));",
+    "expected": "TypeError|Cannot read properties of null (reading 'create')|THREW|factory/nf"
+  },
+  {
+    "label": "null-array:Push",
+    "cpp": "Probe s(trace,{});s.Push({});return \"ok\";",
+    "expected": "TypeError|Cannot read properties of null (reading 'push')|THREW|"
+  },
+  {
+    "label": "null-array:Pop",
+    "cpp": "Probe s(trace,{});s.Pop();return \"ok\";",
+    "expected": "TypeError|Cannot read properties of null (reading 'pop')|THREW|"
+  },
+  {
+    "label": "null-array:First",
+    "cpp": "Probe s(trace,{});s.First();return \"ok\";",
+    "expected": "TypeError|Cannot read properties of null (reading 'length')|THREW|"
+  },
+  {
+    "label": "null-array:setFirst",
+    "cpp": "Probe s(trace,{});s.setFirst(a);return \"ok\";",
+    "expected": "TypeError|Cannot read properties of null (reading 'length')|THREW|"
+  },
+  {
+    "label": "null-array:Last",
+    "cpp": "Probe s(trace,{});s.Last();return \"ok\";",
+    "expected": "TypeError|Cannot read properties of null (reading '0')|THREW|"
+  },
+  {
+    "label": "null-array:setLast",
+    "cpp": "Probe s(trace,{});s.setLast(a);return \"ok\";",
+    "expected": "TypeError|Cannot set properties of null (setting '0')|THREW|"
+  },
+  {
+    "label": "null-array:Peek",
+    "cpp": "Probe s(trace,{});s.Peek();return \"ok\";",
+    "expected": "TypeError|Cannot read properties of null (reading 'slice')|THREW|"
+  },
+  {
+    "label": "null-array:Size",
+    "cpp": "Probe s(trace,{});s.Size();return \"ok\";",
+    "expected": "TypeError|Cannot read properties of null (reading 'length')|THREW|"
+  },
+  {
+    "label": "null-array:toMml",
+    "cpp": "Probe s(trace,{});s.toMml();return \"ok\";",
+    "expected": "TypeError|Cannot read properties of null (reading 'length')|THREW|"
+  },
+  {
+    "label": "null-array-clear",
+    "cpp": "Probe other(trace,{});other.Clear();return snap(other.array());",
+    "expected": "ok|len=0;|"
+  },
+  {
+    "label": "null-array-virtual-order:First",
+    "cpp": "Probe other(trace,{});other.sizeHook=[&](){trace.push_back(\"size\");return 0;};other.First();return \"ok\";",
+    "expected": "TypeError|Cannot read properties of null (reading '-1')|THREW|size"
+  },
+  {
+    "label": "null-array-virtual-order:setFirst",
+    "cpp": "Probe other(trace,{});other.sizeHook=[&](){trace.push_back(\"size\");return 0;};other.setFirst(a);return \"ok\";",
+    "expected": "TypeError|Cannot set properties of null (setting '-1')|THREW|size"
+  },
+  {
+    "label": "null-array-virtual-order:Peek",
+    "cpp": "Probe other(trace,{});other.sizeHook=[&](){trace.push_back(\"size\");return 0;};other.Peek();return \"ok\";",
+    "expected": "TypeError|Cannot read properties of null (reading 'slice')|THREW|"
+  },
+  {
+    "label": "first-inherited-named",
+    "cpp": "auto parent=std::make_shared<tree::ChildArray<MmlNode>>();parent->setProperty(\"-1\",b);s.array()->setPrototype(parent);auto before=tag(s.First());s.setFirst(c);return before+\":\"+tag(s.First())+\":\"+tag(parent->getProperty(\"-1\"))+\":\"+snap(s.array());",
+    "expected": "ok|mn:mo:mn:len=0;|"
+  },
+  {
+    "label": "raw-nodes-not-accessor",
+    "cpp": "auto old=s.array();s.nodesHook=[]()->Children{throw Error(\"Error\",u\"unexpected nodes getter\");};std::array<NodeValue,2> values{a,b};s.Push(values);s.setFirst(c);s.setLast(a);auto first=s.First();auto last=s.Last();auto peek=s.Peek(2);auto popped=s.Pop();auto size=s.Size();auto mml=s.toMml();auto result=tag(first)+\":\"+tag(last)+\":\"+snap(peek)+\":\"+tag(popped)+\":\"+val(Property(size))+\":\"+tag(mml);s.Clear();return result+\":\"+val(Property(s.Size()))+\":\"+snap(old);",
+    "expected": "ok|mo:mi:len=2;mi,mo:mo:1:mi:0:len=1;mi|"
+  }
+]

@@ -1,0 +1,121 @@
+{
+  "stage": "ordinary Context array forEach native primitive; not FindTeX",
+  "node": "v24.13.0",
+  "caller": {
+    "source": "ts/input/tex/FindTeX.ts",
+    "source_sha256": "65355d94cac0c1e8a790313c52e231212733b5a98d6f6697c2c7864812a72944",
+    "cjs_sha256": "1361bd1171e5ef0c8210342d89c9cebd660dbb9d4810bc571c64172b3a5c3d4b"
+  },
+  "rows": [
+    {
+      "label": "empty-array-and-undefined-result",
+      "cpp": "return e.text(e.each(e.callback()));",
+      "expected": "ok|U|"
+    },
+    {
+      "label": "three-callback-arguments-and-original-array",
+      "cpp": "e.set(0,4);e.set(1,5);return e.text(e.each(e.callback()));",
+      "expected": "ok|U|0:4:3:true:U/1:5:3:true:U"
+    },
+    {
+      "label": "holes-skipped",
+      "cpp": "e.context.set(e.array,opts::Key(u\"length\"),3);e.set(1,7);return e.text(e.each(e.callback()));",
+      "expected": "ok|U|1:7:3:true:U"
+    },
+    {
+      "label": "inherited-slot-is-visited",
+      "cpp": "auto prototype=e.context.objectWithPrototype(e.context.intrinsics().arrayPrototype);e.context.set(prototype,opts::Key(u\"1\"),8);e.context.setPrototype(e.array,prototype);e.context.set(e.array,opts::Key(u\"length\"),2);return e.text(e.each(e.callback()));",
+      "expected": "ok|U|1:8:3:true:U"
+    },
+    {
+      "label": "appended-entry-outside-original-length-ignored",
+      "cpp": "e.set(0,1);return e.text(e.each(e.callback([&](auto,auto){e.set(1,9);})));",
+      "expected": "ok|U|0:1:3:true:U"
+    },
+    {
+      "label": "deleted-future-slot-skipped",
+      "cpp": "e.set(0,1);e.set(1,2);return e.text(e.each(e.callback([&](auto,auto i){if(i==0)e.context.erase(e.array,opts::Key(u\"1\"));})));",
+      "expected": "ok|U|0:1:3:true:U"
+    },
+    {
+      "label": "changed-future-slot-read-live",
+      "cpp": "e.set(0,1);e.set(1,2);return e.text(e.each(e.callback([&](auto,auto i){if(i==0)e.set(1,9);})));",
+      "expected": "ok|U|0:1:3:true:U/1:9:3:true:U"
+    },
+    {
+      "label": "filled-future-hole-is-visited",
+      "cpp": "e.set(0,1);e.context.set(e.array,opts::Key(u\"length\"),3);return e.text(e.each(e.callback([&](auto,auto i){if(i==0)e.set(2,9);})));",
+      "expected": "ok|U|0:1:3:true:U/2:9:3:true:U"
+    },
+    {
+      "label": "shrinking-array-skips-deleted-slots",
+      "cpp": "e.set(0,1);e.set(1,2);e.set(2,3);return e.text(e.each(e.callback([&](auto,auto i){if(i==0)e.context.set(e.array,opts::Key(u\"length\"),1);})));",
+      "expected": "ok|U|0:1:3:true:U"
+    },
+    {
+      "label": "replacing-caller-array-keeps-captured-receiver",
+      "cpp": "e.set(0,1);e.set(1,2);return e.text(e.each(e.callback([&](auto,auto i){if(i==0){e.array=e.context.array();e.set(0,9);}})));",
+      "expected": "ok|U|0:1:3:true:U/1:2:3:false:U"
+    },
+    {
+      "label": "getter-read-once-before-callback",
+      "cpp": "e.getter(0,[&]{e.trace.push_back(\"get\");return opts::Value(6);});return e.text(e.each(e.callback()));",
+      "expected": "ok|U|get/0:6:3:true:U"
+    },
+    {
+      "label": "getter-appends-outside-captured-length",
+      "cpp": "e.getter(0,[&]{e.trace.push_back(\"get\");e.set(1,9);return opts::Value(6);});return e.text(e.each(e.callback()));",
+      "expected": "ok|U|get/0:6:3:true:U"
+    },
+    {
+      "label": "callback-throw-propagates",
+      "cpp": "e.set(0,1);e.set(1,2);return e.text(e.each(e.callback([](auto,auto){throw opts::Exception(\"Error\",u\"callback\");})));",
+      "expected": "Error|THREW|0:1:3:true:U"
+    },
+    {
+      "label": "getter-throw-propagates",
+      "cpp": "e.getter(0,[]()->opts::Value{throw opts::Exception(\"Error\",u\"getter\");});return e.text(e.each(e.callback()));",
+      "expected": "Error|THREW|"
+    },
+    {
+      "label": "empty-array-still-validates-callback",
+      "cpp": "return e.text(e.each(opts::Value(4)));",
+      "expected": "TypeError|THREW|"
+    },
+    {
+      "label": "undefined-callback-is-invalid",
+      "cpp": "return e.text(e.each(opts::Undefined{}));",
+      "expected": "TypeError|THREW|"
+    },
+    {
+      "label": "this-argument:null",
+      "cpp": "e.set(0,1);return e.text(e.each(e.callback(),opts::Null{}));",
+      "expected": "ok|U|0:1:3:true:N"
+    },
+    {
+      "label": "this-argument:false",
+      "cpp": "e.set(0,1);return e.text(e.each(e.callback(),false));",
+      "expected": "ok|U|0:1:3:true:false"
+    },
+    {
+      "label": "this-argument:zero",
+      "cpp": "e.set(0,1);return e.text(e.each(e.callback(),0));",
+      "expected": "ok|U|0:1:3:true:0"
+    },
+    {
+      "label": "this-argument:object",
+      "cpp": "e.set(0,1);return e.text(e.each(e.callback(),e.context.object()));",
+      "expected": "ok|U|0:1:3:true:object"
+    },
+    {
+      "label": "method-arity-and-nonenumerable",
+      "cpp": "auto method=e.context.get(e.array,opts::Key(u\"forEach\"));auto descriptor=e.context.descriptor(e.context.intrinsics().arrayPrototype,opts::Key(u\"forEach\"));return e.text(e.context.get(method,opts::Key(u\"length\")))+\":\"+(descriptor->enumerable?\"true\":\"false\");",
+      "expected": "ok|1:false|"
+    },
+    {
+      "label": "looked-up-native-method-can-be-overridden",
+      "cpp": "auto method=e.context.function(u\"override\",[&](auto&,auto receiver,auto args)->opts::Value{e.trace.push_back(std::string(\"override:\")+(receiver==opts::Value(e.array)?\"true\":\"false\")+\":\"+std::to_string(args.size()));return 12;});e.context.set(e.array,opts::Key(u\"forEach\"),method);return e.text(e.each(e.callback()));",
+      "expected": "ok|12|override:true:2"
+    }
+  ]
+}

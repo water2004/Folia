@@ -1,0 +1,325 @@
+{
+  "stage": "native numeric-cursor non-Unicode scanner RegExp host; not complete ECMAScript regex",
+  "node": "v24.13.0",
+  "srell_sha256": "eac98b722d702048e7448eb885f918d2343503b1ba9174d7efe86e2a791a0b9a",
+  "hashes": [
+    {
+      "source": "ts/input/tex/FindTeX.ts",
+      "source_sha256": "65355d94cac0c1e8a790313c52e231212733b5a98d6f6697c2c7864812a72944",
+      "cjs_sha256": "1361bd1171e5ef0c8210342d89c9cebd660dbb9d4810bc571c64172b3a5c3d4b"
+    },
+    {
+      "source": "ts/util/string.ts",
+      "source_sha256": "024a2ac6f96a314884f2bd71a913060c06fb75d46cbf6c94e15f4e71643a7084",
+      "cjs_sha256": "e1f09bca257dd268b9483b7310e4c77039dd022f01c5e9f5a62f47a981921e9c"
+    }
+  ],
+  "rows": [
+    {
+      "label": "dot-splits-surrogate-pair",
+      "pattern": ".",
+      "input": "😀",
+      "flags": "g",
+      "lastIndex": 0,
+      "count": 3,
+      "expected": "index=0,caps=d83d,input=d83dde00;last=1|index=1,caps=de00,input=d83dde00;last=2|null;last=0"
+    },
+    {
+      "label": "dot-starting-at-low-surrogate",
+      "pattern": ".",
+      "input": "😀",
+      "flags": "g",
+      "lastIndex": 1,
+      "count": 2,
+      "expected": "index=1,caps=de00,input=d83dde00;last=2|null;last=0"
+    },
+    {
+      "label": "negated-class-splits-surrogates",
+      "pattern": "[^}]",
+      "input": "😀",
+      "flags": "g",
+      "lastIndex": 0,
+      "count": 3,
+      "expected": "index=0,caps=d83d,input=d83dde00;last=1|index=1,caps=de00,input=d83dde00;last=2|null;last=0"
+    },
+    {
+      "label": "literal-astral-pair",
+      "pattern": "😀",
+      "input": "a😀b",
+      "flags": "g",
+      "lastIndex": 0,
+      "count": 3,
+      "expected": "index=1,caps=d83dde00,input=0061d83dde000062;last=3|null;last=0|index=1,caps=d83dde00,input=0061d83dde000062;last=3"
+    },
+    {
+      "label": "optional-captures-are-undefined",
+      "pattern": "(a)?(b*)",
+      "input": "b",
+      "flags": "g",
+      "lastIndex": 0,
+      "count": 3,
+      "expected": "index=0,caps=0062/U/0062,input=0062;last=1|index=1,caps=/U/,input=0062;last=1|index=1,caps=/U/,input=0062;last=1"
+    },
+    {
+      "label": "unmatched-alternative-captures",
+      "pattern": "(a)|(b)",
+      "input": "b a",
+      "flags": "g",
+      "lastIndex": 0,
+      "count": 3,
+      "expected": "index=0,caps=0062/U/0062,input=006200200061;last=1|index=2,caps=0061/0061/U,input=006200200061;last=3|null;last=0"
+    },
+    {
+      "label": "absolute-index-with-nonzero-cursor",
+      "pattern": "x",
+      "input": "abx x",
+      "flags": "g",
+      "lastIndex": 3,
+      "count": 3,
+      "expected": "index=4,caps=0078,input=00610062007800200078;last=5|null;last=0|index=2,caps=0078,input=00610062007800200078;last=3"
+    },
+    {
+      "label": "preceding-context-is-not-sliced",
+      "pattern": "\\bx",
+      "input": "ax x",
+      "flags": "g",
+      "lastIndex": 1,
+      "count": 3,
+      "expected": "index=3,caps=0078,input=0061007800200078;last=4|null;last=0|index=3,caps=0078,input=0061007800200078;last=4"
+    },
+    {
+      "label": "global-failure-resets-cursor",
+      "pattern": "x",
+      "input": "ab",
+      "flags": "g",
+      "lastIndex": 1,
+      "count": 3,
+      "expected": "null;last=0|null;last=0|null;last=0"
+    },
+    {
+      "label": "cursor-after-end",
+      "pattern": "x",
+      "input": "x",
+      "flags": "g",
+      "lastIndex": 2,
+      "count": 3,
+      "expected": "null;last=0|index=0,caps=0078,input=0078;last=1|null;last=0"
+    },
+    {
+      "label": "negative-cursor-is-zero",
+      "pattern": "x",
+      "input": "x",
+      "flags": "g",
+      "lastIndex": -4,
+      "count": 3,
+      "expected": "index=0,caps=0078,input=0078;last=1|null;last=0|index=0,caps=0078,input=0078;last=1"
+    },
+    {
+      "label": "fractional-cursor-is-floored",
+      "pattern": "x",
+      "input": "xx",
+      "flags": "g",
+      "lastIndex": 1.9,
+      "count": 3,
+      "expected": "index=1,caps=0078,input=00780078;last=2|null;last=0|index=0,caps=0078,input=00780078;last=1"
+    },
+    {
+      "label": "nan-cursor-is-zero",
+      "pattern": "x",
+      "input": "x",
+      "flags": "g",
+      "lastIndex": "NaN",
+      "count": 3,
+      "expected": "index=0,caps=0078,input=0078;last=1|null;last=0|index=0,caps=0078,input=0078;last=1"
+    },
+    {
+      "label": "infinite-cursor-fails",
+      "pattern": "x",
+      "input": "x",
+      "flags": "g",
+      "lastIndex": "Infinity",
+      "count": 3,
+      "expected": "null;last=0|index=0,caps=0078,input=0078;last=1|null;last=0"
+    },
+    {
+      "label": "large-cursor-fails",
+      "pattern": "x",
+      "input": "x",
+      "flags": "g",
+      "lastIndex": 9007199254740992,
+      "count": 3,
+      "expected": "null;last=0|index=0,caps=0078,input=0078;last=1|null;last=0"
+    },
+    {
+      "label": "plain-scan-ignores-and-retains-cursor",
+      "pattern": "x",
+      "input": "ax",
+      "flags": "",
+      "lastIndex": 17,
+      "count": 3,
+      "expected": "index=1,caps=0078,input=00610078;last=17|index=1,caps=0078,input=00610078;last=17|index=1,caps=0078,input=00610078;last=17"
+    },
+    {
+      "label": "plain-negative-cursor-retained",
+      "pattern": "x",
+      "input": "ax",
+      "flags": "",
+      "lastIndex": -3,
+      "count": 3,
+      "expected": "index=1,caps=0078,input=00610078;last=-3|index=1,caps=0078,input=00610078;last=-3|index=1,caps=0078,input=00610078;last=-3"
+    },
+    {
+      "label": "empty-global-match-does-not-advance",
+      "pattern": "",
+      "input": "abc",
+      "flags": "g",
+      "lastIndex": 1,
+      "count": 3,
+      "expected": "index=1,caps=,input=006100620063;last=1|index=1,caps=,input=006100620063;last=1|index=1,caps=,input=006100620063;last=1"
+    },
+    {
+      "label": "lookahead-zero-width-does-not-advance",
+      "pattern": "(?=x)",
+      "input": "ax",
+      "flags": "g",
+      "lastIndex": 1,
+      "count": 3,
+      "expected": "index=1,caps=,input=00610078;last=1|index=1,caps=,input=00610078;last=1|index=1,caps=,input=00610078;last=1"
+    },
+    {
+      "label": "sticky-failure-resets-cursor",
+      "pattern": "x",
+      "input": "ax",
+      "flags": "y",
+      "lastIndex": 0,
+      "count": 3,
+      "expected": "null;last=0|null;last=0|null;last=0"
+    },
+    {
+      "label": "sticky-starts-at-cursor",
+      "pattern": "x",
+      "input": "ax",
+      "flags": "y",
+      "lastIndex": 1,
+      "count": 3,
+      "expected": "index=1,caps=0078,input=00610078;last=2|null;last=0|null;last=0"
+    },
+    {
+      "label": "global-and-sticky",
+      "pattern": "x",
+      "input": "xx",
+      "flags": "gy",
+      "lastIndex": 1,
+      "count": 3,
+      "expected": "index=1,caps=0078,input=00780078;last=2|null;last=0|index=0,caps=0078,input=00780078;last=1"
+    },
+    {
+      "label": "dot-excludes-all-four-line-terminators",
+      "pattern": ".",
+      "input": "\n\r  a",
+      "flags": "g",
+      "lastIndex": 0,
+      "count": 3,
+      "expected": "index=4,caps=0061,input=000a000d202820290061;last=5|null;last=0|index=4,caps=0061,input=000a000d202820290061;last=5"
+    },
+    {
+      "label": "space-includes-ecmascript-whitespace",
+      "pattern": "\\s+",
+      "input": "       　﻿",
+      "flags": "g",
+      "lastIndex": 0,
+      "count": 3,
+      "expected": "index=1,caps=00a01680200020282029202f205f3000feff,input=008500a01680200020282029202f205f3000feff;last=10|null;last=0|index=1,caps=00a01680200020282029202f205f3000feff,input=008500a01680200020282029202f205f3000feff;last=10"
+    },
+    {
+      "label": "identity-escape-colon",
+      "pattern": "\\:",
+      "input": ":",
+      "flags": "g",
+      "lastIndex": 0,
+      "count": 3,
+      "expected": "index=0,caps=003a,input=003a;last=1|null;last=0|index=0,caps=003a,input=003a;last=1"
+    },
+    {
+      "label": "identity-escape-hyphen",
+      "pattern": "\\-",
+      "input": "-",
+      "flags": "g",
+      "lastIndex": 0,
+      "count": 3,
+      "expected": "index=0,caps=002d,input=002d;last=1|null;last=0|index=0,caps=002d,input=002d;last=1"
+    },
+    {
+      "label": "all-quoted-delimiter-punctuation",
+      "pattern": "\\^\\$\\(\\)\\{\\}\\.\\+\\*\\?\\-\\|\\[\\]\\:\\\\",
+      "input": "a^$(){}.+*?-|[]:\\b",
+      "flags": "g",
+      "lastIndex": 0,
+      "count": 3,
+      "expected": "index=1,caps=005e002400280029007b007d002e002b002a003f002d007c005b005d003a005c,input=0061005e002400280029007b007d002e002b002a003f002d007c005b005d003a005c0062;last=17|null;last=0|index=1,caps=005e002400280029007b007d002e002b002a003f002d007c005b005d003a005c,input=0061005e002400280029007b007d002e002b002a003f002d007c005b005d003a005c0062;last=17"
+    },
+    {
+      "label": "actual-start-environment-and-refs",
+      "pattern": "\\$\\$|\\\\\\(|\\\\\\[|\\\\begin\\s*\\{([^}]*)\\}|(\\\\([\\\\$])|(\\\\(?:eq)?ref\\s*\\{[^}]*\\}))",
+      "input": "\\begin {align}x\\ref﻿{a}\\$\\\\",
+      "flags": "g",
+      "lastIndex": 0,
+      "count": 3,
+      "expected": "index=0,caps=005c0062006500670069006e00a0007b0061006c00690067006e007d/0061006c00690067006e/U/U/U,input=005c0062006500670069006e00a0007b0061006c00690067006e007d0078005c007200650066feff007b0061007d005c0024005c005c;last=14|index=15,caps=005c007200650066feff007b0061007d/U/005c007200650066feff007b0061007d/U/005c007200650066feff007b0061007d,input=005c0062006500670069006e00a0007b0061006c00690067006e007d0078005c007200650066feff007b0061007d005c0024005c005c;last=23|index=23,caps=005c0024/U/005c0024/0024/U,input=005c0062006500670069006e00a0007b0061006c00690067006e007d0078005c007200650066feff007b0061007d005c0024005c005c;last=25"
+    },
+    {
+      "label": "actual-end-pattern-skips-low-surrogate",
+      "pattern": "\\\\\\)|\\\\(?:[a-zA-Z]|.)|[{}]",
+      "input": "\\😀{x}\\)",
+      "flags": "g",
+      "lastIndex": 0,
+      "count": 3,
+      "expected": "index=0,caps=005cd83d,input=005cd83dde00007b0078007d005c0029;last=2|index=3,caps=007b,input=005cd83dde00007b0078007d005c0029;last=4|index=5,caps=007d,input=005cd83dde00007b0078007d005c0029;last=6"
+    },
+    {
+      "label": "actual-end-pattern-skips-control-sequences",
+      "pattern": "\\$\\$|\\\\(?:[a-zA-Z]|.)|[{}]",
+      "input": "\\a{b}$$",
+      "flags": "g",
+      "lastIndex": 0,
+      "count": 3,
+      "expected": "index=0,caps=005c0061,input=005c0061007b0062007d00240024;last=2|index=2,caps=007b,input=005c0061007b0062007d00240024;last=3|index=4,caps=007d,input=005c0061007b0062007d00240024;last=5"
+    },
+    {
+      "label": "actual-environment-end-capture",
+      "pattern": "\\\\end\\s*(\\{a\\-b\\})|\\\\(?:[a-zA-Z]|.)|[{}]",
+      "input": "x\\end {a-b}",
+      "flags": "g",
+      "lastIndex": 0,
+      "count": 3,
+      "expected": "index=1,caps=005c0065006e006400a0007b0061002d0062007d/007b0061002d0062007d,input=0078005c0065006e006400a0007b0061002d0062007d;last=11|null;last=0|index=1,caps=005c0065006e006400a0007b0061002d0062007d/007b0061002d0062007d,input=0078005c0065006e006400a0007b0061002d0062007d;last=11"
+    },
+    {
+      "label": "invalid-group-is-syntax-error",
+      "pattern": "(",
+      "input": "x",
+      "flags": "g",
+      "lastIndex": 0,
+      "count": 3,
+      "expected": "SyntaxError"
+    },
+    {
+      "label": "duplicate-flags-are-syntax-error",
+      "pattern": "x",
+      "input": "x",
+      "flags": "gg",
+      "lastIndex": 0,
+      "count": 3,
+      "expected": "SyntaxError"
+    },
+    {
+      "label": "unknown-flag-is-syntax-error",
+      "pattern": "x",
+      "input": "x",
+      "flags": "z",
+      "lastIndex": 0,
+      "count": 3,
+      "expected": "SyntaxError"
+    }
+  ]
+}

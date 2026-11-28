@@ -1,0 +1,53 @@
+{
+  "stage": "native RegExp identities in Context; not FindTeX",
+  "node": "v24.13.0",
+  "hashes": [
+    {
+      "source": "ts/util/Options.ts",
+      "source_sha256": "b810ffc09864eb8ed9295d829b229194d7e38aaac6c8f01525bc1a4b190a61e3",
+      "cjs_sha256": "76f3df8a3e899fba1d0944d5b79818b586c1d9f95cc7021c395fbb10295db660"
+    }
+  ],
+  "rows": [
+    {
+      "label": "canonical-same-native-identity",
+      "cpp": "auto r=std::make_shared<host::RegExp>(u\"x\",u\"g\");return yes(e.bindings.bind(r)==e.bindings.bind(r));",
+      "expected": "true"
+    },
+    {
+      "label": "distinct-new-expressions",
+      "cpp": "return yes(e.make()!=e.make());",
+      "expected": "true"
+    },
+    {
+      "label": "option-copy-retains-actual-regexp",
+      "cpp": "auto r=e.make();auto original=e.object({{u\"r\",r}});auto copied=opts::copy(e.context,original);return yes(copied!=opts::Value(original))+\":\"+yes(e.context.get(copied,opts::Key(u\"r\"))==opts::Value(r));",
+      "expected": "true:true"
+    },
+    {
+      "label": "copied-end-tuple-keeps-pattern-identity",
+      "cpp": "auto r=e.make();auto tuple=e.tuple(r);auto copied=opts::copy(e.context,tuple);return yes(copied!=opts::Value(tuple))+\":\"+yes(e.context.get(copied,opts::Key(u\"2\"))==opts::Value(r));",
+      "expected": "true:true"
+    },
+    {
+      "label": "cursor-update-observed-through-copied-alias",
+      "cpp": "auto r=e.make();auto copied=opts::copy(e.context,e.object({{u\"r\",r}}));auto alias=e.context.get(copied,opts::Key(u\"r\"));e.bindings.setLastIndex(r,1);auto match=e.bindings.exec(alias,u\"xxx\");return std::to_string(match->index)+\":\"+e.number(e.bindings.lastIndex(r))+\":\"+e.number(e.bindings.lastIndex(alias));",
+      "expected": "1:2:2"
+    },
+    {
+      "label": "independent-pattern-cursors",
+      "cpp": "auto a=e.make(),b=e.make();e.bindings.setLastIndex(a,1);auto ma=e.bindings.exec(a,u\"xxx\"),mb=e.bindings.exec(b,u\"xxx\");return std::to_string(ma->index)+\":\"+std::to_string(mb->index)+\":\"+e.number(e.bindings.lastIndex(a))+\":\"+e.number(e.bindings.lastIndex(b));",
+      "expected": "1:0:2:1"
+    },
+    {
+      "label": "global-failure-resets-shared-cursor",
+      "cpp": "auto r=e.make();auto tuple=e.tuple(r);e.bindings.setLastIndex(r,4);auto alias=e.context.get(tuple,opts::Key(u\"2\"));const bool failed=!e.bindings.exec(alias,u\"x\");return yes(failed)+\":\"+e.number(e.bindings.lastIndex(r));",
+      "expected": "true:0"
+    },
+    {
+      "label": "actual-regexp-constructor-metadata",
+      "cpp": "auto r=e.make();auto constructor=e.context.get(r,opts::Key(u\"constructor\"));return yes(constructor==opts::Value(e.bindings.constructorIdentity()))+\":\"+e.text(e.context.get(constructor,opts::Key(u\"name\")))+\":\"+e.text(e.context.get(constructor,opts::Key(u\"length\")));",
+      "expected": "true:RegExp:2"
+    }
+  ]
+}

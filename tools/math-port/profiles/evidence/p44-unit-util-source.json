@@ -1,0 +1,1231 @@
+{
+  "source": "ts/input/tex/UnitUtil.ts",
+  "sha256": "90f461310aa6d07b494cda98dc5398e9737231f046e20099ea0f5c19fa24c66e",
+  "rows": [
+    {
+      "label": "match:[\"0em\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"0em\"),false));",
+      "expected": "ok|0:em:3"
+    },
+    {
+      "label": "match:[\"0em\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"0em\"),true));",
+      "expected": "ok|0:em:3"
+    },
+    {
+      "label": "match:[\"-0em\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"-0em\"),false));",
+      "expected": "ok|-0:em:4"
+    },
+    {
+      "label": "match:[\"-0em\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"-0em\"),true));",
+      "expected": "ok|-0:em:4"
+    },
+    {
+      "label": "match:[\"+2em\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"+2em\"),false));",
+      "expected": "ok|+2:em:4"
+    },
+    {
+      "label": "match:[\"+2em\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"+2em\"),true));",
+      "expected": "ok|+2:em:4"
+    },
+    {
+      "label": "match:[\"2 ex\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"2 ex\"),false));",
+      "expected": "ok|2:ex:4"
+    },
+    {
+      "label": "match:[\"2 ex\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"2 ex\"),true));",
+      "expected": "ok|2:ex:4"
+    },
+    {
+      "label": "match:[\"12pt\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"12pt\"),false));",
+      "expected": "ok|12:pt:4"
+    },
+    {
+      "label": "match:[\"12pt\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"12pt\"),true));",
+      "expected": "ok|12:pt:4"
+    },
+    {
+      "label": "match:[\".4pc\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\".4pc\"),false));",
+      "expected": "ok|.4:pc:4"
+    },
+    {
+      "label": "match:[\".4pc\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\".4pc\"),true));",
+      "expected": "ok|.4:pc:4"
+    },
+    {
+      "label": "match:[\"4.px\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"4.px\"),false));",
+      "expected": "ok|4.:px:4"
+    },
+    {
+      "label": "match:[\"4.px\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"4.px\"),true));",
+      "expected": "ok|4.:px:4"
+    },
+    {
+      "label": "match:[\"2,5in\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"2,5in\"),false));",
+      "expected": "ok|2.5:in:5"
+    },
+    {
+      "label": "match:[\"2,5in\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"2,5in\"),true));",
+      "expected": "ok|2.5:in:5"
+    },
+    {
+      "label": "match:[\",5cm\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\",5cm\"),false));",
+      "expected": "ok|.5:cm:4"
+    },
+    {
+      "label": "match:[\",5cm\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\",5cm\"),true));",
+      "expected": "ok|.5:cm:4"
+    },
+    {
+      "label": "match:[\"-3mm\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"-3mm\"),false));",
+      "expected": "ok|-3:mm:4"
+    },
+    {
+      "label": "match:[\"-3mm\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"-3mm\"),true));",
+      "expected": "ok|-3:mm:4"
+    },
+    {
+      "label": "match:[\"18mu\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"18mu\"),false));",
+      "expected": "ok|1:em:4"
+    },
+    {
+      "label": "match:[\"18mu\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"18mu\"),true));",
+      "expected": "ok|1:em:4"
+    },
+    {
+      "label": "match:[\".001mu\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\".001mu\"),false));",
+      "expected": "ok|0:em:6"
+    },
+    {
+      "label": "match:[\".001mu\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\".001mu\"),true));",
+      "expected": "ok|0:em:6"
+    },
+    {
+      "label": "match:[\"0.01mu\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"0.01mu\"),false));",
+      "expected": "ok|0:em:6"
+    },
+    {
+      "label": "match:[\"0.01mu\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"0.01mu\"),true));",
+      "expected": "ok|0:em:6"
+    },
+    {
+      "label": "match:[\"-0.01mu\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"-0.01mu\"),false));",
+      "expected": "ok|0:em:7"
+    },
+    {
+      "label": "match:[\"-0.01mu\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"-0.01mu\"),true));",
+      "expected": "ok|0:em:7"
+    },
+    {
+      "label": "match:[\"18.1234mu\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"18.1234mu\"),false));",
+      "expected": "ok|1.007:em:9"
+    },
+    {
+      "label": "match:[\"18.1234mu\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"18.1234mu\"),true));",
+      "expected": "ok|1.007:em:9"
+    },
+    {
+      "label": "match:[\"1\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"1\"),false));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"1\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"1\"),true));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"\"),false));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"\"),true));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"abc\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"abc\"),false));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"abc\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"abc\"),true));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"1EM\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"1EM\"),false));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"1EM\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"1EM\"),true));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"1e2em\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"1e2em\"),false));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"1e2em\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"1e2em\"),true));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"1.2.3em\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"1.2.3em\"),false));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"1.2.3em\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"1.2.3em\"),true));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"+em\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"+em\"),false));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"+em\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"+em\"),true));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"1,2,3em\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"1,2,3em\"),false));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"1,2,3em\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"1,2,3em\"),true));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"1 em \",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"1 em \"),false));",
+      "expected": "ok|1:em:5"
+    },
+    {
+      "label": "match:[\"1 em \",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"1 em \"),true));",
+      "expected": "ok|1:em:5"
+    },
+    {
+      "label": "match:[\" \\t-2.25 em\\n\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\" \\t-2.25 em\\n\"),false));",
+      "expected": "ok|-2.25:em:11"
+    },
+    {
+      "label": "match:[\" \\t-2.25 em\\n\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\" \\t-2.25 em\\n\"),true));",
+      "expected": "ok|-2.25:em:10"
+    },
+    {
+      "label": "match:[\" 2em﻿\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em﻿\"),false));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "match:[\" 2em﻿\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em﻿\"),true));",
+      "expected": "ok|2:em:4"
+    },
+    {
+      "label": "match:[\" 2em \",false]",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \"),false));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "match:[\" 2em \",true]",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \"),true));",
+      "expected": "ok|2:em:4"
+    },
+    {
+      "label": "match:[\"١em\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"١em\"),false));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"١em\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"١em\"),true));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"１em\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"１em\"),false));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"１em\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"１em\"),true));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"2emtail\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"2emtail\"),false));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"2emtail\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"2emtail\"),true));",
+      "expected": "ok|2:em:3"
+    },
+    {
+      "label": "match:[\"2em tail\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"2em tail\"),false));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"2em tail\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"2em tail\"),true));",
+      "expected": "ok|2:em:4"
+    },
+    {
+      "label": "match:[\"2em  tail\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"2em  tail\"),false));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"2em  tail\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"2em  tail\"),true));",
+      "expected": "ok|2:em:4"
+    },
+    {
+      "label": "match:[\"2em\\ttail\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"2em\\ttail\"),false));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"2em\\ttail\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"2em\\ttail\"),true));",
+      "expected": "ok|2:em:3"
+    },
+    {
+      "label": "match:[\"2em😀\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"2em😀\"),false));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"2em😀\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"2em😀\"),true));",
+      "expected": "ok|2:em:3"
+    },
+    {
+      "label": "match:[\"2µ\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"2µ\"),false));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"2µ\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"2µ\"),true));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"2em\\nrest\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"2em\\nrest\"),false));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "match:[\"2em\\nrest\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"2em\\nrest\"),true));",
+      "expected": "ok|2:em:3"
+    },
+    {
+      "label": "match:[\"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001em\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001em\"),false));",
+      "expected": "ok|00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001:em:328"
+    },
+    {
+      "label": "match:[\"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001em\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001em\"),true));",
+      "expected": "ok|00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001:em:328"
+    },
+    {
+      "label": "match:[\"9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999em\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999em\"),false));",
+      "expected": "ok|9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999:em:327"
+    },
+    {
+      "label": "match:[\"9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999em\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999em\"),true));",
+      "expected": "ok|9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999:em:327"
+    },
+    {
+      "label": "match:[\"0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001em\",false]",
+      "cpp": "return shape(u.matchDimen(Property(\"0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001em\"),false));",
+      "expected": "ok|0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001:em:330"
+    },
+    {
+      "label": "match:[\"0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001em\",true]",
+      "cpp": "return shape(u.matchDimen(Property(\"0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001em\"),true));",
+      "expected": "ok|0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001:em:330"
+    },
+    {
+      "label": "dimen2em:\"0em\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"0em\"))));",
+      "expected": "ok|0"
+    },
+    {
+      "label": "dimen2em:\"-0em\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"-0em\"))));",
+      "expected": "ok|-0"
+    },
+    {
+      "label": "dimen2em:\"+2em\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"+2em\"))));",
+      "expected": "ok|2"
+    },
+    {
+      "label": "dimen2em:\"2 ex\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"2 ex\"))));",
+      "expected": "ok|0.86"
+    },
+    {
+      "label": "dimen2em:\"12pt\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"12pt\"))));",
+      "expected": "ok|1.2000000000000002"
+    },
+    {
+      "label": "dimen2em:\".4pc\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\".4pc\"))));",
+      "expected": "ok|0.48"
+    },
+    {
+      "label": "dimen2em:\"4.px\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"4.px\"))));",
+      "expected": "ok|0.4"
+    },
+    {
+      "label": "dimen2em:\"2,5in\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"2,5in\"))));",
+      "expected": "ok|18"
+    },
+    {
+      "label": "dimen2em:\",5cm\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\",5cm\"))));",
+      "expected": "ok|1.4173228346456692"
+    },
+    {
+      "label": "dimen2em:\"-3mm\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"-3mm\"))));",
+      "expected": "ok|-0.8503937007874016"
+    },
+    {
+      "label": "dimen2em:\"18mu\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"18mu\"))));",
+      "expected": "ok|1"
+    },
+    {
+      "label": "dimen2em:\".001mu\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\".001mu\"))));",
+      "expected": "ok|0"
+    },
+    {
+      "label": "dimen2em:\"0.01mu\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"0.01mu\"))));",
+      "expected": "ok|0"
+    },
+    {
+      "label": "dimen2em:\"-0.01mu\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"-0.01mu\"))));",
+      "expected": "ok|0"
+    },
+    {
+      "label": "dimen2em:\"18.1234mu\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"18.1234mu\"))));",
+      "expected": "ok|1.007"
+    },
+    {
+      "label": "dimen2em:\"1\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"1\"))));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "dimen2em:\"\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"\"))));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "dimen2em:\"abc\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"abc\"))));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "dimen2em:\"1EM\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"1EM\"))));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "dimen2em:\"1e2em\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"1e2em\"))));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "dimen2em:\"1.2.3em\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"1.2.3em\"))));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "dimen2em:\"+em\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"+em\"))));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "dimen2em:\"1,2,3em\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"1,2,3em\"))));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "dimen2em:\"1 em \"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"1 em \"))));",
+      "expected": "ok|1"
+    },
+    {
+      "label": "dimen2em:\" \\t-2.25 em\\n\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\" \\t-2.25 em\\n\"))));",
+      "expected": "ok|-2.25"
+    },
+    {
+      "label": "dimen2em:\" 2em﻿\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\" 2em﻿\"))));",
+      "expected": "ok|2"
+    },
+    {
+      "label": "dimen2em:\" 2em \"",
+      "cpp": "return val(Property(u.dimen2em(Property(\" 2em \"))));",
+      "expected": "ok|2"
+    },
+    {
+      "label": "dimen2em:\"١em\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"١em\"))));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "dimen2em:\"１em\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"１em\"))));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "dimen2em:\"2emtail\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"2emtail\"))));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "dimen2em:\"2em tail\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"2em tail\"))));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "dimen2em:\"2em  tail\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"2em  tail\"))));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "dimen2em:\"2em\\ttail\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"2em\\ttail\"))));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "dimen2em:\"2em😀\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"2em😀\"))));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "dimen2em:\"2µ\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"2µ\"))));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "dimen2em:\"2em\\nrest\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"2em\\nrest\"))));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "dimen2em:\"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001em\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001em\"))));",
+      "expected": "ok|1"
+    },
+    {
+      "label": "dimen2em:\"9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999em\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999em\"))));",
+      "expected": "ok|Infinity"
+    },
+    {
+      "label": "dimen2em:\"0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001em\"",
+      "cpp": "return val(Property(u.dimen2em(Property(\"0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001em\"))));",
+      "expected": "ok|0"
+    },
+    {
+      "label": "em:0:false",
+      "cpp": "return u.em(0);",
+      "expected": "ok|0em"
+    },
+    {
+      "label": "em:0:true",
+      "cpp": "return u.em(-0.0);",
+      "expected": "ok|0em"
+    },
+    {
+      "label": "em:0.000599999999:false",
+      "cpp": "return u.em(0.000599999999);",
+      "expected": "ok|0em"
+    },
+    {
+      "label": "em:0.0006:false",
+      "cpp": "return u.em(0.0006);",
+      "expected": "ok|0.001em"
+    },
+    {
+      "label": "em:-0.0006:false",
+      "cpp": "return u.em(-0.0006);",
+      "expected": "ok|-0.001em"
+    },
+    {
+      "label": "em:0.000600000001:false",
+      "cpp": "return u.em(0.000600000001);",
+      "expected": "ok|0.001em"
+    },
+    {
+      "label": "em:0.001:false",
+      "cpp": "return u.em(0.001);",
+      "expected": "ok|0.001em"
+    },
+    {
+      "label": "em:-0.001:false",
+      "cpp": "return u.em(-0.001);",
+      "expected": "ok|-0.001em"
+    },
+    {
+      "label": "em:0.12345:false",
+      "cpp": "return u.em(0.12345);",
+      "expected": "ok|0.123em"
+    },
+    {
+      "label": "em:1.2345:false",
+      "cpp": "return u.em(1.2345);",
+      "expected": "ok|1.234em"
+    },
+    {
+      "label": "em:1.2344999999:false",
+      "cpp": "return u.em(1.2344999999);",
+      "expected": "ok|1.234em"
+    },
+    {
+      "label": "em:-1.2345:false",
+      "cpp": "return u.em(-1.2345);",
+      "expected": "ok|-1.234em"
+    },
+    {
+      "label": "em:1000.1:false",
+      "cpp": "return u.em(1000.1);",
+      "expected": "ok|1000.1em"
+    },
+    {
+      "label": "em:1e+21:false",
+      "cpp": "return u.em(1e+21);",
+      "expected": "ok|1e+21em"
+    },
+    {
+      "label": "em:1e+22:false",
+      "cpp": "return u.em(1e+22);",
+      "expected": "ok|1e+22em"
+    },
+    {
+      "label": "em:1e+30:false",
+      "cpp": "return u.em(1e+30);",
+      "expected": "ok|1e+3em"
+    },
+    {
+      "label": "em:-1e+30:false",
+      "cpp": "return u.em(-1e+30);",
+      "expected": "ok|-1e+3em"
+    },
+    {
+      "label": "em:NaN:false",
+      "cpp": "return u.em(std::numeric_limits<double>::quiet_NaN());",
+      "expected": "ok|NaNem"
+    },
+    {
+      "label": "em:Infinity:false",
+      "cpp": "return u.em(std::numeric_limits<double>::infinity());",
+      "expected": "ok|Infinityem"
+    },
+    {
+      "label": "em:-Infinity:false",
+      "cpp": "return u.em(-std::numeric_limits<double>::infinity());",
+      "expected": "ok|-Infinityem"
+    },
+    {
+      "label": "whitespace-match:9",
+      "cpp": "return shape(u.matchDimen(Property(\"\\t2em\\t\")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:9",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"\\ta\\t\"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:10",
+      "cpp": "return shape(u.matchDimen(Property(\"\\n2em\\n\")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:10",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"\\na\\n\"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:11",
+      "cpp": "return shape(u.matchDimen(Property(\"\\u000b2em\\u000b\")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:11",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"\\u000ba\\u000b\"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:12",
+      "cpp": "return shape(u.matchDimen(Property(\"\\f2em\\f\")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:12",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"\\fa\\f\"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:13",
+      "cpp": "return shape(u.matchDimen(Property(\"\\r2em\\r\")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:13",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"\\ra\\r\"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:32",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:32",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a \"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:160",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:160",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a \"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:5760",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:5760",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a \"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:8192",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:8192",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a \"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:8193",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:8193",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a \"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:8194",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:8194",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a \"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:8195",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:8195",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a \"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:8196",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:8196",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a \"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:8197",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:8197",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a \"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:8198",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:8198",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a \"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:8199",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:8199",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a \"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:8200",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:8200",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a \"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:8201",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:8201",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a \"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:8202",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:8202",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a \"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:8232",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:8232",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a \"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:8233",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:8233",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a \"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:8239",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:8239",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a \"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:8287",
+      "cpp": "return shape(u.matchDimen(Property(\" 2em \")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:8287",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a \"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:12288",
+      "cpp": "return shape(u.matchDimen(Property(\"　2em　\")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:12288",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"　a　\"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:65279",
+      "cpp": "return shape(u.matchDimen(Property(\"﻿2em﻿\")));",
+      "expected": "ok|2:em:5"
+    },
+    {
+      "label": "whitespace-trim:65279",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"﻿a﻿\"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "whitespace-match:133",
+      "cpp": "return shape(u.matchDimen(Property(\"2em\")));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "whitespace-trim:133",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"a\"))));",
+      "expected": "ok|0085,0061,0085"
+    },
+    {
+      "label": "whitespace-match:6158",
+      "cpp": "return shape(u.matchDimen(Property(\"᠎2em᠎\")));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "whitespace-trim:6158",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"᠎a᠎\"))));",
+      "expected": "ok|180e,0061,180e"
+    },
+    {
+      "label": "rest-truthiness:U",
+      "cpp": "return shape(u.matchDimen(\"2emtail\",Property(Missing{})));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "rest-truthiness:N",
+      "cpp": "return shape(u.matchDimen(\"2emtail\",Property(PropertyNull{})));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "rest-truthiness:zero",
+      "cpp": "return shape(u.matchDimen(\"2emtail\",Property(0)));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "rest-truthiness:empty",
+      "cpp": "return shape(u.matchDimen(\"2emtail\",Property(\"\")));",
+      "expected": "ok|N:N:0"
+    },
+    {
+      "label": "rest-truthiness:one",
+      "cpp": "return shape(u.matchDimen(\"2emtail\",Property(1)));",
+      "expected": "ok|2:em:3"
+    },
+    {
+      "label": "rest-truthiness:string",
+      "cpp": "return shape(u.matchDimen(\"2emtail\",Property(\"rest\")));",
+      "expected": "ok|2:em:3"
+    },
+    {
+      "label": "rest-truthiness:object",
+      "cpp": "return shape(u.matchDimen(\"2emtail\",Property(PropertyList{})));",
+      "expected": "ok|2:em:3"
+    },
+    {
+      "label": "trim:\"\"",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"\"))));",
+      "expected": "ok|"
+    },
+    {
+      "label": "trim:\"  abc  \"",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"  abc  \"))));",
+      "expected": "ok|0061,0062,0063"
+    },
+    {
+      "label": "trim:\" \\t\\nabc \"",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" \\t\\nabc \"))));",
+      "expected": "ok|0061,0062,0063"
+    },
+    {
+      "label": "trim:\"\\\\ \"",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"\\\\ \"))));",
+      "expected": "ok|005c,0020"
+    },
+    {
+      "label": "trim:\"\\\\  \"",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"\\\\  \"))));",
+      "expected": "ok|005c,0020"
+    },
+    {
+      "label": "trim:\"\\\\\\t\"",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"\\\\\\t\"))));",
+      "expected": "ok|005c"
+    },
+    {
+      "label": "trim:\"\\\\\\n\"",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"\\\\\\n\"))));",
+      "expected": "ok|005c"
+    },
+    {
+      "label": "trim:\"a\\\\ \"",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"a\\\\ \"))));",
+      "expected": "ok|0061,005c,0020"
+    },
+    {
+      "label": "trim:\" a\\\\\\t \"",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\" a\\\\\\t \"))));",
+      "expected": "ok|0061,005c,0020"
+    },
+    {
+      "label": "trim:\"a\\\\\\t\"",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"a\\\\\\t\"))));",
+      "expected": "ok|0061,005c"
+    },
+    {
+      "label": "trim:\"a\\\\ \"",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"a\\\\ \"))));",
+      "expected": "ok|0061,005c"
+    },
+    {
+      "label": "trim:\"a\\\\  \"",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"a\\\\  \"))));",
+      "expected": "ok|0061,005c,0020"
+    },
+    {
+      "label": "trim:\"😀 \"",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"😀 \"))));",
+      "expected": "ok|d83d,de00"
+    },
+    {
+      "label": "trim:\"﻿a﻿\"",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"﻿a﻿\"))));",
+      "expected": "ok|0061"
+    },
+    {
+      "label": "trim:\"a\"",
+      "cpp": "return hex(unit_util_host::text(u.trimSpaces(Property(\"a\"))));",
+      "expected": "ok|0085,0061,0085"
+    },
+    {
+      "label": "trim-pass-through:U",
+      "cpp": "Property p=Missing{};return std::string(u.trimSpaces(p)==p?\"same\":\"bad\")+\":\"+val(u.trimSpaces(p));",
+      "expected": "ok|same:U"
+    },
+    {
+      "label": "non-string-match:U",
+      "cpp": "return shape(u.matchDimen(Property(Missing{})));",
+      "expected": "TypeError|Cannot read properties of undefined (reading 'match')|THREW"
+    },
+    {
+      "label": "trim-pass-through:N",
+      "cpp": "Property p=PropertyNull{};return std::string(u.trimSpaces(p)==p?\"same\":\"bad\")+\":\"+val(u.trimSpaces(p));",
+      "expected": "ok|same:N"
+    },
+    {
+      "label": "non-string-match:N",
+      "cpp": "return shape(u.matchDimen(Property(PropertyNull{})));",
+      "expected": "TypeError|Cannot read properties of null (reading 'match')|THREW"
+    },
+    {
+      "label": "trim-pass-through:false",
+      "cpp": "Property p=false;return std::string(u.trimSpaces(p)==p?\"same\":\"bad\")+\":\"+val(u.trimSpaces(p));",
+      "expected": "ok|same:false"
+    },
+    {
+      "label": "non-string-match:false",
+      "cpp": "return shape(u.matchDimen(Property(false)));",
+      "expected": "TypeError|dim.match is not a function|THREW"
+    },
+    {
+      "label": "trim-pass-through:zero",
+      "cpp": "Property p=0;return std::string(u.trimSpaces(p)==p?\"same\":\"bad\")+\":\"+val(u.trimSpaces(p));",
+      "expected": "ok|same:0"
+    },
+    {
+      "label": "non-string-match:zero",
+      "cpp": "return shape(u.matchDimen(Property(0)));",
+      "expected": "TypeError|dim.match is not a function|THREW"
+    },
+    {
+      "label": "trim-record-identity",
+      "cpp": "Property p=PropertyList{{\"a\",1}};return std::string(u.trimSpaces(p)==p?\"same\":\"bad\");",
+      "expected": "ok|same"
+    },
+    {
+      "label": "initial-map-metadata",
+      "cpp": "return property_host::debugText(u.UNIT_CASES->num)+\":\"+property_host::debugText(u.UNIT_CASES->unit)+\":\"+property_host::debugText(u.UNIT_CASES->dimenEnd->source)+\":\"+property_host::debugText(u.UNIT_CASES->dimenRest->source);",
+      "expected": "ok|([-+]?([.,]\\d+|\\d+([.,]\\d*)?)):(em|ex|pt|pc|px|in|cm|mm|mu):^\\s*([-+]?([.,]\\d+|\\d+([.,]\\d*)?))\\s*(em|ex|pt|pc|px|in|cm|mm|mu)\\s*$:^\\s*([-+]?([.,]\\d+|\\d+([.,]\\d*)?))\\s*(em|ex|pt|pc|px|in|cm|mm|mu) ?"
+    },
+    {
+      "label": "map-get:em",
+      "cpp": "return val(u.UNIT_CASES->get(Property(\"em\")));",
+      "expected": "ok|1"
+    },
+    {
+      "label": "map-get:ex",
+      "cpp": "return val(u.UNIT_CASES->get(Property(\"ex\")));",
+      "expected": "ok|0.43"
+    },
+    {
+      "label": "map-get:pt",
+      "cpp": "return val(u.UNIT_CASES->get(Property(\"pt\")));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "map-get:pc",
+      "cpp": "return val(u.UNIT_CASES->get(Property(\"pc\")));",
+      "expected": "ok|1.2"
+    },
+    {
+      "label": "map-get:px",
+      "cpp": "return val(u.UNIT_CASES->get(Property(\"px\")));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "map-get:in",
+      "cpp": "return val(u.UNIT_CASES->get(Property(\"in\")));",
+      "expected": "ok|7.2"
+    },
+    {
+      "label": "map-get:cm",
+      "cpp": "return val(u.UNIT_CASES->get(Property(\"cm\")));",
+      "expected": "ok|2.8346456692913384"
+    },
+    {
+      "label": "map-get:mm",
+      "cpp": "return val(u.UNIT_CASES->get(Property(\"mm\")));",
+      "expected": "ok|0.28346456692913385"
+    },
+    {
+      "label": "map-get:mu",
+      "cpp": "return val(u.UNIT_CASES->get(Property(\"mu\")));",
+      "expected": "ok|0.05555555555555555"
+    },
+    {
+      "label": "map-get:bad",
+      "cpp": "return val(u.UNIT_CASES->get(Property(\"bad\")));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "map-get:",
+      "cpp": "return val(u.UNIT_CASES->get(Property(\"\")));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "map-null-get",
+      "cpp": "return val(u.UNIT_CASES->get(PropertyNull{}));",
+      "expected": "ok|0.1"
+    },
+    {
+      "label": "map-update-retains-key-order-and-this",
+      "cpp": "auto*map=u.UNIT_CASES.get();auto old=map->dimenEnd;auto*r=map->set(u\"em\",2);map->set(u\"zz\",3);return std::string(r==map?\"same\":\"bad\")+\":\"+property_host::debugText(map->unit)+\":\"+std::string(old!=map->dimenEnd?\"new\":\"bad\")+\":\"+val(Property(u.dimen2em(\"2em\")))+\":\"+val(Property(u.dimen2em(\"2zz\")));",
+      "expected": "ok|same:(em|ex|pt|pc|px|in|cm|mm|mu|zz):new:4:6"
+    },
+    {
+      "label": "map-zero-fallback",
+      "cpp": "u.UNIT_CASES->set(u\"em\",0);return val(u.UNIT_CASES->get(\"em\"))+\":\"+val(Property(u.dimen2em(\"2em\")));",
+      "expected": "ok|0.1:0.2"
+    },
+    {
+      "label": "map-delete-pattern-identity",
+      "cpp": "auto map=u.UNIT_CASES;auto old=map->dimenEnd;const bool absent=map->erase(u\"bad\");const bool same=old==map->dimenEnd;const bool removed=map->erase(u\"em\");return val(Property(absent))+\":\"+val(Property(same))+\":\"+val(Property(removed))+\":\"+std::string(old!=map->dimenEnd?\"new\":\"bad\")+\":\"+shape(u.matchDimen(\"2em\"));",
+      "expected": "ok|false:true:true:new:N:N:0"
+    },
+    {
+      "label": "map-delete-pt-no-fallback",
+      "cpp": "u.UNIT_CASES->erase(u\"pt\");return val(u.UNIT_CASES->get(\"bad\"))+\":\"+val(Property(u.dimen2em(\"bad\")));",
+      "expected": "ok|U:NaN"
+    },
+    {
+      "label": "map-reinsert-key-at-end",
+      "cpp": "u.UNIT_CASES->erase(u\"em\");u.UNIT_CASES->set(u\"em\",4);return property_host::debugText(u.UNIT_CASES->unit);",
+      "expected": "ok|(ex|pt|pc|px|in|cm|mm|mu|em)"
+    },
+    {
+      "label": "map-constructor-duplicate-key",
+      "cpp": "UnitMap map(UnitEntries{{u\"x\",1},{u\"pt\",.1},{u\"x\",2}});return property_host::debugText(map.unit)+\":\"+val(map.get(\"x\"));",
+      "expected": "ok|(x|pt):2"
+    },
+    {
+      "label": "map-empty-constructor",
+      "cpp": "u.UNIT_CASES=std::make_shared<UnitMap>(UnitEntries{});return property_host::debugText(u.UNIT_CASES->unit)+\":\"+shape(u.matchDimen(\"2\"))+\":\"+val(Property(u.dimen2em(\"2\")));",
+      "expected": "ok|():2::1:NaN"
+    },
+    {
+      "label": "map-alternative-prefix-order",
+      "cpp": "u.UNIT_CASES=std::make_shared<UnitMap>(UnitEntries{{u\"e\",1},{u\"em\",2},{u\"pt\",.1}});return shape(u.matchDimen(\"2emtail\",true))+\":\"+shape(u.matchDimen(\"2em\"));",
+      "expected": "ok|2:e:2:2:em:3"
+    },
+    {
+      "label": "map-unicode-literal-key",
+      "cpp": "u.UNIT_CASES->set(property_host::text(\"😀\"),2);return shape(u.matchDimen(\"2😀tail\",true));",
+      "expected": "ok|2:😀:3"
+    },
+    {
+      "label": "live-mu-factor",
+      "cpp": "u.UNIT_CASES->set(u\"mu\",.25);return shape(u.matchDimen(\"2mu\"))+\":\"+val(Property(u.dimen2em(\"2mu\")));",
+      "expected": "ok|0.5:em:3:0.5"
+    }
+  ]
+}

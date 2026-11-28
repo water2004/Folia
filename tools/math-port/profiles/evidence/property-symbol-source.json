@@ -1,0 +1,27 @@
+{
+  "schema": "property-symbol-v1",
+  "hashes": {
+    "ts/input/tex/TokenMap.ts": "0209895b13569008b2129b61c88050e7c70e70ce9477d234b9a6e303a86a738e",
+    "cjs/input/tex/TokenMap.js": "9e3f086080a6ab052b68b22a5d9ee3dbc5e17d7b0c03a31e789664b01df36cf7"
+  },
+  "cases": {
+    "identity": {
+      "same": true,
+      "peerDistinct": true,
+      "truthy": true
+    },
+    "realMap": {
+      "present": true,
+      "retainsMarker": true,
+      "removed": true
+    },
+    "string": {
+      "name": "TypeError",
+      "message": "Cannot convert a Symbol value to a string"
+    },
+    "number": {
+      "name": "TypeError",
+      "message": "Cannot convert a Symbol value to a number"
+    }
+  }
+}

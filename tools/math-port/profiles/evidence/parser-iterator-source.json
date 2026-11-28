@@ -1,0 +1,236 @@
+{
+  "node": "v24.13.0",
+  "source": "ts/input/tex/Configuration.ts",
+  "source_sha256": "8184716579abf3ffa14c64413d276dab4fc721e3e3f43afb0cdccbe2ab782719",
+  "cjs": "cjs/input/tex/Configuration.js",
+  "cjs_sha256": "86f62a6f6e44fec20156546b7e8d424cac493c7465c2c8ec621c604332a276f3",
+  "observations": [
+    {
+      "label": "array-iterator-dynamic-prototype-method",
+      "outcome": {
+        "value": 1
+      },
+      "log": [
+        "iterator:call",
+        "next:0",
+        "next:1",
+        "iterator:call",
+        "next:0",
+        "iterator:call",
+        "next:0"
+      ],
+      "nativeCandidate": "source_values_resolves_current_symbol_iterator_method"
+    },
+    {
+      "label": "iterator-method-call-property-is-dynamic",
+      "outcome": {
+        "value": 1
+      },
+      "log": [
+        "call:true"
+      ],
+      "nativeCandidate": "source_helper_uses_current_function_call_property"
+    },
+    {
+      "label": "truthy-iterator-object-call-method",
+      "outcome": {
+        "value": 1
+      },
+      "log": [
+        "call:true"
+      ],
+      "nativeCandidate": "source_helper_accepts_object_with_callable_call_property"
+    },
+    {
+      "label": "iterator-method-missing-call-is-typeerror",
+      "outcome": {
+        "error": "TypeError|m.call is not a function"
+      },
+      "log": [],
+      "nativeCandidate": "source_helper_method_call_error"
+    },
+    {
+      "label": "custom-iterator-abrupt-close",
+      "outcome": {
+        "error": "Error|Package 'p55-wrong' doesn't target the proper parser"
+      },
+      "log": [
+        "slice",
+        "reverse",
+        "iterator",
+        "next",
+        "return"
+      ],
+      "nativeCandidate": "source_for_of_body_error_closes_current_iterator"
+    },
+    {
+      "label": "custom-iterator-next-error-close",
+      "outcome": {
+        "error": "Error|next-fault"
+      },
+      "log": [
+        "next",
+        "next",
+        "return"
+      ],
+      "nativeCandidate": "source_for_of_next_error_closes_previous_step"
+    },
+    {
+      "label": "arraylike-values-fallback-live",
+      "outcome": {
+        "value": 1
+      },
+      "log": [
+        "length",
+        "length",
+        "get0",
+        "length",
+        "get1",
+        "warn:MathJax Warning: Package 'late' not found.  Omitted.",
+        "length"
+      ],
+      "nativeCandidate": "source_values_arraylike_fallback_reads_dynamic_length_and_get"
+    },
+    {
+      "label": "symbol-iterator-getter-before-arraylike-length",
+      "outcome": {
+        "error": "Error|iterator-get-fault"
+      },
+      "log": [
+        "get:Symbol(Symbol.iterator)"
+      ],
+      "nativeCandidate": "source_values_symbol_getter_precedes_length_fallback"
+    },
+    {
+      "label": "null-values-helper-read-error",
+      "outcome": {
+        "error": "TypeError|object null is not iterable (cannot read property Symbol(Symbol.iterator))"
+      },
+      "log": [],
+      "nativeCandidate": "source_values_null_fails_during_symbol_lookup"
+    },
+    {
+      "label": "tuple-destructure-close",
+      "outcome": {
+        "value": "ok"
+      },
+      "log": [
+        "tuple:iterator",
+        "tuple:next0",
+        "tuple:next1",
+        "tuple:return",
+        "add:proc,7"
+      ],
+      "nativeCandidate": "source_read_bounded_iterator_closes_after_requested_values"
+    },
+    {
+      "label": "tuple-destructure-close-throw-priority",
+      "outcome": {
+        "error": "Error|close-fault"
+      },
+      "log": [
+        "tuple:return"
+      ],
+      "nativeCandidate": "source_read_close_error_propagates_without_prior_error"
+    },
+    {
+      "label": "tuple-arraylike-read-fallback",
+      "outcome": {
+        "value": "ok"
+      },
+      "log": [
+        "tuple:get0",
+        "tuple:get1",
+        "add:proc,9"
+      ],
+      "nativeCandidate": "source_read_without_iterator_returns_original_identity"
+    },
+    {
+      "label": "tuple-next-abrupt-keeps-original-over-return",
+      "outcome": {
+        "error": "Error|next-fault"
+      },
+      "log": [
+        "tuple:next"
+      ],
+      "nativeCandidate": "source_read_iterator_error_precedes_close_error"
+    },
+    {
+      "label": "tuple-next-error-after-yield-keeps-priority-over-return",
+      "outcome": {
+        "error": "Error|next-fault"
+      },
+      "log": [
+        "tuple:next0",
+        "tuple:next1",
+        "tuple:return"
+      ],
+      "nativeCandidate": "source_read_iterator_error_after_yield_precedes_close_error"
+    },
+    {
+      "label": "function-prototype-call-metadata",
+      "outcome": {
+        "value": "1:false:true:true"
+      },
+      "log": [],
+      "nativeCandidate": "source_function_prototype_call_metadata"
+    },
+    {
+      "label": "function-prototype-call-getter-is-live",
+      "outcome": {
+        "value": 1
+      },
+      "log": [
+        "get-call:false",
+        "invoke-call:false:false",
+        "get-call:false",
+        "invoke-call:false:false",
+        "get-call:true",
+        "invoke-call:true:true",
+        "get-call:false",
+        "invoke-call:false:false"
+      ],
+      "nativeCandidate": "source_helper_gets_inherited_function_call"
+    },
+    {
+      "label": "function-prototype-call-deleted-is-not-bypassed",
+      "outcome": {
+        "error": "TypeError|m.call is not a function"
+      },
+      "log": [],
+      "nativeCandidate": "source_helper_does_not_bypass_deleted_call"
+    },
+    {
+      "label": "arraylike-fallback-iterator-object-shape",
+      "outcome": {
+        "value": "true:true:undefined"
+      },
+      "log": [],
+      "nativeCandidate": "source_arraylike_helper_iterator_is_plain_own_next"
+    },
+    {
+      "label": "configuration-handler-method-metadata",
+      "outcome": {
+        "value": "set:2:true:true:true/get:1:true:true:true/keys:0:true:true:true"
+      },
+      "log": [],
+      "nativeCandidate": "source_configuration_handler_methods_metadata"
+    },
+    {
+      "label": "configuration-handler-live-keys-iterator",
+      "outcome": {
+        "value": "false:true:true:true"
+      },
+      "log": [],
+      "nativeCandidate": "source_configuration_handler_keys_is_live"
+    },
+    {
+      "label": "configuration-handler-overwrite-keeps-map-order",
+      "outcome": {
+        "value": "true:false:false"
+      },
+      "log": [],
+      "nativeCandidate": "source_configuration_handler_set_overwrites_in_place"
+    }
+  ]
+}

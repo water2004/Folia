@@ -1,0 +1,2917 @@
+{
+  "schema": 1,
+  "source": "actual pinned MathJax CJS classes, real TeX/ParseOptions/Stack/MML peers; no native code",
+  "sourceCommit": "fb987178c2d279a99b0db5ea02e751691703955e",
+  "scope_sha256": "9705d389538b2fc8bf782feea4372ace639b3727304f2971937bbcfb0042a0d1",
+  "modules": [
+    {
+      "source": "ts/input/tex/TexParser.ts",
+      "source_sha256": "9afdfff070ec7ed7115a1afe97048b3d1f1befae5b75e8ec963e0456685ee167",
+      "cjs": "input/tex/TexParser.js",
+      "cjs_sha256": "106d7ff9298dce899d046339eab1996358f3efca3a7ce66f5ca915747dc9c6a8"
+    },
+    {
+      "cjs": "input/tex/TexParser.js",
+      "cjs_sha256": "106d7ff9298dce899d046339eab1996358f3efca3a7ce66f5ca915747dc9c6a8"
+    },
+    {
+      "cjs": "input/tex.js",
+      "cjs_sha256": "ef2852b197173f373e62326016e980aef01ffc838f5f766ab6076262f944eada"
+    },
+    {
+      "cjs": "input/tex/Stack.js",
+      "cjs_sha256": "78743f9dfcf1ebf9beb890629d908111be5c1e47f49c16d5ffa0877c5935c385"
+    },
+    {
+      "cjs": "input/tex/MapHandler.js",
+      "cjs_sha256": "d82e3034776d2392689aad86500b5e60dbe0aa5540853b48f308841879f3cf67"
+    },
+    {
+      "cjs": "input/tex/ParseOptions.js",
+      "cjs_sha256": "ff19d70539cb76911c5f1d7673ddfd908183dcf5849c91cb068b19e58da8a9ec"
+    },
+    {
+      "cjs": "input/tex/StackItem.js",
+      "cjs_sha256": "53baa91d7c27475a91a9b6993235071ab32b04a29736c5920bdda2836ab5a91b"
+    },
+    {
+      "cjs": "input/tex/StackItemFactory.js",
+      "cjs_sha256": "2722b21be90f76b48325c22a65b37f80dc283e4bc9f74b644dcae81386d001c2"
+    },
+    {
+      "cjs": "input/tex/UnitUtil.js",
+      "cjs_sha256": "22fd8e826575bf9cd612b2f85208a49b07eb3cb6d9ace6c6db36e79d6e50bade"
+    },
+    {
+      "cjs": "input/tex/TexError.js",
+      "cjs_sha256": "a5713111ff2ab646740da13ca6273cb5f2a7ceff9d0fb6a2e116185e4994e64f"
+    },
+    {
+      "cjs": "core/MmlTree/MmlFactory.js",
+      "cjs_sha256": "d0c4e25237d04a9d21d12ee44776e46d30777e7f284db6f4f3ed1cc625b752d3"
+    },
+    {
+      "cjs": "core/MmlTree/MmlNode.js",
+      "cjs_sha256": "86c5eb572dcf2652c3c52a60b66c720d231e17f600cc9aeef3ace4aeafc81d45"
+    },
+    {
+      "cjs": "core/Tree/Factory.js",
+      "cjs_sha256": "739db2e5760c29d7bb4f1bc7baa08ff8d727f4d117522aff5ede017f812cffef"
+    }
+  ],
+  "observations": [
+    {
+      "label": "texparser-emitted-prototype-method-metadata",
+      "result": {
+        "constructor": {
+          "enumerable": false,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "TexParser",
+            "length": 3
+          }
+        },
+        "options": {
+          "enumerable": false,
+          "configurable": true,
+          "get": {
+            "name": "get",
+            "length": 0
+          },
+          "set": null,
+          "value": {
+            "$": "undefined"
+          }
+        },
+        "itemFactory": {
+          "enumerable": false,
+          "configurable": true,
+          "get": {
+            "name": "get",
+            "length": 0
+          },
+          "set": null,
+          "value": {
+            "$": "undefined"
+          }
+        },
+        "tags": {
+          "enumerable": false,
+          "configurable": true,
+          "get": {
+            "name": "get",
+            "length": 0
+          },
+          "set": null,
+          "value": {
+            "$": "undefined"
+          }
+        },
+        "string": {
+          "enumerable": false,
+          "configurable": true,
+          "get": {
+            "name": "get",
+            "length": 0
+          },
+          "set": {
+            "name": "set",
+            "length": 1
+          },
+          "value": {
+            "$": "undefined"
+          }
+        },
+        "parse": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 2
+          }
+        },
+        "lookup": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 2
+          }
+        },
+        "contains": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 2
+          }
+        },
+        "toString": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 0
+          }
+        },
+        "Parse": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 0
+          }
+        },
+        "Push": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 1
+          }
+        },
+        "PushAll": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 1
+          }
+        },
+        "mml": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 0
+          }
+        },
+        "convertDelimiter": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 1
+          }
+        },
+        "getCodePoint": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 0
+          }
+        },
+        "nextIsSpace": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 0
+          }
+        },
+        "GetNext": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 0
+          }
+        },
+        "GetCS": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 0
+          }
+        },
+        "GetArgument": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 2
+          }
+        },
+        "GetBrackets": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 3
+          }
+        },
+        "GetDelimiter": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 2
+          }
+        },
+        "GetDimen": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 1
+          }
+        },
+        "GetUpTo": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 2
+          }
+        },
+        "ParseArg": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 1
+          }
+        },
+        "ParseUpTo": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 2
+          }
+        },
+        "GetDelimiterArg": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 1
+          }
+        },
+        "GetStar": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 0
+          }
+        },
+        "create": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 1
+          }
+        },
+        "trimTex": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 1
+          }
+        },
+        "updateResult": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 2
+          }
+        },
+        "composeLatex": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 4
+          }
+        },
+        "composeBraces": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 1
+          }
+        },
+        "composeBracedContent": {
+          "enumerable": true,
+          "configurable": true,
+          "get": null,
+          "set": null,
+          "value": {
+            "name": "",
+            "length": 1
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "constructor-real-parse-empty-token-macro-and-mml",
+      "result": {
+        "$": "array",
+        "items": [
+          {
+            "source": "",
+            "before": {
+              "string": "",
+              "i": 0,
+              "macroCount": 0,
+              "currentCS": "",
+              "topKind": "mml",
+              "parserCount": 1
+            },
+            "result": {
+              "kind": "inferredMrow",
+              "attrs": {},
+              "properties": {},
+              "children": {
+                "$": "array",
+                "items": []
+              }
+            },
+            "parserCountAfterMml": 0
+          },
+          {
+            "source": "x",
+            "before": {
+              "string": "x",
+              "i": 1,
+              "macroCount": 0,
+              "currentCS": "",
+              "topKind": "mml",
+              "parserCount": 1
+            },
+            "result": {
+              "kind": "mi",
+              "attrs": {
+                "data-latex": "x"
+              },
+              "properties": {},
+              "children": {
+                "$": "array",
+                "items": [
+                  {
+                    "kind": "text",
+                    "attrs": {},
+                    "properties": {},
+                    "children": {
+                      "$": "array",
+                      "items": []
+                    }
+                  }
+                ]
+              }
+            },
+            "parserCountAfterMml": 0
+          },
+          {
+            "source": "x+1",
+            "before": {
+              "string": "x+1",
+              "i": 3,
+              "macroCount": 0,
+              "currentCS": "",
+              "topKind": "mml",
+              "parserCount": 1
+            },
+            "result": {
+              "kind": "inferredMrow",
+              "attrs": {
+                "data-latex": "x+1"
+              },
+              "properties": {},
+              "children": {
+                "$": "array",
+                "items": [
+                  {
+                    "kind": "mi",
+                    "attrs": {
+                      "data-latex": "x"
+                    },
+                    "properties": {},
+                    "children": {
+                      "$": "array",
+                      "items": [
+                        {
+                          "kind": "text",
+                          "attrs": {},
+                          "properties": {},
+                          "children": {
+                            "$": "array",
+                            "items": []
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "kind": "mo",
+                    "attrs": {
+                      "data-latex": "+"
+                    },
+                    "properties": {
+                      "fixStretchy": true,
+                      "in-lists": "fixStretchy"
+                    },
+                    "children": {
+                      "$": "array",
+                      "items": [
+                        {
+                          "kind": "text",
+                          "attrs": {},
+                          "properties": {},
+                          "children": {
+                            "$": "array",
+                            "items": []
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "kind": "mn",
+                    "attrs": {
+                      "data-latex": "1"
+                    },
+                    "properties": {},
+                    "children": {
+                      "$": "array",
+                      "items": [
+                        {
+                          "kind": "text",
+                          "attrs": {},
+                          "properties": {},
+                          "children": {
+                            "$": "array",
+                            "items": []
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            "parserCountAfterMml": 0
+          },
+          {
+            "source": "\\frac{1}{2}",
+            "before": {
+              "string": "\\frac{1}{2}",
+              "i": 11,
+              "macroCount": 0,
+              "currentCS": "",
+              "topKind": "mml",
+              "parserCount": 1
+            },
+            "result": {
+              "kind": "mfrac",
+              "attrs": {
+                "data-latex": "\\frac{1}{2}"
+              },
+              "properties": {},
+              "children": {
+                "$": "array",
+                "items": [
+                  {
+                    "kind": "mn",
+                    "attrs": {
+                      "data-latex": "1"
+                    },
+                    "properties": {},
+                    "children": {
+                      "$": "array",
+                      "items": [
+                        {
+                          "kind": "text",
+                          "attrs": {},
+                          "properties": {},
+                          "children": {
+                            "$": "array",
+                            "items": []
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "kind": "mn",
+                    "attrs": {
+                      "data-latex": "2"
+                    },
+                    "properties": {},
+                    "children": {
+                      "$": "array",
+                      "items": [
+                        {
+                          "kind": "text",
+                          "attrs": {},
+                          "properties": {},
+                          "children": {
+                            "$": "array",
+                            "items": []
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            "parserCountAfterMml": 0
+          },
+          {
+            "source": "😀",
+            "before": {
+              "string": "😀",
+              "i": 2,
+              "macroCount": 0,
+              "currentCS": "",
+              "topKind": "mml",
+              "parserCount": 1
+            },
+            "result": {
+              "kind": "mo",
+              "attrs": {
+                "data-latex": "😀"
+              },
+              "properties": {
+                "fixStretchy": true,
+                "in-lists": "fixStretchy"
+              },
+              "children": {
+                "$": "array",
+                "items": [
+                  {
+                    "kind": "text",
+                    "attrs": {},
+                    "properties": {},
+                    "children": {
+                      "$": "array",
+                      "items": []
+                    }
+                  }
+                ]
+              }
+            },
+            "parserCountAfterMml": 0
+          },
+          {
+            "source": "x^2",
+            "before": {
+              "string": "x^2 ",
+              "i": 4,
+              "macroCount": 0,
+              "currentCS": "",
+              "topKind": "mml",
+              "parserCount": 1
+            },
+            "result": {
+              "kind": "msubsup",
+              "attrs": {
+                "data-latex": "x^2"
+              },
+              "properties": {
+                "sub-sup": "^"
+              },
+              "children": {
+                "$": "array",
+                "items": [
+                  {
+                    "kind": "mi",
+                    "attrs": {
+                      "data-latex": "x"
+                    },
+                    "properties": {},
+                    "children": {
+                      "$": "array",
+                      "items": [
+                        {
+                          "kind": "text",
+                          "attrs": {},
+                          "properties": {},
+                          "children": {
+                            "$": "array",
+                            "items": []
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "$": "hole"
+                  },
+                  {
+                    "kind": "mn",
+                    "attrs": {
+                      "data-latex": "2"
+                    },
+                    "properties": {},
+                    "children": {
+                      "$": "array",
+                      "items": [
+                        {
+                          "kind": "text",
+                          "attrs": {},
+                          "properties": {},
+                          "children": {
+                            "$": "array",
+                            "items": []
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            "parserCountAfterMml": 0
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "label": "mml-reads-stack-top-independently-for-kind-and-first",
+      "result": {
+        "reads": {
+          "$": "array",
+          "items": [
+            {
+              "receiverIsStack": true,
+              "argc": 0
+            },
+            {
+              "receiverIsStack": true,
+              "argc": 0
+            }
+          ]
+        },
+        "result": {
+          "kind": "mi",
+          "attrs": {
+            "data-latex": "x"
+          },
+          "properties": {},
+          "children": {
+            "$": "array",
+            "items": [
+              {
+                "kind": "text",
+                "attrs": {},
+                "properties": {},
+                "children": {
+                  "$": "array",
+                  "items": []
+                }
+              }
+            ]
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "constructor-env-isInner-own-test-delete-and-stack-copy",
+      "result": {
+        "envAfter": {
+          "font": "bold"
+        },
+        "stackEnv": {
+          "font": "bold"
+        },
+        "stackInner": {
+          "$": "undefined"
+        },
+        "ownParserFields": {
+          "$": "array",
+          "items": [
+            "_string",
+            "configuration",
+            "macroCount",
+            "i",
+            "currentCS",
+            "saveI",
+            "stack"
+          ]
+        },
+        "descriptors": {
+          "_string": {
+            "value": "",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "configuration": {
+            "value": {
+              "options": {
+                "preFilters": {
+                  "$": "array",
+                  "items": []
+                },
+                "postFilters": {
+                  "$": "array",
+                  "items": []
+                },
+                "FindTeX": null,
+                "packages": {
+                  "$": "array",
+                  "items": [
+                    "base"
+                  ]
+                },
+                "maxBuffer": 5120,
+                "maxTemplateSubtitutions": 10000,
+                "mathStyle": "TeX",
+                "formatError": {
+                  "$": "function",
+                  "name": "formatError",
+                  "length": 2
+                },
+                "tags": "none",
+                "tagSide": "right",
+                "tagIndent": "0.8em",
+                "useLabelIds": true,
+                "ignoreDuplicateLabels": false,
+                "tagAlign": "baseline",
+                "maxMacros": 1000,
+                "digits": "",
+                "numberPattern": {
+                  "lastIndex": 0
+                },
+                "initialDigit": {
+                  "lastIndex": 0
+                },
+                "identifierPattern": {
+                  "lastIndex": 0
+                },
+                "initialLetter": {
+                  "lastIndex": 0
+                },
+                "baseURL": ""
+              },
+              "columnParser": {
+                "columnHandler": {
+                  "l": {
+                    "$": "function",
+                    "name": "l",
+                    "length": 1
+                  },
+                  "c": {
+                    "$": "function",
+                    "name": "c",
+                    "length": 1
+                  },
+                  "r": {
+                    "$": "function",
+                    "name": "r",
+                    "length": 1
+                  },
+                  "p": {
+                    "$": "function",
+                    "name": "p",
+                    "length": 1
+                  },
+                  "m": {
+                    "$": "function",
+                    "name": "m",
+                    "length": 1
+                  },
+                  "b": {
+                    "$": "function",
+                    "name": "b",
+                    "length": 1
+                  },
+                  "w": {
+                    "$": "function",
+                    "name": "w",
+                    "length": 1
+                  },
+                  "W": {
+                    "$": "function",
+                    "name": "W",
+                    "length": 1
+                  },
+                  "|": {
+                    "$": "function",
+                    "name": "|",
+                    "length": 1
+                  },
+                  ":": {
+                    "$": "function",
+                    "name": ":",
+                    "length": 1
+                  },
+                  ">": {
+                    "$": "function",
+                    "name": ">",
+                    "length": 1
+                  },
+                  "<": {
+                    "$": "function",
+                    "name": "<",
+                    "length": 1
+                  },
+                  "@": {
+                    "$": "function",
+                    "name": "@",
+                    "length": 1
+                  },
+                  "!": {
+                    "$": "function",
+                    "name": "!",
+                    "length": 1
+                  },
+                  "*": {
+                    "$": "function",
+                    "name": "*",
+                    "length": 1
+                  },
+                  "{": {
+                    "$": "function",
+                    "name": "{",
+                    "length": 1
+                  },
+                  "P": {
+                    "$": "function",
+                    "name": "P",
+                    "length": 1
+                  },
+                  "M": {
+                    "$": "function",
+                    "name": "M",
+                    "length": 1
+                  },
+                  "B": {
+                    "$": "function",
+                    "name": "B",
+                    "length": 1
+                  },
+                  " ": {
+                    "$": "function",
+                    "name": " ",
+                    "length": 1
+                  },
+                  "\n": {
+                    "$": "function",
+                    "name": "\n",
+                    "length": 1
+                  }
+                },
+                "MAXCOLUMNS": 10000
+              },
+              "packageData": {},
+              "parsers": {
+                "$": "array",
+                "items": []
+              },
+              "root": null,
+              "nodeLists": {
+                "inferredMrow": {
+                  "$": "array",
+                  "items": [
+                    {
+                      "factory": {
+                        "defaultKind": "unknown",
+                        "nodeMap": {},
+                        "node": {
+                          "math": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mi": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mn": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mo": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mtext": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mspace": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "ms": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mrow": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "inferredMrow": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mfrac": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "msqrt": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mroot": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mstyle": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "merror": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mpadded": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mphantom": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mfenced": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "menclose": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "maction": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "msub": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "msup": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "msubsup": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "munder": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mover": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "munderover": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mmultiscripts": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mprescripts": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "none": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mtable": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mlabeledtr": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mtr": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mtd": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "maligngroup": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "malignmark": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "mglyph": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "semantics": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "annotation": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "annotation-xml": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "TeXAtom": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "MathChoice": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "text": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "XML": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          },
+                          "html": {
+                            "$": "function",
+                            "name": "",
+                            "length": 0
+                          }
+                        }
+                      },
+                      "parent": null,
+                      "properties": {},
+                      "childNodes": {
+                        "$": "array",
+                        "items": []
+                      },
+                      "prevClass": null,
+                      "prevLevel": null,
+                      "texclass": null,
+                      "attributes": {
+                        "global": {
+                          "mathbackground": "transparent",
+                          "mathcolor": "",
+                          "mathsize": "normal",
+                          "dir": "ltr",
+                          "mathvariant": "normal",
+                          "scriptlevel": 0,
+                          "displaystyle": false,
+                          "display": "inline",
+                          "maxwidth": "",
+                          "overflow": "linebreak",
+                          "altimg": "",
+                          "altimg-width": "",
+                          "altimg-height": "",
+                          "altimg-valign": "",
+                          "alttext": "",
+                          "cdgroup": "",
+                          "scriptsizemultiplier": 0.7071067811865475,
+                          "scriptminsize": ".4em",
+                          "infixlinebreakstyle": "before",
+                          "lineleading": "100%",
+                          "linebreakmultchar": "⁢",
+                          "indentshift": "auto",
+                          "indentalign": "auto",
+                          "indenttarget": "",
+                          "indentalignfirst": "indentalign",
+                          "indentshiftfirst": "indentshift",
+                          "indentalignlast": "indentalign",
+                          "indentshiftlast": "indentshift"
+                        },
+                        "defaults": {
+                          "mathbackground": "_inherit_",
+                          "mathcolor": "_inherit_",
+                          "mathsize": "_inherit_",
+                          "dir": "_inherit_"
+                        },
+                        "inherited": {},
+                        "attributes": {}
+                      },
+                      "_core": null
+                    }
+                  ]
+                }
+              },
+              "error": false,
+              "handlers": {
+                "map": {}
+              },
+              "nodeFactory": {
+                "mmlFactory": {
+                  "$": "cycle"
+                },
+                "factory": {
+                  "node": {
+                    "$": "function",
+                    "name": "",
+                    "length": 5
+                  },
+                  "token": {
+                    "$": "function",
+                    "name": "",
+                    "length": 4
+                  },
+                  "text": {
+                    "$": "function",
+                    "name": "",
+                    "length": 2
+                  },
+                  "error": {
+                    "$": "function",
+                    "name": "",
+                    "length": 2
+                  }
+                },
+                "configuration": {
+                  "$": "cycle"
+                }
+              },
+              "itemFactory": {
+                "defaultKind": "dummy",
+                "nodeMap": {},
+                "node": {
+                  "start": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "stop": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "open": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "close": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "null": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "prime": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "subsup": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "over": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "left": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "middle": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "right": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "break": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "begin": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "end": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "style": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "position": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "cell": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "mml": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "fn": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "not": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "nonscript": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "dots": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "array": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "eqnarray": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "equation": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  },
+                  "mstyle": {
+                    "$": "function",
+                    "name": "",
+                    "length": 0
+                  }
+                },
+                "configuration": {
+                  "$": "cycle"
+                }
+              },
+              "mathStyle": {
+                "$": "function",
+                "name": "",
+                "length": 2
+              },
+              "tags": {
+                "counter": 0,
+                "allCounter": 0,
+                "configuration": {
+                  "$": "cycle"
+                },
+                "ids": {},
+                "allIds": {},
+                "labels": {},
+                "allLabels": {},
+                "redo": false,
+                "refUpdate": false,
+                "currentTag": {
+                  "env": "",
+                  "taggable": false,
+                  "defaultTags": false,
+                  "tag": null,
+                  "tagId": "",
+                  "tagFormat": "",
+                  "noTag": false,
+                  "labelId": ""
+                },
+                "history": {
+                  "$": "array",
+                  "items": []
+                },
+                "stack": {
+                  "$": "array",
+                  "items": []
+                },
+                "enTag": {
+                  "$": "function",
+                  "name": "",
+                  "length": 2
+                }
+              }
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "macroCount": {
+            "value": 0,
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "i": {
+            "value": 0,
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "currentCS": {
+            "value": "",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "saveI": {
+            "value": 0,
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          },
+          "stack": {
+            "value": {
+              "_factory": {
+                "$": "cycle"
+              },
+              "_env": {
+                "font": "bold"
+              },
+              "global": {
+                "isInner": false
+              },
+              "stack": {
+                "$": "array",
+                "items": [
+                  {
+                    "_nodes": {
+                      "$": "array",
+                      "items": [
+                        {
+                          "$": "cycle"
+                        }
+                      ]
+                    },
+                    "startStr": "",
+                    "startI": 0,
+                    "stopI": 0,
+                    "factory": {
+                      "$": "cycle"
+                    },
+                    "global": {
+                      "$": "cycle"
+                    },
+                    "_properties": {},
+                    "_env": {}
+                  }
+                ]
+              }
+            },
+            "writable": true,
+            "enumerable": true,
+            "configurable": true
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "constructor-malformed-env-null-before-parser-push",
+      "result": {
+        "outcome": {
+          "result": null,
+          "error": {
+            "name": "TypeError",
+            "id": null,
+            "message": "Cannot convert undefined or null to object"
+          }
+        },
+        "parserCount": 0
+      },
+      "error": null
+    },
+    {
+      "label": "parser-getters-setter-and-default-string-replacement",
+      "result": {
+        "initial": {
+          "optionsIdentity": true,
+          "itemFactoryIdentity": true,
+          "tagsIdentity": true,
+          "string": ""
+        },
+        "codePoint": "𝑥",
+        "afterOneCodePointIndex": 2,
+        "nextIsSpace": true,
+        "next": "y",
+        "index": 3
+      },
+      "error": null
+    },
+    {
+      "label": "parser-getnext-spaces-ascii-unicode-and-end",
+      "result": {
+        "$": "array",
+        "items": [
+          {
+            "text": " \t\nX",
+            "initialSpace": true,
+            "next": "X",
+            "index": 3,
+            "afterSpace": false,
+            "code": "X"
+          },
+          {
+            "text": " x",
+            "initialSpace": true,
+            "next": "x",
+            "index": 1,
+            "afterSpace": false,
+            "code": "x"
+          },
+          {
+            "text": "😀x",
+            "initialSpace": false,
+            "next": "😀",
+            "index": 0,
+            "afterSpace": false,
+            "code": "😀"
+          },
+          {
+            "text": "",
+            "initialSpace": false,
+            "next": "",
+            "index": 0,
+            "afterSpace": false,
+            "code": ""
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "label": "parser-getcs-control-sequence-ascii-astral-and-empty",
+      "result": {
+        "$": "array",
+        "items": [
+          {
+            "text": "alpha X",
+            "result": "alpha",
+            "index": 6
+          },
+          {
+            "text": "Abc",
+            "result": "Abc",
+            "index": 3
+          },
+          {
+            "text": "😀X",
+            "result": "😀",
+            "index": 2
+          },
+          {
+            "text": "\\",
+            "result": " ",
+            "index": 2
+          },
+          {
+            "text": "",
+            "result": " ",
+            "index": 1
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "label": "parser-getargument-single-control-group-nesting-and-errors",
+      "result": {
+        "$": "array",
+        "items": [
+          {
+            "text": "xR",
+            "result": {
+              "result": "x",
+              "error": null
+            },
+            "index": 1
+          },
+          {
+            "text": "\\alpha tail",
+            "result": {
+              "result": "\\alpha",
+              "error": null
+            },
+            "index": 7
+          },
+          {
+            "text": "{a{b}c}z",
+            "result": {
+              "result": "a{b}c",
+              "error": null
+            },
+            "index": 7
+          },
+          {
+            "text": "{a\\}b}",
+            "result": {
+              "result": "a\\}b",
+              "error": null
+            },
+            "index": 6
+          },
+          {
+            "text": "",
+            "result": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "MissingArgFor",
+                "message": "Missing argument for \\probe"
+              }
+            },
+            "index": 0
+          },
+          {
+            "text": "}",
+            "result": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "ExtraCloseMissingOpen",
+                "message": "Extra close brace or missing open brace"
+              }
+            },
+            "index": 0
+          },
+          {
+            "text": "{open",
+            "result": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "MissingCloseBrace",
+                "message": "Missing close brace"
+              }
+            },
+            "index": 5
+          },
+          {
+            "text": "optional-empty",
+            "result": {
+              "result": null,
+              "error": null
+            },
+            "index": 3
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "label": "parser-getbrackets-matching-escapes-braces-default-and-errors",
+      "result": {
+        "$": "array",
+        "items": [
+          {
+            "text": "[a[b]c]z",
+            "match": true,
+            "result": {
+              "result": "a[b]c",
+              "error": null
+            },
+            "index": 7
+          },
+          {
+            "text": "[a[b]c]z",
+            "match": false,
+            "result": {
+              "result": "a[b",
+              "error": null
+            },
+            "index": 5
+          },
+          {
+            "text": "[{]}]z",
+            "match": true,
+            "result": {
+              "result": "{]}",
+              "error": null
+            },
+            "index": 5
+          },
+          {
+            "text": "[a\\]b]",
+            "match": true,
+            "result": {
+              "result": "a\\]b",
+              "error": null
+            },
+            "index": 6
+          },
+          {
+            "text": "}",
+            "match": false,
+            "result": {
+              "result": "DEFAULT",
+              "error": null
+            },
+            "index": 0
+          },
+          {
+            "text": "[open",
+            "match": false,
+            "result": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "MissingCloseBracket",
+                "message": "Could not find closing ']' for argument to \\probe"
+              }
+            },
+            "index": 5
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "label": "parser-getdelimiter-base-delimiters-and-errors",
+      "result": {
+        "$": "array",
+        "items": [
+          {
+            "text": "(",
+            "result": {
+              "result": "(",
+              "error": null
+            },
+            "index": 1
+          },
+          {
+            "text": "\\{",
+            "result": {
+              "result": "{",
+              "error": null
+            },
+            "index": 2
+          },
+          {
+            "text": "{(",
+            "result": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "MissingCloseBrace",
+                "message": "Missing close brace"
+              }
+            },
+            "index": 2
+          },
+          {
+            "text": "\\unknown",
+            "result": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "MissingOrUnrecognizedDelim",
+                "message": "Missing or unrecognized delimiter for \\probe"
+              }
+            },
+            "index": 8
+          },
+          {
+            "text": "x",
+            "result": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "MissingOrUnrecognizedDelim",
+                "message": "Missing or unrecognized delimiter for \\probe"
+              }
+            },
+            "index": 1
+          },
+          {
+            "text": "",
+            "result": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "MissingOrUnrecognizedDelim",
+                "message": "Missing or unrecognized delimiter for \\probe"
+              }
+            },
+            "index": 0
+          },
+          {
+            "text": "\\langle",
+            "result": {
+              "result": "⟨",
+              "error": null
+            },
+            "index": 7
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "label": "parser-getdimen-braced-and-unbraced-source-consumption",
+      "result": {
+        "$": "array",
+        "items": [
+          {
+            "text": "{1.25em}x",
+            "result": {
+              "result": "1.25em",
+              "error": null
+            },
+            "index": 8,
+            "rest": "x"
+          },
+          {
+            "text": "2.5pt plus 1em",
+            "result": {
+              "result": "2.5pt",
+              "error": null
+            },
+            "index": 6,
+            "rest": "plus 1em"
+          },
+          {
+            "text": "{bad}",
+            "result": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "MissingDimOrUnits",
+                "message": "Missing dimension or its units for \\probe"
+              }
+            },
+            "index": 5,
+            "rest": ""
+          },
+          {
+            "text": "bad",
+            "result": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "MissingDimOrUnits",
+                "message": "Missing dimension or its units for \\probe"
+              }
+            },
+            "index": 0,
+            "rest": "bad"
+          },
+          {
+            "text": "{1em",
+            "result": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "MissingCloseBrace",
+                "message": "Missing close brace"
+              }
+            },
+            "index": 4,
+            "rest": ""
+          },
+          {
+            "text": "",
+            "result": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "MissingDimOrUnits",
+                "message": "Missing dimension or its units for \\probe"
+              }
+            },
+            "index": 0,
+            "rest": ""
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "label": "parser-getupto-braces-commands-token-and-error-state",
+      "result": {
+        "$": "array",
+        "items": [
+          {
+            "text": "  a{b ;c;rest",
+            "result": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "TokenNotFoundForCommand",
+                "message": "Could not find ; for \\probe"
+              }
+            },
+            "index": 13
+          },
+          {
+            "text": "a\\; rest",
+            "result": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "TokenNotFoundForCommand",
+                "message": "Could not find ; for \\probe"
+              }
+            },
+            "index": 8
+          },
+          {
+            "text": "a}token",
+            "result": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "ExtraCloseLooking",
+                "message": "Extra close brace while looking for ;"
+              }
+            },
+            "index": 2
+          },
+          {
+            "text": "no ;",
+            "result": {
+              "result": "no",
+              "error": null
+            },
+            "index": 4
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "label": "parser-parsearg-parseupto-real-nested-parser-and-latex",
+      "result": {
+        "$": "array",
+        "items": [
+          {
+            "text": "{x+1}rest",
+            "method": "ParseArg",
+            "result": {
+              "result": {
+                "factory": {
+                  "defaultKind": "unknown",
+                  "nodeMap": {},
+                  "node": {
+                    "math": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mi": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mn": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mo": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mtext": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mspace": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "ms": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mrow": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "inferredMrow": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mfrac": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "msqrt": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mroot": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mstyle": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "merror": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mpadded": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mphantom": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mfenced": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "menclose": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "maction": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "msub": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "msup": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "msubsup": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "munder": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mover": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "munderover": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mmultiscripts": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mprescripts": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "none": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mtable": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mlabeledtr": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mtr": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mtd": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "maligngroup": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "malignmark": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "mglyph": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "semantics": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "annotation": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "annotation-xml": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "TeXAtom": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "MathChoice": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "text": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "XML": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    },
+                    "html": {
+                      "$": "function",
+                      "name": "",
+                      "length": 0
+                    }
+                  }
+                },
+                "parent": null,
+                "properties": {},
+                "childNodes": {
+                  "$": "array",
+                  "items": {
+                    "$": "array",
+                    "items": [
+                      {
+                        "factory": {
+                          "$": "cycle"
+                        },
+                        "parent": {
+                          "$": "cycle"
+                        },
+                        "properties": {},
+                        "childNodes": {
+                          "$": "array",
+                          "items": {
+                            "$": "array",
+                            "items": [
+                              {
+                                "factory": {
+                                  "$": "cycle"
+                                },
+                                "parent": {
+                                  "$": "cycle"
+                                },
+                                "properties": {},
+                                "childNodes": {
+                                  "$": "array",
+                                  "items": {
+                                    "$": "array",
+                                    "items": []
+                                  }
+                                },
+                                "text": "x"
+                              }
+                            ]
+                          }
+                        },
+                        "prevClass": null,
+                        "prevLevel": null,
+                        "texclass": 0,
+                        "attributes": {
+                          "global": {
+                            "mathbackground": "transparent",
+                            "mathcolor": "",
+                            "mathsize": "normal",
+                            "dir": "ltr",
+                            "mathvariant": "normal",
+                            "scriptlevel": 0,
+                            "displaystyle": false,
+                            "display": "inline",
+                            "maxwidth": "",
+                            "overflow": "linebreak",
+                            "altimg": "",
+                            "altimg-width": "",
+                            "altimg-height": "",
+                            "altimg-valign": "",
+                            "alttext": "",
+                            "cdgroup": "",
+                            "scriptsizemultiplier": 0.7071067811865475,
+                            "scriptminsize": ".4em",
+                            "infixlinebreakstyle": "before",
+                            "lineleading": "100%",
+                            "linebreakmultchar": "⁢",
+                            "indentshift": "auto",
+                            "indentalign": "auto",
+                            "indenttarget": "",
+                            "indentalignfirst": "indentalign",
+                            "indentshiftfirst": "indentshift",
+                            "indentalignlast": "indentalign",
+                            "indentshiftlast": "indentshift"
+                          },
+                          "defaults": {
+                            "mathbackground": "_inherit_",
+                            "mathcolor": "_inherit_",
+                            "mathsize": "_inherit_",
+                            "dir": "_inherit_",
+                            "mathvariant": "normal"
+                          },
+                          "inherited": {},
+                          "attributes": {
+                            "data-latex": "x"
+                          }
+                        }
+                      },
+                      {
+                        "factory": {
+                          "$": "cycle"
+                        },
+                        "parent": {
+                          "$": "cycle"
+                        },
+                        "properties": {
+                          "fixStretchy": true,
+                          "in-lists": "fixStretchy"
+                        },
+                        "childNodes": {
+                          "$": "array",
+                          "items": {
+                            "$": "array",
+                            "items": [
+                              {
+                                "factory": {
+                                  "$": "cycle"
+                                },
+                                "parent": {
+                                  "$": "cycle"
+                                },
+                                "properties": {},
+                                "childNodes": {
+                                  "$": "array",
+                                  "items": {
+                                    "$": "array",
+                                    "items": []
+                                  }
+                                },
+                                "text": "+"
+                              }
+                            ]
+                          }
+                        },
+                        "prevClass": null,
+                        "prevLevel": null,
+                        "texclass": null,
+                        "attributes": {
+                          "global": {
+                            "$": "cycle"
+                          },
+                          "defaults": {
+                            "mathbackground": "_inherit_",
+                            "mathcolor": "_inherit_",
+                            "mathsize": "_inherit_",
+                            "dir": "_inherit_",
+                            "mathvariant": "normal",
+                            "form": "infix",
+                            "fence": false,
+                            "separator": false,
+                            "lspace": "thickmathspace",
+                            "rspace": "thickmathspace",
+                            "stretchy": false,
+                            "symmetric": false,
+                            "maxsize": "infinity",
+                            "minsize": "0em",
+                            "largeop": false,
+                            "movablelimits": false,
+                            "accent": false,
+                            "linebreak": "auto",
+                            "lineleading": "100%",
+                            "linebreakstyle": "before",
+                            "indentalign": "auto",
+                            "indentshift": "0",
+                            "indenttarget": "",
+                            "indentalignfirst": "indentalign",
+                            "indentshiftfirst": "indentshift",
+                            "indentalignlast": "indentalign",
+                            "indentshiftlast": "indentshift"
+                          },
+                          "inherited": {},
+                          "attributes": {
+                            "data-latex": "+"
+                          }
+                        },
+                        "_texClass": null,
+                        "lspace": 0.2777777777777778,
+                        "rspace": 0.2777777777777778
+                      },
+                      {
+                        "factory": {
+                          "$": "cycle"
+                        },
+                        "parent": {
+                          "$": "cycle"
+                        },
+                        "properties": {},
+                        "childNodes": {
+                          "$": "array",
+                          "items": {
+                            "$": "array",
+                            "items": [
+                              {
+                                "factory": {
+                                  "$": "cycle"
+                                },
+                                "parent": {
+                                  "$": "cycle"
+                                },
+                                "properties": {},
+                                "childNodes": {
+                                  "$": "array",
+                                  "items": {
+                                    "$": "array",
+                                    "items": []
+                                  }
+                                },
+                                "text": "1"
+                              }
+                            ]
+                          }
+                        },
+                        "prevClass": null,
+                        "prevLevel": null,
+                        "texclass": 0,
+                        "attributes": {
+                          "global": {
+                            "$": "cycle"
+                          },
+                          "defaults": {
+                            "mathbackground": "_inherit_",
+                            "mathcolor": "_inherit_",
+                            "mathsize": "_inherit_",
+                            "dir": "_inherit_",
+                            "mathvariant": "normal"
+                          },
+                          "inherited": {},
+                          "attributes": {
+                            "data-latex": "1"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "prevClass": null,
+                "prevLevel": null,
+                "texclass": null,
+                "attributes": {
+                  "global": {
+                    "$": "cycle"
+                  },
+                  "defaults": {
+                    "mathbackground": "_inherit_",
+                    "mathcolor": "_inherit_",
+                    "mathsize": "_inherit_",
+                    "dir": "_inherit_"
+                  },
+                  "inherited": {},
+                  "attributes": {
+                    "data-latex": "x+1"
+                  }
+                },
+                "_core": null
+              },
+              "error": null
+            },
+            "index": 5,
+            "nestedParserCount": 1
+          },
+          {
+            "text": "x+1}tail",
+            "method": "ParseUpTo",
+            "result": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "ExtraCloseLooking",
+                "message": "Extra close brace while looking for "
+              }
+            },
+            "index": 4,
+            "nestedParserCount": 1
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "label": "parser-delimiter-arg-and-star-state",
+      "result": {
+        "$": "array",
+        "items": [
+          {
+            "text": "{(}",
+            "delimiter": {
+              "result": "(",
+              "error": null
+            },
+            "indexAfterDelimiter": 3
+          },
+          {
+            "text": "  ",
+            "delimiter": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "MissingArgFor",
+                "message": "Missing argument for \\probe"
+              }
+            },
+            "indexAfterDelimiter": 2
+          },
+          {
+            "text": "\\{",
+            "delimiter": {
+              "result": "\\{",
+              "error": null
+            },
+            "indexAfterDelimiter": 2
+          },
+          {
+            "text": "x",
+            "delimiter": {
+              "result": null,
+              "error": {
+                "name": "TexError",
+                "id": "MissingOrUnrecognizedDelim",
+                "message": "Missing or unrecognized delimiter for \\probe"
+              }
+            },
+            "indexAfterDelimiter": 1
+          },
+          {
+            "text": "*x",
+            "star": true,
+            "index": 1
+          },
+          {
+            "text": " x",
+            "star": false,
+            "index": 1
+          },
+          {
+            "text": "",
+            "star": false,
+            "index": 0
+          }
+        ]
+      },
+      "error": null
+    },
+    {
+      "label": "parser-create-real-node-token-mathvariant-and-factory-errors",
+      "result": {
+        "token": {
+          "kind": "mi",
+          "attrs": {
+            "mathvariant": "-tex-caligraphic"
+          },
+          "properties": {
+            "ignore-variant": true
+          },
+          "children": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "ignoreVariant": true,
+        "ordinary": {
+          "kind": "mi",
+          "attrs": {
+            "mathvariant": "normal"
+          },
+          "properties": {},
+          "children": {
+            "$": "array",
+            "items": []
+          }
+        },
+        "invalidFactory": {
+          "result": {
+            "factory": {
+              "defaultKind": "unknown",
+              "nodeMap": {},
+              "node": {
+                "math": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mi": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mn": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mo": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mtext": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mspace": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "ms": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mrow": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "inferredMrow": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mfrac": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "msqrt": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mroot": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mstyle": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "merror": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mpadded": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mphantom": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mfenced": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "menclose": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "maction": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "msub": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "msup": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "msubsup": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "munder": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mover": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "munderover": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mmultiscripts": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mprescripts": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "none": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mtable": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mlabeledtr": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mtr": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mtd": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "maligngroup": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "malignmark": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "mglyph": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "semantics": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "annotation": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "annotation-xml": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "TeXAtom": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "MathChoice": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "text": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "XML": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                },
+                "html": {
+                  "$": "function",
+                  "name": "",
+                  "length": 0
+                }
+              }
+            },
+            "parent": null,
+            "properties": {},
+            "childNodes": {
+              "$": "array",
+              "items": {
+                "$": "array",
+                "items": []
+              }
+            },
+            "prevClass": null,
+            "prevLevel": null,
+            "texclass": 0,
+            "attributes": {
+              "global": {
+                "mathbackground": "transparent",
+                "mathcolor": "",
+                "mathsize": "normal",
+                "dir": "ltr",
+                "mathvariant": "normal",
+                "scriptlevel": 0,
+                "displaystyle": false,
+                "display": "inline",
+                "maxwidth": "",
+                "overflow": "linebreak",
+                "altimg": "",
+                "altimg-width": "",
+                "altimg-height": "",
+                "altimg-valign": "",
+                "alttext": "",
+                "cdgroup": "",
+                "scriptsizemultiplier": 0.7071067811865475,
+                "scriptminsize": ".4em",
+                "infixlinebreakstyle": "before",
+                "lineleading": "100%",
+                "linebreakmultchar": "⁢",
+                "indentshift": "auto",
+                "indentalign": "auto",
+                "indenttarget": "",
+                "indentalignfirst": "indentalign",
+                "indentshiftfirst": "indentshift",
+                "indentalignlast": "indentalign",
+                "indentshiftlast": "indentshift"
+              },
+              "defaults": {
+                "mathbackground": "_inherit_",
+                "mathcolor": "_inherit_",
+                "mathsize": "_inherit_",
+                "dir": "_inherit_",
+                "mathvariant": "normal"
+              },
+              "inherited": {},
+              "attributes": {}
+            }
+          },
+          "error": null
+        }
+      },
+      "error": null
+    },
+    {
+      "label": "parser-push-and-pushall-actual-inferred-mml-and-stackitem",
+      "result": {
+        "before": 1,
+        "afterInferred": 1,
+        "afterItem": {
+          "startI": 0,
+          "stopI": 4,
+          "startStr": "",
+          "height": 2
+        },
+        "afterAll": 2,
+        "top": "stop"
+      },
+      "error": null
+    },
+    {
+      "label": "parser-parse-lookup-contains-tostring-live-subhandlers",
+      "result": {
+        "before": {
+          "containsX": true,
+          "lookupA": "a",
+          "containsUnknown": false,
+          "string": "character: digit, letter, special, command\ndelimiter: delimiter\nmacro: mathchar7, mathchar0mo, mathchar0mi, ucGreek, lcGreek, macros, delimiter\nenvironment: environment\n"
+        },
+        "after": {
+          "containsX": true,
+          "lookupX": "x"
+        }
+      },
+      "error": null
+    }
+  ]
+}

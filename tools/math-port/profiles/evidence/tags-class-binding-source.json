@@ -1,0 +1,55 @@
+{
+  "schema": "tags-class-binding-v1",
+  "hashes": {
+    "ts/input/tex/Tags.ts": "5a73a8d16f1d3c87ece167fc06dac0c323ea05a519e5ee5ea9aadbb76cef9a5d",
+    "cjs/input/tex/Tags.js": "e027c7edb6f7207f3b3ce7e7203dcfc763219b1fa37a3b39925ae83c1beef896"
+  },
+  "cases": {
+    "phase": [
+      {
+        "actualClass": true,
+        "counter": 0,
+        "configuration": null,
+        "tagEnv": "",
+        "historyLength": 0,
+        "stackLength": 0
+      },
+      {
+        "actualClass": true,
+        "counter": 0,
+        "configuration": null,
+        "tagEnv": "",
+        "historyLength": 0,
+        "stackLength": 0
+      },
+      {
+        "actualClass": true,
+        "counter": 0,
+        "configuration": null,
+        "tagEnv": "",
+        "historyLength": 0,
+        "stackLength": 0
+      }
+    ],
+    "prototype": {
+      "constructor": true,
+      "instance": true,
+      "madeClass": true,
+      "baseInstance": true,
+      "noTags": true,
+      "allTags": true
+    },
+    "fresh": {
+      "instance": true,
+      "ids": true,
+      "tag": true,
+      "history": true,
+      "enTag": true
+    },
+    "metadata": {
+      "name": "ProbeTags",
+      "length": 0
+    },
+    "derived": true
+  }
+}

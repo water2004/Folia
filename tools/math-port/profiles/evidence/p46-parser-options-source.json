@@ -1,0 +1,1007 @@
+{
+  "stage": "original Source observations only; native parser classes and option bindings not accepted",
+  "node": "v24.13.0",
+  "hashes": [
+    {
+      "source": "ts/components/version.ts",
+      "source_sha256": "c9bc1c3757a64ba4cc3a8aa47ad5068e8f61e3283b5330a6efe9897103ec44bd",
+      "cjs_sha256": "6745428310a6a0e35b9a8fc9fab9d89f181bf5ca8ccc27c169efce14824f9d81"
+    },
+    {
+      "source": "ts/core/FindMath.ts",
+      "source_sha256": "6beae5addf391086272ffdcf7050d85e7bb42457842d12b7ec3af991583720d8",
+      "cjs_sha256": "d38ba2d6c307ba3a9935e63c0b76fb2ed50e1c56f1b491c8c2872cc9a9271e4d"
+    },
+    {
+      "source": "ts/core/HandlerList.ts",
+      "source_sha256": "13eccf4ec1104d00fe9cb1761ae50380b031f43d0969a3081893fb377456c1f6",
+      "cjs_sha256": "499ad4c1b81cbb52abdb74b124e3a691405464881fca347927a8d9d31647a59a"
+    },
+    {
+      "source": "ts/core/InputJax.ts",
+      "source_sha256": "99af0b13253a27a3c3db639f5cc6531580166aa4e569bc225fb7327257696948",
+      "cjs_sha256": "e2e330b4ba637c93bc3d2411e59129d681f865be7ad76297e8ab79d8f0f01f7a"
+    },
+    {
+      "source": "ts/core/MathItem.ts",
+      "source_sha256": "c1c7308320ae15514fd1114c3f94642a4e8a8268bfe6f68192e8a557829626ce",
+      "cjs_sha256": "e6ed5008854e4d2ac6b34ab98c53bec6afb34e460895e8320c90a0d8d700d261"
+    },
+    {
+      "source": "ts/core/MmlTree/Attributes.ts",
+      "source_sha256": "c1e363944e0c059c7ed554b4b6aeb8ea56d43c844f84934c267ccc79b090468a",
+      "cjs_sha256": "efa567c0c573f13f136f1d37b0af6bdc1a675f70cc13a9ae1cd7334321f30749"
+    },
+    {
+      "source": "ts/core/MmlTree/MML.ts",
+      "source_sha256": "c64bcfdf65452559995a92c13db75133b1500ef59efc2be5c9489ceacc4d4964",
+      "cjs_sha256": "380332b7f0cc13104130affb65532ebca2ac214ccd897b93edda551cea443684"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlFactory.ts",
+      "source_sha256": "5e7338cd3eed5a4002243b7371dc5098c6433ff4ba4345cb2d50cf0385b2abdb",
+      "cjs_sha256": "d0c4e25237d04a9d21d12ee44776e46d30777e7f284db6f4f3ed1cc625b752d3"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNode.ts",
+      "source_sha256": "cc0594eb5782928412c4307637866d9f80ac147af577297edd48ee88b63b8656",
+      "cjs_sha256": "86c5eb572dcf2652c3c52a60b66c720d231e17f600cc9aeef3ace4aeafc81d45"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/HtmlNode.ts",
+      "source_sha256": "1bf0ba981fc72b63a525424fb51e8bc45231fcf768d618fb8c75517bd72ae665",
+      "cjs_sha256": "cd10798f07fbdafb6f2a375b85904a5fdcf0c546cc95ddc955cae5e411ce3eef"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/TeXAtom.ts",
+      "source_sha256": "bad114224392b94852456a4636b85ad90a5a2c96b63e6c7911d155db299f7028",
+      "cjs_sha256": "bf72fd0716f88d144a8ba0befef383de4a0a4fd4d690d37fec9d55b2f15a02e4"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/maction.ts",
+      "source_sha256": "fa173b7e2b25b90e0f83ac201098357a8abf28462fa86fa69d92b65906527895",
+      "cjs_sha256": "eddcdd2111b4b7cf5ad72937b0a4ff7beb555b98308c6771a013a18121af8ce7"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/maligngroup.ts",
+      "source_sha256": "4d8ecdae93aaff85887ec4eb09c8821811866a9e9b56e037ac61d0b6d81bf2b1",
+      "cjs_sha256": "ec7d583f79bd49dfdd5b69630cf7f52d56e6e34f9f9c7e0963b0e1933cc4176c"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/malignmark.ts",
+      "source_sha256": "f35d8b9edcf1afce67f74eef1dc1c04434f9caea944b3f3fd439d1aaf484cb61",
+      "cjs_sha256": "9dba71cd21e25a0c43e58e13c02f4ec9629b1b7d4c87991cf62e12415e6a1ad7"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/math.ts",
+      "source_sha256": "ca0769f26d00145b2c520ac7bcfb1ac1f3e3eb34c387d0eeb8e4444e7d382ea0",
+      "cjs_sha256": "44debed089b254bc09e73e22d4c30336db13ff8dad0af140e915a320bdda8e71"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mathchoice.ts",
+      "source_sha256": "e1f9fdf92e345c7bc09e3333c4f436ae8f2d1e4c8fa9a2280877590cf9025d76",
+      "cjs_sha256": "659a1e37a309512beaa1636725155aced82dc8195b81c2ebd5a44d5f7cb3a8b7"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/menclose.ts",
+      "source_sha256": "ffa4ab507744cb4f190312ca8dcd692474c333bee6e19c86709554aa9dad4333",
+      "cjs_sha256": "2cea1d1819a2eb545727f37940b341ac0ce802fad4d7daa11f813ce7381f23de"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/merror.ts",
+      "source_sha256": "a13174c3d2ea478562efb382e77cac194010f65111203d05df018e11506703bf",
+      "cjs_sha256": "cd9b48970d5d0878d3806e8ff4e4f091d2db38f5021a63aa043acfc50d952d6a"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mfenced.ts",
+      "source_sha256": "64b3f4d89d47765eb83034b480b843b2769d8de12e31d7571c50e5c4bb2bd397",
+      "cjs_sha256": "33dee590a2a6c2f104ccfb175e79c5179f422e150625f4b89bf2fa42ec8f69cf"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mfrac.ts",
+      "source_sha256": "4ded5fc9922d462d02818523d676c30299d08cfe7794067bd4e20950c8fccfc7",
+      "cjs_sha256": "b2e053ce68304c03ea740fb22baa5b01a28d540002faeddc30ad5720a4172770"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mglyph.ts",
+      "source_sha256": "2c2d336067d3970c55f3fcdafb82b55d4339a2c11d69088c8c7eff4a6d953504",
+      "cjs_sha256": "1f19fe167f2b606a8bd84b0a82e81313a7a9d0cfef90fef3bfe954ad5cbabe09"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mi.ts",
+      "source_sha256": "3bbddaeac72d2c0f2e5d8a0440c28188f98d1bf1481a0ec6872e103a50f146c2",
+      "cjs_sha256": "47058d7ddb5b24ed530936baffe834a06c0557ec7dbdc03312d3ffa0aca17241"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mmultiscripts.ts",
+      "source_sha256": "bb8d8d2180ef483b86b0b1570b919ba424ed54db1f30ef6e0e697cfab0bf5cf7",
+      "cjs_sha256": "db40a3543cffbd706c0070ae0877285ce22b07db3a7e530e56f42eaa7b2d922e"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mn.ts",
+      "source_sha256": "5eaf9e5c7e0222303e98757aeed6a1d909ff08560591fd7a6985220d70e0522c",
+      "cjs_sha256": "8da61e1b68bfb4abbff2103c04b6fcf6c03b35c6934a3abba55ba1144b4ac142"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mo.ts",
+      "source_sha256": "2082cd372a4c21fa46c67ab3972b51bcc950f711dd3369cbb2bd7ced62c2f605",
+      "cjs_sha256": "7c68f0570d82f585eb6ca7e8bbca119b96a02666e0d4b268a413bf4035ff0b2c"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mpadded.ts",
+      "source_sha256": "b5aac516c32fb019ac5ace504f86312f3e0849e1faa44006567bac05815c7271",
+      "cjs_sha256": "675aae98959b257582171d58584f220da4543deb8e0e3d3b8b07a48ab6fc23a2"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mphantom.ts",
+      "source_sha256": "b06531aeaf78ef1a0e78ebb4e94024079e37d0fadf1cbb8b8a68e56d52e46006",
+      "cjs_sha256": "dae156634a5a2fd1076af9abd551df195463a2b6db029635b13e9809ddb566f3"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mroot.ts",
+      "source_sha256": "b4b8f9deddb22efe7580067d8845d7cb225046e244eb93da8b0e931eff76e99a",
+      "cjs_sha256": "f73d25a1ca793ab21cc78ae73ce6062c925f49c8a51c4484211b8098a1a6bcd8"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mrow.ts",
+      "source_sha256": "af58f0c1aa39a71d6c3dc5addf358a8cefeecb3f76cb483ec940f3a7ea72b4b9",
+      "cjs_sha256": "5846d2b0334223b759a4059dfb0ac5e31aef1f5a96c041da45b3de94c0689896"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/ms.ts",
+      "source_sha256": "71b28a279461524fce585c4e57960d5586bd04a5f52379c66c04e4b1f82cdaf0",
+      "cjs_sha256": "db185825f9f19d22b7ad23e9c75c9e869b3dfc423eb61962f129b8a18781c8eb"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mspace.ts",
+      "source_sha256": "69961341e3323cc3af8721f9d800190e2051057b11cba5558ef1940e0deefdd4",
+      "cjs_sha256": "61dc8d544aa9550e3e132dfc1c426c5204fab292ddf9f46171e9baf6f4f35383"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/msqrt.ts",
+      "source_sha256": "8d522b96f39f35c170fe12ab7e59e0999c65551335466010522280bfa3570b7e",
+      "cjs_sha256": "5dfe5af23967d82ccc74cf3f187c49d847da21e13ea721a539cb93afcde0ef35"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mstyle.ts",
+      "source_sha256": "7442e2885d2f4605d42f5b4472b3183f9cbadbd8ed5c0aeddf03b8f23c1d8616",
+      "cjs_sha256": "49e13c923b88f6b41806c3f030a30edbfe8527beee6350e0e7067fc87707c488"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/msubsup.ts",
+      "source_sha256": "37fd01fa0c44ceab5b4ed30ba3d95ab43ffb8aed55db27c7290d6d786131f6e7",
+      "cjs_sha256": "7971b391a8d7c92e0d6115b17c4c394dafc828942fc00591ba6064b871610c18"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mtable.ts",
+      "source_sha256": "8c701c9e8e55565c7ea905bd2d0e23e8a433547c5ed11bfb868f74e3089a3bda",
+      "cjs_sha256": "89f9cf650c72e146c544efdb640108f6f0b496d74f6bd7258a5ecaf28a284516"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mtd.ts",
+      "source_sha256": "8b888aec4069818407079e84c42247495e04bd93ff52a3fd28bff65ca7635cfb",
+      "cjs_sha256": "0210a0d98d9098fcdab7362302841a77625341bf1459582e72f57f39314d9699"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mtext.ts",
+      "source_sha256": "66e24a47505714c0d67b334a8c73c6e85dbfcac1f920913eef9f664546f2403f",
+      "cjs_sha256": "1d3f64150977d8a1cfcc95a9974c9ad4c01f7894a0d05b7f68f5bfae5026b1b5"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/mtr.ts",
+      "source_sha256": "ddf536d1e1a615d542052cd60db6440ad1698c0a13ff2e2307097d05c1b0ed2f",
+      "cjs_sha256": "d6820d1a7f2ad6cb8ea714c0e73d25993987174d8cf51820fac742204df2bf47"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/munderover.ts",
+      "source_sha256": "b9bf04f77922c50044c4d99b3093882cab9b35ec36203f20e1e999997f9adf82",
+      "cjs_sha256": "104a6ed2f1a8967726c4a0da6ffd0ffb917c23fe0b3847138161c975fa0785b9"
+    },
+    {
+      "source": "ts/core/MmlTree/MmlNodes/semantics.ts",
+      "source_sha256": "e609dfc3d7510a996a87804e3929cd4f53a5aa060003e351f45f1fc5dcfb6e96",
+      "cjs_sha256": "61d0e500cbb96d395ef0ac91ae1fb3369a7cebba25204cef1c20d939eaf71f9b"
+    },
+    {
+      "source": "ts/core/MmlTree/OperatorDictionary.ts",
+      "source_sha256": "9afac6e3a8f3b778247a5a678c529b9edddb8172850df7384511bf61dfbffd37",
+      "cjs_sha256": "db65e13a8f3c6290e711303d46cfb6f2fe8ec24e12c499bdf9b1bf4f42027ff8"
+    },
+    {
+      "source": "ts/core/Tree/Factory.ts",
+      "source_sha256": "e61d2f5868287e2f382503cf690cd241698bf212957c1795d0cd35ce3bef049e",
+      "cjs_sha256": "739db2e5760c29d7bb4f1bc7baa08ff8d727f4d117522aff5ede017f812cffef"
+    },
+    {
+      "source": "ts/core/Tree/Node.ts",
+      "source_sha256": "532000186fc65db8f227b7e69f1ed331ebdd58bca2d1984aa099d81f3cbcd1d0",
+      "cjs_sha256": "94174004b89f19bf3c98e8eec5fabdd0bcbf1e13e0b740963fa69554ad8a12a7"
+    },
+    {
+      "source": "ts/core/Tree/NodeFactory.ts",
+      "source_sha256": "b02c5ac2cabb61755785d35def6b57f8246322c626f548df600ca81af27b4599",
+      "cjs_sha256": "148c9a3a2e469fc464036b88deb7067cd779989a43356812d31365a84ec75c54"
+    },
+    {
+      "source": "ts/input/tex.ts",
+      "source_sha256": "151d3c73697bfbf874001549f6e0c80dbebeabba2b36ab50501a4ffd7753bf06",
+      "cjs_sha256": "ef2852b197173f373e62326016e980aef01ffc838f5f766ab6076262f944eada"
+    },
+    {
+      "source": "ts/input/tex/ColumnParser.ts",
+      "source_sha256": "4bffbf64ef23395d551d0e190043222bfffe7fd71e2417e3fb8008c5f3377d5c",
+      "cjs_sha256": "9d09d0b921ce50255facfe303d7771309ad71ea473388167535d5acf711feae9"
+    },
+    {
+      "source": "ts/input/tex/Configuration.ts",
+      "source_sha256": "8184716579abf3ffa14c64413d276dab4fc721e3e3f43afb0cdccbe2ab782719",
+      "cjs_sha256": "86f62a6f6e44fec20156546b7e8d424cac493c7465c2c8ec621c604332a276f3"
+    },
+    {
+      "source": "ts/input/tex/FilterUtil.ts",
+      "source_sha256": "dc821e2483fcd0820159a13d984b2bf299952e8c9f40418d72ff4c183d93053a",
+      "cjs_sha256": "2e626da51d95be455ddde976660abb8ebab035a8712db0f0820870b95e9b1bd8"
+    },
+    {
+      "source": "ts/input/tex/FindTeX.ts",
+      "source_sha256": "65355d94cac0c1e8a790313c52e231212733b5a98d6f6697c2c7864812a72944",
+      "cjs_sha256": "1361bd1171e5ef0c8210342d89c9cebd660dbb9d4810bc571c64172b3a5c3d4b"
+    },
+    {
+      "source": "ts/input/tex/HandlerTypes.ts",
+      "source_sha256": "5b9d091fc53640603956ab4ae39f146735621def9c36f312f8abd00afb043cfc",
+      "cjs_sha256": "bf6216270252efca24688a2bf8afda18a9adb762b4a7ae41471d013063bf4103"
+    },
+    {
+      "source": "ts/input/tex/MapHandler.ts",
+      "source_sha256": "7cacdaef3ed1df90b4f05cc0b3183a2956ae8f848f20ae8833932faa4efcb2a2",
+      "cjs_sha256": "d82e3034776d2392689aad86500b5e60dbe0aa5540853b48f308841879f3cf67"
+    },
+    {
+      "source": "ts/input/tex/NodeFactory.ts",
+      "source_sha256": "bf20e8d4f7ed43450df42d65556ccbceea1469541b214c37544f180aa205c840",
+      "cjs_sha256": "426e3ca8822d209edc8a22b5e9f11c5631e52213b232220a2a55e81828374db5"
+    },
+    {
+      "source": "ts/input/tex/NodeUtil.ts",
+      "source_sha256": "bd7e048c49cf042cb5878c6a73d049ae49e7d6437fb4ba975651dae5a5125cc2",
+      "cjs_sha256": "4a55841fd22167d25f505e8f41adea072715ef024e00ea5ac6df3f199f2cb809"
+    },
+    {
+      "source": "ts/input/tex/ParseMethods.ts",
+      "source_sha256": "1cdc4c6828078cd40863269864cdd6b7e5d22024e2ed36f4eeafb673781a5a70",
+      "cjs_sha256": "2af91730bf39c97e86169c68cdc8c1054c05c58216f60a2f2d8e54ec75294851"
+    },
+    {
+      "source": "ts/input/tex/ParseOptions.ts",
+      "source_sha256": "ab60a07dbb24040c0fb9bd67b942755ffc5b0b18980abf1938736d8d90b22209",
+      "cjs_sha256": "ff19d70539cb76911c5f1d7673ddfd908183dcf5849c91cb068b19e58da8a9ec"
+    },
+    {
+      "source": "ts/input/tex/ParseUtil.ts",
+      "source_sha256": "b43646071997f88f27df51610c7972a8cb5791ea76194e7318d17d1a2f81f76a",
+      "cjs_sha256": "adafa18cefad39e8408bcc0e4eb7103dceb6d16c9e7ea2eb013f23602c3f8941"
+    },
+    {
+      "source": "ts/input/tex/Stack.ts",
+      "source_sha256": "36be7583b14111961367e9e3f1dd5911456d235b096a2fcee62f438d37c7e11a",
+      "cjs_sha256": "78743f9dfcf1ebf9beb890629d908111be5c1e47f49c16d5ffa0877c5935c385"
+    },
+    {
+      "source": "ts/input/tex/StackItem.ts",
+      "source_sha256": "ac138d321e1efbc54afbd961a4b6bfa24f7d0923eddba1c8d891dee9424602b5",
+      "cjs_sha256": "53baa91d7c27475a91a9b6993235071ab32b04a29736c5920bdda2836ab5a91b"
+    },
+    {
+      "source": "ts/input/tex/StackItemFactory.ts",
+      "source_sha256": "229bf0f6bd58642bff86102bb8fb6fd2b9a61d3f52ad31ce738f3f2cefa2e405",
+      "cjs_sha256": "2722b21be90f76b48325c22a65b37f80dc283e4bc9f74b644dcae81386d001c2"
+    },
+    {
+      "source": "ts/input/tex/Tags.ts",
+      "source_sha256": "5a73a8d16f1d3c87ece167fc06dac0c323ea05a519e5ee5ea9aadbb76cef9a5d",
+      "cjs_sha256": "e027c7edb6f7207f3b3ce7e7203dcfc763219b1fa37a3b39925ae83c1beef896"
+    },
+    {
+      "source": "ts/input/tex/TexConstants.ts",
+      "source_sha256": "d9380972dd21333d4699ff351f6af0a589f7c1f9096f0918dc1152287aed37b5",
+      "cjs_sha256": "5c30716472a64ee59b58ddc1c4fe53c7d00baf9d0a37e2288e307996d5dfbcff"
+    },
+    {
+      "source": "ts/input/tex/TexError.ts",
+      "source_sha256": "30f398ff1910edecf029b1e4dde846bef10990539f60c43a4ef2da8783ba7ac8",
+      "cjs_sha256": "a5713111ff2ab646740da13ca6273cb5f2a7ceff9d0fb6a2e116185e4994e64f"
+    },
+    {
+      "source": "ts/input/tex/TexParser.ts",
+      "source_sha256": "9afdfff070ec7ed7115a1afe97048b3d1f1befae5b75e8ec963e0456685ee167",
+      "cjs_sha256": "106d7ff9298dce899d046339eab1996358f3efca3a7ce66f5ca915747dc9c6a8"
+    },
+    {
+      "source": "ts/input/tex/Token.ts",
+      "source_sha256": "6b4c0e42f277daebe8e676afc3b4d3b6083ebc87939ef8203672a831be1595bf",
+      "cjs_sha256": "d317b026fc1ae0ff93d6939a15041d225385a826f8c33115284464bc2f527e35"
+    },
+    {
+      "source": "ts/input/tex/TokenMap.ts",
+      "source_sha256": "0209895b13569008b2129b61c88050e7c70e70ce9477d234b9a6e303a86a738e",
+      "cjs_sha256": "9e3f086080a6ab052b68b22a5d9ee3dbc5e17d7b0c03a31e789664b01df36cf7"
+    },
+    {
+      "source": "ts/input/tex/UnitUtil.ts",
+      "source_sha256": "90f461310aa6d07b494cda98dc5398e9737231f046e20099ea0f5c19fa24c66e",
+      "cjs_sha256": "22fd8e826575bf9cd612b2f85208a49b07eb3cb6d9ace6c6db36e79d6e50bade"
+    },
+    {
+      "source": "ts/input/tex/base/BaseConfiguration.ts",
+      "source_sha256": "578d2c6b03f2f3e902476a0b73a5323b12262215fcbdc831a1135c1d9c1737ad",
+      "cjs_sha256": "0feedc60ac600b647cf2a1437c7244196a5aec04715f4a301fe6e9ec09722c57"
+    },
+    {
+      "source": "ts/input/tex/base/BaseItems.ts",
+      "source_sha256": "0c0d8448f3577be6642c95a412682310362819d2d383ab83b817d2888e4e5f0c",
+      "cjs_sha256": "5310d0429b7b62d405ae9b93c8d21ad17b787e5eb3fd1f01439c62f2094f7d1a"
+    },
+    {
+      "source": "ts/input/tex/base/BaseMappings.ts",
+      "source_sha256": "08dada0ed7fab0134da2c3a341e30637959ebb730512835b9482d7c78d72adae",
+      "cjs_sha256": "3522fc3fbb50af2f65442be3b2fbb2623824620899ebe775a87b885928c4acce"
+    },
+    {
+      "source": "ts/input/tex/base/BaseMethods.ts",
+      "source_sha256": "7336240c8f9c5037f9fdcd5a84ea079312854f1ef3f406aeb5a8b6a8ff765cda",
+      "cjs_sha256": "b8d5c74e01f85ae391ec8d16ffcd216a4ca4267bd8ffa091c5bfe1462ad7b491"
+    },
+    {
+      "source": "ts/input/tex/textmacros/TextMacrosConfiguration.ts",
+      "source_sha256": "5d712a805bfe3ff3db425f24c1887eab300782a8570363abbbe77641222faefc",
+      "cjs_sha256": "5803611b187a6256cae6289cfc2f61fafa7f93395432d3a7b365f8089334b5cf"
+    },
+    {
+      "source": "ts/input/tex/textmacros/TextMacrosMappings.ts",
+      "source_sha256": "9c0e47239e9b9c59e47d045fb56d67b8bfe3d025214641b2ba7f56ad60202cb2",
+      "cjs_sha256": "d331e33a2c3327eeeb2bc1fd5e7e98b0ef17fd7f317aaf91c19f9d665a1a5260"
+    },
+    {
+      "source": "ts/input/tex/textmacros/TextMacrosMethods.ts",
+      "source_sha256": "15b736370eed35d3e65af14d772bfe1b1ad3287844ed44f908f6a9b14004d9c3",
+      "cjs_sha256": "59e0abbeffeb9c859b2150d705abb1dc0a59a7ec71fb830ae6379d887c499817"
+    },
+    {
+      "source": "ts/input/tex/textmacros/TextParser.ts",
+      "source_sha256": "538059c8482022c1a4bc6f8e763fdc21993fa6353f1956655ae11c9271788a30",
+      "cjs_sha256": "ec2fa0145f5e90ef231b023a38ed7d9c1064a8cc58a46bb683d46439bd8fb400"
+    },
+    {
+      "source": "ts/mathjax.ts",
+      "source_sha256": "58222a4b55bb4339ed81e46a7256b1400b5a7898ef5a051db3795530b49a7f80",
+      "cjs_sha256": "17431ff42f26bfca6cc2baee68acb09d551fec8824f392290c5ebf0350df4ec6"
+    },
+    {
+      "source": "ts/util/AsyncLoad.ts",
+      "source_sha256": "070744cb45880b2d29086647b0d8d27cd6fa9fd0a4e3959e6bdafb5c1d6f3ec9",
+      "cjs_sha256": "938fa1d48bf71ccc6b081a4d03f1acbe2b500acb235a2e449d2faf42a626ab0c"
+    },
+    {
+      "source": "ts/util/Entities.ts",
+      "source_sha256": "53c5c38ee612b0b99cea8231726a09ecbd64be2201959dcf4c2da695855a0f76",
+      "cjs_sha256": "a616936550aa115ad994c5f1f7d3bfb50cb818c2876beaae6b60a6e58a647d07"
+    },
+    {
+      "source": "ts/util/FunctionList.ts",
+      "source_sha256": "d4106c42268e0d7cb3549f8ffdbeb5bab87eae6daffae7314d5e724045a6918f",
+      "cjs_sha256": "571f57801b863b2d9f01a66dc72f2836b7fd06a1a48a3fe0057e4ec3d51a7278"
+    },
+    {
+      "source": "ts/util/Options.ts",
+      "source_sha256": "b810ffc09864eb8ed9295d829b229194d7e38aaac6c8f01525bc1a4b190a61e3",
+      "cjs_sha256": "76f3df8a3e899fba1d0944d5b79818b586c1d9f95cc7021c395fbb10295db660"
+    },
+    {
+      "source": "ts/util/PrioritizedList.ts",
+      "source_sha256": "a700459f984ba1a5f18bf0e7dc183c242961b94c33587a9aa81bbaacf97180c8",
+      "cjs_sha256": "787bd21f3634312af666917d8f140145864f98d09ede1bdde3c957d28ec2bc25"
+    },
+    {
+      "source": "ts/util/Retries.ts",
+      "source_sha256": "c517df1c4c67c8cfac65a296b0e185089fd166739d3038eebb89647f4b37c921",
+      "cjs_sha256": "0ffe30ec3d65f1d5edfdbb505e5b76cf5b66ec1a920216ab53595df8e666b549"
+    },
+    {
+      "source": "ts/util/Styles.ts",
+      "source_sha256": "74d365d8c12c7cfbe20595ebf8d85d230e8897be1d5cbfd8dc1a6b772d40f3c4",
+      "cjs_sha256": "842ae4900f4075463e0863d7419909f0f398b5ec98f85c2c951588fc5d4de5c2"
+    },
+    {
+      "source": "ts/util/context.ts",
+      "source_sha256": "9f1878a3f1a404878daeb55b0d0bc179c2c542cbd08004a41694c0e7ddde9201",
+      "cjs_sha256": "c3933cc87801c3a87a4a68b19ed845532750d70c14e19dca8252f2416d4a05f7"
+    },
+    {
+      "source": "ts/util/lengths.ts",
+      "source_sha256": "213f65e9a8fa6d30bda4df4a6c0cc3a1e8d50567267539d85a1f19c1c20cea73",
+      "cjs_sha256": "6b6cd0b9fa024c461c730db54f055a6388d095bcb7dd0d794214c4fd48ded860"
+    },
+    {
+      "source": "ts/util/string.ts",
+      "source_sha256": "024a2ac6f96a314884f2bd71a913060c06fb75d46cbf6c94e15f4e71643a7084",
+      "cjs_sha256": "e1f09bca257dd268b9483b7310e4c77039dd022f01c5e9f5a62f47a981921e9c"
+    }
+  ],
+  "rows": [
+    {
+      "label": "configuration-default-priority:U",
+      "error": "ok",
+      "result": {
+        "name": "",
+        "registered": false,
+        "priority": 5,
+        "parser": "tex",
+        "handlers": [
+          "character",
+          "delimiter",
+          "macro",
+          "environment"
+        ],
+        "methods": [
+          "N",
+          "N"
+        ],
+        "fresh": true
+      },
+      "trace": []
+    },
+    {
+      "label": "configuration-default-priority:N",
+      "error": "ok",
+      "result": {
+        "name": "",
+        "registered": false,
+        "priority": 5,
+        "parser": "tex",
+        "handlers": [
+          "character",
+          "delimiter",
+          "macro",
+          "environment"
+        ],
+        "methods": [
+          "N",
+          "N"
+        ],
+        "fresh": true
+      },
+      "trace": []
+    },
+    {
+      "label": "configuration-default-priority:0",
+      "error": "ok",
+      "result": {
+        "name": "",
+        "registered": false,
+        "priority": 0,
+        "parser": "tex",
+        "handlers": [
+          "character",
+          "delimiter",
+          "macro",
+          "environment"
+        ],
+        "methods": [
+          "N",
+          "N"
+        ],
+        "fresh": true
+      },
+      "trace": []
+    },
+    {
+      "label": "configuration-default-priority:3",
+      "error": "ok",
+      "result": {
+        "name": "",
+        "registered": false,
+        "priority": 3,
+        "parser": "tex",
+        "handlers": [
+          "character",
+          "delimiter",
+          "macro",
+          "environment"
+        ],
+        "methods": [
+          "N",
+          "N"
+        ],
+        "fresh": true
+      },
+      "trace": []
+    },
+    {
+      "label": "configuration-retained-options-and-callback",
+      "error": "ok",
+      "result": {
+        "registered": true,
+        "options": true,
+        "init": true,
+        "config": true,
+        "initPriority": 5,
+        "configPriority": 0,
+        "handler": [
+          "character",
+          "delimiter",
+          "macro",
+          "environment"
+        ],
+        "macro": "x"
+      },
+      "trace": []
+    },
+    {
+      "label": "parser-configuration-append-priority:U",
+      "error": "ok",
+      "result": {
+        "option": 1,
+        "handlers": [
+          "character",
+          "delimiter",
+          "macro",
+          "environment"
+        ]
+      },
+      "trace": [
+        "a"
+      ]
+    },
+    {
+      "label": "parser-configuration-append-priority:0",
+      "error": "ok",
+      "result": {
+        "option": 1,
+        "handlers": [
+          "character",
+          "delimiter",
+          "macro",
+          "environment"
+        ]
+      },
+      "trace": [
+        "a"
+      ]
+    },
+    {
+      "label": "parser-configuration-append-priority:8",
+      "error": "ok",
+      "result": {
+        "option": 1,
+        "handlers": [
+          "character",
+          "delimiter",
+          "macro",
+          "environment"
+        ]
+      },
+      "trace": [
+        "b"
+      ]
+    },
+    {
+      "label": "parser-configuration-registration-order",
+      "error": "ok",
+      "result": [
+        "p46-order-c:1",
+        "p46-order-b:2",
+        "p46-order-a:2"
+      ],
+      "trace": [
+        "init:c",
+        "init:b",
+        "init:a"
+      ]
+    },
+    {
+      "label": "parser-configuration-target-and-warning",
+      "error": "ok",
+      "result": 0,
+      "trace": [
+        "MathJax Warning: Package 'p46-absent' not found.  Omitted.",
+        "Error|Package 'p46-other-target' doesn't target the proper parser"
+      ]
+    },
+    {
+      "label": "parse-options-constructor-owners",
+      "error": "ok",
+      "result": {
+        "handlers": true,
+        "nodeBackEdge": true,
+        "itemBackEdge": true,
+        "tags": "U",
+        "math": "U",
+        "root": "N",
+        "nodeLists": [],
+        "parsers": 0,
+        "error": false,
+        "packages": 0,
+        "style": ""
+      },
+      "trace": []
+    },
+    {
+      "label": "parse-options-default-merge-and-aliases",
+      "error": "ok",
+      "result": {
+        "nested": {
+          "x": 1,
+          "y": 2
+        },
+        "array": [
+          "a"
+        ],
+        "configFresh": true,
+        "nestedFresh": true,
+        "betweenFresh": true,
+        "arraysFresh": true,
+        "functions": true,
+        "regex": true
+      },
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:TeX:A:false",
+      "error": "ok",
+      "result": "",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:TeX:A:true",
+      "error": "ok",
+      "result": "",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:TeX:Α:true",
+      "error": "ok",
+      "result": "normal",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:TeX:é:false",
+      "error": "ok",
+      "result": "",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:TeX:É:false",
+      "error": "ok",
+      "result": "",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:TeX:𝑎:false",
+      "error": "ok",
+      "result": "",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:ISO:A:false",
+      "error": "ok",
+      "result": "italic",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:ISO:A:true",
+      "error": "ok",
+      "result": "italic",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:ISO:Α:true",
+      "error": "ok",
+      "result": "italic",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:ISO:é:false",
+      "error": "ok",
+      "result": "italic",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:ISO:É:false",
+      "error": "ok",
+      "result": "italic",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:ISO:𝑎:false",
+      "error": "ok",
+      "result": "italic",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:French:A:false",
+      "error": "ok",
+      "result": "normal",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:French:A:true",
+      "error": "ok",
+      "result": "normal",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:French:Α:true",
+      "error": "ok",
+      "result": "normal",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:French:é:false",
+      "error": "ok",
+      "result": "italic",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:French:É:false",
+      "error": "ok",
+      "result": "normal",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:French:𝑎:false",
+      "error": "ok",
+      "result": "normal",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:upright:A:false",
+      "error": "ok",
+      "result": "normal",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:upright:A:true",
+      "error": "ok",
+      "result": "normal",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:upright:Α:true",
+      "error": "ok",
+      "result": "normal",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:upright:é:false",
+      "error": "ok",
+      "result": "normal",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:upright:É:false",
+      "error": "ok",
+      "result": "normal",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:upright:𝑎:false",
+      "error": "ok",
+      "result": "normal",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:unknown:A:false",
+      "error": "ok",
+      "result": "",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:unknown:A:true",
+      "error": "ok",
+      "result": "",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:unknown:Α:true",
+      "error": "ok",
+      "result": "normal",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:unknown:é:false",
+      "error": "ok",
+      "result": "",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:unknown:É:false",
+      "error": "ok",
+      "result": "",
+      "trace": []
+    },
+    {
+      "label": "parse-options-math-style:unknown:𝑎:false",
+      "error": "ok",
+      "result": "",
+      "trace": []
+    },
+    {
+      "label": "actual-two-jax-option-identities",
+      "error": "ok",
+      "result": {
+        "jaxAndParseDistinct": true,
+        "betweenDistinct": true,
+        "nested": [
+          9,
+          1
+        ],
+        "arrays": [
+          [
+            "a",
+            "b"
+          ],
+          [
+            "a"
+          ]
+        ],
+        "fn": true,
+        "regex": true,
+        "tagsDistinct": true,
+        "backEdges": true
+      },
+      "trace": []
+    },
+    {
+      "label": "parse-options-clear-persistence",
+      "error": "ok",
+      "result": {
+        "persistent": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "freshParsers": true,
+        "freshLists": true,
+        "oldParsers": 1,
+        "oldLists": 1,
+        "root": "N",
+        "error": false,
+        "packageSize": 1
+      },
+      "trace": [
+        "resetTag"
+      ]
+    },
+    {
+      "label": "parse-options-node-list-filter-and-alias",
+      "error": "ok",
+      "result": {
+        "registered": [
+          "custom",
+          "custom"
+        ],
+        "size": 1,
+        "node": true,
+        "fresh": true,
+        "oldSize": 2,
+        "stored": true
+      },
+      "trace": []
+    },
+    {
+      "label": "parse-options-node-list-removal-identity",
+      "error": "ok",
+      "result": {
+        "same": true,
+        "size": 2,
+        "first": true,
+        "last": true,
+        "kindList": "U",
+        "otherList": "mi"
+      },
+      "trace": []
+    },
+    {
+      "label": "actual-runtime-package-add-order",
+      "error": "ok",
+      "result": {
+        "sameOptions": true,
+        "sameFactory": true,
+        "option": 7,
+        "item": true,
+        "node": true,
+        "tag": true
+      },
+      "trace": [
+        "init",
+        "config:true:7"
+      ]
+    },
+    {
+      "label": "actual-config-callback-receivers",
+      "error": "ok",
+      "result": {
+        "initIdentity": true,
+        "configIdentity": true
+      },
+      "trace": [
+        "init:record:true",
+        "config:record:true:true",
+        "init:record:true",
+        "init:record:true",
+        "config:descriptor:true:true"
+      ]
+    },
+    {
+      "label": "actual-number-regexp-alias-and-live-consumption",
+      "error": "ok",
+      "result": {
+        "alias": true,
+        "first": [
+          "mn=12",
+          "mn=34"
+        ],
+        "second": [
+          "mn=1234"
+        ],
+        "originalDigits": true,
+        "liveReplacement": true
+      },
+      "trace": []
+    },
+    {
+      "label": "actual-format-error-option-receiver",
+      "error": "ok",
+      "result": {
+        "callbackRetained": true,
+        "root": "math",
+        "error": true,
+        "errorKinds": [
+          "merror"
+        ],
+        "mathIdentity": true
+      },
+      "trace": [
+        "formatError:true:UndefinedControlSequence:TexError"
+      ]
+    },
+    {
+      "label": "actual-internal-math-option-live-receiver",
+      "error": "ok",
+      "result": {
+        "first": true,
+        "second": true,
+        "different": true
+      },
+      "trace": [
+        "call:true:true: a b :0:normal",
+        "replacement:true"
+      ]
+    },
+    {
+      "label": "actual-textmacros-shared-options-and-internal-math",
+      "error": "ok",
+      "result": {
+        "sameOptions": true,
+        "samePackage": true,
+        "jax": true,
+        "callback": "function",
+        "retained": true,
+        "actualParser": true,
+        "tokens": [
+          "mtext=a ",
+          "mtext=b"
+        ],
+        "parsers": [
+          0,
+          0
+        ]
+      },
+      "trace": []
+    }
+  ]
+}

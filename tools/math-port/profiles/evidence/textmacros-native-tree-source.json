@@ -1,0 +1,1290 @@
+{
+  "schema": 1,
+  "scope_sha256": "9705d389538b2fc8bf782feea4372ace639b3727304f2971937bbcfb0042a0d1",
+  "source_modules": [
+    {
+      "source": "ts/input/tex/textmacros/TextMacrosConfiguration.ts",
+      "source_sha256": "5d712a805bfe3ff3db425f24c1887eab300782a8570363abbbe77641222faefc",
+      "installed_ts_sha256": "1d77d653cab5d72d7612bc2485bd880aa7edfce35b5b366d27e571f347afd64a",
+      "cjs": "input/tex/textmacros/TextMacrosConfiguration.js",
+      "cjs_sha256": "5803611b187a6256cae6289cfc2f61fafa7f93395432d3a7b365f8089334b5cf"
+    },
+    {
+      "source": "ts/input/tex/textmacros/TextMacrosMappings.ts",
+      "source_sha256": "9c0e47239e9b9c59e47d045fb56d67b8bfe3d025214641b2ba7f56ad60202cb2",
+      "installed_ts_sha256": "5a56afa4d0604be9c42db826195a750d7698b89b5da721babbfcab3dd18f88c7",
+      "cjs": "input/tex/textmacros/TextMacrosMappings.js",
+      "cjs_sha256": "d331e33a2c3327eeeb2bc1fd5e7e98b0ef17fd7f317aaf91c19f9d665a1a5260"
+    },
+    {
+      "source": "ts/input/tex/textmacros/TextMacrosMethods.ts",
+      "source_sha256": "15b736370eed35d3e65af14d772bfe1b1ad3287844ed44f908f6a9b14004d9c3",
+      "installed_ts_sha256": "85b128200fd39484da5ee443170847288626269be37d4e1c57cd0390999a9a42",
+      "cjs": "input/tex/textmacros/TextMacrosMethods.js",
+      "cjs_sha256": "59e0abbeffeb9c859b2150d705abb1dc0a59a7ec71fb830ae6379d887c499817"
+    },
+    {
+      "source": "ts/input/tex/textmacros/TextParser.ts",
+      "source_sha256": "538059c8482022c1a4bc6f8e763fdc21993fa6353f1956655ae11c9271788a30",
+      "installed_ts_sha256": "0d8717ce674eae333c4d1bdc98ae65c9a3be03137ddf49fe9f834795837a335e",
+      "cjs": "input/tex/textmacros/TextParser.js",
+      "cjs_sha256": "ec2fa0145f5e90ef231b023a38ed7d9c1064a8cc58a46bb683d46439bd8fb400"
+    },
+    {
+      "source": "ts/input/tex/base/BaseMethods.ts",
+      "source_sha256": "7336240c8f9c5037f9fdcd5a84ea079312854f1ef3f406aeb5a8b6a8ff765cda",
+      "installed_ts_sha256": "0c4a1c2c3ca19c583e11ee6af7ea0ec4975c03a0ebfad2a0b0266e9f96d3bdf4",
+      "cjs": "input/tex/base/BaseMethods.js",
+      "cjs_sha256": "b8d5c74e01f85ae391ec8d16ffcd216a4ca4267bd8ffa091c5bfe1462ad7b491"
+    },
+    {
+      "source": "ts/input/tex/base/BaseConfiguration.ts",
+      "source_sha256": "578d2c6b03f2f3e902476a0b73a5323b12262215fcbdc831a1135c1d9c1737ad",
+      "installed_ts_sha256": "30b32dcfae07594ed6dbc00c69e2cf125361deac52ba15ca0174f06f41c68429",
+      "cjs": "input/tex/base/BaseConfiguration.js",
+      "cjs_sha256": "0feedc60ac600b647cf2a1437c7244196a5aec04715f4a301fe6e9ec09722c57"
+    },
+    {
+      "source": "ts/input/tex/base/BaseItems.ts",
+      "source_sha256": "0c0d8448f3577be6642c95a412682310362819d2d383ab83b817d2888e4e5f0c",
+      "installed_ts_sha256": "7acbb526600980180d2bda12dc7d4c94953429d87579a9460f3ddcec33d4c9ee",
+      "cjs": "input/tex/base/BaseItems.js",
+      "cjs_sha256": "5310d0429b7b62d405ae9b93c8d21ad17b787e5eb3fd1f01439c62f2094f7d1a"
+    },
+    {
+      "source": "ts/input/tex/ParseUtil.ts",
+      "source_sha256": "b43646071997f88f27df51610c7972a8cb5791ea76194e7318d17d1a2f81f76a",
+      "installed_ts_sha256": "15060cc72658c922cedc568391791cb928ca6aa12e9a41cd4382de6ff7416f43",
+      "cjs": "input/tex/ParseUtil.js",
+      "cjs_sha256": "adafa18cefad39e8408bcc0e4eb7103dceb6d16c9e7ea2eb013f23602c3f8941"
+    },
+    {
+      "source": "ts/input/tex/HandlerTypes.ts",
+      "source_sha256": "5b9d091fc53640603956ab4ae39f146735621def9c36f312f8abd00afb043cfc",
+      "installed_ts_sha256": "86dcf2c79130db2df5a6d047f91b4f9a16c67b3e1c404bcc2a35321a32288a88",
+      "cjs": "input/tex/HandlerTypes.js",
+      "cjs_sha256": "bf6216270252efca24688a2bf8afda18a9adb762b4a7ae41471d013063bf4103"
+    },
+    {
+      "source": "ts/input/tex/MapHandler.ts",
+      "source_sha256": "7cacdaef3ed1df90b4f05cc0b3183a2956ae8f848f20ae8833932faa4efcb2a2",
+      "installed_ts_sha256": "98025e058ac46767a074a480724cbde6e053e4a844a00c31f954b680602c88fc",
+      "cjs": "input/tex/MapHandler.js",
+      "cjs_sha256": "d82e3034776d2392689aad86500b5e60dbe0aa5540853b48f308841879f3cf67"
+    },
+    {
+      "source": "ts/input/tex/TokenMap.ts",
+      "source_sha256": "0209895b13569008b2129b61c88050e7c70e70ce9477d234b9a6e303a86a738e",
+      "installed_ts_sha256": "49401dedf68a96f88e4fe27d87643a5117ed0509bd42bf958bbf89f87e730353",
+      "cjs": "input/tex/TokenMap.js",
+      "cjs_sha256": "9e3f086080a6ab052b68b22a5d9ee3dbc5e17d7b0c03a31e789664b01df36cf7"
+    },
+    {
+      "source": "ts/input/tex/TexError.ts",
+      "source_sha256": "30f398ff1910edecf029b1e4dde846bef10990539f60c43a4ef2da8783ba7ac8",
+      "installed_ts_sha256": "0748aa17602c42451d97bb48488e769edef41ae9e193c9d3df70d198b9ba167f",
+      "cjs": "input/tex/TexError.js",
+      "cjs_sha256": "a5713111ff2ab646740da13ca6273cb5f2a7ceff9d0fb6a2e116185e4994e64f"
+    },
+    {
+      "source": "ts/util/Retries.ts",
+      "source_sha256": "c517df1c4c67c8cfac65a296b0e185089fd166739d3038eebb89647f4b37c921",
+      "installed_ts_sha256": "f1d7f05802783e4b6b5db68931930dfcfe409fdbe56c87d9b7f03d29f3c82772",
+      "cjs": "util/Retries.js",
+      "cjs_sha256": "0ffe30ec3d65f1d5edfdbb505e5b76cf5b66ec1a920216ab53595df8e666b549"
+    },
+    {
+      "cjs": "input/tex/textmacros/TextMacrosConfiguration.js",
+      "cjs_sha256": "5803611b187a6256cae6289cfc2f61fafa7f93395432d3a7b365f8089334b5cf"
+    },
+    {
+      "cjs": "input/tex/textmacros/TextMacrosMappings.js",
+      "cjs_sha256": "d331e33a2c3327eeeb2bc1fd5e7e98b0ef17fd7f317aaf91c19f9d665a1a5260"
+    },
+    {
+      "cjs": "input/tex/textmacros/TextMacrosMethods.js",
+      "cjs_sha256": "59e0abbeffeb9c859b2150d705abb1dc0a59a7ec71fb830ae6379d887c499817"
+    },
+    {
+      "cjs": "input/tex/textmacros/TextParser.js",
+      "cjs_sha256": "ec2fa0145f5e90ef231b023a38ed7d9c1064a8cc58a46bb683d46439bd8fb400"
+    },
+    {
+      "cjs": "input/tex/base/BaseMethods.js",
+      "cjs_sha256": "b8d5c74e01f85ae391ec8d16ffcd216a4ca4267bd8ffa091c5bfe1462ad7b491"
+    },
+    {
+      "cjs": "input/tex/base/BaseConfiguration.js",
+      "cjs_sha256": "0feedc60ac600b647cf2a1437c7244196a5aec04715f4a301fe6e9ec09722c57"
+    },
+    {
+      "cjs": "input/tex/base/BaseItems.js",
+      "cjs_sha256": "5310d0429b7b62d405ae9b93c8d21ad17b787e5eb3fd1f01439c62f2094f7d1a"
+    },
+    {
+      "cjs": "input/tex/ParseUtil.js",
+      "cjs_sha256": "adafa18cefad39e8408bcc0e4eb7103dceb6d16c9e7ea2eb013f23602c3f8941"
+    },
+    {
+      "cjs": "input/tex.js",
+      "cjs_sha256": "ef2852b197173f373e62326016e980aef01ffc838f5f766ab6076262f944eada"
+    },
+    {
+      "cjs": "input/tex/Configuration.js",
+      "cjs_sha256": "86f62a6f6e44fec20156546b7e8d424cac493c7465c2c8ec621c604332a276f3"
+    },
+    {
+      "cjs": "input/tex/ParseOptions.js",
+      "cjs_sha256": "ff19d70539cb76911c5f1d7673ddfd908183dcf5849c91cb068b19e58da8a9ec"
+    },
+    {
+      "cjs": "input/tex/TexParser.js",
+      "cjs_sha256": "106d7ff9298dce899d046339eab1996358f3efca3a7ce66f5ca915747dc9c6a8"
+    },
+    {
+      "cjs": "input/tex/StackItem.js",
+      "cjs_sha256": "53baa91d7c27475a91a9b6993235071ab32b04a29736c5920bdda2836ab5a91b"
+    },
+    {
+      "cjs": "input/tex/HandlerTypes.js",
+      "cjs_sha256": "bf6216270252efca24688a2bf8afda18a9adb762b4a7ae41471d013063bf4103"
+    },
+    {
+      "cjs": "input/tex/MapHandler.js",
+      "cjs_sha256": "d82e3034776d2392689aad86500b5e60dbe0aa5540853b48f308841879f3cf67"
+    },
+    {
+      "cjs": "input/tex/TokenMap.js",
+      "cjs_sha256": "9e3f086080a6ab052b68b22a5d9ee3dbc5e17d7b0c03a31e789664b01df36cf7"
+    },
+    {
+      "cjs": "input/tex/TexError.js",
+      "cjs_sha256": "a5713111ff2ab646740da13ca6273cb5f2a7ceff9d0fb6a2e116185e4994e64f"
+    },
+    {
+      "cjs": "util/Retries.js",
+      "cjs_sha256": "0ffe30ec3d65f1d5edfdbb505e5b76cf5b66ec1a920216ab53595df8e666b549"
+    },
+    {
+      "cjs": "core/MmlTree/MmlFactory.js",
+      "cjs_sha256": "d0c4e25237d04a9d21d12ee44776e46d30777e7f284db6f4f3ed1cc625b752d3"
+    },
+    {
+      "cjs": "core/Tree/Factory.js",
+      "cjs_sha256": "739db2e5760c29d7bb4f1bc7baa08ff8d727f4d117522aff5ede017f812cffef"
+    }
+  ],
+  "cases": {
+    "tex/empty": {
+      "kind": "inferredMrow",
+      "inferred": true,
+      "token": false,
+      "attrs": {},
+      "properties": {},
+      "children": []
+    },
+    "tex/x": {
+      "kind": "mi",
+      "inferred": false,
+      "token": true,
+      "text": "x",
+      "attrs": {
+        "data-latex": "x"
+      },
+      "properties": {},
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "tex/x-plus-one": {
+      "kind": "inferredMrow",
+      "inferred": true,
+      "token": false,
+      "attrs": {
+        "data-latex": "x+1"
+      },
+      "properties": {},
+      "children": [
+        {
+          "kind": "mi",
+          "inferred": false,
+          "token": true,
+          "text": "x",
+          "attrs": {
+            "data-latex": "x"
+          },
+          "properties": {},
+          "children": [
+            {
+              "kind": "text",
+              "inferred": false,
+              "token": false,
+              "attrs": {},
+              "properties": {},
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "mo",
+          "inferred": false,
+          "token": true,
+          "text": "+",
+          "attrs": {
+            "data-latex": "+"
+          },
+          "properties": {
+            "fixStretchy": true,
+            "in-lists": "fixStretchy"
+          },
+          "children": [
+            {
+              "kind": "text",
+              "inferred": false,
+              "token": false,
+              "attrs": {},
+              "properties": {},
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "mn",
+          "inferred": false,
+          "token": true,
+          "text": "1",
+          "attrs": {
+            "data-latex": "1"
+          },
+          "properties": {},
+          "children": [
+            {
+              "kind": "text",
+              "inferred": false,
+              "token": false,
+              "attrs": {},
+              "properties": {},
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    "tex/fraction": {
+      "kind": "mfrac",
+      "inferred": false,
+      "token": false,
+      "attrs": {
+        "data-latex": "\\frac{1}{2}"
+      },
+      "properties": {},
+      "children": [
+        {
+          "kind": "mn",
+          "inferred": false,
+          "token": true,
+          "text": "1",
+          "attrs": {
+            "data-latex": "1"
+          },
+          "properties": {},
+          "children": [
+            {
+              "kind": "text",
+              "inferred": false,
+              "token": false,
+              "attrs": {},
+              "properties": {},
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "mn",
+          "inferred": false,
+          "token": true,
+          "text": "2",
+          "attrs": {
+            "data-latex": "2"
+          },
+          "properties": {},
+          "children": [
+            {
+              "kind": "text",
+              "inferred": false,
+              "token": false,
+              "attrs": {},
+              "properties": {},
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    "tex/astral": {
+      "kind": "mo",
+      "inferred": false,
+      "token": true,
+      "text": "😀",
+      "attrs": {
+        "data-latex": "😀"
+      },
+      "properties": {
+        "fixStretchy": true,
+        "in-lists": "fixStretchy"
+      },
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "tex/superscript": {
+      "kind": "msubsup",
+      "inferred": false,
+      "token": false,
+      "attrs": {
+        "data-latex": "x^2"
+      },
+      "properties": {
+        "sub-sup": "^"
+      },
+      "children": [
+        {
+          "kind": "mi",
+          "inferred": false,
+          "token": true,
+          "text": "x",
+          "attrs": {
+            "data-latex": "x"
+          },
+          "properties": {},
+          "children": [
+            {
+              "kind": "text",
+              "inferred": false,
+              "token": false,
+              "attrs": {},
+              "properties": {},
+              "children": []
+            }
+          ]
+        },
+        null,
+        {
+          "kind": "mn",
+          "inferred": false,
+          "token": true,
+          "text": "2",
+          "attrs": {
+            "data-latex": "2"
+          },
+          "properties": {},
+          "children": [
+            {
+              "kind": "text",
+              "inferred": false,
+              "token": false,
+              "attrs": {},
+              "properties": {},
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    "macro/percent": {
+      "kind": "mtext",
+      "inferred": false,
+      "token": true,
+      "text": "%",
+      "attrs": {},
+      "properties": {},
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "macro/dagger": {
+      "kind": "mtext",
+      "inferred": false,
+      "token": true,
+      "text": "†",
+      "attrs": {},
+      "properties": {},
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "macro/accent": {
+      "kind": "mover",
+      "inferred": false,
+      "token": false,
+      "attrs": {},
+      "properties": {},
+      "children": [
+        {
+          "kind": "mtext",
+          "inferred": false,
+          "token": true,
+          "text": "e",
+          "attrs": {},
+          "properties": {},
+          "children": [
+            {
+              "kind": "text",
+              "inferred": false,
+              "token": false,
+              "attrs": {},
+              "properties": {},
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "mo",
+          "inferred": false,
+          "token": true,
+          "text": "´",
+          "attrs": {},
+          "properties": {},
+          "children": [
+            {
+              "kind": "text",
+              "inferred": false,
+              "token": false,
+              "attrs": {},
+              "properties": {},
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    "macro/frak": {
+      "kind": "mtext",
+      "inferred": false,
+      "token": true,
+      "text": "x",
+      "attrs": {
+        "mathvariant": "fraktur"
+      },
+      "properties": {},
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "macro/quad": {
+      "kind": "mstyle",
+      "inferred": false,
+      "token": false,
+      "attrs": {
+        "scriptlevel": 0
+      },
+      "properties": {},
+      "children": [
+        {
+          "kind": "inferredMrow",
+          "inferred": true,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": [
+            {
+              "kind": "mspace",
+              "inferred": false,
+              "token": true,
+              "text": "",
+              "attrs": {
+                "width": "1em"
+              },
+              "properties": {},
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    "macro/hspace": {
+      "kind": "mspace",
+      "inferred": false,
+      "token": true,
+      "text": "",
+      "attrs": {
+        "width": "1em"
+      },
+      "properties": {},
+      "children": []
+    },
+    "macro/rule": {
+      "kind": "mspace",
+      "inferred": false,
+      "token": true,
+      "text": "",
+      "attrs": {
+        "width": "1em",
+        "height": "2pt",
+        "mathbackground": "black"
+      },
+      "properties": {},
+      "children": []
+    },
+    "macro/reference": {
+      "kind": "mrow",
+      "inferred": false,
+      "token": false,
+      "attrs": {
+        "href": "#",
+        "class": "MathJax_ref"
+      },
+      "properties": {},
+      "children": [
+        {
+          "kind": "mtext",
+          "inferred": false,
+          "token": true,
+          "text": "???",
+          "attrs": {},
+          "properties": {},
+          "children": [
+            {
+              "kind": "text",
+              "inferred": false,
+              "token": false,
+              "attrs": {},
+              "properties": {},
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    "macro/underline": {
+      "kind": "munderover",
+      "inferred": false,
+      "token": false,
+      "attrs": {},
+      "properties": {
+        "subsupOK": true
+      },
+      "children": [
+        {
+          "kind": "mtext",
+          "inferred": false,
+          "token": true,
+          "text": "x",
+          "attrs": {},
+          "properties": {},
+          "children": [
+            {
+              "kind": "text",
+              "inferred": false,
+              "token": false,
+              "attrs": {},
+              "properties": {},
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "mo",
+          "inferred": false,
+          "token": true,
+          "text": "―",
+          "attrs": {
+            "stretchy": true,
+            "accent": true
+          },
+          "properties": {},
+          "children": [
+            {
+              "kind": "text",
+              "inferred": false,
+              "token": false,
+              "attrs": {},
+              "properties": {},
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    "macro/llap": {
+      "kind": "TeXAtom",
+      "inferred": false,
+      "token": false,
+      "attrs": {},
+      "properties": {
+        "texClass": 0
+      },
+      "children": [
+        {
+          "kind": "inferredMrow",
+          "inferred": true,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": [
+            {
+              "kind": "mpadded",
+              "inferred": false,
+              "token": false,
+              "attrs": {
+                "width": 0,
+                "lspace": "-1width"
+              },
+              "properties": {},
+              "children": [
+                {
+                  "kind": "inferredMrow",
+                  "inferred": true,
+                  "token": false,
+                  "attrs": {},
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "mtext",
+                      "inferred": false,
+                      "token": true,
+                      "text": "x",
+                      "attrs": {},
+                      "properties": {},
+                      "children": [
+                        {
+                          "kind": "text",
+                          "inferred": false,
+                          "token": false,
+                          "attrs": {},
+                          "properties": {},
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "macro/phantom": {
+      "kind": "TeXAtom",
+      "inferred": false,
+      "token": false,
+      "attrs": {},
+      "properties": {
+        "texClass": 0
+      },
+      "children": [
+        {
+          "kind": "inferredMrow",
+          "inferred": true,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": [
+            {
+              "kind": "mphantom",
+              "inferred": false,
+              "token": false,
+              "attrs": {},
+              "properties": {},
+              "children": [
+                {
+                  "kind": "inferredMrow",
+                  "inferred": true,
+                  "token": false,
+                  "attrs": {},
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "mtext",
+                      "inferred": false,
+                      "token": true,
+                      "text": "x",
+                      "attrs": {},
+                      "properties": {},
+                      "children": [
+                        {
+                          "kind": "text",
+                          "inferred": false,
+                          "token": false,
+                          "attrs": {},
+                          "properties": {},
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "macro/smash": {
+      "kind": "TeXAtom",
+      "inferred": false,
+      "token": false,
+      "attrs": {},
+      "properties": {
+        "texClass": 0
+      },
+      "children": [
+        {
+          "kind": "inferredMrow",
+          "inferred": true,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": [
+            {
+              "kind": "mpadded",
+              "inferred": false,
+              "token": false,
+              "attrs": {
+                "height": 0,
+                "depth": 0
+              },
+              "properties": {},
+              "children": [
+                {
+                  "kind": "inferredMrow",
+                  "inferred": true,
+                  "token": false,
+                  "attrs": {},
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "mtext",
+                      "inferred": false,
+                      "token": true,
+                      "text": "x",
+                      "attrs": {},
+                      "properties": {},
+                      "children": [
+                        {
+                          "kind": "text",
+                          "inferred": false,
+                          "token": false,
+                          "attrs": {},
+                          "properties": {},
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "macro/mml-token": {
+      "kind": "mi",
+      "inferred": false,
+      "token": true,
+      "text": "x",
+      "attrs": {},
+      "properties": {},
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "macro/emph": {
+      "kind": "mrow",
+      "inferred": false,
+      "token": false,
+      "attrs": {},
+      "properties": {},
+      "children": [
+        {
+          "kind": "mtext",
+          "inferred": false,
+          "token": true,
+          "text": "e",
+          "attrs": {
+            "mathvariant": "-tex-mathit"
+          },
+          "properties": {
+            "ignore-variant": true
+          },
+          "children": [
+            {
+              "kind": "text",
+              "inferred": false,
+              "token": false,
+              "attrs": {},
+              "properties": {},
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "mtext",
+          "inferred": false,
+          "token": true,
+          "text": "mphatic",
+          "attrs": {},
+          "properties": {},
+          "children": [
+            {
+              "kind": "text",
+              "inferred": false,
+              "token": false,
+              "attrs": {},
+              "properties": {},
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    "macro/textbf": {
+      "kind": "mtext",
+      "inferred": false,
+      "token": true,
+      "text": "bold",
+      "attrs": {
+        "mathvariant": "bold"
+      },
+      "properties": {},
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "macro/textit": {
+      "kind": "mtext",
+      "inferred": false,
+      "token": true,
+      "text": "italic",
+      "attrs": {
+        "mathvariant": "-tex-mathit"
+      },
+      "properties": {
+        "ignore-variant": true
+      },
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "macro/texttt": {
+      "kind": "mtext",
+      "inferred": false,
+      "token": true,
+      "text": "mono",
+      "attrs": {
+        "mathvariant": "monospace"
+      },
+      "properties": {},
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "text/bf": {
+      "kind": "mtext",
+      "inferred": false,
+      "token": true,
+      "text": "bold",
+      "attrs": {
+        "mathvariant": "bold"
+      },
+      "properties": {},
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "text/it": {
+      "kind": "mtext",
+      "inferred": false,
+      "token": true,
+      "text": "italic",
+      "attrs": {
+        "mathvariant": "-tex-mathit"
+      },
+      "properties": {
+        "ignore-variant": true
+      },
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "text/tiny": {
+      "kind": "mtext",
+      "inferred": false,
+      "token": true,
+      "text": "small",
+      "attrs": {
+        "mathsize": 0.6
+      },
+      "properties": {},
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "text/emph": {
+      "kind": "mrow",
+      "inferred": false,
+      "token": false,
+      "attrs": {},
+      "properties": {},
+      "children": [
+        {
+          "kind": "mtext",
+          "inferred": false,
+          "token": true,
+          "text": "e",
+          "attrs": {
+            "mathvariant": "-tex-mathit"
+          },
+          "properties": {
+            "ignore-variant": true
+          },
+          "children": [
+            {
+              "kind": "text",
+              "inferred": false,
+              "token": false,
+              "attrs": {},
+              "properties": {},
+              "children": []
+            }
+          ]
+        },
+        {
+          "kind": "mtext",
+          "inferred": false,
+          "token": true,
+          "text": "mphatic",
+          "attrs": {},
+          "properties": {},
+          "children": [
+            {
+              "kind": "text",
+              "inferred": false,
+              "token": false,
+              "attrs": {},
+              "properties": {},
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    "text/textbf": {
+      "kind": "mtext",
+      "inferred": false,
+      "token": true,
+      "text": "bold",
+      "attrs": {
+        "mathvariant": "bold"
+      },
+      "properties": {},
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "text/textit": {
+      "kind": "mtext",
+      "inferred": false,
+      "token": true,
+      "text": "italic",
+      "attrs": {
+        "mathvariant": "-tex-mathit"
+      },
+      "properties": {
+        "ignore-variant": true
+      },
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "text/texttt": {
+      "kind": "mtext",
+      "inferred": false,
+      "token": true,
+      "text": "mono",
+      "attrs": {
+        "mathvariant": "monospace"
+      },
+      "properties": {},
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "text/spaces": {
+      "kind": "mtext",
+      "inferred": false,
+      "token": true,
+      "text": "plain many spaces",
+      "attrs": {},
+      "properties": {},
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "text/nbsp": {
+      "kind": "mtext",
+      "inferred": false,
+      "token": true,
+      "text": "a b",
+      "attrs": {},
+      "properties": {},
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "text/quotes": {
+      "kind": "mtext",
+      "inferred": false,
+      "token": true,
+      "text": "‘open’",
+      "attrs": {},
+      "properties": {},
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "text/double-quotes": {
+      "kind": "mtext",
+      "inferred": false,
+      "token": true,
+      "text": "“pair”",
+      "attrs": {},
+      "properties": {},
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "text/group": {
+      "kind": "mtext",
+      "inferred": false,
+      "token": true,
+      "text": "group",
+      "attrs": {},
+      "properties": {},
+      "children": [
+        {
+          "kind": "text",
+          "inferred": false,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": []
+        }
+      ]
+    },
+    "text/math-delimiter": {
+      "kind": "TeXAtom",
+      "inferred": false,
+      "token": false,
+      "attrs": {},
+      "properties": {
+        "texClass": 0
+      },
+      "children": [
+        {
+          "kind": "inferredMrow",
+          "inferred": true,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": [
+            {
+              "kind": "mi",
+              "inferred": false,
+              "token": true,
+              "text": "x",
+              "attrs": {
+                "data-latex": "x"
+              },
+              "properties": {},
+              "children": [
+                {
+                  "kind": "text",
+                  "inferred": false,
+                  "token": false,
+                  "attrs": {},
+                  "properties": {},
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "text/level-2": {
+      "kind": "mstyle",
+      "inferred": false,
+      "token": false,
+      "attrs": {
+        "displaystyle": false,
+        "scriptlevel": 2
+      },
+      "properties": {},
+      "children": [
+        {
+          "kind": "inferredMrow",
+          "inferred": true,
+          "token": false,
+          "attrs": {},
+          "properties": {},
+          "children": [
+            {
+              "kind": "mtext",
+              "inferred": false,
+              "token": true,
+              "text": "abc",
+              "attrs": {},
+              "properties": {},
+              "children": [
+                {
+                  "kind": "text",
+                  "inferred": false,
+                  "token": false,
+                  "attrs": {},
+                  "properties": {},
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

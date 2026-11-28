@@ -1,0 +1,80 @@
+{
+  "stage": "native string-keyed Map host; not parser algorithm acceptance",
+  "node": "v24.13.0",
+  "hashes": [
+    {
+      "source": "ts/input/tex/Configuration.ts",
+      "sha256": "8184716579abf3ffa14c64413d276dab4fc721e3e3f43afb0cdccbe2ab782719"
+    },
+    {
+      "source": "ts/input/tex/Tags.ts",
+      "sha256": "5a73a8d16f1d3c87ece167fc06dac0c323ea05a519e5ee5ea9aadbb76cef9a5d"
+    },
+    {
+      "source": "ts/input/tex/ParseOptions.ts",
+      "sha256": "ab60a07dbb24040c0fb9bd67b942755ffc5b0b18980abf1938736d8d90b22209"
+    }
+  ],
+  "rows": [
+    {
+      "label": "empty-get-and-has",
+      "cpp": "SourceStringMap<opts::Value> m;return text(m.get(u\"a\"))+\":\"+yes(m.has(u\"a\"))+\":\"+keys(m);",
+      "expected": "U:false:"
+    },
+    {
+      "label": "replacement-preserves-order",
+      "cpp": "SourceStringMap<opts::Value> m;m.set(u\"b\",1);m.set(u\"a\",2);m.set(u\"b\",3);return keys(m)+\":\"+text(m.get(u\"b\"))+\":\"+std::to_string(m.size());",
+      "expected": "b,a:3:2"
+    },
+    {
+      "label": "prototype-names-are-map-keys",
+      "cpp": "SourceStringMap<opts::Value> m;m.set(u\"__proto__\",1);m.set(u\"constructor\",2);m.set(u\"toString\",3);return keys(m)+\":\"+text(m.get(u\"__proto__\"));",
+      "expected": "__proto__,constructor,toString:1"
+    },
+    {
+      "label": "undefined-value-is-present",
+      "cpp": "SourceStringMap<opts::Value> m;m.set(u\"a\",opts::Undefined{});return yes(m.has(u\"a\"))+\":\"+text(m.get(u\"a\"))+\":\"+yes(m.get(u\"a\").has_value())+\":\"+yes(m.get(u\"b\").has_value());",
+      "expected": "true:U:true:false"
+    },
+    {
+      "label": "null-false-zero-empty-values",
+      "cpp": "SourceStringMap<opts::Value> m;m.set(u\"n\",opts::Null{});m.set(u\"b\",false);m.set(u\"z\",0);m.set(u\"s\",u\"\");return text(m.get(u\"n\"))+\":\"+text(m.get(u\"b\"))+\":\"+text(m.get(u\"z\"))+\":\"+text(m.get(u\"s\"));",
+      "expected": "N:false:0:"
+    },
+    {
+      "label": "map-handle-alias",
+      "cpp": "SourceStringMap<opts::Value> m;auto alias=m;alias.set(u\"x\",1);m.set(u\"x\",2);return keys(m)+\":\"+text(alias.get(u\"x\"));",
+      "expected": "x:2"
+    },
+    {
+      "label": "fresh-map-independent",
+      "cpp": "SourceStringMap<opts::Value> a,b;a.set(u\"x\",1);b.set(u\"x\",2);return text(a.get(u\"x\"))+\":\"+text(b.get(u\"x\"));",
+      "expected": "1:2"
+    },
+    {
+      "label": "object-values-retain-identity",
+      "cpp": "opts::Context c;auto value=c.object();SourceStringMap<opts::Value> m;m.set(u\"o\",value);return yes(m.get(u\"o\")==std::optional<opts::Value>(value));",
+      "expected": "true"
+    },
+    {
+      "label": "keys-iterator-sees-appends",
+      "cpp": "SourceStringMap<opts::Value> m;m.set(u\"a\",1);auto iterator=m.keys();auto first=key(iterator.next());m.set(u\"b\",2);auto second=key(iterator.next());return first+\":\"+second+\":\"+key(iterator.next());",
+      "expected": "a:b:U"
+    },
+    {
+      "label": "keys-completion-is-sticky",
+      "cpp": "SourceStringMap<opts::Value> m;m.set(u\"a\",1);auto iterator=m.keys();auto first=key(iterator.next());auto end=key(iterator.next());m.set(u\"b\",2);return first+\":\"+end+\":\"+key(iterator.next());",
+      "expected": "a:U:U"
+    },
+    {
+      "label": "keys-iterator-retains-owner",
+      "cpp": "auto iterator=[] {SourceStringMap<opts::Value> m;m.set(u\"a\",1);return m.keys();}();auto first=key(iterator.next());auto second=key(iterator.next());return first+\":\"+second;",
+      "expected": "a:U"
+    },
+    {
+      "label": "two-key-iterators-independent",
+      "cpp": "SourceStringMap<opts::Value> m;m.set(u\"a\",1);m.set(u\"b\",2);auto a=m.keys(),b=m.keys();auto aa=key(a.next());auto ab=key(a.next());auto ba=key(b.next());return aa+\":\"+ab+\":\"+ba;",
+      "expected": "a:b:a"
+    }
+  ]
+}

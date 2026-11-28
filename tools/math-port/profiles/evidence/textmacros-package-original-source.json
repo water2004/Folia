@@ -1,0 +1,3361 @@
+{
+  "schema": 1,
+  "scope_sha256": "9705d389538b2fc8bf782feea4372ace639b3727304f2971937bbcfb0042a0d1",
+  "modules": [
+    {
+      "source": "ts/input/tex/textmacros/TextMacrosConfiguration.ts",
+      "source_sha256": "5d712a805bfe3ff3db425f24c1887eab300782a8570363abbbe77641222faefc",
+      "installed_ts_sha256": "1d77d653cab5d72d7612bc2485bd880aa7edfce35b5b366d27e571f347afd64a",
+      "cjs": "input/tex/textmacros/TextMacrosConfiguration.js",
+      "cjs_sha256": "5803611b187a6256cae6289cfc2f61fafa7f93395432d3a7b365f8089334b5cf"
+    },
+    {
+      "source": "ts/input/tex/textmacros/TextMacrosMappings.ts",
+      "source_sha256": "9c0e47239e9b9c59e47d045fb56d67b8bfe3d025214641b2ba7f56ad60202cb2",
+      "installed_ts_sha256": "5a56afa4d0604be9c42db826195a750d7698b89b5da721babbfcab3dd18f88c7",
+      "cjs": "input/tex/textmacros/TextMacrosMappings.js",
+      "cjs_sha256": "d331e33a2c3327eeeb2bc1fd5e7e98b0ef17fd7f317aaf91c19f9d665a1a5260"
+    },
+    {
+      "source": "ts/input/tex/textmacros/TextMacrosMethods.ts",
+      "source_sha256": "15b736370eed35d3e65af14d772bfe1b1ad3287844ed44f908f6a9b14004d9c3",
+      "installed_ts_sha256": "85b128200fd39484da5ee443170847288626269be37d4e1c57cd0390999a9a42",
+      "cjs": "input/tex/textmacros/TextMacrosMethods.js",
+      "cjs_sha256": "59e0abbeffeb9c859b2150d705abb1dc0a59a7ec71fb830ae6379d887c499817"
+    },
+    {
+      "source": "ts/input/tex/textmacros/TextParser.ts",
+      "source_sha256": "538059c8482022c1a4bc6f8e763fdc21993fa6353f1956655ae11c9271788a30",
+      "installed_ts_sha256": "0d8717ce674eae333c4d1bdc98ae65c9a3be03137ddf49fe9f834795837a335e",
+      "cjs": "input/tex/textmacros/TextParser.js",
+      "cjs_sha256": "ec2fa0145f5e90ef231b023a38ed7d9c1064a8cc58a46bb683d46439bd8fb400"
+    },
+    {
+      "source": "ts/input/tex/base/BaseMethods.ts",
+      "source_sha256": "7336240c8f9c5037f9fdcd5a84ea079312854f1ef3f406aeb5a8b6a8ff765cda",
+      "installed_ts_sha256": "0c4a1c2c3ca19c583e11ee6af7ea0ec4975c03a0ebfad2a0b0266e9f96d3bdf4",
+      "cjs": "input/tex/base/BaseMethods.js",
+      "cjs_sha256": "b8d5c74e01f85ae391ec8d16ffcd216a4ca4267bd8ffa091c5bfe1462ad7b491"
+    },
+    {
+      "source": "ts/input/tex/base/BaseConfiguration.ts",
+      "source_sha256": "578d2c6b03f2f3e902476a0b73a5323b12262215fcbdc831a1135c1d9c1737ad",
+      "installed_ts_sha256": "30b32dcfae07594ed6dbc00c69e2cf125361deac52ba15ca0174f06f41c68429",
+      "cjs": "input/tex/base/BaseConfiguration.js",
+      "cjs_sha256": "0feedc60ac600b647cf2a1437c7244196a5aec04715f4a301fe6e9ec09722c57"
+    },
+    {
+      "source": "ts/input/tex/base/BaseItems.ts",
+      "source_sha256": "0c0d8448f3577be6642c95a412682310362819d2d383ab83b817d2888e4e5f0c",
+      "installed_ts_sha256": "7acbb526600980180d2bda12dc7d4c94953429d87579a9460f3ddcec33d4c9ee",
+      "cjs": "input/tex/base/BaseItems.js",
+      "cjs_sha256": "5310d0429b7b62d405ae9b93c8d21ad17b787e5eb3fd1f01439c62f2094f7d1a"
+    },
+    {
+      "source": "ts/input/tex/ParseUtil.ts",
+      "source_sha256": "b43646071997f88f27df51610c7972a8cb5791ea76194e7318d17d1a2f81f76a",
+      "installed_ts_sha256": "15060cc72658c922cedc568391791cb928ca6aa12e9a41cd4382de6ff7416f43",
+      "cjs": "input/tex/ParseUtil.js",
+      "cjs_sha256": "adafa18cefad39e8408bcc0e4eb7103dceb6d16c9e7ea2eb013f23602c3f8941"
+    },
+    {
+      "source": "ts/input/tex/HandlerTypes.ts",
+      "source_sha256": "5b9d091fc53640603956ab4ae39f146735621def9c36f312f8abd00afb043cfc",
+      "installed_ts_sha256": "86dcf2c79130db2df5a6d047f91b4f9a16c67b3e1c404bcc2a35321a32288a88",
+      "cjs": "input/tex/HandlerTypes.js",
+      "cjs_sha256": "bf6216270252efca24688a2bf8afda18a9adb762b4a7ae41471d013063bf4103"
+    },
+    {
+      "source": "ts/input/tex/MapHandler.ts",
+      "source_sha256": "7cacdaef3ed1df90b4f05cc0b3183a2956ae8f848f20ae8833932faa4efcb2a2",
+      "installed_ts_sha256": "98025e058ac46767a074a480724cbde6e053e4a844a00c31f954b680602c88fc",
+      "cjs": "input/tex/MapHandler.js",
+      "cjs_sha256": "d82e3034776d2392689aad86500b5e60dbe0aa5540853b48f308841879f3cf67"
+    },
+    {
+      "source": "ts/input/tex/TokenMap.ts",
+      "source_sha256": "0209895b13569008b2129b61c88050e7c70e70ce9477d234b9a6e303a86a738e",
+      "installed_ts_sha256": "49401dedf68a96f88e4fe27d87643a5117ed0509bd42bf958bbf89f87e730353",
+      "cjs": "input/tex/TokenMap.js",
+      "cjs_sha256": "9e3f086080a6ab052b68b22a5d9ee3dbc5e17d7b0c03a31e789664b01df36cf7"
+    },
+    {
+      "source": "ts/input/tex/TexError.ts",
+      "source_sha256": "30f398ff1910edecf029b1e4dde846bef10990539f60c43a4ef2da8783ba7ac8",
+      "installed_ts_sha256": "0748aa17602c42451d97bb48488e769edef41ae9e193c9d3df70d198b9ba167f",
+      "cjs": "input/tex/TexError.js",
+      "cjs_sha256": "a5713111ff2ab646740da13ca6273cb5f2a7ceff9d0fb6a2e116185e4994e64f"
+    },
+    {
+      "source": "ts/util/Retries.ts",
+      "source_sha256": "c517df1c4c67c8cfac65a296b0e185089fd166739d3038eebb89647f4b37c921",
+      "installed_ts_sha256": "f1d7f05802783e4b6b5db68931930dfcfe409fdbe56c87d9b7f03d29f3c82772",
+      "cjs": "util/Retries.js",
+      "cjs_sha256": "0ffe30ec3d65f1d5edfdbb505e5b76cf5b66ec1a920216ab53595df8e666b549"
+    },
+    {
+      "cjs": "input/tex/textmacros/TextMacrosConfiguration.js",
+      "cjs_sha256": "5803611b187a6256cae6289cfc2f61fafa7f93395432d3a7b365f8089334b5cf"
+    },
+    {
+      "cjs": "input/tex/textmacros/TextMacrosMappings.js",
+      "cjs_sha256": "d331e33a2c3327eeeb2bc1fd5e7e98b0ef17fd7f317aaf91c19f9d665a1a5260"
+    },
+    {
+      "cjs": "input/tex/textmacros/TextMacrosMethods.js",
+      "cjs_sha256": "59e0abbeffeb9c859b2150d705abb1dc0a59a7ec71fb830ae6379d887c499817"
+    },
+    {
+      "cjs": "input/tex/textmacros/TextParser.js",
+      "cjs_sha256": "ec2fa0145f5e90ef231b023a38ed7d9c1064a8cc58a46bb683d46439bd8fb400"
+    },
+    {
+      "cjs": "input/tex/base/BaseMethods.js",
+      "cjs_sha256": "b8d5c74e01f85ae391ec8d16ffcd216a4ca4267bd8ffa091c5bfe1462ad7b491"
+    },
+    {
+      "cjs": "input/tex/base/BaseConfiguration.js",
+      "cjs_sha256": "0feedc60ac600b647cf2a1437c7244196a5aec04715f4a301fe6e9ec09722c57"
+    },
+    {
+      "cjs": "input/tex/base/BaseItems.js",
+      "cjs_sha256": "5310d0429b7b62d405ae9b93c8d21ad17b787e5eb3fd1f01439c62f2094f7d1a"
+    },
+    {
+      "cjs": "input/tex/ParseUtil.js",
+      "cjs_sha256": "adafa18cefad39e8408bcc0e4eb7103dceb6d16c9e7ea2eb013f23602c3f8941"
+    },
+    {
+      "cjs": "input/tex.js",
+      "cjs_sha256": "ef2852b197173f373e62326016e980aef01ffc838f5f766ab6076262f944eada"
+    },
+    {
+      "cjs": "input/tex/Configuration.js",
+      "cjs_sha256": "86f62a6f6e44fec20156546b7e8d424cac493c7465c2c8ec621c604332a276f3"
+    },
+    {
+      "cjs": "input/tex/ParseOptions.js",
+      "cjs_sha256": "ff19d70539cb76911c5f1d7673ddfd908183dcf5849c91cb068b19e58da8a9ec"
+    },
+    {
+      "cjs": "input/tex/TexParser.js",
+      "cjs_sha256": "106d7ff9298dce899d046339eab1996358f3efca3a7ce66f5ca915747dc9c6a8"
+    },
+    {
+      "cjs": "input/tex/StackItem.js",
+      "cjs_sha256": "53baa91d7c27475a91a9b6993235071ab32b04a29736c5920bdda2836ab5a91b"
+    },
+    {
+      "cjs": "input/tex/HandlerTypes.js",
+      "cjs_sha256": "bf6216270252efca24688a2bf8afda18a9adb762b4a7ae41471d013063bf4103"
+    },
+    {
+      "cjs": "input/tex/MapHandler.js",
+      "cjs_sha256": "d82e3034776d2392689aad86500b5e60dbe0aa5540853b48f308841879f3cf67"
+    },
+    {
+      "cjs": "input/tex/TokenMap.js",
+      "cjs_sha256": "9e3f086080a6ab052b68b22a5d9ee3dbc5e17d7b0c03a31e789664b01df36cf7"
+    },
+    {
+      "cjs": "input/tex/TexError.js",
+      "cjs_sha256": "a5713111ff2ab646740da13ca6273cb5f2a7ceff9d0fb6a2e116185e4994e64f"
+    },
+    {
+      "cjs": "util/Retries.js",
+      "cjs_sha256": "0ffe30ec3d65f1d5edfdbb505e5b76cf5b66ec1a920216ab53595df8e666b549"
+    },
+    {
+      "cjs": "core/MmlTree/MmlFactory.js",
+      "cjs_sha256": "d0c4e25237d04a9d21d12ee44776e46d30777e7f284db6f4f3ed1cc625b752d3"
+    },
+    {
+      "cjs": "core/Tree/Factory.js",
+      "cjs_sha256": "739db2e5760c29d7bb4f1bc7baa08ff8d727f4d117522aff5ede017f812cffef"
+    }
+  ],
+  "observations": [
+    {
+      "name": "textmacros-package-configuration-identity-and-canonical-function",
+      "value": {
+        "packageKeys": [
+          "textConf",
+          "parseOptions",
+          "jax",
+          "texParser"
+        ],
+        "sharedOptions": true,
+        "sharedPackageData": true,
+        "defaultTags": false,
+        "packageConf": "ParserConfiguration",
+        "callback": {
+          "name": "internalMath",
+          "length": 4
+        },
+        "sameCallback": true,
+        "baseMethodAliases": {
+          "Macro": true,
+          "Spacer": true,
+          "Hskip": true,
+          "rule": true,
+          "Rule": true,
+          "HandleRef": true,
+          "UnderOver": true,
+          "Lap": true,
+          "Phantom": true,
+          "Smash": true,
+          "MmlToken": true
+        }
+      },
+      "error": null
+    },
+    {
+      "name": "textmacros-mapping-registration-and-canonical-method-aliases",
+      "value": {
+        "character": [
+          [
+            "$",
+            {
+              "value": {
+                "_token": "$",
+                "_func": {
+                  "$": "function",
+                  "name": "Math",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "%",
+            {
+              "value": {
+                "_token": "%",
+                "_func": {
+                  "$": "function",
+                  "name": "Comment",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "^",
+            {
+              "value": {
+                "_token": "^",
+                "_func": {
+                  "$": "function",
+                  "name": "MathModeOnly",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "_",
+            {
+              "value": {
+                "_token": "_",
+                "_func": {
+                  "$": "function",
+                  "name": "MathModeOnly",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "&",
+            {
+              "value": {
+                "_token": "&",
+                "_func": {
+                  "$": "function",
+                  "name": "Misplaced",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "#",
+            {
+              "value": {
+                "_token": "#",
+                "_func": {
+                  "$": "function",
+                  "name": "Misplaced",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "~",
+            {
+              "value": {
+                "_token": "~",
+                "_func": {
+                  "$": "function",
+                  "name": "Tilde",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            " ",
+            {
+              "value": {
+                "_token": " ",
+                "_func": {
+                  "$": "function",
+                  "name": "Space",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "\t",
+            {
+              "value": {
+                "_token": "\t",
+                "_func": {
+                  "$": "function",
+                  "name": "Space",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "\r",
+            {
+              "value": {
+                "_token": "\r",
+                "_func": {
+                  "$": "function",
+                  "name": "Space",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "\n",
+            {
+              "value": {
+                "_token": "\n",
+                "_func": {
+                  "$": "function",
+                  "name": "Space",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            " ",
+            {
+              "value": {
+                "_token": " ",
+                "_func": {
+                  "$": "function",
+                  "name": "Tilde",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "{",
+            {
+              "value": {
+                "_token": "{",
+                "_func": {
+                  "$": "function",
+                  "name": "OpenBrace",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "}",
+            {
+              "value": {
+                "_token": "}",
+                "_func": {
+                  "$": "function",
+                  "name": "CloseBrace",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "`",
+            {
+              "value": {
+                "_token": "`",
+                "_func": {
+                  "$": "function",
+                  "name": "OpenQuote",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "'",
+            {
+              "value": {
+                "_token": "'",
+                "_func": {
+                  "$": "function",
+                  "name": "CloseQuote",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ]
+        ],
+        "macro": [
+          [
+            "(",
+            {
+              "value": {
+                "_token": "(",
+                "_func": {
+                  "$": "function",
+                  "name": "Math",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "$",
+            {
+              "value": {
+                "_token": "$",
+                "_func": {
+                  "$": "function",
+                  "name": "SelfQuote",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "_",
+            {
+              "value": {
+                "_token": "_",
+                "_func": {
+                  "$": "function",
+                  "name": "SelfQuote",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "%",
+            {
+              "value": {
+                "_token": "%",
+                "_func": {
+                  "$": "function",
+                  "name": "SelfQuote",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "{",
+            {
+              "value": {
+                "_token": "{",
+                "_func": {
+                  "$": "function",
+                  "name": "SelfQuote",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "}",
+            {
+              "value": {
+                "_token": "}",
+                "_func": {
+                  "$": "function",
+                  "name": "SelfQuote",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            " ",
+            {
+              "value": {
+                "_token": " ",
+                "_func": {
+                  "$": "function",
+                  "name": "SelfQuote",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "&",
+            {
+              "value": {
+                "_token": "&",
+                "_func": {
+                  "$": "function",
+                  "name": "SelfQuote",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "#",
+            {
+              "value": {
+                "_token": "#",
+                "_func": {
+                  "$": "function",
+                  "name": "SelfQuote",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "\\",
+            {
+              "value": {
+                "_token": "\\",
+                "_func": {
+                  "$": "function",
+                  "name": "Macro",
+                  "length": 5
+                },
+                "_args": [
+                  "$\\\\$"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "'",
+            {
+              "value": {
+                "_token": "'",
+                "_func": {
+                  "$": "function",
+                  "name": "Accent",
+                  "length": 3
+                },
+                "_args": [
+                  "´"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "’",
+            {
+              "value": {
+                "_token": "’",
+                "_func": {
+                  "$": "function",
+                  "name": "Accent",
+                  "length": 3
+                },
+                "_args": [
+                  "´"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "`",
+            {
+              "value": {
+                "_token": "`",
+                "_func": {
+                  "$": "function",
+                  "name": "Accent",
+                  "length": 3
+                },
+                "_args": [
+                  "`"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "‘",
+            {
+              "value": {
+                "_token": "‘",
+                "_func": {
+                  "$": "function",
+                  "name": "Accent",
+                  "length": 3
+                },
+                "_args": [
+                  "`"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "^",
+            {
+              "value": {
+                "_token": "^",
+                "_func": {
+                  "$": "function",
+                  "name": "Accent",
+                  "length": 3
+                },
+                "_args": [
+                  "^"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "\"",
+            {
+              "value": {
+                "_token": "\"",
+                "_func": {
+                  "$": "function",
+                  "name": "Accent",
+                  "length": 3
+                },
+                "_args": [
+                  "¨"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "~",
+            {
+              "value": {
+                "_token": "~",
+                "_func": {
+                  "$": "function",
+                  "name": "Accent",
+                  "length": 3
+                },
+                "_args": [
+                  "~"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "=",
+            {
+              "value": {
+                "_token": "=",
+                "_func": {
+                  "$": "function",
+                  "name": "Accent",
+                  "length": 3
+                },
+                "_args": [
+                  "¯"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            ".",
+            {
+              "value": {
+                "_token": ".",
+                "_func": {
+                  "$": "function",
+                  "name": "Accent",
+                  "length": 3
+                },
+                "_args": [
+                  "˙"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "u",
+            {
+              "value": {
+                "_token": "u",
+                "_func": {
+                  "$": "function",
+                  "name": "Accent",
+                  "length": 3
+                },
+                "_args": [
+                  "˘"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "v",
+            {
+              "value": {
+                "_token": "v",
+                "_func": {
+                  "$": "function",
+                  "name": "Accent",
+                  "length": 3
+                },
+                "_args": [
+                  "ˇ"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "emph",
+            {
+              "value": {
+                "_token": "emph",
+                "_func": {
+                  "$": "function",
+                  "name": "Emph",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "rm",
+            {
+              "value": {
+                "_token": "rm",
+                "_func": {
+                  "$": "function",
+                  "name": "SetFont",
+                  "length": 3
+                },
+                "_args": [
+                  "normal"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "mit",
+            {
+              "value": {
+                "_token": "mit",
+                "_func": {
+                  "$": "function",
+                  "name": "SetFont",
+                  "length": 3
+                },
+                "_args": [
+                  "italic"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "oldstyle",
+            {
+              "value": {
+                "_token": "oldstyle",
+                "_func": {
+                  "$": "function",
+                  "name": "SetFont",
+                  "length": 3
+                },
+                "_args": [
+                  "-tex-oldstyle"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "cal",
+            {
+              "value": {
+                "_token": "cal",
+                "_func": {
+                  "$": "function",
+                  "name": "SetFont",
+                  "length": 3
+                },
+                "_args": [
+                  "-tex-calligraphic"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "it",
+            {
+              "value": {
+                "_token": "it",
+                "_func": {
+                  "$": "function",
+                  "name": "SetFont",
+                  "length": 3
+                },
+                "_args": [
+                  "-tex-mathit"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "bf",
+            {
+              "value": {
+                "_token": "bf",
+                "_func": {
+                  "$": "function",
+                  "name": "SetFont",
+                  "length": 3
+                },
+                "_args": [
+                  "bold"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "sf",
+            {
+              "value": {
+                "_token": "sf",
+                "_func": {
+                  "$": "function",
+                  "name": "SetFont",
+                  "length": 3
+                },
+                "_args": [
+                  "sans-serif"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "tt",
+            {
+              "value": {
+                "_token": "tt",
+                "_func": {
+                  "$": "function",
+                  "name": "SetFont",
+                  "length": 3
+                },
+                "_args": [
+                  "monospace"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "frak",
+            {
+              "value": {
+                "_token": "frak",
+                "_func": {
+                  "$": "function",
+                  "name": "TextFont",
+                  "length": 3
+                },
+                "_args": [
+                  "fraktur"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "Bbb",
+            {
+              "value": {
+                "_token": "Bbb",
+                "_func": {
+                  "$": "function",
+                  "name": "TextFont",
+                  "length": 3
+                },
+                "_args": [
+                  "double-struck"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "Tiny",
+            {
+              "value": {
+                "_token": "Tiny",
+                "_func": {
+                  "$": "function",
+                  "name": "SetSize",
+                  "length": 3
+                },
+                "_args": [
+                  0.5
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "tiny",
+            {
+              "value": {
+                "_token": "tiny",
+                "_func": {
+                  "$": "function",
+                  "name": "SetSize",
+                  "length": 3
+                },
+                "_args": [
+                  0.6
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "scriptsize",
+            {
+              "value": {
+                "_token": "scriptsize",
+                "_func": {
+                  "$": "function",
+                  "name": "SetSize",
+                  "length": 3
+                },
+                "_args": [
+                  0.7
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "SMALL",
+            {
+              "value": {
+                "_token": "SMALL",
+                "_func": {
+                  "$": "function",
+                  "name": "SetSize",
+                  "length": 3
+                },
+                "_args": [
+                  0.7
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "Small",
+            {
+              "value": {
+                "_token": "Small",
+                "_func": {
+                  "$": "function",
+                  "name": "SetSize",
+                  "length": 3
+                },
+                "_args": [
+                  0.8
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "footnotesize",
+            {
+              "value": {
+                "_token": "footnotesize",
+                "_func": {
+                  "$": "function",
+                  "name": "SetSize",
+                  "length": 3
+                },
+                "_args": [
+                  0.8
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "small",
+            {
+              "value": {
+                "_token": "small",
+                "_func": {
+                  "$": "function",
+                  "name": "SetSize",
+                  "length": 3
+                },
+                "_args": [
+                  0.9
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "normalsize",
+            {
+              "value": {
+                "_token": "normalsize",
+                "_func": {
+                  "$": "function",
+                  "name": "SetSize",
+                  "length": 3
+                },
+                "_args": [
+                  1
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "large",
+            {
+              "value": {
+                "_token": "large",
+                "_func": {
+                  "$": "function",
+                  "name": "SetSize",
+                  "length": 3
+                },
+                "_args": [
+                  1.095
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "Large",
+            {
+              "value": {
+                "_token": "Large",
+                "_func": {
+                  "$": "function",
+                  "name": "SetSize",
+                  "length": 3
+                },
+                "_args": [
+                  1.2
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "LARGE",
+            {
+              "value": {
+                "_token": "LARGE",
+                "_func": {
+                  "$": "function",
+                  "name": "SetSize",
+                  "length": 3
+                },
+                "_args": [
+                  1.44
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "huge",
+            {
+              "value": {
+                "_token": "huge",
+                "_func": {
+                  "$": "function",
+                  "name": "SetSize",
+                  "length": 3
+                },
+                "_args": [
+                  1.73
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "Huge",
+            {
+              "value": {
+                "_token": "Huge",
+                "_func": {
+                  "$": "function",
+                  "name": "SetSize",
+                  "length": 3
+                },
+                "_args": [
+                  2.07
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "HUGE",
+            {
+              "value": {
+                "_token": "HUGE",
+                "_func": {
+                  "$": "function",
+                  "name": "SetSize",
+                  "length": 3
+                },
+                "_args": [
+                  2.49
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "textnormal",
+            {
+              "value": {
+                "_token": "textnormal",
+                "_func": {
+                  "$": "function",
+                  "name": "Macro",
+                  "length": 5
+                },
+                "_args": [
+                  "{\\rm #1}",
+                  1
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "textup",
+            {
+              "value": {
+                "_token": "textup",
+                "_func": {
+                  "$": "function",
+                  "name": "Macro",
+                  "length": 5
+                },
+                "_args": [
+                  "{\\rm #1}",
+                  1
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "textrm",
+            {
+              "value": {
+                "_token": "textrm",
+                "_func": {
+                  "$": "function",
+                  "name": "Macro",
+                  "length": 5
+                },
+                "_args": [
+                  "{\\rm #1}",
+                  1
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "textit",
+            {
+              "value": {
+                "_token": "textit",
+                "_func": {
+                  "$": "function",
+                  "name": "Macro",
+                  "length": 5
+                },
+                "_args": [
+                  "{\\it #1}",
+                  1
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "textbf",
+            {
+              "value": {
+                "_token": "textbf",
+                "_func": {
+                  "$": "function",
+                  "name": "Macro",
+                  "length": 5
+                },
+                "_args": [
+                  "{\\bf #1}",
+                  1
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "textsf",
+            {
+              "value": {
+                "_token": "textsf",
+                "_func": {
+                  "$": "function",
+                  "name": "Macro",
+                  "length": 5
+                },
+                "_args": [
+                  "{\\sf #1}",
+                  1
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "texttt",
+            {
+              "value": {
+                "_token": "texttt",
+                "_func": {
+                  "$": "function",
+                  "name": "Macro",
+                  "length": 5
+                },
+                "_args": [
+                  "{\\tt #1}",
+                  1
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "dagger",
+            {
+              "value": {
+                "_token": "dagger",
+                "_func": {
+                  "$": "function",
+                  "name": "Insert",
+                  "length": 3
+                },
+                "_args": [
+                  "†"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "ddagger",
+            {
+              "value": {
+                "_token": "ddagger",
+                "_func": {
+                  "$": "function",
+                  "name": "Insert",
+                  "length": 3
+                },
+                "_args": [
+                  "‡"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "S",
+            {
+              "value": {
+                "_token": "S",
+                "_func": {
+                  "$": "function",
+                  "name": "Insert",
+                  "length": 3
+                },
+                "_args": [
+                  "§"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "AA",
+            {
+              "value": {
+                "_token": "AA",
+                "_func": {
+                  "$": "function",
+                  "name": "Insert",
+                  "length": 3
+                },
+                "_args": [
+                  "Å"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "ldots",
+            {
+              "value": {
+                "_token": "ldots",
+                "_func": {
+                  "$": "function",
+                  "name": "Insert",
+                  "length": 3
+                },
+                "_args": [
+                  "…"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "vdots",
+            {
+              "value": {
+                "_token": "vdots",
+                "_func": {
+                  "$": "function",
+                  "name": "Insert",
+                  "length": 3
+                },
+                "_args": [
+                  "⋮"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            ",",
+            {
+              "value": {
+                "_token": ",",
+                "_func": {
+                  "$": "function",
+                  "name": "Spacer",
+                  "length": 3
+                },
+                "_args": [
+                  0.16666666666666666
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            ":",
+            {
+              "value": {
+                "_token": ":",
+                "_func": {
+                  "$": "function",
+                  "name": "Spacer",
+                  "length": 3
+                },
+                "_args": [
+                  0.2222222222222222
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            ">",
+            {
+              "value": {
+                "_token": ">",
+                "_func": {
+                  "$": "function",
+                  "name": "Spacer",
+                  "length": 3
+                },
+                "_args": [
+                  0.2222222222222222
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            ";",
+            {
+              "value": {
+                "_token": ";",
+                "_func": {
+                  "$": "function",
+                  "name": "Spacer",
+                  "length": 3
+                },
+                "_args": [
+                  0.2777777777777778
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "!",
+            {
+              "value": {
+                "_token": "!",
+                "_func": {
+                  "$": "function",
+                  "name": "Spacer",
+                  "length": 3
+                },
+                "_args": [
+                  -0.16666666666666666
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "enspace",
+            {
+              "value": {
+                "_token": "enspace",
+                "_func": {
+                  "$": "function",
+                  "name": "Spacer",
+                  "length": 3
+                },
+                "_args": [
+                  0.5
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "quad",
+            {
+              "value": {
+                "_token": "quad",
+                "_func": {
+                  "$": "function",
+                  "name": "Spacer",
+                  "length": 3
+                },
+                "_args": [
+                  1
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "qquad",
+            {
+              "value": {
+                "_token": "qquad",
+                "_func": {
+                  "$": "function",
+                  "name": "Spacer",
+                  "length": 3
+                },
+                "_args": [
+                  2
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "thinspace",
+            {
+              "value": {
+                "_token": "thinspace",
+                "_func": {
+                  "$": "function",
+                  "name": "Spacer",
+                  "length": 3
+                },
+                "_args": [
+                  0.16666666666666666
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "negthinspace",
+            {
+              "value": {
+                "_token": "negthinspace",
+                "_func": {
+                  "$": "function",
+                  "name": "Spacer",
+                  "length": 3
+                },
+                "_args": [
+                  -0.16666666666666666
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "hskip",
+            {
+              "value": {
+                "_token": "hskip",
+                "_func": {
+                  "$": "function",
+                  "name": "Hskip",
+                  "length": 3
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "hspace",
+            {
+              "value": {
+                "_token": "hspace",
+                "_func": {
+                  "$": "function",
+                  "name": "Hskip",
+                  "length": 3
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "kern",
+            {
+              "value": {
+                "_token": "kern",
+                "_func": {
+                  "$": "function",
+                  "name": "Hskip",
+                  "length": 3
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "mskip",
+            {
+              "value": {
+                "_token": "mskip",
+                "_func": {
+                  "$": "function",
+                  "name": "Hskip",
+                  "length": 3
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "mspace",
+            {
+              "value": {
+                "_token": "mspace",
+                "_func": {
+                  "$": "function",
+                  "name": "Hskip",
+                  "length": 3
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "mkern",
+            {
+              "value": {
+                "_token": "mkern",
+                "_func": {
+                  "$": "function",
+                  "name": "Hskip",
+                  "length": 3
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "rule",
+            {
+              "value": {
+                "_token": "rule",
+                "_func": {
+                  "$": "function",
+                  "name": "rule",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "Rule",
+            {
+              "value": {
+                "_token": "Rule",
+                "_func": {
+                  "$": "function",
+                  "name": "Rule",
+                  "length": 3
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "Space",
+            {
+              "value": {
+                "_token": "Space",
+                "_func": {
+                  "$": "function",
+                  "name": "Rule",
+                  "length": 3
+                },
+                "_args": [
+                  "blank"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "color",
+            {
+              "value": {
+                "_token": "color",
+                "_func": {
+                  "$": "function",
+                  "name": "CheckAutoload",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "textcolor",
+            {
+              "value": {
+                "_token": "textcolor",
+                "_func": {
+                  "$": "function",
+                  "name": "CheckAutoload",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "colorbox",
+            {
+              "value": {
+                "_token": "colorbox",
+                "_func": {
+                  "$": "function",
+                  "name": "CheckAutoload",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "fcolorbox",
+            {
+              "value": {
+                "_token": "fcolorbox",
+                "_func": {
+                  "$": "function",
+                  "name": "CheckAutoload",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "href",
+            {
+              "value": {
+                "_token": "href",
+                "_func": {
+                  "$": "function",
+                  "name": "CheckAutoload",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "style",
+            {
+              "value": {
+                "_token": "style",
+                "_func": {
+                  "$": "function",
+                  "name": "CheckAutoload",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "class",
+            {
+              "value": {
+                "_token": "class",
+                "_func": {
+                  "$": "function",
+                  "name": "CheckAutoload",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "data",
+            {
+              "value": {
+                "_token": "data",
+                "_func": {
+                  "$": "function",
+                  "name": "CheckAutoload",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "cssId",
+            {
+              "value": {
+                "_token": "cssId",
+                "_func": {
+                  "$": "function",
+                  "name": "CheckAutoload",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "unicode",
+            {
+              "value": {
+                "_token": "unicode",
+                "_func": {
+                  "$": "function",
+                  "name": "CheckAutoload",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "U",
+            {
+              "value": {
+                "_token": "U",
+                "_func": {
+                  "$": "function",
+                  "name": "CheckAutoload",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "char",
+            {
+              "value": {
+                "_token": "char",
+                "_func": {
+                  "$": "function",
+                  "name": "CheckAutoload",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "ref",
+            {
+              "value": {
+                "_token": "ref",
+                "_func": {
+                  "$": "function",
+                  "name": "HandleRef",
+                  "length": 3
+                },
+                "_args": [
+                  false
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "eqref",
+            {
+              "value": {
+                "_token": "eqref",
+                "_func": {
+                  "$": "function",
+                  "name": "HandleRef",
+                  "length": 3
+                },
+                "_args": [
+                  true
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "underline",
+            {
+              "value": {
+                "_token": "underline",
+                "_func": {
+                  "$": "function",
+                  "name": "UnderOver",
+                  "length": 4
+                },
+                "_args": [
+                  "2015"
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "llap",
+            {
+              "value": {
+                "_token": "llap",
+                "_func": {
+                  "$": "function",
+                  "name": "Lap",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "rlap",
+            {
+              "value": {
+                "_token": "rlap",
+                "_func": {
+                  "$": "function",
+                  "name": "Lap",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "phantom",
+            {
+              "value": {
+                "_token": "phantom",
+                "_func": {
+                  "$": "function",
+                  "name": "Phantom",
+                  "length": 4
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "vphantom",
+            {
+              "value": {
+                "_token": "vphantom",
+                "_func": {
+                  "$": "function",
+                  "name": "Phantom",
+                  "length": 4
+                },
+                "_args": [
+                  1,
+                  0
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "hphantom",
+            {
+              "value": {
+                "_token": "hphantom",
+                "_func": {
+                  "$": "function",
+                  "name": "Phantom",
+                  "length": 4
+                },
+                "_args": [
+                  0,
+                  1
+                ]
+              },
+              "error": null
+            }
+          ],
+          [
+            "smash",
+            {
+              "value": {
+                "_token": "smash",
+                "_func": {
+                  "$": "function",
+                  "name": "Smash",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ],
+          [
+            "mmlToken",
+            {
+              "value": {
+                "_token": "mmlToken",
+                "_func": {
+                  "$": "function",
+                  "name": "MmlToken",
+                  "length": 2
+                },
+                "_args": []
+              },
+              "error": null
+            }
+          ]
+        ],
+        "fallbacks": [],
+        "itemKinds": [
+          "start",
+          "stop",
+          "mml",
+          "style"
+        ]
+      },
+      "error": null
+    },
+    {
+      "name": "textparser-spacing-specials-quotes-and-groups",
+      "value": [
+        [
+          "plain  many   spaces",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mtext",
+                  "attrs": {},
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "text",
+                      "attrs": {},
+                      "properties": {},
+                      "children": []
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 20,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "a b",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mtext",
+                  "attrs": {},
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "text",
+                      "attrs": {},
+                      "properties": {},
+                      "children": []
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 3,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "`open'",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mtext",
+                  "attrs": {},
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "text",
+                      "attrs": {},
+                      "properties": {},
+                      "children": []
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 6,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "``pair''",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mtext",
+                  "attrs": {},
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "text",
+                      "attrs": {},
+                      "properties": {},
+                      "children": []
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 8,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "{group}",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mtext",
+                  "attrs": {},
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "text",
+                      "attrs": {},
+                      "properties": {},
+                      "children": []
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 7,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "a}",
+          {
+            "value": null,
+            "error": {
+              "name": "TexError",
+              "id": "ExtraCloseMissingOpen",
+              "message": "Extra close brace or missing open brace"
+            }
+          }
+        ]
+      ],
+      "error": null
+    },
+    {
+      "name": "textparser-font-size-and-text-argument-macros",
+      "value": [
+        [
+          "\\bf bold",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mtext",
+                  "attrs": {
+                    "mathvariant": "bold"
+                  },
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "text",
+                      "attrs": {},
+                      "properties": {},
+                      "children": []
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 8,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\it italic",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mtext",
+                  "attrs": {
+                    "mathvariant": "-tex-mathit"
+                  },
+                  "properties": {
+                    "ignore-variant": true
+                  },
+                  "children": [
+                    {
+                      "kind": "text",
+                      "attrs": {},
+                      "properties": {},
+                      "children": []
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 10,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\tiny small",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mtext",
+                  "attrs": {
+                    "mathsize": 0.6
+                  },
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "text",
+                      "attrs": {},
+                      "properties": {},
+                      "children": []
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 11,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\emph emphatic",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mrow",
+                  "attrs": {},
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "mtext",
+                      "attrs": {
+                        "mathvariant": "-tex-mathit"
+                      },
+                      "properties": {
+                        "ignore-variant": true
+                      },
+                      "children": [
+                        {
+                          "kind": "text",
+                          "attrs": {},
+                          "properties": {},
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "mtext",
+                      "attrs": {},
+                      "properties": {},
+                      "children": [
+                        {
+                          "kind": "text",
+                          "attrs": {},
+                          "properties": {},
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 14,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\textbf{bold}",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mtext",
+                  "attrs": {
+                    "mathvariant": "bold"
+                  },
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "text",
+                      "attrs": {},
+                      "properties": {},
+                      "children": []
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 10,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\textit{italic}",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mtext",
+                  "attrs": {
+                    "mathvariant": "-tex-mathit"
+                  },
+                  "properties": {
+                    "ignore-variant": true
+                  },
+                  "children": [
+                    {
+                      "kind": "text",
+                      "attrs": {},
+                      "properties": {},
+                      "children": []
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 12,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\texttt{mono}",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mtext",
+                  "attrs": {
+                    "mathvariant": "monospace"
+                  },
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "text",
+                      "attrs": {},
+                      "properties": {},
+                      "children": []
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 10,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ]
+      ],
+      "error": null
+    },
+    {
+      "name": "textmacros-method-branch-corpus",
+      "value": [
+        [
+          "\\%",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mtext",
+                  "attrs": {},
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "text",
+                      "attrs": {},
+                      "properties": {},
+                      "children": []
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 2,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\dagger",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mtext",
+                  "attrs": {},
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "text",
+                      "attrs": {},
+                      "properties": {},
+                      "children": []
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 7,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\'{e}",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mover",
+                  "attrs": {},
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "mtext",
+                      "attrs": {},
+                      "properties": {},
+                      "children": [
+                        {
+                          "kind": "text",
+                          "attrs": {},
+                          "properties": {},
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "mo",
+                      "attrs": {},
+                      "properties": {},
+                      "children": [
+                        {
+                          "kind": "text",
+                          "attrs": {},
+                          "properties": {},
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 5,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\frak{x}",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mtext",
+                  "attrs": {
+                    "mathvariant": "fraktur"
+                  },
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "text",
+                      "attrs": {},
+                      "properties": {},
+                      "children": []
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 8,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\quad",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mstyle",
+                  "attrs": {
+                    "scriptlevel": 0
+                  },
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "inferredMrow",
+                      "attrs": {},
+                      "properties": {},
+                      "children": [
+                        {
+                          "kind": "mspace",
+                          "attrs": {
+                            "width": "1em"
+                          },
+                          "properties": {},
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 5,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\hspace{1em}",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mspace",
+                  "attrs": {
+                    "width": "1em"
+                  },
+                  "properties": {},
+                  "children": []
+                },
+                "error": null
+              },
+              "index": 12,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\rule{1em}{2pt}",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mspace",
+                  "attrs": {
+                    "width": "1em",
+                    "height": "2pt",
+                    "mathbackground": "black"
+                  },
+                  "properties": {},
+                  "children": []
+                },
+                "error": null
+              },
+              "index": 15,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\Rule",
+          {
+            "value": null,
+            "error": {
+              "name": "TexError",
+              "id": "MissingDimOrUnits",
+              "message": "Missing dimension or its units for \\Rule"
+            }
+          }
+        ],
+        [
+          "\\ref{missing}",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mrow",
+                  "attrs": {
+                    "href": "#",
+                    "class": "MathJax_ref"
+                  },
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "mtext",
+                      "attrs": {},
+                      "properties": {},
+                      "children": [
+                        {
+                          "kind": "text",
+                          "attrs": {},
+                          "properties": {},
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 13,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\underline{x}",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "munderover",
+                  "attrs": {},
+                  "properties": {
+                    "subsupOK": true
+                  },
+                  "children": [
+                    {
+                      "kind": "mtext",
+                      "attrs": {},
+                      "properties": {},
+                      "children": [
+                        {
+                          "kind": "text",
+                          "attrs": {},
+                          "properties": {},
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "mo",
+                      "attrs": {
+                        "stretchy": true,
+                        "accent": true
+                      },
+                      "properties": {},
+                      "children": [
+                        {
+                          "kind": "text",
+                          "attrs": {},
+                          "properties": {},
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 13,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\llap{x}",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "TeXAtom",
+                  "attrs": {},
+                  "properties": {
+                    "texClass": 0
+                  },
+                  "children": [
+                    {
+                      "kind": "inferredMrow",
+                      "attrs": {},
+                      "properties": {},
+                      "children": [
+                        {
+                          "kind": "mpadded",
+                          "attrs": {
+                            "width": 0,
+                            "lspace": "-1width"
+                          },
+                          "properties": {},
+                          "children": [
+                            {
+                              "kind": "inferredMrow",
+                              "attrs": {},
+                              "properties": {},
+                              "children": [
+                                {
+                                  "kind": "mtext",
+                                  "attrs": {},
+                                  "properties": {},
+                                  "children": [
+                                    {
+                                      "kind": "text",
+                                      "attrs": {},
+                                      "properties": {},
+                                      "children": []
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 8,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\phantom{x}",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "TeXAtom",
+                  "attrs": {},
+                  "properties": {
+                    "texClass": 0
+                  },
+                  "children": [
+                    {
+                      "kind": "inferredMrow",
+                      "attrs": {},
+                      "properties": {},
+                      "children": [
+                        {
+                          "kind": "mphantom",
+                          "attrs": {},
+                          "properties": {},
+                          "children": [
+                            {
+                              "kind": "inferredMrow",
+                              "attrs": {},
+                              "properties": {},
+                              "children": [
+                                {
+                                  "kind": "mtext",
+                                  "attrs": {},
+                                  "properties": {},
+                                  "children": [
+                                    {
+                                      "kind": "text",
+                                      "attrs": {},
+                                      "properties": {},
+                                      "children": []
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 11,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\smash{x}",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "TeXAtom",
+                  "attrs": {},
+                  "properties": {
+                    "texClass": 0
+                  },
+                  "children": [
+                    {
+                      "kind": "inferredMrow",
+                      "attrs": {},
+                      "properties": {},
+                      "children": [
+                        {
+                          "kind": "mpadded",
+                          "attrs": {
+                            "height": 0,
+                            "depth": 0
+                          },
+                          "properties": {},
+                          "children": [
+                            {
+                              "kind": "inferredMrow",
+                              "attrs": {},
+                              "properties": {},
+                              "children": [
+                                {
+                                  "kind": "mtext",
+                                  "attrs": {},
+                                  "properties": {},
+                                  "children": [
+                                    {
+                                      "kind": "text",
+                                      "attrs": {},
+                                      "properties": {},
+                                      "children": []
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 9,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\mmlToken{mi}{x}",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "mi",
+                  "attrs": {},
+                  "properties": {},
+                  "children": [
+                    {
+                      "kind": "text",
+                      "attrs": {},
+                      "properties": {},
+                      "children": []
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 16,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\color{red}x",
+          {
+            "value": null,
+            "error": {
+              "name": "TexError",
+              "id": "UndefinedControlSequence",
+              "message": "Undefined control sequence \\color"
+            }
+          }
+        ]
+      ],
+      "error": null
+    },
+    {
+      "name": "textparser-math-delimiters-and-mode-errors",
+      "value": [
+        [
+          "$x$",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "TeXAtom",
+                  "attrs": {},
+                  "properties": {
+                    "texClass": 0
+                  },
+                  "children": [
+                    {
+                      "kind": "inferredMrow",
+                      "attrs": {},
+                      "properties": {},
+                      "children": [
+                        {
+                          "kind": "mi",
+                          "attrs": {
+                            "data-latex": "x"
+                          },
+                          "properties": {},
+                          "children": [
+                            {
+                              "kind": "text",
+                              "attrs": {},
+                              "properties": {},
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 3,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "\\(x\\)",
+          {
+            "value": {
+              "result": {
+                "value": {
+                  "kind": "TeXAtom",
+                  "attrs": {},
+                  "properties": {
+                    "texClass": 0
+                  },
+                  "children": [
+                    {
+                      "kind": "inferredMrow",
+                      "attrs": {},
+                      "properties": {},
+                      "children": [
+                        {
+                          "kind": "mi",
+                          "attrs": {
+                            "data-latex": "x"
+                          },
+                          "properties": {},
+                          "children": [
+                            {
+                              "kind": "text",
+                              "attrs": {},
+                              "properties": {},
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "error": null
+              },
+              "index": 5,
+              "text": "",
+              "envStack": [],
+              "innerParsers": 0,
+              "mainParserStillRegistered": true
+            },
+            "error": null
+          }
+        ],
+        [
+          "x_{y}",
+          {
+            "value": null,
+            "error": {
+              "name": "TexError",
+              "id": "MathModeOnly",
+              "message": "'_' allowed only in math mode"
+            }
+          }
+        ],
+        [
+          "^x",
+          {
+            "value": null,
+            "error": {
+              "name": "TexError",
+              "id": "MathModeOnly",
+              "message": "'^' allowed only in math mode"
+            }
+          }
+        ],
+        [
+          "&",
+          {
+            "value": null,
+            "error": {
+              "name": "TexError",
+              "id": "Misplaced",
+              "message": "Misplaced '&'"
+            }
+          }
+        ],
+        [
+          "#",
+          {
+            "value": null,
+            "error": {
+              "name": "TexError",
+              "id": "Misplaced",
+              "message": "Misplaced '#'"
+            }
+          }
+        ],
+        [
+          "\\unknown",
+          {
+            "value": null,
+            "error": {
+              "name": "TexError",
+              "id": "UndefinedControlSequence",
+              "message": "Undefined control sequence \\unknown"
+            }
+          }
+        ]
+      ],
+      "error": null
+    },
+    {
+      "name": "internalmath-callback-normalization-level-font-and-shared-state",
+      "value": [
+        {
+          "source": "a   b",
+          "level": {
+            "$": "undefined"
+          },
+          "font": {
+            "$": "undefined"
+          },
+          "result": {
+            "value": [
+              {
+                "kind": "mtext",
+                "attrs": {},
+                "properties": {},
+                "children": [
+                  {
+                    "kind": "text",
+                    "attrs": {},
+                    "properties": {},
+                    "children": []
+                  }
+                ]
+              }
+            ],
+            "error": null
+          },
+          "mainParser": true,
+          "innerParsers": 0,
+          "sharedMap": true
+        },
+        {
+          "source": "x",
+          "level": 2,
+          "font": {
+            "$": "undefined"
+          },
+          "result": {
+            "value": [
+              {
+                "kind": "mstyle",
+                "attrs": {
+                  "displaystyle": false,
+                  "scriptlevel": 2
+                },
+                "properties": {},
+                "children": [
+                  {
+                    "kind": "inferredMrow",
+                    "attrs": {},
+                    "properties": {},
+                    "children": [
+                      {
+                        "kind": "mtext",
+                        "attrs": {},
+                        "properties": {},
+                        "children": [
+                          {
+                            "kind": "text",
+                            "attrs": {},
+                            "properties": {},
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "error": null
+          },
+          "mainParser": true,
+          "innerParsers": 0,
+          "sharedMap": true
+        },
+        {
+          "source": "y",
+          "level": {
+            "$": "undefined"
+          },
+          "font": "bold",
+          "result": {
+            "value": [
+              {
+                "kind": "mtext",
+                "attrs": {
+                  "mathvariant": "bold"
+                },
+                "properties": {},
+                "children": [
+                  {
+                    "kind": "text",
+                    "attrs": {},
+                    "properties": {},
+                    "children": []
+                  }
+                ]
+              }
+            ],
+            "error": null
+          },
+          "mainParser": true,
+          "innerParsers": 0,
+          "sharedMap": true
+        }
+      ],
+      "error": null
+    },
+    {
+      "name": "textmacros-copyLists-transfers-actual-node-list-membership",
+      "value": {
+        "mainKeys": [
+          "inferredMrow",
+          "mi",
+          "custom"
+        ],
+        "innerKeys": [],
+        "sameNode": true,
+        "mainMi": 2
+      },
+      "error": null
+    }
+  ]
+}

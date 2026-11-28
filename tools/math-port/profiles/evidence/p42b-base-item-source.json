@@ -1,0 +1,342 @@
+[
+  {
+    "label": "initial",
+    "expected": "ok|base:U:true::U:false:false:false|"
+  },
+  {
+    "label": "independent-instance-state",
+    "expected": "ok|U:U|"
+  },
+  {
+    "label": "isKind:base",
+    "expected": "ok|true|"
+  },
+  {
+    "label": "isKind:open",
+    "expected": "ok|false|"
+  },
+  {
+    "label": "isKind:BASE",
+    "expected": "ok|false|"
+  },
+  {
+    "label": "isKind:",
+    "expected": "ok|false|"
+  },
+  {
+    "label": "isKind-virtual-kind",
+    "expected": "ok|true|kind"
+  },
+  {
+    "label": "property:undefined",
+    "expected": "ok|same:U:U|"
+  },
+  {
+    "label": "property:null",
+    "expected": "ok|same:N:N|"
+  },
+  {
+    "label": "property:false",
+    "expected": "ok|same:false:false|"
+  },
+  {
+    "label": "property:zero",
+    "expected": "ok|same:0:0|"
+  },
+  {
+    "label": "property:text",
+    "expected": "ok|same:abc:abc|"
+  },
+  {
+    "label": "node-property-identity",
+    "expected": "ok|node:mi:same|"
+  },
+  {
+    "label": "getName-virtual-property",
+    "expected": "ok|override|name"
+  },
+  {
+    "label": "inherited-builtin-property",
+    "expected": "ok|function toString() { [native code] }|"
+  },
+  {
+    "label": "assign-key-order-and-node",
+    "expected": "ok|same:node:mi:node:mn:1|"
+  },
+  {
+    "label": "assign-own-only",
+    "expected": "ok|U:node:mn|"
+  },
+  {
+    "label": "assign-style-alias",
+    "expected": "ok|same:blue|"
+  },
+  {
+    "label": "assign-recursive-record-alias",
+    "expected": "ok|same:node:mn|"
+  },
+  {
+    "label": "assign-boxed:U",
+    "expected": "ok|U:U|"
+  },
+  {
+    "label": "assign-boxed:N",
+    "expected": "ok|U:U|"
+  },
+  {
+    "label": "assign-boxed:string",
+    "expected": "ok|a:b|"
+  },
+  {
+    "label": "assign-boxed:number",
+    "expected": "ok|U:U|"
+  },
+  {
+    "label": "prototype-record-shadow",
+    "expected": "ok|node:mi:node:mn:node:mi|"
+  },
+  {
+    "label": "prototype-null",
+    "expected": "ok|U:U|"
+  },
+  {
+    "label": "env-alias-clear-own-only",
+    "expected": "ok|same::1|"
+  },
+  {
+    "label": "clear-env:U",
+    "expected": "TypeError|Cannot convert undefined or null to object|THREW|"
+  },
+  {
+    "label": "clear-env:N",
+    "expected": "TypeError|Cannot convert undefined or null to object|THREW|"
+  },
+  {
+    "label": "clear-env:false",
+    "expected": "ok|ok|"
+  },
+  {
+    "label": "clear-env-live-target",
+    "expected": "ok|a=1,b=2:c=5|env:1/env:2/env:3"
+  },
+  {
+    "label": "errors:end",
+    "expected": "ok|MissingBeginExtraEnd;Missing \\begin{%1} or extra \\end{%1}|"
+  },
+  {
+    "label": "errors:close",
+    "expected": "ok|ExtraCloseMissingOpen;Extra close brace or missing open brace|"
+  },
+  {
+    "label": "errors:right",
+    "expected": "ok|MissingLeftExtraRight;Missing \\left or extra \\right|"
+  },
+  {
+    "label": "errors:middle",
+    "expected": "ok|ExtraMiddle;Extra \\middle|"
+  },
+  {
+    "label": "errors:absent",
+    "expected": "ok|U|"
+  },
+  {
+    "label": "errors-class-prototype-and-live-array",
+    "expected": "ok|same:id;changed:ExtraCloseMissingOpen;Extra close brace or missing open brace|"
+  },
+  {
+    "label": "errors-falsy-fallback:PropertyNull{}",
+    "expected": "ok|ExtraCloseMissingOpen;Extra close brace or missing open brace|"
+  },
+  {
+    "label": "errors-falsy-fallback:false",
+    "expected": "ok|ExtraCloseMissingOpen;Extra close brace or missing open brace|"
+  },
+  {
+    "label": "errors-falsy-fallback:0",
+    "expected": "ok|ExtraCloseMissingOpen;Extra close brace or missing open brace|"
+  },
+  {
+    "label": "errors-falsy-fallback:\"\"",
+    "expected": "ok|ExtraCloseMissingOpen;Extra close brace or missing open brace|"
+  },
+  {
+    "label": "errors-empty-array-identity",
+    "expected": "ok|same:|"
+  },
+  {
+    "label": "check-normal-success",
+    "expected": "ok|success:N:true|"
+  },
+  {
+    "label": "check-final-push",
+    "expected": "ok|fail:N:false:node:mi:1|"
+  },
+  {
+    "label": "check-fail-shared-mutable-tuple",
+    "expected": "ok|fail:N:true:same|"
+  },
+  {
+    "label": "check-cell:false:false",
+    "expected": "ok|success:N:true|"
+  },
+  {
+    "label": "check-cell:false:true",
+    "expected": "ok|success:N:true|"
+  },
+  {
+    "label": "check-cell:true:false",
+    "expected": "TexError|Misplaced|Misplaced &|THREW|"
+  },
+  {
+    "label": "check-cell:true:true",
+    "expected": "ok|fail:N:false|"
+  },
+  {
+    "label": "check-close:end",
+    "expected": "TexError|MissingBeginExtraEnd|Missing \\begin{foo} or extra \\end{foo}|THREW|"
+  },
+  {
+    "label": "check-close:close",
+    "expected": "TexError|ExtraCloseMissingOpen|Extra close brace or missing open brace|THREW|"
+  },
+  {
+    "label": "check-close:right",
+    "expected": "TexError|MissingLeftExtraRight|Missing \\left or extra \\right|THREW|"
+  },
+  {
+    "label": "check-close:middle",
+    "expected": "TexError|ExtraMiddle|Extra \\middle|THREW|"
+  },
+  {
+    "label": "check-close:other",
+    "expected": "ok|success:N:true|"
+  },
+  {
+    "label": "check-over-partial-setter-throw",
+    "expected": "Error|setter|THREW|num:node:mi:1"
+  },
+  {
+    "label": "check-over-clears-rebind",
+    "expected": "ok|success:N:true:node:mi:1:0|"
+  },
+  {
+    "label": "check-repeat-errors-and-kind",
+    "expected": "TexError|id|bad name|THREW|isKind:over/isKind:cell/isClose/kind:1/errors:one/kind:2/errors:two/prop:name"
+  },
+  {
+    "label": "check-errors-second-nullish:Missing{}",
+    "expected": "TypeError|undefined is not iterable (cannot read property Symbol(Symbol.iterator))|THREW|errors:1/errors:2"
+  },
+  {
+    "label": "check-errors-second-nullish:PropertyNull{}",
+    "expected": "TypeError|object null is not iterable (cannot read property Symbol(Symbol.iterator))|THREW|errors:1/errors:2"
+  },
+  {
+    "label": "check-errors-empty-array",
+    "expected": "TypeError|Cannot read properties of undefined (reading 'split')|THREW|prop:name"
+  },
+  {
+    "label": "toString-sparse-live-list",
+    "expected": "ok|base[mi(); ; ; mn()]|"
+  },
+  {
+    "label": "latex:[\"abc\",0,3,\"\"]",
+    "expected": "ok|0061,0062,0063:0061,0062,0063|"
+  },
+  {
+    "label": "latex:[\"}\",0,1,\"\"]",
+    "expected": "ok|007d:U|"
+  },
+  {
+    "label": "latex:[\"}\",0,1,\"pre\"]",
+    "expected": "ok|0070,0072,0065,007d:0070,0072,0065,007d|"
+  },
+  {
+    "label": "latex:[\"\",0,0,\"pre\"]",
+    "expected": "ok|U:U|"
+  },
+  {
+    "label": "latex:[\"abcdef\",-3,-1,\"p\"]",
+    "expected": "ok|0070,0064,0065:0070,0064,0065|"
+  },
+  {
+    "label": "latex:[\"a😀b\",1,2,\"\"]",
+    "expected": "ok|d83d:d83d|"
+  },
+  {
+    "label": "latex:[\"abcdef\",1.9,4.9,\"\"]",
+    "expected": "ok|0062,0063,0064:0062,0063,0064|"
+  },
+  {
+    "label": "latex:[\"abcdef\",4,1,\"\"]",
+    "expected": "ok|U:U|"
+  },
+  {
+    "label": "factory-empty:base",
+    "expected": "TypeError|Cannot read properties of undefined (reading 'apply')|THREW|"
+  },
+  {
+    "label": "factory-empty:dummy",
+    "expected": "TypeError|Cannot read properties of undefined (reading 'apply')|THREW|"
+  },
+  {
+    "label": "factory-empty:unknown",
+    "expected": "TypeError|Cannot read properties of undefined (reading 'apply')|THREW|"
+  },
+  {
+    "label": "factory-default-field-mismatch",
+    "expected": "ok|dummy:0:base:true|"
+  },
+  {
+    "label": "factory-explicit-default-map",
+    "expected": "ok|base:1|"
+  },
+  {
+    "label": "factory-single-identity",
+    "expected": "ok|same:actual:one-factory|"
+  },
+  {
+    "label": "constructor-virtual-open-before-fields",
+    "expected": "ok|object:1:node:mi|open:U::U:U"
+  },
+  {
+    "label": "errors-captured-class-after-replacement",
+    "expected": "ok|old;old message|"
+  },
+  {
+    "label": "factory-null-fallback",
+    "expected": "TypeError|Cannot read properties of null (reading 'apply')|THREW|"
+  },
+  {
+    "label": "toString-kind-before-nodes-and-live-join",
+    "expected": "ok|base[A; ]|kind/nodes/node"
+  },
+  {
+    "label": "latex-empty-touches-no-null-node",
+    "expected": "ok|ok|"
+  },
+  {
+    "label": "latex-null-node-with-source",
+    "expected": "TypeError|Cannot read properties of null (reading 'attributes')|THREW|"
+  },
+  {
+    "label": "latex-rereads-attributes",
+    "expected": "ok|0078:U:0078|attrs:1/attrs:2"
+  },
+  {
+    "label": "latex-retains-first-write-on-second-failure",
+    "expected": "Error|second attrs|THREW|attrs:1/attrs:2/retained:0078"
+  },
+  {
+    "label": "latex-null-attributes",
+    "expected": "TypeError|Cannot read properties of null (reading 'set')|THREW|attrs"
+  },
+  {
+    "label": "latex-current-constant-after-receiver-read",
+    "expected": "ok|0078:0078|attrs/attrs"
+  },
+  {
+    "label": "check-over-explicit-row",
+    "expected": "ok|success:N:true:node:mrow:0|add:mrow"
+  }
+]

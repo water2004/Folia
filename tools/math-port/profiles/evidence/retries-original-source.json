@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "source_sha256": "c517df1c4c67c8cfac65a296b0e185089fd166739d3038eebb89647f4b37c921",
+  "installed_ts_sha256": "f1d7f05802783e4b6b5db68931930dfcfe409fdbe56c87d9b7f03d29f3c82772",
+  "cjs_sha256": "0ffe30ec3d65f1d5edfdbb505e5b76cf5b66ec1a920216ab53595df8e666b549",
+  "observations": [
+    {
+      "name": "retry-after-error-shape",
+      "value": {
+        "name": "Error",
+        "message": "MathJax retry -- an asynchronous action is required; try using one of the promise-based functions and await its resolution.",
+        "hasRetry": true,
+        "retryResolved": "Promise"
+      },
+      "error": null
+    },
+    {
+      "name": "handle-retries-success-return",
+      "value": 17,
+      "error": null
+    },
+    {
+      "name": "handle-retries-retry-after-then-success",
+      "value": 2,
+      "error": null
+    },
+    {
+      "name": "handle-retries-direct-error",
+      "value": null,
+      "error": {
+        "name": "Error",
+        "message": "direct failure",
+        "hasRetry": false,
+        "retryResolved": null
+      }
+    },
+    {
+      "name": "handle-retries-rejected-retry-promise",
+      "value": null,
+      "error": {
+        "name": "Error",
+        "message": "retry rejection",
+        "hasRetry": false,
+        "retryResolved": null
+      }
+    }
+  ]
+}

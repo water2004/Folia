@@ -1,0 +1,9 @@
+{
+  "unicode": "16.0.0",
+  "source_url": "https://www.unicode.org/Public/16.0.0/ucd/UnicodeData.txt",
+  "sha256": "ff58e5823bd095166564a006e47d111130813dcf8bf234ef79fa51a870edb48f",
+  "canonical_decompositions": 2081,
+  "combining_class_records": 934,
+  "values": 3127,
+  "compatibility_mappings_excluded": true
+}
