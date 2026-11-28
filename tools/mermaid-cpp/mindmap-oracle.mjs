@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 import {readFileSync,writeFileSync,readdirSync} from 'node:fs';
 import {JSDOM} from './oracle/node_modules/jsdom/lib/api.js';
 import {cases} from './mindmap-cases.mjs';
-const lock=JSON.parse(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json',import.meta.url)));
+const lock=JSON.parse(readFileSync(new URL('./source-lock.json',import.meta.url)));
 for(const file of lock.files.filter(f=>f.path.includes('/mindmap/')))assert.equal(createHash('sha256').update(readFileSync(new URL('../../.reference/mermaid-js/'+file.path,import.meta.url))).digest('hex'),file.sha256,file.path);
 const dom=new JSDOM('<!doctype html><body></body>');
 globalThis.window=dom.window;globalThis.document=dom.window.document;

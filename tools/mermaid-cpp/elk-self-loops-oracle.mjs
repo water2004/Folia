@@ -8,7 +8,7 @@ import path from 'node:path';
 
 const require=createRequire(realpathSync(new URL('./oracle/node_modules/mermaid/package.json',import.meta.url)));
 const base=path.dirname(require.resolve('elkjs/package.json'));
-const lock=JSON.parse(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json',import.meta.url)));
+const lock=JSON.parse(readFileSync(new URL('./source-lock.json',import.meta.url)));
 assert.equal(JSON.parse(readFileSync(path.join(base,'package.json'))).version,'0.9.3');
 for(const file of lock.elkCycle.files)
   assert.equal(createHash('sha256').update(readFileSync(path.join(base,file.path))).digest('hex'),file.sha256,file.path);

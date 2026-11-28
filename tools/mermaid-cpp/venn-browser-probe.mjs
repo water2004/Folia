@@ -14,7 +14,7 @@ export {inspectVenn};
 export const edge = browserExecutable();
 
 function verifyLayout(mermaidFile) {
-  const {vennLayout: lock, stateBundle} = JSON.parse(readFileSync('docs/mermaid-cpp/source-lock.json', 'utf8'));
+  const {vennLayout: lock, stateBundle} = JSON.parse(readFileSync('tools/mermaid-cpp/source-lock.json', 'utf8'));
   const fromMermaid = createRequire(realpathSync(mermaidFile));
   // This package has no package.json export and its require export targets an
   // absent file. Search Node's module directories from Mermaid's real path.

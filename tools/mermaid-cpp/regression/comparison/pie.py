@@ -15,7 +15,7 @@ from .corpus import REPOSITORY, UPSTREAM, digest, require
 
 
 FIXTURE = REPOSITORY / "tests/mermaid_cpp/fixtures/pie-svg.tsv"
-SOURCE_LOCK = REPOSITORY / "docs/mermaid-cpp/source-lock.json"
+SOURCE_LOCK = REPOSITORY / "tools/mermaid-cpp/source-lock.json"
 
 
 def select(root, selector):

@@ -3,7 +3,7 @@ import {readFileSync,writeFileSync,readdirSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {JSDOM} from './oracle/node_modules/jsdom/lib/api.js';
 import {cases} from './gantt-cases.mjs';
-const lock=JSON.parse(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json',import.meta.url)));
+const lock=JSON.parse(readFileSync(new URL('./source-lock.json',import.meta.url)));
 const chunks=new URL('./oracle/node_modules/mermaid/dist/chunks/mermaid.esm/',import.meta.url),sources=new Map();
 for(const file of readdirSync(chunks).filter(n=>n.endsWith('.mjs.map'))){const map=JSON.parse(readFileSync(new URL(file,chunks)));for(let i=0;i<map.sources.length;++i)sources.set(map.sources[i],map.sourcesContent[i]);}
 for(const file of lock.ganttTime.files)assert.equal(createHash('sha256').update(sources.get(file.source)).digest('hex'),file.sha256,file.source);

@@ -6,7 +6,7 @@ import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {createHash} from 'node:crypto';
 import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
-const lock=JSON.parse(readFileSync('docs/mermaid-cpp/source-lock.json'));
+const lock=JSON.parse(readFileSync('tools/mermaid-cpp/source-lock.json'));
 for(const f of lock.files) assert.equal(createHash('sha256').update(readFileSync('.reference/mermaid-js/'+f.path)).digest('hex'),f.sha256,f.path);
 const cases=[
  ["alignment-left","%%{init: {\"sequence\":{\"messageAlign\":\"left\"}}}%%\nsequenceDiagram\nA->>B: Save\nB-->>A: Done\nA->>A: Check"],

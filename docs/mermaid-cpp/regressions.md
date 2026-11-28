@@ -6,28 +6,12 @@
 生产代码与回归驱动共用 `folia.mermaid.measured_render`，Windows 的
 `folia.platform.mermaid_renderer` 仅提供 DirectWrite、原生数学服务和宿主可用宽度。
 
-## 本次执行结果
-
-本分支的最终源码通过核心 **255项／957,780断言**、真实Math集成
-**5项／205断言**，全部 **375个输入** 均通过官方语法准备和完整原生渲染。
-具体源码、二进制、语料、fixture和SVG散列保存在
-[`regression-validation.json`](regression-validation.json)。
-
-**完整官方SVG验收尚未全部完成。** 本环境已验证Info8张、Packet8张完整SVG，
-以及ZenUML24张实际官方renderer／同机Skia的逐像素零差；其余335张、31个图族
-需要可运行浏览器的环境。本地Chromium启动失败，连接浏览器的测试页又被URL策略
-拒绝，因此没有把缺少的官方证据算作通过。Windows DirectWrite／WinUI也未执行。
-
-正式总比较器只收到Info／Packet捕获时，明确以16／375、退出码1失败，
-`officialSvgCompared` 保持false。ZenUML的24张Canvas证据另行记录。
-下方命令保留完整375例的验收要求，不会因为缺少浏览器而退化成语法检查。
-
 ## 固定基准与覆盖要求
 
 Mermaid 基准为 **12.2.0**，提交
 `1fb7869866dd619168d840291c9c54b4f129758b`；外部 ZenUML 基准为
 `@zenuml/core` **3.49.2**。算法、官方文档样例的来源与源码散列保存在
-[`source-lock.json`](source-lock.json)，Node 依赖使用
+[`source-lock.json`](../../tools/mermaid-cpp/source-lock.json)，Node 依赖使用
 `tools/mermaid-cpp/oracle/pnpm-lock.yaml`。
 
 `corpus.mjs` 检查固定的 34 图族清单，每族至少 8 个不同输入，并要求多个复杂例
@@ -38,54 +22,11 @@ Mermaid 基准为 **12.2.0**，提交
 
 覆盖包括完整官方示例，以及嵌套分组、跨组反馈、长标签、多行与 Unicode、
 方向和布局选择、类与样式、不同箭头、数值极值、排程依赖等组合。
-Flowchart 的 53 个登记形状分别进入普通文字和多行／Markdown 的连接图，
+Flowchart 的登记形状分别进入普通文字和多行／Markdown 的连接图，
 并轮换四个方向。Railroad 在同一图族内覆盖 IR、EBNF、ABNF、PEG 四种语法。
 Architecture 未注册图标的问号是官方的资源缺失行为，不代表外部图标包已注册。
 
-### 当前覆盖矩阵
-
-共有 **375 例**，其中 **230 例复杂组合**。Info 只显示版本信息，8例覆盖主题、
-字体和配置不变量，不把字体大小不生效的等价结果算作新的视觉能力。
-既有数学集成测试和下述算法阶段测试另行统计，不拿它们补足完整图数量。
-
-| 图族 | 完整图输入 | 复杂组合 |
-| --- | ---: | ---: |
-| agentflow | 8 | 5 |
-| architecture | 9 | 5 |
-| block | 10 | 7 |
-| c4 | 8 | 7 |
-| class | 10 | 5 |
-| cynefin | 8 | 7 |
-| er | 9 | 6 |
-| eventmodeling | 15 | 5 |
-| flowchart | 27 | 23 |
-| gantt | 11 | 8 |
-| gitgraph | 12 | 9 |
-| info | 8 | 0 |
-| ishikawa | 8 | 7 |
-| journey | 8 | 5 |
-| kanban | 8 | 6 |
-| mindmap | 8 | 5 |
-| packet | 8 | 5 |
-| pie | 8 | 6 |
-| quadrant | 8 | 5 |
-| radar | 8 | 5 |
-| railroad | 18 | 5 |
-| requirement | 8 | 4 |
-| sankey | 8 | 6 |
-| sequence | 10 | 7 |
-| state | 8 | 4 |
-| swimlane | 13 | 12 |
-| timeline | 8 | 6 |
-| tree-view | 13 | 5 |
-| treemap | 16 | 14 |
-| usecase | 8 | 3 |
-| venn | 11 | 6 |
-| wardley | 21 | 9 |
-| xy | 10 | 7 |
-| zenuml | 24 | 11 |
-
-运行以下命令查看当前准确数量、每族特征和输入文件散列：
+运行以下命令查看当前语料的数量、每族特征和输入文件散列：
 
 ```sh
 node tools/mermaid-cpp/regression/corpus.mjs
@@ -105,9 +46,7 @@ node tools/mermaid-cpp/regression/corpus.mjs
 完整验收必须保留每例结果，逐项核对语料散列和 SVG 散列。
 缺失样例、旧语料报告、生成失败、缺少浏览器或比较失败都会使总检查失败；
 部分成功不会把 `officialSvgCompared` 标为 true。
-当前实际执行结果与限制见 [`regression-validation.json`](regression-validation.json)
-和 [`HANDOFF.md`](HANDOFF.md) 的当前检查点，
-不要把历史基础样例的通过记录当作本语料的验收。
+每次验收都应记录当前源码版本、完整语料与工具版本；不要把旧报告、基础样例或单纯的原生渲染成功当作当前整图对照通过。
 
 ## 构建与原生回归
 
@@ -128,7 +67,7 @@ Unicode 转义，补充平面字符不会被 YAML 转义规则误拒绝。
 
 结果默认写入 `build/mermaid-regression/native/`，包括每张 SVG、逐例错误、
 使用的字体引擎、输入散列和 probe 二进制散列。排查时可传
-`--family flowchart`、`--case flowchart-collapsed-subgraph` 或 `--prepare`。
+`--family FAMILY`、`--case CASE_ID` 或 `--prepare`。
 这些定向结果不能替代全语料结果。异常进程退出必须停止广跑，先定向诊断。
 
 原生数学仍通过现有 Math 动态库接入。若要同时运行既有数学集成回归，
@@ -193,13 +132,7 @@ Canvas 验收存在，不冒充未执行的 Windows 或浏览器验收。
 含义，修复负责该语义的解析、测量或布局模块。不要在回归驱动中重写输入，
 也不要按 case id 或源码片段补坐标。
 算法 fixture 必须由锁定官方实现生成，提交后默认检查模式只比较、不重写。
-ELK 的新增验证保留完整处理语义：24个自环布局，25个Greedy Switch阶段输入，
-7个完整组件布局及14个组件阶段观察，21个Mermaid方向／层级adapter布局。
-组件例包括原模型顺序、DFS存储顺序、共享随机状态、孤点及39／40／41节点阈值。
-Greedy例检查实际交叉减少、端口顺序和RNG状态，不仅检查生成成功。
-对应 `elk-self-loops`、`elk-greedy-switch`、`elk-components`、
-`elk-components-layout`、`elk-directed-scopes` 的 `*-oracle.mjs` 可独立复验。
-`er-regression-oracle.mjs`、`gantt-format-oracle.mjs`、
-`treemap-value-oracle.mjs` 和 `zenuml-regression-oracle.mjs` 是本轮新增的定向入口。
-最后重新构建、运行受影响核心测试和全语料渲染，再进行官方 SVG 对照。
-所有命令均可在本地执行；不要求修改 GitHub CI。
+ELK 阶段 fixture 应检查算法结果及关键中间不变量，例如端口排序、交叉减少、
+共享随机状态、组件顺序与阈值行为；不能只检查成功返回。各图族和阶段的 oracle
+入口位于 `tools/mermaid-cpp/`。改变算法后，先运行受影响的核心测试，再运行完整
+语料渲染和官方 SVG 对照。

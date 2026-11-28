@@ -6,7 +6,7 @@ import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 const require=createRequire(import.meta.url);
-const lock=JSON.parse(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json',import.meta.url)));
+const lock=JSON.parse(readFileSync(new URL('./source-lock.json',import.meta.url)));
 for(const file of lock.coseTree.files) {
  const slash=file.source.indexOf('/'),pkg=file.source.slice(0,slash),name=pkg.slice(0,pkg.indexOf('@'));
  const directory=pkg.startsWith('cytoscape-cose-bilkent@')?pkg+'_cytoscape@3.34.4':pkg;

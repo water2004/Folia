@@ -136,6 +136,6 @@ const fixture='# Original composed frontend: name/source/site/raw/cleaned/withCo
 const output=path.join(root,'tests/mermaid_cpp/fixtures/frontend.tsv');
 if(process.argv.includes('--write')) {
   writeFileSync(output,fixture);
-  writeFileSync(path.join(root,'docs/mermaid-cpp/source-lock.json'),JSON.stringify(lock,null,2)+'\n');
+  writeFileSync(path.join(root,'tools/mermaid-cpp/source-lock.json'),JSON.stringify(lock,null,2)+'\n');
 } else assert.equal(readFileSync(output,'utf8').replaceAll('\r\n','\n'),fixture);
 console.log(`Verified ${cases.length} original composed frontend cases`);

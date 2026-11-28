@@ -7,7 +7,7 @@ import { JSDOM } from './oracle/node_modules/jsdom/lib/api.js';
 for(const argument of process.argv.slice(2)) assert(
  argument==='--write'||argument==='--check'||argument.startsWith('--output='),
  'Use --check/--write [--output=file.json]; native comparison is compare-pie.py.');
-const lock = JSON.parse(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json',import.meta.url)));
+const lock = JSON.parse(readFileSync(new URL('./source-lock.json',import.meta.url)));
 for (const file of lock.files) assert.equal(createHash('sha256').update(readFileSync(
   new URL('../../.reference/mermaid-js/'+file.path,import.meta.url))).digest('hex'),file.sha256);
 const dom = new JSDOM('<!doctype html><body></body>');
@@ -119,7 +119,7 @@ const destination=resolve(process.argv.find(arg=>arg.startsWith('--output='))?.s
 mkdirSync(dirname(destination),{recursive:true});
 writeFileSync(destination,JSON.stringify({schemaVersion:1,
  upstream:{version:'12.2.0',commit:lock.commit},
- sourceLockSha256:hash(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json',import.meta.url))),
+ sourceLockSha256:hash(readFileSync(new URL('./source-lock.json',import.meta.url))),
  fixtureSha256:hash(readFileSync(file)),cases:observations},null,2)+'\n');
 dom.window.close();
 console.log(`Captured ${cases.length} official Pie SVG cases: ${destination}`);

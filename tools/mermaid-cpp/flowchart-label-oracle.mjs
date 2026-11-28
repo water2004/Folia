@@ -9,7 +9,7 @@ import {JSDOM} from './oracle/node_modules/jsdom/lib/api.js';
 const require=createRequire(realpathSync(new URL('./oracle/node_modules/mermaid/package.json',import.meta.url)));
 const markedPath=require.resolve('marked');
 const {marked}=await import(pathToFileURL(markedPath));
-const lockPath='docs/mermaid-cpp/source-lock.json';
+const lockPath='tools/mermaid-cpp/source-lock.json';
 const lock=JSON.parse(readFileSync(lockPath));
 const path='packages/mermaid/src/rendering-util/handle-markdown-text.ts';
 const source=readFileSync('.reference/mermaid-js/'+path,'utf8');

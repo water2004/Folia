@@ -11,7 +11,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const sourceRoot = path.join(root, '.reference/mermaid-js');
 const require = createRequire(path.join(root, 'tools/mermaid-cpp/oracle/package.json'));
-const lock = JSON.parse(readFileSync(path.join(root, 'docs/mermaid-cpp/source-lock.json'), 'utf8'));
+const lock = JSON.parse(readFileSync(path.join(root, 'tools/mermaid-cpp/source-lock.json'), 'utf8'));
 assert.equal(lock.commit, '1fb7869866dd619168d840291c9c54b4f129758b');
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 for (const entry of lock.files) {

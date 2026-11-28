@@ -16,7 +16,7 @@ const sourceRoot = path.join(root, '.reference/mermaid-js');
 const packageRoot = path.join(root, 'tools/mermaid-cpp/oracle');
 const modules = path.join(packageRoot, 'node_modules');
 const commit = '1fb7869866dd619168d840291c9c54b4f129758b';
-const lock = JSON.parse(readFileSync(path.join(root, 'docs/mermaid-cpp/source-lock.json'), 'utf8'));
+const lock = JSON.parse(readFileSync(path.join(root, 'tools/mermaid-cpp/source-lock.json'), 'utf8'));
 assert.equal(lock.commit, commit);
 assert.equal(execFileSync('git', ['-C', sourceRoot, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
   commit, 'The reference checkout is not the pinned Mermaid commit.');

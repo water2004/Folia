@@ -7,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const lock = JSON.parse(readFileSync(path.join(root, 'docs/mermaid-cpp/source-lock.json'), 'utf8'));
+const lock = JSON.parse(readFileSync(path.join(root, 'tools/mermaid-cpp/source-lock.json'), 'utf8'));
 const sourceRoot = path.join(root, '.reference/mermaid-js');
 const restoreCheckoutLineEndings = process.argv.includes('--restore-checkout-line-endings');
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');

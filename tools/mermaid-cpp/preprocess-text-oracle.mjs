@@ -9,7 +9,7 @@ import path from 'node:path';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const sourceRoot = path.join(root, '.reference/mermaid-js');
-const lock = JSON.parse(readFileSync(path.join(root, 'docs/mermaid-cpp/source-lock.json'), 'utf8'));
+const lock = JSON.parse(readFileSync(path.join(root, 'tools/mermaid-cpp/source-lock.json'), 'utf8'));
 for (const entry of lock.files) {
   assert.equal(createHash('sha256').update(readFileSync(path.join(sourceRoot, entry.path))).digest('hex'),
     entry.sha256, `Changed official source: ${entry.path}`);

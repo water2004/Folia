@@ -1,6 +1,6 @@
 # Third-Party Notices (`mermaid-cpp`)
 
-`src/mermaid` ports behaviors and layout algorithms from the pinned upstream Mermaid 12.2.0 release (`1fb7869866dd619168d840291c9c54b4f129758b`) and its algorithm dependencies into native C++23 modules. Exact upstream versions and source file hashes are recorded in [`docs/mermaid-cpp/source-lock.json`](../../docs/mermaid-cpp/source-lock.json).
+`src/mermaid` ports behaviors and layout algorithms from the pinned upstream Mermaid 12.2.0 release (`1fb7869866dd619168d840291c9c54b4f129758b`) and its algorithm dependencies into native C++23 modules. Exact upstream versions and source file hashes are recorded in [`tools/mermaid-cpp/source-lock.json`](../../tools/mermaid-cpp/source-lock.json).
 
 ---
 

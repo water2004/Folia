@@ -5,7 +5,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { JSDOM } from './oracle/node_modules/jsdom/lib/api.js';
 const sourceRoot = new URL('../../.reference/mermaid-js/', import.meta.url);
-const lock = JSON.parse(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json', import.meta.url)));
+const lock = JSON.parse(readFileSync(new URL('./source-lock.json', import.meta.url)));
 for (const file of lock.files) assert.equal(createHash('sha256')
   .update(readFileSync(new URL(file.path, sourceRoot))).digest('hex'), file.sha256);
 const version = JSON.parse(readFileSync(new URL('./oracle/node_modules/mermaid/package.json', import.meta.url))).version;

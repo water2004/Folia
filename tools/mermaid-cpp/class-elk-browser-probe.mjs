@@ -10,7 +10,7 @@ process.argv.push('--library');
 const {inspectClass}=await import('./class-browser-probe.mjs');
 process.argv.pop();
 import {createHash} from 'node:crypto';
-const lock=JSON.parse(readFileSync('docs/mermaid-cpp/source-lock.json'));
+const lock=JSON.parse(readFileSync('tools/mermaid-cpp/source-lock.json'));
 const map=JSON.parse(readFileSync('tools/mermaid-cpp/oracle/node_modules/mermaid/'+lock.elkAdapter.map));
 for(const f of lock.elkAdapter.files){const i=map.sources.findIndex(s=>s.endsWith(f.source));assert(i>=0);assert.equal(createHash('sha256').update(map.sourcesContent[i]).digest('hex'),f.sha256);}
  const directory=resolve(process.argv[2]??'build/mermaid-cpp/class-elk-browser');mkdirSync(directory,{recursive:true});

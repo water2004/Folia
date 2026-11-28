@@ -95,45 +95,35 @@ tooltip；可见 `texhtml` 内容会明确报错，不静默丢弃。
 ## 验证与上游版本
 
 Folia 的图布局基准仍是 Mermaid **12.2.0**，固定 commit 见
-[source-lock.json](source-lock.json)。该版本的默认数学实现使用 KaTeX。
-官方 **13.0.0-alpha.3** 的数学插件使用 MathJax **4.1.3**，但图布局和默认数学字体
-与 Folia 不同。因此，v13 整图用于检查官方集成行为和视觉输出，不作为 v12 整图坐标
-必须完全相同的断言。
+[source-lock.json](../../tools/mermaid-cpp/source-lock.json)。该版本的默认数学实现使用 KaTeX。
+不同 Mermaid 版本可作为数学集成行为的参考，但若其图布局或默认数学字体不同，
+不能将其整图坐标作为本项目版本的精确 oracle。
 
-严格的公式对照使用官方 MathJax 4.1.3 与 Folia 相同的已提交 NewCM 配置。22 个样例
-覆盖分式、积分、求和、矩阵、aligned、cases、化学式、颜色、删除线、空公式、错误公式
-以及不同字号：
-
-- 22/22 的宽、高、基线完全一致，实测最大差异为 0。
-- 22/22 的 SVG 绘制树一致；只规范化属性顺序、数值序列化、资源 ID、非绘制元数据
-  与空组，不删除任何有内容的字形、变换或绘制元素。
-- 22/22 的 2× RGBA 位图逐像素一致；没有图像对齐、模糊、过滤或放宽像素阈值。
+严格的公式对照使用官方 MathJax 与 Folia 相同的已提交 NewCM 配置。样例应覆盖
+分式、积分、求和、矩阵、aligned、cases、化学式、颜色、删除线、空公式、错误公式
+以及不同字号。比较应逐项检查宽、高和基线，并在仅规范化非绘制元数据的前提下比较
+SVG 绘制树与栅格结果；不得删除有内容的字形或放宽像素阈值。
 
 复现工具、锁文件、样例和判定规则位于
-[math-oracle](../../tools/mermaid-cpp/math-oracle/README.md)。另外保存了官方 v13 的
-14 张完整图 SVG/PNG。实际 C++ 集成测试调用生产 Math C ABI，并让数学尺寸进入
-各图族布局；依赖真实字体测量的混排另有新增 Windows 宿主用例，待在 Windows 执行。
+[math-oracle](../../tools/mermaid-cpp/math-oracle/README.md)。实际 C++ 集成测试调用生产
+Math C ABI，并让数学尺寸进入各图族布局；混排测试由宿主提供真实字体测量。
 
-最终验收的引擎版本、二进制散列、逐个样例尺寸与位图散列见
-[math-validation.json](math-validation.json)。Mermaid 核心全量 220 项/937,106 断言，
-真实 Math C ABI 集成 5 组/229 断言均通过；12 份原生 SVG 已成功栅格化。
-
-本轮 Linux 环境已编译并运行真实 C++23 modules 和数学共享库。Windows DirectWrite、
-WinUI 与完整浏览器的新增用例未在该环境执行。Chromium 因进程 socket 权限限制无法
-启动，因此不能把上述公式一致性宣称为整图浏览器或 Windows 界面验收完成。
+验收应分别检查公式尺寸、生成的 SVG 片段以及实际渲染结果，并记录使用的
+Math 运行库、字体环境、输入和源码版本。公式片段一致性不替代 Mermaid
+整图浏览器对照、Windows DirectWrite 或 WinUI 验收。
 
 ## 构建与测试
 
 集成构建启用 `FOLIA_BUILD_MERMAID=ON` 后，Mermaid 自动依赖现有 `FoliaNativeMath`。
 独立 Mermaid 构建可通过 `FOLIA_NATIVE_MATH_RUNTIME` 指向该共享库；Windows 还需
 `FOLIA_NATIVE_MATH_IMPORT_LIBRARY` 指向对应 `.lib`。不要传入没有新 fragment ABI 的
-旧版数学库。具体命令见 [README](README.md#2-本地构建与测试命令)。
+旧版数学库。具体命令见 [README](README.md#构建与测试)。
 
-新增可移植的 `FoliaMermaidMathTests` 测试真实 Math DLL 与 Mermaid 核心的集成。
+`FoliaMermaidMathTests` 测试真实 Math DLL 与 Mermaid 核心的集成。
 纯公式 fixture 对普通文字测量请求报错，不用固定字宽冒充真实字体测量。
 `FoliaMermaidTests` 中的独立标签契约测试使用明确的 provider 尺寸，验证几何组合、
 配置开关和错误传播。两类测试的职责分别清楚。
 
 `FoliaMathSvgBridgeTests` 是显式构建的轻量测试目标，复用完整数学套件中的 SVG writer
-与 C ABI 测试。本轮 53 项测试、1,063 个断言通过，包括既有默认 SVG 输出逐字节回归。
+与 C ABI 测试。包括既有默认 SVG 输出的逐字节回归。
 它没有加入默认 CTest 列表；构建该目标后直接运行即可。

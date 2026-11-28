@@ -10,7 +10,7 @@ import Ajv2019 from './oracle/node_modules/ajv/dist/2019.js';
 import { load, JSON_SCHEMA } from './oracle/node_modules/js-yaml/dist/js-yaml.mjs';
 
 export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-export const lock = JSON.parse(readFileSync(path.join(root, 'docs/mermaid-cpp/source-lock.json')));
+export const lock = JSON.parse(readFileSync(path.join(root, 'tools/mermaid-cpp/source-lock.json')));
 export const read = name => readFileSync(path.join(root, '.reference/mermaid-js', name), 'utf8').replaceAll('\r\n', '\n');
 for (const file of lock.files) assert.equal(createHash('sha256').update(readFileSync(
   path.join(root, '.reference/mermaid-js', file.path))).digest('hex'), file.sha256, file.path);

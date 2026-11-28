@@ -76,7 +76,7 @@ DirectWrite，`mermaid_renderer` 提供宿主桥接，`mermaid_host` 封装 DLL 
 所有输出路径均相对 `src/mermaid/`。生成器与消费方必须同时指向这些位置，
 避免下一次生成又在根目录产生第二份数据。不要手工修改生成结果以通过测试；
 先核实锁定的上游输入与生成步骤。新增上游依赖时更新
-[`source-lock.json`](source-lock.json) 和
+[`source-lock.json`](../../tools/mermaid-cpp/source-lock.json) 和
 [`THIRD_PARTY_NOTICES.md`](../../src/mermaid/THIRD_PARTY_NOTICES.md)。
 许可证留在根目录，供既有 Windows 分发规则收集。
 

@@ -8,7 +8,7 @@
 
 ### 1. 上游基准与许可证
 - 锁定的 Mermaid `1fb7869866dd619168d840291c9c54b4f129758b` 使用 `elkjs` **0.9.3**（`lib/elk-worker.js`，由 Eclipse Layout Kernel 的 Java 实现经 GWT 编译生成）。
-- ELK 相关原生模块遵循 **EPL-2.0** 许可证（见 `src/mermaid/ELK-LICENSE` 及 `THIRD_PARTY_NOTICES.md`），对应上游源码哈希记录于 `docs/mermaid-cpp/source-lock.json`。
+- ELK 相关原生模块遵循 **EPL-2.0** 许可证（见 `src/mermaid/ELK-LICENSE` 及 `THIRD_PARTY_NOTICES.md`），对应上游源码哈希记录于 `tools/mermaid-cpp/source-lock.json`。
 
 ### 2. Mermaid 侧的 ELK 适配器预设契约
 Mermaid 的 `packages/mermaid/src/rendering-util/layout-algorithms/elk/render.ts` 定义了 `layout: elk` 的默认参数预设：
@@ -43,7 +43,7 @@ Mermaid 的 `packages/mermaid/src/rendering-util/layout-algorithms/elk/render.ts
    - `folia.mermaid.elk_routing`、`elk_restore`：执行正交边路由（共享上游 `java.util.Random` 确定性随机状态），并在路由完成后合并长边分段、还原翻转边方向。
 4. **复合图（Compound Graph）与图族适配**：
    - `folia.mermaid.elk_compound_graph`、`elk_compound_ports`、`elk_compound_layout`、`elk_compound_restore`、`elk_direction`、`elk_boundary_layers`、`elk_boundary_layout`：处理跨层级边、外部端口、子图方向变换、复合图递归几何拼装与子图间距。
-   - `folia.mermaid.flowchart_elk`：将实测后的 Flowchart 节点、子图与边接入复合 ELK 管线（已贯通公共入口并通过 6 个基准案例验证；Class 图的 ELK 适配见 `candidates/2026-10-28/class-elk*.patch`）。
+   - `folia.mermaid.flowchart_elk`：将实测后的 Flowchart 节点、子图与边接入复合 ELK 管线。Class 图族也可选择 ELK 适配；图族到共享布局算法的连接由各自图族模块维护。
 
 ---
 

@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {utcFormat} from './oracle/node_modules/.pnpm/d3-time-format@4.1.0/node_modules/d3-time-format/src/index.js';
 
-const lock=JSON.parse(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json',import.meta.url)));
+const lock=JSON.parse(readFileSync(new URL('./source-lock.json',import.meta.url)));
 for(const file of lock.ganttTime.files.filter(f=>f.source.includes('/d3-time-format/'))){
  const relative=file.source.split('/node_modules/.pnpm/')[1];
  const bytes=readFileSync(new URL('./oracle/node_modules/.pnpm/'+relative,import.meta.url));

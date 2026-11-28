@@ -3,7 +3,7 @@ import {readFileSync,writeFileSync} from 'node:fs';
 import {JSDOM} from './oracle/node_modules/jsdom/lib/api.js';
 import {cases} from './c4-cases.mjs';
 import {createHash} from 'node:crypto';
-const pins=JSON.parse(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json',import.meta.url))).c4Bundle.files;
+const pins=JSON.parse(readFileSync(new URL('./source-lock.json',import.meta.url))).c4Bundle.files;
 for(const pin of pins){let content;if(pin.sourceMap){const map=JSON.parse(readFileSync(new URL('./oracle/node_modules/mermaid/dist/chunks/mermaid.esm/'+pin.sourceMap,import.meta.url)));const i=map.sources.findIndex(s=>s.endsWith('/'+pin.path));assert(i>=0,pin.path);content=map.sourcesContent[i];}else content=readFileSync(new URL('../../.reference/mermaid-js/packages/mermaid/'+pin.path,import.meta.url));assert.equal(createHash('sha256').update(content).digest('hex'),pin.sha256,pin.path);}
 const writeFixture=process.argv.includes('--write');process.argv=process.argv.filter(arg=>arg!=='--write');
 const dom=new JSDOM('<!doctype html><body></body>');globalThis.window=dom.window;globalThis.document=dom.window.document;

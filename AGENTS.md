@@ -1,48 +1,19 @@
 # Repository instructions
 
-## Mermaid C++ 迁移指南（Agent 执行规范）
+## Native math and Mermaid maintenance
 
-在参与 Mermaid C++23 原生渲染模块（`src/mermaid/`、`src/platform/text/`、`tools/mermaid-cpp/`）的开发或恢复上下文时，必须首先执行以下步骤：
+- Before changing native math, read its [architecture](docs/math/architecture.md) and [verification contract](docs/math/verification.md).
+- Before changing native Mermaid, read its [maintenance guide](docs/mermaid-cpp/README.md). The upstream hashes are recorded in the [source lock](tools/mermaid-cpp/source-lock.json).
 
-1. **必读入口文档**：
-   - 开始编码或规划前，先完整阅读 [`docs/mermaid-cpp/HANDOFF.md`](docs/mermaid-cpp/HANDOFF.md) 与 [`docs/mermaid-cpp/README.md`](docs/mermaid-cpp/README.md)。
-   - `docs/mermaid-cpp/HANDOFF.md` 顶部记录当前已验证的基准 commit、34 个图族的验收范围与尚未执行的验证。目录归属见 [`docs/mermaid-cpp/architecture.md`](docs/mermaid-cpp/architecture.md)，主题与公共 API 见 [`docs/mermaid-cpp/themes.md`](docs/mermaid-cpp/themes.md)。按当前检查点推进，不把历史交接中的任务重新视为待办。
-2. **模块与平台边界（硬约束）**：
-   - **核心层（平台无关）**：`src/mermaid/` 下的所有模块（`.ixx` / `.cpp`）统一使用 C++23 modules 与 `import std;`，严禁包含任何 Windows、WinRT、Direct2D 或 DirectWrite 头文件。
-   - **平台测量与桥接层（Windows）**：字体解析与文本测量位于 `src/platform/text/mermaid_measurer.ixx`，平台渲染桥接位于 `src/platform/text/mermaid_renderer.ixx`，DLL 会话封装位于 `src/platform/text/mermaid_host.ixx`。
-   - **CMake 源文件收集规则**：`src/mermaid/CMakeLists.txt` 自动收集库源码，`tools/mermaid-cpp/CMakeLists.txt` 自动收集 `tests/mermaid_cpp/**/*.cpp`，并为 `FoliaMermaidPlatformTests` 显式列出平台测试。主工程通过 `FOLIA_BUILD_MERMAID=ON` 开启这些独立目标。
-   - **源码归属**：公共编排在 `api/`，前端在 `frontend/`，配置在 `config/`，主题在 `themes/`，图族在 `diagrams/<family>/`，共享布局在 `layout/<engine>/`；其余按 `text/`、`rendering/`、`support/` 职责维护。根目录不新增 `.cpp`、`.ixx`、`.inc`。物理移动保留模块名称；生成数据移动时同步更新生成器。运行 `python3 tools/mermaid-cpp/check-structure.py` 检查结构。
-3. **算法还原与文本测量纪律**：
-   - 行为基准固定为官方 `mermaid-js/mermaid` **12.2.0**（commit `1fb7869866dd619168d840291c9c54b4f129758b`），新增上游依赖文件时需将源码 SHA-256 记入 `docs/mermaid-cpp/source-lock.json` 并核对 `src/mermaid/THIRD_PARTY_NOTICES.md`。
-   - 凡涉及文本宽高的布局必须使用平台层传入的 DirectWrite 实测数据（注意调用 `MermaidMeasurer::measure` 前须先通过 `resolve_family` 将 CSS 字体族列表解析为单个已安装字体名）。严禁使用“字符数 × 固定系数”估算字宽、按测试样例硬编码坐标或放宽几何比较容差（SVG 实测几何容差固定为 `1.5`，ELK 算子坐标容差固定为 `1e-4`）。
-4. **并行分工与交接更新**：
-   - 共享接线文件（`api/` 公共入口、`frontend/frontend.cpp`、`mermaid_renderer.ixx`、`tools/mermaid-cpp/CMakeLists.txt`）在多人/多智能体并行时由集成负责人统一合入；独立图族负责人仅修改所属图族的源码、测试与 fixture。
-   - 每完成一个任务包并通过对应 `FoliaMermaidTests` / `FoliaMermaidPlatformTests` 及浏览器 SVG 对照后，立即小批提交，并原位更新 `docs/mermaid-cpp/HANDOFF.md` 顶部的基线状态与任务进度（不追加历史流水账）。
+### Mermaid constraints
 
-## Math migration continuity
-
-When working on the native MathJax migration, read `docs/math-port/HANDOFF.md`
-at the start of a session and immediately after context compaction, before
-planning, delegation, edits, or repeating an investigation. It records accepted
-decisions, completed checks, known rejected approaches, and the exact next step.
-Update that same file after a material decision, verification, or commit and
-before handing off; do not create successive competing progress notebooks.
-Use the record to resume work, then inspect only changes that could invalidate
-it. Do not repeat completed broad audits or reinterpret settled user decisions
-merely because context was compacted. This record is continuity information,
-not permission to reset Git, overwrite unrelated work, or claim integration.
-Actually read the file contents after compaction; a summary mentioning its path
-does not satisfy this step. Before reopening a settled issue, identify the code
-change or new evidence that invalidates the recorded conclusion. Keep a short
-current-state and next-action checkpoint at the top of the same handoff file.
-Before context compaction or ending a work session, save the exact stopping
-point, live agent/build handles, candidate paths, verification limits, and next
-concrete action there. On recovery, use the latest checkpoint rather than old
-agent completion messages; search ignored candidate directories with
-`rg --no-ignore` before declaring a delivered file missing.
-Keep one authoritative current checkpoint at the top; label superseded status
-and next-action sections as historical. An instruction to read the notebook is
-not enough: update stale entries before handoff and actually read it on recovery.
+- The behavior baseline is official `mermaid-js/mermaid` **12.2.0**, commit `1fb7869866dd619168d840291c9c54b4f129758b`. Record SHA-256 hashes for added upstream source files in the source lock and check `src/mermaid/THIRD_PARTY_NOTICES.md`.
+- Core modules under `src/mermaid/` use C++23 modules and `import std;`. They must not include Windows, WinRT, Direct2D or DirectWrite headers.
+- Windows font resolution and text measurement live in `src/platform/text/mermaid_measurer.ixx`. The rendering bridge and DLL host live in `mermaid_renderer.ixx` and `mermaid_host.ixx` in that directory. Text layouts use measured DirectWrite data. Resolve CSS font-family lists with `resolve_family` before calling `MermaidMeasurer::measure`.
+- Do not estimate text width as character count times a constant, hard-code coordinates to match a fixture, or relax either geometry tolerance. The SVG tolerance is `1.5` and the ELK operator coordinate tolerance is `1e-4`.
+- `src/mermaid/CMakeLists.txt` collects library sources. `tools/mermaid-cpp/CMakeLists.txt` collects `tests/mermaid_cpp/**/*.cpp` and explicitly lists platform tests. The main project enables these targets with `FOLIA_BUILD_MERMAID=ON`.
+- Keep public orchestration in `api/`, frontend in `frontend/`, configuration in `config/`, themes in `themes/`, diagram families in `diagrams/<family>/`, shared layouts in `layout/<engine>/`, and other code in `text/`, `rendering/` or `support/`. Do not add `.cpp`, `.ixx` or `.inc` files to the Mermaid root. Preserve module names when moving sources, update generators when moving generated data, and run `python3 tools/mermaid-cpp/check-structure.py`.
+- In parallel work, the integration owner handles shared wiring (`api/`, `frontend/frontend.cpp`, `mermaid_renderer.ixx` and `tools/mermaid-cpp/CMakeLists.txt`). Diagram-family work stays within its family sources, tests and fixtures.
 
 ## Build and test
 

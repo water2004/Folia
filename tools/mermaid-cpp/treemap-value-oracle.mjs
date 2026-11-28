@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {readFileSync,readdirSync,writeFileSync} from 'node:fs';
-const lock=JSON.parse(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json',import.meta.url)));
+const lock=JSON.parse(readFileSync(new URL('./source-lock.json',import.meta.url)));
 assert.equal(lock.commit,'1fb7869866dd619168d840291c9c54b4f129758b');
 assert.equal(JSON.parse(readFileSync(new URL('./oracle/node_modules/mermaid/package.json',import.meta.url))).version,'12.2.0');
 const renderer=lock.files.find(file=>file.path==='packages/mermaid/src/diagrams/treemap/renderer.ts');

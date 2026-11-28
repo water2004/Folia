@@ -8,7 +8,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const lockPath = path.join(root, 'docs/mermaid-cpp/source-lock.json');
+const lockPath = path.join(root, 'tools/mermaid-cpp/source-lock.json');
 const lock = JSON.parse(readFileSync(lockPath));
 const sourceRoot = path.join(root, '.reference/mermaid-js/packages/mermaid/src');
 const read = name => readFileSync(path.join(sourceRoot, name), 'utf8').replaceAll('\r\n', '\n');

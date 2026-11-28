@@ -17,7 +17,7 @@ assert.equal(createHash('sha512').update(readFileSync(archive)).digest('base64')
   'qeQMapuE0XETML2mRw2MIIrMCjcZBhRDSwW10//q8XQ+VyExzkAn39VCBwxIbbPdTBt6gJnaBBixF9A4hsIxcA==');
 execFileSync('tar', ['-xzf', archive, '-C', directory]);
 const sourceMap = JSON.parse(readFileSync(resolve(directory, 'package/dist/zenuml.esm.mjs.map'), 'utf8'));
-const lock = JSON.parse(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json', import.meta.url)));
+const lock = JSON.parse(readFileSync(new URL('./source-lock.json', import.meta.url)));
 for (const dependency of lock.zenuml.embeddedDependencies ?? []) {
   const index = sourceMap.sources.indexOf(dependency.source);
   assert(index >= 0, `Missing ZenUML dependency ${dependency.source}`);

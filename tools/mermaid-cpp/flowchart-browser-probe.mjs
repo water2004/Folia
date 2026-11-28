@@ -6,7 +6,7 @@ import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
 import {createHash} from 'node:crypto';
-const lock=JSON.parse(readFileSync('docs/mermaid-cpp/source-lock.json'));
+const lock=JSON.parse(readFileSync('tools/mermaid-cpp/source-lock.json'));
 for(const file of lock.files) assert.equal(createHash('sha256').update(readFileSync('.reference/mermaid-js/'+file.path)).digest('hex'),file.sha256,file.path);
 for(const file of lock.flowchartCurve.files) assert.equal(createHash('sha256').update(readFileSync('tools/mermaid-cpp/oracle/node_modules/d3-shape/'+file.path)).digest('hex'),file.sha256,file.path);
 const elkAdapter=process.argv.includes('--elk');

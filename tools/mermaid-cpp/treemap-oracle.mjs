@@ -3,7 +3,7 @@ import {readFileSync,writeFileSync,readdirSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {JSDOM} from './oracle/node_modules/jsdom/lib/api.js';
 import {cases} from './treemap-cases.mjs';
-const lock=JSON.parse(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json',import.meta.url)));
+const lock=JSON.parse(readFileSync(new URL('./source-lock.json',import.meta.url)));
 const chunks=new URL('./oracle/node_modules/mermaid/dist/chunks/mermaid.esm/',import.meta.url),sources=new Map();
 for(const file of readdirSync(chunks).filter(n=>n.endsWith('.mjs.map'))){const map=JSON.parse(readFileSync(new URL(file,chunks)));for(let i=0;i<map.sources.length;++i)for(const pkg of ['d3-hierarchy','d3-format']){const tail=map.sources[i].split('/'+pkg+'/')[1];if(tail)sources.set(pkg+'/'+tail,map.sourcesContent[i]);}}
 for(const file of lock.treemapLayout.files){const source=file.source.replace(/@[^/]+/,'');assert.equal(createHash('sha256').update(sources.get(source)).digest('hex'),file.sha256,file.source);}

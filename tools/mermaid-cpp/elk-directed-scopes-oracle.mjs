@@ -10,7 +10,7 @@ import {resolve,dirname} from 'node:path';
 import {JSDOM} from './oracle/node_modules/jsdom/lib/api.js';
 
 const root=fileURLToPath(new URL('../..',import.meta.url));
-const lock=JSON.parse(readFileSync(resolve(root,'docs/mermaid-cpp/source-lock.json')));
+const lock=JSON.parse(readFileSync(resolve(root,'tools/mermaid-cpp/source-lock.json')));
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 assert.equal(lock.commit,'1fb7869866dd619168d840291c9c54b4f129758b');
 const packageRoot=new URL('./oracle/node_modules/mermaid/',import.meta.url);

@@ -5,7 +5,7 @@ import {readFileSync,writeFileSync,readdirSync} from 'node:fs';
 import {JSDOM} from './oracle/node_modules/jsdom/lib/api.js';
 import {cases} from './xy-cases.mjs';
 // Pin the original D3 helpers embedded in the shipped XY browser bundle.
-const lock=JSON.parse(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json',import.meta.url)));
+const lock=JSON.parse(readFileSync(new URL('./source-lock.json',import.meta.url)));
 for(const file of lock.xyScales.files) {
  const map=JSON.parse(readFileSync(new URL('./oracle/node_modules/mermaid/dist/chunks/mermaid.esm/'+file.map,import.meta.url)));
  const [pkg,tail]=file.source.split('@'),[version,...parts]=tail.split('/');

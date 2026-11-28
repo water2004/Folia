@@ -9,7 +9,7 @@ const {frontend}=await import('./frontend-oracle.mjs');const {hex}=await import(
 const {default:mermaid}=await import('./oracle/node_modules/mermaid/dist/mermaid.core.mjs');
 const chunks=new URL('./oracle/node_modules/mermaid/dist/chunks/mermaid.esm/',import.meta.url);
 const sources=new Map();for(const file of readdirSync(chunks).filter(n=>n.endsWith('.mjs.map'))){const map=JSON.parse(readFileSync(new URL(file,chunks)));for(let i=0;i<map.sources.length;++i)if(map.sources[i].includes('/d3-sankey/src/'))sources.set(map.sources[i].split('/d3-sankey/src/')[1],map.sourcesContent[i]);}
-const lock=JSON.parse(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json',import.meta.url)));
+const lock=JSON.parse(readFileSync(new URL('./source-lock.json',import.meta.url)));
 for(const file of lock.sankeyLayout.files)assert.equal(createHash('sha256').update(sources.get(file.path.slice(4))).digest('hex'),file.sha256,file.path);
 for(const file of lock.files.filter(f=>f.path.includes('/diagrams/sankey/')))assert.equal(createHash('sha256').update(readFileSync(new URL('../../.reference/mermaid-js/'+file.path,import.meta.url))).digest('hex'),file.sha256,file.path);
 const plain=s=>s.replace(/^import .*?;\n/gm,'').replace(/^export default function Sankey/m,'function Sankey').replace(/^export /gm,'');
