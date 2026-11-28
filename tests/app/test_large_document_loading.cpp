@@ -77,14 +77,14 @@ namespace
             auto const& block = session.RenderModel().blocks.front();
             folia::platform::MathJaxRenderer math;
             folia::platform::SvgNormalizer normalizer;
+            auto sheet = winrt::Folia::CreateEditorStyleSheet(context.theme);
             auto display = winrt::Folia::BuildDisplayInlineText(block.inline_items, {},
                 {block.id, source.size() - 1, folia::TextAffinity::Downstream},
-                math, normalizer, {}, 18, 1000, true, false, false);
+                math, normalizer, {sheet, {}, 18}, 1000, true, false, false);
             log("display projection");
             expect(display.displayToSource.size() == display.text.size() + 1);
             expect(display.displayToSource.storage_bytes() < 4096_u);
             expect(display.ranges.size() == 1_u);
-            auto sheet = winrt::Folia::CreateEditorStyleSheet(context.theme);
             winrt::Folia::EditorRenderResources resources;
             resources.InitializeOffscreen(sheet, 1200, 800);
             winrt::Folia::EditorTextLayoutEngine engine(resources, sheet);

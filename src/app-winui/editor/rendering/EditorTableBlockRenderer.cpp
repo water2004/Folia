@@ -260,7 +260,7 @@ namespace winrt::Folia
                                 const folia::TextPosition end{part.container_id, part.source_range.end,
                                     folia::TextAffinity::Upstream};
                                 auto content = BuildDisplayInlineText(special.table_cells[index], caret, end,
-                                    mathJax, svgNormalizer, foreground, fontSize, contentWidth,
+                                    mathJax, svgNormalizer, {styleSheet, foreground, fontSize}, contentWidth,
                                     svgSupported, requestEmbedded, highPriority);
                                 MergeDisplayText(display, std::move(content));
                                 display.displayToSource.push_back(end);
@@ -269,7 +269,8 @@ namespace winrt::Folia
                     if (display.displayToSource.empty())
                         display = BuildDisplayInlineText(special.table_cells[rangeIndex], caret,
                             {sourceSpan.container_id, sourceSpan.source_range.end, folia::TextAffinity::Downstream},
-                            mathJax, svgNormalizer, foreground, fontSize, contentWidth, svgSupported, requestEmbedded, highPriority);
+                            mathJax, svgNormalizer, {styleSheet, foreground, fontSize}, contentWidth,
+                            svgSupported, requestEmbedded, highPriority);
                 }
                 else
                 {

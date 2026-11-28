@@ -54,11 +54,12 @@ namespace
             auto const& block = frame.renderModel.blocks.front();
             folia::platform::MathJaxRenderer math;
             folia::platform::SvgNormalizer normalizer;
+            auto const sheet = CreateEditorStyleSheet(folia::default_theme_profile());
             auto prepare = [&](std::uint64_t owner, bool visible)
             {
                 math.BeginBlock(owner);
                 auto display = BuildDisplayInlineText(block.inline_items, {}, {}, math, normalizer,
-                    D2D1::ColorF(D2D1::ColorF::Black), 16, 500, true, true, visible);
+                    {sheet, D2D1::ColorF(D2D1::ColorF::Black), 16}, 500, true, true, visible);
                 math.EndBlock();
                 return display;
             };

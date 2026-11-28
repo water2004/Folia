@@ -45,7 +45,7 @@ namespace {
                 EditorTextLayoutEngine engine(resources, sheet);
                 folia::platform::MathJaxRenderer math; folia::platform::SvgNormalizer normalizer;
                 auto display = BuildDisplayInlineText(frame.renderModel.blocks.front().inline_items, {}, {},
-                    math, normalizer, sheet.textColor, sheet.body.size, 560, false, false, false);
+                    math, normalizer, {sheet, sheet.textColor, sheet.body.size}, 560, false, false, false);
                 auto layout = engine.CreateFlow(display, resources.textFormat.Get(), 560, {});
                 ::Microsoft::WRL::ComPtr<IDWriteTextLayout1> spacing;
                 winrt::check_hresult(layout.As(&spacing));
@@ -117,7 +117,7 @@ namespace {
                         ++examined;
                         for (auto width : {64.f, 320.f}) {
                             auto display = BuildDisplayInlineText(items, {}, {}, math, normalizer,
-                                sheet.textColor, sheet.body.size, width, false, false, false);
+                                {sheet, sheet.textColor, sheet.body.size}, width, false, false, false);
                             auto layout = engine.CreateFlow(display, resources.textFormat.Get(), width, {});
                             for (auto const& range : display.ranges) {
                                 if (range.marker || range.style.code != folia::CodeStyle::Inline) continue;

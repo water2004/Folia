@@ -55,6 +55,52 @@ namespace
                 expect(prepared->math.Snapshot().fileReads == 0_u);
             }
         };
+        "math preparation and inline rendering share heading font sizes"_test = []
+        {
+            EditorSession session;
+            session.SetText(L"Body $x+1$.\n\n# Title $x+1$\n\n"
+                L"> ## Quoted heading $x+1$\n>\n> Body $x+1$.\n\n#### Subheading $x+1$");
+            EditorMathPreparationContext context{folia::default_theme_profile(), 1, 900, 600, true};
+            context.textLayout.font = 130;
+            auto frame = session.RenderFrame();
+            auto prepared = EditorSurfaceRenderer::PrepareMath(frame, context, {}, {});
+            expect(prepared->formulaCount == 5_u);
+
+            auto const sheet = CreateEditorStyleSheet(context.theme, context.textLayout);
+            auto const width = EditorDocumentContentWidth(context.surfaceWidth, sheet.horizontalPadding);
+            auto const color = SvgColor(sheet.textColor);
+            std::array const sizes{sheet.body.size, sheet.heading1.size, sheet.heading2.size,
+                sheet.body.size, sheet.body.size * 1.15f};
+            std::vector<float> widths;
+            folia::platform::SvgNormalizer normalizer;
+            if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
+            auto const before = prepared->math.Snapshot();
+            for (auto const& block : frame.renderModel.blocks)
+            {
+                auto const contentWidth = EditorBlockContentWidth(block, width);
+                prepared->math.BeginBlock(block.id.v);
+                auto display = BuildDisplayInlineText(block.inline_items, {}, {}, prepared->math, normalizer,
+                    {sheet, sheet.textColor, sheet.body.size}, contentWidth, true, true, true);
+                prepared->math.EndBlock();
+                expect(!display.pendingMath);
+                auto const& overlays = display.mathOverlays;
+                for (std::size_t first = 0; first < overlays.size();)
+                {
+                    expect(fatal(widths.size() < sizes.size()));
+                    auto svg = prepared->math.Lookup("x+1", false, sizes[widths.size()], contentWidth, color);
+                    expect(fatal(svg && bool(*svg)));
+                    expect(fatal(svg->fragments.size() <= overlays.size() - first));
+                    for (auto const& fragment : svg->fragments)
+                        expect(overlays[first++].fragment.renderId == fragment.renderId);
+                    widths.push_back(svg->width);
+                }
+            }
+            expect(fatal(widths.size() == sizes.size()));
+            expect(widths[1] > widths[2] && widths[2] > widths[4] && widths[4] > widths[0]);
+            expect(widths[3] == widths[0]);
+            auto const after = prepared->math.Snapshot();
+            expect(after.pending == 0_u && after.nativeRenders == before.nativeRenders);
+        };
         "math opening reuses duplicates and cancels staged requests"_test = []
         {
             EditorMathPreparationContext context{folia::default_theme_profile(), 1, 900, 600, true};

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "editor/rendering/layout/EditorContentPreparation.h"
 #include "editor/rendering/EditorCaretPresentation.h"
+#include "editor/rendering/EditorStyleSheet.h"
 
 import folia.core.render_model;
 import folia.core.source_style;
@@ -203,14 +204,18 @@ namespace winrt::Folia
         return display;
     }
 
+    float EditorInlineLayoutStyle::FontSizeFor(folia::InlineStyle const& style) const
+    {
+        return style.heading_level ? sheet.HeadingSize(*style.heading_level) : baseFontSize;
+    }
+
     DisplayInlineText BuildDisplayInlineText(
         std::vector<folia::InlineRenderItem> const& items,
         folia::TextPosition caret,
         EditorDisplayPosition sourceEnd,
         folia::platform::MathJaxRenderer& mathJax,
         folia::platform::SvgNormalizer& svgNormalizer,
-        D2D1_COLOR_F svgColor,
-        float fontSize,
+        EditorInlineLayoutStyle const& inlineStyle,
         float containerWidth,
         bool svgSupported,
         bool requestMath,
@@ -225,7 +230,9 @@ namespace winrt::Folia
             if (item.kind == folia::InlineRenderItem::Kind::Link)
             {
                 if (presentation == EditorInlinePresentation::Source) AppendInlineSource(display, item);
-                else MergeDisplayText(display, BuildDisplayInlineText(item.special().semantic().children, caret, {item.source_span.container_id, item.source_span.source_range.end, folia::TextAffinity::Downstream}, mathJax, svgNormalizer, svgColor, fontSize, containerWidth, svgSupported, requestMath, highPriority));
+                else MergeDisplayText(display, BuildDisplayInlineText(item.special().semantic().children, caret,
+                    {item.source_span.container_id, item.source_span.source_range.end, folia::TextAffinity::Downstream},
+                    mathJax, svgNormalizer, inlineStyle, containerWidth, svgSupported, requestMath, highPriority));
                 continue;
             }
             if (item.kind == folia::InlineRenderItem::Kind::Image)
@@ -249,6 +256,7 @@ namespace winrt::Folia
             }
             if (item.kind == folia::InlineRenderItem::Kind::Math)
             {
+                auto fontSize = inlineStyle.FontSizeFor(item.style);
                 if (item.special().semantic().block_source) {
                     folia::RenderBlock block;
                     block.kind = folia::RenderBlockKind::Math;
@@ -260,7 +268,7 @@ namespace winrt::Folia
                         ? folia::SourceRange{0, block.special().tex.size()}
                         : folia::SourceRange{offsets.front(), offsets.back()}};
                     MergeDisplayText(display, BuildMathBlockText(block, caret, mathJax,
-                        svgNormalizer, svgColor, fontSize, containerWidth,
+                        svgNormalizer, inlineStyle.foreground, fontSize, containerWidth,
                         svgSupported, requestMath, highPriority,
                         item.special().semantic().continuation_indent_columns));
                     continue;
@@ -274,7 +282,7 @@ namespace winrt::Folia
                 auto editing = presentation == EditorInlinePresentation::Source;
                 auto purpose = editing ? folia::platform::MathRenderPurpose::Preview : folia::platform::MathRenderPurpose::Document;
                 auto tex = folia::cps_to_utf8(item.text);
-                auto foreground = InlineForeground(item.style, svgColor);
+                auto foreground = InlineForeground(item.style, inlineStyle.foreground);
                 auto color = SvgColor(foreground);
                 // highPriority identifies the visible band. Offscreen layout
                 // reuses existing geometry and must not restart canceled jobs.
@@ -363,6 +371,7 @@ namespace winrt::Folia
                         markerPosition,
                         item.style,
                         EditorDisplayPositionKind::BoundaryDecoration);
+                    auto fontSize = inlineStyle.baseFontSize;
                     auto boxSize = (std::clamp)(fontSize * 0.86f, 14.0f, 18.0f);
                     auto height = (std::max)(boxSize, fontSize * 1.2f);
                     display.taskCheckboxOverlays.push_back({

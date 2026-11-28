@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
 #include <string>
 #include <d2d1.h>
 #include <dwrite.h>
@@ -21,6 +22,9 @@ namespace winrt::Folia
 
     struct EditorStyleSheet
     {
+        EditorFontStyle const* HeadingFont(std::uint8_t level) const;
+        float HeadingSize(std::uint8_t level) const;
+
         // Fixed SVG tile and external clearance, relative to the body size.
         struct MarkerStyle
         {

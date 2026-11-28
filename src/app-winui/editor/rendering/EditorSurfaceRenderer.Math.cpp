@@ -50,15 +50,15 @@ namespace winrt::Folia
             }
         };
         auto inlines = [&](auto const& self, std::vector<folia::InlineRenderItem> const& items,
-            float available, D2D1_COLOR_F foreground, float fontSize) -> void
+            float available, EditorInlineLayoutStyle const& inlineStyle) -> void
         {
             for (auto const& item : items)
             {
                 if (item.kind == folia::InlineRenderItem::Kind::Math)
                     formula(item.text, item.special().display == folia::MathDisplayMode::Block, available,
-                        InlineForeground(item.style, foreground), fontSize);
+                        InlineForeground(item.style, inlineStyle.foreground), inlineStyle.FontSizeFor(item.style));
                 else if (item.kind == folia::InlineRenderItem::Kind::Link)
-                    self(self, item.special().semantic().children, available, foreground, fontSize);
+                    self(self, item.special().semantic().children, available, inlineStyle);
             }
         };
         auto block = [&](auto const& self, folia::RenderBlock const& source, float available) -> void
@@ -84,12 +84,12 @@ namespace winrt::Folia
                     auto appearance = EditorTableCellAppearance(metadata, index / special.column_count, column);
                     auto foreground = appearance.foreground
                         ? sheet.tablePalette[static_cast<std::size_t>(*appearance.foreground)] : sheet.textColor;
-                    inlines(inlines, special.table_cells[index], cellWidth, foreground,
-                        EditorTableCellFontSize(sheet.body.size, metadata, appearance));
+                    inlines(inlines, special.table_cells[index], cellWidth,
+                        {sheet, foreground, EditorTableCellFontSize(sheet.body.size, metadata, appearance)});
                 }
             }
             else if (!source.inline_items.empty())
-                inlines(inlines, source.inline_items, contentWidth, sheet.textColor, sheet.body.size);
+                inlines(inlines, source.inline_items, contentWidth, {sheet, sheet.textColor, sheet.body.size});
             else
                 for (auto const& child : source.child_blocks) self(self, child, contentWidth);
         };

@@ -158,14 +158,24 @@ namespace winrt::Folia
     void ApplyTaskCheckboxInlineObjects(IDWriteTextLayout* layout, std::vector<DisplayInlineText::TaskCheckboxOverlay> const& overlays);
     DisplayInlineText BuildMathPreviewText(DisplayInlineText::MathPreview const& preview);
     void HighlightMathSources(DisplayInlineText& display, folia::TextPosition caret, TreeSitterHighlighter& highlighter);
+    struct EditorStyleSheet;
+
+    struct EditorInlineLayoutStyle
+    {
+        EditorStyleSheet const& sheet;
+        D2D1_COLOR_F foreground;
+        float baseFontSize;
+
+        float FontSizeFor(folia::InlineStyle const& style) const;
+    };
+
     DisplayInlineText BuildDisplayInlineText(
         std::vector<folia::InlineRenderItem> const& items,
         folia::TextPosition caret,
         EditorDisplayPosition sourceEnd,
         folia::platform::MathJaxRenderer& mathJax,
         folia::platform::SvgNormalizer& svgNormalizer,
-        D2D1_COLOR_F svgColor,
-        float fontSize,
+        EditorInlineLayoutStyle const& inlineStyle,
         float containerWidth,
         bool svgSupported,
         bool requestMath,

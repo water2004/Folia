@@ -30,6 +30,23 @@ namespace
 
 namespace winrt::Folia
 {
+    EditorFontStyle const* EditorStyleSheet::HeadingFont(std::uint8_t level) const
+    {
+        switch (level)
+        {
+            case 1: return &heading1;
+            case 2: return &heading2;
+            case 3: return &heading3;
+            default: return nullptr;
+        }
+    }
+
+    float EditorStyleSheet::HeadingSize(std::uint8_t level) const
+    {
+        if (auto const* heading = HeadingFont(level)) return heading->size;
+        return level == 4 ? body.size * 1.15f : body.size;
+    }
+
     EditorStyleSheet CreateEditorStyleSheet(folia::ThemeProfile const& theme, TextLayoutOptions const& options)
     {
         EditorStyleSheet sheet;

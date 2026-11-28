@@ -22,6 +22,7 @@ namespace
         if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
         folia::platform::MathJaxRenderer math;
         folia::platform::SvgNormalizer normalizer;
+        auto const sheet = CreateEditorStyleSheet(folia::default_theme_profile());
         std::vector<SyntaxIcon> icons;
         auto collect = [&](DisplayInlineText const& display) {
             for (auto const& range : display.ranges)
@@ -37,11 +38,11 @@ namespace
             } else {
                 collect(BuildDisplayInlineText(block.inline_items, caret,
                     {caret.container_id, source->size(), folia::TextAffinity::Upstream},
-                    math, normalizer, {}, 18, 500, false, false, false));
+                    math, normalizer, {sheet, {}, 18}, 500, false, false, false));
                 for (std::size_t i = 0; i < block.special().table_cells.size(); ++i)
                     collect(BuildDisplayInlineText(block.special().table_cells[i], caret,
                         {caret.container_id, source->size(), folia::TextAffinity::Upstream},
-                        math, normalizer, {}, 18, 500, false, false, false));
+                        math, normalizer, {sheet, {}, 18}, 500, false, false, false));
             }
         }
         expect(math.Snapshot().entries == 0_u);

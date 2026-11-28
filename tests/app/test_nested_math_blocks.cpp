@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
 #include "editor/session/EditorSession.h"
+#include "editor/rendering/EditorStyleSheet.h"
 #include "editor/rendering/layout/EditorContentPreparation.h"
 
 import folia.markdown.instrumentation;
@@ -10,6 +11,7 @@ using namespace boost::ut;
 using namespace winrt::Folia;
 suite nested_math_blocks = [] {
     "nested math retains block source markers highlighting and every caret boundary"_test = [] {
+        auto const sheet = CreateEditorStyleSheet(folia::default_theme_profile());
         for (auto input : {
             L"> before\n>\n> $$\n> \\frac{x}{2}+\U0001f600\n> $$\n>\n> after\n",
             L"> > $$\n> > \\frac{x}{2}\n> > $$\n",
@@ -47,7 +49,7 @@ suite nested_math_blocks = [] {
                 auto caret = folia::TextPosition{mathBlock->id, offset, folia::TextAffinity::Downstream};
                 auto display = BuildDisplayInlineText(root->inline_items, caret,
                     InlineItemsEndPosition(root->inline_items, caret), math, normalizer,
-                    {}, 18, 500, false, false, false);
+                    {sheet, {}, 18}, 500, false, false, false);
                 HighlightMathSources(display, caret, highlighter);
                 expect(display.mathSources.size() == 1_u);
                 expect(display.mathSources.front().toSource == mathBlock->special().content_to_source);

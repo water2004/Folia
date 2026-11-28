@@ -196,17 +196,7 @@ namespace winrt::Folia
 
         float BaseFontSize(folia::InlineStyle const& style, EditorStyleSheet const& styleSheet)
         {
-            if (style.heading_level)
-            {
-                switch (*style.heading_level)
-                {
-                    case 1: return styleSheet.heading1.size;
-                    case 2: return styleSheet.heading2.size;
-                    case 3: return styleSheet.heading3.size;
-                    case 4: return styleSheet.body.size * 1.15f;
-                    default: return styleSheet.body.size;
-                }
-            }
+            if (style.heading_level) return styleSheet.HeadingSize(*style.heading_level);
             return style.code != folia::CodeStyle::None ? styleSheet.code.size : styleSheet.body.size;
         }
 
@@ -214,13 +204,8 @@ namespace winrt::Folia
         {
             if (style.heading_level)
             {
-                switch (*style.heading_level)
-                {
-                    case 1: return styleSheet.heading1.lineHeight;
-                    case 2: return styleSheet.heading2.lineHeight;
-                    case 3: return styleSheet.heading3.lineHeight;
-                    default: return styleSheet.body.lineHeight;
-                }
+                auto const* heading = styleSheet.HeadingFont(*style.heading_level);
+                return heading ? heading->lineHeight : styleSheet.body.lineHeight;
             }
             return style.code != folia::CodeStyle::None ? styleSheet.code.lineHeight : styleSheet.body.lineHeight;
         }
@@ -460,16 +445,10 @@ namespace winrt::Folia
             if (range.style.heading_level)
             {
                 auto level = *range.style.heading_level;
-                auto const* heading = level == 1 ? &styleSheet.heading1
-                    : level == 2 ? &styleSheet.heading2
-                    : level == 3 ? &styleSheet.heading3
-                    : nullptr;
-                auto size = heading ? heading->size
-                    : level == 4 ? styleSheet.body.size * 1.15f
-                    : styleSheet.body.size;
+                auto const* heading = styleSheet.HeadingFont(level);
                 if (heading && range.style.code == folia::CodeStyle::None)
                     layout->SetFontFamilyName(heading->family.c_str(), textRange);
-                layout->SetFontSize(size, textRange);
+                layout->SetFontSize(styleSheet.HeadingSize(level), textRange);
                 auto weight = heading ? heading->weight : DWRITE_FONT_WEIGHT_SEMI_BOLD;
                 if (range.style.bold && weight < DWRITE_FONT_WEIGHT_SEMI_BOLD)
                     weight = DWRITE_FONT_WEIGHT_SEMI_BOLD;

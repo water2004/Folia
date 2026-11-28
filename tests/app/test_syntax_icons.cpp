@@ -82,6 +82,7 @@ namespace
             folia::platform::MathJaxRenderer math;
             folia::platform::SvgNormalizer normalizer;
             auto const& theme = folia::default_theme_profile(folia::Theme::Light);
+            auto const sheet = CreateEditorStyleSheet(theme);
             for (auto const& example : {std::pair{"pre **x** post", SyntaxIcon::DoubleStar},
                     {"pre ==x== post", SyntaxIcon::DoubleEquals}}) {
                 auto parsed = folia::parse_text(1, example.first);
@@ -92,7 +93,7 @@ namespace
                     auto display = BuildDisplayInlineText(block.inline_items,
                         {block.id, offset, folia::TextAffinity::Downstream},
                         {block.id, block.source_span.source_range.end, folia::TextAffinity::Downstream},
-                        math, normalizer, D2D1::ColorF(D2D1::ColorF::Black), 16, 150, false, false, false);
+                        math, normalizer, {sheet, D2D1::ColorF(D2D1::ColorF::Black), 16}, 150, false, false, false);
                     auto icons = std::ranges::count_if(display.ranges, [&](auto const& range) {
                         return range.icon == example.second && range.length == 2;
                     });

@@ -166,6 +166,7 @@ namespace {
         };
 
         "inline format markers reveal their exact source only while editing the construct"_test = [] {
+            auto const sheet = CreateEditorStyleSheet(folia::default_theme_profile());
             struct Example { wchar_t const* source; std::u32string_view visible; };
             for (auto const& example : {
                 Example{L"**abc** tail\n", U"abc tail"},
@@ -190,7 +191,7 @@ namespace {
                 auto const& block = frame.renderModel.blocks.front();
                 auto reading = BuildDisplayInlineText(block.inline_items, {},
                     {owner, source->size(), folia::TextAffinity::Upstream}, math, normalizer,
-                    D2D1::ColorF(D2D1::ColorF::Black), 16, 500, false, false, false);
+                    {sheet, D2D1::ColorF(D2D1::ColorF::Black), 16}, 500, false, false, false);
                 expect(std::u32string_view{reading.text} == example.visible);
                 expect(std::none_of(reading.ranges.begin(), reading.ranges.end(), [](auto const& range) { return range.marker; }));
                 auto constructEnd = source->find(U" tail");
@@ -198,7 +199,7 @@ namespace {
                     auto caret = folia::TextPosition{owner, offset, folia::TextAffinity::Downstream};
                     auto display = BuildDisplayInlineText(block.inline_items, caret,
                         {owner, source->size(), folia::TextAffinity::Upstream}, math, normalizer,
-                        D2D1::ColorF(D2D1::ColorF::Black), 16, 500, false, false, false);
+                        {sheet, D2D1::ColorF(D2D1::ColorF::Black), 16}, 500, false, false, false);
                     auto active = offset <= constructEnd;
                     expect(std::u32string_view{display.text} == (active ? std::u32string_view{*source} : example.visible)) << offset;
                     auto markers = std::count_if(display.ranges.begin(), display.ranges.end(), [](auto const& range) { return range.marker; });
@@ -222,6 +223,7 @@ namespace {
         };
 
         "inline markers preserve nested spelling and incomplete syntax"_test = [] {
+            auto const sheet = CreateEditorStyleSheet(folia::default_theme_profile());
             for (auto text : {L"a***b***c\n", L"**abc\n", L"~~abc\n", L"\\*abc\\*\n", L"[title](<url>)\n"}) {
                 EditorSession session;
                 session.SetText(text);
@@ -234,7 +236,7 @@ namespace {
                 auto display = BuildDisplayInlineText(frame.renderModel.blocks.front().inline_items,
                     {owner, 3, folia::TextAffinity::Downstream},
                     {owner, source->size(), folia::TextAffinity::Upstream}, math, normalizer,
-                    D2D1::ColorF(D2D1::ColorF::Black), 16, 500, false, false, false);
+                    {sheet, D2D1::ColorF(D2D1::ColorF::Black), 16}, 500, false, false, false);
                 // Escapes reveal only at their own source span, not anywhere
                 // in the paragraph. Other constructs encompass this caret.
                 expect(static_cast<bool>(display.text == (*source == U"\\*abc\\*" ? U"*abc*" : *source)));
@@ -274,6 +276,7 @@ namespace {
         };
 
         "math and link marker decorations exclude their editable content"_test = [] {
+            auto const sheet = CreateEditorStyleSheet(folia::default_theme_profile());
             struct Example { wchar_t const* source; std::wstring_view markers; std::wstring_view body; };
             for (auto example : {
                 Example{L"$a+b$ tail\n", L"$$", L"a+b tail"},
@@ -294,7 +297,7 @@ namespace {
                 auto display = BuildDisplayInlineText(frame.renderModel.blocks.front().inline_items,
                     {owner, 3, folia::TextAffinity::Downstream},
                     {owner, source->size(), folia::TextAffinity::Upstream}, math, normalizer,
-                    D2D1::ColorF(D2D1::ColorF::Black), 16, 500, false, false, false);
+                    {sheet, D2D1::ColorF(D2D1::ColorF::Black), 16}, 500, false, false, false);
                 auto wide = ToWide(display.text);
                 std::wstring markers, body;
                 for (auto const& range : display.ranges)
