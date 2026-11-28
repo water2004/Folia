@@ -24,9 +24,15 @@ def registrations(root: Path) -> Counter:
 def check_names(current: Counter, cases: list) -> list[str]:
     failures = []
     for row in cases:
-        name = row.get("replaced_by", row["name"])
-        if current[name] < row["count"]:
-            failures.append(f"Missing test registration: {name} ({current[name]}/{row['count']})")
+        replacement = row.get("replaced_by", row["name"])
+        names = [replacement] if isinstance(replacement, str) else replacement
+        if (not isinstance(names, list) or not names
+                or any(not isinstance(name, str) or not name for name in names)
+                or len(names) != len(set(names))):
+            raise ValueError(f"Invalid replacement for test registration: {row['name']}")
+        for name in names:
+            if current[name] < row["count"]:
+                failures.append(f"Missing test registration: {name} ({current[name]}/{row['count']})")
     return failures
 
 

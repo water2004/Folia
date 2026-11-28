@@ -76,7 +76,8 @@ namespace winrt::Folia {
             effortRow.Visibility(effort.Visibility());
         };
         update(selected, appliedSettings_.completion.reasoningEffort);
-        model.SelectionChanged([update = std::move(update)](auto const& sender, auto const&) {
+        model.SelectionChanged([update = std::move(update), cache](auto const& sender, auto const&) {
+            cache.IsOn(false);
             update(sender.template as<ComboBox>().SelectedIndex(), {});
         });
         fields.Children().Append(cacheRow);

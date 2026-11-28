@@ -22,20 +22,19 @@ python -m unittest discover -s tests/tools -p test_fixtures.py
 The `tooling` suite includes both preservation test modules. The optional
 `python tests/tools/check_inventory.py --windows-baseline` audit verifies the
 Windows files recorded for this refactor without building the Windows SDK tests.
-Registration checks preserve repeated test names as repeated registrations;
-corpus records are checked separately by their readers and the fixture guard.
-When behavior changes, `replaced_by` can name the current regression that
-replaces a historical test. The original name and file remain recorded.
+Registration checks preserve repeated test names as repeated registrations.
+Corpus records are checked separately by their readers and the fixture guard.
+The `replaced_by` field names the current regression when a historical test
+changes. If the behavior is split across tests, list their names and the guard
+requires every registration at the recorded multiplicity. Keep the original
+name and file and explain the coverage change in `replacement_reason`.
 
-The 120-file baseline includes SDK-free policy tests historically run by the
-Windows runner. The audit retains every original hash: 118 files are unchanged
-under its existing CRLF-to-LF policy, and the LaTeX/snippet session tests each
-have one explicit module import added for portable compilation.
-`portable_import_additions` names those two paths and exact import lines. Each
-line must occur exactly once; only that line is removed before comparing the
-remaining source to its original hash. This checks all original assertions,
-inputs, helpers and registration text without accepting other edits. Windows
-SDK test files remain unchanged.
+The Windows baseline keeps the original hashes for all 120 files, including
+SDK-free policy tests historically run by the Windows runner. The optional
+audit reports later source edits against those hashes. It normalizes line
+endings and permits one recorded module import each for the LaTeX and snippet
+session tests. Each permitted import must appear exactly once before the
+remaining source is compared to its original hash.
 
 ## Current byte checkpoint
 

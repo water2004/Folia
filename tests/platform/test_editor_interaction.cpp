@@ -350,8 +350,10 @@ suite editor_interaction_tests = [] {
 
 "table chrome keeps the four insertion edges and distinct row and column handles"_test = [] {
     const auto owner = NodeId{503};
+    const auto tableId = NodeId{502};
     EditorInteractionMap interaction;
     interaction.tables.push_back(MakeEditableTable(owner));
+    interaction.tables.front().id = tableId;
     interaction.tables.front().headerRows = 1;
     auto action = [&](float x, float y) -> std::optional<EditorTableAction> {
         const auto controls = interaction.TableControlsAt(x, y);
@@ -359,20 +361,26 @@ suite editor_interaction_tests = [] {
         return hit ? std::optional{hit->action} : std::nullopt;
     };
     using Kind = EditorTableActionKind;
-    expect(action(100, -23)->kind == Kind::InsertRow);
-    expect(action(100, -23)->index == 1_u);
-    expect(action(100, 109)->index == 2_u);
-    expect(action(-19, 50)->kind == Kind::InsertColumn);
-    expect(action(210, 50)->index == 2_u);
-    expect(action(0, 75)->kind == Kind::DragRow);
-    expect(action(0, 75)->index == 1_u);
-    expect(!action(0, 25)->draggable);
-    expect(action(50, 9)->kind == Kind::DragColumn);
-    expect(action(64, 11)->kind == Kind::DragColumn);
-    expect(action(100, 0)->kind == Kind::ResizeColumn);
-    expect(action(108, 0)->kind == Kind::ResizeColumn);
-    expect(action(-14, -13)->kind == Kind::Menu);
-    expect(action(-25, -14)->kind == Kind::Menu);
+    auto verify = [&](float x, float y, Kind kind, std::size_t index) {
+        auto hit = action(x, y);
+        expect(fatal(hit.has_value())) << x << y;
+        expect(hit->kind == kind && hit->index == index) << x << y;
+        expect(hit->sourcePosition == TextPosition{owner, 0, TextAffinity::Downstream});
+        expect(hit->tableId == tableId);
+    };
+    verify(100, -23, Kind::InsertRow, 1);
+    verify(100, 109, Kind::InsertRow, 2);
+    verify(-19, 50, Kind::InsertColumn, 0);
+    verify(210, 50, Kind::InsertColumn, 2);
+    verify(0, 75, Kind::DragRow, 1);
+    auto header = action(0, 25);
+    expect(header && !header->draggable);
+    verify(50, 9, Kind::DragColumn, 0);
+    verify(64, 11, Kind::DragColumn, 0);
+    verify(100, 0, Kind::ResizeColumn, 0);
+    verify(108, 0, Kind::ResizeColumn, 0);
+    verify(-14, -13, Kind::Menu, 0);
+    verify(-25, -14, Kind::Menu, 0);
     expect(!action(50, 30).has_value());
     expect(!action(150, 75).has_value());
 };

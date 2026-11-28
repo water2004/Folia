@@ -26,6 +26,20 @@ class InventoryTests(unittest.TestCase):
         self.assertEqual(check_inventory.check_names(Counter({"old scheduler": 1}), baseline),
                          ["Missing test registration: WinUI scheduler (0/1)"])
 
+    def test_split_replacement_requires_every_current_test_with_the_recorded_count(self):
+        baseline = [{"name": "old transfer", "count": 2, "replaced_by": ["session", "viewport"]}]
+        self.assertEqual(check_inventory.check_names(Counter(session=2, viewport=2), baseline), [])
+        self.assertEqual(check_inventory.check_names(Counter(session=2, viewport=1), baseline),
+                         ["Missing test registration: viewport (1/2)"])
+        self.assertEqual(check_inventory.check_names(Counter(session=0, viewport=2), baseline),
+                         ["Missing test registration: session (0/2)"])
+
+    def test_empty_or_invalid_replacements_do_not_waive_a_registration(self):
+        for replacement in ([], "", None, ["session", "session"], ["session", 1]):
+            with self.subTest(replacement=replacement), self.assertRaises(ValueError):
+                check_inventory.check_names(Counter(), [
+                    {"name": "old transfer", "count": 1, "replaced_by": replacement}])
+
     def import_report(self, current: bytes):
         baseline = b'"retained"_test = [] { expect(value == 42); };\n'
         relative = "tests/platform/policy.cpp"

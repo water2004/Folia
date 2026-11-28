@@ -598,9 +598,13 @@ namespace winrt::Folia {
                         self->ReportConnection(error.empty()
                             ? LocalizeFormat(L"ChatConnectionOK", {to_hstring(elapsed.count())}) : error, !error.empty());
                     } else if (auto form = self->modelForm) {
-                        if (!error.empty()) form->QueryStatus(error, false, true);
-                        else if (offered.empty()) form->QueryStatus(Localize(L"AINoModels"));
-                        else form->SetCatalog(std::move(offered));
+                        if (!error.empty()) {
+                            form->QueryStatus(error, false, true);
+                        } else {
+                            const bool empty = offered.empty();
+                            form->SetCatalog(std::move(offered));
+                            if (empty) form->QueryStatus(Localize(L"AINoModels"));
+                        }
                     }
                 });
             }

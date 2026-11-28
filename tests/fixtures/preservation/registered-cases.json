@@ -1216,6 +1216,8 @@
     },
     {
       "name": "actual credential edits cancel pending model discovery",
+      "replaced_by": "provider connection check cancels when the configured credentials change",
+      "replacement_reason": "Credentials now belong to the provider form. Editing the key and requesting its removal both cancel the provider's in-flight model request.",
       "count": 1,
       "original_files": [
         "tests/app/visual/test_settings_styles.cpp"
@@ -4184,6 +4186,8 @@
     },
     {
       "name": "completion metadata requests retire when settings service changes",
+      "replaced_by": "provider connection check retires the previous service request when its address changes",
+      "replacement_reason": "The provider form owns the connection. The test cancels the old request and verifies that the next request reaches the new address.",
       "count": 1,
       "original_files": [
         "tests/app/visual/test_settings_styles.cpp"
@@ -4296,6 +4300,8 @@
     },
     {
       "name": "completion settings save independent budgets eagerness and protocol reasoning choices",
+      "replaced_by": "completion saves the chosen model and independent input prediction budgets",
+      "replacement_reason": "Completion stores the model ID, both budgets, eagerness and the chosen model effort, and restores them when settings are reopened.",
       "count": 1,
       "original_files": [
         "tests/app/visual/test_settings_styles.cpp"
@@ -6580,6 +6586,8 @@
     },
     {
       "name": "explicit prompt cache is opt-in and available only for Responses",
+      "replaced_by": "explicit completion cache follows the selected route and requires a new opt-in",
+      "replacement_reason": "The cache option now follows provider, protocol and model support. The regression covers opt-in, switching routes and saving an unsupported selection.",
       "count": 1,
       "original_files": [
         "tests/app/visual/test_settings_styles.cpp"
@@ -8919,6 +8927,8 @@
     },
     {
       "name": "leaving completion settings cancels pending model discovery",
+      "replaced_by": "leaving the provider model page cancels pending catalog discovery",
+      "replacement_reason": "Catalog discovery moved to the provider model page. Leaving the live settings page cancels the underlying request.",
       "count": 1,
       "original_files": [
         "tests/app/visual/test_settings_styles.cpp"
@@ -9416,6 +9426,8 @@
     },
     {
       "name": "manual reasoning effort survives moving focus away and saves",
+      "replaced_by": "completion saves the chosen model and independent input prediction budgets",
+      "replacement_reason": "Free-form effort entry was removed when models began declaring their allowed levels. The current test changes focus, saves a declared level and checks it after reopening the page.",
       "count": 1,
       "original_files": [
         "tests/app/visual/test_settings_styles.cpp"
@@ -12594,6 +12606,8 @@
     },
     {
       "name": "model discovery empty and failed responses remain selectable only by explicit available choices",
+      "replaced_by": "empty or failed model catalogs do not invent selectable models",
+      "replacement_reason": "Provider discovery starts with explicit upstream choices. A successful empty refresh removes the choices and preserves the edited model ID.",
       "count": 1,
       "original_files": [
         "tests/app/visual/test_settings_styles.cpp"
@@ -12601,6 +12615,8 @@
     },
     {
       "name": "model refresh preserves selected and manually entered model IDs",
+      "replaced_by": "provider catalog refresh preserves the chosen and manually edited model IDs",
+      "replacement_reason": "The model form preserves both the chosen model and later manual edits across catalog refreshes. Saving uses the typed upstream ID.",
       "count": 1,
       "original_files": [
         "tests/app/visual/test_settings_styles.cpp"
@@ -12615,6 +12631,12 @@
     },
     {
       "name": "models without advertised capabilities show an explicit message without inventing list entries",
+      "replaced_by": [
+        "model settings fill only metadata from the upstream model explicitly chosen by the user",
+        "OpenAI model discovery never infers reasoning capabilities from IDs or private fields",
+        "Anthropic model discovery reads only explicitly supported capabilities"
+      ],
+      "replacement_reason": "Missing metadata leaves capabilities off and the default-effort picker disabled. Transport tests verify that only advertised metadata supplies options.",
       "count": 1,
       "original_files": [
         "tests/app/visual/test_settings_styles.cpp"
@@ -16060,6 +16082,11 @@
     },
     {
       "name": "single-tab native merge can tear back into its original window before release",
+      "replaced_by": [
+        "native single-tab drag can leave a dock preview before release without transferring",
+        "native pointer tears a distinct file out of a split and docks a standalone tab into either side"
+      ],
+      "replacement_reason": "The native drag now previews docking and commits on release. Real pointer tests cover leaving the preview and dropping a standalone tab into each group.",
       "count": 1,
       "original_files": [
         "tests/app/visual/test_tab_transfer.cpp"
@@ -17418,6 +17445,8 @@
     },
     {
       "name": "table hit policy returns semantic actions without renderer ownership",
+      "replaced_by": "table chrome keeps the four insertion edges and distinct row and column handles",
+      "replacement_reason": "The platform hit map returns semantic actions with the source position and table ID. Direct deletion gutter buttons were replaced by row and column menus.",
       "count": 1,
       "original_files": [
         "tests/platform/test_editor_interaction.cpp"
@@ -19668,6 +19697,11 @@
     },
     {
       "name": "workspace transfer moves the original session and preserves source history and viewport",
+      "replaced_by": [
+        "workspace transfer moves the original session and preserves source history",
+        "tab transfer restores the visible source anchor and its viewport inset in the receiving window"
+      ],
+      "replacement_reason": "The workspace model retains document ownership and source history. The active view restores the viewport, which is verified in a receiving window.",
       "count": 1,
       "original_files": [
         "tests/app/test_workspace_documents.cpp"

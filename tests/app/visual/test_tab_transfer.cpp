@@ -109,6 +109,10 @@ namespace winrt::Folia::implementation {
         static void Moving(Microsoft::UI::Xaml::Window const& window, bool value) { Impl(window)->tabMoveInProgress = value; }
         static bool PressedTab(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->tabGrabOffset.has_value(); }
         static bool Idle(Microsoft::UI::Xaml::Window const& window) { return !Impl(window)->tabPointerDown && !Impl(window)->tabMoveInProgress; }
+        static bool PendingDropIn(Microsoft::UI::Xaml::Window const& window, Microsoft::UI::Xaml::Window const& target) {
+            auto impl = Impl(window);
+            return impl->pendingDrop.has_value() && impl->dropWindow.get().get() == Impl(target);
+        }
         static auto Items(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->tabSource; }
         static auto Binding(Microsoft::UI::Xaml::Window const& window, std::uint64_t id) { return Impl(window)->tabItems.at(id); }
         static auto View(Microsoft::UI::Xaml::Window const& window, std::uint64_t id) {
@@ -272,7 +276,7 @@ namespace {
 
     // The native move loop is modal. Feed a real mouse gesture from the input thread
     // while the test UI thread dispatches normally, including a physical button release.
-    void DragTab(Window const& source, FrameworkElement const& item, ScreenPoint end) {
+    void DragTabAlong(Window const& source, FrameworkElement const& item, std::span<ScreenPoint const> route) {
         auto start = CenterOnScreen(item);
         auto hwnd = Access::Handle(source);
         source.Activate();
@@ -288,16 +292,24 @@ namespace {
             ::Sleep(65);
             button(MOUSEEVENTF_LEFTDOWN);
             ::Sleep(95);
-            for (int i = 1; i <= 32; ++i) {
-                ::SetCursorPos(start.X + (end.X-start.X)*i/32, start.Y + (end.Y-start.Y)*i/32);
-                ::Sleep(16);
+            auto from = start;
+            for (auto point : route) {
+                for (int i = 1; i <= 32; ++i) {
+                    ::SetCursorPos(from.X + (point.X-from.X)*i/32, from.Y + (point.Y-from.Y)*i/32);
+                    ::Sleep(16);
+                }
+                ::Sleep(160);
+                from = point;
             }
-            ::Sleep(160);
             button(MOUSEEVENTF_LEFTUP);
             released = true;
         });
         Pump([&] { return released.load(); });
         Pump([&] { return Access::Idle(source); });
+    }
+
+    void DragTab(Window const& source, FrameworkElement const& item, ScreenPoint end) {
+        DragTabAlong(source, item, std::span{&end, 1});
     }
 
     suite tab_transfer_tests = [] {
@@ -373,6 +385,40 @@ namespace {
             auto incoming = Access::Groups(second.window).Selected(EditorGroup::Left);
             dock(second.window, EditorGroup::Left);
             expect(groups.Selected(EditorGroup::Left) == incoming);
+        };
+        "native single-tab drag can leave a dock preview before release without transferring"_test = [] {
+            using winrt::Folia::EditorGroup;
+            auto base = visual_tests::Window().AppWindow();
+            base.Hide();
+            auto restoreBase = wil::scope_exit([&] { base.Show(false); });
+            OwnedWindow source(App()->CreateMainWindow()), target(App()->CreateMainWindow());
+            RECT work{};
+            winrt::check_bool(::SystemParametersInfoW(SPI_GETWORKAREA, 0, &work, 0));
+            const auto width = (work.right - work.left) / 2 - 20;
+            const auto height = (work.bottom - work.top) / 2;
+            source.window.AppWindow().MoveAndResize({work.left + 6, work.top + 20, width, height});
+            target.window.AppWindow().MoveAndResize({work.right - width - 6, work.top + 20, width, height});
+            auto document = Access::Documents(source.window).Active();
+            auto destination = Access::Documents(target.window).Active();
+            auto sourceTab = FirstTab(source.window, EditorGroup::Left);
+            auto targetPoint = CenterOnScreen(FirstTab(target.window, EditorGroup::Left));
+            std::array route{targetPoint, ScreenPoint{targetPoint.X, work.top + (work.bottom - work.top) * 4 / 5}};
+            auto pointer = winrt::Microsoft::UI::Input::InputNonClientPointerSource::GetForWindowId(source.window.AppWindow().Id());
+            bool offered = false, leftOffer = false, changedOwner = false;
+            auto changing = pointer.WindowRectChanging([&](auto const&, auto const&) {
+                if (Access::PendingDropIn(source.window, target.window)) offered = true;
+                else if (offered) leftOffer = true;
+                changedOwner |= Access::Documents(source.window).Active() != document
+                    || Access::Documents(target.window).Find(document->id) != nullptr;
+            });
+            auto removeChanging = wil::scope_exit([&] { pointer.WindowRectChanging(changing); });
+            DragTabAlong(source.window, sourceTab, route);
+            expect(offered && leftOffer);
+            expect(!changedOwner);
+            expect(Access::Documents(source.window).Active() == document);
+            expect(Access::Documents(target.window).Active() == destination);
+            expect(Access::Documents(source.window).Items().size() == 1_u);
+            expect(Access::Documents(target.window).Items().size() == 1_u);
         };
         "split groups can detach one dirty document view while the other window retains its history"_test = [] {
             using winrt::Folia::EditorGroup;
