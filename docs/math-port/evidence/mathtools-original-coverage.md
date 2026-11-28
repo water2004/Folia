@@ -1,9 +1,0 @@
-# Mathtools original observation coverage
-
-The pinned observation is produced by `tools/math-port/mathtools-original-oracle.cjs` against MathJax 4.1.3 commit `fb987178c2d279a99b0db5ea02e751691703955e`. The lock in `mathtools-source-lock.json` covers all six upstream TypeScript files and their emitted CJS files, plus the SHA-256 of the complete formatted JSON output. The oracle loads the real AMS configuration followed by Mathtools and compiles each case through the real `TeX` and `MmlFactory` owners.
-
-The 42 cases cover each distinct method family used by the command and environment maps, standard and starred matrix environments, paired-delimiter declarations, tag-form definition and use, configuration mutation, malformed widths, and unknown commands. Cases retain result MML or the exact thrown error and the complete package data state. The map record captures every key and argument tuple from all five maps: regular macros, legacy colon macros, environments, delimiters, and character handlers. This ensures unexercised aliases and per-command defaults are still observed through their complete map entries.
-
-The `mathtools-xmapsto` and `mathtools-xmapsto-after-ams` observations are included to protect the package override and its horizontal padding in the enabled AMS profile. Exact native parity remains unproven until the native Mathtools modules and native candidate are compiled against the current graph and compared with the strict comparator.
-
-The Folia package list loads `extpfeil` immediately before `mathtools`. A separate two-case Source observation compiles `xmapsto` in that order and captures the actual winning map entry; its independent lock is `mathtools-package-order-source-lock.json`. This supplementary observation does not change the complete 42-case output hash above.
