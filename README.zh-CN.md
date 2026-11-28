@@ -1,16 +1,12 @@
 <p align="center">
-  <img src="src/app-winui/Assets/branding/Folia.svg" width="156" alt="折笺图标">
+  <img src="src/app-winui/Assets/branding/Folia.svg" width="88" alt="折笺">
 </p>
 
-<h1 align="center">折笺</h1>
+<h1 align="center">折笺 Folia</h1>
 
-<p align="center">
-  一款安静、原生、忠于源码的 Windows Markdown 阅读与编辑器。
-</p>
+<p align="center">Windows 原生 Markdown 编辑器，支持所见即所得与源码编辑，直接读写本地 Markdown 文件。</p>
 
-<p align="center">
-  <a href="README.md">English</a>
-</p>
+<p align="center"><a href="README.md">English</a></p>
 
 <p align="center">
   <img alt="许可证：MIT" src="https://img.shields.io/badge/license-MIT-238AF5.svg">
@@ -20,147 +16,58 @@
   <img alt="渲染器：Direct2D" src="https://img.shields.io/badge/renderer-Direct2D-2F855A.svg">
 </p>
 
----
+![左侧打开「河口观测」文件夹，正文显示《河口的清晨》](docs/screenshots/zh-CN/workspace.png)
 
-折笺使用 WinUI 3 构建应用外壳，以 Direct2D 和 DirectWrite 自绘文档界面，
-不嵌入 HTML 编辑器。编辑状态由统一块树和块内 source-backed lossless inline
-CST 组成，因此结构化编辑不需要重新生成或规范化用户没有修改的 Markdown。
+## 获取折笺
 
-## 特点
+Windows x64 安装包与便携版均在仓库的 **Releases** 发布。运行 MSI 安装折笺，或解压便携版 ZIP 后运行 `Folia.exe`。
 
-- **忠于源码** — 保留标记写法、转义、空白、链接语法和暂时未闭合的编辑状态。
-- **原生编辑** — 所见即所得与等宽源码模式、行号和目录导航、事务历史、
-  语义化复制粘贴、可配置的分区快捷键/snippet、显式且可单步撤销的 Markdown
-  源码格式化、LaTeX 补全和正则查找替换均以原生 C++ 实现。渲染模式只搜索
-  可见文字，源码模式则直接搜索完整 Markdown 缓冲区。
-- **丰富渲染** — 支持 MathJax、Mermaid、Tree-sitter 代码高亮、原生 SVG、
-  动态 GIF、Windows 图片编解码器（PNG、JPEG、BMP、TIFF、ICO，以及系统已安装的
-  WebP/HEIF 编解码器）、表格、脚注、callout 与递归嵌套块。安全的内嵌 HTML
-  会被投影为原生块级与行内样式，包括常用文字样式、图片/链接流以及
-  `align`/`text-align`；HTML 注释不会渲染，Ctrl+单击本地链接时会解析经过
-  百分号编码的路径与锚点。应用不会嵌入浏览器界面。
-- **Agent 对话** — 在文档旁打开聊天，用 `@` 引用页签或授权读取指定文件夹。
-  回复以 Markdown 流式显示，点击文档引用可跳到原文。聊天和行内补全共用设置中的模型目录。
-- **左右分屏** — 同时查看两个页签组，可调整宽度，在组或窗口之间拖动页签。
-  从资源管理器拖入的文件会在落点所在的分栏打开。
-- **专注阅读** — 支持可配置主题、中英文界面、无边框 WinUI 外壳、文件关联，
-  以及带逐页进度和取消操作的原生 Windows PDF 导出。
-- **文件夹工作区** — 按需展开文件树，单击预览、双击或编辑后固定标签，
-  每个文档独立保留撤销历史与阅读位置。文件浏览与文档大纲共用一个带动画的侧栏，
-  标签下方的文档工具栏可在鼠标悬浮时展开。
-- **编码感知** — 基于 ICU 自动探测字符集；以指定编码重新打开时按置信度排列
-  候选，而转换保存可选择 ICU 支持的任意编码，后续保存继续忠实使用该编码。
-- **清晰边界** — C++23 modules 核心保持平台无关；Windows、DirectX 和
-  WinUI 代码仅存在于平台层和应用层。
+## Markdown 编辑
 
-## 架构
+折笺支持直接编辑排版后的正文，也可以随时切换到源码。两种视图共用同一份 Markdown，保存时保留未修改部分的标记、空白和转义。
 
-```text
-Markdown 源码
-    └─ 块树
-        └─ 可编辑块
-            ├─ 精确的块内源码
-            └─ 逐字符无损的可编辑 CST
-                 ↓
-        平台无关的渲染模型
-                 ↓
-        可确定性测试的 Windows 编辑器计划
-                 ↓
-        WinUI 3 + Direct2D/DirectWrite 资源
-```
+- 正文可渲染 **LaTeX 公式与 Mermaid 图表**，支持代码高亮、提示块和脚注。
+- **富表格**支持合并单元格、设置颜色和拖动行列，兼容 `gogoga-table` 元数据。
+- 文件可按指定编码重新打开，文档可导出为 **PDF**。
 
-各层职责见 [源码目录说明](src/README.md)、[核心层说明](src/core/README.md)、
-[Windows 平台层说明](src/platform/README.md) 与
-[WinUI 应用层说明](src/app-winui/README.md)。
+![《样点计数》中的鸟类观测表、平均数公式和 Python 代码](docs/screenshots/zh-CN/rich-markdown.png)
 
-## 从源码构建
+## 双栏工作区
 
-需要 Windows 10 或 11、带 MSVC 桌面开发工作负载的 Visual Studio、CMake、
-Ninja、Rust/Cargo 和 PowerShell。
+折笺以本地文件夹为工作区。写作时可以把草稿和参考资料放在同一个窗口里对照，每一栏都有自己的页签和工具栏。
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\setup.ps1
-powershell -ExecutionPolicy Bypass -File .\build_app.ps1 -Configuration Debug
-```
+- **侧栏**可在文件树和文档大纲之间切换，文件可在预览页签中打开。
+- 拖动**分隔线**可调整两栏的宽度。
+- 支持**跨栏、跨窗口拖动页签**，也可以从资源管理器将 Markdown 文件或图片拖入指定分栏。
 
-`setup.ps1` 会还原 NuGet/原生依赖，并下载字符集探测与严格转码使用的固定版本
-ICU 运行库。
+![左栏为《路线计划》，右栏为《现场记录》](docs/screenshots/zh-CN/split-view.png)
 
-执行干净的 Release 构建：
+## AI 文档问答
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\build_app.ps1 -Configuration Release -Clean
-```
+折笺的 AI 会话可以围绕你授权的资料回答问题。会话可只读访问已打开的页签或指定目录，回复中的文档引用可直接跳到原文对应行。
 
-构建当前用户安装的 x64 MSI：
+- 输入 `@` **引用指定文档**。模型支持视觉时，可以直接粘贴图片。
+- **Markdown 回复**流式渲染，工具调用记录可展开查看。
+- **会话记录**保存在本机，较早的消息按需加载。
+- 在 **设置 → AI 供应商** 中接入 API。聊天和行内补全共用模型配置，模型和推理力度可按会话选择。
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\build_msi.ps1
-```
+![「整理河口观测计划」会话中，回复建议先在栈道记录水位](docs/screenshots/zh-CN/agent-chat.png)
 
-安装器会生成自包含 Windows App SDK 的 Release 应用，因此目标电脑无需另行
-安装 Windows App SDK Runtime。MSI 输出到
-`build/installer/bin/Folia-<version>-x64.msi`；安装向导可以选择程序目录，默认是
-`%LOCALAPPDATA%\Programs\Folia`，升级会记住此目录。静默安装也可传入
-`INSTALLFOLDER="D:\Apps\Folia"`。可配置的 Assets 树安装在
-`%LOCALAPPDATA%\Folia\Assets`。卸载会移除 MSI 管理的内置资源，但保留
-`settings.json` 和 `themes/custom/`。卸载向导提供默认不勾选的完整清理选项，
-勾选后会删除用户资源、设置、自定义主题、命令以及保存的 AI API Key。
-静默卸载可传入 `FOLIAREMOVEUSERDATA=1`；升级会保留用户数据。
-安装器会把折笺注册为 `.md` 和
-`.markdown` 的可选打开程序；是否设为默认应用仍由用户在 Windows 中决定。
+联网搜索和网页读取需供应商与模型支持，并在会话中开启。 [聊天使用说明](docs/agent-chat.md)
 
-安装包构建会通过编译参数把 Assets 根目录设为
-`{LocalAppData}\Folia\Assets`，程序启动时再针对当前用户解析该占位符；普通
-开发构建仍沿用原有 Assets 位置。
+## 主题与排版
 
-构建自包含的 x64 便携 ZIP：
+窗口与正文可以使用不同的材质，例如亚克力窗口配纯色正文。文档与聊天也各自保存排版设置。
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\build_portable.ps1
-```
+- 内置浅色、深色和高对比度**主题**，支持预览和导入主题包。材质可选云母、亚克力或纯色。 [主题配置与导入格式](docs/THEMES.md)
+- **字号、行距和页边距**可在工具栏调整。 [设置和快捷键](docs/SETTINGS.md)
 
-将 `build/portable/Folia-<version>-x64-portable.zip` 解压到可写目录后，
-直接运行 `Folia.exe`。应用设置和自定义主题存放在程序旁的 `Assets`，
-AI API Key 由 Windows 凭据管理器保存。
+![深色窗口叠在浅色窗口前，两个窗口均打开《河口的清晨》](docs/screenshots/zh-CN/light-and-dark.png)
 
-检查刚生成的自包含 MSI 应用中的原生数学 worker：
+![排版设置页上方为文档阅读，下方为聊天](docs/screenshots/zh-CN/typography.png)
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\math-port\winui-math-worker-probe.ps1 -Configuration Release -SkipBuild -SelfContained
-```
+## 贡献与许可证
 
-该检查使用已有应用对象和已部署的数学 DLL，不改变应用的部署构建参数。
-worker 测试程序留在构建目录。
+构建、测试与打包步骤见 [贡献指南](CONTRIBUTING.md)。
 
-所有生成文件都位于 `build/`。应用输出位于
-`build/app-winui/bin/<platform>/<configuration>/`，构建不会向源码树写入文件。
-
-运行平台无关核心测试和可确定性 Windows 编辑器测试：
-
-```powershell
-cmd /c tests\run_core.bat
-cmd /c tests\platform\run.bat
-cmd /c tests\encoding\run.bat
-```
-
-两个入口都会把位置参数转交给 Boost.UT，例如
-`cmd /c tests\run_core.bat "*inline*"`。测试套件的职责和约定见
-[测试目录说明](tests/README.md)。
-
-WinUI 工程入口是 [Folia.vcxproj](src/app-winui/Folia.vcxproj)。快捷键、snippet、
-LaTeX 补全和运行时选项见 [设置文档](docs/SETTINGS.md)；主题字段与外部
-Assets 根目录见 [主题文档](docs/THEMES.md)。
-[MarkText 交互参考](docs/MARKTEXT_REFERENCE.md) 只记录行为语义参考，不改变
-折笺的原生架构；[表格交互规范](docs/TABLE_INTERACTION.md) 明确定义了线性文本
-选择与显式行列结构操作之间的边界。
-
-## 项目状态
-
-折笺仍在积极开发中。编辑器核心、原生渲染器与 WinUI 应用已可运行；单元测试
-和随机属性测试会持续检查源码无损与编辑不变量。
-
-## 许可证
-
-折笺采用 [MIT License](LICENSE)。第三方依赖许可证见
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 及其指向的完整分发清单。
+折笺采用 MIT 许可证。 [许可证](LICENSE) · [第三方许可清单](THIRD_PARTY_NOTICES.md)

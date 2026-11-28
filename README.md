@@ -1,16 +1,12 @@
 <p align="center">
-  <img src="src/app-winui/Assets/branding/Folia.svg" width="156" alt="Folia logo">
+  <img src="src/app-winui/Assets/branding/Folia.svg" width="88" alt="Folia">
 </p>
 
 <h1 align="center">Folia</h1>
 
-<p align="center">
-  A calm, native, source-faithful Markdown reader and editor for Windows.
-</p>
+<p align="center">A native Markdown editor for Windows. Edit the rendered document or switch to its source. Files are saved locally as Markdown.</p>
 
-<p align="center">
-  <a href="README.zh-CN.md">简体中文</a>
-</p>
+<p align="center"><a href="README.zh-CN.md">简体中文</a></p>
 
 <p align="center">
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-238AF5.svg">
@@ -20,177 +16,58 @@
   <img alt="Renderer: Direct2D" src="https://img.shields.io/badge/renderer-Direct2D-2F855A.svg">
 </p>
 
----
+![The Estuary survey folder beside a note titled A morning by the estuary](docs/screenshots/en-US/workspace.png)
 
-Folia uses a WinUI 3 application shell and draws its document surface with
-Direct2D and DirectWrite. It does not embed an HTML editor. Its editing state
-combines one unified block tree with source-backed, lossless inline CSTs, so
-structured editing does not require regenerating or normalizing Markdown that
-the user did not change.
+## Install
 
-## Highlights
+Find the Windows x64 installer and portable build under **Releases** on GitHub. Run the MSI to install Folia, or extract the portable ZIP and run `Folia.exe`.
 
-- **Agent conversations** — chat alongside a document, reference an open tab with `@`,
-  or grant read access to a folder. Replies stream as Markdown and can link to
-  a source line. Chat and inline completion share the models configured in Settings.
-- **Side-by-side editors** — split a window into two tab groups, resize them, and
-  drag tabs between groups or windows. Dropping files opens them in the target group.
-- **Source faithful** — preserves marker spelling, escapes, whitespace, link
-  syntax, and temporarily incomplete editing states.
-- **Native editing** — WYSIWYG and monospaced source modes, line numbers and
-  outline navigation, transactional history, semantic copy/paste, configurable
-  context-aware shortcuts/snippets, explicit one-step Markdown source
-  formatting, LaTeX completion, and regular-expression find/replace are
-  implemented in native C++. Rendered-mode search operates on visible text
-  while source mode searches the exact Markdown buffer.
-- **Rich rendering** — MathJax, Mermaid, Tree-sitter syntax highlighting,
-  native SVG, animated GIFs, Windows image codecs (PNG, JPEG, BMP, TIFF, ICO,
-  and installed WebP/HEIF codecs), tables, footnotes, callouts, and recursively
-  nested blocks. Safe embedded HTML is projected into native block/inline
-  presentation, including common text styles, image/link flows, and
-  `align`/`text-align`; HTML comments stay non-rendered, and Ctrl-clicked local
-  links resolve percent-encoded paths and anchors. No browser surface is
-  embedded.
-- **Focused reading** — configurable themes, English and Chinese interfaces,
-  a borderless WinUI shell, file-association support, and cancellable native
-  Windows PDF export with page progress.
-- **Folder workspace** — lazy file browsing, preview tabs that become permanent
-  on double-click or editing, and independent history and reading positions per
-  document. Create files and folders or rename with F2 directly in the tree;
-  drag onto a folder to move, or hold Ctrl to copy. Long operations show progress,
-  and moving an open document preserves its unsaved edits and undo history.
-  Files and Outline share one animated sidebar. A toolbar below the tabs
-  provides document actions and can reveal itself on hover.
-- **Encoding aware** — ICU-based charset detection ranks likely encodings when
-  reopening a file, while explicit conversion saves in any installed ICU
-  encoding and preserves the selected encoding on subsequent saves.
-- **Clear boundaries** — the C++23 modules core remains platform independent;
-  Windows, DirectX, and WinUI code stays in the platform and application layers.
+## Markdown editing
 
-## Architecture
+Edit the formatted page directly, or switch to the source when you need to work with the Markdown itself. Both views edit the same file, and Folia preserves markers, whitespace, and escapes in text you leave untouched.
 
-```text
-Markdown source
-    └─ block tree
-        └─ editable block
-            ├─ exact inline source
-            └─ lossless editable CST
-                 ↓
-        platform-neutral render model
-                 ↓
-        deterministic Windows editor plans
-                 ↓
-        WinUI 3 + Direct2D/DirectWrite resources
-```
+- The rendered view supports **LaTeX equations and Mermaid diagrams**, along with syntax highlighting, callouts, and footnotes.
+- **Rich tables** support merged cells, colors, and row and column reordering. Folia reads and writes `gogoga-table` metadata.
+- Reopen a file with a different encoding or export a document to **PDF**.
 
-See the [source layout](src/README.md), [core layout](src/core/README.md),
-[Windows platform layer](src/platform/README.md), and
-[WinUI application layer](src/app-winui/README.md) for ownership boundaries.
-The [table interaction contract](docs/TABLE_INTERACTION.md) defines the exact
-boundary between linear text selection and explicit row/column operations.
+![The Survey measurements note with a bird count table, a mean formula, and a Python snippet](docs/screenshots/en-US/rich-markdown.png)
 
-## Build from source
+## Work side by side
 
-Requirements: Windows 10 or 11, Visual Studio with the MSVC desktop workload,
-CMake, Ninja, Rust/Cargo, and PowerShell.
+Open a local folder as a workspace and keep a draft beside its reference material in the same window. Each pane has its own tabs and toolbar.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\setup.ps1
-powershell -ExecutionPolicy Bypass -File .\build_app.ps1 -Configuration Debug
-```
+- The **sidebar** switches between the file tree and the current document’s outline. Files can open in preview tabs.
+- Drag the **divider** to give either pane more room.
+- **Tabs** can move between panes or windows. Markdown files and images dropped from Explorer open in the target pane.
 
-`setup.ps1` restores NuGet/native dependencies and the pinned ICU runtime used
-for charset detection and lossless transcoding.
+![Route plan in the left pane and Observations in the right pane](docs/screenshots/en-US/split-view.png)
 
-For a clean Release build:
+## AI chat with your documents
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\build_app.ps1 -Configuration Release -Clean
-```
+Ask questions about your notes in a Folia conversation. Give the chat read-only access to open tabs or a folder you choose, and follow document citations in the reply back to the source line.
 
-Build the per-user x64 MSI with:
+- Use `@` to **reference a document**. With a vision-capable model, you can paste images into the chat.
+- **Markdown replies** render as they stream, and tool call records can be expanded.
+- **Conversation history** is stored locally, with older messages loaded on demand.
+- Connect an API under **Settings → AI providers**. Chat and inline completion share the configured models. Each conversation can use its own model and reasoning level.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\build_msi.ps1
-```
+![The Review the estuary survey chat recommends starting at the saltmarsh](docs/screenshots/en-US/agent-chat.png)
 
-The installer creates a self-contained Windows App SDK build, so the target
-machine does not need a separately installed Windows App SDK runtime. The MSI
-is written to `build/installer/bin/Folia-<version>-x64.msi`. It installs the
-application in a directory selected in the setup wizard, defaulting to
-`%LOCALAPPDATA%\Programs\Folia`. Upgrades remember that directory. Unattended
-installations can set `INSTALLFOLDER="D:\Apps\Folia"`. The configurable Assets
-tree is installed below `%LOCALAPPDATA%\Folia\Assets`. Uninstall removes MSI-owned built-in
-resources but preserves `settings.json` and `themes/custom/`. The uninstall
-wizard offers an unchecked option to also remove all Folia user resources, settings,
-custom themes, commands and the saved AI API key. Silent uninstallations can
-request the same cleanup with `FOLIAREMOVEUSERDATA=1`. Upgrades retain user data.
-The installer registers Folia as an available handler for `.md` and `.markdown`; Windows still
-leaves the default-app choice to the user.
+Web search and page reading require provider and model support and permission in the conversation. [Agent chat guide](docs/agent-chat.md)
 
-For installer builds, `build_app.ps1` receives the compile-time Assets token
-`{LocalAppData}\Folia\Assets`; it is resolved for the current user at runtime.
-Normal developer builds continue to use their existing Assets location.
+## Themes and typography
 
-Build the self-contained x64 portable ZIP with:
+The window and the document can use different materials, such as an acrylic window with a solid page. Documents and chats remember their own text layout settings.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\build_portable.ps1
-```
+- Folia includes light, dark, and high-contrast **themes** and supports previewing and importing theme packages. Materials include Mica, acrylic, and solid color. [Themes and import format](docs/THEMES.md)
+- Adjust **font size, line spacing, and page margins** from the toolbar. [Settings and shortcuts](docs/SETTINGS.md)
 
-Extract `build/portable/Folia-<version>-x64-portable.zip` to a writable folder and
-run `Folia.exe`. The application stores its editable settings and themes in
-`Assets` beside the executable. AI API keys use Windows Credential Manager.
+![Two windows showing the same note with the dark theme in front of the light theme](docs/screenshots/en-US/light-and-dark.png)
 
-To check the native math worker in the existing self-contained MSI payload:
+![The Text layout settings page with Document reading above Chat](docs/screenshots/en-US/typography.png)
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\math-port\winui-math-worker-probe.ps1 -Configuration Release -SkipBuild -SelfContained
-```
+## Contributing and license
 
-This checks the built application objects and deployed math DLL without
-rebuilding the application with different deployment settings. The worker probe
-stays in the build directory.
+Build, test, and packaging instructions are in the [contributing guide](CONTRIBUTING.md).
 
-All generated files stay below `build/`. Application binaries are written to
-`build/app-winui/bin/<platform>/<configuration>/`; builds do not write into
-the source tree.
-
-Run the portable test system with a C++23 module toolchain:
-
-```sh
-python tests/run.py list
-python tests/run.py --suite core
-python tests/run.py --suite all
-```
-
-The [test guide](tests/README.md) covers toolchain/dependency preparation, suite
-selection, offline fixtures and reports. Existing Windows entry points remain:
-
-```powershell
-cmd /c tests\run_core.bat
-cmd /c tests\platform\run.bat
-cmd /c tests\encoding\run.bat
-```
-
-Both runners forward positional Boost.UT name filters, for example
-`cmd /c tests\run_core.bat "*inline*"`. See the [test layout](tests/README.md) for
-suite ownership and conventions.
-
-The WinUI project entry point is [Folia.vcxproj](src/app-winui/Folia.vcxproj).
-See [Settings](docs/SETTINGS.md) for shortcuts, snippets, LaTeX completion, and
-runtime options; see [Themes](docs/THEMES.md) for profile fields and external
-Assets roots. [MarkText interaction notes](docs/MARKTEXT_REFERENCE.md) record
-behavioral references without changing Folia's native architecture.
-
-## Project status
-
-Folia is under active development. The editor core, native renderer, and WinUI
-application are functional; unit and randomized property tests continuously
-exercise source losslessness and editing invariants.
-
-## License
-
-Folia is released under the [MIT License](LICENSE). Third-party licenses are
-listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the complete
-distribution notice referenced there.
+Folia uses the MIT License. [License](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md)
