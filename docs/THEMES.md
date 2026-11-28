@@ -47,14 +47,6 @@ complete `syntaxMarkers` object from a shipped theme before customizing it.
 Older or incomplete profiles receive the existing whole-profile diagnostic;
 Folia does not silently mix their settings with another theme's artwork.
 
-MSI treats the built-in `themes/*.json` and `themes/*.png` files as application resources. Its
-generated payload replaces each exact packaged filename on install/upgrade
-and repair, including same-version upgrades. `themes/custom/` and
-`settings.json` are excluded from the MSI payload and replacement rules.
-The isolated Windows Installer regression can be run with
-`powershell -ExecutionPolicy Bypass -File tests/installer/test_theme_upgrade.ps1`;
-it creates its own test product and does not install or uninstall Folia.
-
 The `syntax` array has exactly eleven entries in this order:
 
 1. plain text

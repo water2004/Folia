@@ -1,80 +1,62 @@
 # Table interaction contract
 
-Folia treats a Markdown table as a rectangular structure whose cells own
-ordinary block-local Markdown source. This document defines which gestures
-edit text and which gestures edit table structure so the two cannot be
-silently confused.
+Folia stores Markdown pipe tables as a rectangular tree of rows and cells. Each
+cell owns ordinary block-local Markdown source. Rich table behavior is layered
+on top through the adjacent `<!-- gogoga-table: {...} -->` metadata comment:
+metadata can describe merged-cell regions, dimensions, styles, colors, and other
+table presentation and value settings without changing the pipe-table source
+grid. The physical rows and cells stay rectangular when cells are merged.
 
-## Selection model
+HTML-backed tables remain source content, not editable Markdown table grids.
+They use HTML parsing/rendering rules; HTML `rowspan`/`colspan` do not become
+Folia Markdown table metadata or table structure commands.
 
-There is one authoritative `TextSelection`: anchor and active
-`TextPosition`s, each expressed as an editable container id plus a source
-offset and affinity. Tables do not introduce cell-selection coordinates or a
-parallel selection state.
+## Selection
 
-- Dragging through cell content creates a row-major text range.
-- The first and last cells are selected only over their endpoint source
-  ranges. Cells strictly between them are selected in full.
-- Reversing anchor and active produces the same selected content.
-- Visual highlighting must use those exact ranges; it must not paint an
-  entire cell merely because the range intersects it.
+The editor has one selection value. It supports block-local text ranges and an
+explicit rectangular table-cell range for table actions; these are selection
+kinds, not parallel editor selections. Text positions continue to use a cell
+owner ID, source offset, and affinity.
+
+- Dragging through cell text creates a row-major text range. The first and last
+  cells contribute only the selected source slices; intervening cells
+  contribute all their source. Reversing the endpoints selects the same text.
 - Copying a same-cell range returns that exact Markdown source substring.
-- Copying a cross-cell range returns cell source separated by tabs within a
-  row and newlines between rows. It does not silently copy the whole table.
+  Copying a cross-cell range separates cells with tabs within a row and rows
+  with newlines; it does not copy the whole table.
+- A merged visual cell may map to multiple physical cell owners. Rendering,
+  hit-testing, navigation, and text editing resolve those owners through the
+  parsed merge metadata while preserving the rectangular source tree.
+- An explicit cell-range selection is rectangular and expands to include any
+  intersected merged regions. It is used for table actions such as appearance
+  changes and merge/unmerge.
 
-This linear rule deliberately handles ranges such as the final cell of one
-row through the first cell of the next. Such a range is not forced into an
-artificial rectangle.
+## Text and structure edits
 
-## Text deletion
+Backspace, Delete, Cut, and replacement edit selected cell source. Across cells
+they preserve every row and cell node; empty cells remain valid. Undo/Redo
+restores the edited source and selection as one transaction. A selection that
+crosses a table boundary is a structure barrier and must not remove table cells
+or leave rows with unequal widths.
 
-Backspace, Delete, Cut, and selection replacement are text operations.
-
-- Within one cell they edit only that cell's source.
-- Across cells in one table they erase the selected source slice in each cell
-  and preserve every row and cell node.
-- Empty cells remain valid cells. Text deletion never removes a row, column,
-  or table.
-- Undo/Redo restores all edited cell sources and the selection as one
-  transaction.
-
-Selections that cross a table boundary must treat the table as a structure
-barrier; implementations must not remove individual `TableCell` nodes or
-leave rows with unequal column counts. Structural deletion requires an
-explicit table command.
-
-## Structural controls
-
-Insertion, deletion, and reordering of rows or columns are structural
-operations. They are invoked only by visible table controls or an explicit
-command. A table command has a valid target only when both text-selection
-endpoints resolve to the same cell. Pointer controls collapse the selection
-to their source cell before issuing the command.
-
-Consequences:
-
-- A cross-cell text selection is never interpreted from its active endpoint
-  as "delete this row" or "move this column".
-- Row and column drags are mutually exclusive with text-selection drags.
-- Dropping is valid only inside the source table.
-- Delete removes content; a row/column delete control removes structure.
+Row/column insertion, deletion, and reordering change the rectangular Markdown
+grid and require an explicit table command with an unambiguous target cell.
+Merge/unmerge and rich formatting update `gogoga-table` metadata instead; they
+must preserve the pipe-table content and metadata's exact save/undo behavior.
+A cross-cell text selection is not implicitly reinterpreted as a structural
+command. Explicit rectangular cell-range actions remain available for metadata
+operations.
 
 ## Keyboard behavior
 
-- `Tab` moves to the next cell.
-- `Tab` in the final cell appends one body row and moves to its first cell.
+- `Tab` moves to the next cell. In the final cell it appends one body row and
+  moves to that row's first cell.
 - `Shift+Tab` moves to the previous cell; in the first cell it does nothing.
-- Table navigation that does not change structure creates no history entry.
-  Appending the final row is a reversible structure transaction.
-- Enter and soft-break behavior remains a cell-local Markdown edit; it does
-  not navigate or reshape the table.
+- Navigation that changes only selection creates no history entry. Appending a
+  row is a reversible structural transaction.
+- Enter and soft-break behavior edit the current cell's Markdown source; they
+  do not navigate or reshape the table.
 
-## Markdown capability boundary
-
-Markdown tables remain rectangular and do not support merged cells,
-`rowspan`, or `colspan`. Safe HTML tables may render those HTML features, but
-they are not converted into Markdown-table structure commands. Their source
-is edited as HTML/source content according to the existing HTML rules.
-
-The contract follows familiar desktop table conventions where they fit
-Markdown, while keeping Folia's source-backed block tree authoritative.
+The source tree remains a rectangular Markdown table throughout. Merge and
+presentation semantics live in Folia's metadata layer, while HTML tables remain
+in their own source-backed editing path.

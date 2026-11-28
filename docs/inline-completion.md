@@ -86,23 +86,6 @@ they do not issue a request per word. New proposals follow ordinary idle typing.
 Partial acceptance uses ICU word segmentation, including Chinese words, emoji
 sequences and combining marks.
 
-## Responsibilities
-
-- `src/ai/completion` (`folia.ai.completion`) owns portable request context, the
-  bounded cache, proposal state, acceptance boundaries and prompt policy.
-- `src/ai/providers` exports the model contract and the request, response and
-  SSE codecs for Chat Completions, Responses and Anthropic Messages.
-- Windows transport: asynchronous worker execution, streamed HTTP, cancellation,
-  response limits and credential storage. No renderer or document access.
-- Application completion controller: immutable document snapshots, debounce,
-  request generations, settings and UI-thread delivery. One active request,
-  no backlog of obsolete cursor locations.
-- Display preparation: plain muted generated text inserted into the existing
-  DirectWrite flow. It wraps with the text, without Markdown styling or math
-  rendering. It is absent from CST, selection source, copy, save and export.
-- Acceptance: existing source/tree editing transaction, with exact undo/redo.
-  Display offsets never become a second selection coordinate.
-
 ## Edit proposals
 
 The client marks a short editable tail at the caret (up to 32 Unicode scalars,
@@ -150,17 +133,6 @@ are recorded in one transaction. The source view uses its source-patch history.
 Thus Markdown fences still create blocks and undo restores the original caret,
 not a temporary replacement selection.
 
-Structural paste recognizes continued fences using the destination owner's
-source together with the inserted text. Parsing the inserted text alone would
-misread a closing fence as an opener when its opening fence is already in the
-document. The affected owner becomes a locally parsed fragment, with source
-and tree edits recorded in the same transaction. Existing raw blocks likewise
-split when a pasted closing boundary is followed by ordinary document content.
-The local structure module prepares a plan containing the parsed blocks and
-caret mapping without changing source, selection or document ids. Applying that
-plan allocates ids and records tree edits without parsing the fragment again;
-paste uses one application path for both continued inline owners and raw blocks.
-
 ## Prompt configuration
 
 The instruction text, frequency policies and optional examples are runtime data
@@ -200,70 +172,20 @@ falling back to compiled instructions. The portable completion module only
 validates and expands the explicitly supplied configuration; filesystem and JSON
 loading belong to application settings.
 
-## Cost and lifetime
+## Request behavior
 
-Use a small bounded prefix/suffix window and preceding block context, gathered
-from block-local source without a full-document serialization. Stable instructions
-and stable context precede changing cursor text. Do not include timestamps or
-request IDs in prompts. The transport preserves provider usage, including cache counts only when supplied
-by that provider. Local context hits reuse proposals without a provider request.
-Document context is presented in reading order in one user message: preceding
-source, current prefix, marked editable tail, protected suffix, following source.
-The system instructions and unchanged preceding text remain ahead of the active
-region. Long lines and prefix starts retain fixed 256-codepoint anchors rather
-than shifting on every keystroke. Following text is kept after the active region
-for coherent context; it is not reordered solely to lengthen a cache prefix.
-This preserves useful prefix reuse without promising a provider cache ratio.
+Requests use bounded context from the active document. The default context budget
+is 7 KB of UTF-8 and the output budget defaults to 128 tokens; suggestions are
+capped at 512 Unicode scalars. These are size limits, not a model-specific token
+estimate, and output tokens may include reasoning. Errors do not retry
+automatically, and late results cannot replace the current proposal.
 
 For a Responses service and model that support explicit breakpoints, enable
-**Explicit prompt caching** in the completion settings and save. The setting
-defaults to off. Folia keeps the document in a single user message and sends
-stable context and the cursor fragment as separate text parts. It places one
-explicit breakpoint after stable context and uses explicit-only mode so the
-changing fragment does not request a cache write. The service applies its own
-token threshold and billing. Changing the base URL clears the opt-in. Other
-protocols continue to send the ordinary message format. See the
+**Explicit prompt caching** in completion settings and save. It defaults to off;
+Folia places a breakpoint after stable context and uses explicit-only mode. The
+service controls its token threshold and billing. Changing the base URL clears
+the opt-in. Other protocols use the ordinary message format. See the
 [Responses cache rules](https://developers.openai.com/api/docs/guides/prompt-caching).
-
-Neighbor collection consumes the byte budget instead of stopping after three
-owners/lines. Source-mode lines use single line breaks; block-local source uses
-block separators. It uses the maintained editable index and views, with bounded
-work, no full document traversal, parse or serialization.
-
-The context budget is divided roughly 4:1:1:1 between prefix, nearby suffix,
-preceding blocks and following blocks. Defaults are 7 KB of UTF-8 context and 128 output tokens; suggestions
-remain limited to 512 codepoints. Output tokens may include
-model reasoning, so an exhausted limit need not produce insertable text. Document views
-are bounded before copying/encoding. The 10 MiB case exercises start/middle/end
-and Unicode expansion. These byte caps are not a model-specific token estimate.
-
-Requests debounce for 450 ms and start at least 1.5 s apart. Network reads use
-a 15 s inactivity timeout; each new chunk, including reasoning or heartbeat
-data, starts a fresh wait. There is no total generation deadline. Reads consume
-available data promptly, and a protocol terminal event completes the request
-without waiting for connection closure. Errors do not retry automatically. Local LRU holds at most
-32 entries / 256 KiB of payload, only in memory.
-Cancellation, document changes, focus loss and tab/window changes retire request
-generations. Late results cannot overwrite the current proposal. Network waits
-and thread joins do not run on the UI thread.
-
-Accepted Markdown uses the ordinary semantic paste transaction with an explicit
-replacement range. Empty code
-blocks expose a body caret below their generated language header. When a fence
-at EOF has no opening line break, the first body insertion creates that source
-boundary in the same reversible edit; typing never extends the language name.
-
-## Verification
-
-Deterministic tests cover debounce/request counts, stale delivery, cancellation,
-local cache reuse, typed-through proposals, word/full acceptance, Unicode,
-reversed selection, undo/redo and zero full-document work. Real display tests
-cover wrapping, source hit mapping, nested containers, source view, theme colors
-and absence from save/export. Protocol fixtures cover all three protocols and fragmented UTF-8/SSE. Native
-loopback HTTP tests cover fragmented responses, cancellation and service errors
-with explicit fixture credentials, without reading saved keys or calling a model.
-Live model quality and latency require a user-configured service and are reported
-separately from fixture results.
 
 Context reference: [GitHub Copilot input processing](https://docs.github.com/en/copilot/responsible-use/inline-suggestions).
 

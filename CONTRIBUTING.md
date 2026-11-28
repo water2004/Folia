@@ -26,7 +26,7 @@ Markdown source
 
 The core uses C++23 modules and stays platform-independent. Block structure and exact inline source own editing state. Windows APIs and presentation live in the platform and application layers. Use the repository instructions for the editing and testing invariants. [Repository instructions](AGENTS.md) · [Source layout](src/README.md) · [Core](src/core/README.md) · [Windows platform](src/platform/README.md) · [WinUI app](src/app-winui/README.md)
 
-For subsystem work, use the established contracts and verification guides. [Development docs](docs/README.md) · [Table interaction](docs/TABLE_INTERACTION.md) · [Native math](docs/math-port/architecture.md) · [Native Mermaid](docs/mermaid-cpp/README.md) · [Editor interaction references](docs/MARKTEXT_REFERENCE.md)
+For subsystem work, use the established contracts and verification guides. [Development docs](docs/README.md) · [Table interaction](docs/TABLE_INTERACTION.md) · [Native math](docs/math/architecture.md) · [Math verification](docs/math/verification.md) · [Native Mermaid](docs/mermaid-cpp/README.md) · [Development log](docs/devlog/README.md)
 
 ## Run tests
 
