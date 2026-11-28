@@ -4,7 +4,7 @@
 // use one Node realm per case, with that row's options applied at construction.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),cp=require('node:child_process'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'../../../../..'),bundle=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax'),cjsRoot=path.join(bundle,'src/cjs');
-const scopePath=path.join(root,'docs/math-port/scope.json'),profileLockPath=path.join(root,'tools/math-port/common-layout-reference/profile-source-lock.json'),casesPath=path.join(__dirname,'cases.json');
+const scopePath=path.join(root,'tools/math-port/profiles/scope.json'),profileLockPath=path.join(root,'tools/math-port/common-layout-reference/profile-source-lock.json'),casesPath=path.join(__dirname,'cases.json');
 const scope=JSON.parse(fs.readFileSync(scopePath,'utf8')),lock=JSON.parse(fs.readFileSync(profileLockPath,'utf8')),casesFile=JSON.parse(fs.readFileSync(casesPath,'utf8'));
 const sha=f=>crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex');
 assert.equal(scope.upstream.version,'4.1.3');assert.equal(scope.upstream.commit,'fb987178c2d279a99b0db5ea02e751691703955e');

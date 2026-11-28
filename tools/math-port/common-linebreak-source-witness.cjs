@@ -8,7 +8,7 @@ const path = require('node:path');
 function findRoot(start) {
   let current = path.resolve(start);
   for (;;) {
-    if (fs.existsSync(path.join(current, 'docs/math-port/HANDOFF.md')) &&
+    if (fs.existsSync(path.join(current, 'tools/math-port/README.md')) &&
         fs.existsSync(path.join(current, 'tools/math-port/common-layout-reference/profile-source-lock.json'))) return current;
     const parent = path.dirname(current);
     if (parent === current) return null;
@@ -24,7 +24,7 @@ const root = rootIndex >= 0 ? path.resolve(process.argv[rootIndex + 1]) :
 assert.ok(root, 'pass --repo-root <repository> or run from the repository');
 const expectations = JSON.parse(fs.readFileSync(
   path.join(root, 'tests/math/fixtures/common-source/linebreak-source-expectations.json'), 'utf8'));
-const scope = JSON.parse(fs.readFileSync(path.join(root, 'docs/math-port/scope.json'), 'utf8'));
+const scope = JSON.parse(fs.readFileSync(path.join(root, 'tools/math-port/profiles/scope.json'), 'utf8'));
 const tsFile = 'ts/output/common/LinebreakVisitor.ts';
 const sourceRecord = scope.files.find(record => record.source === tsFile);
 assert.ok(sourceRecord, 'LinebreakVisitor.ts is absent from the pinned scope');

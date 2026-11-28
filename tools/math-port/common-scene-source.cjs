@@ -16,7 +16,7 @@ const profileCases = JSON.parse(fs.readFileSync(path.join(__dirname,
   'common-layout-reference/profile-cases.json'), 'utf8'));
 const sourceLock = JSON.parse(fs.readFileSync(path.join(__dirname,
   'common-layout-reference/profile-source-lock.json'), 'utf8'));
-const scopePath = path.join(root, 'docs/math-port/scope.json');
+const scopePath = path.join(root, 'tools/math-port/profiles/scope.json');
 assert.equal(digest(fs.readFileSync(scopePath)), sourceLock.scopeHash, 'profile scope lock changed');
 assert.equal(digest(fs.readFileSync(path.join(__dirname,
   'common-layout-reference/profile-cases.json'))), sourceLock.corpusSha256, '75-case corpus changed');

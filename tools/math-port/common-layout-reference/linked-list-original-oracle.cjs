@@ -9,7 +9,7 @@ const root=path.resolve(__dirname,'../../..');
 const sourceRoot=path.join(root,'.reference/MathJax-src');
 const packageRoot=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src');
 const digest=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-const scope=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json'),'utf8'));
+const scope=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json'),'utf8'));
 const sources=['ts/util/LinkedList.ts','ts/core/MathList.ts'];
 for(const file of sources){
   const entry=scope.files.find(x=>x.source===file);assert.ok(entry,`missing scope lock: ${file}`);

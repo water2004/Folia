@@ -10,7 +10,7 @@ const sourceRoot=path.join(root,'.reference/MathJax-src');
 const packages=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax');
 const src=path.join(packages,'src');
 const digest=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-const scopeFile=path.join(root,'docs/math-port/scope.json');
+const scopeFile=path.join(root,'tools/math-port/profiles/scope.json');
 assert.equal(digest(scopeFile),'9705d389538b2fc8bf782feea4372ace639b3727304f2971937bbcfb0042a0d1');
 const oldCapturePath=path.join(root,'build/math-port/common-layout-profile-root-locked.json');
 assert.equal(digest(oldCapturePath),'9f58d09411512b4682b1f0049e40d6a47844ddffb9794eda52e2700998e0d740');

@@ -4,7 +4,7 @@ const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 
-function findRoot(start=__dirname){for(let current=path.resolve(start);current!==path.dirname(current);current=path.dirname(current))if(fs.existsSync(path.join(current,'docs/math-port/scope.json'))&&fs.existsSync(path.join(current,'tools/mathjax-bundle/node_modules/@mathjax/src/package.json')))return current;return null;}
+function findRoot(start=__dirname){for(let current=path.resolve(start);current!==path.dirname(current);current=path.dirname(current))if(fs.existsSync(path.join(current,'tools/math-port/profiles/scope.json'))&&fs.existsSync(path.join(current,'tools/mathjax-bundle/node_modules/@mathjax/src/package.json')))return current;return null;}
 const rootArg=process.argv.indexOf('--repo-root');
 assert.ok(rootArg<0?process.argv.length===2:(process.argv[rootArg+1]&&process.argv.length===rootArg+2),'usage: node common-menclose-geometry-source.cjs [--repo-root <repository>]');
 const root=rootArg<0?findRoot():path.resolve(process.argv[rootArg+1]);
@@ -19,7 +19,7 @@ for (const [file, digest] of Object.entries(lock.source))
 for (const [file, digest] of Object.entries(lock.cjs))
   assert.equal(sha(path.join(bundle, 'src/cjs', file)), digest, `locked CJS changed: ${file}`);
 assert.equal(JSON.parse(fs.readFileSync(path.join(bundle, 'src/package.json'))).version, '4.1.3');
-assert.equal(sha(path.join(root,'docs/math-port/scope.json')),lock.scopeSha256,'MathJax scope changed');
+assert.equal(sha(path.join(root,'tools/math-port/profiles/scope.json')),lock.scopeSha256,'MathJax scope changed');
 const svgRootSource = fs.readFileSync(path.join(sourceRoot, 'output/svg.ts'), 'utf8');
 const svgRootCjs = fs.readFileSync(path.join(bundle, 'src/cjs/output/svg.js'), 'utf8');
 assert.match(svgRootSource, /'stroke-width': 0,[\s\S]{0,100}transform: 'scale\(1,-1\)'/);

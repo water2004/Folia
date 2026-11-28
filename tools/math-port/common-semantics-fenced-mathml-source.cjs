@@ -10,7 +10,7 @@ assert.ok(process.argv.length === 2 ||
 
 const root = path.resolve(__dirname, '../..');
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
-const scopePath = path.join(root, 'docs/math-port/scope.json');
+const scopePath = path.join(root, 'tools/math-port/profiles/scope.json');
 const casesPath = path.join(__dirname, 'common-semantics-fenced-mathml-cases.json');
 const scope = JSON.parse(fs.readFileSync(scopePath, 'utf8'));
 const cases = JSON.parse(fs.readFileSync(casesPath, 'utf8'));

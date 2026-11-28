@@ -3,14 +3,14 @@ const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
-function findRoot(start=__dirname) { for(let current=path.resolve(start);current!==path.dirname(current);current=path.dirname(current)) if(fs.existsSync(path.join(current,'docs/math-port/scope.json'))) return current; return null; }
+function findRoot(start=__dirname) { for(let current=path.resolve(start);current!==path.dirname(current);current=path.dirname(current)) if(fs.existsSync(path.join(current,'tools/math-port/profiles/scope.json'))) return current; return null; }
 const rootArg=process.argv.indexOf('--repo-root');
 assert.ok(rootArg<0?process.argv.length===2:(process.argv[rootArg+1]&&process.argv.length===rootArg+2),'usage: node common-table-branch-source-witness.cjs [--repo-root <repository>]');
 const root=rootArg<0?findRoot():path.resolve(process.argv[rootArg+1]);
 assert.ok(root,'pass --repo-root <repository> or run from the repository');
 const packages = path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax');
 const src = path.join(packages, 'src');
-const scope = JSON.parse(fs.readFileSync(path.join(root, 'docs/math-port/scope.json'), 'utf8'));
+const scope = JSON.parse(fs.readFileSync(path.join(root, 'tools/math-port/profiles/scope.json'), 'utf8'));
 const digest = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 assert.equal(digest(path.join(root, scope.profile.file)), scope.profile.sha256);
 const load = name => require(path.join(src, 'cjs', name));

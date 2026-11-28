@@ -5,7 +5,7 @@ const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypt
 const assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'../..');
 const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-const scopeFile=path.join(root,'docs/math-port/scope.json');
+const scopeFile=path.join(root,'tools/math-port/profiles/scope.json');
 const scope=JSON.parse(fs.readFileSync(scopeFile));
 for(const lock of scope.files)assert.equal(sha(path.join(root,'.reference/MathJax-src',lock.source)),lock.source_sha256,lock.source);
 const sourceFile=path.join(root,'.reference/MathJax-src/ts/output/common.ts');

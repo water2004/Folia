@@ -12,7 +12,7 @@ const packages=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax');
 const src=path.join(packages,'src');
 const cjs=path.join(src,'cjs');
 const digest=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-const scopePath=path.join(root,'docs/math-port/scope.json');
+const scopePath=path.join(root,'tools/math-port/profiles/scope.json');
 const scope=JSON.parse(fs.readFileSync(scopePath,'utf8'));
 assert.equal(scope.upstream.version,'4.1.3');
 assert.equal(scope.upstream.commit,'fb987178c2d279a99b0db5ea02e751691703955e');
@@ -27,7 +27,7 @@ for(const font of scope.font_packages){
   const actual=require(path.join(root,'tools/mathjax-bundle/node_modules',font.package,'package.json'));
   assert.equal(actual.version,font.version,font.package);
 }
-const bussproofsLock=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/bussproofs-source-lock.json'),'utf8'));
+const bussproofsLock=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/locks/bussproofs-source-lock.json'),'utf8'));
 const sourceRoot=path.join(root,'.reference/MathJax-src');
 for(const file of bussproofsLock.files){
   assert.equal(digest(path.join(sourceRoot,file.ts)),file.tsSha256,file.ts);
@@ -75,7 +75,7 @@ const records=corpus.cases.map(item=>{
 });
 const outputValue={schema:1,source:{version:scope.upstream.version,commit:scope.upstream.commit,
   scopeSha256:digest(scopePath),profileSha256:digest(path.join(root,scope.profile.file)),
-  dependencyLockSha256:digest(dependencyLockPath),bussproofsLockSha256:digest(path.join(root,'docs/math-port/evidence/bussproofs-source-lock.json')),
+  dependencyLockSha256:digest(dependencyLockPath),bussproofsLockSha256:digest(path.join(root,'tools/math-port/locks/bussproofs-source-lock.json')),
   bussproofsCjs:Object.fromEntries(bussproofsLock.files.map(file=>[file.cjs,file.cjsSha256]))},
   corpusSha256:digest(casesPath),records};
 const destination=process.argv[2]||path.join(__dirname,'bussproofs-public-render-source.json');

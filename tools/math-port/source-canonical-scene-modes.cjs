@@ -11,7 +11,7 @@ const {byteField, binary64, table} = require('./fixture-data.cjs');
 
 const root = path.resolve(__dirname, '../..');
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
-const scopePath = path.join(root, 'docs/math-port/scope.json');
+const scopePath = path.join(root, 'tools/math-port/profiles/scope.json');
 const casesPath = path.join(__dirname, 'common-layout-reference/profile-cases.json');
 const lockPath = path.join(__dirname, 'common-layout-reference/profile-source-lock.json');
 const profileCases = JSON.parse(fs.readFileSync(casesPath, 'utf8'));

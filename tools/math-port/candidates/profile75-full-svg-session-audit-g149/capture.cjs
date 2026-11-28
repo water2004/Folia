@@ -2,7 +2,7 @@
 // Read-only diagnostic for whether fresh captures inherit state from the first group.
 const fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'../../../..'), packages=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax'), cjsRoot=path.join(packages,'src/cjs');
-const scope=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json'),'utf8'));
+const scope=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json'),'utf8'));
 const profileText=fs.readFileSync(path.join(root,scope.profile.file),'utf8');
 const inventory=JSON.parse(fs.readFileSync(path.join(root,'build/math-port/common-layout-profile-root-locked.json'),'utf8')).records;
 const mode=process.argv[2], caseName=process.argv[3];

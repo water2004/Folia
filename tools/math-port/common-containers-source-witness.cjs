@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const {execFileSync}=require('node:child_process');
 const fs=require('node:fs');
 const path=require('node:path');
-function findRoot(start=__dirname){for(let current=path.resolve(start);current!==path.dirname(current);current=path.dirname(current))if(fs.existsSync(path.join(current,'docs/math-port/scope.json'))&&fs.existsSync(path.join(current,'tools/mathjax-bundle/node_modules/@mathjax/src/package.json')))return current;return null;}
+function findRoot(start=__dirname){for(let current=path.resolve(start);current!==path.dirname(current);current=path.dirname(current))if(fs.existsSync(path.join(current,'tools/math-port/profiles/scope.json'))&&fs.existsSync(path.join(current,'tools/mathjax-bundle/node_modules/@mathjax/src/package.json')))return current;return null;}
 const rootArg=process.argv.indexOf('--repo-root');
 assert.ok(rootArg<0?process.argv.length===2:(process.argv[rootArg+1]&&process.argv.length===rootArg+2),'usage: node common-containers-source-witness.cjs [--repo-root <repository>]');
 const root=rootArg<0?findRoot():path.resolve(process.argv[rootArg+1]);

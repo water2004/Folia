@@ -1,7 +1,7 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'../..'),sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-const scope=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json')));
+const scope=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json')));
 for(const lock of scope.files)assert.equal(sha(path.join(root,'.reference/MathJax-src',lock.source)),lock.source_sha256);
 const moduleFile=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src/cjs/output/common/Wrapper.js');
 const {CommonWrapper}=require(moduleFile);

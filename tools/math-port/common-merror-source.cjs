@@ -11,7 +11,7 @@ assert.ok(process.argv.length === 2 ||
   'usage: common-merror-source.cjs [--write-fixture]');
 
 const root = path.resolve(__dirname, '../..');
-const scopePath = path.join(root, 'docs/math-port/scope.json');
+const scopePath = path.join(root, 'tools/math-port/profiles/scope.json');
 const scope = JSON.parse(fs.readFileSync(scopePath, 'utf8'));
 const cases = [
   {name: 'merror-basic-text', mathml: '<math xmlns="http://www.w3.org/1998/Math/MathML"><merror><mrow><mi>x</mi><mo>+</mo><mi>y</mi></mrow></merror></math>'},

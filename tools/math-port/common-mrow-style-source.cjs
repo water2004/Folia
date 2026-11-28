@@ -123,7 +123,7 @@ console.log(JSON.stringify({
   packageVersion: '4.1.3',
 }));
 
-const scope = JSON.parse(fs.readFileSync(path.join(rootDir, 'docs/math-port/scope.json')));
+const scope = JSON.parse(fs.readFileSync(path.join(rootDir, 'tools/math-port/profiles/scope.json')));
 const modules = [
   'ts/core/MmlTree/MmlNodes/mrow.ts',
   'ts/output/common/Wrapper.ts',

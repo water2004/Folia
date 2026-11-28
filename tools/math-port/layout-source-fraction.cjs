@@ -20,7 +20,7 @@ const digest=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).dig
 const sourceRoot=path.join(root,'.reference/MathJax-src/ts');
 const sourceFiles=['output/common/Wrappers/mfrac.ts','output/svg/Wrappers/mfrac.ts'];
 const sourceHashes=Object.fromEntries(sourceFiles.map(name=>[name,digest(path.join(sourceRoot,name))]));
-const scope=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json'),'utf8'));
+const scope=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json'),'utf8'));
 for(const name of sourceFiles){
   const lock=scope.files.find(file=>file.source===`ts/${name}`);
   if(!lock||lock.source_sha256!==sourceHashes[name])throw new Error(`Source hash mismatch: ${name}`);

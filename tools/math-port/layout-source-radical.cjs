@@ -18,7 +18,7 @@ const sourceFiles = [
 ];
 const sourceHashes = Object.fromEntries(sourceFiles.map(name => [name,
   digest(path.join(repo, '.reference/MathJax-src/ts', name))]));
-const scope = JSON.parse(fs.readFileSync(path.join(repo, 'docs/math-port/scope.json'), 'utf8'));
+const scope = JSON.parse(fs.readFileSync(path.join(repo, 'tools/math-port/profiles/scope.json'), 'utf8'));
 for (const name of sourceFiles) {
   const lock = scope.files.find(file => file.source === `ts/${name}`);
   if (!lock || lock.source_sha256 !== sourceHashes[name]) throw new Error(`Source hash mismatch ${name}`);

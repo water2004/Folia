@@ -16,7 +16,7 @@
   },
   "sourceCaptureSha256": "8bc9c64c70a2c8a27d92b7e7535c8f80ae196ed3bb8c1b3c31db42f84f6d13f7",
   "profile": {
-    "scopePath": "docs/math-port/scope.json",
+    "scopePath": "tools/math-port/profiles/scope.json",
     "scopeSha256": "9705d389538b2fc8bf782feea4372ace639b3727304f2971937bbcfb0042a0d1",
     "file": "tools/mathjax-bundle/entry.cjs",
     "sha256": "a5a03eed8a10872b9b435b9e602523a08a9f574e21cc5636e8377f0222811ac9",

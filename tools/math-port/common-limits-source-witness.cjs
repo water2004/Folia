@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 function findRoot(start=__dirname) {
   for(let current=path.resolve(start);current!==path.dirname(current);current=path.dirname(current))
-    if(fs.existsSync(path.join(current,'docs/math-port/scope.json')) && fs.existsSync(path.join(current,'tools/mathjax-bundle/node_modules/@mathjax/src/package.json'))) return current;
+    if(fs.existsSync(path.join(current,'tools/math-port/profiles/scope.json')) && fs.existsSync(path.join(current,'tools/mathjax-bundle/node_modules/@mathjax/src/package.json'))) return current;
   return null;
 }
 const rootArg=process.argv.indexOf('--repo-root');
@@ -116,7 +116,7 @@ async function captureLimitsScene() {
   const {createReference} = require('./reference-profile.cjs');
   const ref = createReference();
   assert.deepEqual(ref.provenance.packages, JSON.parse(fs.readFileSync(
-    path.join(root, 'docs/math-port/scope.json'), 'utf8')).profile.tex_packages);
+    path.join(root, 'tools/math-port/profiles/scope.json'), 'utf8')).profile.tex_packages);
   const {MathML} = require(path.join(pkg, 'input/MathML.js'));
   const input = new MathML();
   const outputJax = ref.output;

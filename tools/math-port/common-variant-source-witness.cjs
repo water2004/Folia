@@ -6,7 +6,7 @@ const path = require('node:path');
 
 function findRepositoryRoot(start = __dirname) {
   for (let current = path.resolve(start); current !== path.dirname(current); current = path.dirname(current)) {
-    if (fs.existsSync(path.join(current, 'docs/math-port/common-native-implementation.md')) &&
+    if (fs.existsSync(path.join(current, 'tools/math-port/README.md')) &&
         fs.existsSync(path.join(current, 'tools/mathjax-bundle/node_modules/@mathjax/src/package.json'))) return current;
   }
   return null;
@@ -25,7 +25,7 @@ const src = path.join(root, '.reference/MathJax-src');
 const fixtureRoot = process.env.FOLIA_COMMON_SOURCE_FIXTURE_ROOT || path.join(root, 'tests/math/fixtures/common-source');
 const lock = JSON.parse(fs.readFileSync(path.join(fixtureRoot, 'variant-source-lock.json'), 'utf8'));
 const sha256 = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-const scopePath = path.join(root, 'docs/math-port/scope.json');
+const scopePath = path.join(root, 'tools/math-port/profiles/scope.json');
 const scope = JSON.parse(fs.readFileSync(scopePath, 'utf8'));
 assert.equal(sha256(scopePath), lock.scopeSha256, 'scope lock changed');
 for (const [file, expected] of Object.entries(lock.source)) {

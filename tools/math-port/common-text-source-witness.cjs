@@ -5,7 +5,7 @@ const crypto = require('node:crypto');
 const assert = require('node:assert/strict');
 function findRepositoryRoot(start = __dirname) {
   for (let current = path.resolve(start); current !== path.dirname(current); current = path.dirname(current)) {
-    if (fs.existsSync(path.join(current, 'docs/math-port/common-native-implementation.md')) &&
+    if (fs.existsSync(path.join(current, 'tools/math-port/README.md')) &&
         fs.existsSync(path.join(current, 'tools/mathjax-bundle/node_modules/@mathjax/src/package.json'))) return current;
   }
   return null;
@@ -21,7 +21,7 @@ function repositoryRoot() {
 const root = repositoryRoot();
 const fixtureRoot = process.env.FOLIA_COMMON_SOURCE_FIXTURE_ROOT || path.join(root, 'tests/math/fixtures/common-source');
 const lock = JSON.parse(fs.readFileSync(path.join(fixtureRoot, 'text-source-lock.json'), 'utf8'));
-const scopeFile = path.join(root, 'docs/math-port/scope.json');
+const scopeFile = path.join(root, 'tools/math-port/profiles/scope.json');
 const digest = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 assert.equal(digest(scopeFile), lock.scopeSha256, 'scope.json lock changed');
 const packageRoot = path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax');

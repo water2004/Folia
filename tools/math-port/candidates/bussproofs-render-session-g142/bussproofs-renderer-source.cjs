@@ -11,7 +11,7 @@ const sourceRoot=path.join(root,'.reference/MathJax-src');
 const cjsRoot=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src');
 const cjs=path.join(cjsRoot,'cjs');
 const packages=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax');
-const lock=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/bussproofs-source-lock.json'),'utf8'));
+const lock=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/locks/bussproofs-source-lock.json'),'utf8'));
 const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 for(const file of lock.files){
   assert.equal(hash(path.join(sourceRoot,file.ts)),file.tsSha256,`Source ${file.ts}`);
