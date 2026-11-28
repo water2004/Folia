@@ -4,7 +4,7 @@
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'../..');
 const source='ts/input/tex/Configuration.ts';
-const scope=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json'),'utf8'));
+const scope=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json'),'utf8'));
 const pin=scope.files.find(f=>f.source===source);
 const bytes=fs.readFileSync(path.join(root,'.reference/MathJax-src',source));
 assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),pin.source_sha256);
@@ -216,7 +216,7 @@ const candidates={
   ,'configuration-handler-overwrite-keeps-map-order':'source_configuration_handler_set_overwrites_in_place'
 };
 for(const row of rows)row.nativeCandidate=candidates[row.label];
-const output=path.join(root,'docs/math-port/evidence/parser-iterator-source.json');
+const output=path.join(root,'tools/math-port/profiles/evidence/parser-iterator-source.json');
 const data=JSON.stringify({node:process.version,source,source_sha256:pin.source_sha256,cjs:'cjs/input/tex/Configuration.js',cjs_sha256:cjsSha256,observations:rows},null,2)+'\n';
 assert.ok(process.argv.includes('--check'),'Frozen Source owner is check-only');
 assert.equal(fs.readFileSync(output,'utf8').replaceAll('\r\n','\n'),data,'Frozen iterator Source profile changed');

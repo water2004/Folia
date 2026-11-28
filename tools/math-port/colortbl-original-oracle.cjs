@@ -8,7 +8,7 @@ const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '../..');
 const sourceRoot = path.join(root, '.reference/MathJax-src');
 const cjsRoot = path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax/src');
-const lockPath = path.join(root, 'docs/math-port/evidence/colortbl-source-lock.json');
+const lockPath = path.join(root, 'tools/math-port/locks/colortbl-source-lock.json');
 const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
 const shaFile = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 for (const file of lock.files) {

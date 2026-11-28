@@ -6,7 +6,7 @@ const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypt
 const root=path.resolve(__dirname,'../../..'),bundle=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src/cjs');
 const digest=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const lock=JSON.parse(fs.readFileSync(path.join(__dirname,'source-lock.json'),'utf8'));
-assert.equal(digest(path.join(root,'docs/math-port/scope.json')),lock.scopeSha256,'scope.json differs from the locked profile');
+assert.equal(digest(path.join(root,'tools/math-port/profiles/scope.json')),lock.scopeSha256,'scope.json differs from the locked profile');
 for(const entry of lock.sources){
   assert.equal(digest(path.join(root,'.reference/MathJax-src',entry.file)),entry.sha256,`${entry.file} differs from its Source lock`);
   if(entry.cjsFile)assert.equal(digest(path.join(root,entry.cjsFile)),entry.cjsSha256,`${entry.cjsFile} differs from its executable Source lock`);

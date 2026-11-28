@@ -2,9 +2,9 @@
 
 The expected results come from the actual pinned CJS observers:
 
-- `tools/math-port/tex-parser-original-oracle.cjs` -> `docs/math-port/evidence/tex-parser-original-source.json`
-- `tools/math-port/parse-util-original-oracle.cjs` -> `docs/math-port/evidence/parse-util-original-source.json`
-- `tools/math-port/text-parser-original-oracle.cjs` -> `docs/math-port/evidence/text-parser-original-source.json`
+- `tools/math-port/tex-parser-original-oracle.cjs` -> `tools/math-port/profiles/evidence/tex-parser-original-source.json`
+- `tools/math-port/parse-util-original-oracle.cjs` -> `tools/math-port/profiles/evidence/parse-util-original-source.json`
+- `tools/math-port/text-parser-original-oracle.cjs` -> `tools/math-port/profiles/evidence/text-parser-original-source.json`
 
 These are candidate comparisons only. No native fixture has yet exercised the
 full set of methods through a real Context instance graph, so class names or

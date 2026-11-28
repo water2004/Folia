@@ -8,7 +8,7 @@ const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '../..');
 const srcRoot = path.join(root, '.reference/MathJax-src');
 const packageRoot = path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax/src');
-const lock = JSON.parse(fs.readFileSync(path.join(root, 'docs/math-port/evidence/texhtml-xml-source-lock.json'), 'utf8'));
+const lock = JSON.parse(fs.readFileSync(path.join(root, 'tools/math-port/locks/texhtml-xml-source-lock.json'), 'utf8'));
 const digest = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 for (const item of lock.sources.slice(1)) {
   const original = path.join(srcRoot, item.file);

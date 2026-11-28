@@ -13,7 +13,7 @@ def compare(args):
     summary_path = root_path(args, 2, 'build/math-port/tag-setoptions-comparison.json')
     lock_path = FOLDER / 'source-lock.json'
     lock, source, native = read(lock_path), read(source_path), read(native_path)
-    equal(lock['scopeSha256'], digest(ROOT / 'docs/math-port/scope.json'), 'Source profile')
+    equal(lock['scopeSha256'], digest(ROOT / 'tools/math-port/profiles/scope.json'), 'Source profile')
     equal(lock['scopeSha256'], source['scopeSha256'])
     equal(digest(lock_path), source['sourceLockSha256'])
     equal(digest(lock_path), native['sourceLockSha256'])

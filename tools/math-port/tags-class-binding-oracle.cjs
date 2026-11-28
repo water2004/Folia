@@ -32,6 +32,6 @@ assert.equal(cases.phase.length,3);
 assert.ok(Object.values(cases.prototype).every(Boolean));assert.ok(Object.values(cases.fresh).every(Boolean));
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const result={schema:'tags-class-binding-v1',hashes:{[ts]:hash(source),[cjs]:hash(fs.readFileSync(path.join(installed,cjs)))},cases};
-const output=path.join(root,'docs/math-port/evidence/tags-class-binding-source.json');
+const output=path.join(root,'tools/math-port/profiles/evidence/tags-class-binding-source.json');
 if(process.argv.includes('--check')){assert.deepEqual(result,JSON.parse(fs.readFileSync(output,'utf8')));console.log('Pinned Tags subclass allocation, initialization and identities agree');}
 else fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n');

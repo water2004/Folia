@@ -80,7 +80,7 @@ def next_packages(args, *, seven=False):
     native_path = root_path(args, 0, '')
     summary_path = root_path(args, 1, f'build/math-port/{name}-comparison.json')
     source_path = root_path(args, 2, f'build/math-port/{name}-original.json')
-    scope_path = ROOT / 'docs/math-port/scope.json'
+    scope_path = ROOT / 'tools/math-port/profiles/scope.json'
     scope, source, native = read(scope_path), read(source_path), read(native_path)
     if seven:
         equal(23, len(source['cases']), 'Source oracle case count changed')

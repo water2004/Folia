@@ -24,4 +24,4 @@ cases.push({name:"math_port_tex_table_"+name+"",observations:[{kind:'value',valu
 // Native callable seam witnesses use real Token/Macro storage and all typed alternatives.
 ;
 
-const report=({cases});const gold=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/tex-token-source.json'),'utf8'));assert.ok(process.argv.includes('--check'),'Source owner is check-only');assert.deepEqual(report,gold);console.log(JSON.stringify({profile:'tex-token-source.json',cases:report.cases?.length??report.rows?.length,mode:'check'}));
+const report=({cases});const gold=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence/tex-token-source.json'),'utf8'));assert.ok(process.argv.includes('--check'),'Source owner is check-only');assert.deepEqual(report,gold);console.log(JSON.stringify({profile:'tex-token-source.json',cases:report.cases?.length??report.rows?.length,mode:'check'}));

@@ -11,7 +11,7 @@ const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '../..');
 const sourceRoot = path.join(root, '.reference/MathJax-src');
 const packageRoot = path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax/src');
-const lockPath = path.join(root, 'docs/math-port/evidence/texhtml-xml-source-lock.json');
+const lockPath = path.join(root, 'tools/math-port/locks/texhtml-xml-source-lock.json');
 const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
 const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 assert.equal(digest(fs.readFileSync(lockPath)), '8b42afbe5fc15903cbaf12efe18c8b7b75f28a97265012fb763b8566b5aa8ab2', 'texhtml source lock changed');
@@ -294,7 +294,7 @@ for (const item of loadedFiles) {
   const expected = cjsLock.get(item.file) || additionalCjsPins.get(item.file);
   assert.ok(expected, `${item.file}: loaded CJS file has no fixed hash`);
   assert.equal(item.sha256, expected, `${item.file}: CJS lock mismatch`);
-  item.pin = cjsLock.has(item.file) ? 'docs/math-port/evidence/texhtml-xml-source-lock.json' : 'texhtml-source.cjs additionalCjsPins';
+  item.pin = cjsLock.has(item.file) ? 'tools/math-port/locks/texhtml-xml-source-lock.json' : 'texhtml-source.cjs additionalCjsPins';
 }
 loadedFiles.sort((a, b) => a.file.localeCompare(b.file));
 const originalTests = [

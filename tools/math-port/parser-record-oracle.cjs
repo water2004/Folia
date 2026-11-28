@@ -6,7 +6,7 @@ const pkg=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src'),load=
 const {SubHandlers}=load('input/tex/MapHandler.js'),{CharacterMap}=load('input/tex/TokenMap.js');
 const {NodeFactory}=load('input/tex/NodeFactory.js'),{Label,TagInfo}=load('input/tex/Tags.js');
 const files=['input/tex/MapHandler','input/tex/TokenMap','input/tex/NodeFactory','input/tex/Tags'],hashes=[];
-const scope=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json'),'utf8'));
+const scope=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json'),'utf8'));
 for(const file of files){const source='ts/'+file+'.ts',bytes=fs.readFileSync(path.join(root,'.reference/MathJax-src',source)),sha256=crypto.createHash('sha256').update(bytes).digest('hex');assert.equal(sha256,scope.files.find(x=>x.source===source).source_sha256);assert.equal(fs.readFileSync(path.join(pkg,source),'utf8').replaceAll('\r\n','\n'),bytes.toString().replaceAll('\r\n','\n'));hashes.push({source,sha256,cjs_sha256:crypto.createHash('sha256').update(fs.readFileSync(path.join(pkg,'cjs',file+'.js'))).digest('hex')});}
 for(const name of ['a','b','c'])new CharacterMap('p55-'+name,null,{x:name});
 const yes=x=>String(!!x),names=h=>h.get('macro')?.toString()||'',fallback=h=>[...h.get('macro')._fallback].length;
@@ -43,9 +43,9 @@ function tagFields(x){return[x.env,yes(x.taggable),yes(x.defaultTags),x.tag===nu
 
 // Frozen original Source JSON remains byte-identical; only renderer-only cpp fields are projected.
 assert.ok(process.argv.includes('--check'),'Source-only oracle supports read-only --check');
-const frozenProfilePath=path.join(root,"docs/math-port/evidence/p55-parser-record-source.json");
+const frozenProfilePath=path.join(root,"tools/math-port/profiles/evidence/p55-parser-record-source.json");
 const frozenBytes=fs.readFileSync(frozenProfilePath);
 function sourceFields(value){if(Array.isArray(value))return value.map(sourceFields);if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).filter(([key])=>key!=='cpp').map(([key,v])=>[key,sourceFields(v)]));return value;}
 const actualSourceProfile={stage:'canonical configuration-record consumers and complete tag record constructors; not parser or full Tags acceptance',node:process.version,hashes,rows};
 assert.deepStrictEqual(sourceFields(actualSourceProfile),sourceFields(JSON.parse(frozenBytes)),'Original Source inputs/expectations/pins changed');
-console.log(JSON.stringify({sourceCases:rows.length,profile:"docs/math-port/evidence/p55-parser-record-source.json",profileSha256:crypto.createHash('sha256').update(frozenBytes).digest('hex'),mode:'check'}));
+console.log(JSON.stringify({sourceCases:rows.length,profile:"tools/math-port/profiles/evidence/p55-parser-record-source.json",profileSha256:crypto.createHash('sha256').update(frozenBytes).digest('hex'),mode:'check'}));

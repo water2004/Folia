@@ -7,7 +7,7 @@ const assert = require('node:assert/strict');
 
 const root = path.resolve(__dirname, '../..');
 const packageRoot = path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax/src');
-const scopePath = path.join(root, 'docs/math-port/scope.json');
+const scopePath = path.join(root, 'tools/math-port/profiles/scope.json');
 const scopeBytes = fs.readFileSync(scopePath);
 const scopeHash = crypto.createHash('sha256').update(scopeBytes).digest('hex');
 const expectedScope = '9705d389538b2fc8bf782feea4372ace639b3727304f2971937bbcfb0042a0d1';
@@ -239,7 +239,7 @@ record('parser-parse-lookup-contains-tostring-live-subhandlers', () => {
 
 const output = { schema: 1, source: 'actual pinned MathJax CJS classes, real TeX/ParseOptions/Stack/MML peers; no native code',
   sourceCommit: scope.upstream.commit, scope_sha256: scopeHash, modules, observations: rows };
-const out = path.join(root, 'docs/math-port/evidence/tex-parser-original-source.json');
+const out = path.join(root, 'tools/math-port/profiles/evidence/tex-parser-original-source.json');
 const serialized = JSON.stringify(output, null, 2) + '\n';
 if (process.argv.includes('--check')) assert.equal(fs.readFileSync(out, 'utf8').replaceAll('\r\n', '\n'), serialized);
 else fs.writeFileSync(out, serialized);

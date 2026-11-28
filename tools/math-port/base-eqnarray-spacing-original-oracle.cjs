@@ -99,7 +99,7 @@ fs.mkdirSync(path.dirname(output), {recursive: true});
 const bytes = Buffer.from(`${JSON.stringify(result, null, 2)}\n`);
 fs.writeFileSync(output, bytes);
 const lock = {schema: 1, source, sourceOutputSha256: hash(bytes), files: result.files};
-const lockPath = path.join(root, 'docs/math-port/evidence/base-eqnarray-spacing-source-lock.json');
+const lockPath = path.join(root, 'tools/math-port/locks/base-eqnarray-spacing-source-lock.json');
 fs.writeFileSync(lockPath, `${JSON.stringify(lock, null, 2)}\n`);
 process.stdout.write(`${JSON.stringify({cases: spacingCases.length, formulas: formulas.length,
   output: path.relative(root, output), sha256: lock.sourceOutputSha256})}\n`);

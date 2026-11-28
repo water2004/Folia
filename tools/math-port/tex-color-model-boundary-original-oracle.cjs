@@ -2,7 +2,7 @@
 // Supplementary actual ColorModel boundaries; validates the full pinned source
 // lock before loading the original implementation.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
-const root=path.resolve(__dirname,'../..'),scope=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json'),'utf8'));
+const root=path.resolve(__dirname,'../..'),scope=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json'),'utf8'));
 const sha=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
 if(sha(path.join(root,scope.profile.file))!==scope.profile.sha256)throw Error('profile lock mismatch');
 for(const item of scope.files){const p=path.join(root,'.reference/MathJax-src',item.source);if(sha(p)!==item.source_sha256)throw Error(`Source lock mismatch: ${item.source}`);}

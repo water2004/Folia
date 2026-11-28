@@ -4,7 +4,7 @@
 const fs = require('node:fs'), path = require('node:path'), crypto = require('node:crypto'), assert = require('node:assert/strict');
 const root=path.resolve(__dirname,'../..');
 const source = 'ts/input/tex/Configuration.ts';
-const scope = JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json'),'utf8'));
+const scope = JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json'),'utf8'));
 const scoped = scope.files.find(file => file.source === source);
 assert.ok(scoped);
 assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(root,'.reference/MathJax-src',source))).digest('hex'),scoped.source_sha256);
@@ -161,7 +161,7 @@ const nativeCoverageRows=rows.map(row=>{
   return {sourceObservation:row.name,nativeCandidate:coverage[0],status:coverage[1]};
 });
 const output={stage:'Node observations for actual ordinary Array methods used by enabled MathJax TeX source',node:process.version,source:{file:source,sha256:scoped.source_sha256},methods:['slice','reverse','includes','push','pop','join','fill','find'],rows,nativeCoverage:nativeCoverageRows};
-const out=path.join(root,'docs/math-port/evidence/parser-array-host-source.json');
+const out=path.join(root,'tools/math-port/profiles/evidence/parser-array-host-source.json');
 if(process.argv.includes('--check'))assert.equal(fs.readFileSync(out,'utf8').replaceAll('\r\n','\n'),JSON.stringify(output,null,2)+'\n');
 else fs.writeFileSync(out,JSON.stringify(output,null,2)+'\n');
 console.log(JSON.stringify({node:process.version,observations:rows.length}));

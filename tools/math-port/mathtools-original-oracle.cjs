@@ -148,7 +148,7 @@ const destination = path.join(root, 'build/math-port/mathtools-original.json');
 fs.mkdirSync(path.dirname(destination), {recursive: true});
 const bytes = Buffer.from(`${JSON.stringify(result, null, 2)}\n`);
 fs.writeFileSync(destination, bytes);
-const lockPath = path.join(root, 'docs/math-port/evidence/mathtools-source-lock.json');
+const lockPath = path.join(root, 'tools/math-port/locks/mathtools-source-lock.json');
 const prior = fs.existsSync(lockPath) ? JSON.parse(fs.readFileSync(lockPath, 'utf8')) : {};
 const lock = {...prior, schema: 1, source: result.source,
   scopeSha256: '9705d389538b2fc8bf782feea4372ace639b3727304f2971937bbcfb0042a0d1',

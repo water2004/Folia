@@ -10,7 +10,7 @@ const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '../..');
 const cjsRoot = path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax/src');
 const lock = JSON.parse(fs.readFileSync(path.join(root,
-  'docs/math-port/evidence/bussproofs-source-lock.json'), 'utf8'));
+  'tools/math-port/locks/bussproofs-source-lock.json'), 'utf8'));
 const hash = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 for (const file of lock.files) {
   assert.equal(hash(path.join(root, '.reference/MathJax-src', file.ts)), file.tsSha256, `Source ${file.ts}`);

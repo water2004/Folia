@@ -22,7 +22,7 @@ def texhtml_fixture():
 class TexHtmlAndPassiveTests(unittest.TestCase):
     def test_complete_texhtml_xml_envelopes_and_dom_groups(self):
         values = texhtml_fixture()
-        check = TexHtmlValidation(ROOT / 'docs/math-port/evidence/texhtml-xml-source-lock.json')
+        check = TexHtmlValidation(ROOT / 'tools/math-port/locks/texhtml-xml-source-lock.json')
         check.observations(*values)
         self.assertEqual(check.failures, [])
         for mutation in ['meta', 'envelope', 'tex-extra-field', 'tex-missing', 'xml-extra', 'dom-count', 'dom-key-order', 'dom-value', 'group-extra']:
@@ -46,7 +46,7 @@ class TexHtmlAndPassiveTests(unittest.TestCase):
                     native_tex['domStrings']['cases'][1]['nestedMarkers']['value'] += 1e-12
                 else:
                     native_tex['domStrings']['extra'] = None
-                check = TexHtmlValidation(ROOT / 'docs/math-port/evidence/texhtml-xml-source-lock.json')
+                check = TexHtmlValidation(ROOT / 'tools/math-port/locks/texhtml-xml-source-lock.json')
                 check.observations(tex, dom, xml, native_tex, native_xml)
                 self.assertTrue(check.failures)
 

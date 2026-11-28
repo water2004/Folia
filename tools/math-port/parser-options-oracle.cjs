@@ -116,6 +116,6 @@ for(const file of Object.keys(require.cache).filter(f=>f.startsWith(path.join(pk
  hashes.push({source,source_sha256:crypto.createHash('sha256').update(upstream).digest('hex'),cjs_sha256:crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')});
 }
 assert.ok(rows.every(row=>row.error==='ok'),JSON.stringify(rows.filter(row=>row.error!=='ok')));
-const report={stage:'original Source observations only; native parser classes and option bindings not accepted',node:process.version,hashes,rows},data=JSON.stringify(report,null,2)+'\n',target=path.join(root,'docs/math-port/evidence/p46-parser-options-source.json');
+const report={stage:'original Source observations only; native parser classes and option bindings not accepted',node:process.version,hashes,rows},data=JSON.stringify(report,null,2)+'\n',target=path.join(root,'tools/math-port/profiles/evidence/p46-parser-options-source.json');
 if(process.argv.includes('--check'))assert.equal(fs.readFileSync(target,'utf8').replaceAll('\r\n','\n'),data);else fs.writeFileSync(target,data);
 console.log(JSON.stringify({source_cases:rows.length,loaded_source_files:hashes.length,unexpected_errors:rows.filter(x=>x.error!=='ok').map(x=>({label:x.label,error:x.error}))}));

@@ -3,11 +3,11 @@
 // dumper. This runs the pinned MathJax CJS classes and real package graph.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'../..'),packageRoot=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src');
-const scopeBytes=fs.readFileSync(path.join(root,'docs/math-port/scope.json'));
+const scopeBytes=fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json'));
 const scope=JSON.parse(scopeBytes.toString('utf8'));
 const scopeHash=crypto.createHash('sha256').update(scopeBytes).digest('hex');
 assert.equal(scopeHash,'9705d389538b2fc8bf782feea4372ace639b3727304f2971937bbcfb0042a0d1','scope lock');
-const original=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/textmacros-package-original-source.json'),'utf8'));
+const original=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence/textmacros-package-original-source.json'),'utf8'));
 const cjsLocks={
   'input/tex.js':'ef2852b197173f373e62326016e980aef01ffc838f5f766ab6076262f944eada',
   'input/tex/TexParser.js':'106d7ff9298dce899d046339eab1996358f3efca3a7ce66f5ca915747dc9c6a8',
@@ -91,7 +91,7 @@ const textCases=[
 for(const [key,source] of textCases)cases[`text/${key}`]=parseText(source);
 cases['text/level-2']=parseText('abc',2);
 const output={schema:1,scope_sha256:scopeHash,source_modules:original.modules,cases};
-const destination=path.join(root,'docs/math-port/evidence/textmacros-native-tree-source.json');
+const destination=path.join(root,'tools/math-port/profiles/evidence/textmacros-native-tree-source.json');
 const serialized=JSON.stringify(output,null,2)+'\n';
 if(process.argv.includes('--check'))assert.equal(fs.readFileSync(destination,'utf8').replaceAll('\r\n','\n'),serialized);
 else fs.writeFileSync(destination,serialized);

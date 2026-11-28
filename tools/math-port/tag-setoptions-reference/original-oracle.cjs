@@ -4,7 +4,7 @@ const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypt
 const root=path.resolve(__dirname,'../../..'),bundle=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax'),src=path.join(bundle,'src');
 const digest=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const lock=JSON.parse(fs.readFileSync(path.join(__dirname,'source-lock.json'),'utf8'));
-const scopePath=path.join(root,'docs/math-port/scope.json');
+const scopePath=path.join(root,'tools/math-port/profiles/scope.json');
 assert.equal(digest(scopePath),lock.scopeSha256,'scope.json changed; refresh the reviewed Source lock first');
 for(const source of lock.sources){
  const file=path.join(root,'.reference/MathJax-src',source.file);

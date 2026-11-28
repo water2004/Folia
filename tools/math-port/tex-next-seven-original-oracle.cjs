@@ -4,7 +4,7 @@
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'../..'),bundle=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax'),src=path.join(bundle,'src');
 const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-const scope=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json'),'utf8'));
+const scope=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json'),'utf8'));
 assert.equal(sha(path.join(root,scope.profile.file)),scope.profile.sha256);
 for(const lock of scope.files){const reference=path.join(root,'.reference/MathJax-src',lock.source);assert.equal(sha(reference),lock.source_sha256,lock.source);}
 for(const lock of scope.files){const installed=path.join(bundle,'src',lock.source);if(fs.existsSync(installed))assert.equal(fs.readFileSync(installed,'utf8').replaceAll('\r\n','\n'),fs.readFileSync(path.join(root,'.reference/MathJax-src',lock.source),'utf8').replaceAll('\r\n','\n'),lock.source);}
@@ -49,4 +49,4 @@ const records=[];
 for(const [name,input,packages] of inputs){let jax=null,result=null,error=null;try{jax=new TeX({packages});jax.setMmlFactory(new MmlFactory());result=tree(jax.compile(new AbstractMathItem(input,jax,true),{}));}catch(e){error={name:e.name||e.constructor.name,id:e.id??null,message:String(e.message)};}
  const mapNames=['fontsizev3-macros','unicode','upgreek','gensymb-symbols','verb','extpfeil'];const maps={};for(const key of mapNames){const map=MapHandler.getMap(key);if(map)maps[key]=plain(map.map);}
  records.push({name,input,packages,result,error,packageData:jax?plain(jax.parseOptions.packageData):null,maps});}
-const output={schema:1,scopeSha256:sha(path.join(root,'docs/math-port/scope.json')),cases:records};const dest=path.join(root,'build/math-port/tex-next-seven-original.json');fs.mkdirSync(path.dirname(dest),{recursive:true});fs.writeFileSync(dest,JSON.stringify(output,null,2)+'\n');console.log(JSON.stringify({cases:records.length,sourceLocks:scope.files.length,output:path.relative(root,dest)}));
+const output={schema:1,scopeSha256:sha(path.join(root,'tools/math-port/profiles/scope.json')),cases:records};const dest=path.join(root,'build/math-port/tex-next-seven-original.json');fs.mkdirSync(path.dirname(dest),{recursive:true});fs.writeFileSync(dest,JSON.stringify(output,null,2)+'\n');console.log(JSON.stringify({cases:records.length,sourceLocks:scope.files.length,output:path.relative(root,dest)}));

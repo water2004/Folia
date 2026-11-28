@@ -8,7 +8,7 @@ const crypto = require('node:crypto');
 const root = path.resolve(__dirname, '../..');
 const sourceRoot = path.join(root, '.reference/MathJax-src');
 const packageRoot = path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax/src');
-const scope = JSON.parse(fs.readFileSync(path.join(root, 'docs/math-port/scope.json'), 'utf8'));
+const scope = JSON.parse(fs.readFileSync(path.join(root, 'tools/math-port/profiles/scope.json'), 'utf8'));
 const source = 'ts/input/tex.ts';
 const sourceLock = scope.files.find(file => file.source === source);
 if (!sourceLock) throw new Error('scope lock lacks ' + source);

@@ -3,7 +3,7 @@
 // use real TeX/ParseOptions/TextParser/MML owners; no native results imported.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'../..'), packageRoot=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src');
-const scopeBytes=fs.readFileSync(path.join(root,'docs/math-port/scope.json'));
+const scopeBytes=fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json'));
 const scopeHash=crypto.createHash('sha256').update(scopeBytes).digest('hex'),scope=JSON.parse(scopeBytes.toString('utf8'));
 const lock={
  'ts/input/tex/textmacros/TextMacrosConfiguration.ts':'5d712a805bfe3ff3db425f24c1887eab300782a8570363abbbe77641222faefc',
@@ -84,6 +84,6 @@ row('textmacros-method-branch-corpus',()=>['\\%','\\dagger',"\\'{e}",'\\frak{x}'
 row('textparser-math-delimiters-and-mode-errors',()=>['$x$','\\(x\\)','x_{y}','^x','&','#','\\unknown'].map(x=>[x,capture(()=>runText(x))]));
 row('internalmath-callback-normalization-level-font-and-shared-state',()=>{const out=[];for(const [source,level,font] of [['a   b',undefined,undefined],['x',2,undefined],['y',undefined,'bold']]){const s=makeSession();out.push({source,level,font,result:capture(()=>ParseUtil.internalMath(s.parser,source,level,font).map(node)),mainParser:s.data.texParser===s.parser,innerParsers:s.data.parseOptions.parsers.length,sharedMap:s.data.parseOptions.packageData===s.jax.parseOptions.packageData});}return out;});
 row('textmacros-copyLists-transfers-actual-node-list-membership',()=>{const s=makeSession(),main=s.jax.parseOptions,inner=s.data.parseOptions,node=s.parser.create('node','mi',[],{},s.parser.create('text','x'));inner.addNode('custom',node);inner.addNode('mi',node);s.data.texParser=s.parser;const p=new TextParser('',{},inner);p.copyLists();return{mainKeys:Object.keys(main.nodeLists),innerKeys:Object.keys(inner.nodeLists),sameNode:main.nodeLists.custom?.[0]===node,mainMi:main.nodeLists.mi?.length};});
-const output={schema:1,scope_sha256:scopeHash,modules,observations:rows};const dest=path.join(root,'docs/math-port/evidence/textmacros-package-original-source.json'),serialized=JSON.stringify(output,null,2)+'\n';
+const output={schema:1,scope_sha256:scopeHash,modules,observations:rows};const dest=path.join(root,'tools/math-port/profiles/evidence/textmacros-package-original-source.json'),serialized=JSON.stringify(output,null,2)+'\n';
 if(process.argv.includes('--check'))assert.equal(fs.readFileSync(dest,'utf8').replaceAll('\r\n','\n'),serialized);else fs.writeFileSync(dest,serialized);
 console.log(JSON.stringify({observations:rows.length,modules:modules.length,output:path.relative(root,dest)}));

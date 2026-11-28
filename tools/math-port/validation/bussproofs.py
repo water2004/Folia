@@ -43,8 +43,8 @@ def main(args):
     source_path, native_path = Path(args[0]).resolve(), Path(args[1]).resolve()
     destination = Path(args[2] if len(args) > 2 else 'build/math-port/bussproofs-public-render-comparison.json').resolve()
     source, native = read(source_path), read(native_path)
-    scope = read(ROOT / 'docs/math-port/scope.json')
-    lock_path = ROOT / 'docs/math-port/evidence/bussproofs-source-lock.json'
+    scope = read(ROOT / 'tools/math-port/profiles/scope.json')
+    lock_path = ROOT / 'tools/math-port/locks/bussproofs-source-lock.json'
     lock = read(lock_path)
     corpus_path = FOLDER / 'bussproofs-public-render-cases.json'
     cases = read(corpus_path)['cases']

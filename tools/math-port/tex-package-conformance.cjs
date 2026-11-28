@@ -30,7 +30,7 @@ const aliasObservations = {
 };
 write('tests/math/fixtures/packages/registry/aliases.json', JSON.stringify(aliasObservations, null, 2) + '\n');
 
-const scope = JSON.parse(fs.readFileSync(path.join(root, 'docs/math-port/scope.json')));
+const scope = JSON.parse(fs.readFileSync(path.join(root, 'tools/math-port/profiles/scope.json')));
 const packages = path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax');
 assert.equal(JSON.parse(fs.readFileSync(path.join(packages, 'src/package.json'))).version, '4.1.3');
 assert.equal(hash(path.join(root, 'tools/mathjax-bundle/entry.cjs')), scope.profile.sha256);
@@ -153,5 +153,5 @@ const summary = {version: '4.1.3', legacyVersion: '2.7.9', legacySha256: hash(so
   preservedV4Names: Object.keys(aliases).filter(name => !missing.includes(name)),
   packages: profile.length, finiteMaps: maps.size, registrations: registrations.length, svgCases: svgs.length,
   omittedV4Packages: ['autoload', 'require', 'noerrors', 'colorv2']};
-write('docs/math-port/evidence/tex-package-conformance.json', JSON.stringify(summary, null, 2) + '\n');
+write('tools/math-port/profiles/evidence/tex-package-conformance.json', JSON.stringify(summary, null, 2) + '\n');
 console.log(JSON.stringify(summary));

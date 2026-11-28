@@ -7,7 +7,7 @@ const path=require('node:path');
 const crypto=require('node:crypto');
 const root=path.resolve(__dirname,'../../..');
 const packageRoot=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src');
-const scope=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json'),'utf8'));
+const scope=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json'),'utf8'));
 const locks={
   'ts/input/tex/textmacros/TextMacrosConfiguration.ts':'5d712a805bfe3ff3db425f24c1887eab300782a8570363abbbe77641222faefc',
   'ts/input/tex/textmacros/TextMacrosMethods.ts':'15b736370eed35d3e65af14d772bfe1b1ad3287844ed44f908f6a9b14004d9c3',

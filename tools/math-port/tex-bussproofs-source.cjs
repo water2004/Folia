@@ -1,7 +1,7 @@
 'use strict';
 // Whole Bussproofs Source witness: real pinned NewCM output measurements and TeX.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
-const root=path.resolve(__dirname,'../..'),lock=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/bussproofs-source-lock.json'),'utf8'));
+const root=path.resolve(__dirname,'../..'),lock=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/locks/bussproofs-source-lock.json'),'utf8'));
 for(const f of lock.files)for(const [file,sha]of [[path.join(root,'.reference/MathJax-src',f.ts),f.tsSha256],[path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src',f.cjs),f.cjsSha256]])assert.equal(crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'),sha,file);
 const reference=require('./reference-profile.cjs').createReference();assert.equal(reference.provenance.compiled_source_sha256,'cbb0d3b6a08fbde6614b070f111fb58cc3cfe9d00a9713163fd4cd6d0300355a');
 const load=f=>require(path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src/cjs',f));

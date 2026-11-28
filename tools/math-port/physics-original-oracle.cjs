@@ -9,7 +9,7 @@ const root = path.resolve(__dirname, '../..');
 const sourceRoot = path.join(root, '.reference/MathJax-src');
 const cjsRoot = path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax/src');
 const lock = JSON.parse(fs.readFileSync(path.join(root,
-  'docs/math-port/evidence/physics-source-lock.json'), 'utf8'));
+  'tools/math-port/locks/physics-source-lock.json'), 'utf8'));
 const hash = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const hashBuffer = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 for (const file of lock.files) {

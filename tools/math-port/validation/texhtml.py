@@ -29,7 +29,7 @@ class TexHtmlValidation:
         for key, value in [('schema', 1), ('reference', 'MathJax 4.1.3')]:
             if js_type(field(lock, key)) != js_type(value) or field(lock, key) != value:
                 self.fail('lock.' + key, {'expected': value, 'actual': lock.get(key)})
-        scope_path = ROOT / 'docs/math-port/scope.json'
+        scope_path = ROOT / 'tools/math-port/profiles/scope.json'
         if not scope_path.exists():
             self.fail('lock.scope.json', {'missing': str(scope_path)})
         elif digest(scope_path) != lock['scopeSha256']:
@@ -164,7 +164,7 @@ class TexHtmlValidation:
 
 def main(args):
     require(len(args) >= 2, 'Expected TexHtml native JSON, XML native JSON [report JSON]')
-    lock_path = ROOT / 'docs/math-port/evidence/texhtml-xml-source-lock.json'
+    lock_path = ROOT / 'tools/math-port/locks/texhtml-xml-source-lock.json'
     native_tex_path, native_xml_path = root_path(args, 0, ''), root_path(args, 1, '')
     report_path = root_path(args, 2, 'build/math-port/texhtml-xml-comparison.json')
     check, lock = TexHtmlValidation(lock_path), read(lock_path)

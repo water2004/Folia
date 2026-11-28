@@ -1,6 +1,6 @@
 // Root complete original FindTeX observations; no replacement scanner.
 'use strict';const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
-const root=(process.env.FOLIA_MATH_ROOT||path.resolve(__dirname,'../..')),base=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src'),lock=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p46-parser-options-source.json'))),hashes=[];
+const root=(process.env.FOLIA_MATH_ROOT||path.resolve(__dirname,'../..')),base=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src'),lock=JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence/p46-parser-options-source.json'))),hashes=[];
 for(const source of ['ts/input/tex/FindTeX.ts','ts/core/FindMath.ts','ts/core/MathItem.ts','ts/util/string.ts','ts/util/Options.ts']){const entry=lock.hashes.find(x=>x.source===source);assert.ok(entry,source);const bytes=fs.readFileSync(path.join(root,'.reference/MathJax-src',source));assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),entry.source_sha256);assert.equal(fs.readFileSync(path.join(base,source),'utf8').replaceAll('\r\n','\n'),bytes.toString().replaceAll('\r\n','\n'));assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(base,source.replace(/^ts\//,'cjs/').replace(/\.ts$/,'.js')))).digest('hex'),entry.cjs_sha256);hashes.push(entry);}
 const {FindTeX}=require(path.join(base,'cjs/input/tex/FindTeX.js')),rows=[];
 function hex(s){return Array.from({length:s.length},(_,i)=>s.charCodeAt(i).toString(16).padStart(4,'0')).join('');}
@@ -72,9 +72,9 @@ add('actual-constructor-metadata-and-defaults',()=>{let out=[FindTeX.name,FindTe
 
 // Frozen original Source JSON remains byte-identical; only renderer-only cpp fields are projected.
 assert.ok(process.argv.includes('--check'),'Source-only oracle supports read-only --check');
-const frozenProfilePath=path.join(root,"docs/math-port/evidence/p52-find-tex-source.json");
+const frozenProfilePath=path.join(root,"tools/math-port/profiles/evidence/p52-find-tex-source.json");
 const frozenBytes=fs.readFileSync(frozenProfilePath);
 function sourceFields(value){if(Array.isArray(value))return value.map(sourceFields);if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).filter(([key])=>key!=='cpp').map(([key,v])=>[key,sourceFields(v)]));return value;}
 const actualSourceProfile={stage:'complete actual FindTeX algorithms; not TeXParser',node:process.version,hashes,rows};
 assert.deepStrictEqual(sourceFields(actualSourceProfile),sourceFields(JSON.parse(frozenBytes)),'Original Source inputs/expectations/pins changed');
-console.log(JSON.stringify({sourceCases:rows.length,profile:"docs/math-port/evidence/p52-find-tex-source.json",profileSha256:crypto.createHash('sha256').update(frozenBytes).digest('hex'),mode:'check'}));
+console.log(JSON.stringify({sourceCases:rows.length,profile:"tools/math-port/profiles/evidence/p52-find-tex-source.json",profileSha256:crypto.createHash('sha256').update(frozenBytes).digest('hex'),mode:'check'}));

@@ -3,7 +3,7 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'../..'), packageRoot=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src');
-const scopeBytes=fs.readFileSync(path.join(root,'docs/math-port/scope.json'));
+const scopeBytes=fs.readFileSync(path.join(root,'tools/math-port/profiles/scope.json'));
 const scopeHash=crypto.createHash('sha256').update(scopeBytes).digest('hex');
 const scope=JSON.parse(scopeBytes.toString('utf8'));
 const locks={
@@ -158,7 +158,7 @@ record('textparser-Error-real-TexError-substitution',()=>{
 
 const output={schema:1,source:{path:'ts/input/tex/textmacros/TextParser.ts',sha256:locks['ts/input/tex/textmacros/TextParser.ts']},
   scope_sha256:scopeHash,modules,observations:rows};
-const outPath=path.join(root,'docs/math-port/evidence/text-parser-original-source.json');
+const outPath=path.join(root,'tools/math-port/profiles/evidence/text-parser-original-source.json');
 const serialized=JSON.stringify(output,null,2)+'\n';
 if(process.argv.includes('--check'))assert.equal(fs.readFileSync(outPath,'utf8').replaceAll('\r\n','\n'),serialized);
 else fs.writeFileSync(outPath,serialized);

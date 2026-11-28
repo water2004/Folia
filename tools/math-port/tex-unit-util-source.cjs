@@ -5,7 +5,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const assert = require('node:assert/strict');
 let root = __dirname;
-while (!fs.existsSync(path.join(root, 'docs/math-port/HANDOFF.md'))) {
+while (!fs.existsSync(path.join(root, 'tools/math-port/README.md'))) {
   const parent = path.dirname(root);
   if (parent === root) throw new Error('repository root not found');
   root = parent;

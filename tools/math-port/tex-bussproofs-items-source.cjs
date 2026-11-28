@@ -3,7 +3,7 @@
 const fs = require('node:fs'), path = require('node:path');
 const crypto = require('node:crypto'), assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '../..');
-const lock = JSON.parse(fs.readFileSync(path.join(root, 'docs/math-port/evidence/bussproofs-source-lock.json'), 'utf8'));
+const lock = JSON.parse(fs.readFileSync(path.join(root, 'tools/math-port/locks/bussproofs-source-lock.json'), 'utf8'));
 for (const f of lock.files) for (const [file, hash] of [
   [path.join(root, '.reference/MathJax-src', f.ts), f.tsSha256],
   [path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax/src', f.cjs), f.cjsSha256]

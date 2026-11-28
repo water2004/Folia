@@ -9,7 +9,7 @@ const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '../..');
 const sourceRoot = path.join(root, '.reference/MathJax-src');
 const packageRoot = path.join(root, 'tools/mathjax-bundle/node_modules/@mathjax/src');
-const scopePath = path.join(root, 'docs/math-port/scope.json');
+const scopePath = path.join(root, 'tools/math-port/profiles/scope.json');
 const scopeBytes = fs.readFileSync(scopePath);
 const scopeHash = crypto.createHash('sha256').update(scopeBytes).digest('hex');
 const expectedScopeHash = '9705d389538b2fc8bf782feeA4372ace639b3727304f2971937bbcfb0042a0d1'.toLowerCase();
@@ -858,7 +858,7 @@ const output = {
   modules: moduleFiles,
   observations: rows,
 };
-const outPath = path.join(root, 'docs/math-port/evidence/parser-family-original-source.json');
+const outPath = path.join(root, 'tools/math-port/profiles/evidence/parser-family-original-source.json');
 const serialized = JSON.stringify(output, null, 2) + '\n';
 if (process.argv.includes('--check')) {
   assert.equal(fs.readFileSync(outPath, 'utf8').replaceAll('\r\n', '\n'), serialized);

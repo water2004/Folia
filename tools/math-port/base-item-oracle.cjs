@@ -70,5 +70,5 @@ add('latex-null-attributes',({x,a,trace})=>{Object.defineProperty(a,'attributes'
 add('latex-current-constant-after-receiver-read',({x,a,trace})=>{const original=a.attributes;Object.defineProperty(a,'attributes',{get(){trace.push('attrs');TC.Attr.LATEXITEM='item-now';TC.Attr.LATEX='latex-now';return original;}});x.startStr='x';x.stopI=1;x.addLatexItem(a);return hex(original.getExplicit('item-now'))+':'+hex(original.getExplicit('latex-now'));});
 add('check-over-explicit-row',({x,y,a,b})=>{x.Push(a,b);Object.defineProperty(x,'isOpen',{get(){return true;}});Object.defineProperty(y,'kind',{get(){return'over';}});const got=x.checkItem(y);return tuple(got)+':'+val(y.getProperty('num'))+':'+x.Size();});
 assert.ok(process.argv.includes('--check'),'Source-only oracle is check-only');
-assert.deepEqual(JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p42b-base-item-source.json'),'utf8')),rows);
+assert.deepEqual(JSON.parse(fs.readFileSync(path.join(root,'tools/math-port/profiles/evidence/p42b-base-item-source.json'),'utf8')),rows);
 console.log(JSON.stringify({cases:rows.length,orderedExpectedValues:rows.length,mode:'check'}));
